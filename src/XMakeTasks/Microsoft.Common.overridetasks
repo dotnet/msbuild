@@ -1,0 +1,24 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <!-- This file lists UsingTask elements that we wish to override 
+         any other UsingTask elements -->
+    
+    <!-- NOTE: Listing a <UsingTask> tag in a *.tasks file like this one rather than in a project or targets file
+               can give a significant performance advantage in a large build, because every time a <UsingTask> tag
+               is encountered, it will cause the task to be rediscovered next time the task is used. -->
+    <!-- NOTE: Using the fully qualified class name in a <UsingTask> tag is faster than using a partially qualified name. -->
+
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveComReference"  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="ResolveComReference"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="GenerateResource"                           AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="RegisterAssembly"                           AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="UnregisterAssembly"                         AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="ReadLinesFromFile"                          AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="FindUnderPath"                              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="ConvertToAbsolutePath"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="MSBuild"                                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="ResolveAssemblyReference"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+</Project>

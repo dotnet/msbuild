@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<Rule
+  Name="VisualBasic"
+  DisplayName="File Properties"
+  PageTemplate="generic"
+  Description="File Properties"
+  xmlns="http://schemas.microsoft.com/build/2009/properties">
+
+  <Rule.DataSource>
+    <DataSource Persistence="ProjectFile" Label="Configuration" ItemType="Compile" HasConfigurationCondition="false" />
+  </Rule.DataSource>
+
+  <Rule.Categories>
+    <Category Name="Advanced" DisplayName="Advanced" />
+    <Category Name="Misc" DisplayName="Misc" />
+  </Rule.Categories>
+
+  <DynamicEnumProperty
+      Name="{}{ItemType}"
+      DisplayName="Build Action"
+      Category="Advanced"
+      Description="How the file relates to the build and deployment processes."
+      EnumProvider="ItemTypes" />
+
+  <EnumProperty
+      Name="CopyToOutputDirectory"
+      DisplayName="Copy to Output Directory"
+      Category="Advanced"
+      Description="Specifies the source file will be copied to the output directory.">
+    <EnumValue Name="Never" DisplayName="Do not copy" />
+    <EnumValue Name="Always" DisplayName="Copy always" />
+    <EnumValue Name="PreserveNewest" DisplayName="Copy if newer" />
+  </EnumProperty>
+
+  <StringProperty
+      Name="Identity"
+      Visible="false"
+      ReadOnly="true"
+      Category="Misc"
+      Description="The item specified in the Include attribute.">
+    <StringProperty.DataSource>
+      <DataSource Persistence="Intrinsic" ItemType="Compile" PersistedName="Identity" />
+    </StringProperty.DataSource>
+  </StringProperty>
+
+  <StringProperty
+      Name="FullPath"
+      DisplayName="Full Path"
+      ReadOnly="true"
+      Category="Misc"
+      Description="Location of the file.">
+    <StringProperty.DataSource>
+      <DataSource Persistence="Intrinsic" ItemType="Compile" PersistedName="FullPath" />
+    </StringProperty.DataSource>
+  </StringProperty>
+
+  <StringProperty
+      Name="FileNameAndExtension"
+      DisplayName="File Name"
+      ReadOnly="true"
+      Category="Misc"
+      Description="Name of the file or folder.">
+    <StringProperty.DataSource>
+      <DataSource Persistence="Intrinsic" ItemType="Compile" PersistedName="FileNameAndExtension" />
+    </StringProperty.DataSource>
+  </StringProperty>
+
+  <BoolProperty Name="Visible" Visible="false" />
+  <StringProperty Name="DependentUpon" Visible="false">
+    <StringProperty.Metadata>
+      <NameValuePair Name="DoNotCopyAcrossProjects" Value="true" />
+    </StringProperty.Metadata>
+  </StringProperty>
+  <StringProperty Name="Link" Visible="false">
+    <StringProperty.Metadata>
+      <NameValuePair Name="DoNotCopyAcrossProjects" Value="true" />
+    </StringProperty.Metadata>
+  </StringProperty>
+  <StringProperty Name="SubType" Visible="false" />
+  <StringProperty Name="LastGenOutput" Visible="false" Description="The filename of the last file generated as a result of the SFG." />
+  <BoolProperty Name="DesignTime" Visible="false" Description="A value indicating whether this file has a designer." />
+  <BoolProperty Name="AutoGen" Visible="false" Description="A value indicating whether this is a generated file." />
+</Rule>

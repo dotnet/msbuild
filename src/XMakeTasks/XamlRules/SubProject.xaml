@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<Rule
+  Name="SubProject"
+  DisplayName="General"
+  PageTemplate="generic"
+  Description="Projects that must be built as part of the containing project, but without an actual build dependency"
+  xmlns="http://schemas.microsoft.com/build/2009/properties">
+  <Rule.DataSource>
+    <DataSource Persistence="ProjectFile" HasConfigurationCondition="False" ItemType="SubProject" />
+  </Rule.DataSource>
+
+  <StringProperty Name="ProjectTypeGuid" Visible="False" />
+  <StringProperty Name="ProjectId" Visible="False" />
+  <BoolProperty Name="VirtualProject" Visible="False" />
+</Rule>

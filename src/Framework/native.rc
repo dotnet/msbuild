@@ -1,0 +1,5 @@
+﻿// From Dev12 on we want the versioning strings to be the VS ones instead of .NET Framework ones.
+#include <buildverstrings.h>
+#include <vsver.h>
+
+#include <vsver.rc>

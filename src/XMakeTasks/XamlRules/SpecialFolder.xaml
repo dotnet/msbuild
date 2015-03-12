@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<Rule
+	Name="SpecialFolder"
+	DisplayName="General"
+	PageTemplate="generic"
+	Description="Special folders"
+	xmlns="http://schemas.microsoft.com/build/2009/properties">
+	<Rule.DataSource>
+		<DataSource Persistence="ProjectInstance" HasConfigurationCondition="False" ItemType="SpecialFolder" />
+	</Rule.DataSource>
+
+	<StringProperty Name="Identity" Visible="false" ReadOnly="true" Category="Misc" />
+	<StringProperty Name="FullPath" DisplayName="Full Path" ReadOnly="true" Category="Misc" />
+    <StringProperty Name="FileNameAndExtension" DisplayName="Folder Name" ReadOnly="true" Category="Misc">
+        <StringProperty.DataSource>
+            <DataSource Persistence="ProjectInstance" ItemType="SpecialFolder" PersistedName="FileNameAndExtension" />
+        </StringProperty.DataSource>
+    </StringProperty>
+    <EnumProperty Name="DisableAddItem" Visible="False">
+        <EnumValue Name="Recursive" />
+        <EnumValue Name="TopDirectoryOnly" />
+    </EnumProperty>
+</Rule>

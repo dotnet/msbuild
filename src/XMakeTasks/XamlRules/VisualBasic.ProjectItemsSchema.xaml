@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<ProjectSchemaDefinitions
+    xmlns="http://schemas.microsoft.com/build/2009/properties">
+
+    <ContentType
+        Name="VisualBasicFile"
+        DisplayName="VB file"
+        ItemType="Compile">
+    </ContentType>
+
+    <ItemType Name="Compile" DisplayName="VB compiler"/>
+
+	<FileExtension Name=".vb" ContentType="VisualBasicFile"/>
+</ProjectSchemaDefinitions>
+

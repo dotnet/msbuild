@@ -1,0 +1,80 @@
+###############################################################################
+# Set default behavior to automatically normalize line endings.
+###############################################################################
+
+[attr]wintext text eol=crlf
+
+* text=auto
+
+# Default
+*.* wintext
+
+# Build Specifications
+*.sln	wintext
+*.props	wintext
+*.proj	wintext
+*.targets	wintext
+*.tasks	wintext
+*.overridetasks	wintext
+*.csproj	wintext
+*.rptproj	wintext
+*.vcxproj	wintext
+*.filters	wintext
+*.cd	wintext
+
+# Sources (Managed)
+*.cs	wintext
+*.vb	wintext
+*.resx	wintext
+*.xaml	wintext
+*.config	wintext
+*.manifest	wintext
+*.txt	wintext
+*.tst	wintext
+
+# Sources (Web)
+*.html	wintext
+*.css	wintext
+*.js	wintext
+
+# Sources (Native)
+*.h	wintext
+*.cpp	wintext
+*.rc	wintext
+
+# Sources (Xml)
+*.xml	wintext
+*.xsl	wintext
+*.xsd	wintext
+
+# Sources (Script)
+*.cmd	wintext
+*.bat	wintext
+*.rsp	wintext
+*.sample wintext
+
+
+# Sources (Binary)
+*.doc  binary
+*.ico  binary
+*.appx binary
+
+# Configuration
+*.gitattributes	wintext
+*.gitignore	wintext
+
+#Binaries
+*.exe  binary
+*.dll  binary
+*.obj  binary
+*.pdb  binary
+*.zip  binary
+*.chm  binary
+*.nupkg  binary
+*.lex binary
+*.ocx binary
+*.mui binary
+
+#Images (Binary)
+*.png binary
+*.jpg binary

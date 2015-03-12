@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="dogfood" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <BuildProjectReferences>true</BuildProjectReferences>
+    <BuildNonShipping Condition="'$(BuildNonShipping)'==''">true</BuildNonShipping>
+  </PropertyGroup>
+
+  <Import Project="$(_NTDRIVE)$(_NTROOT)\tools\Microsoft.DevDiv.Settings.targets"/>
+
+  <ItemGroup Condition="'$(BuildExePass)' == '0' or '$(BuildExePass)' == ''">
+    <ProjectFile Include="MSBuildTaskHost\MSBuildTaskHost.csproj"/>
+  </ItemGroup>
+
+  <Import Project="$(_NTDRIVE)$(_NTROOT)\tools\Microsoft.devdiv.traversal.targets"/>
+   
+</Project>
+

@@ -1,0 +1,4 @@
+﻿#include <buildverstrings.h>
+#include <vsver.h>
+
+#include <vsver.rc>

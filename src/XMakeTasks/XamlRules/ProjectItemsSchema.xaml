@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<ProjectSchemaDefinitions
+    xmlns="http://schemas.microsoft.com/build/2009/properties">
+
+    <ContentType
+        Name="Text"
+        DisplayName="Text file"
+        ItemType="Content">
+    </ContentType>
+
+    <ContentType
+        Name="XML"
+        DisplayName="Xml file"
+        ItemType="Content">
+    </ContentType>
+
+    <ContentType
+        Name="HTML"
+        DisplayName="Html file"
+        ItemType="Content">
+    </ContentType>
+
+    <ContentType
+        Name="CSS"
+        DisplayName="Cascading style sheet"
+        ItemType="Content">
+    </ContentType>
+
+    <ContentType
+        Name="Json"
+        DisplayName="Json file"
+        ItemType="Content">
+    </ContentType>
+
+    <ContentType
+      Name="Font"
+      DisplayName="Font file"
+      ItemType="Content">
+    </ContentType>
+
+    <ContentType
+      Name="Media"
+      DisplayName="Media file"
+      ItemType="Content">
+    </ContentType>
+    
+    <ContentType
+      Name="Image"
+      DisplayName="Image file"
+      ItemType="Content">
+    </ContentType>
+    
+    <ContentType
+      Name="EmbeddedResource"
+      DisplayName="Embedded resource"
+      ItemType="EmbeddedResource">
+      <NameValuePair Name="DefaultMetadata_Generator" Value="ResXFileCodeGenerator" />
+    </ContentType>
+
+    <ItemType Name="None" DisplayName="None"/>
+    <ItemType Name="Content" DisplayName="Content" />
+    <ItemType Name="EmbeddedResource" DisplayName="Embedded resource "/>
+
+    <FileExtension Name=".asax" ContentType="Asax" />
+    <FileExtension Name=".asmx" ContentType="HTML" />
+    <FileExtension Name=".asp" ContentType="AspPage" />
+    <FileExtension Name=".txt" ContentType="Text" />
+    <FileExtension Name=".resx" ContentType="EmbeddedResource" />
+    <FileExtension Name=".html" ContentType="HTML" />
+    <FileExtension Name=".htm" ContentType="HTML" />
+    <FileExtension Name=".css" ContentType="CSS" />
+    <FileExtension Name=".cur" ContentType="CUR" />
+    <FileExtension Name=".vbS" ContentType="Script" />
+    <FileExtension Name=".jS" ContentType="Script" />
+    <FileExtension Name=".xml" ContentType="XML" />
+    <FileExtension Name=".mht" ContentType="MHT" />
+    <FileExtension Name=".manifest" ContentType="Manifest" />
+    <FileExtension Name=".rdlc" ContentType="RDLC" />
+    <FileExtension Name=".cd" ContentType="ClassDiagram" />
+    <FileExtension Name=".licenses" ContentType="Licenses" />
+    <FileExtension Name=".json" ContentType="Json" />
+
+    <!-- Image formats -->
+    <FileExtension Name=".jpeg" ContentType="Image" />
+    <FileExtension Name=".jpe" ContentType="Image" />
+    <FileExtension Name=".jpg" ContentType="Image" />
+    <FileExtension Name=".jfif" ContentType="Image" />
+    <FileExtension Name=".exif" ContentType="Image" />
+    <FileExtension Name=".gif" ContentType="Image" />
+    <FileExtension Name=".tiff" ContentType="Image" />
+    <FileExtension Name=".tif" ContentType="Image" />
+    <FileExtension Name=".png" ContentType="Image" />
+    <FileExtension Name=".bmp" ContentType="Image" />
+    <FileExtension Name=".dib" ContentType="Image" />
+    <FileExtension Name=".rle" ContentType="Image" />
+    <FileExtension Name=".ico" ContentType="Image" />
+    <FileExtension Name=".wdp" ContentType="Image" />
+    <FileExtension Name=".dds" ContentType="Image" />
+    <FileExtension Name=".tga" ContentType="Image" />
+
+    <!-- Audio formats-->
+    <FileExtension Name=".wav" ContentType="Media" />
+    <FileExtension Name=".wma" ContentType="Media" />
+    <FileExtension Name=".au" ContentType="Media" />
+    <FileExtension Name=".aif" ContentType="Media" />
+    <FileExtension Name=".aiff" ContentType="Media" />
+    <FileExtension Name=".aifc" ContentType="Media" />
+    <FileExtension Name=".mid" ContentType="Media" />
+    <FileExtension Name=".midi" ContentType="Media" />
+    <FileExtension Name=".mp3" ContentType="Media" />
+    <FileExtension Name=".snd" ContentType="Media" />
+    <FileExtension Name=".rmi" ContentType="Media" />
+
+    <!-- Video formats-->
+    <FileExtension Name=".avi" ContentType="Media" />
+    <FileExtension Name=".wmv" ContentType="Media" />
+    <FileExtension Name=".mov" ContentType="Media" />
+    <FileExtension Name=".qt" ContentType="Media" />
+    <FileExtension Name=".mpe" ContentType="Media" />
+    <FileExtension Name=".mpeg" ContentType="Media" />
+    <FileExtension Name=".mpg" ContentType="Media" />
+    <FileExtension Name=".mp2" ContentType="Media" />
+    <FileExtension Name=".mp4" ContentType="Media" />
+    <FileExtension Name=".asx" ContentType="Media" />
+    <FileExtension Name=".asf" ContentType="Media" />
+    <FileExtension Name=".webm" ContentType="Media" />
+
+    <!-- Font formats -->
+    <FileExtension Name=".ttf" ContentType="Font" />
+    <FileExtension Name=".odttf" ContentType="Font" />
+    <FileExtension Name=".otf" ContentType="Font" />
+    <FileExtension Name=".compositefont" ContentType="Font" />
+    <FileExtension Name=".ttc" ContentType="Font" />
+    <FileExtension Name=".tte" ContentType="Font" />
+    <FileExtension Name=".woff" ContentType="Font" />
+    <FileExtension Name=".eot" ContentType="Font" />
+</ProjectSchemaDefinitions>
+

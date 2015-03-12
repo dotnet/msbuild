@@ -1,0 +1,78 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- This file lists all the tasks that ship by default with MSBuild -->
+    
+    <!-- NOTE: Listing a <UsingTask> tag in a *.tasks file like this one rather than in a project or targets file
+               can give a significant performance advantage in a large build, because every time a <UsingTask> tag
+               is encountered, it will cause the task to be rediscovered next time the task is used. -->
+    <!-- NOTE: Using the fully qualified class name in a <UsingTask> tag is faster than using a partially qualified name. -->
+ 
+    <UsingTask TaskName="Microsoft.Build.Tasks.AL"                                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.AspNetCompiler"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AssignCulture"                         AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AssignLinkMetadata"                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AssignProjectConfiguration"            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AssignTargetPath"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.CallTarget"                            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.CombinePath"                           AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.ConvertToAbsolutePath"                 AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Copy"                                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.CreateCSharpManifestResourceName"      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.CreateItem"                            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.CreateProperty"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.CreateVisualBasicManifestResourceName" AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.Csc"                                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Delete"                                AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Error"                                 AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ErrorFromResources"                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Exec"                                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FindAppConfigFile"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FindInList"                            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FindInvalidProjectReferences"          AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FindUnderPath"                         AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FormatUrl"                             AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FormatVersion"                         AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateApplicationManifest"           AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateBindingRedirects"              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateBootstrapper"                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateDeploymentManifest"            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateTrustInfo"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetAssemblyIdentity"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkPath"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkSdkPath"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetReferenceAssemblyPaths"             AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.LC"                                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.MakeDir"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Message"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Move"                                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.MSBuild"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ReadLinesFromFile"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RemoveDir"                             AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RemoveDuplicates"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RequiresFramework35SP1Assembly"        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveAssemblyReference"              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveCodeAnalysisRuleSet"            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveSDKReference"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetInstalledSDKLocations"              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetSDKReferenceFiles"                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveComReference"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveKeySource"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveManifestFiles"                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNativeReference"                AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNonMSBuildProjectOutput"        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.SGen"                                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.SignFile"                              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Touch"                                 AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.UpdateManifest"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Vbc"                                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Warning"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.WriteCodeFragment"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
+    <UsingTask TaskName="Microsoft.Build.Tasks.WriteLinesToFile"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
+    <UsingTask TaskName="Microsoft.Build.Tasks.XmlPeek"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.XmlPoke"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
+    <UsingTask TaskName="Microsoft.Build.Tasks.WinMDExp"                              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+</Project>
+

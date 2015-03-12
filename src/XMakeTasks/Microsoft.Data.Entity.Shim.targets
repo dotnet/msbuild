@@ -1,0 +1,14 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <!-- 
+        With MSBuild 12, we've changed MSBuildToolsPath to for the first time point to a directory
+        outside of the .NET Framework.  As a result of this, there were several targets files, of which 
+        this was one, that were being referenced as out of MSBuildToolsPath that are now no longer there.  
+
+        Thus, we are shimming those targets files so that they do still appear in MSBuildToolsPath, so that 
+        consumers of them are not broken, but since the targets files themselves are still part of .NET, 
+        the shim will internally simply redirect to the real copy of the targets file in the .NET Framework. 
+   -->
+
+   <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.Data.Entity.targets" />
+
+</Project>

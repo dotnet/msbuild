@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<ProjectSchemaDefinitions
+    xmlns="http://schemas.microsoft.com/build/2009/properties">
+
+    <ContentType
+        Name="CSharpFile"
+        DisplayName="C# file"
+        ItemType="Compile">
+    </ContentType>
+
+    <ItemType Name="Compile" DisplayName="C# compiler"/>
+
+	<FileExtension Name=".cs" ContentType="CSharpFile"/>
+</ProjectSchemaDefinitions>
+

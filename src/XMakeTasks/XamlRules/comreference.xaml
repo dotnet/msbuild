@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Copyright, Microsoft Corporation, All rights reserved.-->
+<Rule
+	Name="ComReference"
+	DisplayName="COM Reference"
+	PageTemplate="generic"
+	Description="COM reference properties"
+	xmlns="http://schemas.microsoft.com/build/2009/properties">
+	<Rule.DataSource>
+		<DataSource Persistence="ProjectFile" ItemType="COMReference" HasConfigurationCondition="False" />
+	</Rule.DataSource>
+	<StringProperty Name="Guid" DisplayName="CLSID"
+					Description="The GUID of the COM server." />
+	<StringProperty Name="Lcid" DisplayName="Locale"
+					Description="The LCID of the COM server." />
+	<IntProperty Name="VersionMajor" />
+	<IntProperty Name="VersionMinor" />
+	<BoolProperty Name="Isolated" />
+	<StringProperty Name="WrapperTool" />
+</Rule>
