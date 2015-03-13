@@ -24,7 +24,7 @@ You must sign a Contributor License Agreement (CLA) before submitting your pull 
 
 Please follow these guidelines when creating new issues in the issue tracker:
 
-- Use a descriptive title that identifies the issue to be addressed or the requested feature. For example when describing an issue where the compiler is not behaving as expected, write your bug title in terms of what the product should do rather than what it is doing – “C# compiler should report CS1234 when Xyz is used in Abcd.”
+- Use a descriptive title that identifies the issue to be addressed or the requested feature. For example when describing an issue where the compiler is not behaving as expected, write your bug title in terms of what the product should do rather than what it is doing – “MSBuild should report CS1234 when Xyz is used in Abcd.”
 - Do not set any bug fields other than Impact.
 - Specify a detailed description of the issue or requested feature.
 - For bug reports, please also:
