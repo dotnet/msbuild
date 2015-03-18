@@ -26,7 +26,7 @@ Before you contribute, please read through the contributing and developer guides
 
 Want to get more familiar with what's going on in the code?
 * [Pull requests](https://github.com/Microsoft/msbuild/pulls): [Open](https://github.com/Microsoft/msbuild/pulls?q=is%3Aopen+is%3Apr)/[Closed](https://github.com/Microsoft/msbuild/pulls?q=is%3Apr+is%3Aclosed)
-* [Issue Guide](https://github.com/Microsoft/msbuild/wiki/Issue-Guide)
+* [Issues](https://github.com/Microsoft/msbuild/issues)
 
 You are also encouraged to start a discussion by filing an issue or creating a gist.
 
