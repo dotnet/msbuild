@@ -10,7 +10,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
-    /// This class will throw an exception when it recieves any event except for the build started or build finished event
+    /// This class will throw an exception when it receives any event except for the build started or build finished event
     /// this logger is good to use if a distributed logger is attached but does not want to forward any events
     /// </summary>
     internal class NullCentralLogger : INodeLogger
@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (!(e is BuildStartedEventArgs) && !(e is BuildFinishedEventArgs))
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(false, "Should not recieve any events other than build started or finished");
+                ErrorUtilities.VerifyThrowInvalidOperation(false, "Should not receive any events other than build started or finished");
             }
         }
 

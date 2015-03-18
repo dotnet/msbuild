@@ -10,7 +10,7 @@ namespace Microsoft.Build.UnitTests.QA
     /// <summary>
     /// Mock Implementation of the results cache which does captures some counters and provides it
     /// back to the tests for validation purposes. Most of the implementation is routed to the default component
-    /// by means of aggrigration
+    /// by means of aggregation
     /// </summary>
     internal class QAResultsCache : IResultsCache, IBuildComponent
     {

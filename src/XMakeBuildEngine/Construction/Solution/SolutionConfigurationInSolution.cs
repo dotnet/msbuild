@@ -16,7 +16,7 @@ namespace Microsoft.Build.Construction
     public sealed class SolutionConfigurationInSolution
     {
         /// <summary>
-        /// Default seperator between configuration and platform in configuration 
+        /// Default separator between configuration and platform in configuration
         /// full names
         /// </summary>
         internal const char ConfigurationPlatformSeparator = '|';

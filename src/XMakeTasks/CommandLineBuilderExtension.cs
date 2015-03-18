@@ -201,7 +201,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Returns true if the parameter is empty in spirits, 
-        /// even if it contains the seperators and white space only
+        /// even if it contains the separators and white space only
         /// Split on the characters provided.
         /// </summary>
         /// <param name="parameters"></param>

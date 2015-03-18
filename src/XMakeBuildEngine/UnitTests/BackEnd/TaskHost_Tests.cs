@@ -1083,7 +1083,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             /// <summary>
-            /// Log if we have recieved any event.
+            /// Log if we have received any event.
             /// </summary>
             internal void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
             {

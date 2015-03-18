@@ -11,7 +11,7 @@ using System.Xml.Serialization;
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     /// <summary>
-    /// Describes a fileAssocation for an application manifest
+    /// Describes a fileAssociation for an application manifest
     /// </summary>
     [ComVisible(false)]
     public sealed class FileAssociation

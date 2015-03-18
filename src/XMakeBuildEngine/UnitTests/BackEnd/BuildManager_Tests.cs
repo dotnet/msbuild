@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure when we are doign an inprocess build that even if the environment variable msbuildforwardpropertiesfromchild is set that we still 
+        /// Make sure when we are doing an inprocess build that even if the environment variable msbuildforwardpropertiesfromchild is set that we still
         /// get all of the initial properties.
         /// </summary>
         [TestMethod]
@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure when we are doign an inprocess build that even if the environment variable MsBuildForwardAllPropertiesFromChild is set that we still 
+        /// Make sure when we are doing an inprocess build that even if the environment variable MsBuildForwardAllPropertiesFromChild is set that we still
         /// get all of the initial properties.
         /// </summary>
         [TestMethod]

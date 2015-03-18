@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #region LogWarningErrorFromText
         /// <summary>
-        /// Verify an InternalErrorException is thown when a null BuildEventContext is passed in
+        /// Verify an InternalErrorException is thrown when a null BuildEventContext is passed in
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InternalErrorException))]
