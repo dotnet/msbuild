@@ -1,0 +1,320 @@
+# Microsoft make file
+#
+
+# Gnumake version
+# Extracted by hand from configure.in
+VERSION=3.82.90
+VERSION_CSV=3,82,90
+TARGET=EXE
+PROJECT=gmake
+TOPDIR=.
+
+CC=cl.exe
+CXX=$(CC) -TP
+CPP=$(CC) -EP
+LINK=link.exe
+RC=rc.exe
+MT=mt.exe
+
+# If CPU is not defined, apply defaults
+!IF !DEFINED(CPU) || "$(CPU)" == ""
+# Set BUILD_CPU if it is not yet set
+!IF !DEFINED(BUILD_CPU) || "$(BUILD_CPU)" == ""
+!IF "$(PROCESSOR_ARCHITECTURE)" == ""
+!IF "$(PROCESSOR_ARCHITEW6432)" == ""
+# Default to x86, will be upcased later
+BUILD_CPU=x86
+!ELSE
+BUILD_CPU=$(PROCESSOR_ARCHITEW6432)
+!ENDIF
+!ELSE
+BUILD_CPU=$(PROCESSOR_ARCHITECTURE)
+!ENDIF
+!ENDIF
+# Check BUILD_CPU and reset value if necessary
+!IF "$(BUILD_CPU)" == "i386" || "$(BUILD_CPU)" == "x86" || "$(BUILD_CPU)" == "i686"
+CPU=X86
+!ENDIF
+!IF "$(BUILD_CPU)" == "amd64" || "$(BUILD_CPU)" == "x86_64" || "$(BUILD_CPU)" == "x64"
+CPU=X64
+!ENDIF
+!IF "$(BUILD_CPU)" == "ia64" || "$(BUILD_CPU)" == "i64"
+CPU=I64
+!ENDIF
+# did we manage to set CPU?
+!IF !DEFINED(CPU) || "$(CPU)" == ""
+!ERROR Unexpected value of BUILD_CPU: $(BUILD_CPU) or PROCESSOR_ARCHITECTURE=$(PROCESSOR_ARCHITECTURE) or PROCESSOR_ARCHITEW6432=$(PROCESSOR_ARCHITEW6432).
+!ENDIF
+!ENDIF
+
+!IF "$(CPU)" != "X86"
+!IF "$(CPU)" != "X64"
+!IF "$(CPU)" != "I64"
+!ERROR Must specify CPU environment variable (X86, X64, I64) $(CPU)
+!ENDIF
+!ENDIF
+!ENDIF
+
+!IF !DEFINED(TARGET) || "$(TARGET)" == ""
+TARGET=EXE
+!ENDIF
+
+!IF "$(TARGET)" != "EXE"
+!IF "$(TARGET)" != "GUI"
+!IF "$(TARGET)" != "DLL"
+!IF "$(TARGET)" != "LIB"
+!ERROR Must specify TARGET environment variable (EXE, GUI, DLL, LIB)
+!ENDIF
+!ENDIF
+!ENDIF
+!ENDIF
+
+!IF !DEFINED(WINVER) || "$(WINVER)" == ""
+WINVER=WIN32
+!ENDIF
+!IF !DEFINED(WIN32_WINNT) || "$(WIN32_WINNT)" == ""
+WIN32_WINNT=0x502
+!ENDIF
+NMAKE_WINNT=-D_WINNT -D_WIN32_WINNT=$(WIN32_WINNT) -D_WIN32_IE=0x0700
+
+!IF !DEFINED(BUILD) || "$(BUILD)" == ""
+BUILD=RELEASE
+!ENDIF
+!IFDEF RELEASE
+BUILD=RELEASE
+!ENDIF
+!IFDEF DEBUG
+BUILD=DEBUG
+!ENDIF
+!IFDEF NODEBUG
+BUILD=RELEASE
+!ENDIF
+
+!IF "$(BUILD)" != "RELEASE"
+!IF "$(BUILD)" != "DEBUG"
+!ERROR Must specify BUILD environment variable (RELEASE, DEBUG)
+!ENDIF
+!ENDIF
+
+# Common flags for all platforms
+CMN_CFLAGS=-c -nologo -DWIN32 -D_WIN32 -D_WINDOWS $(NMAKE_WINNT) -W3
+!IF "$(TARGET)" == "EXE"
+CMN_CFLAGS=$(CMN_CFLAGS) -D_CONSOLE
+!ENDIF
+# Mark that extern C newer throws C++ exception
+CMN_CFLAGS=$(CMN_CFLAGS) -EHsc
+
+!IF !DEFINED(UNICODE) || "$(UNICODE)" == ""
+CMN_CFLAGS=$(CMN_CFLAGS) -D_MBCS -DMBCS
+!ELSE
+CMN_CFLAGS=$(CMN_CFLAGS) -D_UNICODE -DUNICODE
+!ENDIF
+
+!IF "$(CPU)" == "X86"
+CPU_CFLAGS=-D_X86_=1
+MACHINE=X86
+MACHINE_LC=i386
+!ELSEIF "$(CPU)" == "X64"
+CPU_CFLAGS=-D_AMD64_=1 -DWIN64 -D_WIN64
+MACHINE=AMD64
+MACHINE_LC=amd64
+!ELSEIF "$(CPU)" == "I64"
+CPU_CFLAGS=-D_IA64_=1 -DWIN64 -D_WIN64
+MACHINE=IA64
+MACHINE_LC=ia64
+!ENDIF
+
+!IF "$(BUILD)" == "RELEASE"
+!IF "$(CPU)" == "X86"
+OPT_CFLAGS=-O2 -Ob2 -Oy- -Zi -DNDEBUG
+!ELSE
+OPT_CFLAGS=-O2 -Ob2 -Zi -DNDEBUG
+!ENDIF
+!ELSE
+OPT_CFLAGS=-Od -Zi -DDEBUG -D_DEBUG
+!ENDIF
+
+!IF "$(BUILD)" == "DEBUG"
+CRT_CFLAGS=$(CRT_CFLAGS)d
+!ENDIF
+
+CFLAGS=$(CMN_CFLAGS) $(CPU_CFLAGS) $(OPT_CFLAGS) $(CRT_CFLAGS)
+
+!IF DEFINED(EXTRA_CFLAGS)
+CFLAGS=$(CFLAGS) $(EXTRA_CFLAGS)
+!ENDIF
+
+# Cleanup CXXFLAGS
+CXXFLAGS=
+!IF DEFINED(EXTRA_CXXFLAGS)
+CXXFLAGS=$(EXTRA_CXXFLAGS)
+!ENDIF
+
+# Linker section
+LIBS=kernel32.lib advapi32.lib ole32.lib shell32.lib rpcrt4.lib user32.lib
+# Extra libs from command line or env
+
+!IF DEFINED(STATIC_CRT)
+CRT_CFLAGS=-D_MT -MT
+!ELSE
+CRT_CFLAGS=-D_MT -MD
+!IF DEFINED(EXTRA_LIBS)
+LIBS=$(LIBS) $(EXTRA_LIBS)
+!ENDIF
+!ENDIF
+
+# Run-Time Error Checks
+!IF "$(BUILD)" == "DEBUG"
+!IF DEFINED(RTC_CHECK)
+LIBS=$(LIBS) RunTmChk.lib
+CFLAGS=$(CFLAGS) -RTC1
+!ENDIF
+!ENDIF
+
+COMMON_LFLAGS=/NOLOGO
+
+# Always add debugging to the linker
+OPT_LFLAGS=/INCREMENTAL:NO /DEBUG
+!IF "$(BUILD)" == "RELEASE"
+OPT_LFLAGS=$(OPT_LFLAGS) /OPT:REF
+!ENDIF
+
+!IF "$(TARGET)" == "EXE"
+LFLAGS=$(COMMON_LFLAGS) /SUBSYSTEM:CONSOLE /MACHINE:$(MACHINE)
+!ELSEIF "$(TARGET)" == "GUI"
+LFLAGS=$(COMMON_LFLAGS) /SUBSYSTEM:WINDOWS /MACHINE:$(MACHINE)
+!ELSEIF "$(TARGET)" == "DLL"
+LFLAGS=$(COMMON_LFLAGS) /DLL /SUBSYSTEM:WINDOWS /MACHINE:$(MACHINE)
+!ELSEIF "$(TARGET)" == "LIB"
+LFLAGS=-lib $(COMMON_LFLAGS)
+!ENDIF
+
+!IF DEFINED(EXTRA_LFLAGS)
+LFLAGS=$(LFLAGS) $(EXTRA_LFLAGS)
+!ENDIF
+
+!IF "$(TARGET)" != "LIB"
+LFLAGS=$(LFLAGS) $(OPT_LFLAGS)
+!ENDIF
+
+# Resource compiler flags
+
+RCFLAGS=/l 0x409
+!IF "$(BUILD)" == "RELEASE"
+RCFLAGS=$(RCFLAGS) /d "NDEBUG"
+!ELSE
+RCFLAGS=$(RCFLAGS) /d "_DEBUG" /d "DEBUG"
+!ENDIF
+RCFLAGS=$(RCFLAGS)
+!IF DEFINED(EXTRA_RCFLAGS)
+RCFLAGS=$(RCFLAGS) $(EXTRA_RCFLAGS)
+!ENDIF
+
+# Build Target dir e.g. WINNT_I386_RELEASE_DLL
+!IF !DEFINED(OUTDIR) || "$(OUTDIR)" == ""
+!IF !DEFINED(OUTDIR_EXT) || "$(OUTDIR_EXT)" == ""
+OUTDIR=$(WINVER)_$(CPU)_$(TARGET)_$(BUILD)
+OUTDIR_DLL=$(WINVER)_$(CPU)_DLL_$(BUILD)
+OUTDIR_LIB=$(WINVER)_$(CPU)_LIB_$(BUILD)
+OUTDIR_EXE=$(WINVER)_$(CPU)_EXE_$(BUILD)
+!ELSE
+OUTDIR=$(WINVER)_$(CPU)_$(BUILDIR_EXT)_$(BUILD)
+!ENDIF
+!ENDIF
+PDBFLAGS=-Fd$(OUTDIR)\$(PROJECT)-src
+INCLUDES=-I$(TOPDIR) -I$(TOPDIR)\include -I$(TOPDIR)\glob -I$(TOPDIR)\w32\include
+CFLAGS=$(CFLAGS) -DHAVE_CONFIG_H=1 -DWINDOWS32
+
+MAKEOUTDIR=
+
+# Assembler Section
+!IF !DEFINED(ML) || "$(ML)" == ""
+!IF "$(CPU)" == "X86"
+ML=ml.exe
+AFLAGS=/coff /Zi /c
+!ELSEIF "$(CPU)" == "X64"
+ML=ml64.exe
+AFLAGS=/Zi /c
+!ELSEIF "$(CPU)" == "I64"
+ML=ml64.exe
+AFLAGS=/coff /Zi /c
+!ENDIF
+!ENDIF
+
+BUILDEXE=$(OUTDIR)\$(PROJECT).exe
+BUILDLOC=$(PREFIX)
+!IF "$(CPU)" == "X64"
+BUILDLOC=$(PREFIX)\amd64
+!ELSEIF "$(CPU)" == "I64"
+BUILDLOC=$(PREFIX)\ia64
+!ENDIF
+BUILDPDB=$(OUTDIR)\$(PROJECT).pdb
+BUILDRES=$(OUTDIR)\$(PROJECT).res
+BUILDMAN=$(BUILDEXE).manifest
+
+SRCDIRS=\
+	$(TOPDIR) \
+	$(TOPDIR)\glob \
+	$(TOPDIR)\w32\compat \
+	$(TOPDIR)\w32\subproc \
+	$(TOPDIR)\w32 \
+
+SOURCES= \
+	$(TOPDIR)\ar.c \
+	$(TOPDIR)\arscan.c \
+	$(TOPDIR)\commands.c \
+	$(TOPDIR)\default.c \
+	$(TOPDIR)\dir.c \
+	$(TOPDIR)\expand.c \
+	$(TOPDIR)\file.c \
+	$(TOPDIR)\function.c \
+	$(TOPDIR)\getloadavg.c \
+	$(TOPDIR)\getopt.c \
+	$(TOPDIR)\getopt1.c \
+	$(TOPDIR)\hash.c \
+	$(TOPDIR)\implicit.c \
+	$(TOPDIR)\job.c \
+	$(TOPDIR)\main.c \
+	$(TOPDIR)\misc.c \
+	$(TOPDIR)\read.c \
+	$(TOPDIR)\remake.c \
+	$(TOPDIR)\remote-stub.c \
+	$(TOPDIR)\rule.c \
+	$(TOPDIR)\signame.c \
+	$(TOPDIR)\strcache.c \
+	$(TOPDIR)\variable.c \
+	$(TOPDIR)\version.c \
+	$(TOPDIR)\vpath.c \
+	$(TOPDIR)\glob\glob.c \
+	$(TOPDIR)\glob\fnmatch.c \
+	$(TOPDIR)\w32\compat\dirent.c \
+	$(TOPDIR)\w32\pathstuff.c \
+	$(TOPDIR)\w32\subproc\misc.c  \
+	$(TOPDIR)\w32\subproc\sub_proc.c  \
+	$(TOPDIR)\w32\subproc\w32err.c
+
+OBJECTS=$(SOURCES:.c=.obj)
+
+all: $(BUILDEXE)
+
+$(OUTDIR):
+	@if not exist "$(OUTDIR)\$(NULL)" mkdir $(OUTDIR)
+
+$(TOPDIR)\config.h:
+	@set VERSION="$(VERSION)"
+	@copy $(TOPDIR)\config.h.W32.template $@
+
+.c.obj:
+	$(CC) $(CFLAGS) $(INCLUDES) -c -Fo$@ $(PDBFLAGS) $<
+
+$(BUILDEXE): $(TOPDIR)\config.h $(OUTDIR) $(OBJECTS)
+	$(LINK) $(LFLAGS) $(OBJECTS) $(LIBS) $(LDIRS) /pdb:$(BUILDPDB) /out:$(BUILDEXE)
+	IF EXIST $(BUILDMAN) \
+		mt -nologo -manifest $(BUILDMAN) -outputresource:$(BUILDEXE);1
+
+clean:
+	@for %i in ($(SRCDIRS)) do @del /Q %%i\*.obj 2>NUL
+	@for %i in ($(SRCDIRS)) do @del /Q %%i\*.res 2>NUL
+	@rmdir /Q /S $(OUTDIR) >NUL 2>&1
+	@echo Cleaned.
+

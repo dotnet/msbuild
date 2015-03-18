@@ -1,0 +1,141 @@
+                                                            -*-Indented-Text-*-
+GNU Make TODO List
+------------------
+
+This list comes both from the authors and from users of GNU make.
+
+They are listed in no particular order!
+
+Also, I don't gaurantee that all of them will be ultimately deemed "good
+ideas" and implemented.  These are just the ones that, at first blush,
+seem to have some merit (and that I can remember).
+
+However, if you see something here you really, really want, speak up.
+All other things being equal, I will tend to implement things that seem
+to maximize user satisfaction.
+
+If you want to implement some of them yourself, barring the ones I've
+marked below, have at it!  Please contact me first to let me know you're
+working on it, and give me some info about the design--and, critically,
+information about any user-visible syntax change, etc.
+
+
+The Top Item
+------------
+
+If you know perl (or want to learn DejaGNU or similar), the number one
+priority on my list of things I don't have time to do right now is
+fixing up the GNU make test suite.  Most importantly it needs to be made
+"parallelizable", so more than one regression can run at the same time
+(essentially, make the "work" directory local).  Also, the CWD during
+the test should be in the work directory or, better, a test-specific
+temporary directory so each test gets a new directory; right now
+sometimes tests leak files into the main directory which causes
+subsequent tests to fail (some tests may need to be tweaked).  Beyond
+that, any cleanup done to make writing, reading, or handling tests
+simpler would be great!  Please feel free to make whatever changes you
+like to the current tests, given some high-level goals, and that you'll
+port the current tests to whatever you do :).
+
+
+The Rest of the List
+--------------------
+
+ 1) Option to check more than timestamps to determine if targets have
+    changed.  This is also a very big one.  It's _close_ to my plate :),
+    and I have very definite ideas about how I would like it done.
+    Please pick something else unless you must have this feature.  If
+    you try it, please work _extremely_ closely with me on it.
+
+ 1a) Possibly a special case of this is the .KEEP_STATE feature of Sun's
+     make.  Some great folks at W U. in Canada did an implementation of
+     this for a class project.  Their approach is reasonable and
+     workable, but doesn't really fit into my ideas for #2.  Maybe
+     that's OK.  I have paperwork for their work so if you want to do
+     this one talk to me to get what they've already done.
+
+     [K R Praveen <praveen@cair.res.in>]
+
+ 2) Currently you can use "%.foo %.bar : %.baz" to mean that one
+    invocation of the rule builds both targets.  GNU make needs a way to
+    do that for explicit rules, too.  I heard a rumor that some versions
+    of make all you to say "a.foo + a.bar : a.baz" to do this (i.e., a
+    "+" means one invocation builds both).  Don't know if this is the
+    best syntax or not... what if you say "a.foo + a.bar a.bam : a.baz";
+    what does that mean?
+
+ 3) Multi-token pattern rule matching (allow %1/%2.c : %1/obj/%2.o,
+    etc., or something like that).  Maybe using regex?
+
+ 4) Provide a .TARGETS variable, containing the names of the targets
+    defined in the makefile.
+
+    Actually, I now think a $(targets ...) function, at least, might be
+    better than a MAKETARGETS variable.  The argument would be types of
+    targets to list: "phony" is the most useful one.  I suppose
+    "default" might also be useful.  Maybe some others; check the
+    bitfields to see what might be handy.
+
+ 5) Some sort of operating-system independent way of handling paths
+    would be outstanding, so makefiles can be written for UNIX, VMS,
+    DOS, MS-Windows, Amiga, etc. with a minimum of specialization.
+
+    Or, perhaps related/instead of, some sort of meta-quoting syntax so
+    make can deal with filenames containing spaces, colons, etc.  I
+    dunno, maybe something like $[...]?  This may well not be worth
+    doing until #1 is done.
+
+ 6) Right now the .PRECIOUS, .INTERMEDIATE, and .SECONDARY
+    pseudo-targets have different capabilities.  For example, .PRECIOUS
+    can take a "%", the others can't.  Etc.  These should all work the
+    same, insofar as that makes sense.
+
+ 7) Improved debugging/logging/etc. capabilities.  Part of this is done:
+    I introduced a number of debugging enhancements.  Tim Magill is (I
+    think) looking into options to control output more selectively.
+    One thing I want to do in debugging is add a flag to allow debugging
+    of variables as they're expanded (!).  This would be incredibly
+    verbose, but could be invaluable when nothing else seems to work and
+    you just can't figure it out.  The way variables are expanded now
+    means this isn't 100% trivial, but it probably won't be hard.
+
+ 8) Integration of Guile as an embedded scripting language.  This means:
+    allowing Guile functions to be declared in makefiles somehow, then
+    providing a syntax for invoking them.  At least one formulation of
+    that would have the function resolve to a string which would be
+    substituted in the makefile, kind of like $(shell ...) does now, but
+    using the embedded interpreter so there's no process forked of
+    course.  Obviously this is an optional add-on feature.
+
+    It could be more advanced than that, even, who knows?  Maybe make
+    could provide Guile functions that allow Guile scripts more direct
+    access to internal make structures, somehow.  This kind of thing
+    needs a lot of thought.
+
+    Also there's always the flip side: in some very fundamental ways
+    make isn't the best choice right now for a complex build tool.  It's
+    great for simple-to-medium tasks, but there are already other tools
+    available for the really tough situations.  Ask yourself,
+    realistically, how much work is worthwhile to add to make, given the
+    fundamentals you can't really overcome without significantly
+    affecting backward compatibility--and then why not use another tool
+    in the first place?
+
+    Something to think about.
+
+
+-------------------------------------------------------------------------------
+Copyright (C) 1997-2012 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 3 of the License, or (at your option) any later
+version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <http://www.gnu.org/licenses/>.

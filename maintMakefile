@@ -1,0 +1,288 @@
+# Maintainer-only makefile segment.  This contains things that are relevant
+# only if you have the full copy of the GNU make sources from the CVS
+# tree, not a dist copy.
+
+# We like mondo-warnings!
+AM_CFLAGS += -Wall -Wextra -Wdeclaration-after-statement -Wshadow -Wpointer-arith -Wbad-function-cast
+
+MAKE_MAINTAINER_MODE := -DMAKE_MAINTAINER_MODE
+AM_CPPFLAGS += $(MAKE_MAINTAINER_MODE)
+
+# I want this one but I have to wait for the const cleanup!
+# -Wwrite-strings
+
+# Find the glob source files... this might be dangerous, but we're maintainers!
+globsrc := $(wildcard glob/*.c)
+globhdr := $(wildcard glob/*.h)
+
+TEMPLATES = README README.DOS README.W32 README.OS2 \
+	    config.ami configh.dos config.h.W32 config.h-vms
+MTEMPLATES = Makefile.DOS SMakefile
+
+# These are built as a side-effect of the dist rule
+#all-am: $(TEMPLATES) $(MTEMPLATES) build.sh.in
+
+# General rule for turning a .template into a regular file.
+#
+$(TEMPLATES) : % : %.template Makefile
+	rm -f $@
+	sed -e 's@%VERSION%@$(VERSION)@g' \
+	    -e 's@%PACKAGE%@$(PACKAGE)@g' \
+	  $< > $@
+	chmod a-w $@
+
+# Construct Makefiles by adding on dependencies, etc.
+#
+$(MTEMPLATES) : % : %.template .dep_segment Makefile
+	rm -f $@
+	sed -e 's@%VERSION%@$(VERSION)@g' \
+	    -e 's@%PROGRAMS%@$(bin_PROGRAMS)@g' \
+	    -e 's@%SOURCES%@$(filter-out remote-%,$(make_SOURCES)) remote-$$(REMOTE).c@g' \
+	    -e 's@%OBJECTS%@$(filter-out remote-%,$(make_OBJECTS)) remote-$$(REMOTE).o@g' \
+	    -e 's@%GLOB_SOURCES%@$(globsrc) $(globhdr)@g' \
+	    -e 's@%GLOB_OBJECTS%@$(globsrc:glob/%.c=%.o)@g' \
+	  $< > $@
+	echo >>$@; echo '# --------------- DEPENDENCIES' >>$@; echo '#' >>$@; \
+	  cat $(word 2,$^) >>$@
+	chmod a-w $@
+
+NMakefile: NMakefile.template .dep_segment Makefile
+	rm -f $@
+	cp $< $@
+	echo >>$@; echo '# --------------- DEPENDENCIES' >>$@; echo '#' >>$@; \
+	  sed 's/^\([^ ]*\)\.o:/$$(OUTDIR)\/\1.obj:/' $(word 2,$^) >>$@
+	chmod a-w $@
+
+# Construct build.sh.in
+#
+build.sh.in: build.template Makefile
+	rm -f $@
+	sed -e 's@%objs%@$(patsubst %.o,%.$${OBJEXT},$(filter-out remote-%,$(make_OBJECTS)))@g' \
+	    -e 's@%globobjs%@$(patsubst %.c,%.$${OBJEXT},$(globsrc))@g' \
+	  $< > $@
+	chmod a-w+x $@
+
+
+# Use automake to build a dependency list file, for "foreign" makefiles like
+# Makefile.DOS.
+#
+# Automake used to have a --generate-deps flag, but it's gone now, so we have
+# to do it ourselves.
+#
+DEP_FILES := $(wildcard $(DEPDIR)/*.Po)
+.dep_segment: Makefile.am maintMakefile $(DEP_FILES)
+	rm -f $@
+	(for f in $(DEPDIR)/*.Po; do \
+	   echo ""; \
+	   echo "# $$f"; \
+	   sed	-e '/^[^:]*\.[ch] *:/d' \
+		-e 's, /usr/[^ ]*,,g' \
+		-e 's, $(srcdir)/, ,g' \
+		-e '/^ *\\$$/d' \
+		-e '/^ *$$/d' \
+		< $$f; \
+	 done) > $@
+
+# Get rid of everything "else".
+#
+maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in
+
+CVS-CLEAN-FILES +=	$(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
+			build.sh.in .deps .dep_segment ABOUT-NLS \
+			ansi2knr.*
+
+# This rule tries to clean the tree right down to how it looks when you do a
+# virgin CVS checkout.
+
+# This target is potentially dangerous since it removes _ANY FILE_ that
+# is not in CVS.  Including files you might mean to add to CVS but
+# haven't yet...  I only use this in subdirectories where it's unlikely
+# we have any new files.  Still... be careful!!
+
+cvsclean = $(PERL) -e '$$k{CVS} = 1; open(E,"< CVS/Entries") || die "CVS/Entries: $$!\n"; while (defined ($$_ = <E>)) { m%^/([^/]*)% or next; $$k{$$1} = 1; } close(E) || die "CVS/Entries: $$!\n"; opendir(D, ".") || die ".: $$!\n"; while (defined ($$_ = readdir(D))) { -f $$_ && ! exists $$k{$$_} && unlink($$_); } closedir(D) || die ".: $$!\n";'
+
+.PHONY: cvs-clean
+cvs-clean: maintainer-clean
+	-rm -rf *~ $(CVS-CLEAN-FILES)
+	-cd config && $(cvsclean)
+	-cd po     && $(cvsclean)
+	-cd doc    && $(cvsclean)
+	-cd glob   && $(cvsclean)
+
+
+# ----------------------------------------------------------------------
+#
+# The sections below were stolen from the Makefile.maint used by fileutils,
+# sh-utils, textutils, CPPI, Bison, and Autoconf.
+
+
+## ---------------- ##
+## Updating files.  ##
+## ---------------- ##
+
+WGET = wget --passive-ftp -nv
+ftp-gnu = ftp://ftp.gnu.org/gnu
+
+move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
+		    echo $(target) is unchanged; rm -f $(target).t; \
+		  else \
+		    mv $(target).t $(target); \
+		  fi
+
+# ------------------- #
+# Updating PO files.  #
+# ------------------- #
+
+# PO archive mirrors --- Be careful; some might not be fully populated!
+#   ftp://ftp.unex.es/pub/gnu-i18n/po/maint/
+#   http://translation.sf.net/maint/
+#   ftp://tiger.informatik.hu-berlin.de/pub/po/maint/
+
+po_wget_flags =	--recursive --level=1 --no-directories --no-parent \
+		--no-check-certificate
+po_repo = http://translationproject.org/latest/$(PACKAGE)
+.PHONY: do-po-update po-update
+do-po-update:
+	tmppo="/tmp/po-$(PACKAGE)-$(VERSION).$$$$" \
+	  && rm -rf "$$tmppo" \
+	  && mkdir "$$tmppo" \
+	  && (cd "$$tmppo" \
+		&& $(WGET) $(po_wget_flags) -A '*.po' $(po_repo)) \
+	  && cp "$$tmppo"/*.po $(top_srcdir)/po && rm -rf "$$tmppo"
+	cd po && $(MAKE) update-po
+	$(MAKE) po-check
+
+po-update:
+	[ -d "po" ] && $(MAKE) do-po-update
+
+# -------------------------- #
+# Updating GNU build files.  #
+# -------------------------- #
+
+# The following pseudo table associates a local directory and a URL
+# with each of the files that belongs to some other package and is
+# regularly updated from the specified URL.
+
+cvs-url = http://savannah.gnu.org/cgi-bin/viewcvs/~checkout~
+git-url = http://git.savannah.gnu.org/cgit
+target = $(patsubst get-%,%,$@)
+
+config-url = $(git-url)/config.git/plain/$(patsubst get-config/%,%,$@)
+get-config/config.guess get-config/config.sub:
+	@echo $(WGET) $(config-url) -O $(target) \
+	  && $(WGET) $(config-url) -O $(target).t \
+	  && $(move_if_change)
+
+gnulib-url = $(git-url)/gnulib.git/plain/build-aux/$(patsubst get-config/%,%,$@)
+get-config/texinfo.tex:
+	@echo $(WGET) $(gnulib-url) -O $(target) \
+	  && $(WGET) $(gnulib-url) -O $(target).t \
+	  && $(move_if_change)
+
+gnustandards-url = $(cvs-url)/gnustandards/gnustandards/$(patsubst get-doc/%,%,$@)
+get-doc/make-stds.texi get-doc/fdl.texi:
+	@echo $(WGET) $(gnustandards-url) -O $(target) \
+	  && $(WGET) $(gnustandards-url) -O $(target).t \
+	  && $(move_if_change)
+
+.PHONY: scm-update
+scm-update: get-config/texinfo.tex get-config/config.guess get-config/config.sub get-doc/make-stds.texi get-doc/fdl.texi
+
+
+# --------------------- #
+# Updating everything.  #
+# --------------------- #
+
+.PHONY: update
+update: po-update scm-update
+
+
+## --------------- ##
+## Sanity checks.  ##
+## --------------- ##
+
+# Checks that don't require cvs.  Run 'changelog-check' last as
+# previous test may reveal problems requiring new ChangeLog entries.
+local-check: po-check changelog-check
+
+# copyright-check writable-files
+
+changelog-check:
+	if head $(top_srcdir)/ChangeLog | grep 'Version $(VERSION)' >/dev/null; then \
+	  :; \
+	else \
+	  echo "$(VERSION) not in ChangeLog" 1>&2; \
+	  exit 1; \
+	fi
+
+# Verify that all source files using _() are listed in po/POTFILES.in.
+# Ignore make.h; it defines _().
+po-check:
+	if test -f po/POTFILES.in; then \
+	  grep '^[^#]' po/POTFILES.in | sort > $@-1; \
+	  $(PERL) -wn -e 'if (/\b_\(/) { $$ARGV eq "make.h" || print "$$ARGV\n" and close ARGV }' *.c *.h | sort > $@-2; \
+	  diff -u $@-1 $@-2 || exit 1; \
+	  rm -f $@-1 $@-2; \
+	fi
+
+## ------------------------- ##
+## GNU FTP upload artifacts. ##
+## ------------------------- ##
+
+# This target creates the upload artifacts.
+# Sign it with my key.  If you don't have my key/passphrase then sorry,
+# you're SOL! :)
+
+GPG = gpg
+GPGFLAGS = -u 6338B6D4
+
+DIST_ARCHIVES_SIG = $(addsuffix .sig,$(DIST_ARCHIVES))
+DIST_ARCHIVES_DIRECTIVE = $(addsuffix .directive.asc,$(DIST_ARCHIVES))
+
+# A simple rule to test signing, etc.
+.PHONY: distsign
+distsign: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
+
+%.sig : %
+	@echo "Signing file '$<':"
+	$(GPG) $(GPGFLAGS) -o "$@" -b "$<"
+
+%.directive.asc: %
+	@echo "Creating directive file '$@':"
+	@( \
+	   echo 'version: 1.1'; \
+	   echo 'directory: make'; \
+	   echo 'filename: $*'; \
+	   echo 'comment: Official upload of GNU make version $(VERSION)'; \
+	 ) > "$*.directive"
+	$(GPG) $(GPGFLAGS) -o "$@" --clearsign "$*.directive"
+	@rm -f "$*.directive"
+
+# Upload the artifacts
+
+FTPPUT = ncftpput
+gnu-upload-host = ftp-upload.gnu.org
+gnu-upload-dir  = /incoming
+
+
+UPLOADS = upload-alpha upload-ftp
+.PHONY: $(UPLOADS)
+$(UPLOADS): $(DIST_ARCHIVES) $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
+	$(FTPPUT) "$(gnu-upload-host)" "$(gnu-upload-dir)/$(@:upload-%=%)" $^
+
+
+# Copyright (C) 1997-2012 Free Software Foundation, Inc.
+# This file is part of GNU Make.
+#
+# GNU Make is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
+#
+# GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.

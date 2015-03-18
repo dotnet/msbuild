@@ -1,0 +1,124 @@
+# -*-Makefile-*- to build GNU make with nmake
+#
+# NOTE: If you have no 'make' program at all to process this makefile,
+# run 'build_w32.bat' instead.
+#
+# Copyright (C) 1996-2012 Free Software Foundation, Inc.
+# This file is part of GNU Make.
+#
+# GNU Make is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
+#
+# GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
+LINK = link
+CC = cl
+MAKE = nmake
+
+OUTDIR=.
+MAKEFILE=NMakefile
+SUBPROC_MAKEFILE=NMakefile
+
+CFLAGS_any = /nologo /MT /W4 /GX /Zi /YX /I . /I glob /I w32/include /D WIN32 /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H
+CFLAGS_debug = $(CFLAGS_any) /Od /D DEBUG /D _DEBUG /FR.\WinDebug/ /Fp.\WinDebug/make.pch /Fo.\WinDebug/ /Fd.\WinDebug/make.pdb
+CFLAGS_release = $(CFLAGS_any) /O2 /D NDEBUG /FR.\WinRel/ /Fp.\WinRel/make.pch /Fo.\WinRel/
+
+LDFLAGS_debug = w32\subproc\WinDebug\subproc.lib /NOLOGO /SUBSYSTEM:console\
+	/INCREMENTAL:no /PDB:WinDebug/make.pdb /OUT:WinDebug/make.exe /DEBUG
+LDFLAGS_release = w32\subproc\WinRel\subproc.lib /NOLOGO /SUBSYSTEM:console\
+	/INCREMENTAL:no /OUT:WinRel/make.exe
+
+all: config.h subproc Release Debug
+
+#
+# Make sure we build the subproc library first. It has it's own
+# makefile. To be portable to Windows 95, we put the instructions
+# on how to build the library into a batch file. On NT, we could
+# simply have done foo && bar && dog, but this doesn't port.
+#
+subproc: w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib
+
+w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib: w32/subproc/misc.c w32/subproc/sub_proc.c w32/subproc/w32err.c
+	subproc.bat $(SUBPROC_MAKEFILE) $(MAKE)
+	if exist WinDebug\make.exe erase WinDebug\make.exe
+	if exist WinRel\make.exe erase WinRel\make.exe
+
+config.h: config.h.W32
+	copy $? $@
+
+Release:
+	$(MAKE) /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_release)" CFLAGS="$(CFLAGS_release)" OUTDIR=WinRel WinRel/make.exe
+Debug:
+	$(MAKE) /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_debug)" CFLAGS="$(CFLAGS_debug)" OUTDIR=WinDebug WinDebug/make.exe
+
+clean:
+	if exist WinDebug\nul rmdir /s /q WinDebug
+	if exist WinRel\nul rmdir /s /q WinRel
+	if exist w32\subproc\WinDebug\nul rmdir /s /q w32\subproc\WinDebug
+	if exist w32\subproc\WinRel\nul rmdir /s /q w32\subproc\WinRel
+	if exist config.h erase config.h
+	erase *.pdb
+
+$(OUTDIR):
+	if not exist .\$@\nul mkdir .\$@
+
+LIBS = kernel32.lib user32.lib advapi32.lib
+
+#guile = $(OUTDIR)/guile.obj
+
+OBJS = \
+	$(OUTDIR)/ar.obj \
+	$(OUTDIR)/arscan.obj \
+	$(OUTDIR)/commands.obj \
+	$(OUTDIR)/default.obj \
+	$(OUTDIR)/dir.obj \
+	$(OUTDIR)/expand.obj \
+	$(OUTDIR)/file.obj \
+	$(OUTDIR)/function.obj \
+	$(OUTDIR)/getloadavg.obj \
+	$(OUTDIR)/getopt.obj \
+	$(OUTDIR)/getopt1.obj \
+	$(OUTDIR)/hash.obj \
+	$(OUTDIR)/implicit.obj \
+	$(OUTDIR)/job.obj \
+	$(OUTDIR)/main.obj \
+	$(OUTDIR)/misc.obj \
+	$(OUTDIR)/read.obj \
+	$(OUTDIR)/remake.obj \
+	$(OUTDIR)/remote-stub.obj \
+	$(OUTDIR)/rule.obj \
+	$(OUTDIR)/signame.obj \
+	$(OUTDIR)/strcache.obj \
+	$(OUTDIR)/variable.obj \
+	$(OUTDIR)/version.obj \
+	$(OUTDIR)/vpath.obj \
+	$(OUTDIR)/glob.obj \
+	$(OUTDIR)/fnmatch.obj \
+	$(OUTDIR)/dirent.obj \
+	$(OUTDIR)/pathstuff.obj \
+	$(guile)
+
+$(OUTDIR)/make.exe: $(OUTDIR) $(OBJS)
+	$(LINK) @<<
+		$(LDFLAGS) $(LIBS) $(OBJS)
+<<
+
+.c{$(OUTDIR)}.obj:
+	$(CC) $(CFLAGS) /c $<
+
+$(OUTDIR)/glob.obj : glob/glob.c
+	$(CC) $(CFLAGS) /c $?
+$(OUTDIR)/fnmatch.obj : glob/fnmatch.c
+	$(CC) $(CFLAGS) /c $?
+$(OUTDIR)/dirent.obj : w32/compat/dirent.c
+	$(CC) $(CFLAGS) /c $?
+$(OUTDIR)/pathstuff.obj : w32/pathstuff.c
+	$(CC) $(CFLAGS) /c $?

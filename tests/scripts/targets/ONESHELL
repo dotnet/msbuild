@@ -1,0 +1,69 @@
+#                                                                    -*-perl-*-
+
+$description = "Test the behaviour of the .ONESHELL target.";
+
+$details = "";
+
+
+# Simple
+
+run_make_test(q!
+.ONESHELL:
+all:
+	a=$$$$
+	[ 0"$$a" -eq "$$$$" ] || echo fail
+!,
+              '', 'a=$$
+[ 0"$a" -eq "$$" ] || echo fail
+');
+
+# Again, but this time with inner prefix chars
+
+run_make_test(q!
+.ONESHELL:
+all:
+	a=$$$$
+	@-+    [ 0"$$a" -eq "$$$$" ] || echo fail
+!,
+              '', 'a=$$
+[ 0"$a" -eq "$$" ] || echo fail
+');
+
+# This time with outer prefix chars
+
+run_make_test(q!
+.ONESHELL:
+all:
+	   @a=$$$$
+	    [ 0"$$a" -eq "$$$$" ] || echo fail
+!,
+              '', '');
+
+
+# This time with outer and inner prefix chars
+
+run_make_test(q!
+.ONESHELL:
+all:
+	   @a=$$$$
+	    -@     +[ 0"$$a" -eq "$$$$" ] || echo fail
+!,
+              '', '');
+
+
+# Now try using a different interpreter
+
+run_make_test(q!
+.RECIPEPREFIX = >
+.ONESHELL:
+SHELL = #PERL#
+.SHELLFLAGS = -e
+all:
+>	   @$$a=5
+>	    +7;
+>	@y=qw(a b c);
+>print "a = $$a, y = (@y)\n";
+!,
+              '', "a = 12, y = (a b c)\n");
+
+1;

@@ -1,0 +1,34 @@
+#                                                                    -*-perl-*-
+
+$description = "Test the behaviour of the .PHONY target.";
+
+$details = "";
+
+
+# Ensure turning on .POSIX enables the -e flag for the shell
+# We can't assume the exit value of "false" because on different systems it's
+# different.
+
+my $script = 'false; true';
+my $flags = '-ec';
+my $out = `/bin/sh $flags '$script' 2>&1`;
+my $err = $? >> 8;
+run_make_test(qq!
+.POSIX:
+all: ; \@$script
+!,
+              '', "#MAKEFILE#:3: recipe for target `all' failed
+#MAKE#: *** [all] Error $err\n", 512);
+
+# User settings must override .POSIX
+$flags = '-xc';
+$out = `/bin/sh $flags '$script' 2>&1`;
+run_make_test(qq!
+.SHELLFLAGS = $flags
+.POSIX:
+all: ; \@$script
+!,
+              '', $out);
+
+# This tells the test driver that the perl test script executed properly.
+1;

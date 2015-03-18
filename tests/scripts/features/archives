@@ -1,0 +1,47 @@
+#                                                              -*-mode: perl-*-
+
+$description = "Test GNU make's archive management features.";
+
+$details = "\
+This only works on systems that support it.";
+
+# If this instance of make doesn't support archives, skip it
+exists $FEATURES{archives} or return -1;
+
+# Create some .o files to work with
+utouch(-60, qw(a1.o a2.o a3.o));
+
+# Very simple
+run_make_test('all: libxx.a(a1.o)',
+              '', "ar rv libxx.a a1.o\nar: creating libxx.a\na - a1.o\n");
+
+# Multiple .o's.  Add a new one to the existing library
+run_make_test('all: libxx.a(a1.o a2.o)',
+              '', "ar rv libxx.a a2.o\na - a2.o\n");
+
+# Touch one of the .o's so it's rebuilt
+utouch(-40, 'a1.o');
+run_make_test(undef, '', "ar rv libxx.a a1.o\nr - a1.o\n");
+
+# Use wildcards
+run_make_test('all: libxx.a(*.o)',
+              '', "#MAKE#: Nothing to be done for `all'.\n");
+
+# Touch one of the .o's so it's rebuilt
+utouch(-30, 'a1.o');
+run_make_test(undef, '', "ar rv libxx.a a1.o\nr - a1.o\n");
+
+# Use both wildcards and simple names
+utouch(-50, 'a2.o');
+run_make_test('all: libxx.a(a3.o *.o)', '',
+              "ar rv libxx.a a3.o\na - a3.o\nar rv libxx.a a2.o\nr - a2.o\n");
+
+# Check whitespace handling
+utouch(-40, 'a2.o');
+run_make_test('all: libxx.a(  a3.o    *.o     )', '',
+              "ar rv libxx.a a2.o\nr - a2.o\n");
+
+rmfiles(qw(a1.o a2.o a3.o libxx.a));
+
+# This tells the test driver that the perl test script executed properly.
+1;

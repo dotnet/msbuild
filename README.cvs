@@ -1,0 +1,219 @@
+                                                                     -*-text-*-
+
+-------------------------------------------------------------------------------
+Copyright (C) 2002-2012 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 3 of the License, or (at your option) any later
+version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <http://www.gnu.org/licenses/>.
+-------------------------------------------------------------------------------
+
+Obtaining CVS Code
+------------------
+
+This seems redundant, since if you're reading this you most likely have
+already performed this step; however, for completeness, you can obtain
+the GNU make source code via anonymous CVS from the FSF's Savannah
+project <http://savannah.gnu.org/projects/make/>:
+
+  $ cvs -d:pserver:anoncvs@cvs.savannah.gnu.org:/sources/make co make
+
+You might want to use the "-z3" option to get compression, and you most
+certainly will want the -P option to avoid unneeded directories
+cluttering up your source.  Personally I add these (as well as -dP for
+update) to my ~/.cvsrc file.
+
+
+If you have an older version of CVS, you might have to login first.
+There is no password; just hit the ENTER key if you are asked for one.
+
+
+Building From CVS
+-----------------
+
+To build GNU make from CVS, you will need Autoconf, Automake, and
+Gettext, and any tools that those utilities require (GNU m4, Perl,
+etc.).  See the configure.in file to find the minimum versions of each
+of these tools.  You will also need a copy of wget.
+
+When building from CVS you must build in the source directory: "VPATH
+builds" from remote directories are not supported.  Once you've created
+a distribution, of course, you can unpack it and do a VPATH build from
+there.
+
+After checking out the code, you will need to perform these steps to get
+to the point where you can run "make".
+
+
+ 1) $ autoreconf -i
+
+    This rebuilds all the things that need rebuilding, installing
+    missing files as symbolic links.
+
+    You may get warnings here about missing files like README, etc.
+    Ignore them, they are harmless.
+
+
+ 2) $ ./configure
+
+    Generate a Makefile
+
+
+ 3) $ make update
+
+    Use wget to retrieve various other files that GNU make relies on,
+    but does not keep in its own source tree.
+
+    NB: You may need GNU make to correctly perform this step; if you use
+    a platform-local make you may get problems with missing files in doc/.
+
+
+At this point you have successfully brought your CVS copy of the GNU
+make source directory up to the point where it can be treated
+more-or-less like the official package you would get from ftp.gnu.org.
+That is, you can just run:
+
+  $ make && make check && make install
+
+to build and install GNU make.
+
+
+Windows builds from CVS
+-----------------------
+
+If you have a UNIX emulation like CYGWIN you can opt to run the general
+build procedure above; it will work.  Be sure to read
+README.W32.template for information on options you might want to use
+when running ./configure.
+
+If you can't or don't want to do that, then rename the file
+README.W32.template to README.W32 and follow those instructions.
+
+
+Creating a Package
+------------------
+
+Once you have performed the above steps (including the configuration and
+build) you can create a GNU make package.  This is very simple, just
+run:
+
+  $ make dist-gzip
+
+and, if you like:
+
+  $ make dist-bzip2
+
+Even better, you should run this:
+
+  $ make distcheck
+
+Which will build both .gz and .bz2 package files, then unpack them into
+a temporary location, try to build them, and repack them, verifying that
+everything works, you get the same results, _and_ no extraneous files
+are left over after the "distclean" rule--whew!!  Now, _that_ is why
+converting to Automake is worth the trouble!  A big "huzzah!" to Tom
+T. and the AutoToolers!
+
+
+Steps to Release
+----------------
+
+Here are the things that need to be done (in more or less this order)
+before making an official release:
+
+  * Update the configure.in file with the new release number.
+  * Update the NEWS file with the release number and date.
+  * Create the new release in the Savannah "Bugs" Administration for
+    both the "Component Version" and "Fixed Release" fields.
+  * Create the new release in the Savannah "Patches" Administration for
+    the "Fixed Release" field.
+  * Update the Savannah bug list URL in the NEWS file to use the correct
+    "Fixed Release" ID number.
+  * Run "make distcheck" to be sure it all works.
+  * Commit everything.
+  * cvs tag <RTAG> where RTAG is constructed by replacing each "." in
+    the version with "-" and prefixing it with "make-".
+
+
+Publishing a Package
+--------------------
+
+In order to publish a package on the FSF FTP site, either the release
+site ftp://ftp.gnu.org, or the prerelease site ftp://alpha.gnu.org, you
+first need to have my GPG private key and my passphrase to unlock it.
+And, you can't have them!  So there!  But, just so I remember here's
+what you do:
+
+  Make sure the "Steps to Release" are complete and committed and tagged.
+
+  cvs -d :pserver:anonymous@cvs.savannah.gnu.org:/sources/make \
+     export -r<RTAG> -d make-release make
+
+  cd make-release
+
+  <run the commands above to build the release>
+
+  make upload-alpha             # for alpha.gnu.org (pre-releases)
+       -OR-
+  make upload-ftp               # for ftp.gnu.org (official releases)
+
+It will ask for the GPG passphrase _THREE_ times.  Sigh.
+
+
+For both final releases and pre-releases, send an email with the URL of
+the package to the GNU translation robot to allow the translators to
+work on it:
+
+     <translation@iro.umontreal.ca>
+
+
+Where to Announce
+-----------------
+
+Create the announcement in a text file, then sign it with GPG.
+
+  gpg --clearsign <announcement.txt>
+
+Upload to gnu.org, then login and send from my account there.
+
+Email to: make-alpha@gnu.org, bug-make@gnu.org, help-make@gnu.org, make-w32@gnu.org.
+Email to: info-gnu@gnu.org
+
+Add a news item to the Savannah project site.
+
+Add an update to freshmeat.net.
+
+
+Appendix A - For The Brave
+--------------------------
+
+For those of you who trust me implicitly, or are just brave (or
+foolhardy), here is a canned sequence of commands to build a GNU make
+distribution package from a virgin CVS source checkout (assuming all the
+prerequisites are available of course).
+
+This list is eminently suitable for a quick swipe o' the mouse and a
+swift click o' mouse-2 into an xterm.  Go for it!
+
+autoreconf -i
+./configure
+make update
+make
+make check
+
+Or, for a debugging version:
+
+autoreconf -i && ./configure CFLAGS=-g && make update && make && make check
+
+Or, all-in-one:
+
+autoreconf -i && ./configure && make update && make && make check

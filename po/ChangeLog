@@ -1,0 +1,89 @@
+2012-01-12  Paul Smith  <psmith@gnu.org>
+
+	* POTFILES.in: Add new guile.c file.
+
+2011-09-26  Paul Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added new translation file for Czech (cs).
+
+2009-09-16  Paul Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added new translation for Italian (it).
+
+2008-05-17  Paul Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added new translation for Lithuanian (lt).
+
+2007-08-15  Paul Smith  <psmith@gnu.org>
+
+	* LINGUAS: The Kinyarwanda (rw) translation has disappeared from
+	the translation site, so remove it.
+
+2006-01-28  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added new translation for Vietnamese (vi).
+
+2005-07-14  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added new translation for Indonesian (id).
+
+2005-05-09  Paul D. Smith  <psmith@gnu.org>
+
+	* POTFILES.in: Add new file vmsjobs.c.
+
+2005-04-06  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added a new translation for Kinywarwanda (rw).
+
+2005-02-09  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added a new translation for Irish (ga).
+
+2005-02-01  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added a new translation for Finnish (fi).
+
+2003-10-18  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added a new translation for Belarusian (be).
+
+2002-12-19  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added a new translation for Ukrainian (uk).
+
+2002-10-05  Paul D. Smith  <psmith@gnu.org>
+
+	* POTFILES.in: Add variable.h as it has a translatable string.
+
+2002-08-08  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Add a new translation for Chinese (simplified) (zh_CN).
+
+2002-08-02  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Add a new translation for Swedish (sv).
+
+2002-04-21  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS, hr.po: Added new translation: Croatian.
+
+	* da.po, de.po, es.po, fr.po, gl.po, he.po, ja.po, ko.po, nl.po,
+	pl.po, pt_BR.po, ru.po, tr.po: Moved from i18n to here.
+	* .cvsignore: Moved from i18n to here.
+
+	* POTFILES.in, LINGUAS, Makevars: Created.
+
+Copyright (C) 2002-2012 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 3 of the License, or (at your option) any later
+version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <http://www.gnu.org/licenses/>.

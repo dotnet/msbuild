@@ -1,0 +1,19 @@
+#                                                                    -*-perl-*-
+
+$description = "Test the --eval option.";
+
+$details = "Verify that --eval options take effect,
+and are passed to sub-makes.";
+
+# Verify that --eval is evaluated first
+run_make_test(q!
+BAR = bar
+all: ; @echo all
+recurse: ; @$(MAKE) -f #MAKEFILE# && echo recurse!,
+              '--eval=\$\(info\ eval\) FOO=\$\(BAR\)', "eval\nall");
+
+# Make sure that --eval is handled correctly during recursion
+run_make_test(undef, '--no-print-directory --eval=\$\(info\ eval\) recurse',
+              "eval\neval\nall\nrecurse");
+
+1;
