@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -15,13 +15,13 @@ using System.Globalization;
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AxImp_Tests
     {
         /// <summary>
         /// Tests that the assembly being imported is passed to the command line
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ActiveXControlName()
         {
             var t = new ResolveComReference.AxImp();
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests that the assembly being imported is passed to the command line
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ActiveXControlNameWithSpaces()
         {
             var t = new ResolveComReference.AxImp();
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /source switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GenerateSource()
         {
             var t = new ResolveComReference.AxImp();
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /nologo switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoLogo()
         {
             var t = new ResolveComReference.AxImp();
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /out: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutputAssembly()
         {
             var t = new ResolveComReference.AxImp();
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /out: switch, with a space in the output file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutputAssemblyWithSpaces()
         {
             var t = new ResolveComReference.AxImp();
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /rcw: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RuntimeCallableWrapper()
         {
             var t = new ResolveComReference.AxImp();
@@ -136,7 +136,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /rcw: switch with a space in the filename
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RuntimeCallableWrapperWithSpaces()
         {
             var t = new ResolveComReference.AxImp();
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /silent switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Silent()
         {
             var t = new ResolveComReference.AxImp();
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /verbose switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Verbose()
         {
             var t = new ResolveComReference.AxImp();
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests that task does the right thing (fails) when no .ocx file is passed to it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskFailsWithNoInputs()
         {
             var t = new ResolveComReference.AxImp();

@@ -7,13 +7,13 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Text;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public sealed class NativeMethodsShared_Tests
     {
         #region Data
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Confirms we can find a file on the system path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FindFileOnPath()
         {
             string expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         /// Confirms we can find a file on the system path even if the path
         /// to the file is very long.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FindFileOnPathAfterResizingBuffer()
         {
             int savedMaxPath = NativeMethodsShared.MAX_PATH;
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Confirms we cannot find a bogus file on the system path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotFindFileOnPath()
         {
             string bogusFile = Path.ChangeExtension(Guid.NewGuid().ToString(), ".txt");
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify that getProcAddress works, bug previously was due to a bug in the attributes used to pinvoke the method
         /// when that bug was in play this test would fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetProcAddress()
         {
             IntPtr kernel32Dll = NativeMethodsShared.LoadLibrary("kernel32.dll");
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that when NativeMethodsShared.GetLastWriteFileUtcTime() is called on a
         /// missing time, DateTime.MinValue is returned.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetLastWriteFileUtcTimeReturnsMinValueForMissingFile()
         {
             string nonexistentFile = FileUtilities.GetTemporaryFile();
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that NativeMethodsShared.SetCurrentDirectory(), when called on a nonexistent
         /// directory, will not set the current directory to that location. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCurrentDirectoryDoesNotSetNonexistentFolder()
         {
             string currentDirectory = Environment.CurrentDirectory;

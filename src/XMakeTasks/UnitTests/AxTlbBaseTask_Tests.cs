@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -17,13 +17,13 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AxTlbBaseTask_Tests
     {
         /// <summary>
         /// Tests the /delaysign switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DelaySign()
         {
             AxTlbBaseTask t = new ResolveComReference.AxImp();
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keycontainer: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyContainer()
         {
             var t = new ResolveComReference.TlbImp();
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keycontainer: switch with a space in the name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyContainerWithSpaces()
         {
             AxTlbBaseTask t = new ResolveComReference.AxImp();
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keyfile: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyFile()
         {
             var t = new ResolveComReference.AxImp();
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keyfile: switch with a space in the filename
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyFileWithSpaces()
         {
             AxTlbBaseTask t = new ResolveComReference.TlbImp();
@@ -168,7 +168,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SdkToolsPath()
         {
             var t = new ResolveComReference.TlbImp();
@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the ToolPath property:  Should log an error if it's null or a bad path.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolPath()
         {
             var t = new ResolveComReference.AxImp();
@@ -237,7 +237,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests that strong name sign-related parameters are validated properly, causing the task
         /// to fail if they are incorrectly set up.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskFailsWhenImproperlySigned()
         {
             var t = new ResolveComReference.TlbImp();

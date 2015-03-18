@@ -5,16 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class FindAppConfigFile_Tests
     {
-        [TestMethod]
+        [Test]
         public void FoundInFirstInProjectDirectory()
         {
             FindAppConfigFile f = new FindAppConfigFile();
@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("targetpath", f.AppConfigFile.GetMetadata("TargetPath"));
         }
 
-        [TestMethod]
+        [Test]
         public void FoundInSecondInProjectDirectory()
         {
             FindAppConfigFile f = new FindAppConfigFile();
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("targetpath", f.AppConfigFile.GetMetadata("TargetPath"));
         }
 
-        [TestMethod]
+        [Test]
         public void FoundInSecondBelowProjectDirectory()
         {
             FindAppConfigFile f = new FindAppConfigFile();
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("targetpath", f.AppConfigFile.GetMetadata("TargetPath"));
         }
 
-        [TestMethod]
+        [Test]
         public void NotFound()
         {
             FindAppConfigFile f = new FindAppConfigFile();
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(null, f.AppConfigFile);
         }
 
-        [TestMethod]
+        [Test]
         public void MatchFileNameOnlyWithAnInvalidPath()
         {
             FindAppConfigFile f = new FindAppConfigFile();
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // For historical reasons, we should return the last one in the list
-        [TestMethod]
+        [Test]
         public void ReturnsLastOne()
         {
             FindAppConfigFile f = new FindAppConfigFile();

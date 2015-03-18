@@ -8,7 +8,7 @@
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -16,13 +16,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for logging contexts. 
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class LoggingContext_Tests
     {
         /// <summary>
         /// A few simple tests for NodeLoggingContexts. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CreateValidNodeLoggingContexts()
         {
             NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(), 1, true);
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we'll know about it.  
         /// </summary>
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void InvalidNodeIdOnNodeLoggingContext()
         {
             NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(), -2, true);

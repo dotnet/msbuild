@@ -8,20 +8,20 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Unit tests for the AppConfig class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class AppConfig_Tests
     {
         /// <summary>
         /// A simple app.config.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Simple()
         {
             AppConfig app = new AppConfig();
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A simple app.config.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleRange()
         {
             AppConfig app = new AppConfig();
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// An app.config taken from rascal, that has some bindingRedirects.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RascalTest()
         {
             AppConfig app = new AppConfig();
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A machine.config file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MachineConfig()
         {
             AppConfig app = new AppConfig();
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure that only dependent assemblies under the configuration-->runtime tag work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress339840_DependentAssemblyUnderAlienTag()
         {
             AppConfig app = new AppConfig();

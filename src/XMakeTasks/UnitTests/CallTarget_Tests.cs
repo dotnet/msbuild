@@ -6,7 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -16,16 +16,16 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class CallTarget_Tests
     {
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Simple test of the CallTarget task.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Simple()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Simple test of the CallTarget task, where one of the middle targets invoked fails.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FailedTargets()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@"
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         /// Test the CallTarget task, where one of the middle targets invoked fails, but we
         /// specified RunEachTargetSeparately, so all the targets should have been run anyway.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FailedTargetsRunSeparately()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@"
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
         /// to succeed, so that callers of the task don't have to add a Condition to ensure
         /// that the list of targets is non-empty.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoTargets()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the CallTarget task and capture the outputs of the invoked targets.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CaptureTargetOutputs()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
                 targetOutputsTaskItems.ToArray(), false /* ignore the order */);
         }
 
-        [TestMethod]
+        [Test]
         public void CaptureTargetOutputsRunningEachTargetSeparately()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"

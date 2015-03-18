@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -11,7 +11,7 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class SGen_Tests
     {
         internal class SGenExtension : SGen
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void KeyFileQuotedOnCommandLineIfNecessary()
         {
             SGenExtension sgen = new SGenExtension();
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(commandLine.IndexOf("/compiler:\"/keyfile:\\\"" + sgen.KeyFile + "\\\"\"", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        [TestMethod]
+        [Test]
         public void TestKeepFlagTrue()
         {
             SGenExtension sgen = new SGenExtension();
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.IsTrue(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) >= 0);
         }
-        [TestMethod]
+        [Test]
         public void TestKeepFlagFalse()
         {
             SGenExtension sgen = new SGenExtension();
@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestInputChecks1()
         {
             MockEngine engine = new MockEngine();
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Errors == 1);
         }
 
-        [TestMethod]
+        [Test]
         public void TestInputChecks2()
         {
             MockEngine engine = new MockEngine();
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Errors == 1);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestInputChecks3()
         {
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
             string commandLine = sgen.CommandLine();
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestInputChecks4()
         {
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests
             string commandLine = sgen.CommandLine();
         }
 
-        [TestMethod]
+        [Test]
         public void TestInputPlatform()
         {
             SGenExtension sgen = new SGenExtension();
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(String.Equals(commandLine, "/assembly:\"C:\\SomeFolder\\MyAsm.dll\\MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /compiler:/platform:x86", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void TestInputTypes()
         {
             SGenExtension sgen = new SGenExtension();
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(String.Equals(commandLine, "/assembly:\"C:\\SomeFolder\\MyAsm.dll\\MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /type:System.String /type:System.Boolean", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void TestInputEmptyTypesAndPlatform()
         {
             SGenExtension sgen = new SGenExtension();

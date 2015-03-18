@@ -4,7 +4,7 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Text;
 
 using Microsoft.Build.Collections;
@@ -14,13 +14,13 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class FileUtilities_Tests
     {
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetItemSpecModifier()
         {
             TestGetItemSpecModifier(Environment.CurrentDirectory);
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(@"goo", modifier);
         }
 
-        [TestMethod]
+        [Test]
         public void MakeRelativeTests()
         {
             Assert.AreEqual(@"foo.cpp", FileUtilities.MakeRelative(@"c:\abc\def", @"c:\abc\def\foo.cpp"));
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void GetItemSpecModifierOnBadPath()
         {
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void GetItemSpecModifierOnBadPath2()
         {
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GetFileInfoNoThrowBasic()
         {
             string file = null;
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GetFileInfoNoThrowNonexistent()
         {
             FileInfo info = FileUtilities.GetFileInfoNoThrow("this_file_is_nonexistent");
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.EndsWithSlash
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EndsWithSlash()
         {
             Assert.IsTrue(FileUtilities.EndsWithSlash(@"C:\foo\"));
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.GetDirectory
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetDirectoryWithTrailingSlash()
         {
             Assert.AreEqual(@"c:\", FileUtilities.GetDirectory(@"c:\"));
@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.HasExtension
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HasExtension()
         {
             Assert.IsTrue(FileUtilities.HasExtension("foo.txt", new string[] { ".EXE", ".TXT" }), "test 1");
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.EnsureTrailingSlash
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EnsureTrailingSlash()
         {
             // Doesn't have a trailing slash to start with.
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.IsItemSpecModifier
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsItemSpecModifier()
         {
             // Positive matches using exact case.
@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(FileUtilities.ItemSpecModifiers.IsItemSpecModifier(null), "test 67");
         }
 
-        [TestMethod]
+        [Test]
         public void CheckDerivableItemSpecModifiers()
         {
             Assert.IsTrue(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("Filename"));
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("recursivedir"));
         }
 
-        [TestMethod]
+        [Test]
         public void GetExecutablePath()
         {
             string path = Path.Combine(Environment.CurrentDirectory, "msbuild.exe").ToLowerInvariant();
@@ -313,7 +313,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(directoryName, Path.GetDirectoryName(path));
         }
 
-        [TestMethod]
+        [Test]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(PathTooLongException))]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
         }
 
-        [TestMethod]
+        [Test]
         public void GetItemSpecModifierRootDirThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -346,55 +346,55 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(@"c:\", FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, fullPath, String.Empty, FileUtilities.ItemSpecModifiers.RootDir, ref cache));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NormalizePathNull()
         {
             Assert.AreEqual(null, FileUtilities.NormalizePath(null));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NormalizePathEmpty()
         {
             Assert.AreEqual(null, FileUtilities.NormalizePath(String.Empty));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NormalizePathBadUNC1()
         {
             Assert.AreEqual(null, FileUtilities.NormalizePath(@"\\"));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NormalizePathBadUNC2()
         {
             Assert.AreEqual(null, FileUtilities.NormalizePath(@"\\XXX\"));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NormalizePathBadUNC3()
         {
             Assert.AreEqual(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
         }
 
-        [TestMethod]
+        [Test]
         public void NormalizePathGoodUNC()
         {
             Assert.AreEqual(@"\\localhost\share", FileUtilities.NormalizePath(@"\\localhost\share"));
         }
 
-        [TestMethod]
+        [Test]
         public void NormalizePathTooLongWithDots()
         {
             string longPart = new string('x', 300);
             Assert.AreEqual(@"c:\abc\def", FileUtilities.NormalizePath(@"c:\abc\" + longPart + @"\..\def"));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NormalizePathBadGlobalroot()
         {
@@ -409,7 +409,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(null, FileUtilities.NormalizePath(@"\\?\globalroot\XXX"));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NormalizePathInvalid()
         {
@@ -417,7 +417,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(null, FileUtilities.NormalizePath(filePath));
         }
 
-        [TestMethod]
+        [Test]
         public void FileOrDirectoryExistsNoThrow()
         {
             Assert.AreEqual(false, FileUtilities.FileOrDirectoryExistsNoThrow("||"));
@@ -438,7 +438,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void FileOrDirectoryExistsNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -453,7 +453,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(false, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
         }
 
-        [TestMethod]
+        [Test]
         public void FileOrDirectoryExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -481,7 +481,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void DirectoryExistsNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -495,7 +495,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, FileUtilities.DirectoryExistsNoThrow(inputPath));
         }
 
-        [TestMethod]
+        [Test]
         public void DirectoryExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -523,7 +523,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void FileExistsNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -538,7 +538,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, FileUtilities.FileExistsNoThrow(inputPath));
         }
 
-        [TestMethod]
+        [Test]
         public void FileExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GetFileInfoNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -581,7 +581,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(false, FileUtilities.GetFileInfoNoThrow(inputPath.Replace('\\', 'X')) != null);
         }
 
-        [TestMethod]
+        [Test]
         public void GetFileInfoNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Simple test, neither the base file nor retry files exist
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GenerateTempFileNameSimple()
         {
             string path = null;
@@ -634,7 +634,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Choose an extension
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GenerateTempFileNameWithExtension()
         {
             string path = null;
@@ -656,7 +656,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Choose a (missing) directory and extension
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GenerateTempFileNameWithDirectoryAndExtension()
         {
             string path = null;
@@ -680,7 +680,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Extension without a period
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GenerateTempFileNameWithExtensionNoPeriod()
         {
             string path = null;
@@ -702,7 +702,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Extension is invalid
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(IOException))]
         public void GenerateTempBatchFileWithBadExtension()
         {
@@ -712,7 +712,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// No extension is given
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void GenerateTempBatchFileWithEmptyExtension()
         {
@@ -722,7 +722,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Directory is invalid
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(IOException))]
         public void GenerateTempBatchFileWithBadDirectory()
         {

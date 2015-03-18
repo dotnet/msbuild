@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
@@ -14,7 +14,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class ToolTask_Tests
     {
         internal class MyTool : ToolTask, IDisposable
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests
             }
         };
 
-        [TestMethod]
+        [Test]
         public void Regress_Mutation_UserSuppliedToolPathIsLogged()
         {
             using (MyTool t = new MyTool())
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void Regress_Mutation_MissingExecutableIsLogged()
         {
             using (MyTool t = new MyTool())
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void Regress_Mutation_WarnIfCommandLineTooLong()
         {
             using (MyTool t = new MyTool())
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HandleExecutionErrorsWhenToolDoesntLogError()
         {
             using (MyTool t = new MyTool())
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
             using (MyTool t = new MyTool())
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests
         /// ToolTask should never run String.Format on strings that are 
         /// not meant to be formatted.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotFormatTaskCommandOrMessage()
         {
             MyTool t = new MyTool();
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When a message is logged to the standard error stream do not error is LogStandardErrorAsError is not true or set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotErrorWhenTextSentToStandardError()
         {
             using (MyTool t = new MyTool())
@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When a message is logged to the standard output stream do not error is LogStandardErrorAsError is  true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotErrorWhenTextSentToStandardOutput()
         {
             using (MyTool t = new MyTool())
@@ -290,7 +290,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When a message is logged to the standard error stream error if LogStandardErrorAsError is true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ErrorWhenTextSentToStandardError()
         {
             using (MyTool t = new MyTool())
@@ -313,7 +313,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When ToolExe is set, it is used instead of ToolName
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolExeWinsOverToolName()
         {
             using (MyTool t = new MyTool())
@@ -332,7 +332,7 @@ namespace Microsoft.Build.UnitTests
         /// When ToolExe is set, it is appended to ToolPath instead
         /// of the regular tool name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolExeIsFoundOnToolPath()
         {
             using (MyTool t = new MyTool())
@@ -359,7 +359,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Task is not found on path - regress #499196
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskNotFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Task is found on path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// StandardOutputImportance set to Low should now show up in our log
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OverrideStdOutImportanceToLow()
         {
             string tempFile = FileUtilities.GetTemporaryFile();
@@ -427,7 +427,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// StandardOutputImportance set to Low should now show up in our log
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OverrideStdOutImportanceToHigh()
         {
             string tempFile = FileUtilities.GetTemporaryFile();
@@ -458,7 +458,7 @@ namespace Microsoft.Build.UnitTests
         /// himself.  This is so that in case the tool doesn't log its errors in canonical
         /// format, the task can still opt to do something reasonable with it.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
             string tempFile = FileUtilities.GetTemporaryFile();
@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing env vars through the tooltask public property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EnvironmentVariablesToToolTask()
         {
             MyTool task = new MyTool();
@@ -516,7 +516,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Equals sign in value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
             MyTool task = new MyTool();
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// No value provided
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EnvironmentVariablesToToolTaskInvalid1()
         {
             MyTool task = new MyTool();
@@ -546,7 +546,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Empty string provided
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EnvironmentVariablesToToolTaskInvalid2()
         {
             MyTool task = new MyTool();
@@ -561,7 +561,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Empty name part provided
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EnvironmentVariablesToToolTaskInvalid3()
         {
             MyTool task = new MyTool();
@@ -576,7 +576,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Not set should not wipe out other env vars
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
             MyTool task = new MyTool();

@@ -12,7 +12,7 @@ using System.Globalization;
 using System.Resources;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
@@ -29,20 +29,20 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
     /// <summary>
     /// Test the GetInstalledSDKLocations task
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class GetInstalledSDKLocationsTestFixture
     {
         private static string s_fakeSDKStructureRoot = null;
         private static string s_fakeSDKStructureRoot2 = null;
 
-        [ClassInitialize]
+        [TestFixtureSetUp]
         public static void ClassSetup(TestContext context)
         {
             s_fakeSDKStructureRoot = MakeFakeSDKStructure();
             s_fakeSDKStructureRoot2 = MakeFakeSDKStructure2();
         }
 
-        [ClassCleanup]
+        [TestFixtureTearDown]
         public static void ClassCleanup()
         {
             if (FileUtilities.DirectoryExistsNoThrow(s_fakeSDKStructureRoot))
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Make sure we get a ArgumentException if null is passed into the target platform version.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullTargetPlatformVersion()
         {
@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Make sure we get a ArgumentException if null is passed into the target platform version.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullTargetPlatformIdentifier()
         {
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Make sure we get an error message if an empty platform identifier is passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyTargetPlatformIdentifier()
         {
             MockEngine engine = new MockEngine();
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Make sure we get an error message if an empty platform Version is passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyTargetPlatformVersion()
         {
             MockEngine engine = new MockEngine();
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Make sure we get an error message if an empty platform Version is passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BadTargetPlatformVersion()
         {
             MockEngine engine = new MockEngine();
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Make sure we get an Warning if no SDKs were found.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoSDKsFound()
         {
             MockEngine engine = new MockEngine();
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetSDKVersions()
         {
             try
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetGoodSDKs()
         {
             try
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
         /// <summary>
         /// Get a good set of SDKS installed on the machine from the fake SDK location.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetGoodSDKs2()
         {
             try

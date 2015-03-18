@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -14,13 +14,13 @@ using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AssignLinkMetadata_Tests
     {
         /// <summary>
         /// AssignLinkMetadata should behave nicely when no items are set to it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoItems()
         {
             AssignLinkMetadata t = new AssignLinkMetadata();
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
         /// AssignLinkMetadata should behave nicely when there is an item with an 
         /// itemspec that contains invalid path characters.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidItemPath()
         {
             ITaskItem item = GetParentedTaskItem();
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test basic function of the AssignLinkMetadata task
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             ITaskItem item = GetParentedTaskItem();
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests
         /// itemspec that contains invalid path characters, and still successfully 
         /// output any items that aren't problematic.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidItemPathWithOtherValidItem()
         {
             ITaskItem item1 = GetParentedTaskItem(itemSpec: "|||");
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// AssignLinkMetadata should not override if Link is already set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DontOverrideLink()
         {
             ITaskItem item = GetParentedTaskItem(linkMetadata: @"SubFolder2\SubSubFolder\a.cs");
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests
         /// AssignLinkMetadata should not set Link if the item is outside the 
         /// defining project's cone
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutsideDefiningProjectCone()
         {
             ITaskItem item = GetParentedTaskItem(itemSpec: @"c:\subfolder\a.cs");
@@ -136,7 +136,7 @@ namespace Microsoft.Build.UnitTests
         /// AssignLinkMetadata should not set Link if the item does not know its
         /// defining project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoDefiningProjectMetadata()
         {
             ITaskItem item = new TaskItem(@"SubFolder\a.cs");

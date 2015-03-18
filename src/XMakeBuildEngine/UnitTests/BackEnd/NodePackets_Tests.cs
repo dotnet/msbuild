@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// Each packet is split up into a region, the region contains the tests for 
     /// a given packet type.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class NodePackets_Tests
     {
         #region LogMessagePacket Tests
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify a null build event throws an exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogMessageConstructorNullBuildEvent()
         {
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify when creating a LogMessagePacket
         /// that the correct Event Type is set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyEventType()
         {
             BuildFinishedEventArgs buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serialization of LogMessagePacket with each kind of event type.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslation()
         {
             TaskItem item = new TaskItem("Hello", "my.proj");

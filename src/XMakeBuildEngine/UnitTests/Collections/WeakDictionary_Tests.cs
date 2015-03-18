@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -21,13 +21,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// <summary>
     /// Tests for the weak dictionary class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class WeakDictionary_Tests
     {
         /// <summary>
         /// Find with the same key inserted using the indexer
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Indexer_ReferenceFound()
         {
             object k1 = new Object();
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Find something not present with the indexer
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(KeyNotFoundException))]
         public void Indexer_NotFound()
         {
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Find with the same key inserted using TryGetValue
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TryGetValue_ReferenceFound()
         {
             object k1 = new Object();
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Find something not present with TryGetValue
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TryGetValue_ReferenceNotFound()
         {
             var dictionary = new WeakDictionary<object, object>();
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Find a key that wasn't inserted but is equal
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualityComparer()
         {
             string k1 = String.Concat("ke", "y");
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// If value target has been collected, key should not be present.
         /// (When accessed, if target is null, entry is removed instead of returned.)
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(KeyNotFoundException))]
         public void IndexerRemovesDeadValue()
         {
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// If value target has been collected, key should not be present.
         /// (When accessed, if target is null, entry is removed instead of returned.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ContainsRemovesDeadValue()
         {
             Console.WriteLine("Fixed contains test ..");
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// If value target has been collected, key should not be present.
         /// (When accessed, if target is null, entry is removed instead of returned.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TryGetRemovesDeadValue()
         {
             object k = new Object();
@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Verify dictionary doesn't hold onto keys
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeysCollectable()
         {
             string k1 = new string('k', 1000000);
@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Verify dictionary doesn't hold onto values
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValuesCollectable()
         {
             string k1 = new string('k', 1000000);
@@ -242,7 +242,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Call Scavenge explicitly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExplicitScavenge()
         {
             object k1 = new Object();
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Growing should invoke Scavenge
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ScavengeOnGrow()
         {
             var dictionary = new WeakDictionary<object, object>();

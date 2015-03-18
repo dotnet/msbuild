@@ -12,20 +12,20 @@ using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for the HostServices object.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class HostServices_Tests
     {
         /// <summary>
         /// Setup
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test allowed host object registrations
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestValidHostObjectRegistration()
         {
             HostServices hostServices = new HostServices();
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ensuring a null project for host object registration throws.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestInvalidHostObjectRegistration_NullProject()
         {
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ensuring a null target for host object registration throws.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestInvalidHostObjectRegistration_NullTarget()
         {
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ensuring a null task for host object registration throws.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestInvalidHostObjectRegistration_NullTask()
         {
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which verifies host object unregistration.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestUnregisterHostObject()
         {
             HostServices hostServices = new HostServices();
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which shows that affinity defaults to Any.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAffinityDefaultsToAny()
         {
             HostServices hostServices = new HostServices();
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which shows that setting a host object causes the affinity to become InProc.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestHostObjectCausesInProcAffinity()
         {
             HostServices hostServices = new HostServices();
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test of the ability to set and change specific project affinities.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSpecificAffinityRegistration()
         {
             HostServices hostServices = new HostServices();
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Make sure we get the default affinity when the affinity map exists, but the specific 
         /// project we're requesting is not set. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDefaultAffinityWhenProjectNotRegistered()
         {
             HostServices hostServices = new HostServices();
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test of setting the default affinity.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGeneralAffinityRegistration()
         {
             HostServices hostServices = new HostServices();
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures specific project affinities override general affinity.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOverrideGeneralAffinityRegistration()
         {
             HostServices hostServices = new HostServices();
@@ -188,7 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test of clearing the affinity settings for all projects.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestClearingAffinities()
         {
             HostServices hostServices = new HostServices();
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures that setting an OutOfProc affinity for a project with a host object throws.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void TestContradictoryAffinityCausesException_OutOfProc()
         {
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures that setting an Any affinity for a project with a host object throws.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void TestContradictoryAffinityCausesException_Any()
         {
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures that setting the InProc affinity for a project with a host object is allowed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestNonContradictoryAffinityAllowed()
         {
             HostServices hostServices = new HostServices();
@@ -249,7 +249,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures that setting a host object for a project with an out-of-proc affinity throws.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void TestContraditcoryHostObjectCausesException_OutOfProc()
         {
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures the host object can be set for a project which has the Any affinity specifically set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestNonContraditcoryHostObjectAllowed_Any()
         {
             HostServices hostServices = new HostServices();
@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Test which ensures the host object can be set for a project which has an out-of-proc affinity only because that affinity
         /// is implied by being set generally for all project, not for that specific project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestNonContraditcoryHostObjectAllowed_ImplicitOutOfProc()
         {
             HostServices hostServices = new HostServices();
@@ -288,7 +288,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures the host object can be set for a project which has the InProc affinity specifically set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestNonContraditcoryHostObjectAllowed_InProc()
         {
             HostServices hostServices = new HostServices();
@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures the affinity for a project can be changed once the host object is cleared.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAffinityChangeAfterClearingHostObject()
         {
             HostServices hostServices = new HostServices();
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures that setting then clearing the host object restores a previously specifically set non-conflicting affinity.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestUnregisteringNonConflictingHostObjectRestoresOriginalAffinity()
         {
             HostServices hostServices = new HostServices();
@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests that creating a BuildRequestData with a non-conflicting HostServices and ProjectInstance works.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProjectInstanceWithNonConflictingHostServices()
         {
             HostServices hostServices = new HostServices();
@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Tests that unloading all projects from the project collection
         /// discards the host services
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UnloadedProjectDiscardsHostServicesAllProjects()
         {
             HostServices hostServices = new HostServices();
@@ -371,7 +371,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Tests that unloading the last project from the project collection
         /// discards the host services for that project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UnloadedProjectDiscardsHostServices()
         {
             HostServices hostServices = new HostServices();

@@ -9,14 +9,14 @@ using System;
 using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the TargetFinishedEventArgs class.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TargetFinishedEventArgs_Tests
     {
         /// <summary>
@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EventArgsCtors()
         {
             List<ITaskItem> outputs = new List<ITaskItem>();

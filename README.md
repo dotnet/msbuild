@@ -19,7 +19,7 @@ or grab a [prebuilt Azure VM image](http://blogs.msdn.com/b/visualstudioalm/arch
 3. Open src/MSBuild.sln solution in Visual Studio 2015.
  
 ## How to Engage, Contribute and Provide Feedback
-Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requsts we will or won't accept. 
+Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we will or won't accept.
 
 * [Contributing Guide](https://github.com/Microsoft/msbuild/wiki/Contributing-Code)
 * [Developer Guide](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging)

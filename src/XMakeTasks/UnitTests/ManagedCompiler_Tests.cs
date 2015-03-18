@@ -8,12 +8,12 @@ using System.Text;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ManagedCompiler_Tests
     {
         #region Test DebugType and EmitDebugInformation settings
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the test matrix for DebugSymbols = true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDebugSymbolsTrue()
         {
             // Verify each of the DebugType settings when EmitDebugInformation is true
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the test matrix for DebugSymbols = false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DebugSymbolsFalse()
         {
             // Verify each of the DebugType settings when EmitDebugInformation is false
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the test matrix for DebugSymbols when it is not set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDebugSymbolsNull()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        [TestMethod]
+        [Test]
         public void DuplicateSources()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)m.BuildEngine).AssertLogContains("MSB3105");
         }
 
-        [TestMethod]
+        [Test]
         public void DuplicateResourcesWithNoLogicalNames()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)m.BuildEngine).AssertLogContains("MSB3105");
         }
 
-        [TestMethod]
+        [Test]
         public void DuplicateResourcesButWithDifferentLogicalNames()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)m.BuildEngine).AssertLogDoesntContain("MSB3083");
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultWin32ManifestEmbeddedInConsoleApp()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultWin32ManifestEmbeddedInConsoleAppWhenTargetTypeInferred()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultWin32ManifestNotEmbeddedInClassLibrary()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -267,7 +267,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultWin32ManifestNotEmbeddedInNetModule()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void DuplicateResourcesWithSameLogicalNames()
         {
             MyManagedCompiler m = new MyManagedCompiler();

@@ -7,20 +7,20 @@ using System.Collections;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class InternalLoggerExceptionTests
     {
         /// <summary>
         /// Verify I implemented ISerializable correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializeDeserialize()
         {
             InternalLoggerException e = new InternalLoggerException("message",

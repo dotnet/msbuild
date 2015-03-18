@@ -27,7 +27,7 @@ using Microsoft.Build.Logging;
 
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Diagnostics;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// The test fixture for the BuildManager
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class BuildManager_Tests
     {
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// SetUp
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// TearDown
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             Environment.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", null);
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Check that we behave reasonably when passed a null ProjectCollection
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void BuildParametersWithNullCollection()
         {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that the environment between two msbuild calls to the same project are stored
         /// so that on the next call we get access to them
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void VerifyEnvironmentSavedBetweenCalls()
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// The final number of nodes has to be less or equal the number of nodes already in 
         /// the system before this method was called.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShutdownNodesAfterParallelBuild()
         {
             ProjectCollection projectCollection = new ProjectCollection();
@@ -261,7 +261,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleBuildOutOfProcess()
         {
             this.RunOutOfProcBuild(_ => Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1"));
@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only. Triggered by setting build parameters' DisableInProcNode to true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DisableInProcNode()
         {
             this.RunOutOfProcBuild(buildParameters => buildParameters.DisableInProcNode = true);
@@ -336,10 +336,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure when we are doign an inprocess build that even if the environment variable msbuildforwardpropertiesfromchild is set that we still 
+        /// Make sure when we are doing an inprocess build that even if the environment variable msbuildforwardpropertiesfromchild is set that we still
         /// get all of the initial properties.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void InProcForwardPropertiesFromChild()
@@ -389,10 +389,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure when we are doign an inprocess build that even if the environment variable MsBuildForwardAllPropertiesFromChild is set that we still 
+        /// Make sure when we are doing an inprocess build that even if the environment variable MsBuildForwardAllPropertiesFromChild is set that we still
         /// get all of the initial properties.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void InProcMsBuildForwardAllPropertiesFromChild()
@@ -445,7 +445,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when we launch a child node and set MsBuildForwardAllPropertiesFromChild that we get all of our properties. This needs to happen 
         /// even if the msbuildforwardpropertiesfromchild is set to something.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MsBuildForwardAllPropertiesFromChildLaunchChildNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to a value and
         /// we launch a child node that we get only that value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutOfProcNodeForwardCertainproperties()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get only that value. Also, make sure that when a project is pulled from the results cache
         /// and we have a list of properties to serialize that we do not crash. This is to prevent a regression of 826594
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutOfProcNodeForwardCertainpropertiesAlsoGetResultsFromCache()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -644,7 +644,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to empty and
         /// we launch a child node that we get no properties
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ForwardNoPropertiesLaunchChildNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -696,7 +696,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// defined on the parent are also availiable on the child nodes for tasks which use the global project
         /// collection
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyCustomToolSetsPropigated()
         {
             string netFrameworkDirectory = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
@@ -769,7 +769,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// When a child node is launched by default we should not send any properties.
         /// we launch a child node that we get no properties
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ForwardNoPropertiesLaunchChildNodeDefault()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -819,7 +819,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple failing build.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleBuildWithFailure()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -839,7 +839,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A build with a message, error and warning, verify that 
         /// we only get errors, warnings, and project started and finished when OnlyLogCriticalEvents is true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsTrue()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -873,7 +873,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A build with a message, error and warning, verify that 
         /// we only get errors, warnings, messages, task and target messages OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsFalse()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -906,7 +906,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Submitting a synchronous build request before calling BeginBuild yields an InvalidOperationException.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void BuildRequestWithoutBegin()
         {
@@ -917,7 +917,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Pending a build request before calling BeginBuild yields an InvalidOperationException.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void PendBuildRequestWithoutBegin()
         {
@@ -928,14 +928,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Calling EndBuild before BeginBuild yields an InvalidOperationException.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void EndWithoutBegin()
         {
             _buildManager.EndBuild();
         }
 
-        [TestMethod]
+        [Test]
         public void DisposeAfterUse()
         {
             string project = FrameworkLocationHelper.PathToDotNetFrameworkV45 + "\\microsoft.common.targets";
@@ -948,7 +948,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Test]
         public void DisposeWithoutUse()
         {
             var bm = new BuildManager();
@@ -958,7 +958,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Calling BeginBuild after BeginBuild has already been called yields an InvalidOperationException.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OverlappingBegin()
         {
             try
@@ -987,7 +987,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Starting and ending a build without submitting any requests is valid.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyBuild()
         {
             _buildManager.BeginBuild(_parameters);
@@ -1000,7 +1000,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Calling EndBuild after it has already been called yields an InvalidOperationException.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void ExtraEnds()
         {
@@ -1012,7 +1012,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Pending a request after EndBuild has been called yields an InvalidOperationException.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void PendBuildRequestAfterEnd()
         {
@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Attempting a synchronous build when a build is in progress yields an InvalidOperationException.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuildDuringBuild()
         {
             try
@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A sequential build.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EndBuildBlocks()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1080,7 +1080,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that EndBuild can be called during a submission completion callback.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EndBuildCalledWithinSubmissionCallback()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1124,7 +1124,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A sequential build.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SequentialBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1160,7 +1160,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A sequential build.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void OverlappingBuildSubmissions()
@@ -1204,7 +1204,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// target involved that skipped, make sure that the second one successfully completes 
         /// (retrieved from the cache). 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Timeout(10000)] // this initially caused a hang
         public void OverlappingIdenticalBuildSubmissions()
         {
@@ -1239,7 +1239,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// the target.  (E.g. despite the fact that the target results are in the cache already 
         /// as 'skipped', ensure that we retry execution in case conditions have changed.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OverlappingBuildSubmissions_OnlyOneSucceeds()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1287,7 +1287,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Calling EndBuild with an unexecuted submission.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EndWithUnexecutedSubmission()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1307,7 +1307,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A cancelled build with a submssion which is not executed yet.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CancelledBuildWithUnexecutedSubmission()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1328,7 +1328,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A cancelled build
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CancelledBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1359,7 +1359,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A cancelled build which waits for the task to get started before cancelling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CancelledBuildWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1392,7 +1392,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A cancelled build which waits for the task to get started before cancelling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CancelledBuildInTaskHostWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1429,7 +1429,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A cancelled build which waits for the task to get started before cancelling.  Because it is a 12.. task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CancelledBuildWithDelay40()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1459,7 +1459,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A cancelled build which waits for the task to get started before cancelling.  Because it is a 12.0 task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1492,7 +1492,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that builds of the same project instance in sequence are permitted.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SequentialBuildsOfTheSameProjectAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1521,7 +1521,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that overlapping builds of the same project are allowed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OverlappingBuildsOfTheSameProjectDifferentTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1561,7 +1561,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that overlapping builds of the same project are allowed.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void OverlappingBuildsOfTheSameProjectSameTargetsAreAllowed()
@@ -1603,7 +1603,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that the out-of-proc node won't lock the directory containing the target project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutOfProcNodeDoesntLockWorkingDirectory()
         {
             string tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -1637,7 +1637,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieving a ProjectInstance from the BuildManager stores it in the cache
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectInstanceStoredInCache()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1657,7 +1657,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieving a ProjectInstance from the BuildManager after a build.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectInstanceRetrievedAfterBuildMatchesSourceProject()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1683,7 +1683,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieving a ProjectInstance after resetting the cache clears the instances.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResetCacheClearsInstances()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1715,7 +1715,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieving a ProjectInstance after another build without resetting the cache keeps the existing instance
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DisablingCacheResetKeepsInstance()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1754,7 +1754,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieving a ProjectInstance after another build without resetting the cache keeps the existing instance
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void GhostProjectRootElementCache()
@@ -1836,7 +1836,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies that explicitly loaded projects' imports are all marked as also explicitly loaded.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyImportedProjectRootElementsInheritExplicitLoadFlag()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -1910,7 +1910,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that using a second BuildManager doesn't cause the system to crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void Regress251333()
@@ -1945,7 +1945,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node doesn't cause projects which don't require it to fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress239661()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1983,7 +1983,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node when a project requires it will cause the build to fail, but not crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress239661_NodeUnavailable()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2012,7 +2012,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that properties and items are transferred to the out-of-proc node when an instance is used to start the build.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectInstanceTransfersToOOPNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2083,7 +2083,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that a limited set of properties are transferred from a project instance to an OOP node.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectInstanceLimitedTransferToOOPNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2129,7 +2129,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that cache files are created as expected and their lifetime is controlled appropriately.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CacheLifetime()
         {
             const string ForceCaching = "MSBUILDDEBUGFORCECACHING";
@@ -2178,7 +2178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// overall build result -- and thus the return value of the MSBuild task -- should reflect
         /// that failure. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure()
@@ -2245,7 +2245,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure.  Specifically tests where there are multiple entrypoint targets with 
         /// AfterTargets, only one of which fails. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints()
@@ -2328,7 +2328,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure. This should also be true if the AfterTarget is an AfterTarget of the 
         /// entrypoint target.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void FailedNestedAfterTargetInP2PShouldCauseOverallBuildFailure()
@@ -2398,7 +2398,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// depend on non-overlapping sets of targets, and the first fails, the second 
         /// should not inherit that failure if all the targets it calls succeed. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NonOverlappingEntrypointTargetsShouldNotInfluenceEachOthersResults()
         {
             string projA = null;
@@ -2465,7 +2465,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// targets, one of which depends on "A;B", the other of which depends on "B", which has a dependency of 
         /// its own on "A", that we still properly build.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress473114()
         {
             string projA = null;
@@ -2590,7 +2590,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// second request will bail out where the first request did, as though it had 
         /// executed the target, rather than skipping and continuing. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyMultipleRequestForSameProjectWithErrors_Simple()
         {
             string projA = null;
@@ -2695,7 +2695,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// expected in the first request, but be skipped by the second (since if it's "skipping 
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyMultipleRequestForSameProjectWithErrors_OnErrorChain()
         {
             string projA = null;
@@ -2830,7 +2830,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but 
         /// will continue executing (on the first request) or skipping (on the second)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyMultipleRequestForSameProjectWithErrors_ErrorAndContinue()
         {
             string projA = null;
@@ -2937,7 +2937,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that if the errors are in AfterTargets, we still 
         /// exit as though the target that those targets run after has already run. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyMultipleRequestForSameProjectWithErrors_AfterTargets()
         {
             string projA = null;
@@ -3029,7 +3029,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// request also runs that target, its skip-unsuccessful should behave in the same 
         /// way as if the target had actually errored. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyMultipleRequestForSameProjectWithErrors_DifferentEntrypoints()
         {
             string projA = null;
@@ -3113,7 +3113,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that we can submit multiple simultaneous submissions with 
         /// legacy threading mode active and successfully build.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData()
         {
             string projectPath1 = null;
@@ -3190,7 +3190,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// legacy threading mode active and successfully build, and that one of those
         /// submissions can P2P to the other.  (See Dev14 969114)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P()
         {
             string projectPath1 = null;
@@ -3290,7 +3290,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// submissions aren't restricted to running strictly serially by the single in-proc 
         /// node.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P_MP()
         {
             string projectPath1 = null;
@@ -3389,7 +3389,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This differs from transferring a project instance to an out-of-proc node because in this case the project
         /// was loaded by MSBuild, not supplied directly by the user.
         /// </remarks>
-        [TestMethod]
+        [Test]
         public void Regress265010()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"

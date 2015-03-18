@@ -574,7 +574,7 @@
     <Compile Include="RequiresFramework35SP1Assembly.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Sgen.cs">
+    <Compile Include="SGen.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="SignFile.cs">

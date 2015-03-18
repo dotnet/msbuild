@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the Exec task
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class Exec_Tests
     {
         private Exec PrepareExec(string command)
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
         /// Ensures that calling the Exec task does not leave any extra TEMP files
         /// lying around.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoTempFileLeaks()
         {
             // Get a count of how many temp files there are right now.
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(originalTempFileCount, newTempFileCount);
         }
 
-        [TestMethod]
+        [Test]
         public void ExitCodeCausesFailure()
         {
             Exec exec = PrepareExec("xcopy thisisanonexistentfile");
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
         }
 
-        [TestMethod]
+        [Test]
         [Ignore] // "Timing issue found on RI candidate from ToolPlat to Main, disabling for RI only."
         public void Timeout()
         {
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1, ((MockEngine)exec.BuildEngine).Errors);
         }
 
-        [TestMethod]
+        [Test]
         public void ExitCodeGetter()
         {
             Exec exec = PrepareExec("exit 666");
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(666, exec.ExitCode);
         }
 
-        [TestMethod]
+        [Test]
         public void LoggedErrorsCauseFailureDespiteExitCode0()
         {
             // This will return 0 exit code, but emitted a canonical error
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
         }
 
-        [TestMethod]
+        [Test]
         public void IgnoreExitCodeTrueMakesTaskSucceedDespiteLoggingErrors()
         {
             Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror");
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, result);
         }
 
-        [TestMethod]
+        [Test]
         public void IgnoreExitCodeTrueMakesTaskSucceedDespiteExitCode1()
         {
             Exec exec = PrepareExec("dir ||invalid||");
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, result);
         }
 
-        [TestMethod]
+        [Test]
         public void NonUNCWorkingDirectoryUsed()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("[" + working + "]");
         }
 
-        [TestMethod]
+        [Test]
         public void UNCWorkingDirectoryUsed()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(system, exec.GetWorkingDirectoryAccessor());
         }
 
-        [TestMethod]
+        [Test]
         public void NoWorkingDirectorySet()
         {
             var cd = Directory.GetCurrentDirectory();
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that Exec still executes properly when there's an '&' in the temp directory path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TempPathContainsAmpersand1()
         {
             string directoryWithAmpersand = "foo&bar";
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that Exec still executes properly when there's an ' &' in the temp directory path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TempPathContainsAmpersand2()
         {
             string directoryWithAmpersand = "foo &bar";
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that Exec still executes properly when there's an '& ' in the temp directory path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TempPathContainsAmpersand3()
         {
             string directoryWithAmpersand = "foo& bar";
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that Exec still executes properly when there's an ' & ' in the temp directory path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TempPathContainsAmpersand4()
         {
             string directoryWithAmpersand = "foo & bar";
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidUncDirectorySet()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB6003");
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidWorkingDirectorySet()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB6003");
         }
 
-        [TestMethod]
+        [Test]
         public void BogusCustomRegexesCauseOneErrorEach()
         {
             Exec exec = PrepareExec("echo Some output & echo Some output & echo Some output & echo Some output ");
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests
             e.AssertLogContains("MSB3076");
         }
 
-        [TestMethod]
+        [Test]
         public void CustomErrorRegexSupplied()
         {
             Exec exec = PrepareExec("echo Some output & echo ALERT:This is an error & echo Some more output");
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests
             e.AssertLogContains("ALERT:This is an error");
         }
 
-        [TestMethod]
+        [Test]
         public void CustomWarningRegexSupplied()
         {
             Exec exec = PrepareExec("echo Some output & echo YOOHOO:This is a warning & echo Some more output");
@@ -367,7 +367,7 @@ namespace Microsoft.Build.UnitTests
             e.AssertLogContains("YOOHOO:This is a warning");
         }
 
-        [TestMethod]
+        [Test]
         public void ErrorsAndWarningsWithIgnoreStandardErrorWarningFormatTrue()
         {
             Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning");
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(0, ((MockEngine)exec.BuildEngine).Warnings);
         }
 
-        [TestMethod]
+        [Test]
         public void CustomAndStandardErrorsAndWarnings()
         {
             Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning & echo YOGI & echo BEAR & echo some content");
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests
         /// Nobody should try to run a string emitted from the task through String.Format.
         /// Firstly that's unnecessary and secondly if there's eg an unmatched curly it will throw.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotAttemptToFormatTaskOutput()
         {
             Exec exec = PrepareExec("echo unmatched curly {");
@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests
         /// Nobody should try to run a string emitted from the task through String.Format.
         /// Firstly that's unnecessary and secondly if there's eg an unmatched curly it will throw.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotAttemptToFormatTaskOutput2()
         {
             Exec exec = PrepareExec("echo unmatched curly {");
@@ -425,7 +425,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(0, ((MockEngine)exec.BuildEngine).Warnings);
         }
 
-        [TestMethod]
+        [Test]
         public void NoDuplicateMessagesWhenCustomRegexAndRegularRegexBothMatch()
         {
             Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning ");
@@ -438,7 +438,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1, ((MockEngine)exec.BuildEngine).Warnings);
         }
 
-        [TestMethod]
+        [Test]
         public void OnlySingleErrorWhenCustomWarningAndCustomErrorRegexesBothMatch()
         {
             Exec exec = PrepareExec("echo YOGI BEAR ");
@@ -451,7 +451,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(0, ((MockEngine)exec.BuildEngine).Warnings);
         }
 
-        [TestMethod]
+        [Test]
         public void GettersSetters()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -467,7 +467,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(items, exec.Outputs);
         }
 
-        [TestMethod]
+        [Test]
         public void StdEncodings()
         {
             ExecWrapper exec = PrepareExecWrapper("echo [%cd%]");
@@ -481,7 +481,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, exec.StdOutputEncoding.EncodingName.Contains("US-ASCII"));
         }
 
-        [TestMethod]
+        [Test]
         public void AnyExistingEnvVarCalledErrorLevelIsIgnored()
         {
             string oldValue = Environment.GetEnvironmentVariable("errorlevel");
@@ -500,7 +500,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateParametersNoCommand()
         {
             Exec exec = PrepareExec("   ");
@@ -515,7 +515,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the EnvironmentVariables parameter exposed publicly
         /// by ToolTask can be used to modify the environment of the cmd.exe spawned.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEnvironmentVariableParameter()
         {
             Exec exec = new Exec();
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests
         /// Execute return output as an Item
         /// Test include ConsoleToMSBuild, StandardOutput
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConsoleToMSBuild()
         {
             //Exec with no output

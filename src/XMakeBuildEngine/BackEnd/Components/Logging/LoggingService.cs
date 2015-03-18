@@ -642,7 +642,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Will recieve a logging packet and send it to the correct
+        /// Will receive a logging packet and send it to the correct
         /// sink which is registered to the LoggingServices.
         /// PacketReceived should be called from a single thread.
         /// </summary>
@@ -669,7 +669,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Register an instantiated logger which implements the ILogger interface. This logger will be registered to a specific event
-        /// source (the central logger event source) which will recieve all logging messages for a given build. 
+        /// source (the central logger event source) which will receive all logging messages for a given build.
         /// This should not be used on a node, Loggers are not to be registered on a child node.
         /// </summary>
         /// <param name="logger">ILogger</param>
@@ -760,12 +760,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// 
         /// The central logger is initialized before the distributed logger
         /// </summary>
-        /// <param name="centralLogger">Central logger to recieve messages from the forwarding logger, This logger cannot have been registered before</param>
-        /// <param name="forwardingLogger">Logger description which describes how to create the forwarding logger, the logger description canot have been used before</param>
+        /// <param name="centralLogger">Central logger to receive messages from the forwarding logger, This logger cannot have been registered before</param>
+        /// <param name="forwardingLogger">Logger description which describes how to create the forwarding logger, the logger description cannot have been used before</param>
         /// <returns value="bool">True if the distributed and central logger were registered, false if they either were already registered</returns>
         /// <exception cref="InternalErrorException">If forwardingLogger is null</exception>
-        /// <exception cref="LoggerException">If a logger exception is thown while creating or initializing the distributed or central logger</exception>
-        /// <exception cref="InternalLoggerException">If any exception (other than a loggerException)is thown while creating or initializing the distributed or central logger, we will wrap these exceptions in an InternalLoggerException</exception>
+        /// <exception cref="LoggerException">If a logger exception is thrown while creating or initializing the distributed or central logger</exception>
+        /// <exception cref="InternalLoggerException">If any exception (other than a loggerException)is thrown while creating or initializing the distributed or central logger, we will wrap these exceptions in an InternalLoggerException</exception>
         public bool RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger)
         {
             lock (_lockObject)
@@ -1111,7 +1111,7 @@ namespace Microsoft.Build.BackEnd.Logging
             bool cultureSet = false;
             try
             {
-                // If we have a componenthost then set the culture on the first message we recieve
+                // If we have a componenthost then set the culture on the first message we receive
                 if (_componentHost != null)
                 {
                     originalCultureInfo = Thread.CurrentThread.CurrentCulture;
@@ -1205,7 +1205,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 _filterEventSource.Consume(eventArg);
 
                 // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the 
-                // central logger sinks to see if they have recieved the events or not. If the sink has not recieved the event we need to send it to the 
+                // central logger sinks to see if they have received the events or not. If the sink has not received the event we need to send it to the
                 // logger for backwards compatibility with orcas.
                 // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to 
                 // forward build started or build finished events. In the new OM we allow the loggers to forward the events. However since orcas did not forward them

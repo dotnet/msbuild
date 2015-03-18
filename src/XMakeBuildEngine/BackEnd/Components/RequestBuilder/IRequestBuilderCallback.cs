@@ -51,7 +51,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Instructs the RequestBuilder that next Build request from a task should post its request
-        /// and immeditely return so that the thread may be freed up.  May not be nested.
+        /// and immediately return so that the thread may be freed up.  May not be nested.
         /// </summary>
         void EnterMSBuildCallbackState();
 

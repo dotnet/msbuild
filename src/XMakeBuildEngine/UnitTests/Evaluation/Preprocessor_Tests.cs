@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
@@ -23,13 +23,13 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     /// <summary>
     /// Tests mainly for project preprocessing
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class Preprocessor_Tests
     {
         /// <summary>
         /// Clear out the cache
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Clear out the cache
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void Teardown()
         {
             Setup();
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Single()
         {
             Project project = new Project();
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// InitialTargets are concatenated, outermost to innermost
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitialTargetsOuterAndInner()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// InitialTargets are concatenated, outermost to innermost
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitialTargetsInnerOnly()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// InitialTargets are concatenated, outermost to innermost
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitialTargetsOuterOnly()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic empty project importing another
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoFirstEmpty()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// False import should not be followed
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FalseImport()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -286,7 +286,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another empty one
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoSecondEmpty()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -333,7 +333,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoWithContent()
         {
             string one = ObjectModelHelpers.CleanupFileContents(
@@ -398,7 +398,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another one via an ImportGroup
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportGroup()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -451,7 +451,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another one via an ImportGroup with two imports inside it, and a condition on it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportGroupDoubleChildPlusCondition()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -526,7 +526,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// First DefaultTargets encountered is used
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultTargetsOuterAndInner()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -588,7 +588,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// First DefaultTargets encountered is used
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultTargetsInnerOnly()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -649,7 +649,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another one via an ImportGroup, but the ImportGroup condition is false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportGroupFalseCondition()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -687,7 +687,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Import has a wildcard expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportWildcard()
         {
             string directory = null;
@@ -775,7 +775,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// CDATA node type cloned correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CData()
         {
             Project project = new Project();
@@ -798,7 +798,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Metadata named "Project" should not confuse it..
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

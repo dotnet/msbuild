@@ -16,7 +16,7 @@ using System.Xml;
 using System.Text;
 using System.Globalization;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
@@ -33,13 +33,13 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Class containing tests for the ProjectItem and related functionality.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectItem_Tests
     {
         /// <summary>
         /// Make sure the the CopyFrom actually does a clone.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyFromClonesMetadata()
         {
             ProjectItem item1 = GetOneItemFromFragment(@"<i Include='i1'><m>m1</m></i>");

@@ -16,7 +16,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
      * Test the ResolveComReference task in various ways.
      *
      */
-    [TestClass]
+    [TestFixture]
     sealed public class ResolveComReference_Tests
     {
         /*
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Issue in this bug was an ArgumentNullException when ResolvedAssemblyReferences was null
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetResolvedASsemblyReferenceSpecNotNull()
         {
             var task = new ResolveComReference();
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
          * 
          * Checks if verification of Com reference item metadata works properly
          */
-        [TestMethod]
+        [Test]
         public void CheckComReferenceMetadataVerificationForNameItems()
         {
             // valid item
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
          * 
          * Checks if missing optional attributes for COM name references get initialized correctly
          */
-        [TestMethod]
+        [Test]
         public void CheckComReferenceMetadataInitializationForNameItems()
         {
             // missing lcid - should get initialized to 0
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests
          * 
          * Checks if missing optional attributes for COM file references get initialized correctly
          */
-        [TestMethod]
+        [Test]
         public void CheckComReferenceMetadataInitializationForFileItems()
         {
             // missing wrapperTool - should get initialized to tlbimp
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the ResolveComReference.TaskItemToTypeLibAttr method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckTaskItemToTypeLibAttr()
         {
             Guid refGuid = Guid.NewGuid();
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Unit test for the ResolveComReference.IsExistingProjectReference() method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckIsExistingProjectReference()
         {
             TYPELIBATTR axAttr, tlbAttr, piaAttr, notInProjectAttr;
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Unit test for the ResolveComReference.IsExistingDependencyReference() method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckIsExistingDependencyReference()
         {
             TYPELIBATTR axAttr, tlbAttr, piaAttr, notInProjectAttr;
@@ -397,7 +397,7 @@ namespace Microsoft.Build.UnitTests
         /// ResolveComReference automatically adds missing tlbimp references for aximp references. 
         /// This test verifies we actually create the missing references.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckAddMissingTlbReference()
         {
             TYPELIBATTR axAttr, tlbAttr, piaAttr, notInProjectAttr;
@@ -432,7 +432,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(rcr.allProjectRefs.Count == 4, "There should still be four references");
         }
 
-        [TestMethod]
+        [Test]
         public void BothKeyFileAndKeyContainer()
         {
             ResolveComReference rcr = new ResolveComReference();
@@ -447,7 +447,7 @@ namespace Microsoft.Build.UnitTests
             e.AssertLogContains("MSB3300");
         }
 
-        [TestMethod]
+        [Test]
         public void DelaySignWithoutEitherKeyFileOrKeyContainer()
         {
             ResolveComReference rcr = new ResolveComReference();
@@ -463,7 +463,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckSetCopyLocalToFalseOnEmbedInteropTypesAssemblies()
         {
             string gacPath = @"C:\windows\gac";
@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckSetCopyLocalToFalseOnGacAssemblies()
         {
             string gacPath = @"C:\windows\gac";
@@ -626,7 +626,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure the conflicting references are detected correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestCheckForConflictingReferences()
         {
             TYPELIBATTR axAttr, tlbAttr, piaAttr, notInProjectAttr;
@@ -689,7 +689,7 @@ namespace Microsoft.Build.UnitTests
         /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so 
         /// this was done by ad hoc testing and will be maintained by the dev suites.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MultiTargetingDefaultSetCorrectly()
         {
             ResolveComReference t = new ResolveComReference();
@@ -702,7 +702,7 @@ namespace Microsoft.Build.UnitTests
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AxReferenceKnowsItsRCWCreateTlb()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.GenerateTlb /* have RCR create the TLB reference */, false /* don't include TLB version in the interop name */);
@@ -713,7 +713,7 @@ namespace Microsoft.Build.UnitTests
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AxReferenceKnowsItsRCWCreateTlb_IncludeVersion()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.GenerateTlb /* have RCR create the TLB reference */, true /* include TLB version in the interop name */);
@@ -724,7 +724,7 @@ namespace Microsoft.Build.UnitTests
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AxReferenceKnowsItsRCWTlbExists()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingTlb /* pass in the TLB reference */, false /* don't include TLB version in the interop name */);
@@ -737,7 +737,7 @@ namespace Microsoft.Build.UnitTests
         ///
         /// Tests that still works when IncludeVersionInInteropName = true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AxReferenceKnowsItsRCWTlbExists_IncludeVersion()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingTlb /* pass in the TLB reference */, true /* include TLB version in the interop name */);
@@ -748,7 +748,7 @@ namespace Microsoft.Build.UnitTests
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AxReferenceKnowsItsRCWPiaExists()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingPia /* pass in the TLB reference */, false /* don't include version in the interop name */);
@@ -761,7 +761,7 @@ namespace Microsoft.Build.UnitTests
         ///
         /// Tests that still works when IncludeVersionInInteropName = true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AxReferenceKnowsItsRCWPiaExists_IncludeVersion()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingPia /* pass in the PIA reference */, true /* include version in the interop name */);

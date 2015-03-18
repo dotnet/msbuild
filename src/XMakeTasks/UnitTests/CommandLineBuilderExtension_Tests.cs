@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class CommandLineBuilderExtensionTest
     {
         /*
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
         * the boolean flag has a string value that cannot be converted to a boolean. In this
         * case we expect an exception.
         */
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void AppendItemWithInvalidBooleanAttribute()
         {
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
         /// order on the command-line, so we skip all subsequent attributes as soon
         /// as we find one missing.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendItemWithMissingAttribute()
         {
             // Construct the task items.

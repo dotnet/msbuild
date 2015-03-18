@@ -4,14 +4,14 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class Culture_Tests
     {
         /*
@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Test the basic functionality.
         */
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.fr.resx", null);
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
         *
         * The item doesn't have a culture, and there isn't one embedded in the file name.
         */
-        [TestMethod]
+        [Test]
         public void NonCultureFile()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.resx", null);
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         *
         * The item has something that looks like an embedded culture, but isn't.
         */
-        [TestMethod]
+        [Test]
         public void BogusEmbeddedCulture()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.notalocale.resx", null);

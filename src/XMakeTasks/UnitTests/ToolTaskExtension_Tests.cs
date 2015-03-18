@@ -5,7 +5,7 @@ using System;
 using System.Resources;
 using System.Reflection;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -14,7 +14,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ToolTaskExtensionTests
     {
         /// <summary>
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
         /// With moving ToolTask into Utilities, tasks inheriting from it now have to deal with 3 (THREE!) resource streams,
         /// which has a lot of potential for breaking. Make sure that tasks can access all of them using the correct logger helpers.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestResourceAccess()
         {
             Csc t = new Csc();
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the above method actually tests something, that is make sure that non-existent resources throw
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void ResourceAccessSanityCheck()
         {
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Retrieve a non-existent value but ask for a default.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetNonExistentBoolWithDefault()
         {
             Csc t = new Csc();
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
         /// Retrieve a value that exists, but ask for a default. We expect the
         /// real value to win.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetBoolWithDefault()
         {
             Csc t = new Csc();
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests
         /// Retrieve a value that exists, but ask for a default. We expect the
         /// real value to win.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetIntWithDefault()
         {
             Csc t = new Csc();

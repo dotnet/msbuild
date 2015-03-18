@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
      *
      * Tests that exercise the <OnError> tag.
      */
-    [TestClass]
+    [TestFixture]
     sealed public class OnError_Tests
     {
         /*
@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Construct a simple OnError tag.
          */
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             MockLogger l = new MockLogger();
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// outputs them fails. (Of course the task must have populated its property before it errors.)
         /// Then these items and properties should be visible to the onerror targets.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FailingTaskStillPublishesOutputs()
         {
             MockLogger l = new MockLogger();
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Target items and properties should be published to the project level when an OnError
         /// target runs, and those items and properties should be visible to the OnError targets.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OnErrorSeesPropertiesAndItemsFromFirstTarget()
         {
             MockLogger l = new MockLogger();
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Make sure two execute targets can be called.
          */
-        [TestMethod]
+        [Test]
         public void TwoExecuteTargets()
         {
             MockLogger l = new MockLogger();
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Make sure two OnError clauses can be used.
          */
-        [TestMethod]
+        [Test]
         public void TwoOnErrorClauses()
         {
             MockLogger l = new MockLogger();
@@ -242,7 +242,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * Make sure that a target that is a dependent of a target called because of an
          * OnError clause is called
          */
-        [TestMethod]
+        [Test]
         public void DependentTarget()
         {
             MockLogger l = new MockLogger();
@@ -274,7 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * If a target is dependent on a child target and that child target errors,
          * then the parent's OnError clauses should fire.
          */
-        [TestMethod]
+        [Test]
         public void ErrorInChildIsHandledInParent()
         {
             MockLogger l = new MockLogger();
@@ -305,7 +305,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Construct a simple OnError tag.
          */
-        [TestMethod]
+        [Test]
         public void NonExistentExecuteTarget()
         {
             MockLogger l = new MockLogger();
@@ -329,7 +329,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Test the case when the result of the condition is 'true'
          */
-        [TestMethod]
+        [Test]
         public void TrueCondition()
         {
             MockLogger l = new MockLogger();
@@ -356,7 +356,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Test the case when the result of the condition is 'false'
          */
-        [TestMethod]
+        [Test]
         public void FalseCondition()
         {
             MockLogger l = new MockLogger();
@@ -384,7 +384,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Make sure that properties in ExecuteTargets are properly expanded.
          */
-        [TestMethod]
+        [Test]
         public void PropertiesInExecuteTargets()
         {
             MockLogger l = new MockLogger();
@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * If an error occurs in an error handling target, then continue processing
          * remaining error targets
          */
-        [TestMethod]
+        [Test]
         public void ErrorTargetsContinueAfterErrorsInErrorHandler()
         {
             MockLogger l = new MockLogger();
@@ -457,7 +457,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * If an OnError specifies an ExecuteTarget that is missing, that's an error
          */
-        [TestMethod]
+        [Test]
         public void ExecuteTargetIsMissing()
         {
             MockLogger l = new MockLogger();
@@ -481,7 +481,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * Since there is special-case code to ignore comments around OnError blocks,
          * let's test this case.
          */
-        [TestMethod]
+        [Test]
         public void CommentsAroundOnError()
         {
             MockLogger l = new MockLogger();
@@ -510,7 +510,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Detect circular dependencies and break out.
          */
-        [TestMethod]
+        [Test]
         public void CircularDependency()
         {
             MockLogger l = new MockLogger();
@@ -534,7 +534,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * OnError clauses must come at the end of a Target, it can't be sprinkled in-between tasks. Catch this case.
          */
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void OutOfOrderOnError()
         {
@@ -562,7 +562,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * Handle the basic post-build case where the user has asked for 'On_Success' and
          * none of the build steps fail.
          */
-        [TestMethod]
+        [Test]
         public void PostBuildBasic()
         {
             MockLogger l = new MockLogger();
@@ -586,7 +586,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'On_Success' but the compile step failed. We don't expect post-build
          * to be called.
          */
-        [TestMethod]
+        [Test]
         public void PostBuildOnSuccessWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
@@ -611,7 +611,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'On_Success' but the PostBuildOnSuccessWhereGenerateSatellitesFailed step
          * failed. We don't expect post-build to be called.
          */
-        [TestMethod]
+        [Test]
         public void PostBuildOnSuccessWhereGenerateSatellitesFailed()
         {
             MockLogger l = new MockLogger();
@@ -636,7 +636,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'Always' but the compile step failed. We expect the post-build
          * to be called.
          */
-        [TestMethod]
+        [Test]
         public void PostBuildAlwaysWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
@@ -661,7 +661,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'Final_Output_Changed' but the Compile step failed.
          * We expect post-build to be called.
          */
-        [TestMethod]
+        [Test]
         public void PostBuildFinalOutputChangedWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
@@ -686,7 +686,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'Final_Output_Changed' but the GenerateSatellites step failed.
          * We expect post-build to be called because Compile succeeded (and wrote to the output).
          */
-        [TestMethod]
+        [Test]
         public void PostBuildFinalOutputChangedWhereGenerateSatellitesFailed()
         {
             MockLogger l = new MockLogger();

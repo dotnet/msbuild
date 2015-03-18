@@ -7,20 +7,20 @@ using System.Collections;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class InvalidProjectFileExceptionTests
     {
         /// <summary>
         /// Verify I implemented ISerializable correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializeDeserialize()
         {
             InvalidProjectFileException e = new InvalidProjectFileException(
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that nesting an IPFE copies the error code
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ErrorCodeShouldAppearForCircularDependency()

@@ -5,14 +5,14 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class CommandLineBuilderTest
     {
         /*
@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Just append a simple switch.
         */
-        [TestMethod]
+        [Test]
         public void AppendSwitchSimple()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Append a switch that has a string parameter.
         */
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithStringParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         *
         * This should trigger implicit quoting.
         */
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithSpacesInParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test for AppendSwitchIfNotNull for the ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithSpacesInParameterTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Implicit quoting should not happen.
         */
-        [TestMethod]
+        [Test]
         public void AppendLiteralSwitchWithSpacesInParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         *
         * When appending two comma-delimted strings, there should be no space before the comma.
         */
-        [TestMethod]
+        [Test]
         public void AppendTwoStringsEnsureNoSpace()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Append several sources files using JoinAppend
         */
-        [TestMethod]
+        [Test]
         public void AppendSourcesArray()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -115,7 +115,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Append several sources files starting with dashes using JoinAppend
         */
-        [TestMethod]
+        [Test]
         public void AppendSourcesArrayWithDashes()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test AppendFileNamesIfNotNull, the ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSourcesArrayWithDashesTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Append append and empty array. Result should be NOP.
         */
-        [TestMethod]
+        [Test]
         public void JoinAppendEmpty()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Append append and empty array. Result should be NOP.
         */
-        [TestMethod]
+        [Test]
         public void JoinAppendNull()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Append a switch with parameter array, quoting
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithParameterArrayQuoting()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Append a switch with parameter array, quoting, ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithParameterArrayQuotingTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Append a switch with parameter array, no quoting
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithParameterArrayNoQuoting()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Append a switch with parameter array, no quoting, ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithParameterArrayNoQuotingTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Appends a single file name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSingleFileName()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Appends a single file name, ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSingleFileNameTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -259,7 +259,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that we throw an exception correctly for the case where we don't have a switch name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void AppendSingleFileNameWithQuotes()
         {
@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trigger escaping of literal quotes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithLiteralQuotesInParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -284,7 +284,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trigger escaping of literal quotes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithLiteralQuotesInParameter2()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -295,7 +295,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trigger escaping of literal quotes. This time, a double set of literal quotes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithLiteralQuotesInParameter3()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -306,7 +306,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When a value contains a backslash, it doesn't normally need escaping.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchContainingBackslash()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Backslashes before quotes need escaping themselves.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchContainingBackslashBeforeLiteralQuote()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -328,7 +328,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Don't quote if not asked to
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchUnquotedIfNotNull()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests
         /// When a value ends with a backslash, that certainly should be escaped if it's
         /// going to be quoted.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchEndingInBackslash()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Backslashes don't need to be escaped if the string isn't going to get quoted.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendNonQuotableSwitchEndingInBackslash()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Quoting of hyphens
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchWithHyphen()
         {
             CommandLineBuilder c = new CommandLineBuilder(/* do not quote hyphens*/);
@@ -373,7 +373,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Quoting of hyphens 2
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchWithHyphenQuoting()
         {
             CommandLineBuilder c = new CommandLineBuilder(true /* quote hyphens*/);
@@ -384,7 +384,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Appends an ITaskItem item spec as a parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder(true);
@@ -395,7 +395,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Appends an ITaskItem item spec as a parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchUnQuotedTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder(true);
@@ -407,7 +407,7 @@ namespace Microsoft.Build.UnitTests
         /// Odd number of literal quotes. This should trigger an exception, because command line parsers
         /// generally can't handle this case.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void AppendSwitchWithOddNumberOfLiteralQuotesInParameter()
         {
@@ -431,7 +431,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the else of VerifyThrowNOEmbeddedDouble quotes where the switch name is not empty or null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void TestVerifyThrowElse()
         {

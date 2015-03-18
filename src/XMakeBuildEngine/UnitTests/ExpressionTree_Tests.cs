@@ -8,7 +8,7 @@ using System.Collections;
 using System.IO;
 using System.Xml;
 using System.Collections.Specialized;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -20,12 +20,12 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ExpressionTreeTest
     {
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleEvaluationTests()
         {
             Parser p = new Parser();
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EvaluateAVarietyOfExpressions()
         {
             string[] files = { "a", "a;b", "a'b", ";", "'" };
@@ -506,7 +506,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualityTests()
         {
             Parser p = new Parser();
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RelationalTests()
         {
             Parser p = new Parser();
@@ -550,7 +550,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AndandOrTests()
         {
             Parser p = new Parser();
@@ -561,7 +561,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FunctionTests()
         {
             Parser p = new Parser();
@@ -599,7 +599,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertyTests()
         {
             Parser p = new Parser();
@@ -643,7 +643,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemListTests()
         {
             Parser p = new Parser();
@@ -673,7 +673,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StringExpansionTests()
         {
             Parser p = new Parser();
@@ -709,7 +709,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ComplexTests()
         {
             Parser p = new Parser();
@@ -741,7 +741,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure when a non number is used in an expression which expects a numeric value that a error is emitted.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidItemInConditionEvaluation()
         {
             Parser p = new Parser();
@@ -758,7 +758,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OldSyntaxTests()
         {
             Parser p = new Parser();
@@ -787,7 +787,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConditionedPropertyUpdateTests()
         {
             Parser p = new Parser();
@@ -878,7 +878,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NotTests()
         {
             Console.WriteLine("NegationParseTest()");
@@ -973,7 +973,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NegativeTests()
         {
             Parser p = new Parser();

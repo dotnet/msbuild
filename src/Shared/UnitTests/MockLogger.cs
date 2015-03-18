@@ -11,7 +11,7 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests
         /*
          * Method:  LoggerEventHandler
          *
-         * Recieves build events and logs them the way we like.
+         * Receives build events and logs them the way we like.
          *
          */
         internal void LoggerEventHandler(object sender, BuildEventArgs eventArgs)

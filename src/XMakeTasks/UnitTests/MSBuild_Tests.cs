@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
@@ -16,16 +16,16 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class MSBuildTask_Tests
     {
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests
         /// If we pass in an item spec that is over the max path but it can be normalized down to something under the max path, we should still work and not
         /// throw a path too long exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ProjectItemSpecTooLong()
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
         /// Ensure that the MSBuild task tags any output items with two pieces of metadata -- MSBuildSourceProjectFile and
         /// MSBuildSourceTargetName  -- that give an indication of where the items came from.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutputItemsAreTaggedWithProjectFileAndTargetName()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests
         /// with an empty Projects parameter, and it shouldn't error, and it shouldn't try to
         /// build itself.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyProjectsParameterResultsInNoop()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that nonexistent projects aren't normally skipped
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NormallyDoNotSkipNonexistentProjects()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that nonexistent projects aren't normally skipped
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NormallyDoNotSkipNonexistentProjectsBuildInParallel()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that nonexistent projects are skipped when requested
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SkipNonexistentProjects()
@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that nonexistent projects are skipped when requested when building in parallel.
         /// DDB # 125831
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SkipNonexistentProjectsBuildingInParallel()
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(logger.FullLog.Contains("MSB3202")); // project file not found error
         }
 
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void LogErrorWhenBuildingVCProj()
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests
         /// However, it's a situation where the project author doesn't have control over the
         /// property value and so he can't escape it himself.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void PropertyOverridesContainSemicolon()
@@ -437,7 +437,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing different global properites via metadata works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentGlobalPropertiesWithDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -495,7 +495,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing different global properites via metadata works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentGlobalPropertiesWithoutDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -552,7 +552,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing different global properites via metadata works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentGlobalPropertiesWithBlanks()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -608,7 +608,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing different global properites via metadata works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentGlobalPropertiesInvalid()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -657,7 +657,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing additional global properites via metadata works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentAdditionalPropertiesWithDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -713,7 +713,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing additional global properites via metadata works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentAdditionalPropertiesWithGlobalProperties()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -772,7 +772,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing additional global properites via metadata works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentAdditionalPropertiesWithoutDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -826,7 +826,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Properties and Targets that use non-standard separation chars
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetsWithSeparationChars()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -880,7 +880,7 @@ namespace Microsoft.Build.UnitTests
         /// The Aardvark tests which also test StopOnFirstFailure are at:
         /// qa\md\wd\DTP\MSBuild\ShippingExtensions\ShippingTasks\MSBuild\_Tst\MSBuild.StopOnFirstFailure
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StopOnFirstFailureandBuildInParallelSingleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -981,7 +981,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify stopOnFirstFailure with BuildInParallel override message are correctly logged when there are multiple nodes
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StopOnFirstFailureandBuildInParallelMultipleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1081,7 +1081,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the skipping of the remaining projects. Verify the skip message is only displayed when there are projects to skip.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SkipRemainingProjects()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1146,7 +1146,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the behavior of Target execution with StopOnFirstFailure
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetStopOnFirstFailureBuildInParallel()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1250,7 +1250,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Properties and Targets that use non-standard separation chars
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertiesWithSeparationChars()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1314,7 +1314,7 @@ namespace Microsoft.Build.UnitTests
         /// Orcas had a bug that if the target casing specified was not correct, we would still build it,
         /// but not return any target outputs!
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetNameIsCaseInsensitive()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"

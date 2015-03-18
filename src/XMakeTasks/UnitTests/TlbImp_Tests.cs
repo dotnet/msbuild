@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -15,13 +15,13 @@ using System.Globalization;
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class TlbImp_Tests
     {
         /// <summary>
         /// Tests that /machine flag will be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Machine()
         {
             var t = new ResolveComReference.TlbImp();
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Check ReferenceFiles
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceFiles()
         {
             var t = new ResolveComReference.TlbImp();
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests that the assembly being imported is passed to the command line
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TypeLibName()
         {
             var t = new ResolveComReference.TlbImp();
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests that the assembly being imported is passed to the command line
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TypeLibNameWithSpaces()
         {
             var t = new ResolveComReference.TlbImp();
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /namespace: command line option
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyNamespace()
         {
             var t = new ResolveComReference.TlbImp();
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /asmversion: command line option
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyVersion()
         {
             var t = new ResolveComReference.TlbImp();
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /nologo switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoLogo()
         {
             var t = new ResolveComReference.TlbImp();
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /out: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutputAssembly()
         {
             var t = new ResolveComReference.TlbImp();
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /out: switch, with a space in the output file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutputAssemblyWithSpaces()
         {
             var t = new ResolveComReference.TlbImp();
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /noclassmembers switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PreventClassMembers()
         {
             var t = new ResolveComReference.TlbImp();
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /sysarray switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SafeArrayAsSystemArray()
         {
             var t = new ResolveComReference.TlbImp();
@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /silent switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Silent()
         {
             var t = new ResolveComReference.TlbImp();
@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /transform: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Transform()
         {
             var t = new ResolveComReference.TlbImp();
@@ -242,7 +242,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /verbose switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Verbose()
         {
             var t = new ResolveComReference.TlbImp();
@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests that task does the right thing (fails) when no .ocx file is passed to it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskFailsWithNoInputs()
         {
             var t = new ResolveComReference.TlbImp();

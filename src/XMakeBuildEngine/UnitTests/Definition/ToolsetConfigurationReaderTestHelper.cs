@@ -7,7 +7,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Configuration;
 using Microsoft.Win32;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Threading;
 
 namespace Microsoft.Build.UnitTests

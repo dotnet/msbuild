@@ -18,7 +18,7 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// This delegate is used for objects which do not have public paramaterless constructors and must be constructed using
+    /// This delegate is used for objects which do not have public parameterless constructors and must be constructed using
     /// another method.  When invoked, this delegate should return a new object which has been translated appropriately.
     /// </summary>
     /// <typeparam name="T">The type to be translated.</typeparam>

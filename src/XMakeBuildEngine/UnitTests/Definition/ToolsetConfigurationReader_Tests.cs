@@ -7,7 +7,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Configuration;
 using Microsoft.Win32;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 
 using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
@@ -17,17 +17,17 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Unit tests for ToolsetConfigurationReader class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ToolsetConfigurationReaderTests
     {
         private static string s_msbuildToolsets = "msbuildToolsets";
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
         }
 
-        [TestCleanup]
+        [TearDown]
         public void Teardown()
         {
             ToolsetConfigurationReaderTestHelper.CleanUp();
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  msbuildToolsets element is empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MSBuildToolsetsTest_EmptyElement()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  tests if ToolsetConfigurationReaderTests is successfully initialized from the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MSBuildToolsetsTest_Basic()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.Definition
         ///  Tests if ToolsetConfigurationReaderTests is successfully initialized from the config file when msbuildOVerrideTasksPath is set.
         ///  Also verify the msbuildOverrideTasksPath is properly read in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MSBuildToolsetsTest_Basic2()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests.Definition
         ///  Tests if ToolsetConfigurationReaderTests is successfully initialized from the config file and that msbuildOVerrideTasksPath 
         ///  is correctly read in when the value is empty.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MSBuildToolsetsTest_Basic3()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  tests if ToolsetConfigurationReaderTests is successfully initialized from the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MSBuildToolsetsTest_BasicWithOtherConfigEntries()
         {
             // NOTE: for some reason, <configSections> MUST be the first element under <configuration>
@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// name attribute is missing from toolset element 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
         public void ToolsVersionTest_NameNotSpecified()
         {
@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  More than 1 toolset element with the same name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
         public void ToolsVersionTest_MultipleElementsWithSameName()
         {
@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// empty toolset element 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
         public void ToolsVersionTest_EmptyElement()
         {
@@ -279,7 +279,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// only 1 toolset is specified
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionTest_SingleElement()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  name attribute is missing
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
         public void PropertyTest_NameNotSpecified()
         {
@@ -339,7 +339,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// value attribute is missing
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
         public void PropertyTest_ValueNotSpecified()
         {
@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// more than 1 property element with the same name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
         public void PropertyTest_MultipleElementsWithSameName()
         {
@@ -388,7 +388,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  property element is an empty element
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
         public void PropertyTest_EmptyElement()
         {
@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// more than 1 property element specified
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertyTest_MultipleElement()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -449,7 +449,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// tests GetElement(string name) function in propertycollection class
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertyTest_GetValueByName()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"

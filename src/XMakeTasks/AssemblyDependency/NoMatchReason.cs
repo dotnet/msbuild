@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks
         NotAFileNameOnDisk,
 
         /// <summary>
-        /// The processor architecure does not match the targeted processor architecture.
+        /// The processor architecture does not match the targeted processor architecture.
         /// </summary>
         ProcessorArchitectureDoesNotMatch
     }

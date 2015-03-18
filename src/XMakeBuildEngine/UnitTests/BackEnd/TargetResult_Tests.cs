@@ -12,7 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Unittest;
 using Microsoft.Build.Evaluation;
@@ -27,13 +27,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for the target result test.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TargetResult_Tests
     {
         /// <summary>
         /// Tests a constructor with no items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConstructorNoItems()
         {
             TargetResult result = new TargetResult(new TaskItem[] { }, TestUtilities.GetStopWithErrorResult());
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a constructor with items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConstructorWithItems()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a constructor with a null item array passed.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestConstructorNullItems()
         {
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a constructor with an exception passed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConstructorWithException()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a constructor with a null exception passed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConstructorWithExceptionNull()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serialization with no exception in the result.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationNoException()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serialization with an exception in the result.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithException()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test GetCacheDirectory is resilient to paths with strings that would normally make string.format to throw a FormatException
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetCacheDirectory()
         {
             string oldTmp = Environment.GetEnvironmentVariable("TMP");

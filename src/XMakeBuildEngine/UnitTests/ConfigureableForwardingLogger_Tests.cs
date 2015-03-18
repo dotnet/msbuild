@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.BackEnd.Logging;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ConfigureableForwardingLogger_Tests
     {
         private static BuildFinishedEventArgs s_buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [ClassInitialize]
+        [TestFixtureSetUp]
         public static void FixtureSetup(TestContext testContext)
         {
             BuildEventContext context = new BuildEventContext(1, 2, 3, 4);
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
             s_targetFinished.BuildEventContext = context;
         }
 
-        [TestMethod]
+        [Test]
         public void ForwardingLoggingEventsBasedOnVerbosity()
         {
             EventSourceSink source = new EventSourceSink();
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(logger.forwardedEvents.Contains(s_commandLine));
         }
 
-        [TestMethod]
+        [Test]
         public void ForwardingLoggingPerformanceSummary()
         {
             EventSourceSink source = new EventSourceSink();
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(logger.forwardedEvents.Contains(s_taskFinished));
         }
 
-        [TestMethod]
+        [Test]
         public void ForwardingLoggingNoSummary()
         {
             EventSourceSink source = new EventSourceSink();
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(logger.forwardedEvents.Contains(s_commandLine));
         }
 
-        [TestMethod]
+        [Test]
         public void ForwardingLoggingShowCommandLine()
         {
             EventSourceSink source = new EventSourceSink();

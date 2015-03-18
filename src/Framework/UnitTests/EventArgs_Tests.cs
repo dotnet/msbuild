@@ -13,14 +13,14 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Unit test the base class BuildEventArgs
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class EventArgs_Tests
     {
         #region BaseClass Equals Tests
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Setup the text, this method is run ONCE for the entire text fixture
         /// </summary>
-        [ClassInitialize]
+        [TestFixtureSetUp]
         public static void Setup(TestContext context)
         {
             s_baseGenericEvent = new GenericBuildEventArgs("Message", "HelpKeyword", "senderName");
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise getHashCode.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetHashCode()
         {
             s_baseGenericEvent.GetHashCode();
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EventArgsCtors()
         {
             GenericBuildEventArgs genericEventTest = new GenericBuildEventArgs();
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify a whidby project started event can be deserialized, the whidby event is stored in a serialized base64 string.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Type in serialized string targets MSBuild retail public key, will not de-serialize
         public void TestDeserialization()
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the BuildEventContext is exercised
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExerciseBuildEventContext()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(0, 0, 0, 0);

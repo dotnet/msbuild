@@ -9,7 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -20,41 +20,41 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
+    [TestFixture]
     public class BuildRequestConfiguration_Tests
     {
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorNullFile()
         {
             BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", new string[0], null);
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorNullProps()
         {
             BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", new string[0], null);
         }
 
-        [TestMethod]
+        [Test]
         public void TestConstructor1()
         {
             BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorInvalidConfigId()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
@@ -62,14 +62,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration config2 = config1.ShallowCloneWithNewId(0);
         }
 
-        [TestMethod]
+        [Test]
         public void TestConstructor2PositiveConfigId()
         {
             BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
             new BuildRequestConfiguration(1, config1, "2.0");
         }
 
-        [TestMethod]
+        [Test]
         public void TestConstructor2NegativeConfigId()
         {
             BuildRequestData config1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
@@ -77,20 +77,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructor2NullFile()
         {
             BuildRequestData config1 = new BuildRequestData(null, new Dictionary<string, string>(), "toolsVersion", new string[0], null);
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructor2NullProps()
         {
             BuildRequestData config1 = new BuildRequestData("file", null, "toolsVersion", new string[0], null);
         }
 
-        [TestMethod]
+        [Test]
         public void TestWasGeneratedByNode()
         {
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsFalse(config3.WasGeneratedByNode);
         }
 
-        [TestMethod]
+        [Test]
         public void TestDefaultConfigurationId()
         {
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestSetConfigurationIdBad()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             config1.ConfigurationId = -2;
         }
 
-        [TestMethod]
+        [Test]
         public void TestSetConfigurationIdGood()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(config1.ConfigurationId, 1);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetFileName()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(config1.ProjectFullPath, Path.GetFullPath("file"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetToolsVersion()
         {
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", new string[0], null);
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(config1.ToolsVersion, "toolsVersion");
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetProperties()
         {
             Dictionary<string, string> props = new Dictionary<string, string>();
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(props.Count, Helpers.MakeList((IEnumerable<ProjectPropertyInstance>)(config1.Properties)).Count);
         }
 
-        [TestMethod]
+        [Test]
         public void TestSetProjectGood()
         {
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreSame(config1.Project, projectInstance);
         }
 
-        [TestMethod]
+        [Test]
         public void TestPacketType()
         {
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
@@ -187,7 +187,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(config1.Type, NodePacketType.BuildRequestConfiguration);
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetHashCode()
         {
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null), "2.0");
@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreNotEqual(config4.GetHashCode(), config5.GetHashCode());
         }
 
-        [TestMethod]
+        [Test]
         public void TestEquals()
         {
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null), "2.0");
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsTrue(config1 != config3);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTranslation()
         {
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(config, deserializedConfig);
         }
 
-        [TestMethod]
+        [Test]
         public void TestProperties()
         {
             BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData("path", new Dictionary<string, string>(), "2.0", new string[] { }, null), "2.0");
@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsFalse(configuration.IsActivelyBuilding);
         }
 
-        [TestMethod]
+        [Test]
         public void TestCache()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -354,7 +354,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestCache2()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"

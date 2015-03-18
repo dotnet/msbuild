@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using System.Linq;
 using System.Collections;
@@ -18,13 +18,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// Tests for the HybridDictionary.  Most of the more interesting tests are handled by the CopyOnWriteDictionary tests
     /// which use this as a backing store.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class HybridDictionary_Tests
     {
         /// <summary>
         /// Tests usage of the major functions.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestUsage()
         {
             var dict = new HybridDictionary<int, string>();
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Tests usage by random activities, comparing matching regular dictionary
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Medley()
         {
             string keys = "AAAAAAABCDEFGabcdefg";

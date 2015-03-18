@@ -4,14 +4,14 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AssignCulture_Tests
     {
         /*
@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Test the basic functionality.
         */
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             AssignCulture t = new AssignCulture();
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
          * Not everything that looks like a culture, really is.
          * Only a specific set of culture ids should be matched.
          */
-        [TestMethod]
+        [Test]
         public void LooksLikeCultureButIsnt()
         {
             AssignCulture t = new AssignCulture();
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Any pre-existing Culture attribute on the item is to be ignored
         */
-        [TestMethod]
+        [Test]
         public void CultureAttributePrecedence()
         {
             AssignCulture t = new AssignCulture();
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         * If the incoming item has a 'Culture' attribute already, but that culture is invalid,
         * we still overwrite that culture.
         */
-        [TestMethod]
+        [Test]
         public void CultureAttributePrecedenceWithBogusCulture()
         {
             AssignCulture t = new AssignCulture();
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
         * Make sure that attributes set on input items are forwarded to ouput items.
         * This applies to every attribute except for the one pointed to by CultureAttribute.
         */
-        [TestMethod]
+        [Test]
         public void AttributeForwarding()
         {
             AssignCulture t = new AssignCulture();
@@ -136,7 +136,7 @@ namespace Microsoft.Build.UnitTests
         * Test the case where an item has no embedded culture. For example,
         * "MyResource.resx"
         */
-        [TestMethod]
+        [Test]
         public void NoCulture()
         {
             AssignCulture t = new AssignCulture();
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Test the case where an item has no extension. For example "MyResource".
         */
-        [TestMethod]
+        [Test]
         public void NoExtension()
         {
             AssignCulture t = new AssignCulture();
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests
         * Test the case where an item has two dots embedded, but otherwise looks
         * like a well-formed item. For example "MyResource..resx".
         */
-        [TestMethod]
+        [Test]
         public void DoubleDot()
         {
             AssignCulture t = new AssignCulture();
@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests
         /// is a resource and form that happen to have an embedded culture. That is, don't assign a 
         /// culture to these.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress283991()
         {
             AssignCulture t = new AssignCulture();
