@@ -8,7 +8,7 @@ using System.Configuration;
 using System.IO;
 using System.Xml;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -21,31 +21,31 @@ using Microsoft.Build.Unittest;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
-    [TestClass]
+    [TestFixture]
     public class Toolset_Tests
     {
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ToolsetCtorErrors1()
         {
             Toolset t = new Toolset(null, "x", new ProjectCollection(), null);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ToolsetCtorErrors2()
         {
             Toolset t = new Toolset("x", null, new ProjectCollection(), null);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void ToolsetCtorErrors3()
         {
             Toolset t = new Toolset(String.Empty, "x", new ProjectCollection(), null);
         }
 
-        [TestMethod]
+        [Test]
         public void Regress27993_TrailingSlashTrimmedFromMSBuildToolsPath()
         {
             Toolset t;
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(@"\\foo\share\", t.ToolsPath); // trim at most one slash
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateToolsetTranslation()
         {
             PropertyDictionary<ProjectPropertyInstance> buildProperties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(t.DefaultOverrideToolsVersion, t2.DefaultOverrideToolsVersion);
         }
 
-        [TestMethod]
+        [Test]
         public void TestDefaultSubToolset()
         {
             Toolset t = GetFakeToolset(null /* no global properties */);
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("v13.0", t.DefaultSubToolsetVersion);
         }
 
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestDefaultSubToolsetFor40()
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestDefaultWhenNoSubToolset()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestGenerateSubToolsetVersionWhenNoSubToolset()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestNoSubToolset_GlobalPropertyOverrides()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestNoSubToolset_EnvironmentOverrides()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -269,7 +269,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestNoSubToolset_ExplicitlyPassedGlobalPropertyOverrides()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -294,7 +294,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestNoSubToolset_ExplicitlyPassedGlobalPropertyWins()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -322,7 +322,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestGenerateSubToolsetVersion_GlobalPropertyOverrides()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestGenerateSubToolsetVersion_EnvironmentOverrides()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestGenerateSubToolsetVersion_ExplicitlyPassedGlobalPropertyOverrides()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -385,7 +385,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestGenerateSubToolsetVersion_SolutionVersionOverrides()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -410,7 +410,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestGenerateSubToolsetVersion_ExplicitlyPassedGlobalPropertyWins()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -438,7 +438,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestGetPropertyFromSubToolset()
         {
             Toolset t = GetFakeToolset(null);

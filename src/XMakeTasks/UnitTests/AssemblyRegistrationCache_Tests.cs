@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AssemblyRegistrationCache_Tests
     {
-        [TestMethod]
+        [Test]
         public void ExerciseCache()
         {
             AssemblyRegistrationCache arc = new AssemblyRegistrationCache();

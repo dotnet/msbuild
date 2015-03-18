@@ -6,14 +6,14 @@ using System.Xml;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Collections;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class HashTableUtilityTests
     {
         /// <summary>
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
         /// This test ensures that hashtable     with unequal numbers of items are considered not 
         /// equivalent.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress_Mutation_HashtablesWithDifferentCountsAreNotEquivalent()
         {
             Dictionary<string, string> h1 = new Dictionary<string, string>();
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(HashTableUtility.Compare(h2, h1) > 0);
         }
 
-        [TestMethod]
+        [Test]
         public void HashtableComparisons()
         {
             Dictionary<string, string> h1 = new Dictionary<string, string>();

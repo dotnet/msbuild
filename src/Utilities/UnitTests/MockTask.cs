@@ -4,7 +4,7 @@
 using System;
 using System.Resources;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;

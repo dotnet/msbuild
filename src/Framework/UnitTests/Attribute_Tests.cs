@@ -9,17 +9,17 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class AttributeTests
     {
         /// <summary>
         /// Test RequiredRuntimeAttribute
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RequiredRuntimeAttribute()
         {
             RequiredRuntimeAttribute attribute =
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("v5", attribute.RuntimeVersion);
         }
 
-        [TestMethod]
+        [Test]
         public void OutputAttribute()
         {
             OutputAttribute attribute =
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNotNull(attribute);
         }
 
-        [TestMethod]
+        [Test]
         public void RequiredAttribute()
         {
             RequiredAttribute attribute =

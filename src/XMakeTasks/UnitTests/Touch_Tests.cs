@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -12,7 +12,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class Touch_Tests
     {
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Fail("Unexpected set last write time: " + path);
         }
 
-        [TestMethod]
+        [Test]
         public void TouchExisting()
         {
             Touch t = new Touch();
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void TouchNonExisting()
         {
             Touch t = new Touch();
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void TouchNonExistingAlwaysCreate()
         {
             Touch t = new Touch();
@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void TouchNonExistingAlwaysCreateAndBadlyFormedTimestamp()
         {
             Touch t = new Touch();
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Log.Contains("MSB3376"));
         }
 
-        [TestMethod]
+        [Test]
         public void TouchReadonly()
         {
             Touch t = new Touch();
@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Log.Contains(@"c:\touch\myreadonly.txt"));
         }
 
-        [TestMethod]
+        [Test]
         public void TouchReadonlyForce()
         {
             Touch t = new Touch();
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
         }
 
-        [TestMethod]
+        [Test]
         public void TouchNonExistingDirectoryDoesntExist()
         {
             Touch t = new Touch();

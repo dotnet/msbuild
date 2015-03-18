@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd;
@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// with the results from the old regexes to make sure they're identical
     /// in every case.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ExpressionShredder_Tests
     {
         private string[] _medleyTests = new string[]
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                             "@(_OutputPathItem->'%(FullPath)', ';');$(MSBuildAllProjects);"
         };
 
-        [TestMethod]
+        [Test]
         public void Medley()
         {
             foreach (string test in _medleyTests)
@@ -272,121 +272,121 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [TestMethod]
+        [Test]
         public void NoOpSplit()
         {
             VerifySplitSemiColonSeparatedList("a", "a");
         }
 
-        [TestMethod]
+        [Test]
         public void BasicSplit()
         {
             VerifySplitSemiColonSeparatedList("a;b", "a", "b");
         }
 
-        [TestMethod]
+        [Test]
         public void Empty()
         {
             VerifySplitSemiColonSeparatedList("", null);
         }
 
-        [TestMethod]
+        [Test]
         public void SemicolonOnly()
         {
             VerifySplitSemiColonSeparatedList(";", null);
         }
 
-        [TestMethod]
+        [Test]
         public void TwoSemicolons()
         {
             VerifySplitSemiColonSeparatedList(";;", null);
         }
 
-        [TestMethod]
+        [Test]
         public void TwoSemicolonsAndOneEntryAtStart()
         {
             VerifySplitSemiColonSeparatedList("a;;", "a");
         }
 
-        [TestMethod]
+        [Test]
         public void TwoSemicolonsAndOneEntryAtEnd()
         {
             VerifySplitSemiColonSeparatedList(";;a", "a");
         }
 
-        [TestMethod]
+        [Test]
         public void AtSignAtEnd()
         {
             VerifySplitSemiColonSeparatedList("@", "@");
         }
 
-        [TestMethod]
+        [Test]
         public void AtSignParenAtEnd()
         {
             VerifySplitSemiColonSeparatedList("foo@(", "foo@(");
         }
 
-        [TestMethod]
+        [Test]
         public void EmptyEntriesRemoved()
         {
             VerifySplitSemiColonSeparatedList(";a;bbb;;c;;", "a", "bbb", "c");
         }
 
-        [TestMethod]
+        [Test]
         public void EntriesTrimmed()
         {
             VerifySplitSemiColonSeparatedList("  ;  a   ;b   ;   ;c\n;  \r;  ", "a", "b", "c");
         }
 
-        [TestMethod]
+        [Test]
         public void NoSplittingOnMacros()
         {
             VerifySplitSemiColonSeparatedList("@(foo->';')", "@(foo->';')");
         }
 
-        [TestMethod]
+        [Test]
         public void NoSplittingOnSeparators()
         {
             VerifySplitSemiColonSeparatedList("@(foo, ';')", "@(foo, ';')");
         }
 
-        [TestMethod]
+        [Test]
         public void NoSplittingOnSeparatorsAndMacros()
         {
             VerifySplitSemiColonSeparatedList("@(foo->'abc;def', 'ghi;jkl')", "@(foo->'abc;def', 'ghi;jkl')");
         }
 
-        [TestMethod]
+        [Test]
         public void CloseParensInMacro()
         {
             VerifySplitSemiColonSeparatedList("@(foo->');')", "@(foo->');')");
         }
 
-        [TestMethod]
+        [Test]
         public void CloseParensInSeparator()
         {
             VerifySplitSemiColonSeparatedList("a;@(foo,');');b", "a", "@(foo,');')", "b");
         }
 
-        [TestMethod]
+        [Test]
         public void CloseParensInMacroAndSeparator()
         {
             VerifySplitSemiColonSeparatedList("@(foo->';);', ';);')", "@(foo->';);', ';);')");
         }
 
-        [TestMethod]
+        [Test]
         public void EmptyQuotesInMacroAndSeparator()
         {
             VerifySplitSemiColonSeparatedList(" @(foo->'', '')", "@(foo->'', '')");
         }
 
-        [TestMethod]
+        [Test]
         public void MoreParensAndAtSigns()
         {
             VerifySplitSemiColonSeparatedList("@(foo->';());', ';@();')", "@(foo->';());', ';@();')");
         }
 
-        [TestMethod]
+        [Test]
         public void SplittingExceptForMacros()
         {
             VerifySplitSemiColonSeparatedList("@(foo->';');def;@ghi;", "@(foo->';')", "def", "@ghi");
@@ -394,7 +394,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         // Invalid item expressions shouldn't cause an error in the splitting function.
         // The caller will emit an error later when it tries to parse the results.
-        [TestMethod]
+        [Test]
         public void InvalidItemExpressions()
         {
             VerifySplitSemiColonSeparatedList("@(x", "@(x");
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             VerifySplitSemiColonSeparatedList("@(x''';", "@(x''';");
         }
 
-        [TestMethod]
+        [Test]
         public void RealisticExample()
         {
             VerifySplitSemiColonSeparatedList("@(_OutputPathItem->'%(FullPath)', ';');$(MSBuildAllProjects);\n                @(Compile);\n                @(ManifestResourceWithNoCulture);\n                $(ApplicationIcon);\n                $(AssemblyOriginatorKeyFile);\n                @(ManifestNonResxWithNoCultureOnDisk);\n                @(ReferencePath);\n                @(CompiledLicenseFile);\n                @(EmbeddedDocumentation);                \n                @(CustomAdditionalCompileInputs)",
@@ -427,7 +427,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         // We need to support any item expressions that satisfy this expression.
         //
         // Try spaces everywhere that that regex allows spaces:
-        [TestMethod]
+        [Test]
         public void SpacingInItemListExpression()
         {
             VerifySplitSemiColonSeparatedList("@(   foo  \n ->  \t  ';abc;def;'   , \t  'ghi;jkl'   )", "@(   foo  \n ->  \t  ';abc;def;'   , \t  'ghi;jkl'   )");
@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.IsTrue(messages.Count == 0);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorTransform1()
         {
             string expression = "@(i->'%(Meta0)'->'%(Filename)'->Substring($(Val)))";
@@ -596,7 +596,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// NOTE: The medley of tests needs to be parsable by the old regex. This is a regression test against that
         /// regex. New expression types should be added in other tests
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemExpressionMedleyRegressionTestAgainstOldRegex()
         {
             List<ExpressionShredder.ItemExpressionCapture> expressions;
@@ -639,7 +639,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpressionInvalid1()
         {
             string expression;
@@ -650,7 +650,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.IsNull(expressions);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression1()
         {
             string expression;
@@ -667,7 +667,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual(null, capture.Captures);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression2()
         {
             string expression;
@@ -685,7 +685,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual(null, capture.Captures);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression3()
         {
             string expression;
@@ -704,7 +704,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("%(Fullpath)", capture.Captures[0].Value);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression4()
         {
             string expression;
@@ -722,7 +722,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("%(Fullpath)", capture.Captures[0].Value);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression5()
         {
             string expression;
@@ -743,7 +743,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("a,b", capture.Captures[0].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression6()
         {
             string expression;
@@ -763,7 +763,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("a,b", capture.Captures[0].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression7()
         {
             string expression;
@@ -785,7 +785,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual(null, capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression8()
         {
             string expression;
@@ -807,7 +807,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual(null, capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression9()
         {
             string expression;
@@ -829,7 +829,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual(null, capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression10()
         {
             string expression;
@@ -851,7 +851,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual(null, capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression11()
         {
             string expression;
@@ -870,7 +870,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual(null, capture.Captures[0].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression12()
         {
             string expression;
@@ -892,7 +892,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("$(Val), $(Boo)", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression13()
         {
             string expression;
@@ -914,7 +914,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("\"AA\", 'BB', `cc`", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression14()
         {
             string expression;
@@ -936,7 +936,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("'()', $(Boo), ')('", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression15()
         {
             string expression;
@@ -958,7 +958,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("`()`, $(Boo), \"AA\"", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression16()
         {
             string expression;
@@ -980,7 +980,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("`()`, $(Boo), \")(\"", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsSingleExpression17()
         {
             string expression;
@@ -1002,7 +1002,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsMultipleExpression1()
         {
             string expression;
@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsMultipleExpression2()
         {
             string expression;
@@ -1050,7 +1050,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsMultipleExpression3()
         {
             string expression;
@@ -1074,7 +1074,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsMultipleExpression4()
         {
             string expression;
@@ -1099,7 +1099,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
 
-        [TestMethod]
+        [Test]
         public void ExtractItemVectorExpressionsMultipleExpression5()
         {
             string expression;

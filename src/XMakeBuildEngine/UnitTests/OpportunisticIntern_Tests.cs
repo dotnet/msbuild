@@ -7,11 +7,11 @@ using System.Text;
 using System.IO;
 using Microsoft.Build;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class OpportunisticIntern_Tests
     {
         private static bool IsInternable(OpportunisticIntern.IInternable internable)
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test interning segment of char array
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SubArray()
         {
             var result = AssertInternable(new char[] { 'a', 't', 'r', 'u', 'e' }, 1, 4);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test interning segment of char array
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SubArray2()
         {
             var result = AssertInternable(new char[] { 'a', 't', 'r', 'u', 'e', 'x' }, 1, 4);
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test a single know-to-intern tiny string to verify the mechanism.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InternableTinyString()
         {
             AssertInternable("true");
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test a single known-to-not-intern tiny string to verify the mechanism.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NonInternableTinyString()
         {
             AssertNotInternable("1234");
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This is the list of hard-coded interns. They should report interned even though they are too small for normal interning.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KnownInternableTinyStrings()
         {
             AssertInternable("C#");
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test a set of strings that are similar to eachother
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InternableDifferingOnlyByNthCharacter()
         {
             string test = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!@#$%^&*()_+ABCDEFGHIJKLMNOPQRSTUVabcdefghijklmnopqrstuvwxyz0150";
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test The empty string
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StringDotEmpty()
         {
             AssertInternable(String.Empty);
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test an empty string.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoubleDoubleQuotes()
         {
             AssertInternable("");

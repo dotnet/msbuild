@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
      * Test the Csc task in various ways.
      *
      */
-    [TestClass]
+    [TestFixture]
     sealed public class CscTests
     {
         /// <summary>
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
         /// supports assembly aliases, so we want to make sure that we pass an assembly
         /// alias into csc.exe.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SingleAliasOnAReference()
         {
             Csc t = new Csc();
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
         /// supports assembly aliases, so we want to make sure that we pass an assembly
         /// alias into csc.exe.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SingleAliasUnicodeOnAReference()
         {
             Csc t = new Csc();
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests
         /// supports assembly aliases, so we want to make sure that we pass an assembly
         /// alias into csc.exe.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MultipleAliasesOnAReference()
         {
             Csc t = new Csc();
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         /// supports assembly aliases, so we want to make sure that we pass an assembly
         /// alias into csc.exe.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NonAliasedReference1()
         {
             Csc t = new Csc();
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
         /// supports assembly aliases, so we want to make sure that we pass an assembly
         /// alias into csc.exe.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NonAliasedReference2()
         {
             Csc t = new Csc();
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
         /// supports assembly aliases, so we want to make sure that we pass an assembly
         /// alias into csc.exe.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GlobalAndExplicitAliasOnAReference()
         {
             Csc t = new Csc();
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         // Tests the "DefineConstants" parameter on the Csc task.  The task actually
         // needs to slightly munge the string that was passed in from the project file,
         // in order to maintain compatibility with VS.
-        [TestMethod]
+        [Test]
         public void DefineConstants()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "DebugType" and "EmitDebuggingInformation" parameters on the Csc task,
         // and confirms that it sets the /debug switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void DebugType()
         {
             Csc t = new Csc();
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "LangVersion" parameter on the Csc task, and confirms that it sets
         // the /langversion switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void LangVersion()
         {
             Csc t = new Csc();
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "AdditionalLibPaths" parameter on the Csc task, and confirms that it sets
         // the /lib switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void AdditionaLibPaths()
         {
             Csc t = new Csc();
@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "PreferredUILang" parameter on the Csc task, and confirms that it sets
         // the /preferreduilang switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void PreferredUILang()
         {
             Csc t = new Csc();
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "Platform" parameter on the Csc task, and confirms that it sets
         // the /platform switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void Platform()
         {
             Csc t = new Csc();
@@ -274,7 +274,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "Platform" and "Prefer32Bit" parameter combinations on the Csc task,
         // and confirms that it sets the /platform switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void PlatformAndPrefer32Bit()
         {
             // Implicit "anycpu"
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "HighEntropyVA" parameter on the Csc task, and confirms that it
         // sets the /highentropyva switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void HighEntropyVA()
         {
             // Implicit /highentropyva-
@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "PdbFile" parameter on the Csc task, and confirms that it sets
         // the /pdb switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void Pdb()
         {
             Csc t = new Csc();
@@ -347,7 +347,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "SubsystemVersion" parameter on the Csc task, and confirms that it sets
         // the /subsystemversion switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void SubsystemVersion()
         {
             Csc t = new Csc();
@@ -372,7 +372,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "ApplicationConfiguration" parameter on the Csc task, and confirms that it sets
         // the /appconfig switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void ApplicationConfiguration()
         {
             Csc t = new Csc();
@@ -383,7 +383,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "UnsafeBlocks" parameter on the Csc task, and confirms that it sets
         // the /unsafe switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void UnsafeBlocks()
         {
             Csc t = new Csc();
@@ -395,7 +395,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "WarningsAsErrors" parameter on the Csc task, and confirms that it sets
         // the /warnaserror switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void WarningsAsErrors()
         {
             Csc t = new Csc();
@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests
         // Check all parameters that are based on ints, bools and other value types.
         // This is because parameters with these types go through a not-so-typesafe check
         // for existence in the property bag.
-        [TestMethod]
+        [Test]
         public void FlagsAndInts()
         {
             Csc t = new Csc();
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [TestMethod]
+        [Test]
         [Ignore]
         public void CscHostObject()
         {
@@ -470,7 +470,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(cscHostObject.CompileMethodWasCalled);
         }
 
-        [TestMethod]
+        [Test]
         [Ignore]
         public void CscHostObject2()
         {
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(cscHostObject.CompileMethodWasCalled);
         }
 
-        [TestMethod]
+        [Test]
         [Ignore]
         public void CscHostObject3()
         {
@@ -510,7 +510,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(cscHostObject.CompileMethodWasCalled);
         }
 
-        [TestMethod]
+        [Test]
         public void CscHostObjectNotUsedIfToolNameSpecified()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -524,7 +524,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(csc.UseAlternateCommandLineToolToExecute());
         }
 
-        [TestMethod]
+        [Test]
         public void CscHostObjectNotUsedIfToolPathSpecified()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -546,10 +546,10 @@ namespace Microsoft.Build.UnitTests
         * with with whitespace and other special characters to try to fool
         * us into spawning Csc.exe while bypassing security
         */
-        [TestClass]
+        [TestFixture]
         sealed public class CscCrossParameterInjection
         {
-            [TestMethod]
+            [Test]
             [ExpectedException(typeof(ArgumentException))]
             public void Win32IconEmbeddedQuote()
             {
@@ -558,7 +558,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void Sources()
             {
                 Csc t = new Csc();
@@ -578,7 +578,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out", "/out:parm0.exe");
             }
 
-            [TestMethod]
+            [Test]
             [ExpectedException(typeof(ArgumentException))]
             public void SourcesEmbeddedQuote()
             {
@@ -593,7 +593,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void Win32Icon()
             {
                 Csc t = new Csc();
@@ -602,7 +602,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateHasParameter(t, @"/win32icon:MyFile.ico /out:c:\windows\system32\notepad.exe");
             }
 
-            [TestMethod]
+            [Test]
             public void AdditionalLibPaths()
             {
                 Csc t = new Csc();
@@ -610,7 +610,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void AddModules()
             {
                 Csc t = new Csc();
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void BaseAddress()
             {
                 Csc t = new Csc();
@@ -626,7 +626,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void DebugType()
             {
                 Csc t = new Csc();
@@ -634,7 +634,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             [Ignore] // "Because constants may legitimately contains quotes _and_ we've cut security, we decided to let DefineConstants be passed through literally."
             public void DefineConstants()
             {
@@ -643,7 +643,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void DisabledWarnings()
             {
                 Csc t = new Csc();
@@ -651,7 +651,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void DocumentationFile()
             {
                 Csc t = new Csc();
@@ -659,7 +659,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void KeyContainer()
             {
                 Csc t = new Csc();
@@ -667,7 +667,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void KeyFile()
             {
                 Csc t = new Csc();
@@ -675,7 +675,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void LinkResources()
             {
                 Csc t = new Csc();
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void MainEntryPoint()
             {
                 Csc t = new Csc();
@@ -691,7 +691,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void OutputAssembly()
             {
                 Csc t = new Csc();
@@ -699,7 +699,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateHasParameter(t, @"/out:parm1 /out:c:\windows\system32\notepad.exe");
             }
 
-            [TestMethod]
+            [Test]
             public void References()
             {
                 Csc t = new Csc();
@@ -711,7 +711,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void Resources()
             {
                 Csc t = new Csc();
@@ -723,7 +723,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void ResponseFiles()
             {
                 Csc t = new Csc();
@@ -734,7 +734,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void TargetType()
             {
                 Csc t = new Csc();
@@ -742,7 +742,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void ToolPath()
             {
                 Csc t = new Csc();
@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void WarningsAsErrors()
             {
                 Csc t = new Csc();
@@ -759,7 +759,7 @@ namespace Microsoft.Build.UnitTests
             }
 
 
-            [TestMethod]
+            [Test]
             public void Win32Resource()
             {
                 Csc t = new Csc();
@@ -768,7 +768,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleResponseFiles()
         {
             Csc t = new Csc();
@@ -782,7 +782,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateContains(t, "@1.rsp @2.rsp @3.rsp @4.rsp", true);
         }
 
-        [TestMethod]
+        [Test]
         public void SingleResponseFile()
         {
             Csc t = new Csc();
@@ -793,7 +793,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "@1.rsp");
         }
 
-        [TestMethod]
+        [Test]
         public void NoAnalyzers_CommandLine()
         {
             Csc csc = new Csc();
@@ -801,7 +801,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateNoParameterStartsWith(csc, "/analyzer");
         }
 
-        [TestMethod]
+        [Test]
         public void Analyzer_CommandLine()
         {
             Csc csc = new Csc();
@@ -813,7 +813,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(csc, "/analyzer:Foo.dll");
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleAnalyzers_CommandLine()
         {
             Csc csc = new Csc();
@@ -827,7 +827,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(csc, "/analyzer:Bar.dll");
         }
 
-        [TestMethod]
+        [Test]
         public void NoAnalyzer_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -850,7 +850,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(cscHostObject.Analyzers);
         }
 
-        [TestMethod]
+        [Test]
         public void Analyzer_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -879,7 +879,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Foo.dll", cscHostObject.Analyzers[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleAnalyzers_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -911,7 +911,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Bar.dll", cscHostObject.Analyzers[1].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void NoRuleSet_CommandLine()
         {
             Csc csc = new Csc();
@@ -919,7 +919,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateNoParameterStartsWith(csc, "/ruleset");
         }
 
-        [TestMethod]
+        [Test]
         public void RuleSet_CommandLine()
         {
             Csc csc = new Csc();
@@ -928,7 +928,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(csc, "/ruleset:Bar.ruleset");
         }
 
-        [TestMethod]
+        [Test]
         public void NoRuleSet_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -951,7 +951,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(cscHostObject.RuleSet);
         }
 
-        [TestMethod]
+        [Test]
         public void RuleSet_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -976,7 +976,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Bar.ruleset", cscHostObject.RuleSet);
         }
 
-        [TestMethod]
+        [Test]
         public void NoAdditionalFiles_CommandLine()
         {
             Csc csc = new Csc();
@@ -984,7 +984,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateNoParameterStartsWith(csc, "/additionalfile");
         }
 
-        [TestMethod]
+        [Test]
         public void AdditionalFiles_CommandLine()
         {
             Csc csc = new Csc();
@@ -996,7 +996,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(csc, "/additionalfile:web.config");
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleAdditionalFiles_CommandLine()
         {
             Csc csc = new Csc();
@@ -1010,7 +1010,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(csc, "/additionalfile:web.config");
         }
 
-        [TestMethod]
+        [Test]
         public void NoAdditionalFile_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1033,7 +1033,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(cscHostObject.AdditionalFiles);
         }
 
-        [TestMethod]
+        [Test]
         public void AdditionalFile_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1062,7 +1062,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("web.config", cscHostObject.AdditionalFiles[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleAdditionalFiles_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();

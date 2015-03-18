@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Security.AccessControl;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -13,13 +13,13 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class ReadLinesFromFile_Tests
     {
         /// <summary>
         /// Write one line, read one line.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             string file = FileUtilities.GetTemporaryFile();
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests
         /// The file should contain the *unescaped* lines, but no escaping information should be 
         /// lost when read. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Escaping()
         {
             string file = FileUtilities.GetTemporaryFile();
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Write a line that contains an ANSI character that is not ASCII.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ANSINonASCII()
         {
             string file = FileUtilities.GetTemporaryFile();
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Reading lines from an missing file should result in the empty list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadMissing()
         {
             string file = FileUtilities.GetTemporaryFile();
@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Reading blank lines from a file should be ignored.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IgnoreBlankLines()
         {
             string file = FileUtilities.GetTemporaryFile();
@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Reading lines from a file that you have no access to.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNoAccess()
         {
             string file = FileUtilities.GetTemporaryFile();
@@ -241,7 +241,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Invalid encoding
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidEncoding()
         {
             WriteLinesToFile a = new WriteLinesToFile();
@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Reading blank lines from a file should be ignored.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Encoding()
         {
             string file = FileUtilities.GetTemporaryFile();

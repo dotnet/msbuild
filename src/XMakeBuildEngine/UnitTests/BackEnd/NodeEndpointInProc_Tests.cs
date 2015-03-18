@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -18,7 +18,7 @@ using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
+    [TestFixture]
     public class NodeEndpointInProc_Tests
     {
         private delegate void EndpointOperationDelegate(NodeEndpointInProc endpoint);
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private Dictionary<INodeEndpoint, LinkStatusContext> _linkStatusTable;
         private MockHost _host;
 
-        [TestMethod]
+        [Test]
         public void ConstructionWithValidHost()
         {
             NodeEndpointInProc.EndpointPair endpoints =
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsNotNull(endpoints);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructionSynchronousWithInvalidHost()
         {
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     NodeEndpointInProc.EndpointMode.Synchronous, null);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructionAsynchronousWithInvalidHost()
         {
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// 2. and that attempting to send data while they are
         /// inactive throws the expected exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InactiveLinkTestSynchronous()
         {
             NodeEndpointInProc.EndpointPair endpoints =
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that the links are marked inactive and that attempting to send data while they are
         /// inactive throws the expected exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InactiveLinkTestAsynchronous()
         {
             NodeEndpointInProc.EndpointPair endpoints =
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             endpoints.NodeEndpoint.Connect(_host);
         }
 
-        [TestMethod]
+        [Test]
         public void ConnectionTestSynchronous()
         {
             NodeEndpointInProc.EndpointPair endpoints =
@@ -269,20 +269,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsTrue(_linkStatusTable[endpoints.ManagerEndpoint].status == LinkStatus.Active);
         }
 
-        [TestMethod]
+        [Test]
         public void DisconnectionTestSynchronous()
         {
             DisconnectionTestHelper(NodeEndpointInProc.EndpointMode.Synchronous);
         }
 
-        [TestMethod]
+        [Test]
         public void DisconnectionTestAsynchronous()
         {
             DisconnectionTestHelper(NodeEndpointInProc.EndpointMode.Asynchronous);
         }
 
 
-        [TestMethod]
+        [Test]
         public void SynchronousData()
         {
             // Create the endpoints
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsTrue(_host.DataReceivedContext.thread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId);
         }
 
-        [TestMethod]
+        [Test]
         public void AsynchronousData()
         {
             // Create the endpoints
@@ -348,14 +348,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsTrue(_host.DataReceivedContext.thread.ManagedThreadId != Thread.CurrentThread.ManagedThreadId);
         }
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _linkStatusTable = new Dictionary<INodeEndpoint, LinkStatusContext>();
             _host = new MockHost();
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             _linkStatusTable = null;

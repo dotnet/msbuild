@@ -9,7 +9,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -21,13 +21,13 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class FindInvalidProjectReferences_Tests
     {
         /// <summary>
         /// Verify FindInvalidProjectReferences for several target platform monikers
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyFindInvalidProjectReferences()
         {
             // Create the engine.

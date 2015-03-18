@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -25,13 +25,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// <summary>
     /// Tests for several of the collections classes
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class OMcollections_Tests
     {
         /// <summary>
         /// End to end test of PropertyDictionary
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicPropertyDictionary()
         {
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Test dictionary serialization with properties
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertyDictionarySerialization()
         {
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Test dictionary serialization with no properties
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertyDictionarySerializationEmpty()
         {
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// End to end test of ItemDictionary
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicItemDictionary()
         {
             ItemDictionary<ProjectItemInstance> items = new ItemDictionary<ProjectItemInstance>();
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Null backing collection should be like empty collection
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOnlyDictionaryNullBackingClone()
         {
             var dictionary = CreateCloneDictionary<string>(null, StringComparer.OrdinalIgnoreCase);
@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Null backing collection should be like empty collection
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOnlyDictionaryNullBackingWrapper()
         {
             var dictionary = new ObjectModel.ReadOnlyDictionary<string, string>(new Dictionary<string, string>(0));
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Cloning constructor should not see subsequent changes
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOnlyDictionaryClone()
         {
             var dictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Wrapping constructor should be "live"
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOnlyDictionaryWrapper()
         {
             var dictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Null backing collection should be an error
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ReadOnlyCollectionNullBacking()
         {
@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// Verify non generic enumeration does not recurse
         /// ie., GetEnumerator() does not call itself
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOnlyDictionaryNonGenericEnumeration()
         {
             var backing = new Dictionary<string, string>();
@@ -266,7 +266,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Verify that the converting collection functions.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOnlyConvertingCollection()
         {
             string[] source = { "1", "2", "3" };
@@ -284,7 +284,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Verify that the converting dictionary functions.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOnlyConvertingDictionary()
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// Verify non generic enumeration does not recurse
         /// ie., GetEnumerator() does not call itself
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOnlyCollectionNonGenericEnumeration()
         {
             var backing = new List<string>();

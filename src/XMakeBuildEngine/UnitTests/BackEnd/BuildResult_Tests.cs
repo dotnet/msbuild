@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Evaluation;
@@ -21,30 +21,30 @@ using Microsoft.Build.Unittest;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
+    [TestFixture]
     public class BuildResult_Tests
     {
         private int _nodeRequestId;
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _nodeRequestId = 1;
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
         }
 
-        [TestMethod]
+        [Test]
         public void TestConstructorGood()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
             BuildResult result2 = new BuildResult(request);
         }
 
-        [TestMethod]
+        [Test]
         public void Clone()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -69,13 +69,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorBad()
         {
             BuildResult result = new BuildResult(null);
         }
 
-        [TestMethod]
+        [Test]
         public void TestConfigurationId()
         {
             BuildRequest request = CreateNewBuildRequest(-1, new string[0]);
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(1, result2.ConfigurationId);
         }
 
-        [TestMethod]
+        [Test]
         public void TestExceptionGood()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(e, result.Exception);
         }
 
-        [TestMethod]
+        [Test]
         public void TestOverallResult()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(BuildResultCode.Failure, result2.OverallResult);
         }
 
-        [TestMethod]
+        [Test]
         public void TestPacketType()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(NodePacketType.BuildResult, ((INodePacket)result).Type);
         }
 
-        [TestMethod]
+        [Test]
         public void TestAddAndRetrieve()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(KeyNotFoundException))]
-        [TestMethod]
+        [Test]
         public void TestIndexerBad1()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(KeyNotFoundException))]
-        [TestMethod]
+        [Test]
         public void TestIndexerBad2()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestAddResultsInvalid1()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestAddResultsInvalid2()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestAddResultsInvalid3()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -189,7 +189,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.AddResultsForTarget(null, TestUtilities.GetEmptySucceedingTargetResult());
         }
 
-        [TestMethod]
+        [Test]
         public void TestMergeResults()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -215,7 +215,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestMergeResultsBad1()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         // test is disabled.
 #if false
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestMergeResultsBad2()
         {
             BuildResult result = new BuildResult(1);
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestMergeResultsBad3()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.MergeResults(result2);
         }
 
-        [TestMethod]
+        [Test]
         public void TestHasResultsForTarget()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsFalse(result.HasResultsForTarget("bar"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestEnumerator()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestTranslation()
         {
             BuildRequest request = new BuildRequest(1, 1, 2, new string[] { "alpha", "omega" }, null, new BuildEventContext(1, 1, 2, 3, 4, 5), null);

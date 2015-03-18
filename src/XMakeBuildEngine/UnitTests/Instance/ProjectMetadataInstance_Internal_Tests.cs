@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
@@ -18,13 +18,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectMetadataInstance internal members
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectMetadataInstance_Internal_Tests
     {
         /// <summary>
         /// Cloning
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DeepClone()
         {
             ProjectMetadataInstance metadata = GetMetadataInstance();
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests serialization
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Serialization()
         {
             ProjectMetadataInstance metadata = new ProjectMetadataInstance("m1", "v1", false);

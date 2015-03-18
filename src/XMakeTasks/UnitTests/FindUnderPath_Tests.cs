@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -14,10 +14,10 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class FindUnderPath_Tests
     {
-        [TestMethod]
+        [Test]
         public void BasicFilter()
         {
             FindUnderPath t = new FindUnderPath();
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidFile()
         {
             FindUnderPath t = new FindUnderPath();
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
             // Don't crash
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidPath()
         {
             FindUnderPath t = new FindUnderPath();
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void VerifyFullPath()
         {
             FindUnderPath t = new FindUnderPath();
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void VerifyFullPathNegative()
         {
             FindUnderPath t = new FindUnderPath();

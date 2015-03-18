@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -17,7 +17,7 @@ using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ResGen_Tests
     {
         /// <summary>
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
         ///  - If there are InputFiles, verify that they all show up on the command line
         ///  - Verify that OutputFiles defaults appropriately
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InputFiles()
         {
             ResGen t = new ResGen();
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         ///  - Verify that if InputFiles and OutputFiles are different lengths (and both exist), an error is logged
         ///  - Verify that if OutputFiles are set explicitly, they map and show up on the command line as expected
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutputFiles()
         {
             ResGen t = new ResGen();
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests ResGen's /publicClass switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PublicClass()
         {
             ResGen t = new ResGen();
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the /r: parameter (passing in reference assemblies)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void References()
         {
             ResGen t = new ResGen();
@@ -343,7 +343,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SdkToolsPath()
         {
             ResGen t = new ResGen();
@@ -380,7 +380,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies the parameters that for resgen.exe's /str: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StronglyTypedParameters()
         {
             ResGen t = new ResGen();
@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the ToolPath property:  Should log an error if it's null or a bad path.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolPath()
         {
             ResGen t = new ResGen();
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests ResGen's /useSourcePath switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UseSourcePath()
         {
             ResGen t = new ResGen();

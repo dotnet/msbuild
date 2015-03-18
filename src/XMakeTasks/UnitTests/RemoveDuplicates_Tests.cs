@@ -4,20 +4,20 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class RemoveDuplicates_Tests
     {
         /// <summary>
         /// Pass one item in, get the same item back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneItemNop()
         {
             RemoveDuplicates t = new RemoveDuplicates();
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass in two of the same items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoItemsTheSame()
         {
             RemoveDuplicates t = new RemoveDuplicates();
@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass in two items that are different.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoItemsDifferent()
         {
             RemoveDuplicates t = new RemoveDuplicates();
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Case should not matter.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CaseInsensitive()
         {
             RemoveDuplicates t = new RemoveDuplicates();
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// No inputs should result in zero-length outputs.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MissingInputs()
         {
             RemoveDuplicates t = new RemoveDuplicates();

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using Microsoft.Win32;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Unit tests for ToolsetReader class and its derived classes
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ToolsetReaderTests
     {
         // The registry key that is passed as the baseKey parameter to the ToolsetRegistryReader class
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Reset the testRegistryKey
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             TearDown();
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             ToolsetConfigurationReaderTestHelper.CleanUp();
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Test to make sure machine.config file has the section registered
         /// and we are picking it up from there.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_SectionNotRegisteredInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that the data is correctly populated using function GetToolsetDataFromConfiguration
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_Basic()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Relative paths can be used in a config file value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RelativePathInValue()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Invalid relative path in msbuildbinpath value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidRelativePath()
         {
             string invalidRelativePath = @"..\|invalid|";
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where application configuration file is invalid
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetDataFromConfiguration_InvalidXmlFile()
         {
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where application configuration file is invalid
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetDataFromConfiguration_InvalidConfigFile()
         {
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where application configuration file is empty
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetDataFromConfiguration_FileEmpty()
         {
@@ -301,7 +301,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests the case when ReadConfiguration throws exception
         /// Make sure that we don't eat it and always throw ConfigurationErrorsException
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetDataFromConfiguration_ConfigurationExceptionThrown()
         {
@@ -321,7 +321,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests the case when ReadConfiguration throws exception
         /// Make sure that we don't eat it and always throw ConfigurationErrorsException
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetDataFromConfiguration_ConfigurationErrorsExceptionThrown()
         {
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where default attribute is not specified in the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_DefaultAttributeNotSpecified()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -372,7 +372,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Default toolset has no toolsVersion element definition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_DefaultToolsetUndefined()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -401,7 +401,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests the case where msbuildToolsets is not specified in the config file
         /// Basically in the code we should be checking if config.GetSection("msbuildToolsets") returns a null
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_MSBuildToolsetsNodeNotPresent()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -426,7 +426,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that we handle empty MSBuildToolsets element correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_EmptyMSBuildToolsetsNode()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -452,7 +452,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where only default ToolsVersion is specified in the application configuration file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_OnlyDefaultSpecified()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -478,7 +478,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where only one ToolsVersion data is specified in the application configuration file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_OneToolsVersionNode()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when an invalid value of ToolsVersion is specified
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetDataFromConfiguration_ToolsVersionIsEmptyString()
         {
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If both MSBuildToolsPath and MSBuildBinPath are present, they must match
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetDataFromConfiguration_ToolsPathAndBinPathDiffer()
         {
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when a blank value of PropertyName is specified in the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void BlankPropertyNameInConfigFile()
         {
@@ -600,7 +600,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when a blank property name is specified in the registry
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void BlankPropertyNameInRegistry()
         {
@@ -626,7 +626,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests the case when a blank property name is specified in the registry in a 
         /// sub-toolset.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void BlankPropertyNameInRegistrySubToolset()
         {
@@ -656,7 +656,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when a blank property value is specified in the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BlankPropertyValueInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -685,7 +685,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when a blank property value is specified in the registry
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BlankPropertyValueInRegistry()
         {
             RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
@@ -709,7 +709,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when a blank property value is specified in the registry
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BlankPropertyValueInRegistrySubToolset()
         {
             RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
@@ -741,7 +741,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when an invalid value of PropertyName is specified in the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void InvalidPropertyNameInConfigFile()
         {
@@ -771,7 +771,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when an invalid value of PropertyName is specified in the registry
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void InvalidPropertyNameInRegistry()
         {
@@ -796,7 +796,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when an invalid value of PropertyName is specified in the registry
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void InvalidPropertyNameInRegistrySubToolset()
         {
@@ -824,7 +824,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that empty string is an invalid value for MSBuildBinPath
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_PropertyValueIsEmptyString1()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -853,7 +853,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that empty string is a valid property value for an arbitrary property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_PropertyValueIsEmptyString2()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -887,7 +887,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Note that this comes for free with the current implementation using the 
         /// framework api to access section in the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetDataFromConfiguration_XmlEscapedCharacters()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -921,7 +921,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where registry and config file contains different toolsVersion
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetData_NoConflict()
         {
             // Set up registry with two tools versions and one property each
@@ -970,7 +970,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that ToolsetInitialization are respected.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsetInitializationFlagsSetToNone()
         {
             // Set up registry with two tools versions and one property each
@@ -1022,7 +1022,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that ToolsetInitialization are respected.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsetInitializationFlagsSetToRegistry()
         {
             // Set up registry with two tools versions and one property each
@@ -1065,7 +1065,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(@"D:\somepath2", values["4.0"].ToolsPath);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void ThrowOnNonStringRegistryValueTypes()
         {
@@ -1089,7 +1089,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
         }
 
-        [TestMethod]
+        [Test]
         public void PropertiesInRegistryCannotReferToOtherPropertiesInRegistry()
         {
             RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
@@ -1117,7 +1117,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("c:\\x", values["2.0"].ToolsPath);
         }
 
-        [TestMethod]
+        [Test]
         public void SubToolsetPropertiesInRegistryCannotReferToOtherPropertiesInRegistry()
         {
             RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
@@ -1147,7 +1147,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("c:\\x", values["2.0"].SubToolsets["dogfood"].Properties["p3"].EvaluatedValue);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void SubToolsetsCannotDefineMSBuildToolsPath()
         {
@@ -1176,7 +1176,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that ToolsetInitialization are respected.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsetInitializationFlagsSetToConfigurationFile()
         {
             // Set up registry with two tools versions and one property each
@@ -1226,7 +1226,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
         /// the default value is desired.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertyInConfigurationFileReferencesRegistryLocation()
         {
             // Registry Read
@@ -1271,7 +1271,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Registry.CurrentUser.DeleteSubKeyTree(@"Software\Vendor");
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void ToolsPathInRegistryHasInvalidPathChars()
         {
@@ -1293,7 +1293,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void SamePropertyDefinedMultipleTimesForSingleToolsVersionInConfigurationFile()
         {
@@ -1325,7 +1325,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void SamePropertyDifferentCaseDefinedMultipleTimesForSingleToolsVersionInConfigurationFile()
         {
@@ -1357,7 +1357,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void SameToolsVersionDefinedMultipleTimesInConfigurationFile()
         {
@@ -1395,7 +1395,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void SameToolsVersionDifferentCaseDefinedMultipleTimesInConfigurationFile()
         {
@@ -1433,7 +1433,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void CannotSetReservedPropertyInConfigFile()
         {
@@ -1463,7 +1463,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void CannotSetReservedPropertyInRegistry()
         {
@@ -1485,7 +1485,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void CannotSetReservedPropertyInRegistrySubToolset()
         {
@@ -1512,7 +1512,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Properties defined in previously processed toolset definitions should
         /// not affect the evaluation of subsequent toolset definitions.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoInterferenceBetweenToolsetDefinitions()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -1567,56 +1567,56 @@ namespace Microsoft.Build.UnitTests.Definition
         /// the default value is desired.
         /// </summary>
 
-        [TestMethod]
+        [Test]
         public void ConfigFileInvalidRegistryExpression1()
         {
             // No location
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:)""/>");
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileInvalidRegistryExpression2()
         {
             // Bogus key expression
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:__bogus__)""/>");
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileInvalidRegistryExpression3()
         {
             // No registry location just @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:@)""/>");
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileInvalidRegistryExpression4()
         {
             // Double @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:HKEY_CURRENT_USER\Software\Vendor\Tools@@TaskLocation)""/>");
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileInvalidRegistryExpression5()
         {
             // Trailing @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:HKEY_CURRENT_USER\Software\Vendor\Tools@TaskLocation@)""/>");
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileInvalidRegistryExpression6()
         {
             // Leading @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:@HKEY_CURRENT_USER\Software\Vendor\Tools@TaskLocation)""/>");
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileInvalidRegistryExpression7()
         {
             // Bogus hive
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:BOGUS_HIVE\Software\Vendor\Tools@TaskLocation)""/>");
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileStringEmptyRegistryExpression1()
         {
             // Regular undefined property beginning with "Registry"
@@ -1624,7 +1624,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                           String.Empty);
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileStringEmptyRegistryExpression2()
         {
             // Nonexistent key
@@ -1632,7 +1632,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                           String.Empty);
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileNonPropertyRegistryExpression1()
         {
             // Property not terminated with paren, does not look like property
@@ -1640,7 +1640,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                           @"$(Registry:HKEY_CURRENT_USER\Software\Vendor\Tools@TaskLocation");
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileNonPropertyRegistryExpression2()
         {
             // Missing colon, looks like regular property (but with invalid property name chars, we will return blank as a result)
@@ -1648,7 +1648,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                           String.Empty);
         }
 
-        [TestMethod]
+        [Test]
         public void ConfigFileItemExpressionsDoNotExpandInConfigurationProperties()
         {
             // Expect that item expressions such as '@(SomeItem)' are not evaluated in any way, e.g., they are treated literally
@@ -1656,14 +1656,14 @@ namespace Microsoft.Build.UnitTests.Definition
                                           @"@(SomeItem)");
         }
 
-        [TestMethod]
+        [Test]
         public void RegistryInvalidRegistryExpression1()
         {
             // Bogus key expression
             RegistryInvalidRegistryExpressionHelper("$(Registry:__bogus__)");
         }
 
-        [TestMethod]
+        [Test]
         public void RegistryValidRegistryExpression1()
         {
             // Regular undefined property beginning with "Registry"
@@ -1770,7 +1770,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where application configuration file overrides a value already specified in the registry
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetData_ConflictingPropertyValuesSameCase()
         {
             // Registry Read
@@ -1811,7 +1811,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// where that registry value is bogus and would otherwise throw.  However, since the config file also 
         /// contains an entry for that toolset, the registry toolset never gets read, and thus never throws.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetData_ConflictingPropertyValuesRegistryThrows()
         {
             // Registry Read
@@ -1852,7 +1852,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// well as in the config file for the same tools version.
         /// We should not merge them; we should take the config file ones only
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetData_NoMerging()
         {
             // Registry Read
@@ -1897,7 +1897,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// The absence of the ToolsVersion attribute on the main Project element in a project file means
         /// that the engine's default tools version should be used.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionAttributeNotSpecifiedOnProjectElementAndDefaultVersionSpecifiedInRegistry()
         {
             string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -1939,7 +1939,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when no values are specified in the registry
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetData_RegistryNotPresent()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -1976,7 +1976,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Note that config file not present is same as config file 
         /// with no MSBuildToolsets Section 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetData_ConfigFileNotPresent()
         {
             // Registry Read
@@ -2003,7 +2003,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where nothing is specified in registry and config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsetData_RegistryAndConfigNotPresent()
         {
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -2033,7 +2033,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when reading config file throws an exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetData_ReadConfigThrowsException()
         {
@@ -2060,7 +2060,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where reading from registry throws exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetToolsetData_ReadRegistryOpenSubKeyThrowsException()
         {
@@ -2100,7 +2100,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests that the default ToolsVersion is correctly resolved when specified
         /// in registry and config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetDefaultToolsetVersion_SpecifiedInRegistryAndConfigFile()
         {
             // Set up registry with two tools versions and one property each
@@ -2143,7 +2143,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified in registry only
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetDefaultToolsetVersion_SpecifiedOnlyInRegistry()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2184,7 +2184,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that the override task path is correctly resolved when specified in registry only
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetOverrideTasks_SpecifiedOnlyInRegistry()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2231,7 +2231,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that the override default toolsversion is correctly resolved when specified in registry only
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetDefaultOverrideToolsVersion_SpecifiedOnlyInRegistry()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2275,7 +2275,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests that the default ToolsVersion is correctly resolved
         /// when specified in config file only
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetDefaultToolsetVersion_SpecifiedOnlyInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2314,7 +2314,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// when specified in config file only.
         /// Also, that MSBuildOverrideTasksPath can be overridden.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetOverrideTaskPath_SpecifiedOnlyInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2355,7 +2355,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests that the override default ToolsVersion is correctly resolved
         /// when specified in config file only.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetDefaultOverrideToolsVersion_SpecifiedOnlyInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2393,7 +2393,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified nowhere
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetDefaultToolsetVersion_SpecifiedNowhere()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2437,7 +2437,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that properties are properly expanded when reading them from the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertiesInToolsetsFromConfigFileAreExpanded()
         {
             // $(COMPUTERNAME) is just a convenient env var. $(NUMBER_OF_PROCESSORS) isn't defined on Longhorn
@@ -2477,7 +2477,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that properties in MSBuildToolsPath are properly expanded when reading them from the config file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertiesInToolsetsFromConfigFileAreExpandedInToolsPath()
         {
             // $(COMPUTERNAME) is just a convenient env var. $(NUMBER_OF_PROCESSORS) isn't defined on Longhorn
@@ -2520,7 +2520,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Global properties are available, but they cannot be overwritten by other toolset properties, just as they cannot
         /// be overwritten by project file properties.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GlobalPropertiesInToolsetsAreExpandedButAreNotOverwritten()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"

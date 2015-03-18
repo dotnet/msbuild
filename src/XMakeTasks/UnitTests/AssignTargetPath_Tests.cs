@@ -4,17 +4,17 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AssignTargetPath_Tests
     {
-        [TestMethod]
+        [Test]
         public void Regress314791()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(@"abc.efg", t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
 
-        [TestMethod]
+        [Test]
         public void AtConeRoot()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(@"file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
 
-        [TestMethod]
+        [Test]
         public void OutOfCone()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
 
-        [TestMethod]
+        [Test]
         public void InConeButAbsolute()
         {
             AssignTargetPath t = new AssignTargetPath();

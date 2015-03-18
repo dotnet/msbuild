@@ -13,7 +13,7 @@ using System.Globalization;
 using System.Resources;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
@@ -29,7 +29,7 @@ using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 {
-    [TestClass]
+    [TestFixture]
     public class ResolveSDKReferenceTestFixture
     {
         private Microsoft.Build.UnitTests.MockEngine.GetStringDelegate _resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Make sure that SDK reference which should be good are parsed correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseItemSpecGood()
         {
             TestGoodSDKReferenceIncludes(new TaskItem("Cat, Version=8.0"), "Cat", "8.0");
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Make sure ones which are incorrect and log the correct error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseItemSpecBadNames()
         {
             //These should all be bad the format must be   <SDKName>, Version=<SDKVersion>.
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Make sure ones which are incorrect and log the correct error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseDependsOnString()
         {
             Assert.IsTrue(ResolveSDKReference.ParseDependsOnSDK(null).Count == 0);
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Make sure ones which are incorrect and log the correct error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetUnResolvedDependentSDKs()
         {
             string[] result = null;
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(result[1].Equals("\"baz, Version=2.0\"", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void VerifyBuildWarningForESDKWithoutMaxPlatformVersionOnBlueOrAbove()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "TestMaxPlatformVersionWithTargetFrameworkVersion");
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Verify "RuntimeReferenceOnly" equals to "true" is set for specified references
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAddMetadataToReferences()
         {
             MockEngine engine = new MockEngine();
@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Make sure ones which are incorrect and log the correct warning.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyUnResolvedSDKMessage()
         {
             MockEngine engine = new MockEngine();
@@ -433,7 +433,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Verify if the DependsOn metadata is set on the reference item and that dependency is not resolved then cause the warning to happen.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyDependencyWarningFromMetadata()
         {
             // Create the engine.
@@ -464,7 +464,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Verify we get the correct dependson warning
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyDependsOnWarningFromManifest()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyDependsOnWarningFromManifest");
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Make sure the equals works on the SDKReference.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSDkReferenceEquals()
         {
             ITaskItem dummyItem = new TaskItem();
@@ -579,7 +579,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit true  Manifest:SupportPrefer32Bit:true Target:msil Expect: No error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit1()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit1");
@@ -634,7 +634,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit true  Manifest:SupportPrefer32Bit:false Target:AnyCPU Expect: error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit2()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit2");
@@ -692,7 +692,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit true  Manifest:SupportPrefer32Bit:false Target:x86 Expect: No error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit3()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit3");
@@ -747,7 +747,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit false  Manifest:SupportPrefer32Bit:false Target:msil Expect: No error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit4()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit4");
@@ -802,7 +802,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit false  Manifest:SupportPrefer32Bit:false Target:x86 Expect: No error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit5()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit5");
@@ -857,7 +857,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit true  Manifest:SupportPrefer32Bit:FOO Target:msil Expect: error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit6()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit6");
@@ -914,7 +914,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit true  Manifest:SupportPrefer32Bit:empty Target:msil Expect: No error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit7()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit7");
@@ -969,7 +969,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit true  Manifest:SupportPrefer32Bit:missing Target:msil Expect: No Error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit8()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit8");
@@ -1023,7 +1023,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Project: Prefer32bit false  Manifest:SupportPrefer32Bit:true Target:msil Expect: No Error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Prefer32bit9()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit9");
@@ -1079,7 +1079,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// Resolve from an SDK which exists and is not a framework SDK. This means there is no frameworkIdentity or APPXLocation.
         /// Also since no configuration or architecture were passed in we expect the defaults.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveFromNonFrameworkNoManifest()
         {
             // Create the engine.
@@ -1116,7 +1116,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// Resolve from an SDK which exists and is not a framework SDK. This means there is no frameworkIdentity or APPXLocation.
         /// Also since no configuration or architecture were passed in we expect the defaults.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveFromNonFrameworkPassInConfigAndArch()
         {
             // Create the engine.
@@ -1154,7 +1154,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// Resolve from an SDK which exists and is not a framework SDK. This means there is no frameworkIdentity or APPXLocation.
         /// Also since no configuration or architecture were passed in we expect the defaults.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveFromNonFrameworkPassInConfigAndArchOverrideByMetadata()
         {
             // Create the engine.
@@ -1195,7 +1195,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// When duplicate references are passed in we only want the first one.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DuplicateSDKReferences()
         {
             // Create the engine.
@@ -1231,7 +1231,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// Verify that if refernces have SDKName metadata on them that matches a resolved SDK then that SDK should
         /// not have its reference assemblies expanded.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotExpandSDKsWhichAreAlsoTargetedByReferences()
         {
             // Create the engine.
@@ -1303,7 +1303,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// When InstalledSDK is empty we should log a message and succeed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InstalledSDKEmpty()
         {
             // Create the engine.
@@ -1327,7 +1327,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Lets have a mix of install sdk items, some are good, some are bad (missing item spec) others are bad (missing SDKName)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MixOfInstalledSDKItemsGoodDuplicateAndBad()
         {
             // Create the engine.
@@ -1377,7 +1377,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Make sure when no sdks are resolved there are no problems and that the names of the sdks which were not resolved are logged.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NOSDKResolved()
         {
             // Create the engine.
@@ -1405,7 +1405,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// When there is a mix of resolved and unresolved SDKs make sure that the resolved ones are correctly found
         /// and the unresolved ones are logged.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MixOfResolvedAndUnResolved()
         {
             // Create the engine.
@@ -1436,7 +1436,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// When a null is passed into the SDKReferences property make sure we get the correct exception out.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullSDKReferences()
         {
@@ -1451,7 +1451,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// When a null is passed into the set of InstalledSDKS property make sure we get the correct exception out.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullInstalledSDKs()
         {
@@ -1467,7 +1467,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// If no SDKReferences are passed in then we should get nothing out.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptySDKReferencesList()
         {
             // Create the engine.
@@ -1491,7 +1491,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// When we find the SDKManifest it may be poorly formatted. If that happens we need to log the error 
         /// and not resolve the SDK. We also add a good one as well to make sure resolution continues.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SDKFoundButBadlyFormattedSDKManifestWarnings()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SDKFoundButBadlyFormattedSDKManifestWarnings");
@@ -1549,7 +1549,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// When we find the SDKManifest it may be poorly formatted. If that happens we need to log the error 
         /// and not resolve the SDK. We also add a good one as well to make sure resolution continues.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SDKFoundButBadlyFormattedSDKManifestErrors()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SDKFoundButBadlyFormattedSDKManifestErrors");
@@ -1600,7 +1600,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestMaxPlatformVersionWithTargetFrameworkVersion()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "TestMaxPlatformVersionWithTargetFrameworkVersion");
@@ -1706,7 +1706,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where the manifest attributes are empty.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptySDKManifestAttributes()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "EmptySDKManifestAttributes");
@@ -1791,7 +1791,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where we override ALL of the manifest properties with ones on the metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OverrideManifestAttributes()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "OverrideManifestAttributes");
@@ -1889,7 +1889,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where we Have a good manfest that had framework and appx locations that exactly match the targeted sdk configuration and architecture.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GoodManifestMatchingConfigAndArch()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GoodManifestMatchingConfigAndArch");
@@ -1962,7 +1962,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where we Have a good manfest that had framework and appx locations that only match the targeted sdk configuration.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GoodManifestMatchingConfigOnly()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GoodManifestMatchingConfigOnly");
@@ -2031,7 +2031,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// TVerify that when a platform identity is found that we do not copy the references or redist
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoCopyOnPlatformIdentityFound()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "NoCopyOnPlatformIdentityFound");
@@ -2098,7 +2098,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// Test the case where we Have a good manfest that had framework and appx locations that does not match any of the config arch combinations but does match
         /// and entry name simply FrameworkIdentity or APPX
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GoodManifestMatchingBaseNameOnly()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GoodManifestMatchingConfigOnly");
@@ -2172,7 +2172,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where we only have the arm APPX and it can be found
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ManifestOnlyHasArmLocation()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ManifestOnlyHasArmLocation");
@@ -2240,7 +2240,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where we have a number of locations and arm APPX and can be found
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ManifestArmLocationWithOthers()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ManifestArmLocationWithOthers");
@@ -2311,7 +2311,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// Test the case where there are framework identity attributes but none of the match and there is no base FrameworkIdentity, the 
         /// same is true for APPX.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MatchNoNamesButNamesExistWarning()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "MatchNoNamesButNamesExistWarning");
@@ -2383,7 +2383,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// Test the case where there are framework identity attributes but none of the match and there is no base FrameworkIdentity, the 
         /// same is true for APPX.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MatchNoNamesButNamesExistError()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "MatchNoNamesButNamesExistError");
@@ -2452,7 +2452,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where there is a single supported architecture and the project targets that architecture
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SingleSupportedArchitectureMatchesProject()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SingleSupportedArchitectureMatchesProject");
@@ -2525,7 +2525,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where the productfamily is set in the manifest and not as metadata on the reference item.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProductFamilySetInManifest()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ProductFamilySetInManifest");
@@ -2590,7 +2590,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where the productfamily is set in the manifest and as metadata on the reference item. Expect the metadata to win.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProductFamilySetInManifestAndMetadata()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ProductFamilySetInManifestAndMetadata");
@@ -2657,7 +2657,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where the SupportsMultipleVersions is NOT in the manifest or on metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SupportsMultipleVersionsNotInManifest()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SupportsMultipleVersionsNotInManifest");
@@ -2721,7 +2721,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where metadata on the item is bad, we should then read from the manifest.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SupportsMultipleVersionsBadMetadata()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SupportsMultipleVersionsBadMetadata");
@@ -2789,7 +2789,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where there are conflicts between sdks of the same product family
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictsBetweenSameProductFamilySameName()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ConflictsBetweenSameProductFamilySameName");
@@ -2887,7 +2887,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where there are conflicts between sdks of the same product family
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictsBetweenSameProductFamilyDiffName()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ConflictsBetweenSameProductFamilyDiffName");
@@ -2985,7 +2985,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where there are conflicts between sdks of the same product family
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictsBetweenMIXPFAndName()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ConflictsBetweenSameProductFamilyDiffName");
@@ -3098,7 +3098,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where there are conflicts between sdks of the same SDK Name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictsBetweenSameSDKName()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ConflictsBetweenSameSDKName");
@@ -3196,7 +3196,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where metadata on the item is bad, we should then read from the manifest.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SupportsMultipleVersionsReadManifest()
         {
             SupportsMultipleVersionsVerifyManifestReading("Error");
@@ -3278,7 +3278,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where the supportedArchitectures are empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyArchitectures()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "OverrideManifestWithMetadata");
@@ -3355,7 +3355,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where the metadata on the reference overrides what is in the manifest but it does not match what is being targeted
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OverrideManifestWithMetadataButMetadataDoesNotMatch()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "OverrideManifestWithMetadataButMetadataDoesNotMatch");
@@ -3421,7 +3421,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where the metadata on the reference overrides what is in the manifest
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OverrideManifestWithMetadata()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "OverrideManifestWithMetadata");
@@ -3499,7 +3499,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where there is a single supported architecture and the project does not target that architecture
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SingleSupportedArchitectureDoesNotMatchProject()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SingleSupportedArchitectureDoesNotMatchProject");
@@ -3563,7 +3563,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where there is are multiple supported architecture and the project targets one of those architectures
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MultipleSupportedArchitectureMatchesProject()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "MultipleSupportedArchitectureMatchesProject");
@@ -3635,7 +3635,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         /// <summary>
         /// Test the case where there is are multiple supported architecture and the project does not match one of those architectures
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MultipleSupportedArchitectureDoesNotMatchProject()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "MultipleSupportedArchitectureMatchesProject");
@@ -3699,10 +3699,10 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
     /// <summary>
     /// Test the output groups which will be used to generate the recipe fileGatherSDKOutputGroups
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class GatherSDKOutputGroupsTestFixture
     {
-        [TestMethod]
+        [Test]
         public void GatherSDKOutputGroupsTargetArchitectureExists()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GatherSDKOutputGroupsWithFramework");
@@ -3845,7 +3845,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GatherSDKOutputGroupsTargetArchitectureExists2()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GatherSDKOutputGroupsWithFramework");
@@ -3989,7 +3989,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
 
-        [TestMethod]
+        [Test]
         public void GatherSDKOutputGroupsTargetArchitectureDoesNotExists()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GatherSDKOutputGroupsTargetArchitectureDoesNotExists");
@@ -4098,7 +4098,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void CheckDefaultingOfTargetConfigAndArchitecture()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "CheckDefaultingOfTargetConfigAndArchitecture");
@@ -4195,7 +4195,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void CheckAttributesFromManifestArePassedToResolvedAssemblies()
         {
             /* \Microsoft SDKs\Windows\v8.0\ExtensionSDKs */

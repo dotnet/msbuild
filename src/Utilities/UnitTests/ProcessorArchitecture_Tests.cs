@@ -3,7 +3,7 @@
 
 using System;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -15,7 +15,7 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ProcessorArchitectureTests
     {
         internal static string ProcessorArchitectureIntToString(NativeMethodsShared.SYSTEM_INFO systemInfo)
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateProcessorArchitectureStrings()
         {
             // Make sure changes to BuildUtilities.ProcessorArchitecture.cs source don't accidentally get mangle ProcessorArchitecture
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("ARM", BuildUtilities.ProcessorArchitecture.ARM, "ARM ProcessorArchitecture isn't correct");
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateCurrentProcessorArchitectureCall()
         {
             NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(ProcessorArchitectureIntToString(systemInfo), BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture, "BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture returned an invalid match");
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateConvertDotNetFrameworkArchitectureToProcessorArchitecture()
         {
             Console.WriteLine("BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture is: {0}", BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture);

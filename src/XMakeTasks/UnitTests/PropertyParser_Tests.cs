@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -13,12 +13,12 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class PropertyParser_Tests
     {
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetTable1()
         {
             Hashtable propertiesTable;
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertiesTable3()
         {
             Hashtable propertiesTable;
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertiesTable4()
         {
             Hashtable propertiesTable;
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertiesTable5()
         {
             Hashtable propertiesTable;
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertiesTable6()
         {
             Hashtable propertiesTable;
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertiesTable7()
         {
             Hashtable propertiesTable;
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertiesTable8()
         {
             Hashtable propertiesTable;
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertiesTable9()
         {
             Hashtable propertiesTable;
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertiesTable10()
         {
             Hashtable propertiesTable;
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("CleanBuild", (string)propertiesTable["Depends On"]);
         }
 
-        [TestMethod]
+        [Test]
         public void GetPropertiesTableWithEscaping1()
         {
             Hashtable propertiesTable;
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Any CPU", (string)propertiesTable["Platform"]);
         }
 
-        [TestMethod]
+        [Test]
         public void GetPropertiesTableWithEscaping2()
         {
             Hashtable propertiesTable;
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Debug", (string)propertiesTable["Configuration"]);
         }
 
-        [TestMethod]
+        [Test]
         public void GetPropertiesTableWithEscaping3()
         {
             Hashtable propertiesTable;

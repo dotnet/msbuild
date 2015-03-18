@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -1219,7 +1219,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception ex)
             {
-                Assert.IsInstanceOfType(ex, expectedExceptionType);
+                Assert.That(ex, Is.InstanceOf(expectedExceptionType));
                 Console.WriteLine("Caught '{0}'", ex.Message);
                 return;
             }

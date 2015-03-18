@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -21,13 +21,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// <summary>
     /// Tests for the multi-dictionary class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class MultiDictionary_Tests
     {
         /// <summary>
         /// Empty dictionary
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Empty()
         {
             MultiDictionary<string, string> dictionary = new MultiDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Remove stuff that is there
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Remove()
         {
             MultiDictionary<string, string> dictionary = new MultiDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Remove stuff that isn't there
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveNonExistent()
         {
             MultiDictionary<string, string> dictionary = new MultiDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Enumerate over all values for a key
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Enumerate()
         {
             MultiDictionary<string, string> dictionary = new MultiDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Mixture of adds and removes
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MixedAddRemove()
         {
             MultiDictionary<string, string> dictionary = new MultiDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Clearing out
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Clear()
         {
             MultiDictionary<string, string> dictionary = new MultiDictionary<string, string>(StringComparer.OrdinalIgnoreCase);

@@ -21,7 +21,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// The test class for the TaskExecutionHost
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TaskExecutionHost_Tests : ITestTaskHost, IBuildEngine2
     {
         /// <summary>
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Prepares the environment for the test.
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             InitializeHost(false);
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Cleans up after the test
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             if (_host != null)
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting parameters with only the required parameters works.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValidateNoParameters()
         {
             Dictionary<string, Tuple<string, ElementLocation>> parameters = new Dictionary<string, Tuple<string, ElementLocation>>(StringComparer.OrdinalIgnoreCase);
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting no parameters when a required parameter exists fails and throws an exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ValidateNoParameters_MissingRequired()
         {
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a non-existant parameter fails, but does not throw an exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValidateNonExistantParameter()
         {
             Dictionary<string, Tuple<string, ElementLocation>> parameters = new Dictionary<string, Tuple<string, ElementLocation>>(StringComparer.OrdinalIgnoreCase);
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a bool param works and sets the right value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolParam()
         {
             ValidateTaskParameter("BoolParam", "true", true);
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a bool param works and sets the right value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolParamFalse()
         {
             ValidateTaskParameter("BoolParam", "false", false);
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a bool param with an empty value does not cause the parameter to get set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolParamEmptyAttribute()
         {
             ValidateTaskParameterNotSet("BoolParam", "");
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a bool param with a property which evaluates to nothing does not cause the parameter to get set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolParamEmptyProperty()
         {
             ValidateTaskParameterNotSet("BoolParam", "$(NonExistantProperty)");
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a bool param with an item which evaluates to nothing does not cause the parameter to get set.
         /// </summary>       
-        [TestMethod]
+        [Test]
         public void TestSetBoolParamEmptyItem()
         {
             ValidateTaskParameterNotSet("BoolParam", "@(NonExistantItem)");
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a bool array with a single true sets the array to one 'true' value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolArrayParamOneItem()
         {
             ValidateTaskParameterArray("BoolArrayParam", "true", new bool[] { true });
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a bool array with a list of two values sets them appropriately.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolArrayParamTwoItems()
         {
             ValidateTaskParameterArray("BoolArrayParam", "false;true", new bool[] { false, true });
@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolArrayParamEmptyAttribute()
         {
             ValidateTaskParameterNotSet("BoolArrayParam", "");
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolArrayParamEmptyProperty()
         {
             ValidateTaskParameterNotSet("BoolArrayParam", "$(NonExistantProperty)");
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetBoolArrayParamEmptyItem()
         {
             ValidateTaskParameterNotSet("BoolArrayParam", "@(NonExistantItem)");
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an int param with a value of 0 causes it to get the correct value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntParamZero()
         {
             ValidateTaskParameter("IntParam", "0", 0);
@@ -284,7 +284,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an int param with a value of 1 causes it to get the correct value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntParamOne()
         {
             ValidateTaskParameter("IntParam", "1", 1);
@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntParamEmptyAttribute()
         {
             ValidateTaskParameterNotSet("IntParam", "");
@@ -302,7 +302,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntParamEmptyProperty()
         {
             ValidateTaskParameterNotSet("IntParam", "$(NonExistantProperty)");
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntParamEmptyItem()
         {
             ValidateTaskParameterNotSet("IntParam", "@(NonExistantItem)");
@@ -324,7 +324,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an int array with a single value causes it to get a single value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntArrayParamOneItem()
         {
             ValidateTaskParameterArray("IntArrayParam", "0", new int[] { 0 });
@@ -333,7 +333,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an int array with a list of values causes it to get the correct values.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntArrayParamTwoItems()
         {
             SetTaskParameter("IntArrayParam", "1;0");
@@ -347,7 +347,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntArrayParamEmptyAttribute()
         {
             ValidateTaskParameterNotSet("IntArrayParam", "");
@@ -356,7 +356,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntArrayParamEmptyProperty()
         {
             ValidateTaskParameterNotSet("IntArrayParam", "$(NonExistantProperty)");
@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetIntArrayParamEmptyItem()
         {
             ValidateTaskParameterNotSet("IntArrayParam", "@(NonExistantItem)");
@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that setting a string param sets the correct value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringParam()
         {
             ValidateTaskParameter("StringParam", "0", "0");
@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that setting a string param sets the correct value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringParamOne()
         {
             ValidateTaskParameter("StringParam", "1", "1");
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringParamEmptyAttribute()
         {
             ValidateTaskParameterNotSet("StringParam", "");
@@ -405,7 +405,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringParamEmptyProperty()
         {
             ValidateTaskParameterNotSet("StringParam", "$(NonExistantProperty)");
@@ -414,7 +414,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringParamEmptyItem()
         {
             ValidateTaskParameterNotSet("StringParam", "@(NonExistantItem)");
@@ -427,7 +427,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a string array with a single value sets the correct value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringArrayParam()
         {
             ValidateTaskParameterArray("StringArrayParam", "0", new string[] { "0" });
@@ -436,7 +436,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting a string array with a list of two values sets the correct values.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringArrayParamOne()
         {
             ValidateTaskParameterArray("StringArrayParam", "1;0", new string[] { "1", "0" });
@@ -445,7 +445,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringArrayParamEmptyAttribute()
         {
             ValidateTaskParameterNotSet("StringArrayParam", "");
@@ -454,7 +454,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringArrayParamEmptyProperty()
         {
             ValidateTaskParameterNotSet("StringArrayParam", "$(NonExistantProperty)");
@@ -463,7 +463,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetStringArrayParamEmptyItem()
         {
             ValidateTaskParameterNotSet("StringArrayParam", "@(NonExistantItem)");
@@ -476,7 +476,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an item with an item list evaluating to one item sets the value appropriately, including metadata.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemParamSingle()
         {
             ValidateTaskParameterItem("ItemParam", "@(ItemListContainingOneItem)", _oneItem[0]);
@@ -485,7 +485,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an item with an item list evaluating to two items sets the value appropriately, including metadata.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void TestSetItemParamDouble()
         {
@@ -495,7 +495,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an item with a string results in an item with the evaluated include set to the string.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemParamString()
         {
             ValidateTaskParameterItem("ItemParam", "MyItemName");
@@ -504,7 +504,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemParamEmptyAttribute()
         {
             ValidateTaskParameterNotSet("ItemParam", "");
@@ -513,7 +513,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemParamEmptyProperty()
         {
             ValidateTaskParameterNotSet("ItemParam", "$(NonExistantProperty)");
@@ -522,7 +522,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemParamEmptyItem()
         {
             ValidateTaskParameterNotSet("ItemParam", "@(NonExistantItem)");
@@ -535,7 +535,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an item array using an item list containing one item sets a single item.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemArrayParamSingle()
         {
             ValidateTaskParameterItems("ItemArrayParam", "@(ItemListContainingOneItem)", _oneItem);
@@ -544,7 +544,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an item array using an item list containing two items sets both items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemArrayParamDouble()
         {
             ValidateTaskParameterItems("ItemArrayParam", "@(ItemListContainingTwoItems)", _twoItems);
@@ -553,7 +553,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an item array with 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemArrayParamString()
         {
             ValidateTaskParameterItems("ItemArrayParam", "MyItemName");
@@ -562,7 +562,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting an item array with a list with multiple values creates multiple items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemArrayParamTwoStrings()
         {
             ValidateTaskParameterItems("ItemArrayParam", "MyItemName;MyOtherItemName", new string[] { "MyItemName", "MyOtherItemName" });
@@ -571,7 +571,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemArrayParamEmptyAttribute()
         {
             ValidateTaskParameterNotSet("ItemArrayParam", "");
@@ -580,7 +580,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with a parameter which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemArrayParamEmptyProperty()
         {
             ValidateTaskParameterNotSet("ItemArrayParam", "$(NonExistantProperty)");
@@ -589,7 +589,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetItemArrayParamEmptyItem()
         {
             ValidateTaskParameterNotSet("ItemArrayParam", "@(NonExistantItem)");
@@ -602,7 +602,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that successful execution returns true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestExecuteTrue()
         {
             Dictionary<string, Tuple<string, ElementLocation>> parameters = new Dictionary<string, Tuple<string, ElementLocation>>(StringComparer.OrdinalIgnoreCase);
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that unsuccessful execution returns false.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestExecuteFalse()
         {
             Dictionary<string, Tuple<string, ElementLocation>> parameters = new Dictionary<string, Tuple<string, ElementLocation>>(StringComparer.OrdinalIgnoreCase);
@@ -634,7 +634,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that when Execute throws, the exception bubbles up.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(IndexOutOfRangeException))]
         public void TestExecuteThrow()
         {
@@ -656,7 +656,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that boolean output to an item produces the correct evaluated include.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputBoolToItem()
         {
             SetTaskParameter("BoolParam", "true");
@@ -666,7 +666,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that boolean output to a property produces the correct evaluated value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputBoolToProperty()
         {
             SetTaskParameter("BoolParam", "true");
@@ -676,7 +676,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that boolean array output to an item  array produces the correct evaluated includes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputBoolArrayToItems()
         {
             SetTaskParameter("BoolArrayParam", "false;true");
@@ -686,7 +686,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that boolean array output to an item produces the correct semi-colon-delimited evaluated value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputBoolArrayToProperty()
         {
             SetTaskParameter("BoolArrayParam", "false;true");
@@ -700,7 +700,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an int output to an item produces the correct evaluated include
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputIntToItem()
         {
             SetTaskParameter("IntParam", "42");
@@ -710,7 +710,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an int output to an property produces the correct evaluated value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputIntToProperty()
         {
             SetTaskParameter("IntParam", "42");
@@ -720,7 +720,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an int array output to an item produces the correct evaluated includes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputIntArrayToItems()
         {
             SetTaskParameter("IntArrayParam", "42;99");
@@ -730,7 +730,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an int array output to a property produces the correct semi-colon-delimiated evaluated value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputIntArrayToProperty()
         {
             SetTaskParameter("IntArrayParam", "42;99");
@@ -744,7 +744,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that a string output to an item produces the correct evaluated include.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputStringToItem()
         {
             SetTaskParameter("StringParam", "FOO");
@@ -754,7 +754,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that a string output to a property produces the correct evaluated value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputStringToProperty()
         {
             SetTaskParameter("StringParam", "FOO");
@@ -764,7 +764,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an empty string output overwrites the property value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputEmptyStringToProperty()
         {
             _bucket.Lookup.SetProperty(ProjectPropertyInstance.Create("output", "initialvalue"));
@@ -774,7 +774,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an empty string array output overwrites the property value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputEmptyStringArrayToProperty()
         {
             _bucket.Lookup.SetProperty(ProjectPropertyInstance.Create("output", "initialvalue"));
@@ -784,7 +784,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A string output returning null should not cause any property set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputNullStringToProperty()
         {
             _bucket.Lookup.SetProperty(ProjectPropertyInstance.Create("output", "initialvalue"));
@@ -794,7 +794,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A string output returning null should not cause any property set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputNullITaskItemToProperty()
         {
             _bucket.Lookup.SetProperty(ProjectPropertyInstance.Create("output", "initialvalue"));
@@ -804,7 +804,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A string output returning null should not cause any property set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputNullStringArrayToProperty()
         {
             _bucket.Lookup.SetProperty(ProjectPropertyInstance.Create("output", "initialvalue"));
@@ -814,7 +814,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A string output returning null should not cause any property set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputNullITaskItemArrayToProperty()
         {
             _bucket.Lookup.SetProperty(ProjectPropertyInstance.Create("output", "initialvalue"));
@@ -824,7 +824,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that a string array output to an item produces the correct evaluated includes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputStringArrayToItems()
         {
             SetTaskParameter("StringArrayParam", "FOO;bar");
@@ -834,7 +834,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that a string array output to a property produces the correct semi-colon-delimited evaluated value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputStringArrayToProperty()
         {
             SetTaskParameter("StringArrayParam", "FOO;bar");
@@ -848,7 +848,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an item output to an item replicates the item, with metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputItemToItem()
         {
             SetTaskParameter("ItemParam", "@(ItemListContainingOneItem)");
@@ -858,7 +858,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate than an item output to a property produces the correct evaluated value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputItemToProperty()
         {
             SetTaskParameter("ItemParam", "@(ItemListContainingOneItem)");
@@ -868,7 +868,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an item array output to an item replicates the items, with metadata.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputItemArrayToItems()
         {
             SetTaskParameter("ItemArrayParam", "@(ItemListContainingTwoItems)");
@@ -878,7 +878,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Validate that an item array output to a property produces the correct semi-colon-demlimited evaluated value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutputItemArrayToProperty()
         {
             SetTaskParameter("ItemArrayParam", "@(ItemListContainingTwoItems)");
@@ -893,7 +893,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Attempts to gather outputs into an item list from an string task parameter that
         /// returns an empty string. This should be a no-op.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEmptyStringInStringArrayParameterIntoItemList()
         {
             SetTaskParameter("StringArrayParam", "");
@@ -904,7 +904,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Attempts to gather outputs into an item list from an string task parameter that
         /// returns an empty string. This should be a no-op.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEmptyStringParameterIntoItemList()
         {
             SetTaskParameter("StringParam", "");
@@ -914,7 +914,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Attempts to gather outputs from a null task parameter of type "ITaskItem[]".  This should succeed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestNullITaskItemArrayParameter()
         {
             ValidateOutputItems("ItemArrayNullOutput", new ITaskItem[] { });
@@ -923,7 +923,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Attempts to gather outputs from a task parameter of type "ArrayList".  This should fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void TestArrayListParameter()
         {
@@ -933,7 +933,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Attempts to gather outputs from a non-existant output.  This should fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void TestNonexistantOutput()
         {
@@ -943,7 +943,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// object[] should not be a supported output type.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void TestOutputObjectArrayToProperty()
         {
@@ -957,7 +957,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that cleanup for task clears out the task instance.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestCleanupForTask()
         {
             _host.CleanupForBatch();
@@ -969,7 +969,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that a using task which specifies an invalid assembly produces an exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void TestTaskResolutionFailureWithUsingTask()
         {
@@ -999,7 +999,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that specifying a task with no using task logs an error, but does not throw.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTaskResolutionFailureWithNoUsingTask()
         {
             TearDown();

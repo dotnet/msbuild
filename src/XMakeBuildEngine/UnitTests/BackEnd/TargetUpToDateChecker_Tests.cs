@@ -11,7 +11,7 @@ using System.Xml;
 using System.Text;
 using System.Globalization;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
@@ -23,18 +23,18 @@ using System.Threading;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
+    [TestFixture]
     public class TargetUpToDateChecker_Tests
     {
         private MockHost _mockHost;
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _mockHost = new MockHost();
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             // Remove any temp files that have been created by each test
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             GC.Collect();
         }
 
-        [TestMethod]
+        [Test]
         public void EmptyItemSpecInTargetInputs()
         {
             MockLogger ml = new MockLogger();
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify missing output metadata does not cause errors.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyItemSpecInTargetOutputs()
         {
             MockLogger ml = new MockLogger();
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If Items = [a.cs;b.cs], and only b.cs is out of date w/r/t its
         /// correlated output b.dll, then we should only build "b" incrementally.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetaInputAndInputItemThatCorrelatesWithOutputItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If Items = [a.cs;b.cs;c.cs], and only b.cs is out of date w/r/t its
         /// correlated outputs (dll or xml), then we should only build "b" incrementally.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InputItemThatCorrelatesWithMultipleTransformOutputItems()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If Items = [a.cs;b.cs;c.cs], and only b.cs is out of date w/r/t its
         /// correlated outputs (dll or xml), then we should only build "b" incrementally.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems()
         {
             Console.WriteLine("MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems");
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsTrue(changedTargetInputs.HasEmptyMarker("MoreItems"));
         }
 
-        [TestMethod]
+        [Test]
         public void InputItemsTransformedToDifferentNumberOfOutputsFewer()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsFewer");
@@ -292,7 +292,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("SomeMetaThing");
         }
 
-        [TestMethod]
+        [Test]
         public void InputItemsTransformedToDifferentNumberOfOutputsFewer1()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsFewer1");
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("SomeMetaThing");
         }
 
-        [TestMethod]
+        [Test]
         public void InputItemsTransformedToDifferentNumberOfOutputsMore()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsMore");
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("a;b;c;d;e;f;g");
         }
 
-        [TestMethod]
+        [Test]
         public void InputItemsTransformedToDifferentNumberOfOutputsMore1()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsMore1");
@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("a;b;c;d;e;f;g");
         }
 
-        [TestMethod]
+        [Test]
         public void InputItemsTransformedToDifferentNumberOfOutputsTwoWays()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsTwoWays");
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensure that items not involved in the incremental build are explicitly empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems2()
         {
             Console.WriteLine("MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems2");
@@ -586,7 +586,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: up to date
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate1()
         {
             IsAnyOutOfDateTestHelper
@@ -602,7 +602,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: first input out of date wrt second output
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate2()
         {
             IsAnyOutOfDateTestHelper
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: second input out of date wrt first output
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate3()
         {
             IsAnyOutOfDateTestHelper
@@ -634,7 +634,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: inputs and outputs have same dates
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate4()
         {
             IsAnyOutOfDateTestHelper
@@ -650,7 +650,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: first input missing
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate5()
         {
             IsAnyOutOfDateTestHelper
@@ -667,7 +667,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: second input missing
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate6()
         {
             IsAnyOutOfDateTestHelper
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: second output missing
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate7()
         {
             IsAnyOutOfDateTestHelper
@@ -699,7 +699,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: first output missing
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate8()
         {
             IsAnyOutOfDateTestHelper
@@ -715,7 +715,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: first input and first output missing
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate9()
         {
             IsAnyOutOfDateTestHelper
@@ -731,7 +731,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: one input, two outputs, input out of date
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate10()
         {
             IsAnyOutOfDateTestHelper
@@ -751,7 +751,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: one input, two outputs, input up to date
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate11()
         {
             IsAnyOutOfDateTestHelper
@@ -771,7 +771,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: two inputs, one output, inputs up to date
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate12()
         {
             IsAnyOutOfDateTestHelper
@@ -791,7 +791,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: two inputs, one output, second input out of date
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestIsAnyOutOfDate13()
         {
             IsAnyOutOfDateTestHelper

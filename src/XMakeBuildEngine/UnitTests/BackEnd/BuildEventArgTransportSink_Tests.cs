@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -17,13 +17,13 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Test the central forwarding logger by initializing a new one and sending events through it.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class BuildEventArgTransportSink_Tests
     {
         /// <summary>
         /// Verify the properties on BuildEventArgTransportSink properly work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertyTests()
         {
             BuildEventArgTransportSink sink = new BuildEventArgTransportSink(PacketProcessor);
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Make sure we throw an exception if the transport delegate is null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TestConstructorNullSendDataDelegate()
         {
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify consume throws the correct exception when a null build event is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TestConsumeNullBuildEvent()
         {
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify consume properly packages up the message event into a packet and send it to the 
         /// transport delegate
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConsumeMessageBuildEvent()
         {
             bool wentInHandler = false;
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify consume ignores BuildStarted events
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConsumeBuildStartedEvent()
         {
             bool wentInHandler = false;
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify consume ignores BuildFinished events
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConsumeBuildFinishedEvent()
         {
             bool wentInHandler = false;
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Make sure shutdown will correctly null out the send data delegate
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShutDown()
         {
             SendDataDelegate transportDelegate = PacketProcessor;

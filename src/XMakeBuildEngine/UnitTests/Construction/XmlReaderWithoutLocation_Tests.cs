@@ -16,13 +16,13 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Xml;
 using System.IO;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    [TestClass]
+    [TestFixture]
     public class XmlReaderWithoutLocation_Tests
     {
         private class XmlReaderNoIXmlLineInfo : XmlReader
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        [TestMethod]
+        [Test]
         public void CreateProjectWithoutLineInfo()
         {
             XmlReader reader = XmlReader.Create(new StringReader

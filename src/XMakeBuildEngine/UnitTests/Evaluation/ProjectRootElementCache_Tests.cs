@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
@@ -22,13 +22,13 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
     /// <summary>
     /// Tests for ProjectRootElementCache
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectRootElementCache_Tests
     {
         /// <summary>
         /// Set up the test
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             // Empty the cache
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tear down the test
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             // Empty the cache
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Verifies that a null entry fails
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void AddNull()
         {
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Verifies that the delegate cannot return a project with a different path
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void AddUnsavedProject()
         {
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tests that an entry added to the cache can be retrieved.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddEntry()
         {
             ProjectRootElement projectRootElement = ProjectRootElement.Create("c:\\foo");
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tests that a strong reference is held to a single item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddEntryStrongReference()
         {
             ProjectRootElement projectRootElement = ProjectRootElement.Create("c:\\foo");
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tests that only a limited number of strong references are held
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore] // "This test seems to be flaky depending on when garbage collection happened"
         public void AddManyEntriesNotAllStrongReferences()
         {
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Cache should not return a ProjectRootElement if the file it was loaded from has since changed -
         /// if the cache was configured to auto-reload.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetProjectRootElementChangedOnDisk1()
         {
             string path = null;
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Cache should return a ProjectRootElement directly even if the file it was loaded from has since changed -
         /// if the cache was configured to NOT auto-reload.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetProjectRootElementChangedOnDisk2()
         {
             string path = null;

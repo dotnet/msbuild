@@ -3,17 +3,17 @@
 
 using System;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ResourceUtilitiesTests
     {
-        [TestMethod]
+        [Test]
         public void ExtractMSBuildCode()
         {
             // most common message pattern

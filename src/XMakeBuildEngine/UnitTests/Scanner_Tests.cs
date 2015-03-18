@@ -4,21 +4,21 @@
 using System;
 using System.Globalization;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ScannerTest
     {
         private MockElementLocation _elementLocation = MockElementLocation.Instance;
         /// <summary>
         /// Tests that we give a useful error position (not 0 for example)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ErrorPosition()
         {
             string[,] tests = {
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the special error for "=".
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SingleEquals()
         {
             Scanner lexer;
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the special errors for "$(" and "$x" and similar cases
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IllFormedProperty()
         {
             Scanner lexer;
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the special errors for "@(" and "@x" and similar cases.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IllFormedItemList()
         {
             Scanner lexer;
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests
         /// Tests the special error for unterminated quotes.
         /// Note, scanner only understands single quotes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IllFormedQuotedString()
         {
             Scanner lexer;
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NumericSingleTokenTests()
         {
             Scanner lexer;
@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropsStringsAndBooleanSingleTokenTests()
         {
             Scanner lexer = new Scanner("$(foo)", ParserOptions.AllowAll);
@@ -259,7 +259,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleSingleTokenTests()
         {
             Scanner lexer = new Scanner("(", ParserOptions.AllowAll);
@@ -297,7 +297,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StringEdgeTests()
         {
             Scanner lexer;
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FunctionTests()
         {
             Scanner lexer;
@@ -407,7 +407,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ComplexTests1()
         {
             Scanner lexer;
@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ComplexTests2()
         {
             Scanner lexer = new Scanner("1234", ParserOptions.AllowAll);
@@ -475,7 +475,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests all tokens with no whitespace and whitespace.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void WhitespaceTests()
         {
             Scanner lexer;
@@ -525,7 +525,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the parsing of item lists.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemListTests()
         {
             Scanner lexer;
@@ -547,7 +547,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that shouldn't work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NegativeTests()
         {
             Scanner lexer;

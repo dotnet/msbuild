@@ -15,7 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -23,13 +23,13 @@ namespace Microsoft.Build.UnitTests
     /// Class to specifically test the TaskParameter class, particularly its serialization 
     /// of various types of parameters.  
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TaskParameter_Tests
     {
         /// <summary>
         /// Verifies that construction and serialization with a null parameter is OK. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NullParameter()
         {
             TaskParameter t = new TaskParameter(null);
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that construction and serialization with a string parameter is OK. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StringParameter()
         {
             TaskParameter t = new TaskParameter("foo");
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that construction and serialization with a string array parameter is OK. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StringArrayParameter()
         {
             TaskParameter t = new TaskParameter(new string[] { "foo", "bar" });
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that construction and serialization with a value type (integer) parameter is OK. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValueTypeParameter()
         {
             TaskParameter t = new TaskParameter(1);
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an array of value types (ints) is OK. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValueTypeArrayParameter()
         {
             TaskParameter t = new TaskParameter(new int[] { 2, 15 });
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that construction and serialization with an ITaskItem parameter is OK. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemParameter()
         {
             TaskParameter t = new TaskParameter(new TaskItem("foo"));
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that construction and serialization with an ITaskItem parameter that has custom metadata is OK. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemParameterWithMetadata()
         {
             TaskItem baseItem = new TaskItem("foo");
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an array of ITaskItems is OK. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemArrayParameter()
         {
             TaskParameter t = new TaskParameter(new ITaskItem[] { new TaskItem("foo"), new TaskItem("bar") });
@@ -224,7 +224,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with an 
         /// itemspec containing escapable characters translates the escaping correctly. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemParameter_EscapedItemSpec()
         {
             TaskParameter t = new TaskParameter(new TaskItem("foo%3bbar"));
@@ -249,7 +249,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with an 
         /// itemspec containing doubly-escaped characters translates the escaping correctly. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemParameter_DoubleEscapedItemSpec()
         {
             TaskParameter t = new TaskParameter(new TaskItem("foo%253bbar"));
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with an 
         /// itemspec containing the non-escaped forms of escapable characters translates the escaping correctly. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemParameter_EscapableNotEscapedItemSpec()
         {
             TaskParameter t = new TaskParameter(new TaskItem("foo;bar"));
@@ -312,7 +312,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with
         /// metadata containing escapable characters translates the escaping correctly. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemParameter_EscapedMetadata()
         {
             IDictionary metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -345,7 +345,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with
         /// metadata containing doubly-escapabed characters translates the escaping correctly. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemParameter_DoubleEscapedMetadata()
         {
             IDictionary metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -392,7 +392,7 @@ namespace Microsoft.Build.UnitTests
         /// metadata containing the non-escaped versions of escapable characters translates the 
         /// escaping correctly. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItemParameter_EscapableNotEscapedMetadata()
         {
             IDictionary metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

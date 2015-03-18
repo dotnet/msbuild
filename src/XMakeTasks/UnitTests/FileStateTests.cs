@@ -12,36 +12,36 @@ using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Test FileState utility class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class FileStateTests
     {
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void BadNoName()
         {
             new FileState("");
         }
 
-        [TestMethod]
+        [Test]
         public void BadCharsCtorOK()
         {
             new FileState("|");
         }
 
-        [TestMethod]
+        [Test]
         public void BadTooLongCtorOK()
         {
             new FileState(new String('x', 5000));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void BadChars()
         {
@@ -49,13 +49,13 @@ namespace Microsoft.Build.UnitTests
             var time = state.LastWriteTime;
         }
 
-        [TestMethod]
+        [Test]
         public void BadTooLongLastWriteTime()
         {
             Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(new String('x', 5000)).LastWriteTime; }, delegate () { var x = new FileState(new String('x', 5000)).LastWriteTime; });
         }
 
-        [TestMethod]
+        [Test]
         public void Exists()
         {
             string file = null;
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void Name()
         {
             string file = null;
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void IsDirectoryTrue()
         {
             var state = new FileState(Path.GetTempPath());
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, state.IsDirectory);
         }
 
-        [TestMethod]
+        [Test]
         public void LastWriteTime()
         {
             string file = null;
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void LastWriteTimeUtc()
         {
             string file = null;
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void Length()
         {
             string file = null;
@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void AccessDenied()
         {
             string locked = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "system32\\notepad.exe");
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if CHECKING4GBFILESWORK
-        [TestMethod]
+        [Test]
         public void LengthHuge()
         {
             var bigFile = @"d:\proj\hugefile";
@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
-        [TestMethod]
+        [Test]
         public void ReadOnly()
         {
             string file = null;
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ExistsReset()
         {
             string file = null;
@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void NameReset()
         {
             string file = null;
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void LastWriteTimeReset()
         {
             string file = null;
@@ -307,7 +307,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void LastWriteTimeUtcReset()
         {
             string file = null;
@@ -333,7 +333,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void LengthReset()
         {
             string file = null;
@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ReadOnlyReset()
         {
             string file = null;
@@ -381,38 +381,38 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ExistsButDirectory()
         {
             Assert.AreEqual(new FileInfo(Path.GetTempPath()).Exists, new FileState(Path.GetTempPath()).FileExists);
             Assert.AreEqual(true, (new FileState(Path.GetTempPath()).IsDirectory));
         }
 
-        [TestMethod]
+        [Test]
         public void ReadOnlyOnDirectory()
         {
             Assert.AreEqual(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath()).IsReadOnly);
         }
 
-        [TestMethod]
+        [Test]
         public void LastWriteTimeOnDirectory()
         {
             Assert.AreEqual(new FileInfo(Path.GetTempPath()).LastWriteTime, new FileState(Path.GetTempPath()).LastWriteTime);
         }
 
-        [TestMethod]
+        [Test]
         public void LastWriteTimeUtcOnDirectory()
         {
             Assert.AreEqual(new FileInfo(Path.GetTempPath()).LastWriteTimeUtc, new FileState(Path.GetTempPath()).LastWriteTimeUtcFast);
         }
 
-        [TestMethod]
+        [Test]
         public void LengthOnDirectory()
         {
             Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(Path.GetTempPath()).Length; }, delegate () { var x = new FileState(Path.GetTempPath()).Length; });
         }
 
-        [TestMethod]
+        [Test]
         public void DoesNotExistLastWriteTime()
         {
             string file = Guid.NewGuid().ToString("N");
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(new FileInfo(file).LastWriteTime, new FileState(file).LastWriteTime);
         }
 
-        [TestMethod]
+        [Test]
         public void DoesNotExistLastWriteTimeUtc()
         {
             string file = Guid.NewGuid().ToString("N");
@@ -428,7 +428,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(new FileInfo(file).LastWriteTimeUtc, new FileState(file).LastWriteTimeUtcFast);
         }
 
-        [TestMethod]
+        [Test]
         public void DoesNotExistLength()
         {
             string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
@@ -436,7 +436,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(file).Length; }, delegate () { var x = new FileState(file).Length; });
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(FileNotFoundException))]
         public void DoesNotExistIsDirectory()
         {
@@ -445,7 +445,7 @@ namespace Microsoft.Build.UnitTests
             var x = new FileState(file).IsDirectory;
         }
 
-        [TestMethod]
+        [Test]
         public void DoesNotExistDirectoryOrFileExists()
         {
             string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
@@ -453,7 +453,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(Directory.Exists(file), new FileState(file).DirectoryExists);
         }
 
-        [TestMethod]
+        [Test]
         public void DoesNotExistParentFolderNotFound()
         {
             string file = Guid.NewGuid().ToString("N") + "\\x"; // presumably doesn't exist

@@ -8,20 +8,20 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for FilteringEnumerable
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class FilteringEnumerable_Tests
     {
         /// <summary>
         /// Verify basic case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FilteringEnumerableBasic()
         {
             A a1 = new A();
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// Null collection should be like an empty collection
         /// (Seems useful for a general purpose class)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FilteringEnumerableNullBacking()
         {
             IEnumerable<B> enumerable = new FilteringEnumerable<A, B>(null);

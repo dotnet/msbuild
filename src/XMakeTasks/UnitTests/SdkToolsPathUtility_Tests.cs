@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.UnitTests;
@@ -13,7 +13,7 @@ using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class SdkToolsPathUtility_Tests
     {
         private string _defaultSdkToolsPath = "C:\\ProgramFiles\\WIndowsSDK\\bin";
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
         private MockEngine _mockEngine = null;
         private MockFileExists _mockExists = null;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             // Create a delegate helper to make the testing of a method which uses a lot of fileExists a bit easier
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the sdkToolsPath is null or empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolNullOrEmptySdkToolPath()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.X86, null, _toolName, _log, true);
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the sdkToolsPath is null or empty and we do not want to log errors or warnings
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolNullOrEmptySdkToolPathNoLogging()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.X86, null, _toolName, _log, false);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is x86 and the tool exists in the x86 sdk path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolX86ExistsOnx86()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.X86, _defaultSdkToolsPath, _toolName, _log, true);
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is x64 and the tool exists in the x64 sdk path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolX64ExistsOnx64()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX64, ProcessorArchitecture.AMD64, _defaultSdkToolsPath, _toolName, _log, true);
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is x64 and the tool does not exists in the x64 sdk path but does exist in the x86 path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolX64ExistsOnx86()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.AMD64, _defaultSdkToolsPath, _toolName, _log, true);
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is ia64 and the tool exists in the ia64 sdk path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolIa64ExistsOnIa64()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInIa64, ProcessorArchitecture.IA64, _defaultSdkToolsPath, _toolName, _log, true);
@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is ia64 and the tool does not exists in the ia64 sdk path but does exist in the x86 path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolIa64ExistsOnx86()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.IA64, _defaultSdkToolsPath, _toolName, _log, true);
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is x86 and the tool does not exist in the x86 sdk path (or anywhere for that matter)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolX86DoesNotExistAnywhere()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, _defaultSdkToolsPath, _toolName, _log, true);
@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there are illegal chars in the sdktoolspath and Path.combine has a problem.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyErrorWithIllegalChars()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, "./?><;)(*&^%$#@!", _toolName, _log, true);
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is x86 and the tool does not exist in the x86 sdk path (or anywhere for that matter)and we do not want to log
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GeneratePathToToolX86DoesNotExistAnywhereNoLogging()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, _defaultSdkToolsPath, _toolName, _log, false);

@@ -9,7 +9,7 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
     /// in ResolveNonMSBuildProjectOutput_Tests.
     /// Here, only test the AssignProjectConfiguration specific code
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class AssignProjectConfiguration_Tests
     {
         private void TestResolveHelper(string itemSpec, string projectGuid, string package, string name,
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestResolve()
         {
             // empty pre-generated string
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element does not have the BuildProjectInSolution attribute set
         ///     Expect none of the metadata to be set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestReferenceWithNoMetadataBadBuildInProjectAttribute()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element does not have the BuildProjectInSolution attribute set
         ///     Expect none of the metadata to be set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestReferenceWithNoMetadataNoBuildInProjectAttribute()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element has BuildProjectInSolution set to true
         ///     Expect none of the metadata to be set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeTrue()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect no pieces of metadata to be set on the reference item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeFalseReferenceAndBuildProjectsDisabledInProjectConfiguration()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect two pieces of metadata to be put on the item and be set to false (BuildReference, and ReferenceOutputAssembly)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeFalse()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect two pieces of metadata to be put on the item and be set to true since they were already set (BuildReference, and ReferenceOutputAssembly)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestReferenceWithMetadataAlreadySetBuildInProjectAttributeFalse()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that the UnresolvedProjectReferences output parameter is populated correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestUnresolvedReferences()
         {
             Hashtable unresolvedProjects = null;
@@ -343,7 +343,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify if no values are passed in for certain properties that their default values are used. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyDefaultValueDefaultToVcxPlatformMappings()
         {
             string expectedDefaultToVcxPlatformMapping = "AnyCPU=Win32;X86=Win32;X64=X64;Itanium=Itanium";
@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify if no values are passed in for certain properties that their default values are used. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyDefaultValuesVcxToDefaultPlatformMappingNoOutput()
         {
             string expectedVcxToDefaultPlatformMappingNoOutput = "Win32=X86;X64=X64;Itanium=Itanium";
@@ -388,7 +388,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify if no values are passed in for certain properties that their default values are used. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyDefaultValuesVcxToDefaultPlatformMappingLibraryOutput()
         {
             string expectedVcxToDefaultPlatformMappingLibraryOutput = "Win32=AnyCPU;X64=X64;Itanium=Itanium";

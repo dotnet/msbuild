@@ -14,7 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
@@ -24,13 +24,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests from Orcas
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class TargetsFile_Test
     {
         /// <summary>
         /// Check that the ARM flag is passed to the compiler when targeting ARM.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TargetARM()
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), library type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPULibraryProjectIsNot32BitPreferred()
@@ -136,7 +136,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platform of anycpu, library type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void ExplicitAnyCPULibraryProjectIsNot32BitPreferred()
@@ -189,7 +189,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), winmdobj type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUWinMDObjProjectIsNot32BitPreferred()
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, winmdobj type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ExplicitAnyCPUWinMDObjProjectIsNot32BitPreferred()
@@ -306,7 +306,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), exe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUExeProjectIs32BitPreferred()
@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, exe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ExplicitAnyCPUExeProjectIs32BitPreferred()
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), exe type assemblies 
         /// that are targeting .NET 4.0 do not get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AnyCPU40ExeProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, exe type assemblies that are 
         /// targeting .NET 4.0 do not get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ExplicitAnyCPU40ExeProjectIsNot32BitPreferred()
@@ -514,7 +514,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), appcontainerexe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUAppContainerExeProjectIs32BitPreferred()
@@ -572,7 +572,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, appcontainerexe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires installed toolset.
         public void ExplicitAnyCPUAppContainerExeProjectIs32BitPreferred()
@@ -631,7 +631,7 @@ namespace Microsoft.Build.UnitTests
         /// Although AnyCPU library projects should not default to AnyCPU32BitPreferred, because that platform is 
         /// not supported for library projects, if Prefer32Bit is explicitly set, we should still respect that. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void AnyCPULibraryProjectIs32BitPreferredIfPrefer32BitSet()
@@ -685,7 +685,7 @@ namespace Microsoft.Build.UnitTests
         /// A project with no explicit OutputType will end up defaulting its OutputType to exe, 
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUProjectWithNoExplicitOutputTypeIs32BitPreferred()
@@ -737,7 +737,7 @@ namespace Microsoft.Build.UnitTests
         /// A project with no explicit OutputType will end up defaulting its OutputType to exe, 
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUJupiterProjectWithNoExplicitOutputTypeIs32BitPreferred()
@@ -791,7 +791,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Validate that the GetFrameworkPaths target 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires installed toolset.
         public void TestGetFrameworkPaths()
@@ -828,7 +828,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Validate that the GetFrameworkPaths target 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestTargetFrameworkPaths()
@@ -895,7 +895,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Doesn't synthesize Link metadata if the items are defined in the project  
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NoLinkMetadataSynthesisWhenDefinedInProject()
@@ -959,7 +959,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Synthesizes Link metadata if the items are defined in an import and are on the whitelist
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SynthesizeLinkMetadataForItemsOnWhitelist()
@@ -1040,7 +1040,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Don't synthesize link metadata if the SynthesizeLinkMetadata property is false
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void DontSynthesizeLinkMetadataIfPropertyNotSet()
@@ -1127,7 +1127,7 @@ namespace Microsoft.Build.UnitTests
         /// those that need to go directly into CSC. Also, Culture and non-Culture resources 
         /// are split.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SplitResourcesByCultureTarget()
         {
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -1164,7 +1164,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test to make sure that referenced projects are being cleaned properly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress565788()
         {
             Helper.CreateTempCSharpProjectWithClassLibrary();
@@ -1186,7 +1186,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that we correctly handle .RESTEXT files marked as EmbeddedResource in the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResTextFiles_CSharp()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1326,7 +1326,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that we correctly handle .RESTEXT files marked as EmbeddedResource in the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResTextFiles_VB()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1461,7 +1461,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Regress specific bugs.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class Bugs
     {
         /// <summary>
@@ -1469,7 +1469,7 @@ namespace Microsoft.Build.UnitTests
         /// to run a target didn't invalidate the cache. The result was that the TargetFrameworkDirectory
         /// wasn't visible to VS.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress381480()
         {
             string f0 = FileUtilities.GetTemporaryFile();
@@ -1516,13 +1516,13 @@ namespace Microsoft.Build.UnitTests
     /// Tests the MainBuiltProjectOutputGroup Target which is responsible for quickly (i.e. without
     /// building) returning the name of the EXE or DLL that would be built.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class GetTargetPath        
     {
         /// <summary>
         /// Try a basic workings.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -1554,13 +1554,13 @@ namespace Microsoft.Build.UnitTests
     /// This target's job is to create manifest resource names for each of
     /// the resource files.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class PrepareResourceNamesTarget        
     {
         /// <summary>
         /// Basic test.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicVbResourceNames()
         {
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -1608,10 +1608,10 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests the CopyAppConfigFile target.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class CopyAppConfigFile
     {
-        [TestMethod]
+        [Test]
         public void CopyAppConfigFileEvenForDllProjects()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1753,7 +1753,7 @@ namespace Microsoft.Build.UnitTests
         ///
         ///If an app.config is not found in one of these locations then there is no app.config for this project.
         /// </remarks>
-        [TestMethod]
+        [Test]
         public void AppConfigLocation()
         {
             // Try each of the cases in turn, by manipulating a single project
@@ -1818,7 +1818,7 @@ namespace Microsoft.Build.UnitTests
         /// In this case both app.config's do not match exactly "app.config" so we should take the /last/
         /// match listed. This arbitrary choice matches the behavior we shipped.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppConfigLocationRelativeDir()
         {
             ProjectCollection e = new ProjectCollection();
@@ -1846,7 +1846,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// None should be chosen in preference to Content
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppConfigLocationNoneWinsOverContent()
         {
             ProjectCollection e = new ProjectCollection();
@@ -1875,14 +1875,14 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests some general things about our .TARGETS files, such as which properties are referenced.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class General
     {
         /// <summary>
         /// Tests that our .TARGETS files do not condition on $(Configuration), thereby adding
         /// configs to the VS config dropdown when they don't really exist in the project file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConfigurationsReferencedInCSharpProject()
         {
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -1932,7 +1932,7 @@ namespace Microsoft.Build.UnitTests
         /// Tests that our .TARGETS files do not condition on $(Configuration), thereby adding
         /// configs to the VS config dropdown when they don't really exist in the project file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConfigurationsReferencedInVBProject()
         {
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -2026,7 +2026,7 @@ namespace Microsoft.Build.UnitTests
         /// relative path can exceed 260 characters.  MSBuild should solve this scenario by doing 
         /// smarter path manipulation.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectToProjectReferenceWithLongRelativePath()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -2190,7 +2190,7 @@ namespace Microsoft.Build.UnitTests
         /// The J# project supports Debug/Release|x86.  There is a solution configuration defined call Debug/Release|Mixed Platforms
         /// which contains the appropriate project configurations.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore("Need J# to be in the v3.5 folder")]
         public void SolutionConfigurationWithDifferentProjectConfigurations()
         {
@@ -2403,7 +2403,7 @@ namespace Microsoft.Build.UnitTests
         /// Tests that the .pdb file is not copied to the output directory when the
         /// SkipCopyingSymbolsToOutputDirectory property is set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SkipCopyingPdbFile()
         {
             // create a temp project
@@ -2432,7 +2432,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that the .pdb file is not produced if /p:debugtype=none is set externally
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SkipProducingPdbCsharp()
         {
             // create a temp project
@@ -2489,7 +2489,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that the .pdb file is not produced if /p:debugsymbols=false is set externally
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SkipProducingPdbVB()
         {
             // create a temp project

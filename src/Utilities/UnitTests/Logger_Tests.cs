@@ -6,7 +6,7 @@ using System.IO;
 using System.Resources;
 using System.Reflection;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -34,10 +34,10 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
-    [TestClass]
+    [TestFixture]
     public class Logger_Tests
     {
-        [TestMethod]
+        [Test]
         public void ExerciseMiscProperties()
         {
             EmptyLogger logger = new EmptyLogger(LoggerVerbosity.Diagnostic);
@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercises every combination of the Logger.IsVerbosityAtLeast method.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsVerbosityAtLeast()
         {
             Assert.AreEqual(true,

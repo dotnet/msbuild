@@ -8,7 +8,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
@@ -23,10 +23,10 @@ using InternalUtilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
-    [TestClass]
+    [TestFixture]
     public class ToolsetState_Tests
     {
-        [TestMethod]
+        [Test]
         public void OverrideTasksAreFoundInOverridePath()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideTaskPathIsRelative()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideTaskPathHasInvalidChars()
         {
             ProjectCollection e = new ProjectCollection();
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains("MSB4194");
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideTaskPathHasTooLongOfAPath()
         {
             string tooLong = "c:\\" + new string('C', 6000);
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideTaskPathIsNotFound()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultTasksAreFoundInToolsPath()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -161,7 +161,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void WarningLoggedIfNoDefaultTasksFound()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidToolPath()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Make sure when we read in the tasks files off disk that they come in in a sorted order so that there is a deterministric way of 
         /// figurting out the order the files were read in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyTasksFilesAreInSortedOrder()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionTooHighMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionMissingLowMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionMissingMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void InvalidToolsVersion()
         {
@@ -373,7 +373,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Validate that a custom defined toolset is honored
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void CustomToolsVersionIsHonored()
@@ -454,7 +454,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist()
         {
             ProjectCollection p = new ProjectCollection();
@@ -482,7 +482,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFromEnvironmentVariable()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -520,7 +520,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionFromEnvironmentVariable()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -558,7 +558,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionMappedToCurrent_CreateProjectInstance()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -599,7 +599,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_CreateProjectInstance()
         {
             ProjectCollection p = new ProjectCollection();
@@ -628,7 +628,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFromEnvironmentVariable_CreateProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -668,7 +668,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionFromEnvironmentVariable_CreateProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -709,7 +709,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionMappedToCurrent_ProjectInstance()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_ProjectInstance()
         {
             ProjectCollection p = new ProjectCollection();
@@ -779,7 +779,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFromEnvironmentVariable_ProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -819,7 +819,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionFromEnvironmentVariable_ProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -859,7 +859,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Inline tasks found in a .tasks file only have properties expanded.
         /// (When they are in a regular MSBuild file, items are also expanded.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InlineTasksInDotTasksFile()
         {
             Toolset t = new Toolset("t", "c:\\inline", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), null, new DirectoryExists(directoryExists));
