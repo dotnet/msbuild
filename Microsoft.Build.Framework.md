@@ -22,3 +22,10 @@ To make this a little bit easier, use:
 BuildAndCopy.cmd <path> true
 ```
 This will set the property for you and create a drop of MSBuild and dependencies needed to build other project.
+
+##Option 3 - Test or Delay Signing
+For the advanced user, another option here is to delay sign this version of MSBuild with our public key. Since that part of the key is public, it's very easy to extract (using `Sn.exe`) and delay sign. You can get more information on that here:
+* [Delay Signing](http://blogs.msdn.com/b/shawnfa/archive/2005/10/24/484170.aspx)
+* [Test Key Signing](http://blogs.msdn.com/b/shawnfa/archive/2005/10/24/484170.aspx)
+
+Delay signing is the easiest, but it allows your system to load and trust any of those assemblies even though they are not signed at all, from any source. The Test Key Signing allows for a much more secure approach (as long as you keep your private key private), but is more complicated. We are providing this as a reference, but please only try this if you: really want to customize Microsoft.Build.Framework, you feel comfortable with the security implications, and you acknowledge this is all at your own risk.
