@@ -307,7 +307,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// We have recieved the node shutdown packet for this node, we should remove it from our list of providers.
+        /// We have received the node shutdown packet for this node, we should remove it from our list of providers.
         /// </summary>
         private void RemoveNodeFromMapping(int nodeId)
         {

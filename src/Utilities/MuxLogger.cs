@@ -15,12 +15,12 @@ namespace Microsoft.Build.Utilities
 {
     /// <summary>
     /// This is a multiplexing logger. The purpose of this logger is to allow the registration and deregistration of 
-    /// multiple loggers during the build. This is to support the VS IDE scenario where loggers are regisered and unregistered
+    /// multiple loggers during the build. This is to support the VS IDE scenario where loggers are registered and unregistered
     /// for each project system's build request. This means one physical build may have multiple logical builds
     /// each with their own set of loggers. 
     /// 
     /// The Mux logger will register itself with the build manager as a regular central /l style logger. 
-    /// It will be responsible for recieving messages from the build manager and route them to the correct 
+    /// It will be responsible for receiving messages from the build manager and route them to the correct
     /// logger based on the logical build the message came from.
     /// 
     /// Requirements:
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Utilities
     ///     
     ///     3) The MUX logger will be shutdown when the build is finished in end build . At this time it will un-register any loggers attached to it.
     ///     
-    ///     4) The MUX logger will log the build finsished event when the project finished event for the first project started event is seen for each logger.
+    ///     4) The MUX logger will log the build finished event when the project finished event for the first project started event is seen for each logger.
     ///    
     /// Registering Loggers:
     /// 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Utilities
     /// UnRegisterLogger:
     ///     When a build submission is completed the UnregisterLogger method will be called with the submission ID.
     ///     At this point we will look up the success state of the project finished event for the submission ID and log a build finished event to the logger.
-    ///     The event source will be cleaned up.  This may be interesting because the unregister will come from a thread other than what is doign the logging. 
+    ///     The event source will be cleaned up.  This may be interesting because the unregister will come from a thread other than what is doing the logging.
     ///     This may create a Synchronization issue, if unregister is called while events are being logged.
     ///     
     /// UNDONE: If we can use ErrorUtilities, replace all InvalidOperation and Argument exceptions with the appropriate calls.

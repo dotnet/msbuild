@@ -12,7 +12,7 @@ using Microsoft.Build.Collections;
 namespace Microsoft.Build.UnitTests.QA
 {
     /// <summary>
-    /// An interfacing representing a build request defination cache.
+    /// An interfacing representing a build request definition cache.
     /// </summary>
     internal interface ITestDataProvider
     {

@@ -469,7 +469,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Which event was raised on the event source, this can be asserted upon 
             /// to verify the event passed to the event source is the same one which was 
-            /// recieved by the event handlers
+            /// received by the event handlers
             /// </summary>
             public BuildEventArgs RaisedEvent
             {

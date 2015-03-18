@@ -362,7 +362,7 @@ namespace Microsoft.Build.BackEnd
                     ScheduleResponse response = TrySatisfyRequestFromCache(request.Parent.AssignedNode, request.BuildRequest, skippedResultsAreOK: false);
 
                     // response may be null if the result was never added to the cache. This can happen if the result has an exception in it
-                    // or the results could not be satisfied becasue the initial or default targets have been skipped. If that is the case
+                    // or the results could not be satisfied because the initial or default targets have been skipped. If that is the case
                     // we need to report the result directly since it contains an exception
                     if (response == null)
                     {

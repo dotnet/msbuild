@@ -2826,7 +2826,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Execute the task. Without confirming that the number of files resolved with and without find dependencies is identical. 
-        /// This is becasue profiles could cause the number of primary references to be different.
+        /// This is because profiles could cause the number of primary references to be different.
         /// </summary>
         protected static bool Execute(ResolveAssemblyReference t, bool buildConsistencyCheck)
         {
@@ -7194,7 +7194,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header. 
-        /// A warning or error is expectected in the log depending on the WarnOrErrorOnTargetArchitecture property value.
+        /// A warning or error is expected in the log depending on the WarnOrErrorOnTargetArchitecture property value.
         /// </summary>
         [Test]
         public void ResolveWinmdWithArchitectureDependency()
@@ -13092,7 +13092,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Test the case where the subset list has the same name as the redist list but it has no entries In this case
-        /// the black list should contain ALL redist list entries becasue there are no white list files to remove from the black list.
+        /// the black list should contain ALL redist list entries because there are no white list files to remove from the black list.
         /// </summary>
         [Test]
         public void RedistListEmptySubsetMatchingName()

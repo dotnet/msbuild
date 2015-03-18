@@ -160,7 +160,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Allows the registering of an ICentralLogger and a forwarding logger pair
         /// </summary>
-        /// <param name="centralLogger">Central logger which is to recieve the events created by the forwarding logger</param>
+        /// <param name="centralLogger">Central logger which is to receive the events created by the forwarding logger</param>
         /// <param name="forwardingLogger">A description of the forwarding logger</param>
         /// <returns value="bool">True if the central and forwarding loggers were registered. False if the central logger or the forwarding logger were already registered</returns>
         bool RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger);

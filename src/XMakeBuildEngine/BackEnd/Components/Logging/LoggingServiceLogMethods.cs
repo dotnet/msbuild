@@ -134,7 +134,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="file">File information about where the error happened</param>
         /// <param name="messageResourceName">String index into the string.resx file</param>
         /// <param name="messageArgs">Arguments for the format string in the resource file</param>
-        /// <exception cref="InternalErrorException">MessageResouceName is null</exception>
+        /// <exception cref="InternalErrorException">MessageResourceName is null</exception>
         public void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             lock (_lockObject)
