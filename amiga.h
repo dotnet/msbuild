@@ -1,13 +1,5 @@
-GNU Make
-========
-
-This directory contains fork of GNU Make.
-
-
--------------------------------------------------------------------------------
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010 Free Software Foundation, Inc.
+/* Definitions for amiga specific things
+Copyright (C) 1995-2012 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -20,4 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+int MyExecute (char ** argv);
+char * wildcard_expansion (char * wc, char * o);

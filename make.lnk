@@ -1,0 +1,5 @@
+FROM LIB:cres.o "commands.o"+"job.o"+"dir.o"+"file.o"+"misc.o"+"main.o"+"read.o"+"remake.o"+"rule.o"+"implicit.o"+"default.o"+"variable.o"+"expand.o"+"function.o"+"vpath.o"+"version.o"+"ar.o"+"arscan.o"+"signame.o"+"remote-stub.o"+"getopt.o"+"getopt1.o"+"alloca.o"+"amiga.o"+"hash.o"+"strcache.o"
+TO "make.new"
+LIB glob/glob.lib LIB:sc.lib LIB:amiga.lib
+QUIET
+

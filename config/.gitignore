@@ -1,0 +1,11 @@
+*.m4
+config.*
+mkinstalldirs
+texinfo.tex
+mdate-sh
+compile
+depcomp
+install-sh
+missing
+
+Makefile Makefile.in
