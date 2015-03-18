@@ -86,7 +86,7 @@
     <Compile Include="..\Shared\TempFileUtilities.cs">
       <Link>TempFileUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\XmakeAttributes.cs">
+    <Compile Include="..\Shared\XMakeAttributes.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\INodeEndpoint.cs" />
