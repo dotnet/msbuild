@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Interface implemted by the Target Builder which allows tasks to invoke targets and build projects.
+    /// Interface implemented by the Target Builder which allows tasks to invoke targets and build projects.
     /// </summary>
     internal interface ITargetBuilderCallback : IRequestBuilderCallback
     {

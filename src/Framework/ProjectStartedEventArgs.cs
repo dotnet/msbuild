@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Arguements for project started events
+    /// Arguments for project started events
     /// </summary>
     /// <remarks>
     /// WARNING: marking a type [Serializable] without implementing

@@ -308,7 +308,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Handler to recieve which project got added to the project collection.
+        /// Handler to receive which project got added to the project collection.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible", Justification = "This has been API reviewed")]
         public delegate void ProjectAddedEventHandler(object sender, ProjectAddedToProjectCollectionEventArgs e);

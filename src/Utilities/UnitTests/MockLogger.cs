@@ -201,7 +201,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /*
          * Method:  LoggerEventHandler
          *
-         * Recieves build events and logs them the way we like.
+         * Receives build events and logs them the way we like.
          *
          */
         internal void LoggerEventHandler(object sender, BuildEventArgs eventArgs)

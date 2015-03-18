@@ -60,7 +60,7 @@ namespace Microsoft.Build.BackEnd
         /// must be non-null.
         /// 
         /// Transitions: 
-        ///           Ready: All of the results which caused the build request to wait have been recieved
+        ///           Ready: All of the results which caused the build request to wait have been received
         /// </summary>
         Waiting,
 

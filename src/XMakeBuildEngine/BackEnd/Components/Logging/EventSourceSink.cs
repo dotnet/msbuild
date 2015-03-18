@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-// <summary>Sink which will take in a build event and raiise it on its internal event source</summary>
+// <summary>Sink which will take in a build event and raise it on its internal event source</summary>
 //-----------------------------------------------------------------------
 
 using System;

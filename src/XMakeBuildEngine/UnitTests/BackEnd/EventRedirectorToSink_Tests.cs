@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Verify when an event is forwarded, the event that was put in is the same event that was recieved on the event source
+        /// Verify when an event is forwarded, the event that was put in is the same event that was received on the event source
         /// also make sure the sinkId has been updated by the event redirector.
         /// </summary>
         [TestMethod]

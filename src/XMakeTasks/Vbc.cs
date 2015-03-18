@@ -38,7 +38,7 @@ namespace Microsoft.Build.Tasks
 
         // The following 1 fields are used, set and re-set in LogEventsFromTextOutput()
         /// <summary>
-        /// This stores the origional lines and error priority together in the order in which they were recieved.
+        /// This stores the origional lines and error priority together in the order in which they were received.
         /// </summary>
         private Queue<VBError> _vbErrorLines = new Queue<VBError>();
 
