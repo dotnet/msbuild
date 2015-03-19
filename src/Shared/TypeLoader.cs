@@ -281,7 +281,7 @@ namespace Microsoft.Build.Shared
                 {
                     Type type = null;
 
-                    // Maybe we've already cracked open this assembly before. Check to see if the typeName is in the list we dont look for partial matches here
+                    // Maybe we've already cracked open this assembly before. Check to see if the typeName is in the list we don't look for partial matches here
                     // this is an optimization.
                     bool foundType = _typeNameToType.TryGetValue(typeName, out type);
                     if (!foundType)

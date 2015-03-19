@@ -14,8 +14,6 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// This enumeration provides three levels of importance for messages.
     /// </summary>
-    /// 
-    /// 
     [Serializable]
     public enum MessageImportance
     {
@@ -59,7 +57,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// This constuctor allows all event data to be initialized
+        /// This constructor allows all event data to be initialized
         /// </summary>
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
@@ -77,7 +75,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// This constuctor allows a timestamp to be set
+        /// This constructor allows a timestamp to be set
         /// </summary>
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
@@ -98,7 +96,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// This constuctor allows a timestamp to be set
+        /// This constructor allows a timestamp to be set
         /// </summary>
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>

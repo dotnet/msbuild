@@ -326,7 +326,7 @@ namespace Microsoft.Build.Framework
         [OnDeserializing]
         private void SetBuildEventContextDefaultBeforeSerialization(StreamingContext sc)
         {
-            // Dont want to create a new one here as default all the time as that would be a lot of 
+            // Don't want to create a new one here as default all the time as that would be a lot of 
             // possibly useless allocations
             _buildEventContext = null;
         }
@@ -351,4 +351,3 @@ namespace Microsoft.Build.Framework
         #endregion
     }
 }
-

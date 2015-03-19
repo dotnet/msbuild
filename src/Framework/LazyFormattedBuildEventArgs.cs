@@ -35,7 +35,7 @@ namespace Microsoft.Build.Framework
         private Object _locker;
 
         /// <summary>
-        /// This constuctor allows all event data to be initialized.
+        /// This constructor allows all event data to be initialized.
         /// </summary>
         /// <param name="message">text message.</param>
         /// <param name="helpKeyword">help keyword.</param>
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// This constuctor that allows message arguments that are lazily formatted.
+        /// This constructor that allows message arguments that are lazily formatted.
         /// </summary>
         /// <param name="message">text message.</param>
         /// <param name="helpKeyword">help keyword.</param>

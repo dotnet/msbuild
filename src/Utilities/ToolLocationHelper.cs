@@ -146,7 +146,7 @@ namespace Microsoft.Build.Utilities
         private static object s_locker = new Object();
 
         /// <summary>
-        /// Cache the results of calling the GetPathToRefernceAssemblies so that we do not recaculate it everytime we call the method
+        /// Cache the results of calling the GetPathToRefernceAssemblies so that we do not recalculate it every time we call the method
         /// </summary>
         private static Dictionary<string, IList<string>> s_cachedReferenceAssemblyPaths;
 
@@ -1569,7 +1569,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Generate the list of reference assembly paths for well known .net framework versions
         /// </summary>
-        /// <param name="frameworkName">Target framework moniker class wich contains the targetframeworkVersion</param>
+        /// <param name="frameworkName">Target framework moniker class which contains the targetframeworkVersion</param>
         /// <returns>A collection of strings which list the chained reference assembly paths with the highest version being first</returns>
         internal static IList<string> HandleLegacyDotNetFrameworkReferenceAssemblyPaths(VersionToPath PathToDotNetFramework, VersionToPath PathToReferenceAssemblies, FrameworkNameVersioning frameworkName)
         {
@@ -1586,7 +1586,7 @@ namespace Microsoft.Build.Utilities
                 return HandleLegacy35(PathToDotNetFramework, PathToReferenceAssemblies);
             }
 
-            // Dont know the framework send back an empty list because it does not exist
+            // Don't know the framework send back an empty list because it does not exist
             return new List<string>();
         }
 
@@ -2457,11 +2457,11 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Get the disk locations to search for sdks under. This can be overidden by an environment variable
+        /// Get the disk locations to search for sdks under. This can be overridden by an environment variable
         /// </summary>
         private static void GetDefaultSDKDiskRoots(List<string> diskRoots)
         {
-            // The order is important here becuase we want to look in the users location first before the non privileged location.
+            // The order is important here because we want to look in the users location first before the non privileged location.
 
             // We need this so that a user can also have an sdk installed in a non privileged location
             string userLocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);

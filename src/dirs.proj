@@ -18,7 +18,7 @@
   <Import Project="..\dir.traversal.targets" />
   
   <PropertyGroup>
-    <!-- Explicity set the OutDir as it is used by the packaging targets -->
+    <!-- Explicitly set the OutDir as it is used by the packaging targets -->
     <OutDir>$(BaseOutputPathWithConfig)</OutDir>
   </PropertyGroup>
 
