@@ -217,9 +217,17 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static Dictionary<string, string> GetEnvironmentVariables()
         {
+            Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
+            if (PlatformUtilities.IsUnix){
+                    // Mono  does have expensive security checks
+                    foreach (DictionaryEntry ke in Environment.GetEnvironmentVariables ()){
+                            table.Add ((string)ke.Key, (string)ke.Value);
+                    }
+                    return table;
+            }
             char[] block = GetEnvironmentCharArray();
 
-            Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
+            
 
             // Copy strings out, parsing into pairs and inserting into the table.
             // The first few environment variable entries start with an '='!

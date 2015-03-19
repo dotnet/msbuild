@@ -163,7 +163,7 @@ namespace Microsoft.Build.Shared
             internal ushort wProcessorRevision;
         }
 
-
+            
         /// <summary>
         /// Wrap the intptr returned by OpenProcess in a safe handle.
         /// </summary>
@@ -370,6 +370,15 @@ namespace Microsoft.Build.Shared
             // there
 
             fileModifiedTimeUtc = DateTime.MinValue;
+
+            if (PlatformUtilities.IsUnix){
+                if (Directory.Exists (fullPath)){
+                        fileModifiedTimeUtc = File.GetLastWriteTimeUtc (fullPath);
+                        return true;
+                }
+                return false;
+            }
+            
             WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
             bool success = false;
 
@@ -481,6 +490,14 @@ namespace Microsoft.Build.Shared
         internal static DateTime GetLastWriteFileUtcTime(string fullPath)
         {
             DateTime fileModifiedTime = DateTime.MinValue;
+            if (PlatformUtilities.IsUnix){
+                if (File.Exists (fullPath))
+                    return File.GetLastWriteTimeUtc (fullPath);
+                if (Directory.Exists (fullPath))
+                    return Directory.GetLastWriteTimeUtc (fullPath);
+                return fileModifiedTime;
+            }
+                
             WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
             bool success = false;
 
@@ -529,6 +546,7 @@ namespace Microsoft.Build.Shared
             Marshal.ThrowExceptionForHR(errorCode);
         }
 
+        static string []paths;
         /// <summary>
         /// Looks for the given file in the system path i.e. all locations in
         /// the %PATH% environment variable.
@@ -537,6 +555,17 @@ namespace Microsoft.Build.Shared
         /// <returns>The location of the file, or null if file not found.</returns>
         internal static string FindOnPath(string filename)
         {
+            if (PlatformUtilities.IsUnix){
+                    if (paths == null)
+                            paths = Environment.GetEnvironmentVariable ("PATH").Split (':');
+                    foreach (var p in paths){
+                            var full = Path.Combine (p, filename);
+                            // TODO: not only it needs to exist, but it also should be executable
+                            if (File.Exists (full))
+                                    return full;
+                    }
+                    return null;
+            }           
             StringBuilder pathBuilder = new StringBuilder(MAX_PATH + 1);
             string pathToFile = null;
 
@@ -747,6 +776,9 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static string GetCurrentDirectory()
         {
+            if (PlatformUtilities.IsUnix)
+                return Environment.CurrentDirectory;
+            
             StringBuilder sb = new StringBuilder(MAX_PATH);
             int pathLength = GetCurrentDirectory(MAX_PATH, sb);
 
@@ -838,11 +870,22 @@ namespace Microsoft.Build.Shared
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern int GetCurrentDirectory(int nBufferLength, [Out] StringBuilder lpBuffer);
 
+        [DllImport("libc", SetLastError = true)]
+        internal static extern int chdir (string path);
+
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [DllImport("kernel32.dll", EntryPoint="SetCurrentDirectory", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool SetCurrentDirectory(string path);
+        static extern bool _SetCurrentDirectory(string path);
+        internal static bool SetCurrentDirectory (string path)
+        {
+                if (PlatformUtilities.IsUnix)
+                    return chdir (path) == 0;
+                else
+                    return _SetCurrentDirectory (path);
+        }
+            
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
@@ -926,5 +969,23 @@ namespace Microsoft.Build.Shared
         }
 
         #endregion
+    }
+    internal class PlatformUtilities {
+        static int platform;
+            
+        internal static bool IsUnix {
+        get {
+                if (platform == 0){
+                    int p = (int) Environment.OSVersion.Platform;
+                        
+                    if ((p == 4) || (p == 6) || (p == 128)) {
+                        platform = 1;
+                    } else {
+                        platform = 2;
+                    }
+                }
+                return platform == 1;
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -342,19 +342,23 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void IsRunningWithCharacterFileType()
         {
-            // Get the std out handle
-            IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-
-            if (stdHandle != Microsoft.Build.BackEnd.NativeMethods.InvalidHandle)
-            {
-                uint fileType = NativeMethodsShared.GetFileType(stdHandle);
-
-                // The std out is a char type(LPT or Console)
-                runningWithCharacterFileType = (fileType == NativeMethodsShared.FILE_TYPE_CHAR);
-            }
-            else
-            {
-                runningWithCharacterFileType = false;
+            if (PlatformUtilities.IsRunningOnUnix){
+                runningWithCharacterFileType = !Console.IsInputRedirected && !Console.IsOutputRedirected;
+            } else {
+                // Get the std out handle
+                IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+                
+                if (stdHandle != Microsoft.Build.BackEnd.NativeMethods.InvalidHandle)
+                {
+                    uint fileType = NativeMethodsShared.GetFileType(stdHandle);
+                
+                    // The std out is a char type(LPT or Console)
+                    runningWithCharacterFileType = (fileType == NativeMethodsShared.FILE_TYPE_CHAR);
+                }
+                else
+                {
+                    runningWithCharacterFileType = false;
+                }
             }
         }
 

@@ -76,13 +76,22 @@ namespace Microsoft.Build.Collections
         /// We need a static contructor to retrieve the running ProcessorArchitecture that way we can
         /// Avoid using optimized code that will not run correctly on IA64 due to alignment issues
         /// </summary>
+
+        //
+        // The side effect of this is to set s_runningProcessorArchitecture, which is not used
+        // in any of the code that has been released, so we skip it for Unix.
+        //
         static MSBuildNameIgnoreCaseComparer()
         {
-            NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
-
-            NativeMethodsShared.GetSystemInfo(ref systemInfo);
-
-            s_runningProcessorArchitecture = systemInfo.wProcessorArchitecture;
+            if (PlatformUtilities.IsUnix){
+                return;
+            } else {
+                NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
+                
+                NativeMethodsShared.GetSystemInfo(ref systemInfo);
+                
+                s_runningProcessorArchitecture = systemInfo.wProcessorArchitecture;
+            }
         }
 
         /// <summary>
