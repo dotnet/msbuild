@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Create a derrived class so that we can test the default constructor in order to increase code coverage and 
+        /// Create a derived class so that we can test the default constructor in order to increase code coverage and 
         /// verify this code path.
         /// </summary>
         private class BuildErrorEventArgs2 : BuildErrorEventArgs

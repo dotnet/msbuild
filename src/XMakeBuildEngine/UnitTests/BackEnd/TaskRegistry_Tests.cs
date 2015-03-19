@@ -1461,16 +1461,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Verify when a class which derives from ITask is attempted to be registered that we get an InvalidProjectFileException. 
-        /// We only support ITaskItems and not their derrived types as input parameters.
+        /// We only support ITaskItems and not their derived types as input parameters.
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidProjectFileException))]
-        public void BadScalarInputOnInputParameterDerrivedFromITask()
+        public void BadScalarInputOnInputParameterDerivedFromITask()
         {
             // Note output is false so these are only input parameters
             string output = bool.FalseString;
             string required = bool.TrueString;
-            string type = type = typeof(DerrivedFromITaskItem).FullName + "," + typeof(DerrivedFromITaskItem).Assembly.FullName;
+            string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
@@ -1520,7 +1520,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             type = typeof(ITaskItem).FullName;
             VerifyTypeParameter(output, required, type);
 
-            type = typeof(DerrivedFromITaskItem).FullName + "," + typeof(DerrivedFromITaskItem).Assembly.FullName;
+            type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
             VerifyTypeParameter(output, required, type);
 
             type = typeof(ITaskItem[]).FullName;
@@ -1535,12 +1535,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             type = typeof(DateTime[]).FullName;
             VerifyTypeParameter(output, required, type);
 
-            type = typeof(DerrivedFromITaskItem[]).FullName + "," + typeof(DerrivedFromITaskItem).Assembly.FullName;
+            type = typeof(DerivedFromITaskItem[]).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
             VerifyTypeParameter(output, required, type);
         }
 
         /// <summary>
-        /// Verify that an arbitrary output type class which is not derrived from ITaskItem is not allowed
+        /// Verify that an arbitrary output type class which is not derived from ITaskItem is not allowed
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidProjectFileException))]
@@ -2065,9 +2065,9 @@ namespace TestTask
         }
 
         /// <summary>
-        /// Create a custom class derrived from ITaskItem to test input and output parameters work using this item.
+        /// Create a custom class derived from ITaskItem to test input and output parameters work using this item.
         /// </summary>
-        internal class DerrivedFromITaskItem : ITaskItem
+        internal class DerivedFromITaskItem : ITaskItem
         {
             /// <summary>
             /// The ItemSpec of the item
