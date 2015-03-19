@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------
 // </copyright>
 // <summary>A packet which informs the task host that the task it is 
-// currently executing has been canceled.</summary>
+// currently executing has been cancelled.</summary>
 //-----------------------------------------------------------------------
 
 using System;
@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// TaskHostTaskCancelled informs the task host that the task it is 
-    /// currently executing has been canceled.
+    /// currently executing has been cancelled.
     /// </summary>
     internal class TaskHostTaskCancelled : INodePacket
     {
@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator to use.</param>
         public void Translate(INodePacketTranslator translator)
         {
-            // Do nothing -- this packet doesn't contain any parameters. 
+            // Do nothing -- this packet doesn't contain any parameters.
         }
 
         /// <summary>
