@@ -39,7 +39,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Constructor to initialize all paramterers.
+        /// Constructor to initialize all parameters.
         /// Sender field cannot be set here and is assumed to be "MSBuild"
         /// </summary>
         /// <param name="message">text message</param>

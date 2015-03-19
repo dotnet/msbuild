@@ -161,7 +161,7 @@ namespace Microsoft.Build.Utilities
         public abstract bool Execute();
 
         /// <summary>
-        /// Overriden to give tasks deriving from this class infinite lease time. Otherwise we end up with a limited
+        /// Overridden to give tasks deriving from this class infinite lease time. Otherwise we end up with a limited
         /// lease (5 minutes I think) and task instances can expire if they take long time processing.
         /// </summary>
         [SecurityCritical]

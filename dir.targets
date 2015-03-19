@@ -37,7 +37,7 @@
   </UsingTask>
 
   <!-- 
-    Needed to avoid the IntialTargets from having an Output which ends up getting
+    Needed to avoid the InitialTargets from having an Output which ends up getting
     added to the output references when you have a project to project reference.
   -->
   <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_RestoreBuildTools" />

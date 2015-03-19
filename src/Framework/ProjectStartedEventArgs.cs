@@ -527,7 +527,7 @@ namespace Microsoft.Build.Framework
         private void SetDefaultsBeforeSerialization(StreamingContext sc)
         {
             _projectId = InvalidProjectId;
-            // Dont want to set the default before deserialization is completed to a new event context because
+            // Don't want to set the default before deserialization is completed to a new event context because
             // that would most likely be a lot of wasted allocations
             _parentProjectBuildEventContext = null;
         }
