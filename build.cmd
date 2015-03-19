@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+echo Hello msbuild
+
 :: Check prerequisites
 if not "%VisualStudioVersion%" == "14.0" (
     echo Error: build.cmd should be run from a Visual Studio 2015 Command Prompt.  
