@@ -12,7 +12,7 @@ namespace Microsoft.Build.Shared
     internal static class MSBuildConstants
     {
         /// <summary>
-        /// The name of the property that indicates the the tools path 
+        /// The name of the property that indicates the tools path 
         /// </summary>
         internal const string ToolsPath = "MSBuildToolsPath";
 

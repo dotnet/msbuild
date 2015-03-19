@@ -311,7 +311,7 @@ namespace Microsoft.Build.Shared
         ///             
         ///             If the string is a version
         ///                 We check to see if the version is a valid target framework version. Meaning.  It has a Maj.Minor version and may have 
-        ///                 build, Build is less than or equal to 255 and there is no revisison. The reason the build number needs to be less thatn 255 is because
+        ///                 build, Build is less than or equal to 255 and there is no revision. The reason the build number needs to be less than 255 is because
         ///                 255 is the largest build number for a target framework version that visual studio 2010 supports. The build number is supposed to 
         ///                 represent a service pack on the 4.0 framework.
         ///                 
@@ -323,7 +323,7 @@ namespace Microsoft.Build.Shared
         ///                 
         ///         Since the dictionary is sorted in reverse order to generate the list to return we do the following:
         ///         Go through the list of dictionary entries 
-        ///             For each entry sort the list in reverse alphabeticl order and add the entries in their internal list to the listToreturn. 
+        ///             For each entry sort the list in reverse alphabetical order and add the entries in their internal list to the listToreturn. 
         ///
         ///         This way we have a reverse sorted list of all of the version keys.
         /// </summary>
