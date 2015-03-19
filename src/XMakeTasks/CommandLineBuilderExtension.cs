@@ -224,8 +224,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Designed to handle the /link and /embed swithes:
         ///
-        ///      /embed[resource]:<filename>[,<name>[,Private]]
-        ///      /link[resource]:<filename>[,<name>[,Private]]
+        ///      /embed[resource]:&lt;filename&gt;[,&lt;name&gt;[,Private]]
+        ///      /link[resource]:&lt;filename&gt;[,&lt;name&gt;[,Private]]
         ///
         /// Where the last flag--Private--is either present or not present
         /// depending on whether the ITaskItem has a Private="True" attribue.
