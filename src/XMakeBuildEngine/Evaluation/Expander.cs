@@ -1200,7 +1200,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (valueToConvert is IEnumerable)
                     {
-                        // If the return is enumerable, then we'll convert to semi-colon delimted elements
+                        // If the return is enumerable, then we'll convert to semi-colon delimited elements
                         // each of which must be converted, so we'll recurse for each element
                         using (var builder = new ReuseableStringBuilder())
                         {

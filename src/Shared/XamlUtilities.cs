@@ -46,7 +46,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Returns an identifier for a property based on its name and its containing object's type. Use this
-        /// overload when the containin object's name is not known (which can be the case when the property
+        /// overload when the containing object's name is not known (which can be the case when the property
         /// being tested is the Name property itself).
         /// </summary>
         /// <param name="propertyName"> The name of the property. </param>

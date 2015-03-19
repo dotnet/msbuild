@@ -95,7 +95,7 @@ namespace Microsoft.Build.Utilities
         private Dictionary<int, int> _submissionProjectsInProgress = new Dictionary<int, int>();
 
         /// <summary>
-        /// The maximum node count as specified in the call to Initialze()
+        /// The maximum node count as specified in the call to Initialize()
         /// </summary>
         private int _maxNodeCount = 1;
 

@@ -313,7 +313,7 @@ namespace Microsoft.Build.Framework
         }
 
         // IEnumerable is not a serializable type. That is okay because
-        // (a) this event will not be thrown by tasks, so it should not generally cross AppFomain boundaries
+        // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
         // (b) this event still makes sense when this field is "null"
         [NonSerialized]
         private IEnumerable _items;

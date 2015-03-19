@@ -128,7 +128,7 @@ namespace Microsoft.Build.Utilities
             get
             {
                 // If the task instance does not equal null then use its build engine because 
-                // the task instances build engine can be changed for example during tests. This changin of the engine on the same task object is not expected to happen 
+                // the task instances build engine can be changed for example during tests. This changing of the engine on the same task object is not expected to happen
                 // during normal operation.
                 if (_taskInstance != null)
                 {

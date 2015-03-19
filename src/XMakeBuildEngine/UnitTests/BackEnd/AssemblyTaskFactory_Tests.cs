@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure the number of properties retreived from the task factory are the same number retreived from the type directly.
+        /// Make sure the number of properties retrieved from the task factory are the same number retrieved from the type directly.
         /// </summary>
         [TestMethod]
         public void VerifyGetTaskParameters()

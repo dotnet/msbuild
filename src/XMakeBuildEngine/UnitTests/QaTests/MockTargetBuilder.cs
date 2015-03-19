@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.QA
         }
 
         /// <summary>
-        /// Simulates callback. Access the configuration for the primary project. Retreive the test test data definition.
+        /// Simulates callback. Access the configuration for the primary project. Retrieve the test test data definition.
         /// Get the child definitions if available and simulate a callback for each of the child definitions. Note that the 
         /// targets to build parameter is the same for all the projects - that is we instruct to build the same set of targets
         /// for all of the projects. Thus the child test definitions of the entry should have the same set of targets available

@@ -1291,8 +1291,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// When an exception is raised in the logging thread, we do not want the application to terminate right away. 
-        /// Whidby and orcas msbuild have the logger exceptions occuring on the engine thread so that the host can 
-        /// catch and deal with these exceptions as they may occure somewhat frequently due to user generated loggers.
+        /// Whidbey and orcas msbuild have the logger exceptions occurring on the engine thread so that the host can
+        /// catch and deal with these exceptions as they may occur somewhat frequently due to user generated loggers.
         /// This method will raise the exception on a delegate to which the engine is registered to. This delegate will 
         /// send the exception to the engine so that it can be raised on the engine thread.
         /// </summary>

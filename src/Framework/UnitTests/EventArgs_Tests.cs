@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests
         #endregion
 
         /// <summary>
-        /// Verify a whidby project started event can be deserialized, the whidby event is stored in a serialized base64 string.
+        /// Verify a whidbey project started event can be deserialized, the whidbey event is stored in a serialized base64 string.
         /// </summary>
         [TestMethod]
         [Ignore]

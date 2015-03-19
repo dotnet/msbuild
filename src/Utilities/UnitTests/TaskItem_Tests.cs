@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests
             from.CopyMetadataTo(to);
 
             Assert.AreEqual("Bonobo.txt", to.ItemSpec);          // ItemSpec is never overwritten
-            Assert.AreEqual("Bob", to.GetMetadata("Sponge"));   // Metadata not in source are preserverd.
+            Assert.AreEqual("Bob", to.GetMetadata("Sponge"));   // Metadata not in source are preserved.
             Assert.AreEqual("Harriet", to.GetMetadata("Dog"));  // Metadata present on destination are not overwritten.
             Assert.AreEqual("Mike", to.GetMetadata("Cat"));
             Assert.AreEqual("Big", to.GetMetadata("Bird"));

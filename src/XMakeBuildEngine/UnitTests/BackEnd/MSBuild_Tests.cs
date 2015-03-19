@@ -1173,7 +1173,7 @@ namespace Microsoft.Build.UnitTests
                             break;
                     }
                     // The build should fail as the first project has an error
-                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally
@@ -1298,7 +1298,7 @@ namespace Microsoft.Build.UnitTests
                             break;
                     }
                     // The build should fail as the first project has an error
-                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.UnitTests
                 bool success = p.Build();
 
                 logger.AssertLogDoesntContain(AssemblyResources.GetString("MSBuild.SkippingRemainingProjects"));
-                Assert.IsFalse(success, "Build Succeded.  See 'Standard Out' tab for details.");
+                Assert.IsFalse(success, "Build Succeeded.  See 'Standard Out' tab for details.");
 
                 parentProjectContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -1371,7 +1371,7 @@ namespace Microsoft.Build.UnitTests
                 Project p2 = ObjectModelHelpers.CreateInMemoryProject(pc, parentProjectContents, logger2);
                 bool success2 = p2.Build();
                 logger2.AssertLogDoesntContain(AssemblyResources.GetString("MSBuild.SkippingRemainingProjects"));
-                Assert.IsFalse(success2, "Build Succeded.  See 'Standard Out' tab for details.");
+                Assert.IsFalse(success2, "Build Succeeded.  See 'Standard Out' tab for details.");
             }
             finally
             {
@@ -1527,7 +1527,7 @@ namespace Microsoft.Build.UnitTests
                     }
 
                     // The build should fail as the first project has an error
-                    Assert.IsFalse(success, "Iteration of i:" + i + "Build Succeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i:" + i + "Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally
