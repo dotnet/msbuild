@@ -9,6 +9,8 @@ root = true
 [*]
 indent_style = space
 indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
 
 # Xml project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
