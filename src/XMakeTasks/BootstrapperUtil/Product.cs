@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         public Product()
         {
-            Debug.Fail("Products are not to be created in this fashion.  Please use IBootstrapperBuilder.Products instead.");
+            Debug.Fail("Products are not to be created in this fashion. Please use IBootstrapperBuilder. Products instead.");
             throw new InvalidOperationException();
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         }
 
         /// <summary>
-        /// The ProductBuilder representation of this Product
+        /// The ProductBuilder representation of this Product.
         /// </summary>
         public ProductBuilder ProductBuilder
         {
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         }
 
         /// <summary>
-        /// A string specifying the unique identifier of this product
+        /// A string specifying the unique identifier of this product.
         /// </summary>
         public string ProductCode
         {
@@ -83,7 +83,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         }
 
         /// <summary>
-        /// A human-readable name for this product
+        /// A human-readable name for this product.
         /// </summary>
         public string Name
         {
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         }
 
         /// <summary>
-        /// All products which this product also installs
+        /// All products which this product also installs.
         /// </summary>
         public ProductCollection Includes
         {
