@@ -6,26 +6,18 @@
 // <summary>Tests for the task that resolves an SDKReference to a full path on disk</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
-using System.Reflection;
-using System.Globalization;
-using System.Resources;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
-using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using SDKReference = Microsoft.Build.Tasks.ResolveSDKReference.SDKReference;
-using ProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
-using Microsoft.Build.Evaluation;
-using System.Linq;
-using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 {

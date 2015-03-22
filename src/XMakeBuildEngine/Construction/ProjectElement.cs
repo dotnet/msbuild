@@ -5,17 +5,11 @@
 // <summary>An unevaluated element in MSBuild XML.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Xml;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Collections.ObjectModel;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Collections;
-
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Xml;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction

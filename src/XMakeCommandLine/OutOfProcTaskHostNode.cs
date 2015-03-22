@@ -9,21 +9,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Globalization;
+using System.IO;
+using System.Runtime.Remoting;
 using System.Threading;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Runtime.Remoting;
 
 namespace Microsoft.Build.CommandLine
 {

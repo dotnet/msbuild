@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using System.Text;
 
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd

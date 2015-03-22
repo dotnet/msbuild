@@ -5,18 +5,14 @@
 // <summary>Loads and stores contents SDKManifest.xml - The sdkmanifest parser has been factored out from ResolveSDKReference.cs</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Xml;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Xml;
 
 namespace Microsoft.Build.Utilities
 {

@@ -5,14 +5,12 @@
 // <summary>An interface for objects which can have project xml evaluated into them.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
-using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Evaluation
 {

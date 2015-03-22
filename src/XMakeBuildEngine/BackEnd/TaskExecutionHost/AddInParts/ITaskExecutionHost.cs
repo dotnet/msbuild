@@ -5,11 +5,11 @@
 // <summary>Interface representing an object which can execute tasks.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;

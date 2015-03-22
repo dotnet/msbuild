@@ -5,6 +5,9 @@
 // <summary>The build request engine.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,11 +15,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 namespace Microsoft.Build.BackEnd

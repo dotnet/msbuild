@@ -5,13 +5,9 @@
 // <summary>A read-only dictionary wrapper which converts values as they are accessed.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
 {

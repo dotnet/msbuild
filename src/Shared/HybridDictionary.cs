@@ -5,15 +5,11 @@
 // <summary>A dictionary which changes its backing store to keep memory use low.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Runtime.Serialization;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
 {

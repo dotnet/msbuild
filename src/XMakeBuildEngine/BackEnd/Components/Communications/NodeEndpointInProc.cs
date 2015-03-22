@@ -5,13 +5,10 @@
 // <summary>Implementation of a node endpoint for in-proc nodes.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
-using System.Diagnostics;
-using Microsoft.Build.Shared;
-
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 
 namespace Microsoft.Build.BackEnd

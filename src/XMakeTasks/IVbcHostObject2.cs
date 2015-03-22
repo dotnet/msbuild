@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Tasks.Hosting
 {

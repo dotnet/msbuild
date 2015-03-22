@@ -4,17 +4,12 @@
 // <summary>Implementation of an in-proc node provider.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.Threading;
-using System.Diagnostics;
-
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-
+using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.Threading;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
 

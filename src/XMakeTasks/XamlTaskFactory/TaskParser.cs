@@ -8,16 +8,13 @@
 // </summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Xaml;
-using System.Xml;
-using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;
 
 namespace Microsoft.Build.Tasks.Xaml

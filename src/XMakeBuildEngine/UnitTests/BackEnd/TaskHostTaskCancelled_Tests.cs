@@ -5,13 +5,8 @@
 // <summary>Unit Tests for TaskHostTaskCancelled packet.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.BackEnd;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

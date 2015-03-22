@@ -5,16 +5,14 @@
 // <summary>A logging context for projects.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Execution;
-using System.Collections;
-using Microsoft.Build.Shared;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.BackEnd.Logging
 {

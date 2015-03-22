@@ -4,17 +4,11 @@
 // <summary>Helper to create a "preprocessed" or "logical" view of an evaluated Project.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Xml;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Evaluation
 {

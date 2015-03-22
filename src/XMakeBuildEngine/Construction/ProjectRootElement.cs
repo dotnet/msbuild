@@ -16,7 +16,6 @@ using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;

@@ -5,10 +5,8 @@
 // <summary>Build request which has not had its configuration resolved yet.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Shared;
+using System;
 
 namespace Microsoft.Build.BackEnd
 {

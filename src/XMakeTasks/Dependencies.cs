@@ -3,16 +3,6 @@
 
 using System;
 using System.Collections;
-using System.IO;
-using System.Text;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

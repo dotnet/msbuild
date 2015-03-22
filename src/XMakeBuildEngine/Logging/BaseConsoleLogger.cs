@@ -1,17 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-
-using ColorSetter = Microsoft.Build.Logging.ColorSetter;
+using System.Text;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
+using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 
 namespace Microsoft.Build.BackEnd.Logging

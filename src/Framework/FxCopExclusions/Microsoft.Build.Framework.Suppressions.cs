@@ -4,7 +4,7 @@
 // To Use:
 // Add add module level suppressions to this file to have them suppressed in the assembly
 
-using System.Diagnostics.CodeAnalysis;
+
 
 #if CODE_ANALYSIS
 [module: SuppressMessage("Microsoft.Design", "CA2210:AssembliesShouldHaveValidStrongNames")]

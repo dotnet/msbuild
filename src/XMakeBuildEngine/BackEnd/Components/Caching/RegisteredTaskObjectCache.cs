@@ -5,9 +5,9 @@
 // <summary>Implements a cache for registered task objects.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
 
 namespace Microsoft.Build.BackEnd.Components.Caching
 {

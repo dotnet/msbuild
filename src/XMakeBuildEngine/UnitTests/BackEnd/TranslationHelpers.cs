@@ -5,13 +5,11 @@
 // <summary>Helper class for serialization tests.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd;
+using System.Linq;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

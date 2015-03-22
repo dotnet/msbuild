@@ -1,19 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Text;
-using System.Collections;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System;
+using System.IO;
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
-using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
+using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 
 namespace Microsoft.Build.Logging
 {

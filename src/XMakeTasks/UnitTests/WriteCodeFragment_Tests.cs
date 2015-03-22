@@ -5,13 +5,11 @@
 // <summary>Tests for write code fragment task.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {

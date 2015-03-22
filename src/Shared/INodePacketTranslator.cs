@@ -5,15 +5,11 @@
 // <summary>Interface for objects which can Translate data for inter-node communication.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.IO;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd
 {

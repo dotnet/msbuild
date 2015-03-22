@@ -5,13 +5,11 @@
 // <summary>Tests for ProjectMetadataInstance internal members</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.Build.UnitTests.BackEnd;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {

@@ -5,12 +5,11 @@
 // <summary>A read-only wrapper around an ICollection&lt;K&gt;</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Collections;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
 {

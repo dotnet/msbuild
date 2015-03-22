@@ -5,15 +5,12 @@
 // <summary>Helper task for creating custom tasks for unit tests.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.CodeDom.Compiler;
-
 using Microsoft.Build.Utilities;
+using System;
+using System.CodeDom.Compiler;
+using System.IO;
+using System.Reflection;
+using System.Text;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

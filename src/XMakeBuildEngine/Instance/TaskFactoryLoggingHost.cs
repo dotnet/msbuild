@@ -5,14 +5,14 @@
 // <summary>The host allows task factories access to method to allow them to log message during the construction of the task factories.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
 using System.Diagnostics;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Lifetime;
 using BaseLoggingContext = Microsoft.Build.BackEnd.Logging.BaseLoggingContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using System.Runtime.Remoting.Lifetime;
-using System.Runtime.Remoting;
 
 namespace Microsoft.Build.BackEnd
 {

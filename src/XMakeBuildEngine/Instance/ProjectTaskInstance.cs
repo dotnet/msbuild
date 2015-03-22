@@ -5,12 +5,12 @@
 // <summary>Wraps a task element.</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Microsoft.Build.Execution
 {

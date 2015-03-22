@@ -1,33 +1,21 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Xml;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Specialized;
-using System.Text.RegularExpressions;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-
-using Toolset = Microsoft.Build.Evaluation.Toolset;
+using System.IO;
+using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
+using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
 using Project = Microsoft.Build.Evaluation.Project;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-
-using InternalUtilities = Microsoft.Build.Internal.Utilities;
-using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-
+using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlDocumentWithLocation = Microsoft.Build.Construction.XmlDocumentWithLocation;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
-
-using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
 
 namespace Microsoft.Build.UnitTests
 {

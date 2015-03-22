@@ -5,12 +5,10 @@
 // <summary>The exception which gets thrown if the build is aborted gracefully.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Exceptions
 {

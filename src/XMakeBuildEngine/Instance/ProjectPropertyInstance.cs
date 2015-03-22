@@ -5,15 +5,13 @@
 // <summary>Wraps an evaluated property for build purposes.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd;
-
+using Microsoft.Build.Shared;
+using System;
+using System.Diagnostics;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 namespace Microsoft.Build.Execution

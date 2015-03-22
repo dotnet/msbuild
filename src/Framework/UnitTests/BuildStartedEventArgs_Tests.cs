@@ -5,9 +5,9 @@
 // <summary>Unit tests for BuildStartedEventArgs</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Microsoft.Build.UnitTests
 {

@@ -5,18 +5,12 @@
 // <summary>Tests for preprocessor</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Xml;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
+using System.Xml;
 
 namespace Microsoft.Build.UnitTests.Preprocessor
 {

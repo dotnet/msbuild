@@ -5,17 +5,13 @@
 // <summary>Class which can load and hold toolsets.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
+using System;
+using System.Collections.Generic;
 
-using Constants = Microsoft.Build.Internal.Constants;
 
 namespace Microsoft.Build.Evaluation
 {

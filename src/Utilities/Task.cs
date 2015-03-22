@@ -1,12 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Resources;
-using System.Runtime.InteropServices;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using System.Resources;
 
 namespace Microsoft.Build.Utilities
 {

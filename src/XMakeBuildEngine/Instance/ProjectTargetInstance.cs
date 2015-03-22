@@ -5,12 +5,12 @@
 // <summary>Represents a target for build purposes.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using ObjectModel = System.Collections.ObjectModel;
 
 namespace Microsoft.Build.Execution

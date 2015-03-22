@@ -1,26 +1,21 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.IO;
-using System.Xml;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
-using System.Collections;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
-
+using System.Runtime.InteropServices;
+using System.Threading;
 using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
-using ObjectModelHelpers = Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
 

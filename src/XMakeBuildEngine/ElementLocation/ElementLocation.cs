@@ -5,10 +5,9 @@
 // <summary>The location of an XML node in a file</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Shared;
 using System;
 using System.Diagnostics;
 

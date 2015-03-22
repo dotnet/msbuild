@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -14,15 +13,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Microsoft.Build.Collections;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -965,7 +960,7 @@ namespace Microsoft.Build.BackEnd
                     if (requiredNodeId == InvalidNodeId || idleNodes.Contains(requiredNodeId))
                     {
                         // Look for a request with the smallest source file
-                        System.IO.FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
+                        FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
                         if (f.Length < sizeOfSmallestSourceFile)
                         {
                             sizeOfSmallestSourceFile = f.Length;
@@ -1007,7 +1002,7 @@ namespace Microsoft.Build.BackEnd
                     if (requiredNodeId == InvalidNodeId || idleNodes.Contains(requiredNodeId))
                     {
                         // Look for a request with the largest source file
-                        System.IO.FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
+                        FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
                         if (f.Length > sizeOfLargestSourceFile)
                         {
                             sizeOfLargestSourceFile = f.Length;
@@ -1354,7 +1349,7 @@ namespace Microsoft.Build.BackEnd
                 // Although this request has not been scheduled, this configuration may previously have been 
                 // scheduled to an existing node.  If so, we shouldn't count it in our checks for new node 
                 // creation, because it'll only eventually get assigned to its existing node anyway.  
-                if (assignedNodeForConfiguration != Scheduler.InvalidNodeId)
+                if (assignedNodeForConfiguration != InvalidNodeId)
                 {
                     continue;
                 }
@@ -1577,7 +1572,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         bool affinityMismatch = false;
                         int assignedNodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
-                        if (assignedNodeId != Scheduler.InvalidNodeId)
+                        if (assignedNodeId != InvalidNodeId)
                         {
                             if (!_availableNodes[assignedNodeId].CanServiceRequestWithAffinity(GetNodeAffinityForRequest(request)))
                             {

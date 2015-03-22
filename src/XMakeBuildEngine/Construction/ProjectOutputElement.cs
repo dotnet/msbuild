@@ -5,13 +5,10 @@
 // <summary>Definition of ProjectOutputElement class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System;
+using System.Diagnostics;
+using System.Xml;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction

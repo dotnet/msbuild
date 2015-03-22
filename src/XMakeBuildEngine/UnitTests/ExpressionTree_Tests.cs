@@ -1,22 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Globalization;
-using System.Reflection;
-using System.Collections;
-using System.IO;
-using System.Xml;
-using System.Collections.Specialized;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using System.Collections.Generic;
 using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {

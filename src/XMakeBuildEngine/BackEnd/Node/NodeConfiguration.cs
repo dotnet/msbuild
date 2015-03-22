@@ -6,16 +6,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
-
-using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
+using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
 namespace Microsoft.Build.BackEnd
 {

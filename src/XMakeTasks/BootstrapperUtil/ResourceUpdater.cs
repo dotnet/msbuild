@@ -5,9 +5,6 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 

@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
 using System;
 using System.Globalization;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

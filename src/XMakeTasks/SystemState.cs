@@ -1,22 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Diagnostics;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Reflection;
+using System;
 using System.Collections;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
-using System.Globalization;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Versioning;
+using System.Security.Permissions;
 
 namespace Microsoft.Build.Tasks
 {

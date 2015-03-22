@@ -1,28 +1,23 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Xml;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using System.Text;
-using System.Threading;
-
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Collections;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 
 namespace Microsoft.Build.BackEnd
 {
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-
+    using ItemVectorPartition = Dictionary<string, IList<ProjectItemInstance>>;
     // ItemVectorPartitionCollection is designed to contains a set of project items which have possibly undergone transforms.
     // The outer dictionary it usually keyed by item type, so if items originally came from 
     // an expression like @(Foo), the outer dictionary would have a key of "Foo" in it.
@@ -31,7 +26,6 @@ namespace Microsoft.Build.BackEnd
     // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be 
     // contained a list of the items which were created/transformed using that pattern.    
     using ItemVectorPartitionCollection = Dictionary<string, Dictionary<string, IList<ProjectItemInstance>>>;
-    using ItemVectorPartition = Dictionary<string, IList<ProjectItemInstance>>;
 
     /// <summary>
     /// Enumeration of the results of target dependency analysis.

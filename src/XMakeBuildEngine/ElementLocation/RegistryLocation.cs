@@ -5,9 +5,8 @@
 // <summary>The location something in the registry</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Shared;
 using System;
 
 namespace Microsoft.Build.Construction

@@ -5,11 +5,9 @@
 // <summary>An interface for target results.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using Microsoft.Build.Framework;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Execution
 {

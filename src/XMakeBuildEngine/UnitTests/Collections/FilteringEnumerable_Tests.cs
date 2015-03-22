@@ -5,10 +5,9 @@
 // <summary>Tests the FilteringEnumerable utility class</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {

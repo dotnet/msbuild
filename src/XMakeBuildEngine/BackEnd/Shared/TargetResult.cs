@@ -5,18 +5,17 @@
 // <summary>Represents results for a specific target.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Globalization;
-using System.IO.Compression;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
+using System.IO.Compression;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.Execution
 {

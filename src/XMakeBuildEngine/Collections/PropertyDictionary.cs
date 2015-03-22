@@ -5,14 +5,12 @@
 // <summary>A dictionary over properties or metadata.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Collections
 {

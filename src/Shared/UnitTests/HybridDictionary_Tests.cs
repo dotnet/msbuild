@@ -5,12 +5,12 @@
 // <summary>Tests of a dictionary which changes its backing store to keep memory use low.</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {

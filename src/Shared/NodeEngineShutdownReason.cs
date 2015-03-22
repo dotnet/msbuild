@@ -4,9 +4,6 @@
 // <summary>Enumeration of the reasons a node would shut down.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.Execution
 {

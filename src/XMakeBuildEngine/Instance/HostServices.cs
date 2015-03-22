@@ -5,11 +5,10 @@
 // <summary>Implementation of HostServices that mediates access from the build to the host.</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
-using System.Collections.Generic;
+using Microsoft.Build.Shared;
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Microsoft.Build.Execution

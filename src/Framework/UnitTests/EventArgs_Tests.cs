@@ -5,15 +5,11 @@
 // <summary>Unit tests for EventArgsTests</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.IO;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Microsoft.Build.UnitTests
 {

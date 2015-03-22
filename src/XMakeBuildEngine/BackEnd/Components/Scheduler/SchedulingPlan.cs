@@ -5,16 +5,14 @@
 // <summary>Class which maintains the plan used by the Scheduler to efficiently distribute work to multiple nodes.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Text;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd.Logging;
 
 namespace Microsoft.Build.BackEnd
 {

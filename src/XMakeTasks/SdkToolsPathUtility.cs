@@ -5,13 +5,11 @@
 // <summary>Provide a helper class for tasks to find their tools if they are in the SDK</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+using System;
+using System.IO;
 
 namespace Microsoft.Build.Tasks
 {

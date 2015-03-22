@@ -5,15 +5,10 @@
 // <summary>Implementation a class which splits expressions to MSBuild rules.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Security.Permissions;
-using System.Diagnostics;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using System.Collections.Generic;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Evaluation
 {

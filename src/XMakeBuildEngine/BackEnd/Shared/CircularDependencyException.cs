@@ -6,10 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.Serialization;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {

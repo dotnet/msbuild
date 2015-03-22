@@ -5,13 +5,13 @@
 // <summary>Tests for ProjectStringCache</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {

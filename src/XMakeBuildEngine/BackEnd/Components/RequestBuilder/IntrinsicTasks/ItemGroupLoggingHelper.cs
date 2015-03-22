@@ -5,12 +5,12 @@
 // <summary>Helper class to convert ItemGroup parameters to a string value for logging.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {

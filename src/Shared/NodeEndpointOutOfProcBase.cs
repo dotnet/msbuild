@@ -5,21 +5,15 @@
 // <summary>Base class for the implementation of a node endpoint for out-of-proc nodes.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.IO;
-using System.IO.Pipes;
-using System.Threading;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Security;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Security.Permissions;
+using System.Threading;
 
 namespace Microsoft.Build.BackEnd
 {

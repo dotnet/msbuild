@@ -5,12 +5,10 @@
 // <summary> Tool switch description class for DataDriven tasks. </summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks.Xaml
 {

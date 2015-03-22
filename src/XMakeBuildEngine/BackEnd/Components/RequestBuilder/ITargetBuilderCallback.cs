@@ -5,13 +5,9 @@
 // <summary>Interface for the target builder callback.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using System.Threading.Tasks;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 namespace Microsoft.Build.BackEnd
 {

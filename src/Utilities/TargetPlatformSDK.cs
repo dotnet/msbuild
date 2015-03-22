@@ -5,11 +5,11 @@
 // <summary>Internal representation of a target platform</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {

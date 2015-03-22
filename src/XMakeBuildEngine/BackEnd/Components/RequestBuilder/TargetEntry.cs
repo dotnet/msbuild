@@ -7,22 +7,19 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Debugging;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using MessageImportance = Microsoft.Build.Framework.MessageImportance;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
@@ -347,7 +344,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!condition)
             {
-                _targetResult = new TargetResult(new TaskItem[0] { }, new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
+                _targetResult = new TargetResult(new ProjectItemInstance.TaskItem[0] { }, new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null));
                 _state = TargetEntryState.Completed;
 
                 if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
@@ -550,7 +547,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Produce the final results.
-                List<TaskItem> targetOutputItems = new List<TaskItem>();
+                List<ProjectItemInstance.TaskItem> targetOutputItems = new List<ProjectItemInstance.TaskItem>();
 
                 try
                 {
@@ -613,12 +610,12 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            HashSet<TaskItem> addedItems = new HashSet<TaskItem>();
+                            HashSet<ProjectItemInstance.TaskItem> addedItems = new HashSet<ProjectItemInstance.TaskItem>();
                             foreach (ItemBucket bucket in batchingBuckets)
                             {
-                                IList<TaskItem> itemsToAdd = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation);
+                                IList<ProjectItemInstance.TaskItem> itemsToAdd = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation);
 
-                                foreach (TaskItem item in itemsToAdd)
+                                foreach (ProjectItemInstance.TaskItem item in itemsToAdd)
                                 {
                                     if (!addedItems.Contains(item))
                                     {
@@ -707,7 +704,7 @@ namespace Microsoft.Build.BackEnd
             // create a result for this target to report when it gets to the Completed state.
             if (null == _targetResult)
             {
-                _targetResult = new TargetResult(new TaskItem[] { }, new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
+                _targetResult = new TargetResult(new ProjectItemInstance.TaskItem[] { }, new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
             }
 
             _state = TargetEntryState.Completed;

@@ -5,21 +5,8 @@
 // <summary>Tests for the BuildRequestConfigurationResponse class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd;
-using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

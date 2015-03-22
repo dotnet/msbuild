@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.CommandLine
@@ -96,7 +94,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Serialize the contents of the class.
         /// </summary>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

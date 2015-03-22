@@ -5,14 +5,13 @@
 // <summary>Moves files from one place to another.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using System;
+using System.Collections;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
 
 namespace Microsoft.Build.Tasks
 {

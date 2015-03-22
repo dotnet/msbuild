@@ -5,12 +5,10 @@
 // <summary>Represents a set of metadata for the evaluator.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Collections;
-
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
 
 namespace Microsoft.Build.Evaluation

@@ -5,9 +5,8 @@
 // <summary>Description of a local type for a debugger local.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
+using System;
 
 namespace Microsoft.Build.Debugging
 {

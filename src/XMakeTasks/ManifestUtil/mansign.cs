@@ -6,16 +6,13 @@
 //
 
 
-using System;
-using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Xml;
-using System.Runtime.InteropServices;
-
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace System.Deployment.Internal.CodeSigning

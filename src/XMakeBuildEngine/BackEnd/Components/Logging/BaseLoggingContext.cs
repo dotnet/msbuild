@@ -5,15 +5,10 @@
 // <summary>A base class providing type-safe methods of logging in various contexts.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System;
+using System.Diagnostics;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.BackEnd.Logging

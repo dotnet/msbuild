@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Tasks.Hosting;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Tasks.Hosting;
 
 namespace Microsoft.Build.UnitTests
 {

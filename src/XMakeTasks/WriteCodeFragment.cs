@@ -5,22 +5,20 @@
 // <summary>Generates a temporary code file with the specified generated code fragment.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Globalization;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
+using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Configuration;
-using System.Security;
+using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
+using System.Security;
+using System.Text;
 
 namespace Microsoft.Build.Tasks
 {

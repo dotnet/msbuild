@@ -5,19 +5,16 @@
 // <summary>Tests for several of the collections classes</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.UnitTests;
-using Microsoft.Build.Framework;
-using System.Collections;
-using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
 using Microsoft.Build.UnitTests.BackEnd;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using ObjectModel = System.Collections.ObjectModel;
 
 namespace Microsoft.Build.UnitTests.OM.Collections

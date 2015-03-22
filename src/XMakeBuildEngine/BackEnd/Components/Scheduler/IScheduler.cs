@@ -4,10 +4,8 @@
 // <summary>Interface for the scheduler.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Microsoft.Build.Execution;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd
 {

@@ -1,17 +1,17 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
-using System.IO;
-using System.Text;
-using System.Runtime.InteropServices;
-using Microsoft.Build.Shared;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
-using Microsoft.Build.Framework;
-using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Microsoft.Build.Tasks
 {

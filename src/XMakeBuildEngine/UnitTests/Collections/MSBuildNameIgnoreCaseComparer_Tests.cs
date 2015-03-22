@@ -5,13 +5,13 @@
 // <summary>Tests the MSBuildNameIgnoreCaseComparer</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {

@@ -5,11 +5,10 @@
 // <summary>Unit tests for ProjectStartedEventArgs</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
 
 namespace Microsoft.Build.UnitTests
 {

@@ -5,13 +5,8 @@
 // <summary>Strongly typed weak reference</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections.ObjectModel;
-using System.Collections;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
+using System;
 
 namespace Microsoft.Build.Collections
 {

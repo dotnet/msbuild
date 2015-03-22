@@ -5,10 +5,9 @@
 // <summary>Unit tests for TaskCommandLineEventArgs</summary>
 //-----------------------------------------------------------------------
 
-using System;
-
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Microsoft.Build.UnitTests
 {

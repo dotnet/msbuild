@@ -4,16 +4,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Security;
 using System.Text;
 using System.Xml;
-
-using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
-using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
-using System.Collections.ObjectModel;
+using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
+using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
 
 namespace Microsoft.Build.Construction
 {

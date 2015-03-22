@@ -5,12 +5,10 @@
 // <summary>A dictionary that can hold more than one distinct value with the same key.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections.ObjectModel;
-using System.Collections;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Microsoft.Build.Collections

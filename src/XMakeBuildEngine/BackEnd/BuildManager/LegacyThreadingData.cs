@@ -5,11 +5,11 @@
 // <summary>Contains a set of data used for legacy threading semantics</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Build.Execution

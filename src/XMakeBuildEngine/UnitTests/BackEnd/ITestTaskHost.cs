@@ -5,9 +5,6 @@
 // <summary>Interface used by the test task to communicate what the TaskExecutionHost did to it.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd

@@ -5,11 +5,11 @@
 // <summary>Loads and stores the contents of Platform.xml</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using System.Collections.Generic;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {

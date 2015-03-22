@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Shared;
 using System;
 using System.Xml;
-using System.Collections;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {

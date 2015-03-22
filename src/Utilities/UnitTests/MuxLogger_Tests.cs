@@ -5,19 +5,15 @@
 // <summary>Tests for the MuxLogger.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Xml;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
-
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
+using System.Threading;
+using System.Xml;
 using MuxLogger = Microsoft.Build.Utilities.MuxLogger;
 
 namespace Microsoft.VisualStudio.Build.UnitTest

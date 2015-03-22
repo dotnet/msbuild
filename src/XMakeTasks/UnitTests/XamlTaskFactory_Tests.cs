@@ -1,21 +1,17 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
-using System.Xml;
-using System.IO;
+using Microsoft.Build.Tasks.Xaml;
+using Microsoft.CSharp;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Linq;
-using Microsoft.CSharp;
-using System.Reflection;
-using Microsoft.Build.Shared;
+using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Build.Tasks.Xaml;
+using System.IO;
+using System.Reflection;
 using System.Xaml;
 
 namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests

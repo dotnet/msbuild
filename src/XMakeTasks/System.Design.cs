@@ -7,15 +7,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Reflection;
+using System.ComponentModel;
 using System.Globalization;
 using System.Resources;
-using System.Text;
 using System.Threading;
-using System.Security.Permissions;
-
-
-using System.ComponentModel;
 
 
 namespace Microsoft.Build.Tasks

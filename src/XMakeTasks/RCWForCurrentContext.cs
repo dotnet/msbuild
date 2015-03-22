@@ -6,8 +6,8 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.Tasks.InteropUtilities
 {

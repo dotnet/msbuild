@@ -5,10 +5,10 @@
 // <summary>Interface implemented by objects which can build tasks.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Execution;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Execution;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 
 namespace Microsoft.Build.BackEnd

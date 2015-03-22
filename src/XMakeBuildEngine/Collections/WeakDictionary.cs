@@ -5,12 +5,10 @@
 // <summary>A dictionary that does not hold strong references to either keys or values</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections.ObjectModel;
-using System.Collections;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Microsoft.Build.Collections

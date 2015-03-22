@@ -5,11 +5,10 @@
 // <summary>Dictionary that does not prevent values from being garbage collected.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
 {

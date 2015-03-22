@@ -5,21 +5,16 @@
 // <summary>Tests for the AssemblyTaskFactory</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
 using System.Reflection;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Construction;
-
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.BackEnd

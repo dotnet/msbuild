@@ -1,14 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Globalization;
-using System.Collections;
-using System.Xml;
-using System;
-using Microsoft.Build.Shared;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using System;
+using System.Collections;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 namespace Microsoft.Build.Evaluation
 {

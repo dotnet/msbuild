@@ -5,21 +5,18 @@
 // <summary>The standard implementation of ITargetBuilder.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Text;
-using System.Threading;
-using System.Xml;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.BackEnd
 {

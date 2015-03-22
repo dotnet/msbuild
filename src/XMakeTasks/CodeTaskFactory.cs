@@ -5,22 +5,21 @@
 // <summary>A code task factory which uses code dom to generate tasks</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.CodeDom.Compiler;
-using System.Reflection;
-using System.Xml;
-using System.Diagnostics;
-using System.IO;
-
 using Microsoft.Build.Framework;
-using System.CodeDom;
-using Microsoft.Build.Utilities;
-using System.Globalization;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Xml;
 
 namespace Microsoft.Build.Tasks
 {

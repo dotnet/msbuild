@@ -4,10 +4,9 @@
 // <summary>Sink which will take in a build event and raise it on its internal event source</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 
 namespace Microsoft.Build.BackEnd.Logging

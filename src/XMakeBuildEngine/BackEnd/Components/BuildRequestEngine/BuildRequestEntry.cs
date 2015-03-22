@@ -5,16 +5,13 @@
 // <summary>Class representing a build request entry in the request engine's queue.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.IO;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 namespace Microsoft.Build.BackEnd
 {

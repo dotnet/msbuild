@@ -4,11 +4,10 @@
 // <summary>Get the reference assembly paths for a given target framework version / moniker.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+using System;
 using System.Collections.Generic;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;

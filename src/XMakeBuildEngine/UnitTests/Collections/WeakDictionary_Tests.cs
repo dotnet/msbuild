@@ -5,16 +5,10 @@
 // <summary>Tests for the weak dictionary class</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.UnitTests;
-using System.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
