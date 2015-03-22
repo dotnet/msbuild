@@ -5,14 +5,12 @@
 // <summary>A dictionary that has copy-on-write semantics.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Collections
 {

@@ -5,12 +5,9 @@
 // <summary>Implements the TargetSpecification class</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 namespace Microsoft.Build.BackEnd
 {

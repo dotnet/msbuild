@@ -5,22 +5,17 @@
 // <summary>Abstract base class for objects reading toolsets.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Collections.Generic;
-
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
-using Microsoft.Win32;
-
-using error = Microsoft.Build.Shared.ErrorUtilities;
-using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using error = Microsoft.Build.Shared.ErrorUtilities;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 namespace Microsoft.Build.Evaluation
 {

@@ -4,12 +4,8 @@
 // <summary>Class containing information about a node.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd
 {

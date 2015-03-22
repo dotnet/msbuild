@@ -5,10 +5,8 @@
 // <summary>Helper class used to track the time spent by requests in the Scheduler.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Shared;
+using System;
 
 namespace Microsoft.Build.BackEnd
 {

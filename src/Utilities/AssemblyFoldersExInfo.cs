@@ -5,9 +5,9 @@
 // <summary>Contains information about entries in the AssemblyFoldersEx registry keys.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
+using System;
 
 namespace Microsoft.Build.Utilities
 {

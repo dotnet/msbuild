@@ -24,18 +24,17 @@
 **
 ===========================================================*/
 
+using Microsoft.Build.Shared;
 using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using System.Resources;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Reflection;
-using System.Globalization;
-using System.Xml;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Build.Shared;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Resources;
 
 /*
   Plan for the future:

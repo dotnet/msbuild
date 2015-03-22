@@ -7,12 +7,9 @@
 // </summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd.Logging
 {

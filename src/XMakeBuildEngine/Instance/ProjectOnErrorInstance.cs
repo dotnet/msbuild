@@ -5,10 +5,9 @@
 // <summary>Wraps an onerror element.</summary>
 //-----------------------------------------------------------------------
 
-using System.Diagnostics;
-using Microsoft.Build.Shared;
-
 using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
+using System.Diagnostics;
 
 namespace Microsoft.Build.Execution
 {

@@ -5,9 +5,9 @@
 // <summary>A hack (leaking into public API) to prevent a certain case of Jitting in our NGen'd assemblies.</summary>
 //-----------------------------------------------------------------------
 
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Evaluation
 {

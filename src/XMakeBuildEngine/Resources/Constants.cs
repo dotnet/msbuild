@@ -1,18 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
-using System.IO;
-using System.Xml;
-using System.Globalization;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
-using System.Collections.Concurrent;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Microsoft.Build.Internal
 {

@@ -5,8 +5,8 @@
 // <summary>TaskParameterTypeVerifier verifies the correct type for both input and output parameters.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Framework;
+using System;
 
 namespace Microsoft.Build.BackEnd
 {

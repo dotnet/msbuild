@@ -5,11 +5,10 @@
 // <summary>Verify the event redirector to sink properly forwards message to the attached sink</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Build.UnitTests.Logging
 {

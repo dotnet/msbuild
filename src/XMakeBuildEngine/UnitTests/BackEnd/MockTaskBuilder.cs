@@ -5,20 +5,13 @@
 // <summary>A fake task builder used for testing other components.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
-using System.Linq;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-
-using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using System.Threading.Tasks;
+using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

@@ -5,19 +5,14 @@
 // <summary>Implementation of INodePacketTranslator.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using System.Globalization;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Microsoft.Build.BackEnd
 {

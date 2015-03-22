@@ -1,15 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Runtime.InteropServices.ComTypes;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
 using Marshal = System.Runtime.InteropServices.Marshal;
 using VarEnum = System.Runtime.InteropServices.VarEnum;
-using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
 
 namespace Microsoft.Build.UnitTests
 {

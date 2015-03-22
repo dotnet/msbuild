@@ -5,19 +5,11 @@
 // <summary>Moved from Orcas Engine</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
-using System.Text;
-using System.Threading;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.UnitTests
 {

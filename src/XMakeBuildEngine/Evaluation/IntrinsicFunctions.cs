@@ -5,19 +5,12 @@
 // <summary>Definition of functions which can be accessed from MSBuild files.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Reflection;
-
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Collections.Concurrent;
 using Microsoft.Win32;
-
+using System;
+using System.Collections.Generic;
+using System.IO;
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
 

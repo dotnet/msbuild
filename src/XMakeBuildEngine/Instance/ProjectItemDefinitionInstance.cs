@@ -5,15 +5,14 @@
 // <summary>Represents a set of item definitions all applying to the same item-type.</summary>
 //-----------------------------------------------------------------------
 
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Execution
 {

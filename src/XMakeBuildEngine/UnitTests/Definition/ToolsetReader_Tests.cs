@@ -1,23 +1,21 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Configuration;
-using Microsoft.Win32;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-
-using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
-using RegistryException = Microsoft.Build.Exceptions.RegistryException;
-using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+using RegistryException = Microsoft.Build.Exceptions.RegistryException;
+using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
 
 namespace Microsoft.Build.UnitTests.Definition
 {

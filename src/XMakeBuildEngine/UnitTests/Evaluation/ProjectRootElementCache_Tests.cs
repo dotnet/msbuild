@@ -5,17 +5,13 @@
 // <summary>Tests for ProjectRootElementCache</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
-using System.Collections;
-using System;
 using Microsoft.Build.Construction;
-using System.IO;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {

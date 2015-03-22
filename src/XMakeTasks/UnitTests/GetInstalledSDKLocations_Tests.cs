@@ -5,24 +5,13 @@
 // <summary>Test that we can retrieve the list of SDKs and output them to the project file.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
-using System.Reflection;
-using System.Globalization;
-using System.Resources;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
-using System.Linq;
-using Microsoft.Build.Execution;
+using System.IO;
 
 namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
 {

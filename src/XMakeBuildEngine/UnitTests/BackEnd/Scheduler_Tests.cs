@@ -5,27 +5,20 @@
 // <summary>Tests for the basic scheduler.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-    using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
     using Microsoft.Build.Unittest;
 
     /// <summary>

@@ -5,11 +5,10 @@
 // <summary>Unit tests for TargetFinishedEventArgs</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests
 {

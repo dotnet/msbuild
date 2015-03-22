@@ -1,17 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using Microsoft.Win32;
-using Microsoft.Build.Evaluation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests.Definition
 {

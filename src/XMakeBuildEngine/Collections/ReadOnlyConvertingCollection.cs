@@ -5,13 +5,9 @@
 // <summary>A read-only collection wrapper which converts values as they are accessed.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Collections
 {

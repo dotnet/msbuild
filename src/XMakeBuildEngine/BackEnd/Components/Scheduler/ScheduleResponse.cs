@@ -4,14 +4,10 @@
 // <summary>Struct containing a response from a scheduler.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Globalization;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using System;
+using System.Globalization;
 
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.BackEnd
 {

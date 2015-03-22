@@ -4,13 +4,11 @@
 // <summary> Property description class for the XamlTaskFactory parser. </summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml;
 using System.IO;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+using System.Xml;
 
 namespace Microsoft.Build.Tasks.Xaml
 {

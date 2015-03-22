@@ -5,15 +5,13 @@
 // <summary>A mock implementation of ILoggingService used for testing.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Logging;
-using Microsoft.Build.Shared;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 

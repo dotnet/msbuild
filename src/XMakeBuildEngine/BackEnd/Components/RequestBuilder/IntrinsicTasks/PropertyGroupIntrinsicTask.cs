@@ -5,12 +5,11 @@
 // <summary>The PropertyGroup intrinsic task.</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System.Collections.Generic;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 

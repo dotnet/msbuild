@@ -5,31 +5,28 @@
 // <summary>Definition of ProjectInstance class.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
-using Evaluation = Microsoft.Build.Evaluation;
-using ObjectModel = System.Collections.ObjectModel;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Internal;
-using Utilities = Microsoft.Build.Internal.Utilities;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
-using Microsoft.Build.Debugging;
-using System.Xml;
 using System.IO;
-using System.Collections;
-using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Xml;
+using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
+using ObjectModel = System.Collections.ObjectModel;
+using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
+using Utilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.Execution
 {

@@ -5,12 +5,11 @@
 // <summary>Wraps a logical metadatum on an item.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 using System;
 using System.Diagnostics;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {

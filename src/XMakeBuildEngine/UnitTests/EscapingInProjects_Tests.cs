@@ -1,24 +1,19 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Microsoft.Build.UnitTests;
-
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using FileUtilities = Microsoft.Build.Shared.FileUtilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
+using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 

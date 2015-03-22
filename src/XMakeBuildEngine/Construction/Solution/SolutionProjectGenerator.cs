@@ -5,6 +5,9 @@
 // <summary>Converts a solution file to a set of project instances which can be built.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,21 +15,13 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
-
+using Constants = Microsoft.Build.Internal.Constants;
+using FrameworkName = System.Runtime.Versioning.FrameworkName;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using IProperty = Microsoft.Build.Evaluation.IProperty;
 using Project = Microsoft.Build.Evaluation.Project;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using ProjectItem = Microsoft.Build.Evaluation.ProjectItem;
-using IProperty = Microsoft.Build.Evaluation.IProperty;
-
-using Constants = Microsoft.Build.Internal.Constants;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-
-using FrameworkName = System.Runtime.Versioning.FrameworkName;
-using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.Construction
 {

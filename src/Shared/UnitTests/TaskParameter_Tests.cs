@@ -6,16 +6,14 @@
 // testing its serialization.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
-
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests
 {

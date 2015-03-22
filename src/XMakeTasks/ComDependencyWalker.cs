@@ -2,17 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices.ComTypes;
 using System.Globalization;
-
-
-using Microsoft.Build.Shared;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
+using System.Runtime.InteropServices.ComTypes;
 using COMException = System.Runtime.InteropServices.COMException;
+using Marshal = System.Runtime.InteropServices.Marshal;
 using VarEnum = System.Runtime.InteropServices.VarEnum;
 
 namespace Microsoft.Build.Tasks

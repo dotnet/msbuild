@@ -5,9 +5,6 @@
 // <summary>Class describing what is blocking a build request from continuing.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 
 namespace Microsoft.Build.BackEnd

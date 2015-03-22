@@ -1,12 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Internal
 {

@@ -1,18 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Framework;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
-using System.Diagnostics;
 
 namespace Microsoft.Build.Tasks
 {

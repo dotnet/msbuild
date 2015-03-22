@@ -5,14 +5,14 @@
 // <summary>Tests for TaskItem internal members</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {

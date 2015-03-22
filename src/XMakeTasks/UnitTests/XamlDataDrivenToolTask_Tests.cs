@@ -1,27 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.IO;
-using System.Runtime.Remoting;
-using System.Globalization;
-using System.Reflection;
-
-using System.CodeDom;
-using System.CodeDom.Compiler;
-using System.Xaml;
-
-using Microsoft.CSharp;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Tasks.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
 {

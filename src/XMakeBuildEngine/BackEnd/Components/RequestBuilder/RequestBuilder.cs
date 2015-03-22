@@ -6,34 +6,26 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Globalization;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
 #endif
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -882,7 +874,7 @@ namespace Microsoft.Build.BackEnd
                 int handle;
                 if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))
                 {
-                    handle = RequestBuilder.WaitWithBuilderThreadStart(handles, true, _componentHost.LegacyThreadingData, _requestEntry.Request.SubmissionId);
+                    handle = WaitWithBuilderThreadStart(handles, true, _componentHost.LegacyThreadingData, _requestEntry.Request.SubmissionId);
                 }
                 else if (_inMSBuildCallback)
                 {
@@ -1090,7 +1082,7 @@ namespace Microsoft.Build.BackEnd
                 (_requestEntry.RequestConfiguration.ResultsNodeId != _componentHost.BuildParameters.NodeId))
             {
                 // This indicates to the system that we will block waiting for a results transfer.  We will block here until those results become available.
-                await BlockOnTargetInProgress(Microsoft.Build.BackEnd.BuildRequest.InvalidGlobalRequestId, null);
+                await BlockOnTargetInProgress(BackEnd.BuildRequest.InvalidGlobalRequestId, null);
 
                 // All of the results should now be on this node.
                 ErrorUtilities.VerifyThrow(_requestEntry.RequestConfiguration.ResultsNodeId == _componentHost.BuildParameters.NodeId, "Results for configuration {0} were not retrieved from node {1}", _requestEntry.RequestConfiguration.ConfigurationId, _requestEntry.RequestConfiguration.ResultsNodeId);

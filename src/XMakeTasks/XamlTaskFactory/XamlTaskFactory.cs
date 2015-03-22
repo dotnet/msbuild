@@ -5,20 +5,18 @@
 // <summary> The task factory for Xaml data driven tasks. </summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.Xaml;
+using Microsoft.Build.Utilities;
 using System;
 using System.CodeDom;
-using System.Collections.Generic;
-using System.Text;
 using System.CodeDom.Compiler;
-using System.Reflection;
-using System.Xml;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Threading;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks.Xaml;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {

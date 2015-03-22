@@ -1,11 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Win32;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Deployment.Internal.CodeSigning;
@@ -14,6 +10,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Resources;
+using System.Runtime.Hosting;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
@@ -21,7 +19,11 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Xml;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+using Microsoft.Win32;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -141,15 +143,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (majorVersion == Fx2MajorVersion)
             {
-                return SecurityUtilities.XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
+                return XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
             }
             else if (majorVersion == Fx3MajorVersion)
             {
-                return SecurityUtilities.XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
+                return XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
             }
             else
             {
-                return SecurityUtilities.XmlToPermissionSet((GetXmlElement(targetZone, fn)));
+                return XmlToPermissionSet((GetXmlElement(targetZone, fn)));
             }
         }
 
@@ -248,7 +250,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     throw new ArgumentException(String.Empty /* no message */, "targetZone");
             }
 
-            Evidence evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity("")) }, null);
+            Evidence evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new ActivationArguments(new System.ApplicationIdentity("")) }, null);
 
             PermissionSet sandbox = SecurityManager.GetStandardSandbox(evidence);
             resultInString = sandbox.ToString();
@@ -569,7 +571,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path, string targetFrameworkVersion)
         {
-            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", typeof(SecurityUtilities).Module.Assembly);
+            ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", typeof(SecurityUtilities).Module.Assembly);
 
             if (String.IsNullOrEmpty(certThumbprint))
                 throw new ArgumentNullException("certThumbprint");
@@ -628,11 +630,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
             // setup resources
-            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", typeof(SecurityUtilities).Module.Assembly);
+            ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Deployment.ManifestUtilities.Strings", typeof(SecurityUtilities).Module.Assembly);
             SignFileInternal(cert, timestampUrl, path, true, resources);
         }
 
-        private static void SignFileInternal(X509Certificate2 cert, Uri timestampUrl, string path, bool targetFrameworkSupportsSha256, System.Resources.ResourceManager resources)
+        private static void SignFileInternal(X509Certificate2 cert, Uri timestampUrl, string path, bool targetFrameworkSupportsSha256, ResourceManager resources)
         {
             if (cert == null)
                 throw new ArgumentNullException("cert");
@@ -687,7 +689,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
                 catch (Exception ex)
                 {
-                    int exceptionHR = System.Runtime.InteropServices.Marshal.GetHRForException(ex);
+                    int exceptionHR = Marshal.GetHRForException(ex);
                     if (exceptionHR == -2147012889 || exceptionHR == -2147012867)
                     {
                         throw new ApplicationException(resources.GetString("SecurityUtil.TimestampUrlNotFound"), ex);
@@ -698,7 +700,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
 
-        private static void SignPEFile(X509Certificate2 cert, System.Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
+        private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, string path, ResourceManager resources, bool useSha256)
         {
             if (GetPathToTool() == null) throw new ApplicationException(resources.GetString("SecurityUtil.SigntoolNotFound"));
 
@@ -717,7 +719,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 while (!signTool.HasExited)
                 {
-                    System.Threading.Thread.Sleep(50);
+                    Thread.Sleep(50);
                 }
                 switch (signTool.ExitCode)
                 {

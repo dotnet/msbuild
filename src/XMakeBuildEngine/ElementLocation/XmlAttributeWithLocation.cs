@@ -5,10 +5,9 @@
 // <summary>Improvement to XmlAttribute that during load attaches location information to itself.</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Shared;
 using System;
-using System.Xml;
 using System.Diagnostics;
+using System.Xml;
 
 namespace Microsoft.Build.Construction
 {

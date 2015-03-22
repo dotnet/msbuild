@@ -5,12 +5,12 @@
 // <summary>Wraps a task factory and provides helper methods to gather the parameters</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Reflection;
-using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Microsoft.Build.Execution
 {

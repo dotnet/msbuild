@@ -5,9 +5,6 @@
 // <summary>Compare the version numbers only for an AssemblyNameExtension and make sure they are in reverse order. This assumes the names are the same.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Shared

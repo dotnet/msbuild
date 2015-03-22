@@ -5,17 +5,17 @@
 // <summary>Tests for ProjectInstance internal members</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
-using System.Collections;
-using System;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
-using System.Xml;
 using System.Linq;
+using System.Xml;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {

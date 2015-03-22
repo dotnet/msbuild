@@ -2,21 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Security;
-using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Text;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Internal;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Microsoft.Build.Shared
 {

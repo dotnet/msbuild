@@ -5,23 +5,22 @@
 // <summary>Test the logging service component</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using System.IO;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml;
-
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MockHost = Microsoft.Build.UnitTests.BackEnd.MockHost;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.UnitTests.Logging
 {

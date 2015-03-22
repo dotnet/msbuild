@@ -5,22 +5,16 @@
 // <summary>A configuration for a build request.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Logging;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
-using System.Xml;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.BackEnd
 {

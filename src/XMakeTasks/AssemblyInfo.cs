@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Reflection;
-using System.Security;
-using System.Security.Permissions;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 // This is the assembly-level GUID, and the GUID for the TypeLib associated with
 // this assembly.  We should specify this explicitly, as opposed to letting 

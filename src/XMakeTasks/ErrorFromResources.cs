@@ -5,9 +5,9 @@
 // <summary>Task that logs an error given the appropriate resource string.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
 
 namespace Microsoft.Build.Tasks
 {

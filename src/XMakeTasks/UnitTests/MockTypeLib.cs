@@ -1,14 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Runtime.InteropServices.ComTypes;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Microsoft.Build.Tasks;
-
 using Marshal = System.Runtime.InteropServices.Marshal;
 
 namespace Microsoft.Build.UnitTests

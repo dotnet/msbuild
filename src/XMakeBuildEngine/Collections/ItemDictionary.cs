@@ -5,14 +5,12 @@
 // <summary>Collection of instance or definition items</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using ObjectModel = System.Collections.ObjectModel;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Collections
 {

@@ -5,11 +5,11 @@
 // <summary>Export a windows metadata file from a dll</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text;
 
 namespace Microsoft.Build.Tasks

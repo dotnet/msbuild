@@ -5,21 +5,20 @@
 // <summary>Test the logging service component</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Logging;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
-using System.IO;
-using System.Threading;
-using System.Reflection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Threading;
 
 namespace Microsoft.Build.UnitTests.Logging
 {

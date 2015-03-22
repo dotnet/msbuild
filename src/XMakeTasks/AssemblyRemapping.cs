@@ -4,8 +4,8 @@
 // <summary>Describes a remapping entry pair</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Shared;
+using System;
 
 namespace Microsoft.Build.Tasks
 {

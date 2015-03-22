@@ -5,7 +5,7 @@
 // Add module level suppressions to this file to have them suppressed in the assembly
 //
 
-using System.Diagnostics.CodeAnalysis;
+
 
 #if CODE_ANALYSIS
 [module: SuppressMessage("Microsoft.Naming","CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId="0", Scope="module", Target="microsoft.build.tasks.core.dll", Justification="Already shipped several versions with a name like this")]

@@ -6,14 +6,12 @@
 // messages across nodes.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Reflection;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd;
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 
 namespace Microsoft.Build.Shared

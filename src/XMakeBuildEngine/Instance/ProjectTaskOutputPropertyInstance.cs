@@ -5,8 +5,8 @@
 // <summary>Represents an output property tag on a task for build purposes</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {

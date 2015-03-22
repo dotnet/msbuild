@@ -5,30 +5,22 @@
 // <summary>Tests for evaluation</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Xml;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Threading;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.BackEnd;
-using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Threading;
+using System.Xml;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {

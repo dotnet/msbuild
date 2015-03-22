@@ -5,18 +5,15 @@
 // <summary>Tests for TaskItem internal members</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
-using Microsoft.Build.UnitTests.BackEnd;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using System.Xml;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.BackEnd;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+using System.Xml;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {

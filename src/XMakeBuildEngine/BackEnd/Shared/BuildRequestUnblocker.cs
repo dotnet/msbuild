@@ -5,12 +5,8 @@
 // <summary>Class used to unblock a blocked build request.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
 using Microsoft.Build.Shared;
-
+using System.Diagnostics;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
 namespace Microsoft.Build.BackEnd

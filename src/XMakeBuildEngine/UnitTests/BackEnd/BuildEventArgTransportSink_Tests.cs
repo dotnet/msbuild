@@ -5,12 +5,12 @@
 // <summary>Transport sink correctly takes a buildEventArg and sends to the transport layer</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Microsoft.Build.UnitTests.Logging
 {

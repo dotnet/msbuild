@@ -5,26 +5,23 @@
 // <summary>Implementation of ITaskExecutionHost for executing tasks in-proc.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-
-using Microsoft.Build.Execution;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.Build.BackEnd.Logging;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Remoting;
-
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.BackEnd

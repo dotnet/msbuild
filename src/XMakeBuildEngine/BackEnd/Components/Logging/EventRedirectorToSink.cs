@@ -5,8 +5,6 @@
 // <summary>NodePackets which are used for node communication</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 

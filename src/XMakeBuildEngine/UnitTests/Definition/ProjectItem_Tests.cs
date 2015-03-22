@@ -5,28 +5,16 @@
 // <summary>Tests for ProjectInstance internal members</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.IO;
-using System.Linq;
-using System.Resources;
-using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Xml;
-using System.Text;
-using System.Globalization;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
-using System.Threading;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
-using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.UnitTests.Definition
 {

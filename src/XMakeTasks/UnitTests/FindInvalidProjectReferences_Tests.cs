@@ -5,19 +5,11 @@
 // <summary>Tests for the task that resolves an FindInvalidProjectReferences to a full path on disk</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
-using System.Text.RegularExpressions;
+using Microsoft.Build.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Microsoft.Build.UnitTests
 {

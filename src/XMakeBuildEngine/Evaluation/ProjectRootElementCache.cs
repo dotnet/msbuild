@@ -5,21 +5,16 @@
 // <summary>Holds weak references to ProjectRootElement's for design time sharing purposes.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml;
-using Microsoft.Build.Construction;
-
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System.Globalization;
-using Microsoft.Build.BackEnd;
-
+using System.IO;
+using System.Xml;
+using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
 namespace Microsoft.Build.Evaluation

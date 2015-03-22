@@ -1,21 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
-using System.Resources;
-using System.Text;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.LanguageParser;
 using Microsoft.Build.Tasks.Hosting;
 using Microsoft.Build.Tasks.InteropUtilities;
 using Microsoft.Build.Utilities;
+using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
 
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;

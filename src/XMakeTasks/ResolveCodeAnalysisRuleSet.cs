@@ -5,8 +5,8 @@
 // <summary>A task to determine the code analysis rule set file.</summary>
 //-----------------------------------------------------------------------
 
-using System.IO;
 using Microsoft.Build.Framework;
+using System.IO;
 
 namespace Microsoft.Build.Tasks
 {

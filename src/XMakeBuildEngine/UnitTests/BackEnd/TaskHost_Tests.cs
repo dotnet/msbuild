@@ -5,21 +5,20 @@
 // <summary>Tests for the TaskHost</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
-using System.Collections.Generic;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
-using System.Collections;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

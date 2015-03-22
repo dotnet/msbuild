@@ -5,13 +5,11 @@
 // <summary>Definition of UsingTaskParameterGroupElement class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-
+using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction

@@ -5,12 +5,9 @@
 // <summary>Interface for the target builder.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.Build.BackEnd.Logging;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Logging;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
 namespace Microsoft.Build.BackEnd

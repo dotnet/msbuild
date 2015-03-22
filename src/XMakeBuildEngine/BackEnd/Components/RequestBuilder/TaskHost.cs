@@ -5,24 +5,23 @@
 // <summary>The object tasks use to interact with the rest of the build system.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Runtime.Remoting.Lifetime;
-using System.Runtime.Remoting;
-using System.Threading;
-using System.Text;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
 using System.Diagnostics;
-using Microsoft.Build.Collections;
+using System.Globalization;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Lifetime;
+using System.Threading;
+using System.Threading.Tasks;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Components.Caching;
 
 namespace Microsoft.Build.BackEnd
 {

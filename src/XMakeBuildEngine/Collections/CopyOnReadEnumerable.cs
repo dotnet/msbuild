@@ -5,9 +5,9 @@
 // <summary>A class which implements IEnumerable by creating an optionally-deep copy of the backing collection.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
 {

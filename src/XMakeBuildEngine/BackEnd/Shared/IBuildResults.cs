@@ -5,10 +5,9 @@
 // <summary>The interface for build results.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Execution;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
 {

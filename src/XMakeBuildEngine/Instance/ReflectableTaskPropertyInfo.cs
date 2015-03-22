@@ -5,13 +5,10 @@
 // <summary>A reflection-generated TaskPropertyInfo instance.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
+using System.Reflection;
 
 namespace Microsoft.Build.Execution
 {

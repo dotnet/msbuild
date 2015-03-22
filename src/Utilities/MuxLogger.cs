@@ -5,11 +5,10 @@
 // <summary>Implementation of the Multiplexing logger.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Utilities
 {

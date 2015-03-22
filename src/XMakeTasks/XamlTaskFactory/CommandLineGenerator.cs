@@ -8,15 +8,15 @@
 // </summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.XamlTypes;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.XamlTypes;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks.Xaml
 {

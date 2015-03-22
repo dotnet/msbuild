@@ -5,14 +5,9 @@
 // <summary>Definition of ProjectOnErrorElement class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.Reflection;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System.Diagnostics;
+using System.Xml;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction

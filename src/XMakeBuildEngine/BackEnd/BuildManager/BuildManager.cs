@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -24,8 +23,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
 namespace Microsoft.Build.Execution
 {
@@ -825,7 +822,7 @@ namespace Microsoft.Build.Execution
                 // Now create the build request
                 submission.BuildRequest = new BuildRequest(
                     submission.SubmissionId,
-                    Microsoft.Build.BackEnd.BuildRequest.InvalidNodeRequestId,
+                    BackEnd.BuildRequest.InvalidNodeRequestId,
                     newConfiguration.ConfigurationId,
                     submission.BuildRequestData.TargetNames,
                     submission.BuildRequestData.HostServices,
@@ -1275,7 +1272,7 @@ namespace Microsoft.Build.Execution
                 resolvedConfiguration.Project = unresolvedConfiguration.Project;
                 _resultsCache.ClearResultsForConfiguration(resolvedConfiguration.ConfigurationId);
             }
-            else if (unresolvedConfiguration.Project != null && resolvedConfiguration.Project != null && !Object.ReferenceEquals(unresolvedConfiguration.Project, resolvedConfiguration.Project))
+            else if (unresolvedConfiguration.Project != null && resolvedConfiguration.Project != null && !ReferenceEquals(unresolvedConfiguration.Project, resolvedConfiguration.Project))
             {
                 // The user passed in a different instance than the one we already had.  Throw away any corresponding results.
                 _resultsCache.ClearResultsForConfiguration(resolvedConfiguration.ConfigurationId);
@@ -1704,7 +1701,7 @@ namespace Microsoft.Build.Execution
 
             LoggerMode loggerMode = (cpuCount == 1 && _buildParameters.UseSynchronousLogging) ? LoggerMode.Synchronous : LoggerMode.Asynchronous;
 
-            ILoggingService loggingService = (ILoggingService)Microsoft.Build.BackEnd.Logging.LoggingService.CreateLoggingService(loggerMode, 1 /*This logging service is used for the build manager and the inproc node, therefore it should have the first nodeId*/);
+            ILoggingService loggingService = (ILoggingService)LoggingService.CreateLoggingService(loggerMode, 1 /*This logging service is used for the build manager and the inproc node, therefore it should have the first nodeId*/);
 
             ((IBuildComponent)loggingService).InitializeComponent(this);
             _componentFactories.ReplaceFactory(BuildComponentType.LoggingService, loggingService as IBuildComponent);
@@ -1843,9 +1840,9 @@ namespace Microsoft.Build.Execution
                             _noNodesActiveEvent = null;
                         }
 
-                        if (Object.ReferenceEquals(this, BuildManager.s_singletonInstance))
+                        if (ReferenceEquals(this, s_singletonInstance))
                         {
-                            BuildManager.s_singletonInstance = null;
+                            s_singletonInstance = null;
                         }
 
                         _disposed = true;

@@ -5,10 +5,10 @@
 // <summary>Definition of ProjectCollectionDirtiedEventArgs class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Globalization;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+using System;
+using System.Globalization;
 
 namespace Microsoft.Build.Evaluation
 {

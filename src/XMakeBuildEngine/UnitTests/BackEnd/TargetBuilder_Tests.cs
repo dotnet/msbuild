@@ -5,28 +5,23 @@
 // <summary>Unit tests for the TargetBuilder with a mock task builder.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
+using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

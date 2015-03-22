@@ -5,15 +5,12 @@
 // <summary>Class containing data for a build request.</summary>
 //-----------------------------------------------------------------------
 
-using System;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Execution;
 
-using Constants = Microsoft.Build.Internal.Constants;
 
 namespace Microsoft.Build.BackEnd
 {

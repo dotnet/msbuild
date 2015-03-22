@@ -5,7 +5,7 @@
 // Add module level suppressions to this file to have them suppressed in the assembly
 //
 
-using System.Diagnostics.CodeAnalysis;
+
 
 #if CODE_ANALYSIS
 [module: SuppressMessage("Microsoft.Performance","CA1811:AvoidUncalledPrivateCode", Scope="member", Target="Microsoft.Build.Shared.XMakeAttributes.#GetExplicitMSBuildArchitecture(System.String)", Justification="Source file used by several assemblies and this method is not called by all of them.")]

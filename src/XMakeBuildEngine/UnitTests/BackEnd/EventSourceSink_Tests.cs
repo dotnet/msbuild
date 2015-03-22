@@ -5,13 +5,12 @@
 // <summary>Test that events are properly raised and consumed</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Shared;
-
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 
 namespace Microsoft.Build.UnitTests.Logging

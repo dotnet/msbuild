@@ -5,14 +5,10 @@
 // <summary>The public class representing the data for a build request.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
-
-using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {

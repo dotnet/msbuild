@@ -7,7 +7,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Windows.Markup;
 
 namespace Microsoft.Build.Framework.XamlTypes
 {

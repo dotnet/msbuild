@@ -5,18 +5,17 @@
 // <summary>Provides debugging support for state machines.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.SymbolStore;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Debugging
 {

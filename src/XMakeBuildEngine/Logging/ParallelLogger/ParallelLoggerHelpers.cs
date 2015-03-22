@@ -1,15 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.IO;
-using System.Diagnostics;
-using System.Threading;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Microsoft.Build.BackEnd.Logging

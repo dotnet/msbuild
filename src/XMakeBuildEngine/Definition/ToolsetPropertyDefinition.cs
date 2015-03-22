@@ -5,13 +5,9 @@
 // <summary>A property class used internally by the Toolset readers.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using Microsoft.Build.Shared;
+using System.Diagnostics;
+using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 namespace Microsoft.Build.Evaluation
 {

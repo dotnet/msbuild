@@ -6,9 +6,9 @@
 //-----------------------------------------------------------------------
 
 using System.Reflection;
-using System.Security.Permissions;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Windows.Markup;
 
 // A combination of RequestMinimum and RequestOptional causes the permissions granted to 

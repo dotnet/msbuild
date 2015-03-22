@@ -5,11 +5,10 @@
 // <summary>A task used to test the TaskExecutionHost.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Framework;
 using System.Reflection;
 
 namespace Microsoft.Build.UnitTests.BackEnd

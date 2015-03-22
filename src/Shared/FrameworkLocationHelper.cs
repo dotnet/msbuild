@@ -1,19 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Evaluation;
+using Microsoft.Win32;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
-using System.Text;
-using Microsoft.Build.Evaluation;
-using Microsoft.Win32;
-
 using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElement;
 
 namespace Microsoft.Build.Shared

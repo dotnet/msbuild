@@ -1,15 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Reflection;
-using System.Text;
-using System.IO;
-
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
-
+using System;
+using System.IO;
+using System.Reflection;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 
 namespace Microsoft.Build.Logging

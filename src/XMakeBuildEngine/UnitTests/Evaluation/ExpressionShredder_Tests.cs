@@ -1,16 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using System.Xml;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests.Evaluation

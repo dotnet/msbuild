@@ -2,38 +2,29 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Configuration;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Resources;
 using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading;
-using System.Xml;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
 #if MSBUILDENABLEVSPROFILING 
 using Microsoft.VisualStudio.Profiler;
 #endif
-
-using FileLogger = Microsoft.Build.Logging.FileLogger;
-using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
-using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -904,7 +895,7 @@ namespace Microsoft.Build.CommandLine
                         globalProperties,
                         loggers,
                         null,
-                        Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry,
+                        ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry,
                         cpuCount,
                         onlyLogCriticalEvents
                         );
@@ -925,8 +916,8 @@ namespace Microsoft.Build.CommandLine
                 // If the user has requested that the schema be validated, do that here. 
                 if (needToValidateProject && !FileUtilities.IsSolutionFilename(projectFile))
                 {
-                    Microsoft.Build.Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
-                    Microsoft.Build.Evaluation.Toolset toolset = projectCollection.GetToolset((toolsVersion == null) ? project.ToolsVersion : toolsVersion);
+                    Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                    Toolset toolset = projectCollection.GetToolset((toolsVersion == null) ? project.ToolsVersion : toolsVersion);
 
                     if (toolset == null)
                     {
@@ -967,7 +958,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.MaxNodeCount = cpuCount;
                     parameters.Loggers = projectCollection.Loggers;
                     parameters.ForwardingLoggers = remoteLoggerRecords;
-                    parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
+                    parameters.ToolsetDefinitionLocations = ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry;
                     parameters.DetailedSummary = detailedSummary;
                     if (!String.IsNullOrEmpty(toolsVersion))
                     {
@@ -1205,7 +1196,7 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                codepage = System.Console.OutputEncoding.CodePage;
+                codepage = Console.OutputEncoding.CodePage;
             }
             catch (NotSupportedException)
             {

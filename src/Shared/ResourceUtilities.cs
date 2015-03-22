@@ -2,16 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Resources;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Text.RegularExpressions;
+using System.Resources;
+
 #if DEBUG && !BUILDING_DF_LKG
-using Microsoft.Build.Framework;
+
 #endif
-using System.Reflection;
-using System.Text;
+
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared

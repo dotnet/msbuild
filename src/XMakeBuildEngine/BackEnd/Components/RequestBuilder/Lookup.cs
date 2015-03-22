@@ -2,19 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using Microsoft.Build.Shared;
-using System.Diagnostics;
 using System.Threading;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
-
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -73,7 +68,7 @@ namespace Microsoft.Build.BackEnd
         /// We have to keep them separate, because the adds and removes etc need to be applied to the table
         /// below when we leave a scope.
         /// </summary>
-        private LinkedList<Lookup.Scope> _lookupScopes = new LinkedList<Lookup.Scope>();
+        private LinkedList<Scope> _lookupScopes = new LinkedList<Scope>();
 
         /// <summary>
         /// When we are asked for all the items of a certain type using the GetItems() method, we may have to handle items
@@ -109,7 +104,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowInternalNull(projectItems, "projectItems");
             ErrorUtilities.VerifyThrowInternalNull(properties, "properties");
 
-            Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
+            Scope scope = new Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);
 
             _globalsForDebugging = globalsForDebugging;
@@ -121,7 +116,7 @@ namespace Microsoft.Build.BackEnd
         private Lookup(Lookup that)
         {
             // Add the same tables from the original
-            foreach (Lookup.Scope scope in that._lookupScopes)
+            foreach (Scope scope in that._lookupScopes)
             {
                 _lookupScopes.AddLast(scope);
             }
@@ -287,7 +282,7 @@ namespace Microsoft.Build.BackEnd
         /// Enters the scope using the specified description.
         /// Callers keep the scope in order to pass it to <see cref="LeaveScope">LeaveScope</see>.
         /// </summary>
-        internal Lookup.Scope EnterScope(string description)
+        internal Scope EnterScope(string description)
         {
             // We don't create the tables unless we need them
             Scope scope = new Scope(this, description, null, null);
@@ -301,10 +296,10 @@ namespace Microsoft.Build.BackEnd
         /// and secondary table are merged. This has the effect of "applying" the adds applied to the primary
         /// table into the secondary table.
         /// </summary>
-        private void LeaveScope(Lookup.Scope scopeToLeave)
+        private void LeaveScope(Scope scopeToLeave)
         {
             ErrorUtilities.VerifyThrow(_lookupScopes.Count >= 2, "Too many calls to Leave().");
-            ErrorUtilities.VerifyThrow(Object.ReferenceEquals(scopeToLeave, _lookupScopes.First.Value), "Attempting to leave with scope '{0}' but scope '{1}' is on top of the stack.", scopeToLeave.Description, _lookupScopes.First.Value.Description);
+            ErrorUtilities.VerifyThrow(ReferenceEquals(scopeToLeave, _lookupScopes.First.Value), "Attempting to leave with scope '{0}' but scope '{1}' is on top of the stack.", scopeToLeave.Description, _lookupScopes.First.Value.Description);
 
             // Our lookup works by stopping the first time it finds an item group of the appropriate type. 
             // So we can't apply an add directly into the table below because that could create a new group 

@@ -5,14 +5,12 @@
 // <summary>The task factory for intrinsic tasks.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {

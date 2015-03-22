@@ -5,11 +5,10 @@
 // <summary>Class holding data about requests used by the Scheduler.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
 {

@@ -5,8 +5,8 @@
 // <summary>Class that provides helper methods to abstract the loading of tasks.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using Microsoft.Build.Framework;
+using System;
 using System.Reflection;
 
 namespace Microsoft.Build.Shared

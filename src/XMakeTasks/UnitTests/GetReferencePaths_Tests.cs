@@ -5,15 +5,12 @@
 // <summary>Tests for the task which gets the reference assembly paths for a given target framework version / moniker.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests;
-using System.IO;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 namespace Microsoft.Build.UnitTests

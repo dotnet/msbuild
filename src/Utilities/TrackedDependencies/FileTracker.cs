@@ -1,19 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
-using System.Collections.Generic;
 using System.Collections;
-using System.Text;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Globalization;
 using System.Linq;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Microsoft.Build.Utilities
 {

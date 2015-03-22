@@ -5,17 +5,13 @@
 // <summary>A logging context for targets.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Xml;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.BackEnd.Logging
 {

@@ -5,16 +5,10 @@
 // <summary>The class which manages build nodes.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Diagnostics;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd
 {

@@ -6,25 +6,20 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
-using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -1090,7 +1085,7 @@ namespace Microsoft.Build.BackEnd
                     // This is an output item.
                     // Expand only with properties first, so that expressions like Include="@(foo)" will transfer the metadata of the "foo" items as well, not just their item specs.
                     IList<string> outputItemSpecs = bucket.Expander.ExpandIntoStringListLeaveEscaped(taskParameterAttribute, ExpanderOptions.ExpandPropertiesAndMetadata, taskItemInstance.TaskParameterLocation);
-                    ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(_buildRequestEntry.RequestConfiguration.Project, itemName);
+                    ProjectItemInstance.TaskItem.ProjectItemInstanceFactory itemFactory = new ProjectItemInstance.TaskItem.ProjectItemInstanceFactory(_buildRequestEntry.RequestConfiguration.Project, itemName);
 
                     foreach (string outputItemSpec in outputItemSpecs)
                     {

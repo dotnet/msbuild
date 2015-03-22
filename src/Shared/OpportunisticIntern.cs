@@ -5,13 +5,13 @@
 // <summary>Selectively intern strings.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
-using System.Text;
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using Microsoft.Build.Shared;
+using System.Linq;
+using System.Text;
 
 namespace Microsoft.Build
 {

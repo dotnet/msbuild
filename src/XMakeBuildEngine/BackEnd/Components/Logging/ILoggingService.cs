@@ -4,14 +4,13 @@
 // <summary>Interface for the logging services.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-
-using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.BackEnd.Logging

@@ -5,10 +5,6 @@
 // <summary>A packet which instructs a node that the build is complete.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 
 namespace Microsoft.Build.BackEnd

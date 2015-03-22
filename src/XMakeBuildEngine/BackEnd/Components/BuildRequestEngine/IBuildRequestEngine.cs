@@ -6,11 +6,8 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-
-using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
+using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
 namespace Microsoft.Build.BackEnd
 {

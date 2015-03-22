@@ -5,6 +5,9 @@
 // <summary>Gathers the reference assemblies from the SDK based on what configuration and architecture a SDK references.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,9 +19,6 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

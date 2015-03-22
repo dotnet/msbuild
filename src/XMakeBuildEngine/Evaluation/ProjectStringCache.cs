@@ -12,14 +12,13 @@
 // </remarks>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Construction
 {

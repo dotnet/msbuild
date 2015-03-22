@@ -5,12 +5,11 @@
 // <summary>Manages full tracking activation and suspension.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+using System;
+using System.IO;
 
 namespace Microsoft.Build.BackEnd
 {

@@ -1,10 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Diagnostics;
-using System.Xml;
-
 /******************************************************************************
  * 
  *                              !! WARNING !!
@@ -16,7 +12,8 @@ using System.Xml;
  * 
  ******************************************************************************/
 using Microsoft.Build.Debugging;
-using Microsoft.Build.Evaluation;
+using System;
+using System.Diagnostics;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.Shared

@@ -5,10 +5,10 @@
 // <summary>Cache file state over file name.</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {

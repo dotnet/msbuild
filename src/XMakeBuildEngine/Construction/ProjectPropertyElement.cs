@@ -5,12 +5,10 @@
 // <summary>Definition of ProjectPropertyElement class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.Diagnostics;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
+using System.Diagnostics;
+using System.Xml;
 
 namespace Microsoft.Build.Construction
 {

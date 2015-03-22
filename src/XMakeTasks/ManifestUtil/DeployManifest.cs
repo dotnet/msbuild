@@ -1,17 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Utilities;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
-using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {

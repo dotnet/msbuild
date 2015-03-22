@@ -5,9 +5,6 @@
 // <summary>Interface for objects which can be serialized to packets for inter-node communication.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.BackEnd
 {

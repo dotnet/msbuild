@@ -10,7 +10,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Microsoft.Build.Tasks
 {

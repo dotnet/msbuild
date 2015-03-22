@@ -5,13 +5,11 @@
 // <summary>Wraps a logical property on an item.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-
+using System;
+using System.Diagnostics;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 namespace Microsoft.Build.Evaluation

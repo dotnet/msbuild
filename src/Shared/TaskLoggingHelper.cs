@@ -1,19 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Resources;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using System.Runtime.Remoting.Lifetime;
+using System.Text;
 
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd

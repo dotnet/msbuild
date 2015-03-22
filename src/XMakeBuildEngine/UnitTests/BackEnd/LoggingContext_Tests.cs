@@ -5,11 +5,9 @@
 // <summary>Tests for logging contexts.</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

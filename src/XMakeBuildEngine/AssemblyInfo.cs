@@ -6,9 +6,9 @@
 //-----------------------------------------------------------------------
 
 using System.Reflection;
-using System.Security.Permissions;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 #pragma warning disable 618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, Flags = SecurityPermissionFlag.Execution)]

@@ -5,11 +5,7 @@
 // <summary>Implementation a class which splits expressions to MSBuild rules.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.Evaluation
 {

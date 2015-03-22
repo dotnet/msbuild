@@ -5,10 +5,9 @@
 // <summary>Wraps location info for an assembly</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.BackEnd;
 using System;
 using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Shared
 {

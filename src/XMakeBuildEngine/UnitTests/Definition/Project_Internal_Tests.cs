@@ -5,15 +5,12 @@
 // <summary>Tests for Project that involve some reference to internal code</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using System;
+using System.IO;
+using System.Xml;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.UnitTests.Definition

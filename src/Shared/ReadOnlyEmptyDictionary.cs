@@ -5,9 +5,9 @@
 // <summary>Enumerable over a notional read-only empty dictionary</summary>
 //-----------------------------------------------------------------------
 
+using Microsoft.Build.Shared;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
 {

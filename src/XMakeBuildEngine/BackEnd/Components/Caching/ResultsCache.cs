@@ -5,13 +5,11 @@
 // <summary>Implementation of the results cache.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd
 {
