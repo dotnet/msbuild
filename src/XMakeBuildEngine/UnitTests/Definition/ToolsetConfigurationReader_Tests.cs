@@ -1,14 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Text;
-using System.Collections.Generic;
 using System.Configuration;
-using Microsoft.Win32;
 using NUnit.Framework;
-using Microsoft.Build.Evaluation;
 
 using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
 

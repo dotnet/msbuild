@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectChooseElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -16,8 +18,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -25,13 +26,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectChooseElement class (and for ProjectWhenElement and ProjectOtherwiseElement)
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectChooseElement_Tests
     {
         /// <summary>
         /// Read choose with unexpected attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -48,7 +49,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Read choose with unexpected Condition attribute.
         /// Condition is not currently allowed on Choose.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidConditionAttribute()
         {
@@ -64,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with unexpected child
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidChild()
         {
@@ -82,7 +83,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with a When containing no Condition attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidWhen()
         {
@@ -105,7 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with only an otherwise
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidOnlyOtherwise()
         {
@@ -123,7 +124,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with two otherwises
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidTwoOtherwise()
         {
@@ -142,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with otherwise before when
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidOtherwiseBeforeWhen()
         {
@@ -164,7 +165,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// One might think this should work but 2.0 required at least one When.
         /// </remarks>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidEmptyChoose()
         {
@@ -183,7 +184,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with only a when
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadChooseOnlyWhen()
         {
             string content = @"
@@ -204,7 +205,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read basic choose
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadChooseBothWhenOtherwise()
         {
             string content = @"
@@ -230,7 +231,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Test stack overflow is prevented.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExcessivelyNestedChoose()
         {
@@ -254,7 +255,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting a When's condition should dirty the project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SettingWhenConditionDirties()
         {
             string content = @"

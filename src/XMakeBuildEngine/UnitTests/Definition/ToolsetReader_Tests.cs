@@ -2,17 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
-using Microsoft.Win32;
-using System.Text;
-using NUnit.Framework;
+using System.IO;
+
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Win32;
+
+using NUnit.Framework;
 
 using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
 using RegistryException = Microsoft.Build.Exceptions.RegistryException;
@@ -96,6 +98,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetDataFromConfiguration_SectionNotRegisteredInConfigFile()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("The machine.config is only present on Windows");
+            }
+
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -127,6 +134,12 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetDataFromConfiguration_Basic()
         {
+            string v2Folder = NativeMethodsShared.IsWindows
+                                  ? @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret"
+                                  : Path.Combine(NativeMethodsShared.FrameworkBasePath, "2.0");
+            string v4Folder = NativeMethodsShared.IsWindows
+                                  ? @"D:\windows\Microsoft.NET\Framework\v4.0.x86ret"
+                                  : Path.Combine(NativeMethodsShared.FrameworkBasePath, "4.0");
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -134,10 +147,10 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""2.0"" msbuildOverrideTasksPath=""c:\Cat"" DefaultOverrideToolsVersion=""4.0"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v2.0.x86ret\""/>
+                       <property name=""MSBuildBinPath"" value=""" + v2Folder + @"""/>
                      </toolset>
                      <toolset toolsVersion=""4.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v4.0.x86ret\""/>
+                       <property name=""MSBuildBinPath"" value=""" + v4Folder + @"""/>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -154,9 +167,9 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("2.0", defaultToolsVersion);
             Assert.AreEqual(2, values.Count);
             Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret", values["2.0"].ToolsPath);
+            Assert.AreEqual(v2Folder, values["2.0"].ToolsPath);
             Assert.AreEqual(0, values["4.0"].Properties.Count);
-            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v4.0.x86ret", values["4.0"].ToolsPath);
+            Assert.AreEqual(v4Folder, values["4.0"].ToolsPath);
         }
 
         /// <summary>
@@ -172,9 +185,9 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""2.0"" msbuildOverrideTasksPath=""..\Foo"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBuildToolsPath"" value=""..\foo""/>
+                       <property name=""MSBuildToolsPath"" value="".." + Path.DirectorySeparatorChar + @"foo""/>
                        <!-- derelativization occurs before comparing toolspath and binpath -->
-                       <property name=""MSBuildBinPath"" value=""..\.\foo""/>
+                       <property name=""MSBuildBinPath"" value="".." + Path.DirectorySeparatorChar + "." + Path.DirectorySeparatorChar + @"foo""/>
                      </toolset>
                      <toolset toolsVersion=""3.0"">
                        <!-- properties are expanded before derelativization-->
@@ -187,13 +200,13 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("DotDotSlash", @"..\"));
+            pg.Set(ProjectPropertyInstance.Create("DotDotSlash", @".." + Path.DirectorySeparatorChar));
             string msbuildOverrideTasksPath = null;
             string defaultOverrideToolsVersion = null;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), pg, true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            string expected1 = Path.GetFullPath(Path.Combine(FileUtilities.CurrentExecutableDirectory, @"..\foo"));
-            string expected2 = Path.GetFullPath(Path.Combine(FileUtilities.CurrentExecutableDirectory, @"..\bar"));
+            string expected1 = Path.GetFullPath(Path.Combine(FileUtilities.CurrentExecutableDirectory, "..", "foo"));
+            string expected2 = Path.GetFullPath(Path.Combine(FileUtilities.CurrentExecutableDirectory, "..", "bar"));
             Console.WriteLine(values["2.0"].ToolsPath);
             Assert.AreEqual(expected1, values["2.0"].ToolsPath);
             Assert.AreEqual(expected2, values["3.0"].ToolsPath);
@@ -206,7 +219,12 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void InvalidRelativePath()
         {
-            string invalidRelativePath = @"..\|invalid|";
+            if (NativeMethodsShared.IsUnix)
+            {
+                Assert.Ignore("Cannot force invalid character name on Unix");
+            }
+
+            string invalidRelativePath = ".." + Path.DirectorySeparatorChar + ":|invalid|";
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -343,6 +361,9 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetDataFromConfiguration_DefaultAttributeNotSpecified()
         {
+            string v2Folder = NativeMethodsShared.IsWindows
+                                  ? @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret"
+                                  : Path.Combine(NativeMethodsShared.FrameworkBasePath, "2.0");
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -350,7 +371,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets msbuildOverrideTasksPath=""C:\Cat"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v2.0.x86ret\""/>
+                       <property name=""MSBuildBinPath"" value=""" + v2Folder + @"""/>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -365,7 +386,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(null, defaultToolsVersion);
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret", values["2.0"].ToolsPath);
+            Assert.AreEqual(v2Folder, values["2.0"].ToolsPath);
             Assert.AreEqual("C:\\Cat", msbuildOverrideTasksPath);
         }
 
@@ -481,6 +502,10 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetDataFromConfiguration_OneToolsVersionNode()
         {
+            string v2Folder = NativeMethodsShared.IsWindows
+                                  ? @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret"
+                                  : Path.Combine(NativeMethodsShared.FrameworkBasePath, "2.0");
+
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -488,7 +513,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""2.0"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v2.0.x86ret\""/>
+                       <property name=""MSBuildBinPath"" value=""" + v2Folder + @"""/>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -502,7 +527,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.AreEqual("2.0", defaultToolsVersion);
-            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret", values["2.0"].ToolsPath);
+            Assert.AreEqual(v2Folder, values["2.0"].ToolsPath);
             Assert.AreEqual(1, values.Count);
         }
 
@@ -712,8 +737,9 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void BlankPropertyValueInRegistrySubToolset()
         {
+            string binPath = NativeMethodsShared.IsWindows ? @"c:\someBinPath" : "/someBinPath";
             RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", @"c:\someBinPath");
+            rk.SetValue("MSBuildBinPath", binPath);
 
             RegistryKey subToolsetKey = rk.CreateSubKey("11.0");
             subToolsetKey.SetValue("foo", "");
@@ -733,7 +759,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual("2.0", defaultToolsVersion);
             Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"c:\someBinPath", values["2.0"].ToolsPath);
+            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
             Assert.AreEqual(1, values["2.0"].SubToolsets.Count);
             Assert.AreEqual("", values["2.0"].SubToolsets["11.0"].Properties["foo"].EvaluatedValue);
         }
@@ -924,12 +950,20 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetData_NoConflict()
         {
+            string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
+            string binPath2 = NativeMethodsShared.IsWindows ? @"D:\somepath2" : "/somepath2";
+            string fworkPath2 = NativeMethodsShared.IsWindows
+                                    ? @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret"
+                                    : "/windows/Microsoft.NET/Framework/v2.0.x86ret";
+            string fworkPath4 = NativeMethodsShared.IsWindows
+                                    ? @"D:\windows\Microsoft.NET\Framework\v4.0.x86ret"
+                                    : "/windows/Microsoft.NET/Framework/v4.0.x86ret";
             // Set up registry with two tools versions and one property each
             _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "2.0");
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
+            key1.SetValue("MSBuildBinPath", binPath);
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("4.0");
-            key2.SetValue("MSBuildBinPath", @"D:\somepath2");
+            key2.SetValue("MSBuildBinPath", binPath2);
 
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
@@ -938,10 +972,10 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""4.5"">
                      <toolset toolsVersion=""4.5"">
-                       <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v2.0.x86ret\""/>
+                       <property name=""MSBuildBinPath"" value=""" + fworkPath2 + Path.DirectorySeparatorChar + @"""/>
                      </toolset>
                      <toolset toolsVersion=""5.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v4.0.x86ret\""/>
+                       <property name=""MSBuildBinPath"" value=""" + fworkPath4 + Path.DirectorySeparatorChar + @"""/>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -961,10 +995,10 @@ namespace Microsoft.Build.UnitTests.Definition
             // Verifications
             Assert.AreEqual(4, values.Count);
             Assert.AreEqual("4.5", defaultToolsVersion);
-            Assert.AreEqual(@"D:\somepath", values["2.0"].ToolsPath);
-            Assert.AreEqual(@"D:\somepath2", values["4.0"].ToolsPath);
-            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret", values["4.5"].ToolsPath);
-            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v4.0.x86ret", values["5.0"].ToolsPath);
+            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
+            Assert.AreEqual(binPath2, values["4.0"].ToolsPath);
+            Assert.AreEqual(fworkPath2, values["4.5"].ToolsPath);
+            Assert.AreEqual(fworkPath4, values["5.0"].ToolsPath);
         }
 
         /// <summary>
@@ -1025,12 +1059,14 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ToolsetInitializationFlagsSetToRegistry()
         {
+            string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
+            string binPath2 = NativeMethodsShared.IsWindows ? @"D:\somepath2" : "/somepath2";
             // Set up registry with two tools versions and one property each
             _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "2.0");
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
+            key1.SetValue("MSBuildBinPath", binPath);
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("4.0");
-            key2.SetValue("MSBuildBinPath", @"D:\somepath2");
+            key2.SetValue("MSBuildBinPath", binPath2);
 
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
@@ -1061,8 +1097,8 @@ namespace Microsoft.Build.UnitTests.Definition
             // Verifications
             Assert.AreEqual(2, values.Count);
             Assert.AreEqual("2.0", defaultToolsVersion);
-            Assert.AreEqual(@"D:\somepath", values["2.0"].ToolsPath);
-            Assert.AreEqual(@"D:\somepath2", values["4.0"].ToolsPath);
+            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
+            Assert.AreEqual(binPath2, values["4.0"].ToolsPath);
         }
 
         [Test]
@@ -1092,12 +1128,13 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void PropertiesInRegistryCannotReferToOtherPropertiesInRegistry()
         {
+            string binPath = NativeMethodsShared.IsWindows ? "c:\\x" : "/x";
             RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "c:\\x$(p1)");
+            rk.SetValue("MSBuildBinPath", binPath + "$(p1)");
             rk.SetValue("p0", "$(p1)");
             rk.SetValue("p1", "v");
             rk.SetValue("p2", "$(p1)");
-            rk.SetValue("MSBuildToolsPath", "c:\\x$(p1)");
+            rk.SetValue("MSBuildToolsPath", binPath + "$(p1)");
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1114,7 +1151,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("", values["2.0"].Properties["p0"].EvaluatedValue);
             Assert.AreEqual("v", values["2.0"].Properties["p1"].EvaluatedValue);
             Assert.AreEqual("", values["2.0"].Properties["p2"].EvaluatedValue);
-            Assert.AreEqual("c:\\x", values["2.0"].ToolsPath);
+            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
         }
 
         [Test]
@@ -1179,6 +1216,9 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ToolsetInitializationFlagsSetToConfigurationFile()
         {
+            string v2Dir = NativeMethodsShared.IsWindows ? "D:\\windows\\Microsoft.NET\\Framework\\v2.0.x86ret" : "/windows/Microsoft.NET/Framework/v2.0.x86ret";
+            string v4Dir = NativeMethodsShared.IsWindows ? "D:\\windows\\Microsoft.NET\\Framework\\v4.0.x86ret" : "/windows/Microsoft.NET/Framework/v4.0.x86ret";
+
             // Set up registry with two tools versions and one property each
             _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "2.0");
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
@@ -1193,10 +1233,10 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""4.5"">
                      <toolset toolsVersion=""4.5"">
-                       <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v2.0.x86ret\""/>
+                       <property name=""MSBuildBinPath"" value=""" + v2Dir + @"""/>
                      </toolset>
                      <toolset toolsVersion=""5.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\windows\Microsoft.NET\Framework\v4.0.x86ret\""/>
+                       <property name=""MSBuildBinPath"" value=""" + v4Dir + @"""/>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -1216,8 +1256,8 @@ namespace Microsoft.Build.UnitTests.Definition
             // Verifications
             Assert.AreEqual(2, values.Count);
             Assert.AreEqual("4.5", defaultToolsVersion);
-            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret", values["4.5"].ToolsPath);
-            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v4.0.x86ret", values["5.0"].ToolsPath);
+            Assert.AreEqual(v2Dir, values["4.5"].ToolsPath);
+            Assert.AreEqual(v4Dir, values["5.0"].ToolsPath);
         }
 
         /// <summary>
@@ -1229,6 +1269,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void PropertyInConfigurationFileReferencesRegistryLocation()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Registry access is only supported under Windows.");
+            }
+
             // Registry Read
             RegistryKey key1 = Registry.CurrentUser.CreateSubKey(@"Software\Vendor\Tools");
             key1.SetValue("TaskLocation", @"somePathToTasks");
@@ -1515,6 +1560,8 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void NoInterferenceBetweenToolsetDefinitions()
         {
+            string v20Dir = NativeMethodsShared.IsWindows ? @"D:\20\some\folder\on\disk" : "/20/some/folder/on/disk";
+            string v35Dir = NativeMethodsShared.IsWindows ? @"D:\35\some\folder\on\disk" : "/35/some/folder/on/disk";
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1522,12 +1569,12 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""2.0"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\20\some\folder\on\disk""/>
+                       <property name=""MSBuildBinPath"" value=""" + v20Dir + @"""/>
                        <property name=""p1"" value=""another""/>
                        <property name=""p4"" value=""fourth$(p3)Value"" />
                      </toolset>
                      <toolset toolsVersion=""4.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\35\some\folder\on\disk""/>
+                       <property name=""MSBuildBinPath"" value=""" + v35Dir + @"""/>
                        <property name=""p2"" value=""some$(p1)value""/>
                        <property name=""p3"" value=""propertyValue""/>
                      </toolset>
@@ -1549,12 +1596,12 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(2, values.Count);
 
-            Assert.AreEqual(@"D:\20\some\folder\on\disk", values["2.0"].ToolsPath);
+            Assert.AreEqual(v20Dir, values["2.0"].ToolsPath);
             Assert.AreEqual(2, values["2.0"].Properties.Count);
             Assert.AreEqual(@"another", values["2.0"].Properties["p1"].EvaluatedValue);
             Assert.AreEqual(@"fourthValue", values["2.0"].Properties["p4"].EvaluatedValue);
 
-            Assert.AreEqual(@"D:\35\some\folder\on\disk", values["4.0"].ToolsPath);
+            Assert.AreEqual(v35Dir, values["4.0"].ToolsPath);
             Assert.AreEqual(2, values["4.0"].Properties.Count);
             Assert.AreEqual(@"somevalue", values["4.0"].Properties["p2"].EvaluatedValue);
             Assert.AreEqual(@"propertyValue", values["4.0"].Properties["p3"].EvaluatedValue);
@@ -1570,6 +1617,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ConfigFileInvalidRegistryExpression1()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Access local machine registry is for Windows only");
+            }
+
             // No location
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:)""/>");
         }
@@ -1577,6 +1629,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ConfigFileInvalidRegistryExpression2()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Access local machine registry is for Windows only");
+            }
+
             // Bogus key expression
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:__bogus__)""/>");
         }
@@ -1584,6 +1641,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ConfigFileInvalidRegistryExpression3()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Access local machine registry is for Windows only");
+            }
+
             // No registry location just @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:@)""/>");
         }
@@ -1612,6 +1674,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ConfigFileInvalidRegistryExpression7()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Access registry is for Windows only");
+            }
+
             // Bogus hive
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:BOGUS_HIVE\Software\Vendor\Tools@TaskLocation)""/>");
         }
@@ -1659,6 +1726,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void RegistryInvalidRegistryExpression1()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Access local machine registry is for Windows only");
+            }
+
             // Bogus key expression
             RegistryInvalidRegistryExpressionHelper("$(Registry:__bogus__)");
         }
@@ -1736,6 +1808,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests that a specified registry property expression evaluates to specified value
         /// </summary>
         /// <param name="propertyExpression"></param>
+        /// <param name="expectedValue"></param>
         private void ConfigFileValidRegistryExpressionHelper(string propertyExpression, string expectedValue)
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -1773,9 +1846,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetData_ConflictingPropertyValuesSameCase()
         {
+            string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
+            string overrideBinPath = NativeMethodsShared.IsWindows ? @"D:\somedifferentpath" : "/somedifferentpath";
             // Registry Read
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
+            key1.SetValue("MSBuildBinPath", binPath);
 
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
@@ -1784,7 +1859,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""2.0"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\somedifferentpath""/>
+                       <property name=""MSBuildBinPath"" value=""" + overrideBinPath + @"""/>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -1803,7 +1878,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"D:\somedifferentpath", values["2.0"].ToolsPath);
+            Assert.AreEqual(overrideBinPath, values["2.0"].ToolsPath);
         }
 
         /// <summary>
@@ -1814,6 +1889,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetData_ConflictingPropertyValuesRegistryThrows()
         {
+            string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
             // Registry Read
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
             key1.SetValue("MSBuildBinPath", @"$([MSBuild]::SomeNonexistentPropertyFunction())");
@@ -1825,7 +1901,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""2.0"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\somepath""/>
+                       <property name=""MSBuildBinPath"" value=""" + binPath + @"""/>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -1844,7 +1920,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"D:\somepath", values["2.0"].ToolsPath);
+            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
         }
 
         /// <summary>
@@ -1855,9 +1931,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetData_NoMerging()
         {
+            string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
+            string overrideBinPath = NativeMethodsShared.IsWindows ? @"D:\someotherpath" : "/someotherpath";
             // Registry Read
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
+            key1.SetValue("MSBuildBinPath", binPath);
             key1.SetValue("SomeRegistryProperty", @"SomeRegistryValue");
 
             // Set the config file contents as needed
@@ -1868,7 +1946,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""2.0"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBuildBinPath"" value=""D:\someotherpath""/>
+                       <property name=""MSBuildBinPath"" value=""" + overrideBinPath + @"""/>
                        <property name=""SomeConfigProperty"" value=""SomeConfigValue""/>
                      </toolset>
                    </msbuildToolsets>
@@ -1888,7 +1966,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(1, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"D:\someotherpath", values["2.0"].ToolsPath);
+            Assert.AreEqual(overrideBinPath, values["2.0"].ToolsPath);
             Assert.AreEqual(null, values["2.0"].Properties["SomeRegistryProperty"]); // Was zapped
             Assert.AreEqual(@"SomeConfigValue", values["2.0"].Properties["SomeConfigProperty"].EvaluatedValue);
         }
@@ -1942,6 +2020,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetToolsetData_RegistryNotPresent()
         {
+            string binPath = NativeMethodsShared.IsWindows ? @"D:\somedifferentpath" : "/somedifferentpath";
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1949,7 +2028,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </configSections>
                    <msbuildToolsets default=""2.0"">
                      <toolset toolsVersion=""2.0"">
-                       <property name=""MSBUILDBINPATH"" value=""D:\somedifferentpath""/>
+                       <property name=""MSBUILDBINPATH"" value=""" + binPath + @"""/>
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
@@ -1968,7 +2047,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"D:\somedifferentpath", values["2.0"].ToolsPath);
+            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
         }
 
         /// <summary>
@@ -1980,8 +2059,9 @@ namespace Microsoft.Build.UnitTests.Definition
         public void GetToolsetData_ConfigFileNotPresent()
         {
             // Registry Read
+            string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
+            key1.SetValue("MSBuildBinPath", binPath);
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1997,7 +2077,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"D:\somepath", values["2.0"].ToolsPath);
+            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
         }
 
         /// <summary>
@@ -2202,9 +2282,10 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
+            string overridePath = NativeMethodsShared.IsWindows ? "c:\\TaskOverridePath" : "/TaskOverridePath";
             // Set up registry with two tools versions and one property each
             _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "4.0");
-            _currentVersionRegistryKey.SetValue("msbuildOverrideTasksPath", "c:\\TaskOverridePath");
+            _currentVersionRegistryKey.SetValue("msbuildOverrideTasksPath", overridePath);
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("4.0");
             key2.SetValue("MSBuildBinPath", @"D:\somepath2");
             key2.SetValue("MSBuildBinPath", @"D:\OtherTaskOverridePath");
@@ -2224,7 +2305,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             Assert.AreEqual("4.0", defaultToolsVersion);
-            Assert.AreEqual("c:\\TaskOverridePath", values["4.0"].OverrideTasksPath);
+            Assert.AreEqual(overridePath, values["4.0"].OverrideTasksPath);
             // Assert.AreEqual("c:\\OtherTaskOverridePath", values["5.0"].OverrideTasksPath); // UNDONE: Per-toolset override paths don't work.
         }
 
@@ -2385,7 +2466,6 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-
             Assert.AreEqual("5.0", defaultToolsVersion);
             Assert.AreEqual("3.0", values["4.0"].DefaultOverrideToolsVersion);
         }
@@ -2480,6 +2560,13 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void PropertiesInToolsetsFromConfigFileAreExpandedInToolsPath()
         {
+            string binPathConfig = NativeMethodsShared.IsWindows ?
+                @"D:\windows\$(p1)\Framework\v2.0.x86ret\$(COMPUTERNAME)" :
+                "/windows/$(p1)/Framework/v2.0.x86ret";
+            string toolsPathConfig = NativeMethodsShared.IsWindows ?
+                @"D:\$(p2)\$(p1)\Framework\v2.0.x86ret\$(COMPUTERNAME)" :
+                "/$(p2)/$(p1)/Framework/v2.0.x86ret";
+
             // $(COMPUTERNAME) is just a convenient env var. $(NUMBER_OF_PROCESSORS) isn't defined on Longhorn
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
@@ -2490,8 +2577,8 @@ namespace Microsoft.Build.UnitTests.Definition
                      <toolset toolsVersion=""4.0"">
                        <property name=""p1"" value=""Microsoft.NET""/>
                        <property name=""p2"" value=""windows""/>
-                       <property name=""MSBuildBinPath"" value=""D:\windows\$(p1)\Framework\v2.0.x86ret\$(COMPUTERNAME)""/>
-                       <property name=""MSBuildToolsPath"" value=""D:\$(p2)\$(p1)\Framework\v2.0.x86ret\$(COMPUTERNAME)""/>
+                       <property name=""MSBuildBinPath"" value=""" + binPathConfig + @"""/>
+                       <property name=""MSBuildToolsPath"" value=""" + toolsPathConfig + @"""/>
                        <property name=""p3"" value=""v3$(MSBuildToolsPath)""/>
                      </toolset>
                    </msbuildToolsets>
@@ -2511,7 +2598,10 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual("Microsoft.NET", values["4.0"].Properties["p1"].EvaluatedValue);
             Assert.AreEqual("windows", values["4.0"].Properties["p2"].EvaluatedValue);
-            string expectedToolsPath = @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\" + Environment.MachineName;
+            string expectedToolsPath = NativeMethodsShared.IsWindows
+                                           ? @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\"
+                                             + Environment.MachineName
+                                           : "/windows/Microsoft.NET/Framework/v2.0.x86ret";
             Assert.AreEqual(expectedToolsPath, values["4.0"].ToolsPath);
             Assert.AreEqual("v3" + expectedToolsPath, values["4.0"].Properties["p3"].EvaluatedValue);
         }

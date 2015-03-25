@@ -3,15 +3,13 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Globalization;
-
-using NUnit.Framework;
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -315,7 +313,7 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual(@"fr\RootNamespace.SubFolder.SplashScreen.bmp", result);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"fr\RootNamespace.SubFolder.SplashScreen.bmp"), result);
         }
 
         /// <summary>

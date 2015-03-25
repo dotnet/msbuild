@@ -265,7 +265,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+            Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
         }
 
         /// <summary>
@@ -299,9 +299,17 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, null, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
                 Assert.AreEqual(p.Toolset.DefaultSubToolsetVersion, p.SubToolsetVersion);
-                Assert.AreEqual(p.Toolset.DefaultSubToolsetVersion, p.GetPropertyValue("VisualStudioVersion"));
+
+                if (p.Toolset.DefaultSubToolsetVersion == null)
+                {
+                    Assert.AreEqual(String.Empty, p.GetPropertyValue("VisualStudioVersion"));
+                }
+                else
+                {
+                    Assert.AreEqual(p.Toolset.DefaultSubToolsetVersion, p.GetPropertyValue("VisualStudioVersion"));
+                }
             }
             finally
             {
@@ -324,7 +332,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, null, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
                 Assert.AreEqual("ABCD", p.SubToolsetVersion);
                 Assert.AreEqual("ABCD", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -351,7 +359,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, globalProperties, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
                 Assert.AreEqual("ABCDE", p.SubToolsetVersion);
                 Assert.AreEqual("ABCDE", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -388,9 +396,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 IDictionary<string, string> projectCollectionGlobalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 projectCollectionGlobalProperties.Add("VisualStudioVersion", "ABCDE");
 
-                ProjectInstance p = new ProjectInstance(xml, globalProperties, "4.0", "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties));
+                ProjectInstance p = new ProjectInstance(xml, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties));
 
-                Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
                 Assert.AreEqual("ABCDEF", p.SubToolsetVersion);
                 Assert.AreEqual("ABCDEF", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -564,7 +572,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 globalProperties.Add("g2", "v2");
             }
 
-            Project project = new Project(reader, globalProperties, toolsVersion ?? "4.0", projectCollection ?? ProjectCollection.GlobalProjectCollection);
+            Project project = new Project(reader, globalProperties, toolsVersion ?? ObjectModelHelpers.MSBuildDefaultToolsVersion, projectCollection ?? ProjectCollection.GlobalProjectCollection);
 
             ProjectInstance instance = project.CreateProjectInstance();
 

@@ -2,16 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using NUnit.Framework;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

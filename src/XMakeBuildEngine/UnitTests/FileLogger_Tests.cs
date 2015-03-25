@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#pragma warning disable 436
+
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
-
-using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 using EventSourceSink = Microsoft.Build.BackEnd.Logging.EventSourceSink;
 using Project = Microsoft.Build.Evaluation.Project;
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                SetUpFileLoggerAndLogMessage("logfile=||invalid||", new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
+                SetUpFileLoggerAndLogMessage("logfile=||/invalid||", new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
             }
             finally
             {
@@ -423,9 +423,20 @@ namespace Microsoft.Build.UnitTests
             fileLogger.Initialize(new EventSourceSink());
 
             fileLogger.NodeId = 1;
-            fileLogger.Parameters = "logfile=" + Path.Combine(Environment.CurrentDirectory, "\\DONTEXIST\\mylogfile.log");
+            fileLogger.Parameters = "logfile="
+                                    + Path.Combine(
+                                        Environment.CurrentDirectory,
+                                        Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar
+                                        + "mylogfile.log");
             fileLogger.Initialize(new EventSourceSink());
-            Assert.IsTrue(string.Compare(fileLogger.InternalFilelogger.Parameters, ";ShowCommandLine;logfile=" + Path.Combine(Environment.CurrentDirectory, "\\DONTEXIST\\mylogfile2.log"), StringComparison.OrdinalIgnoreCase) == 0);
+            Assert.IsTrue(
+                string.Compare(
+                    fileLogger.InternalFilelogger.Parameters,
+                    ";ShowCommandLine;logfile="
+                    + Path.Combine(
+                        Environment.CurrentDirectory,
+                        Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar + "mylogfile2.log"),
+                    StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         [Test]

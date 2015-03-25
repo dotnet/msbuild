@@ -577,6 +577,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void MoveFileOnItself2()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("File names under Unix are case-sensitive and this test is not useful");
+            }
+
             string currdir = Environment.CurrentDirectory;
             string filename = "2A333ED756AF4dc392E728D0F864A396";
             string file = Path.Combine(currdir, filename);
@@ -622,7 +627,7 @@ namespace Microsoft.Build.UnitTests
         {
             string temp = Path.GetTempPath();
             string file = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A395");
-            string invalidFile = "!@#$%^&*()|";
+            string invalidFile = "!/@#$%^&*()|";
             string dest2 = "whatever";
 
             try

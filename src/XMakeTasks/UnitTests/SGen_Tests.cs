@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using NUnit.Framework;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System.IO;
+
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -144,12 +144,16 @@ namespace Microsoft.Build.UnitTests
             SGenExtension sgen = new SGenExtension();
             sgen.Platform = "x86";
             sgen.BuildAssemblyName = "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
-            sgen.BuildAssemblyPath = "C:\\SomeFolder\\MyAsm.dll";
+            sgen.BuildAssemblyPath = NativeMethodsShared.IsUnixLike
+                                         ? "/SomeFolder/MyAsm.dll"
+                                         : "C:\\SomeFolder\\MyAsm.dll";
             sgen.ShouldGenerateSerializer = true;
 
             string commandLine = sgen.CommandLine();
+            string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
+                                       + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /compiler:/platform:x86";
 
-            Assert.IsTrue(String.Equals(commandLine, "/assembly:\"C:\\SomeFolder\\MyAsm.dll\\MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /compiler:/platform:x86", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -158,12 +162,16 @@ namespace Microsoft.Build.UnitTests
             SGenExtension sgen = new SGenExtension();
             sgen.Types = new string[] { "System.String", "System.Boolean" };
             sgen.BuildAssemblyName = "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
-            sgen.BuildAssemblyPath = "C:\\SomeFolder\\MyAsm.dll";
+            sgen.BuildAssemblyPath = NativeMethodsShared.IsUnixLike
+                                         ? "/SomeFolder/MyAsm.dll"
+                                         : "C:\\SomeFolder\\MyAsm.dll";
             sgen.ShouldGenerateSerializer = true;
 
             string commandLine = sgen.CommandLine();
+            string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
+                                       + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /type:System.String /type:System.Boolean";
 
-            Assert.IsTrue(String.Equals(commandLine, "/assembly:\"C:\\SomeFolder\\MyAsm.dll\\MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /type:System.String /type:System.Boolean", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -171,12 +179,13 @@ namespace Microsoft.Build.UnitTests
         {
             SGenExtension sgen = new SGenExtension();
             sgen.BuildAssemblyName = "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
-            sgen.BuildAssemblyPath = "C:\\SomeFolder\\MyAsm.dll";
+            sgen.BuildAssemblyPath = NativeMethodsShared.IsUnixLike ? "/SomeFolder/MyAsm.dll" : "C:\\SomeFolder\\MyAsm.dll";
             sgen.ShouldGenerateSerializer = true;
 
             string commandLine = sgen.CommandLine();
-
-            Assert.IsTrue(String.Equals(commandLine, "/assembly:\"C:\\SomeFolder\\MyAsm.dll\\MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"", StringComparison.OrdinalIgnoreCase));
+            string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
+                                       + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"";
+            Assert.IsTrue(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

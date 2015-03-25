@@ -3,11 +3,8 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Resources;
-using System.Reflection;
 using System.Collections;
-using System.Diagnostics;
+
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 
@@ -33,6 +30,8 @@ namespace Microsoft.Build.Tasks
         /// Given a registry key, find all of the registered assembly folders and add them to the list.
         /// </summary>
         /// <param name="hive">Like 'hklm' or 'hkcu'</param>
+        /// <param name="key">The registry key to examine</param>
+        /// <param name="directories">The object to populate</param>
         private static void AddFoldersFromRegistryKey
         (
             RegistryKey hive,
@@ -40,6 +39,21 @@ namespace Microsoft.Build.Tasks
             Hashtable directories
         )
         {
+            if (!NativeMethodsShared.IsWindows && hive == Registry.LocalMachine)
+            {
+                string path = NativeMethodsShared.FrameworkBasePath;
+                if (Directory.Exists(path))
+                {
+                    foreach (var p in Directory.EnumerateDirectories(path))
+                    {
+                        directories[
+                            "hklm" + "\\" + p.Substring(p.LastIndexOf(Path.DirectorySeparatorChar) + 1)] = p;
+                    }
+                }
+
+                return;
+            }
+
             using (RegistryKey baseKey = hive.OpenSubKey(key))
             {
                 string aliasKey = String.Empty;
@@ -145,7 +159,7 @@ namespace Microsoft.Build.Tasks
             // If no specific alias was requested then return the complete list.
             if (regKeyAlias == null || regKeyAlias.Length == 0)
             {
-                return AssemblyFolder.s_assemblyFolders.Values;
+                return s_assemblyFolders.Values;
             }
 
             // If a specific alias was requested then return only that alias.

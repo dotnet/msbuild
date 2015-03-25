@@ -6,21 +6,20 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
-using Microsoft.Win32;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 using error = Microsoft.Build.Shared.ErrorUtilities;
-using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -42,7 +41,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Constructor
         /// </summary>
-        protected ToolsetReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties)
+        protected ToolsetReader(
+            PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
             _environmentProperties = environmentProperties;
             _globalProperties = globalProperties;
@@ -104,7 +105,8 @@ namespace Microsoft.Build.Evaluation
             ToolsetDefinitionLocations locations
             )
         {
-            PropertyDictionary<ProjectPropertyInstance> initialProperties = new PropertyDictionary<ProjectPropertyInstance>(environmentProperties);
+            PropertyDictionary<ProjectPropertyInstance> initialProperties =
+                new PropertyDictionary<ProjectPropertyInstance>(environmentProperties);
 
             initialProperties.ImportProperties(globalProperties);
 
@@ -114,8 +116,8 @@ namespace Microsoft.Build.Evaluation
             string overrideTasksPathFromConfiguration = null;
             string defaultOverrideToolsVersionFromConfiguration = null;
 
-            ToolsetConfigurationReader configurationReaderToUse = null;
-            if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
+            if ((locations & ToolsetDefinitionLocations.ConfigurationFile)
+                == ToolsetDefinitionLocations.ConfigurationFile)
             {
                 if (configurationReader == null && ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
                 {
@@ -127,11 +129,14 @@ namespace Microsoft.Build.Evaluation
 
                 if (configurationReader != null)
                 {
-                    configurationReaderToUse = configurationReader == null ? new ToolsetConfigurationReader(environmentProperties, globalProperties) : configurationReader;
-
                     // Accumulation of properties is okay in the config file because it's deterministically ordered
-                    defaultToolsVersionFromConfiguration =
-                    configurationReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration, out defaultOverrideToolsVersionFromConfiguration);
+                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(
+                        toolsets,
+                        globalProperties,
+                        initialProperties,
+                        true /* accumulate properties */,
+                        out overrideTasksPathFromConfiguration,
+                        out defaultOverrideToolsVersionFromConfiguration);
                 }
             }
 
@@ -139,16 +144,69 @@ namespace Microsoft.Build.Evaluation
             string overrideTasksPathFromRegistry = null;
             string defaultOverrideToolsVersionFromRegistry = null;
 
-            ToolsetRegistryReader registryReaderToUse = null;
             if ((locations & ToolsetDefinitionLocations.Registry) == ToolsetDefinitionLocations.Registry)
             {
-                registryReaderToUse = registryReader == null ? new ToolsetRegistryReader(environmentProperties, globalProperties) : registryReader;
+                if (NativeMethodsShared.IsWindows || registryReader != null)
+                {
+                    var registryReaderToUse = registryReader
+                                              ?? new ToolsetRegistryReader(environmentProperties, globalProperties);
 
-                // We do not accumulate properties when reading them from the registry, because the order
-                // in which values are returned to us is essentially random: so we disallow one property
-                // in the registry to refer to another also in the registry
-                defaultToolsVersionFromRegistry =
-                    registryReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, false /* do not accumulate properties */, out overrideTasksPathFromRegistry, out defaultOverrideToolsVersionFromRegistry);
+                    // We do not accumulate properties when reading them from the registry, because the order
+                    // in which values are returned to us is essentially random: so we disallow one property
+                    // in the registry to refer to another also in the registry
+                    defaultToolsVersionFromRegistry = registryReaderToUse.ReadToolsets(
+                        toolsets,
+                        globalProperties,
+                        initialProperties,
+                        false /* do not accumulate properties */,
+                        out overrideTasksPathFromRegistry,
+                        out defaultOverrideToolsVersionFromRegistry);
+                }
+                else
+                {
+                    var currentDir = FileUtilities.CurrentExecutableDirectory.TrimEnd(Path.DirectorySeparatorChar);
+                    var props = new PropertyDictionary<ProjectPropertyInstance>();
+
+                    var libraryPath = NativeMethodsShared.FrameworkBasePath;
+                    if (!string.IsNullOrEmpty(libraryPath))
+                    {
+                        libraryPath = Path.GetDirectoryName(libraryPath);
+                    }
+
+                    if (!string.IsNullOrEmpty(libraryPath))
+                    {
+                        var r = new Regex(libraryPath + Path.DirectorySeparatorChar + @"\d+\.\d+");
+                        foreach (var d in Directory.GetDirectories(libraryPath).Where(d => r.IsMatch(d)))
+                        {
+                            var version = Path.GetFileName(d);
+                            if (version != null && !toolsets.ContainsKey(version))
+                            {
+                                toolsets.Add(
+                                    version,
+                                    new Toolset(
+                                        version,
+                                        d,
+                                        environmentProperties,
+                                        globalProperties,
+                                        currentDir,
+                                        string.Empty));
+                            }
+                        }
+
+                        if (!toolsets.ContainsKey(MSBuildConstants.CurrentToolsVersion))
+                        {
+                            toolsets.Add(
+                                MSBuildConstants.CurrentToolsVersion,
+                                new Toolset(
+                                    MSBuildConstants.CurrentToolsVersion,
+                                    currentDir,
+                                    props,
+                                    new PropertyDictionary<ProjectPropertyInstance>(),
+                                    currentDir,
+                                    string.Empty));
+                        }
+                    }
+                }
             }
 
             // The 2.0 .NET Framework installer did not write a ToolsVersion key for itself in the registry. 
@@ -157,13 +215,16 @@ namespace Microsoft.Build.Evaluation
             // don't want it unless 2.0 is installed.
             // So if the 2.0 framework is actually installed, we're reading the registry, and either the registry or the config
             // file have not already created the 2.0 toolset, mock up a fake one.  
-            if (
-                ((locations & ToolsetDefinitionLocations.Registry) != 0) &&
-                !toolsets.ContainsKey("2.0") &&
-                FrameworkLocationHelper.PathToDotNetFrameworkV20 != null
-              )
+            if (((locations & ToolsetDefinitionLocations.Registry) != 0) && !toolsets.ContainsKey("2.0")
+                && FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
             {
-                Toolset synthetic20Toolset = new Toolset("2.0", FrameworkLocationHelper.PathToDotNetFrameworkV20, environmentProperties, globalProperties, null /* 2.0 did not have override tasks */, null /* 2.0 did not have a default override toolsversion */);
+                Toolset synthetic20Toolset = new Toolset(
+                    "2.0",
+                    FrameworkLocationHelper.PathToDotNetFrameworkV20,
+                    environmentProperties,
+                    globalProperties,
+                    null /* 2.0 did not have override tasks */,
+                    null /* 2.0 did not have a default override toolsversion */);
                 toolsets.Add("2.0", synthetic20Toolset);
             }
 
@@ -175,7 +236,8 @@ namespace Microsoft.Build.Evaluation
             // We'll use the path from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
             // nor the registry specify a override in which case we'll just return null.
-            string defaultOverrideToolsVersion = defaultOverrideToolsVersionFromConfiguration ?? defaultOverrideToolsVersionFromRegistry;
+            string defaultOverrideToolsVersion = defaultOverrideToolsVersionFromConfiguration
+                                                 ?? defaultOverrideToolsVersionFromRegistry;
 
             // We'll use the default from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
@@ -196,7 +258,9 @@ namespace Microsoft.Build.Evaluation
                     // There's no tools path already for 2.0, so use the path to the v2.0 .NET Framework.
                     // If an old-fashioned caller sets BinPath property, or passed a BinPath to the constructor,
                     // that will overwrite what we're setting here.
-                    ErrorUtilities.VerifyThrow(Constants.defaultToolsVersion == "2.0", "Getting 2.0 FX path so default should be 2.0");
+                    ErrorUtilities.VerifyThrow(
+                        Constants.defaultToolsVersion == "2.0",
+                        "Getting 2.0 FX path so default should be 2.0");
                     string pathToFramework = FrameworkLocationHelper.PathToDotNetFrameworkV20;
 
                     // We could not find the default toolsversion because it was not installed on the machine. Fallback to the 
@@ -210,7 +274,13 @@ namespace Microsoft.Build.Evaluation
                     // Again don't overwrite any existing tools path for this default we're choosing.
                     if (!toolsets.ContainsKey(defaultToolsVersion))
                     {
-                        Toolset defaultToolset = new Toolset(defaultToolsVersion, pathToFramework, environmentProperties, globalProperties, overrideTasksPath, defaultOverrideToolsVersion);
+                        Toolset defaultToolset = new Toolset(
+                            defaultToolsVersion,
+                            pathToFramework,
+                            environmentProperties,
+                            globalProperties,
+                            overrideTasksPath,
+                            defaultOverrideToolsVersion);
                         toolsets.Add(defaultToolsVersion, defaultToolset);
                     }
                 }

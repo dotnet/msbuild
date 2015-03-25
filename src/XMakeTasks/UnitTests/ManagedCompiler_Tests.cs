@@ -2,14 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using Microsoft.Build.Tasks;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
 using NUnit.Framework;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -226,6 +225,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void DefaultWin32ManifestEmbeddedInConsoleApp()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("No default.win32manifest is not available unless under Windows");
+            }
+
             MyManagedCompiler m = new MyManagedCompiler();
             m.BuildEngine = new MockEngine(true);
             m.Sources = new ITaskItem[] { new TaskItem("bar") };
@@ -241,6 +245,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void DefaultWin32ManifestEmbeddedInConsoleAppWhenTargetTypeInferred()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("No default.win32manifest is not available unless under Windows");
+            }
+
             MyManagedCompiler m = new MyManagedCompiler();
             m.BuildEngine = new MockEngine(true);
             m.Sources = new ITaskItem[] { new TaskItem("bar") };

@@ -7,8 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
 
@@ -18,7 +16,7 @@ using Microsoft.Build.Shared;
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd
 #else
-namespace Microsoft.Build.Utilities
+namespace Microsoft.Build.Tasks
 #endif
 {
     /// <summary>

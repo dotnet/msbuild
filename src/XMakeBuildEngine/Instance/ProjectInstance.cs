@@ -20,7 +20,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Internal;
-using Utilities = Microsoft.Build.Internal.Utilities;
+
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -33,6 +33,7 @@ using System.Linq;
 
 namespace Microsoft.Build.Execution
 {
+    using Utilities = Microsoft.Build.Internal.Utilities;
     /// <summary>
     /// Enum for controlling project instance creation
     /// </summary>
@@ -2237,6 +2238,11 @@ namespace Microsoft.Build.Execution
                         _globalProperties.Set(ProjectPropertyInstance.Create(globalProperty.Key, globalProperty.Value, false /* may not be reserved */, _isImmutable));
                     }
                 }
+            }
+
+            if (NativeMethodsShared.IsUnixLike && !_globalProperties.Contains("MSBuildFrameworkToolsRoot"))
+            {
+                _globalProperties.Set(ProjectPropertyInstance.Create("MSBuildFrameworkToolsRoot", NativeMethodsShared.FrameworkBasePath, false));
             }
 
             if (Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.DebugEvaluation)

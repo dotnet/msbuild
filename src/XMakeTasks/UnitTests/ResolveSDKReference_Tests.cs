@@ -7,25 +7,19 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Globalization;
-using System.Resources;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using NUnit.Framework;
-using System.Collections;
+
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
-using Microsoft.Build.Shared;
-using System.Collections.Generic;
+
+using NUnit.Framework;
+
 using SDKReference = Microsoft.Build.Tasks.ResolveSDKReference.SDKReference;
-using ProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
-using Microsoft.Build.Evaluation;
-using System.Linq;
-using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 {
@@ -33,6 +27,11 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
     public class ResolveSDKReferenceTestFixture
     {
         private Microsoft.Build.UnitTests.MockEngine.GetStringDelegate _resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+
+        private readonly string _sdkPath = NativeMethodsShared.IsWindows
+                                     ? @"c:\SDKDirectory\GoodTestSDK\2.0\"
+                                     : @"/SDKDirectory/GoodTestSDK/2.0/";
+
         #region TestMethods
 
         /// <summary>
@@ -129,7 +128,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void VerifyBuildWarningForESDKWithoutMaxPlatformVersionOnBlueOrAbove()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "TestMaxPlatformVersionWithTargetFrameworkVersion");
-            string testDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\ExtensionSDKs\\SDkWithManifest\\2.0\\");
+            string testDirectory = Path.Combine(new[] { testDirectoryRoot, "MyPlatform", "8.0", "ExtensionSDKs", "SDkWithManifest", "2.0" }) + Path.DirectorySeparatorChar;
 
             // manifest does not contain MaxPlatformVersion
             string sdkManifestContents1 =
@@ -181,7 +180,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -444,7 +443,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             item.SetMetadata("DependsOn", "NotHere, Version=1.0");
             t.SDKReferences = new ITaskItem[] { item };
             t.References = null;
-            ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
 
@@ -455,7 +454,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
 
             string warning = ResourceUtilities.FormatResourceString("ResolveSDKReference.SDKMissingDependency", "GoodTestSDK, Version=2.0", "\"NotHere, Version=1.0\"");
             engine.AssertLogContains(warning);
@@ -468,7 +467,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void VerifyDependsOnWarningFromManifest()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyDependsOnWarningFromManifest");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -489,7 +488,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -583,7 +582,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit1()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit1");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -593,7 +592,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -638,7 +637,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit2()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit2");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -648,7 +647,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -696,7 +695,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit3()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit3");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -706,7 +705,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -751,7 +750,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit4()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit4");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -761,7 +760,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -806,7 +805,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit5()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit5");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -816,7 +815,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -861,7 +860,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit6()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit6");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -871,7 +870,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -918,7 +917,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit7()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit7");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -928,7 +927,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -973,7 +972,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit8()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit8");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -982,7 +981,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -1027,7 +1026,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void Prefer32bit9()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "Prefer32bit9");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -1037,7 +1036,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -1089,7 +1088,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ITaskItem item = new TaskItem("GoodTestSDK, Version=2.0");
             t.SDKReferences = new ITaskItem[] { item };
             t.References = null;
-            ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
 
@@ -1100,7 +1099,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length == 0);
@@ -1126,7 +1125,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ITaskItem item = new TaskItem("GoodTestSDK, Version=2.0");
             t.SDKReferences = new ITaskItem[] { item };
             t.References = null;
-            ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
             t.TargetedSDKConfiguration = "Release";
@@ -1138,7 +1137,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies").Equals("True", StringComparison.OrdinalIgnoreCase));
@@ -1167,7 +1166,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             t.SDKReferences = new ITaskItem[] { item };
             t.References = null;
-            ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
             t.TargetedSDKConfiguration = "Debug";
@@ -1179,7 +1178,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies").Equals("True", StringComparison.OrdinalIgnoreCase));
@@ -1206,7 +1205,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ITaskItem item2 = new TaskItem("GoodTestSDK, Version=2.0");
             t.SDKReferences = new ITaskItem[] { item, item2 };
             t.References = new TaskItem[0];
-            ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
 
@@ -1217,7 +1216,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies").Equals("True", StringComparison.OrdinalIgnoreCase));
@@ -1245,7 +1244,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             referenceItem.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.References = new TaskItem[] { referenceItem };
 
-            ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
 
@@ -1256,7 +1255,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("SimpleName").Equals("GoodTestSDK", StringComparison.OrdinalIgnoreCase));
@@ -1279,7 +1278,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             referenceItem.SetMetadata("SDKName", "DifferentSDK, Version=2.0");
             t.References = new TaskItem[] { referenceItem };
 
-            installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
 
@@ -1290,7 +1289,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies").Equals("True", StringComparison.OrdinalIgnoreCase));
@@ -1338,19 +1337,19 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             t.SDKReferences = new ITaskItem[] { item };
             t.References = new TaskItem[0];
 
-            ITaskItem installedSDK1 = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK1 = new TaskItem(_sdkPath);
             installedSDK1.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
 
-            ITaskItem installedSDK2 = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK2 = new TaskItem(_sdkPath);
             installedSDK2.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
 
             ITaskItem installedSDK3 = new TaskItem(String.Empty);
             installedSDK3.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
 
-            ITaskItem installedSDK4 = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK4 = new TaskItem(_sdkPath);
             installedSDK4.SetMetadata("SDKName", String.Empty);
 
-            ITaskItem installedSDK5 = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK5 = new TaskItem(_sdkPath);
 
             t.InstalledSDKs = new ITaskItem[] { installedSDK1, installedSDK2, installedSDK3, installedSDK4, installedSDK5 };
 
@@ -1361,7 +1360,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length == 0);
             Assert.IsTrue(t.ResolvedSDKReferences[0].GetMetadata("SDKType").Length == 0);
@@ -1416,7 +1415,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ITaskItem item2 = new TaskItem("RandomSDK, Version=2.0");
             t.SDKReferences = new ITaskItem[] { item, item2 };
 
-            ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
 
@@ -1428,8 +1427,8 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.IsTrue(t.ResolvedSDKReferences.Length == 1);
 
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.NoFrameworkIdentitiesFound");
-            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(@"c:\SDKDirectory\GoodTestSDK\2.0\", StringComparison.OrdinalIgnoreCase));
-            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.FoundSDK", @"c:\SDKDirectory\GoodTestSDK\2.0\");
+            Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.FoundSDK", _sdkPath);
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "ResolveSDKReference.CouldNotResolveSDK", "RandomSDK, Version=2.0");
         }
 
@@ -1476,7 +1475,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             ResolveSDKReference t = new ResolveSDKReference();
             ITaskItem item = new TaskItem("GoodTestSDK, Version=2.0");
             t.SDKReferences = new ITaskItem[0];
-            ITaskItem installedSDK = new TaskItem(@"c:\SDKDirectory\GoodTestSDK\2.0\");
+            ITaskItem installedSDK = new TaskItem(_sdkPath);
             installedSDK.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
             t.InstalledSDKs = new ITaskItem[] { installedSDK };
 
@@ -1495,13 +1494,13 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void SDKFoundButBadlyFormattedSDKManifestWarnings()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SDKFoundButBadlyFormattedSDKManifestWarnings");
-            string testDirectory = Path.Combine(testDirectoryRoot, "BadTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "BadTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"IAMNOTANXMLFILE";
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -1522,7 +1521,8 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 ITaskItem installLocation = new TaskItem(testDirectory);
                 installLocation.SetMetadata("SDKName", "BadTestSDK, Version=2.0");
 
-                ITaskItem installLocation2 = new TaskItem("C:\\GoodSDKLocation");
+                string goodSDKLocation = NativeMethodsShared.IsWindows ? "C:\\GoodSDKLocation\\" : "/GoodSDKLocation/";
+                ITaskItem installLocation2 = new TaskItem(goodSDKLocation);
                 installLocation2.SetMetadata("SDKName", "GoodTestSDK, Version=2.0");
                 t.InstalledSDKs = new ITaskItem[] { installLocation, installLocation2 };
                 t.BuildEngine = engine;
@@ -1534,7 +1534,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 Assert.IsTrue(t.ResolvedSDKReferences.Length == 2);
                 Assert.IsTrue(t.ResolvedSDKReferences[0].ItemSpec.Equals(testDirectory, StringComparison.OrdinalIgnoreCase));
-                Assert.IsTrue(t.ResolvedSDKReferences[1].ItemSpec.Equals("C:\\GoodSDKLocation\\", StringComparison.OrdinalIgnoreCase));
+                Assert.IsTrue(t.ResolvedSDKReferences[1].ItemSpec.Equals(goodSDKLocation, StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -1559,7 +1559,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -1604,7 +1604,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void TestMaxPlatformVersionWithTargetFrameworkVersion()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "TestMaxPlatformVersionWithTargetFrameworkVersion");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents1 =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -1656,7 +1656,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -1710,7 +1710,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void EmptySDKManifestAttributes()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "EmptySDKManifestAttributes");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -1736,7 +1736,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -1795,7 +1795,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void OverrideManifestAttributes()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "OverrideManifestAttributes");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -1818,7 +1818,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -1893,7 +1893,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void GoodManifestMatchingConfigAndArch()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GoodManifestMatchingConfigAndArch");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -1913,7 +1913,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -1966,7 +1966,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void GoodManifestMatchingConfigOnly()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GoodManifestMatchingConfigOnly");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -1984,7 +1984,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2035,7 +2035,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void NoCopyOnPlatformIdentityFound()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "NoCopyOnPlatformIdentityFound");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2049,7 +2049,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2102,7 +2102,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void GoodManifestMatchingBaseNameOnly()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GoodManifestMatchingConfigOnly");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2122,7 +2122,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2176,7 +2176,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void ManifestOnlyHasArmLocation()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ManifestOnlyHasArmLocation");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2191,7 +2191,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2244,7 +2244,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void ManifestArmLocationWithOthers()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ManifestArmLocationWithOthers");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2261,7 +2261,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2315,7 +2315,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void MatchNoNamesButNamesExistWarning()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "MatchNoNamesButNamesExistWarning");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2332,7 +2332,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2387,7 +2387,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void MatchNoNamesButNamesExistError()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "MatchNoNamesButNamesExistError");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2404,7 +2404,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2456,7 +2456,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void SingleSupportedArchitectureMatchesProject()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SingleSupportedArchitectureMatchesProject");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2474,7 +2474,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2529,7 +2529,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void ProductFamilySetInManifest()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ProductFamilySetInManifest");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2548,7 +2548,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2594,7 +2594,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void ProductFamilySetInManifestAndMetadata()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ProductFamilySetInManifestAndMetadata");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2613,7 +2613,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2661,7 +2661,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void SupportsMultipleVersionsNotInManifest()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SupportsMultipleVersionsNotInManifest");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2680,7 +2680,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2725,7 +2725,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void SupportsMultipleVersionsBadMetadata()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SupportsMultipleVersionsBadMetadata");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -2745,7 +2745,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -2793,9 +2793,9 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void ConflictsBetweenSameProductFamilySameName()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ConflictsBetweenSameProductFamilySameName");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\1.0\\");
-            string testDirectory2 = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
-            string testDirectory3 = Path.Combine(testDirectoryRoot, "GoodTestSDK\\3.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "1.0") + Path.DirectorySeparatorChar;
+            string testDirectory2 = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
+            string testDirectory3 = Path.Combine(testDirectoryRoot, "GoodTestSDK", "3.0") + Path.DirectorySeparatorChar;
 
             string sdkManifestContents1 =
             @"<FileList
@@ -2823,9 +2823,9 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
-                string sdkManifestFile2 = Path.Combine(testDirectory2, "SdkManifest.xml");
-                string sdkManifestFile3 = Path.Combine(testDirectory3, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
+                string sdkManifestFile2 = Path.Combine(testDirectory2, "SDKManifest.xml");
+                string sdkManifestFile3 = Path.Combine(testDirectory3, "SDKManifest.xml");
 
                 if (Directory.Exists(testDirectoryRoot))
                 {
@@ -2891,9 +2891,9 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void ConflictsBetweenSameProductFamilyDiffName()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ConflictsBetweenSameProductFamilyDiffName");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\1.0\\");
-            string testDirectory2 = Path.Combine(testDirectoryRoot, "GoodTestSDK1\\2.0\\");
-            string testDirectory3 = Path.Combine(testDirectoryRoot, "GoodTestSDK3\\3.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "1.0") + Path.DirectorySeparatorChar;
+            string testDirectory2 = Path.Combine(testDirectoryRoot, "GoodTestSDK1", "2.0") + Path.DirectorySeparatorChar;
+            string testDirectory3 = Path.Combine(testDirectoryRoot, "GoodTestSDK3", "3.0") + Path.DirectorySeparatorChar;
 
             string sdkManifestContents1 =
             @"<FileList
@@ -2921,9 +2921,9 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
-                string sdkManifestFile2 = Path.Combine(testDirectory2, "SdkManifest.xml");
-                string sdkManifestFile3 = Path.Combine(testDirectory3, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
+                string sdkManifestFile2 = Path.Combine(testDirectory2, "SDKManifest.xml");
+                string sdkManifestFile3 = Path.Combine(testDirectory3, "SDKManifest.xml");
 
                 if (Directory.Exists(testDirectoryRoot))
                 {
@@ -2989,10 +2989,10 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void ConflictsBetweenMIXPFAndName()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ConflictsBetweenSameProductFamilyDiffName");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\1.0\\");
-            string testDirectory2 = Path.Combine(testDirectoryRoot, "GoodTestSDK2\\2.0\\");
-            string testDirectory3 = Path.Combine(testDirectoryRoot, "GoodTestSDK3\\3.0\\");
-            string testDirectory4 = Path.Combine(testDirectoryRoot, "GoodTestSDK3\\4.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "1.0") + Path.DirectorySeparatorChar;
+            string testDirectory2 = Path.Combine(testDirectoryRoot, "GoodTestSDK2", "2.0") + Path.DirectorySeparatorChar;
+            string testDirectory3 = Path.Combine(testDirectoryRoot, "GoodTestSDK3", "3.0") + Path.DirectorySeparatorChar;
+            string testDirectory4 = Path.Combine(testDirectoryRoot, "GoodTestSDK3", "4.0") + Path.DirectorySeparatorChar;
 
             string sdkManifestContents1 =
             @"<FileList
@@ -3026,10 +3026,10 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             </FileList>";
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
-                string sdkManifestFile2 = Path.Combine(testDirectory2, "SdkManifest.xml");
-                string sdkManifestFile3 = Path.Combine(testDirectory3, "SdkManifest.xml");
-                string sdkManifestFile4 = Path.Combine(testDirectory4, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
+                string sdkManifestFile2 = Path.Combine(testDirectory2, "SDKManifest.xml");
+                string sdkManifestFile3 = Path.Combine(testDirectory3, "SDKManifest.xml");
+                string sdkManifestFile4 = Path.Combine(testDirectory4, "SDKManifest.xml");
 
                 if (Directory.Exists(testDirectoryRoot))
                 {
@@ -3102,9 +3102,9 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void ConflictsBetweenSameSDKName()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "ConflictsBetweenSameSDKName");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\1.0\\");
-            string testDirectory2 = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
-            string testDirectory3 = Path.Combine(testDirectoryRoot, "GoodTestSDK\\3.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "1.0") + Path.DirectorySeparatorChar;
+            string testDirectory2 = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
+            string testDirectory3 = Path.Combine(testDirectoryRoot, "GoodTestSDK", "3.0") + Path.DirectorySeparatorChar;
 
             string sdkManifestContents1 =
             @"<FileList
@@ -3132,9 +3132,9 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
-                string sdkManifestFile2 = Path.Combine(testDirectory2, "SdkManifest.xml");
-                string sdkManifestFile3 = Path.Combine(testDirectory3, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
+                string sdkManifestFile2 = Path.Combine(testDirectory2, "SDKManifest.xml");
+                string sdkManifestFile3 = Path.Combine(testDirectory3, "SDKManifest.xml");
 
                 if (Directory.Exists(testDirectoryRoot))
                 {
@@ -3208,7 +3208,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         private void SupportsMultipleVersionsVerifyManifestReading(string manifestEntry)
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SupportsMultipleVersionsVerifyManifestReading");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -3228,7 +3228,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -3282,7 +3282,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void EmptyArchitectures()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "OverrideManifestWithMetadata");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -3302,7 +3302,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -3359,7 +3359,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void OverrideManifestWithMetadataButMetadataDoesNotMatch()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "OverrideManifestWithMetadataButMetadataDoesNotMatch");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -3378,7 +3378,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -3425,7 +3425,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void OverrideManifestWithMetadata()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "OverrideManifestWithMetadata");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -3446,7 +3446,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -3503,7 +3503,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void SingleSupportedArchitectureDoesNotMatchProject()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "SingleSupportedArchitectureDoesNotMatchProject");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -3522,7 +3522,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -3567,7 +3567,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void MultipleSupportedArchitectureMatchesProject()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "MultipleSupportedArchitectureMatchesProject");
-            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK\\2.0\\");
+            string testDirectory = Path.Combine(testDirectoryRoot, "GoodTestSDK", "2.0") + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -3585,7 +3585,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -3639,7 +3639,9 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         public void MultipleSupportedArchitectureDoesNotMatchProject()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "MultipleSupportedArchitectureMatchesProject");
-            string testDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\ExtensionSDKs\\SDkWithManifest\\2.0\\");
+            string testDirectory =
+                Path.Combine(new[] { testDirectoryRoot, "MyPlatform", "8.0", "ExtensionSDKs", "SDkWithManifest", "2.0" })
+                + Path.DirectorySeparatorChar;
             string sdkManifestContents =
             @"<FileList
                 Identity = 'GoodTestSDK, Version=2.0'
@@ -3657,7 +3659,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
             try
             {
-                string sdkManifestFile = Path.Combine(testDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(testDirectory, "SDKManifest.xml");
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -3702,6 +3704,15 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
     [TestFixture]
     public class GatherSDKOutputGroupsTestFixture
     {
+        [TestFixtureSetUp]
+        public void TestFixtureSetup()
+        {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("No GetResolvedSDKReferences target in Unix");
+            }
+        }
+
         [Test]
         public void GatherSDKOutputGroupsTargetArchitectureExists()
         {
@@ -3786,8 +3797,8 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Directory.CreateDirectory(archRedist33);
                 Directory.CreateDirectory(archCommonRedist3);
 
-                string sdkManifestFile = Path.Combine(sdkDirectory, "SdkManifest.xml");
-                string sdkManifestFile2 = Path.Combine(sdkDirectory3, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(sdkDirectory, "SDKManifest.xml");
+                string sdkManifestFile2 = Path.Combine(sdkDirectory3, "SDKManifest.xml");
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
                 File.WriteAllText(sdkManifestFile, sdkManifestContents);
@@ -3927,8 +3938,8 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Directory.CreateDirectory(archRedist33);
                 Directory.CreateDirectory(archCommonRedist3);
 
-                string sdkManifestFile = Path.Combine(sdkDirectory, "SdkManifest.xml");
-                string sdkManifestFile2 = Path.Combine(sdkDirectory3, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(sdkDirectory, "SDKManifest.xml");
+                string sdkManifestFile2 = Path.Combine(sdkDirectory3, "SDKManifest.xml");
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
                 File.WriteAllText(sdkManifestFile, sdkManifestContents);
@@ -4044,7 +4055,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Directory.CreateDirectory(neutralRedist);
                 Directory.CreateDirectory(neutralCommonRedist);
 
-                string sdkManifestFile = Path.Combine(sdkDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(sdkDirectory, "SDKManifest.xml");
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
                 File.WriteAllText(sdkManifestFile, sdkManifestContents);
@@ -4146,7 +4157,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 Directory.CreateDirectory(neutralRedist);
                 Directory.CreateDirectory(neutralCommonRedist);
 
-                string sdkManifestFile = Path.Combine(sdkDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(sdkDirectory, "SDKManifest.xml");
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
                 File.WriteAllText(sdkManifestFile, sdkManifestContents);
@@ -4274,7 +4285,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
                 File.WriteAllText(testProjectFile, tempProjectContents);
 
-                string sdkManifestFile = Path.Combine(sdkDirectory, "SdkManifest.xml");
+                string sdkManifestFile = Path.Combine(sdkDirectory, "SDKManifest.xml");
 
                 File.WriteAllText(sdkManifestFile, sdkManifestContents1);
                 ITaskItem[] resolvedSDKReferences1 = RunBuildAndReturnResolvedSDKReferences(logger, testProjectFile, testDirectoryRoot);

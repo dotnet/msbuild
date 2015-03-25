@@ -9,14 +9,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
-using Microsoft.Win32;
 using System.Linq;
 using System.Globalization;
 using System.Diagnostics.CodeAnalysis;
+
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

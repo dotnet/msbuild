@@ -5,8 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Resources;
-using System.Globalization;
+
 using Microsoft.Build.Framework;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
@@ -367,9 +366,10 @@ namespace Microsoft.Build.Utilities
                 // their own quotes. Quotes are illegal.
                 VerifyThrowNoEmbeddedDoubleQuotes(string.Empty, fileName);
 
+                fileName = FileUtilities.FixFilePath(fileName);
                 if ((fileName.Length != 0) && (fileName[0] == '-'))
                 {
-                    AppendTextWithQuoting(".\\" + fileName);
+                    AppendTextWithQuoting("." + Path.DirectorySeparatorChar + fileName);
                 }
                 else
                 {
@@ -503,6 +503,13 @@ namespace Microsoft.Build.Utilities
 
         #region Appending switches with quoted parameters
 
+        public static string FixCommandLineSwitch(string switchName)
+        {
+            return !NativeMethodsShared.IsWindows && !string.IsNullOrEmpty(switchName) && switchName.StartsWith("/")
+                       ? "-" + switchName.Substring(1)
+                       : switchName;
+        }
+
         /// <summary>
         /// Appends a command-line switch that has no separate value, without any quoting.
         /// This method appends a space to the command line (if it's not currently empty) before the switch.
@@ -516,7 +523,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(switchName, "switchName");
 
             AppendSpaceIfNotEmpty();
-            AppendTextUnquoted(switchName);
+            AppendTextUnquoted(FixCommandLineSwitch(switchName));
         }
 
         /// <summary>

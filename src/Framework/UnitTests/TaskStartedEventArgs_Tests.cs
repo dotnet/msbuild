@@ -29,11 +29,13 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void EventArgsCtors()
         {
+#pragma warning disable 219
             TaskStartedEventArgs taskStartedEvent = new TaskStartedEventArgs2();
             taskStartedEvent = new TaskStartedEventArgs("Message", "HelpKeyword", "ProjectFile", "TaskFile", "TaskName");
             taskStartedEvent = new TaskStartedEventArgs("Message", "HelpKeyword", "ProjectFile", "TaskFile", "TaskName", DateTime.Now);
             taskStartedEvent = new TaskStartedEventArgs(null, null, null, null, null);
             taskStartedEvent = new TaskStartedEventArgs(null, null, null, null, null, DateTime.Now);
+#pragma warning restore 219
         }
 
         /// <summary>

@@ -458,7 +458,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 currentLine = reader.ReadLine();
-                if (!isCaseSensitive)
+                if (!isCaseSensitive && currentLine != null)
                 {
                     currentLine = currentLine.ToUpper();
                 }

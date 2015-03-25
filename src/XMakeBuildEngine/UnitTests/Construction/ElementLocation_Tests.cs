@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Path to the common targets
         /// </summary>
-        private string _pathToCommonTargets = Path.Combine(FrameworkLocationHelper.PathToDotNetFrameworkV45, "microsoft.common.targets");
+        private string _pathToCommonTargets = Path.Combine(FrameworkLocationHelper.PathToDotNetFrameworkV45, "Microsoft.Common.targets");
 
         /// <summary>
         /// Tests constructor specifying only file.

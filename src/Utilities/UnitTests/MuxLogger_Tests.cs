@@ -6,18 +6,16 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Xml;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using NUnit.Framework;
+using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 
+using NUnit.Framework;
 using MuxLogger = Microsoft.Build.Utilities.MuxLogger;
 
 namespace Microsoft.VisualStudio.Build.UnitTest
@@ -97,7 +95,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             MockLogger mockLogger2 = new MockLogger();
             mockLogger2.LogBuildFinished = false;
             ProjectCollection projectCollection = new ProjectCollection();
-            ProjectInstance project = (new Project(XmlReader.Create(new StringReader(projectBody)), null, "4.0", projectCollection)).CreateProjectInstance();
+            ProjectInstance project = (new Project(XmlReader.Create(new StringReader(projectBody)), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, projectCollection)).CreateProjectInstance();
             BuildParameters parameters = new BuildParameters(projectCollection);
             parameters.Loggers = new ILogger[] { mockLogger2 };
             buildManager.Build(parameters, new BuildRequestData(project, new string[0], null));
@@ -106,7 +104,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             MuxLogger muxLogger = new MuxLogger();
             muxLogger.Verbosity = LoggerVerbosity.Normal;
             projectCollection = new ProjectCollection();
-            project = (new Project(XmlReader.Create(new StringReader(projectBody)), null, "4.0", projectCollection)).CreateProjectInstance();
+            project = (new Project(XmlReader.Create(new StringReader(projectBody)), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, projectCollection)).CreateProjectInstance();
             parameters = new BuildParameters(projectCollection);
             parameters.Loggers = new ILogger[] { muxLogger };
             buildManager.BeginBuild(parameters);

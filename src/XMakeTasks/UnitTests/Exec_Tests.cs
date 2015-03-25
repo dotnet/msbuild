@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using NUnit.Framework;
 using Microsoft.Build.Framework;
@@ -76,7 +74,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore] // "Timing issue found on RI candidate from ToolPlat to Main, disabling for RI only."
+        [Ignore("Timing issue found on RI candidate from ToolPlat to Main, disabling for RI only.")]
         public void Timeout()
         {
             Exec exec = PrepareExec(":foo \n goto foo");
@@ -135,8 +133,9 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void NonUNCWorkingDirectoryUsed()
         {
-            Exec exec = PrepareExec("echo [%cd%]");
-            string working = Environment.GetFolderPath(Environment.SpecialFolder.Windows); // not desktop etc - IT redirection messes it up
+            Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? "echo [%cd%]" : "echo [$PWD]");
+            string working = !NativeMethodsShared.IsWindows ? "/usr/lib" :
+                Environment.GetFolderPath(Environment.SpecialFolder.Windows); // not desktop etc - IT redirection messes it up
             exec.WorkingDirectory = working;
             bool result = exec.Execute();
 
@@ -167,9 +166,10 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                Directory.SetCurrentDirectory(Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+                Directory.SetCurrentDirectory(NativeMethodsShared.IsWindows ?
+                    Environment.GetFolderPath(Environment.SpecialFolder.Windows) : "/usr/lib");
 
-                Exec exec = PrepareExec("echo [%cd%]");
+                Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? "echo [%cd%]" : "echo [$PWD]");
                 bool result = exec.Execute();
 
                 string expected = Directory.GetCurrentDirectory();
@@ -462,7 +462,7 @@ namespace Microsoft.Build.UnitTests
             exec.Outputs = null;
             Assert.AreEqual(0, exec.Outputs.Length);
 
-            ITaskItem[] items = new TaskItem[] { new TaskItem("hi"), new TaskItem("ho") };
+            ITaskItem[] items = { new TaskItem("hi"), new TaskItem("ho") };
             exec.Outputs = items;
             Assert.AreEqual(items, exec.Outputs);
         }
@@ -520,8 +520,8 @@ namespace Microsoft.Build.UnitTests
         {
             Exec exec = new Exec();
             exec.BuildEngine = new MockEngine();
-            exec.Command = "echo [%MYENVVAR%]";
-            exec.EnvironmentVariables = new string[] { "myenvvar=myvalue" };
+            exec.Command = NativeMethodsShared.IsWindows ? "echo [%MYENVVAR%]" : "echo [$myenvvar]";
+            exec.EnvironmentVariables = new[] { "myenvvar=myvalue" };
             exec.Execute();
 
             ((MockEngine)exec.BuildEngine).AssertLogContains("[myvalue]");

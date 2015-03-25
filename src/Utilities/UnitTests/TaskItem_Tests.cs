@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 using NUnit.Framework;
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
-using System.Collections.Generic;
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
 {
@@ -241,17 +242,20 @@ namespace Microsoft.Build.UnitTests
         public void NonexistentRequestDirectory()
         {
             TaskItem from = new TaskItem();
-            from.ItemSpec = @"c:\subdir\Monkey.txt";
-            Assert.AreEqual
-            (
-                @"subdir\",
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory)
-            );
+            from.ItemSpec = NativeMethodsShared.IsWindows ? @"c:\subdir\Monkey.txt" : "/subdir/Monkey.txt";
+            Assert.AreEqual(
+                NativeMethodsShared.IsWindows ? @"subdir\" : "/subdir/",
+                from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory));
         }
 
         [Test]
         public void NonexistentRequestDirectoryUNC()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("UNC is not implemented except under Windows");
+            }
+
             TaskItem from = new TaskItem();
             from.ItemSpec = @"\\local\share\subdir\Monkey.txt";
             Assert.AreEqual

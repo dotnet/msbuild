@@ -2,18 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
+using System.IO;
+
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -39,8 +37,6 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Environment.CurrentDirectory;
@@ -106,8 +102,6 @@ namespace Microsoft.Build.UnitTests
         /// MSBuildSourceTargetName  -- that give an indication of where the items came from.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void OutputItemsAreTaggedWithProjectFileAndTargetName()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -180,8 +174,6 @@ namespace Microsoft.Build.UnitTests
         /// shouldn't error, and it shouldn't try to build itself.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void EmptyProjectsParameterResultsInNoop()
         {
             string projectContents = @"
@@ -203,8 +195,6 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that nonexistent projects aren't normally skipped
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NormallyDoNotSkipNonexistentProjects()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -226,8 +216,6 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that nonexistent projects aren't normally skipped
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NormallyDoNotSkipNonexistentProjectsBuildInParallel()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -251,8 +239,6 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that nonexistent projects are skipped when requested
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SkipNonexistentProjects()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -290,8 +276,6 @@ namespace Microsoft.Build.UnitTests
         /// DDB # 125831
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SkipNonexistentProjectsBuildingInParallel()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -325,8 +309,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void LogErrorWhenBuildingVCProj()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -374,8 +356,7 @@ namespace Microsoft.Build.UnitTests
         /// property value and so he can't escape it himself.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -474,8 +455,6 @@ namespace Microsoft.Build.UnitTests
         /// Check if passing different global properites via metadata works
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DifferentGlobalPropertiesWithDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -545,8 +524,6 @@ namespace Microsoft.Build.UnitTests
         /// Check if passing different global properites via metadata works
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DifferentGlobalPropertiesWithoutDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -614,8 +591,6 @@ namespace Microsoft.Build.UnitTests
         /// Check trailing semicolons are ignored
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void VariousPropertiesToMSBuildTask()
         {
             string projectFile = null;
@@ -790,8 +765,6 @@ namespace Microsoft.Build.UnitTests
         /// Check if passing additional global properites via metadata works
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DifferentAdditionalPropertiesWithDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -859,8 +832,6 @@ namespace Microsoft.Build.UnitTests
         /// Check if passing additional global properites via metadata works
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DifferentAdditionalPropertiesWithGlobalProperties()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -930,8 +901,6 @@ namespace Microsoft.Build.UnitTests
         /// Check if passing additional global properites via metadata works
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DifferentAdditionalPropertiesWithoutDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -997,8 +966,6 @@ namespace Microsoft.Build.UnitTests
         /// Properties and Targets that use non-standard separation chars
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TargetsWithSeparationChars()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1058,8 +1025,6 @@ namespace Microsoft.Build.UnitTests
         /// qa\md\wd\DTP\MSBuild\ShippingExtensions\ShippingTasks\MSBuild\_Tst\MSBuild.StopOnFirstFailure
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void StopOnFirstFailureandBuildInParallelSingleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1187,8 +1152,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify stopOnFirstFailure with BuildInParallel override message are correctly logged when there are multiple nodes
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void StopOnFirstFailureandBuildInParallelMultipleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1384,8 +1347,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify the behavior of Target execution with StopOnFirstFailure
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TargetStopOnFirstFailureBuildInParallel()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1540,8 +1501,6 @@ namespace Microsoft.Build.UnitTests
         /// Properties and Targets that use non-standard separation chars
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void PropertiesWithSeparationChars()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"

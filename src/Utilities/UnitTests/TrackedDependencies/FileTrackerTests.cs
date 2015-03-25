@@ -3,21 +3,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.IO;
-using System.Xml;
-using NUnit.Framework;
-using System.Threading;
-using System.Collections;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
-using System.Linq;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
 
 using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using ObjectModelHelpers = Microsoft.Build.UnitTests.ObjectModelHelpers;
@@ -36,8 +34,13 @@ namespace Microsoft.Build.UnitTests.FileTracking
         private static string s_oldPath = null;
 
         [TestFixtureSetUp]
-        public static void ClassSetup(TestContext testContext)
+        public void TestFixtureSetup()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("FileTracker is not supported under Unix");
+            }
+			
             s_defaultFileTrackerPathUnquoted = null;//FileTracker.GetFileTrackerPath(ExecutableType.SameAsCurrentProcess);
             s_defaultFileTrackerPath = null; //"\"" + defaultFileTrackerPathUnquoted + "\"";
             s_defaultTrackerPath = null;//FileTracker.GetTrackerPath(ExecutableType.SameAsCurrentProcess);
@@ -48,7 +51,17 @@ namespace Microsoft.Build.UnitTests.FileTracking
         {
             // blank out the path so that we know we're not inadvertently depending on it.
             s_oldPath = Environment.GetEnvironmentVariable("PATH");
-            Environment.SetEnvironmentVariable("PATH", Environment.ExpandEnvironmentVariables("%windir%\\system32;%windir%"));
+
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                Environment.SetEnvironmentVariable("PATH", "/sbin:/bin");
+            }
+            else
+            {
+                Environment.SetEnvironmentVariable(
+                    "PATH",
+                    Environment.ExpandEnvironmentVariables("%windir%\\system32;%windir%"));
+            }
 
             // Call StopTrackingAndCleanup here, just in case one of the unit tests failed before it called it
             // In real code StopTrackingAndCleanup(); would always be in a finally {} block.
@@ -572,10 +585,10 @@ class X
             Console.WriteLine("Test: FileTrackerFindUnicode");
 
             File.Delete("find.read.1.tlog");
-            FileTrackerTestHelper.WriteAll("t\u1EBCst.in", "foo");
+            FileTrackerTestHelper.WriteAll("tẼst.in", "foo");
 
             // FINDSTR.EXE doesn't support unicode, so we'll use FIND.EXE which does
-            int exit = FileTrackerTestHelper.RunCommandNoStdOut(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /i . /c find /I \"\\\"foo\"\\\" t\u1EBCst.in");
+            int exit = FileTrackerTestHelper.RunCommandNoStdOut(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /i . /c find /I \"\\\"foo\"\\\" tẼst.in");
             Console.WriteLine("");
             Assert.AreEqual(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("t\u1EBCst.in").ToUpperInvariant(), "find.read.1.tlog");
@@ -691,7 +704,14 @@ class X
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
-            int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, FileTracker.TrackerArguments("findstr", "/ip foo test.in", "" + s_defaultFileTrackerPathUnquoted, ".", "jibbit goo"));
+            int exit = FileTrackerTestHelper.RunCommand(
+                s_defaultTrackerPath,
+                FileTracker.TrackerArguments(
+                    "findstr",
+                    "/ip foo test.in",
+                    "" + s_defaultFileTrackerPathUnquoted,
+                    ".",
+                    "jibbit goo"));
 
             Console.WriteLine("");
             Assert.AreEqual(0, exit);
@@ -888,9 +908,15 @@ class X
             // The default path to temp, used to create explicitly short and long paths
             string tempPath = Path.GetDirectoryName(Path.GetTempPath());
             // The short path to temp
-            string tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(tempPath).ToUpperInvariant());
+            string tempShortPath = NativeMethodsShared.IsUnixLike
+                                       ? tempPath
+                                       : FileUtilities.EnsureTrailingSlash(
+                                           NativeMethodsShared.GetShortFilePath(tempPath).ToUpperInvariant());
             // The long path to temp
-            string tempLongPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetLongFilePath(tempPath).ToUpperInvariant());
+            string tempLongPath = NativeMethodsShared.IsUnixLike
+                                      ? tempPath
+                                      : FileUtilities.EnsureTrailingSlash(
+                                          NativeMethodsShared.GetLongFilePath(tempPath).ToUpperInvariant());
             string testFile;
 
             // We don't want to be including these as dependencies or outputs:

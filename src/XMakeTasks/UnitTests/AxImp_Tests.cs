@@ -1,17 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Reflection;
-using NUnit.Framework;
-using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-using System.Globalization;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
@@ -59,11 +53,17 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             var t = new ResolveComReference.AxImp();
 
             Assert.IsFalse(t.GenerateSource, "GenerateSource should be false by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/source", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/source"),
+                false /* no response file */);
 
             t.GenerateSource = true;
             Assert.IsTrue(t.GenerateSource, "GenerateSource should be true");
-            CommandLine.ValidateHasParameter(t, @"/source", false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/source"),
+                false /* no response file */);
         }
 
         /// <summary>
@@ -72,6 +72,11 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Test]
         public void NoLogo()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("The /nologo switch is not available on Mono");
+            }
+
             var t = new ResolveComReference.AxImp();
 
             Assert.IsFalse(t.NoLogo, "NoLogo should be false by default");
@@ -92,11 +97,17 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             string testParameterValue = "AxInterop.Foo.dll";
 
             Assert.IsNull(t.OutputAssembly, "OutputAssembly should be null by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/out:", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/out:"),
+                false /* no response file */);
 
             t.OutputAssembly = testParameterValue;
             Assert.AreEqual(testParameterValue, t.OutputAssembly, "New OutputAssembly value should be set");
-            CommandLine.ValidateHasParameter(t, @"/out:" + testParameterValue, false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/out:") + testParameterValue,
+                false /* no response file */);
         }
 
         /// <summary>
@@ -109,11 +120,17 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             string testParameterValue = @"c:\Program Files\AxInterop.Foo.dll";
 
             Assert.IsNull(t.OutputAssembly, "OutputAssembly should be null by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/out:", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/out:"),
+                false /* no response file */);
 
             t.OutputAssembly = testParameterValue;
             Assert.AreEqual(testParameterValue, t.OutputAssembly, "New OutputAssembly value should be set");
-            CommandLine.ValidateHasParameter(t, @"/out:" + testParameterValue, false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/out:") + testParameterValue,
+                false /* no response file */);
         }
 
         /// <summary>
@@ -126,11 +143,17 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             string testParameterValue = "Interop.Foo.dll";
 
             Assert.IsNull(t.RuntimeCallableWrapperAssembly, "RuntimeCallableWrapper should be null by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/rcw:", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/rcw:"),
+                false /* no response file */);
 
             t.RuntimeCallableWrapperAssembly = testParameterValue;
             Assert.AreEqual(testParameterValue, t.RuntimeCallableWrapperAssembly, "New RuntimeCallableWrapper value should be set");
-            CommandLine.ValidateHasParameter(t, @"/rcw:" + testParameterValue, false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/rcw:") + testParameterValue,
+                false /* no response file */);
         }
 
         /// <summary>
@@ -143,11 +166,17 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             string testParameterValue = @"C:\Program Files\Microsoft Visual Studio 10.0\Interop.Foo.dll";
 
             Assert.IsNull(t.RuntimeCallableWrapperAssembly, "RuntimeCallableWrapper should be null by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/rcw:", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/rcw:"),
+                false /* no response file */);
 
             t.RuntimeCallableWrapperAssembly = testParameterValue;
             Assert.AreEqual(testParameterValue, t.RuntimeCallableWrapperAssembly, "New RuntimeCallableWrapper value should be set");
-            CommandLine.ValidateHasParameter(t, @"/rcw:" + testParameterValue, false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/rcw:") + testParameterValue,
+                false /* no response file */);
         }
 
         /// <summary>
@@ -159,11 +188,17 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             var t = new ResolveComReference.AxImp();
 
             Assert.IsFalse(t.Silent, "Silent should be false by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/silent", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/silent"),
+                false /* no response file */);
 
             t.Silent = true;
             Assert.IsTrue(t.Silent, "Silent should be true");
-            CommandLine.ValidateHasParameter(t, @"/silent", false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/silent"),
+                false /* no response file */);
         }
 
         /// <summary>
@@ -175,11 +210,17 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             var t = new ResolveComReference.AxImp();
 
             Assert.IsFalse(t.Verbose, "Verbose should be false by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/verbose", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/verbose"),
+                false /* no response file */);
 
             t.Verbose = true;
             Assert.IsTrue(t.Verbose, "Verbose should be true");
-            CommandLine.ValidateHasParameter(t, @"/verbose", false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/verbose"),
+                false /* no response file */);
         }
 
         /// <summary>

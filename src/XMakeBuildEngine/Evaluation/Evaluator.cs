@@ -6,15 +6,12 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Debugging;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using ObjectModel = System.Collections.ObjectModel;
@@ -26,7 +23,6 @@ using Microsoft.VisualStudio.Profiler;
 #endif
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
@@ -35,7 +31,6 @@ using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -1309,6 +1304,11 @@ namespace Microsoft.Build.Evaluation
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture)));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion));
+            // Fake OS env variables when not on Windows
+            if (!NativeMethodsShared.IsWindows)
+            {
+                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.osName, NativeMethodsShared.OSName));
+            }
 
             if (String.IsNullOrEmpty(_projectRootElement.FullPath))
             {

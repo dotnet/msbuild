@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Security;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
@@ -17,8 +16,8 @@ using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -263,10 +262,11 @@ namespace Microsoft.Build.Tasks
                         case UtilitiesProcessorArchitecture.X86:
                             flags |= TypeLibImporterFlags.ImportAsX86;
                             break;
+#if !MONO
                         case UtilitiesProcessorArchitecture.ARM:
                             flags |= TypeLibImporterFlags.ImportAsArm;
                             break;
-
+#endif
                         default:
                             // Let the type importer decide.
                             break;

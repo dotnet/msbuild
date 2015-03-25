@@ -73,7 +73,7 @@ namespace Microsoft.Build.Utilities
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemSpec, "itemSpec");
 
-            _itemSpec = itemSpec;
+            _itemSpec = FileUtilities.FixFilePath(itemSpec);
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Utilities
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "ItemSpec");
 
-                _itemSpec = value;
+                _itemSpec = FileUtilities.FixFilePath(value);
                 _fullPath = null;
             }
         }
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Utilities
 
             set
             {
-                _itemSpec = value;
+                _itemSpec = FileUtilities.FixFilePath(value);
                 _fullPath = null;
             }
         }

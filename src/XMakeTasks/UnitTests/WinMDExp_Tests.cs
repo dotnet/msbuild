@@ -1,16 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
 using NUnit.Framework;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-using System.Globalization;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -31,8 +25,14 @@ namespace Microsoft.Build.UnitTests
             TaskItem windowsFoundationReference = new TaskItem("Windows.Foundation.winmd");
 
             t.References = new TaskItem[] { mscorlibReference, windowsFoundationReference };
-            CommandLine.ValidateHasParameter(t, "/reference:mscorlib.dll", false);
-            CommandLine.ValidateHasParameter(t, "/reference:Windows.Foundation.winmd", false);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch("/reference:mscorlib.dll"),
+                false);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch("/reference:Windows.Foundation.winmd"),
+                false);
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
             WinMDExp t = new WinMDExp();
             t.WinMDModule = "Foo.dll";
             t.DisabledWarnings = "41999,42016";
-            CommandLine.ValidateHasParameter(t, "/nowarn:41999,42016", false);
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/nowarn:41999,42016"), false);
         }
 
 
@@ -56,8 +56,8 @@ namespace Microsoft.Build.UnitTests
             t.OutputDocumentationFile = "output.xml";
             t.InputDocumentationFile = "input.xml";
 
-            CommandLine.ValidateHasParameter(t, "/d:output.xml", false);
-            CommandLine.ValidateHasParameter(t, "/md:input.xml", false);
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/d:output.xml"), false);
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/md:input.xml"), false);
         }
 
         [Test]
@@ -69,8 +69,8 @@ namespace Microsoft.Build.UnitTests
             t.OutputPDBFile = "output.pdb";
             t.InputPDBFile = "input.pdb";
 
-            CommandLine.ValidateHasParameter(t, "/pdb:output.pdb", false);
-            CommandLine.ValidateHasParameter(t, "/mp:input.pdb", false);
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/pdb:output.pdb"), false);
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/mp:input.pdb"), false);
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
             WinMDExp t = new WinMDExp();
             t.WinMDModule = "Foo.dll";
             t.OutputWindowsMetadataFile = "Bob.winmd";
-            CommandLine.ValidateHasParameter(t, "/out:Bob.winmd", false);
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/out:Bob.winmd"), false);
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
 
             t.WinMDModule = "Foo.dll";
             t.OutputWindowsMetadataFile = "Foo.winmd";
-            CommandLine.ValidateHasParameter(t, "/out:Foo.winmd", false);
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/out:Foo.winmd"), false);
         }
     }
 }

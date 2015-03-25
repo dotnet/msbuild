@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectItemElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -16,8 +18,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -25,13 +26,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Test the ProjectItemElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectItemElement_Tests
     {
         /// <summary>
         /// Read item with no children
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNoChildren()
         {
             ProjectItemElement item = GetItemXml();
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with no include
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidNoInclude()
         {
@@ -60,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item which contains text
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidContainsText()
         {
@@ -74,11 +75,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
         }
-        
+
         /// <summary>
         /// Read item with empty include
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidEmptyInclude()
         {
@@ -96,7 +97,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with reserved element name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidReservedElementName()
         {
@@ -114,7 +115,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Exclude without Include
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidExcludeWithoutInclude()
         {
@@ -132,7 +133,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Basic reading of items
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadBasic()
         {
             string content = @"
@@ -173,7 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadata on item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadMetadata()
         {
             string content = @"
@@ -206,7 +207,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove outside of Target: not currently supported
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidRemoveOutsideTarget()
         {
@@ -224,7 +225,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove inside of Target, but with metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidRemoveWithMetadataInsideTarget()
         {
@@ -246,7 +247,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove inside of Target, but with Exclude: not currently supported
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidExcludeAndRemoveInsideTarget()
         {
@@ -266,7 +267,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove inside of Target, but with Include: not currently supported
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidIncludeAndRemoveInsideTarget()
         {
@@ -286,7 +287,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove inside of Target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadValidRemoveInsideTarget()
         {
             string content = @"
@@ -310,7 +311,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Exclude without Include, inside of Target
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidExcludeWithoutIncludeWithinTarget()
         {
@@ -330,7 +331,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Exclude without Include, inside of Target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadValidIncludeExcludeWithinTarget()
         {
             string content = @"
@@ -355,7 +356,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the include on an item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetInclude()
         {
             ProjectItemElement item = GetItemXml();
@@ -368,7 +369,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set empty include: this removes it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyInclude()
         {
             ProjectItemElement item = GetItemXml();
@@ -381,7 +382,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null empty : this removes it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullInclude()
         {
             ProjectItemElement item = GetItemXml();
@@ -394,7 +395,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the Exclude on an item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetExclude()
         {
             ProjectItemElement item = GetItemXml();
@@ -407,7 +408,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set empty Exclude: this removes it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyExclude()
         {
             ProjectItemElement item = GetItemXml();
@@ -420,7 +421,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null Exclude: this removes it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullExclude()
         {
             ProjectItemElement item = GetItemXml();
@@ -433,7 +434,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the Remove on an item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetRemove()
         {
             ProjectItemElement item = GetItemXmlWithRemove();
@@ -446,7 +447,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set empty Remove: this removes it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyRemove()
         {
             ProjectItemElement item = GetItemXmlWithRemove();
@@ -459,7 +460,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null Remove: this removes it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullRemove()
         {
             ProjectItemElement item = GetItemXmlWithRemove();
@@ -472,7 +473,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Include when Remove is present
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetInvalidIncludeWithRemove()
         {
@@ -484,7 +485,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Exclude when Remove is present
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetInvalidExcludeWithRemove()
         {
@@ -496,7 +497,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Remove when Include is present, inside a target
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetInvalidRemoveWithInclude()
         {
@@ -508,7 +509,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Remove outside of a target: this is currently invalid
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetInvalidRemoveOutsideTarget()
         {
@@ -520,7 +521,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the condition on an item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectItemElement item = GetItemXml();
@@ -533,7 +534,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting condition should dirty the project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SettingItemConditionDirties()
         {
             Project project = new Project();
@@ -549,7 +550,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting include should dirty the project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SettingItemIncludeDirties()
         {
             Project project = new Project();
@@ -565,7 +566,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting exclude should dirty the project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SettingItemExcludeDirties()
         {
             Project project = new Project();
@@ -581,7 +582,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting exclude should dirty the project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SettingItemRemoveDirties()
         {
             ProjectRootElement project = ProjectRootElement.Create();

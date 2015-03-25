@@ -92,8 +92,11 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                var configFile = FileUtilities.CurrentExecutableConfigurationFilePath;
-                result = File.Exists(configFile) && File.ReadAllText(configFile).Contains("toolsVersion");
+                result =
+                    (
+                    File.Exists(FileUtilities.CurrentExecutableConfigurationFilePath) &&
+                    File.ReadAllText(FileUtilities.CurrentExecutableConfigurationFilePath).Contains("toolsVersion")
+                    );
             }
             catch (Exception e)
             {

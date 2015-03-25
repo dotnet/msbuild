@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Globalization;
 
 namespace Microsoft.Build.Utilities
 {
@@ -26,14 +23,22 @@ namespace Microsoft.Build.Utilities
         internal static DateTime GetLastWriteTimeUtc(string fullPath)
         {
             DateTime fileModifiedTime = DateTime.MinValue;
-            WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
 
-            success = NativeMethods.GetFileAttributesEx(fullPath, 0, ref data);
-            if (success)
+            if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
             {
-                long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
-                fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
+
+                success = GetFileAttributesEx(fullPath, 0, ref data);
+                if (success)
+                {
+                    long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
+                    fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+                }
+            }
+            else if (File.Exists(fullPath) || Directory.Exists(fullPath))
+            {
+                fileModifiedTime = File.GetLastWriteTimeUtc(fullPath);
             }
 
             return fileModifiedTime;

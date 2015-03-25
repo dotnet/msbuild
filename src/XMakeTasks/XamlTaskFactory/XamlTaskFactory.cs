@@ -16,9 +16,9 @@ using System.IO;
 using System.Threading;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks.Xaml;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

@@ -3,16 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using Microsoft.Win32;
-using Microsoft.Build.Evaluation;
-using NUnit.Framework;
+
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Win32;
 
+using NUnit.Framework;
+
+using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
@@ -105,6 +106,10 @@ namespace Microsoft.Build.UnitTests.Definition
         // Ignore: Test requires installed toolset.
         public void DefaultValuesInRegistryCreatedBySetup()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("TODO: under Unix this runs out of stack. Investigate");
+            }
             ToolsetReader reader = new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>());  //we don't use the test registry key because we want to verify the install
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -179,8 +184,10 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ReadRegistry_OnlyOneSubkey()
         {
+            string xdir = NativeMethodsShared.IsWindows ? "c:\\xxx" : "/xxx";
+
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("tv1");
-            key1.SetValue("msbuildtoolspath", "c:\\xxx");
+            key1.SetValue("msbuildtoolspath", xdir);
 
             ToolsetReader reader = GetStandardRegistryReader();
             string msbuildOverrideTasksPath = null;
@@ -192,7 +199,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(null, defaultToolsVersion);
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(0, values["tv1"].Properties.Count);
-            Assert.IsTrue(0 == String.Compare("c:\\xxx", values["tv1"].ToolsPath, StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(0 == String.Compare(xdir, values["tv1"].ToolsPath, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -201,12 +208,14 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ReadRegistry_Basic()
         {
+            string xdir = NativeMethodsShared.IsWindows ? "c:\\xxx" : "/xxx";
+            string ydir = NativeMethodsShared.IsWindows ? "c:\\yyy" : "/yyy";
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("tv1");
-            key1.SetValue("msbuildtoolspath", "c:\\xxx");
+            key1.SetValue("msbuildtoolspath", xdir);
             key1.SetValue("name1", "value1");
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("tv2");
             key2.SetValue("name2", "value2");
-            key2.SetValue("msbuildtoolspath", "c:\\yyy");
+            key2.SetValue("msbuildtoolspath", ydir);
 
             ToolsetReader reader = GetStandardRegistryReader();
             string msbuildOverrideTasksPath = null;
@@ -217,10 +226,10 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(2, values.Count);
             Assert.AreEqual(1, values["tv1"].Properties.Count);
-            Assert.IsTrue(0 == String.Compare("c:\\xxx", values["tv1"].ToolsPath, StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(0 == String.Compare(xdir, values["tv1"].ToolsPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(0 == String.Compare("value1", values["tv1"].Properties["name1"].EvaluatedValue, StringComparison.OrdinalIgnoreCase));
             Assert.AreEqual(1, values["tv2"].Properties.Count);
-            Assert.IsTrue(0 == String.Compare("c:\\yyy", values["tv2"].ToolsPath, StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(0 == String.Compare(ydir, values["tv2"].ToolsPath, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(0 == String.Compare("value2", values["tv2"].Properties["name2"].EvaluatedValue, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -258,14 +267,17 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ReadRegistry_HasSubToolsets()
         {
+            string xdir = NativeMethodsShared.IsWindows ? "c:\\xxx" : "/xxx";
+            string ydir = NativeMethodsShared.IsWindows ? "c:\\yyy" : "/yyy";
+
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("tv1");
-            key1.SetValue("msbuildtoolspath", "c:\\xxx");
+            key1.SetValue("msbuildtoolspath", xdir);
             key1.SetValue("name1", "value1");
             RegistryKey subKey1 = key1.CreateSubKey("SubKey1");
             subKey1.SetValue("name1a", "value1a");
             subKey1.SetValue("name2a", "value2a");
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("tv2");
-            key2.SetValue("msbuildtoolspath", "c:\\yyy");
+            key2.SetValue("msbuildtoolspath", ydir);
             key2.SetValue("name2", "value2");
             RegistryKey subKey2 = key2.CreateSubKey("SubKey2");
             subKey2.SetValue("name3a", "value3a");
@@ -283,7 +295,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(2, values.Count);
             Assert.AreEqual(1, values["tv1"].Properties.Count);
-            Assert.AreEqual("c:\\xxx", values["tv1"].ToolsPath);
+            Assert.AreEqual(xdir, values["tv1"].ToolsPath);
             Assert.AreEqual("value1", values["tv1"].Properties["name1"].EvaluatedValue);
             Assert.AreEqual(1, values["tv1"].SubToolsets.Count);
             Assert.AreEqual(2, values["tv1"].SubToolsets["SubKey1"].Properties.Count);
@@ -291,7 +303,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("value2a", values["tv1"].SubToolsets["SubKey1"].Properties["name2a"].EvaluatedValue);
 
             Assert.AreEqual(1, values["tv2"].Properties.Count);
-            Assert.AreEqual("c:\\yyy", values["tv2"].ToolsPath);
+            Assert.AreEqual(ydir, values["tv2"].ToolsPath);
             Assert.AreEqual("value2", values["tv2"].Properties["name2"].EvaluatedValue);
             Assert.AreEqual(2, values["tv2"].SubToolsets.Count);
             Assert.AreEqual(2, values["tv2"].SubToolsets["SubKey2"].Properties.Count);
@@ -312,8 +324,10 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ReadRegistry_IgnoreSubToolsetSubKeys()
         {
+            string xdir = NativeMethodsShared.IsWindows ? "c:\\xxx" : "/xxx";
+
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("tv1");
-            key1.SetValue("msbuildtoolspath", "c:\\xxx");
+            key1.SetValue("msbuildtoolspath", xdir);
             key1.SetValue("name1", "value1");
             RegistryKey subKey1 = key1.CreateSubKey("SubKey1");
             subKey1.SetValue("name1a", "value1a");
@@ -330,7 +344,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(1, values["tv1"].Properties.Count);
-            Assert.AreEqual("c:\\xxx", values["tv1"].ToolsPath);
+            Assert.AreEqual(xdir, values["tv1"].ToolsPath);
             Assert.AreEqual("value1", values["tv1"].Properties["name1"].EvaluatedValue);
             Assert.AreEqual(1, values["tv1"].SubToolsets.Count);
             Assert.AreEqual(2, values["tv1"].SubToolsets["SubKey1"].Properties.Count);
@@ -346,8 +360,10 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ReadRegistry_SubToolsetOverridesBaseToolsetEntries()
         {
+            string xdir = NativeMethodsShared.IsWindows ? "c:\\xxx" : "/xxx";
+
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("tv1");
-            key1.SetValue("msbuildtoolspath", "c:\\xxx");
+            key1.SetValue("msbuildtoolspath", xdir);
             key1.SetValue("name1", "value1");
             key1.SetValue("name2", "value2");
             RegistryKey subKey1 = key1.CreateSubKey("Foo");
@@ -363,7 +379,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(2, values["tv1"].Properties.Count);
-            Assert.AreEqual("c:\\xxx", values["tv1"].ToolsPath);
+            Assert.AreEqual(xdir, values["tv1"].ToolsPath);
             Assert.AreEqual("value1", values["tv1"].Properties["name1"].EvaluatedValue);
             Assert.AreEqual("value2", values["tv1"].Properties["name2"].EvaluatedValue);
             Assert.AreEqual(1, values["tv1"].SubToolsets.Count);
@@ -385,8 +401,10 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void ReadRegistry_UnselectedSubToolsetIsIgnored()
         {
+            string xdir = NativeMethodsShared.IsWindows ? "c:\\xxx" : "/xxx";
+
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("tv1");
-            key1.SetValue("msbuildtoolspath", "c:\\xxx");
+            key1.SetValue("msbuildtoolspath", xdir);
             key1.SetValue("name1", "value1");
             key1.SetValue("name2", "value2");
             RegistryKey subKey1 = key1.CreateSubKey("Foo");
@@ -402,7 +420,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(2, values["tv1"].Properties.Count);
-            Assert.AreEqual("c:\\xxx", values["tv1"].ToolsPath);
+            Assert.AreEqual(xdir, values["tv1"].ToolsPath);
             Assert.AreEqual("value1", values["tv1"].Properties["name1"].EvaluatedValue);
             Assert.AreEqual("value2", values["tv1"].Properties["name2"].EvaluatedValue);
         }
@@ -471,6 +489,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GetOverrideTasksPathFromRegistry_Basic()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("Registry is not supported under Unix");
+            }
+
             _currentVersionRegistryKey.SetValue("MsBuildOverrideTasksPath", "c:\\Foo");
 
             ToolsetReader reader = GetStandardRegistryReader();
@@ -506,6 +529,11 @@ namespace Microsoft.Build.UnitTests.Definition
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void GetOverrideTasksPathFromRegistry_NonStringData()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("Registry is not supported under Unix");
+            }
+
             _currentVersionRegistryKey.SetValue("MsBuildOverrideTasksPath", new String[] { "2938304894", "3948394.2.3.3.3" }, RegistryValueKind.MultiString);
 
             ToolsetReader reader = GetStandardRegistryReader();

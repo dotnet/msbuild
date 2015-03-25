@@ -2,32 +2,27 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Xml;
-using System.Reflection;
 using System.Collections;
-using System.Collections.Specialized;
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.IO;
+
+using Microsoft.Build.Shared;
 
 using NUnit.Framework;
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using System.Collections.Generic;
-
-using Toolset = Microsoft.Build.Evaluation.Toolset;
+using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
+using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
 using Project = Microsoft.Build.Evaluation.Project;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
-using InternalUtilities = Microsoft.Build.Internal.Utilities;
-using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
+using Toolset = Microsoft.Build.Evaluation.Toolset;
 
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 using XmlDocumentWithLocation = Microsoft.Build.Construction.XmlDocumentWithLocation;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
 
-using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -94,11 +89,12 @@ namespace Microsoft.Build.UnitTests
             {
                 string content = ObjectModelHelpers.CleanupFileContents(@"
 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
-  <Import Project='$(MSBuildToolsPath)\microsoft.csharp.targets'/>
+  <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
 </Project>");
                 File.WriteAllText(input, content);
 
-                Assert.AreEqual(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + input + @""" /pp:""" + output + @""""));
+                Assert.AreEqual(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + input +
+                    (NativeMethodsShared.IsUnixLike ? @""" -pp:""" : @""" /pp:""") + output + @""""));
 
                 bool foundDoNotModify = false;
                 foreach (string line in File.ReadLines(output))

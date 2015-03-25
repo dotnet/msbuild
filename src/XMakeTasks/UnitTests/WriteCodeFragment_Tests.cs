@@ -7,11 +7,12 @@
 
 using System;
 using System.IO;
-using NUnit.Framework;
-using Microsoft.Build.Framework;
+
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -104,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             task.Language = "c#";
             task.AssemblyAttributes = new TaskItem[] { new TaskItem("aa") };
 
-            string folder = Path.Combine(Path.GetTempPath(), "foo\\");
+            string folder = Path.Combine(Path.GetTempPath(), "foo" + Path.DirectorySeparatorChar);
             string file = Path.Combine(folder, "CombineFileDirectory.tmp");
             Directory.CreateDirectory(folder);
             task.OutputFile = new TaskItem(file);
@@ -184,7 +185,7 @@ namespace Microsoft.Build.UnitTests
             task.BuildEngine = engine;
             task.Language = "c#";
             task.AssemblyAttributes = new TaskItem[] { new TaskItem("aa") };
-            task.OutputFile = new TaskItem("||invalid||");
+            task.OutputFile = new TaskItem("||//invalid||");
             bool result = task.Execute();
 
             Assert.AreEqual(false, result);
@@ -197,6 +198,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void InvalidDirectoryPath()
         {
+            if (!NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("No invalid characters on Unix");
+            }
+
             WriteCodeFragment task = new WriteCodeFragment();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;

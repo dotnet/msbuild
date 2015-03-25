@@ -4,12 +4,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
-using System.Resources;
+using System.IO;
+
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -115,8 +113,9 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem file in Files)
             {
+                string path = FileUtilities.FixFilePath(file.ItemSpec);
                 // For speed, eliminate duplicates caused by poor targets authoring
-                if (touchedFilesSet.Contains(file.ItemSpec))
+                if (touchedFilesSet.Contains(path))
                 {
                     continue;
                 }
@@ -127,7 +126,7 @@ namespace Microsoft.Build.Tasks
                 (
                     TouchFile
                     (
-                        file.ItemSpec,
+                        path,
                         touchDateTime,
                         fileExists,
                         fileCreate,
@@ -147,7 +146,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Add even on failure to avoid reattempting
-                touchedFilesSet.Add(file.ItemSpec);
+                touchedFilesSet.Add(path);
             }
 
             // Now, set the property that indicates which items we touched.  Note that we
@@ -164,12 +163,12 @@ namespace Microsoft.Build.Tasks
         {
             return ExecuteImpl
             (
-                new FileExists(System.IO.File.Exists),
-                new FileCreate(System.IO.File.Create),
-                new GetAttributes(System.IO.File.GetAttributes),
-                new SetAttributes(System.IO.File.SetAttributes),
-                new SetLastAccessTime(System.IO.File.SetLastAccessTime),
-                new SetLastWriteTime(System.IO.File.SetLastWriteTime)
+                new FileExists(File.Exists),
+                new FileCreate(File.Create),
+                new GetAttributes(File.GetAttributes),
+                new SetAttributes(File.SetAttributes),
+                new SetLastAccessTime(File.SetLastAccessTime),
+                new SetLastWriteTime(File.SetLastWriteTime)
             );
         }
 
@@ -187,7 +186,7 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                using (System.IO.FileStream fs = fileCreate(file))
+                using (FileStream fs = fileCreate(file))
                 {
                 }
             }
@@ -251,14 +250,14 @@ namespace Microsoft.Build.Tasks
             // If the file is read only then we must either issue an error, or, if the user so 
             // specified, make the file temporarily not read only.
             bool needToRestoreAttributes = false;
-            System.IO.FileAttributes faOriginal = fileGetAttributes(file);
-            if ((faOriginal & System.IO.FileAttributes.ReadOnly) == System.IO.FileAttributes.ReadOnly)
+            FileAttributes faOriginal = fileGetAttributes(file);
+            if ((faOriginal & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
             {
                 if (ForceTouch)
                 {
                     try
                     {
-                        System.IO.FileAttributes faNew = (faOriginal & ~System.IO.FileAttributes.ReadOnly);
+                        FileAttributes faNew = (faOriginal & ~FileAttributes.ReadOnly);
                         fileSetAttributes(file, faNew);
                         needToRestoreAttributes = true;
                     }

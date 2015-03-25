@@ -2,13 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.IO;
-using System.Xml;
-using System.Globalization;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
 using System.Collections.Concurrent;
 
 using Microsoft.Build.Collections;
@@ -52,6 +47,7 @@ namespace Microsoft.Build.Internal
         internal const string programFiles32 = "MSBuildProgramFiles32";
         internal const string localAppData = "LocalAppData";
         internal const string assemblyVersion = "MSBuildAssemblyVersion";
+        internal const string osName = "OS";
 
         /// <summary>
         /// Lookup for reserved property names
@@ -130,12 +126,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// The toolsversion we will fall back to as a last resort if the default one cannot be found, this fallback should be the most current toolsversion known
         /// </summary>
-        internal const string defaultFallbackToolsVersion = MSBuildConstants.CurrentToolsVersion;
+        internal static string defaultFallbackToolsVersion = MSBuildConstants.CurrentToolsVersion;
 
         /// <summary>
         /// The toolsversion we will use when we construct the solution wrapper metaprojects; this should be the most current toolsversion known
         /// </summary>
-        internal const string defaultSolutionWrapperProjectToolsVersion = MSBuildConstants.CurrentToolsVersion;
+        internal static string defaultSolutionWrapperProjectToolsVersion = MSBuildConstants.CurrentToolsVersion;
 
         /// <summary>
         /// Name of the property used to select which sub-toolset to use. 

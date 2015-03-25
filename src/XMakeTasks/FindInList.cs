@@ -3,9 +3,8 @@
 
 using System;
 using System.IO;
-using System.Resources;
+
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -145,12 +144,13 @@ namespace Microsoft.Build.Tasks
             string filename;
             try
             {
-                filename = (MatchFileNameOnly ? Path.GetFileName(item.ItemSpec) : item.ItemSpec);
+                var path = FileUtilities.FixFilePath(item.ItemSpec);
+                filename = (MatchFileNameOnly ? Path.GetFileName(path) : path);
 
                 if (String.Equals(filename, _itemSpecToFind, comparison))
                 {
                     ItemFound = item;
-                    Log.LogMessageFromResources(MessageImportance.Low, "FindInList.Found", item.ItemSpec);
+                    Log.LogMessageFromResources(MessageImportance.Low, "FindInList.Found", path);
                     return true;
                 }
             }

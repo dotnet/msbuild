@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+   <!--
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" Condition="!$(Configuration.EndsWith('MONO'))"/>
+  -->
+  <Import Project="..\..\dir.props"/>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,6 +16,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
@@ -37,9 +44,6 @@
     <Compile Include="AssemblyRefs.cs" />
     <Compile Include="AssemblyRegistrationCache_Tests.cs" />
     <Compile Include="AssignCulture_Tests.cs" />
-    <!--
-    <Compile Include="AssignLinkMetadata_Tests.cs" />
-    -->
     <Compile Include="AssignLinkMetadata_Tests.cs" />
     <Compile Include="AssignProjectConfiguration_Tests.cs" />
     <Compile Include="AssignTargetPath_Tests.cs" />
@@ -65,9 +69,6 @@
     <Compile Include="Culture_Tests.cs" />
     <Compile Include="Delete_Tests.cs" />
     <Compile Include="DependentAssembly_Tests.cs" />
-    <!--
-    <Compile Include="ErrorWarningMessage_Tests.cs" />
-    -->
     <Compile Include="ErrorWarningMessage_Tests.cs" />
     <Compile Include="Exec_Tests.cs" />
     <Compile Include="FileStateTests.cs" />
@@ -100,9 +101,6 @@
     <Compile Include="ResGenDependencies_Tests.cs" />
     <Compile Include="ResolveAssemblyReference_Tests.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet_Tests.cs" />
-    <!--
-    <Compile Include="ResolveAssemblyReference_Tests.cs" />
-    -->
     <Compile Include="ResolveComReference_Tests.cs" />
     <Compile Include="ResolveNonMSBuildProjectOutput_Tests.cs" />
     <Compile Include="ResolveSDKReference_Tests.cs" />
@@ -119,12 +117,6 @@
     <Compile Include="VisualBasicTokenizer_Tests.cs" />
     <Compile Include="WinMDExp_Tests.cs" />
     <Compile Include="WriteCodeFragment_Tests.cs" />
-    <!--
-    <Compile Include="XamlTestHelpers.cs" />
-    <Compile Include="XamlTaskFactory_Tests.cs" />
-    <Compile Include="CommandLineGenerator_Tests.cs" />
-    <Compile Include="XamlDataDrivenToolTask_Tests.cs" />
-    -->
     <Compile Include="XamlDataDrivenToolTask_Tests.cs" />
     <Compile Include="XamlTaskFactory_Tests.cs" />
     <Compile Include="XamlTestHelpers.cs" />
@@ -140,18 +132,13 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="nunit.framework">
-      <HintPath>C:\Users\angerlic\src\msbuildxplat\src\.nuget\..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Design" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
-    <Reference Include="System.Drawing" />
     <Reference Include="PresentationFramework" />
     <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
@@ -175,5 +162,8 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+   <!--
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
+  -->
+  <Import Project="..\..\dir.targets"/>
 </Project>

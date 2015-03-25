@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectPropertyGroupElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -9,20 +11,20 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Test the ProjectPropertyGroupElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectPropertyGroupElement_Tests
     {
         /// <summary>
         /// Read property groups in an empty project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNoPropertyGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -33,7 +35,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an empty property group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadEmptyPropertyGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -51,7 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an property group with two property children
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadPropertyGroupTwoProperties()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -75,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -92,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the Label value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetLabel()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -109,7 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add a property through the convenience method on a property group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddProperty_ExistingPropertySameName()
         {
             ProjectRootElement project = ProjectRootElement.Create();

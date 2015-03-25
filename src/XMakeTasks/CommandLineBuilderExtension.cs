@@ -6,8 +6,8 @@ using System.Collections;
 using System.Globalization;
 using System.Text;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Text;
-using System.Xml;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using NUnit.Framework;
 
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
     

@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectImportElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -17,8 +19,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -26,13 +27,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectImportElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectImportElement_Tests
     {
         /// <summary>
         /// Read project with no imports
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNone()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -43,7 +44,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read import with no project attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidMissingProject()
         {
@@ -59,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read import with empty project attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidEmptyProject()
         {
@@ -75,7 +76,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read import with unexpected attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -91,7 +92,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read basic valid imports
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadBasic()
         {
             string content = @"
@@ -114,7 +115,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set valid project on import
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetProjectValid()
         {
             string content = @"
@@ -134,7 +135,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set invalid empty project value on import
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetProjectInvalidEmpty()
         {
@@ -154,7 +155,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting the project attribute should dirty the project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SettingProjectDirties()
         {
             string file1 = null;
@@ -200,7 +201,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting the condition should dirty the project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SettingConditionDirties()
         {
             string file = null;
@@ -239,7 +240,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Importing a project which has a relative path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportWithRelativePath()
         {
             string tempPath = Path.GetTempPath();

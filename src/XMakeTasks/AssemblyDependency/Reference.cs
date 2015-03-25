@@ -6,7 +6,6 @@ using System.IO;
 using System.Collections;
 using System.Reflection;
 using System.Diagnostics;
-using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
@@ -646,7 +645,7 @@ namespace Microsoft.Build.Tasks
                         _userRequestedSpecificFile = false;
                         _winMDFile = false;
                     }
-                    else
+                    else if (NativeMethodsShared.IsWindows)
                     {
                         _winMDFile = _isWinMDFile(_fullPath, _getRuntimeVersion, _fileExists, out _imageRuntimeVersion, out _isManagedWinMDFile);
                     }

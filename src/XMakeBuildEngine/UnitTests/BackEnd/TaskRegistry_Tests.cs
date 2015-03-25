@@ -9,22 +9,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
-using NUnit.Framework;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
-using System.Reflection;
+using Microsoft.Build.Tasks;
+
+using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -75,7 +73,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// several of the tests. 
         /// </summary>
         [TestFixtureSetUp]
-        public static void SetupClass(TestContext context)
+        public static void SetupClass()
         {
             s_testTaskLocation = GetTestTaskAssemblyLocation();
         }
@@ -1470,7 +1468,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Note output is false so these are only input parameters
             string output = bool.FalseString;
             string required = bool.TrueString;
-            string type = type = typeof(DerrivedFromITaskItem).FullName + "," + typeof(DerrivedFromITaskItem).Assembly.FullName;
+            string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
@@ -1520,7 +1518,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             type = typeof(ITaskItem).FullName;
             VerifyTypeParameter(output, required, type);
 
-            type = typeof(DerrivedFromITaskItem).FullName + "," + typeof(DerrivedFromITaskItem).Assembly.FullName;
+            type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
             VerifyTypeParameter(output, required, type);
 
             type = typeof(ITaskItem[]).FullName;
@@ -1535,7 +1533,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             type = typeof(DateTime[]).FullName;
             VerifyTypeParameter(output, required, type);
 
-            type = typeof(DerrivedFromITaskItem[]).FullName + "," + typeof(DerrivedFromITaskItem).Assembly.FullName;
+            type = typeof(DerivedFromITaskItem[]).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
             VerifyTypeParameter(output, required, type);
         }
 
@@ -2067,7 +2065,7 @@ namespace TestTask
         /// <summary>
         /// Create a custom class derrived from ITaskItem to test input and output parameters work using this item.
         /// </summary>
-        internal class DerrivedFromITaskItem : ITaskItem
+        internal class DerivedFromITaskItem : ITaskItem
         {
             /// <summary>
             /// The ItemSpec of the item

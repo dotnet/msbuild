@@ -6,24 +6,24 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Xml;
-using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
-using NUnit.Framework;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using Microsoft.Build.Framework;
+using System.Threading.Tasks;
+using System.Xml;
+	
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.BackEnd.Logging;
-using System.Threading.Tasks;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+
+using NUnit.Framework;
+
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -850,16 +850,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 loggers.Add(logger);
 
                 ProjectCollection collection = new ProjectCollection();
-                Project project = new Project(XmlReader.Create(new StringReader(content)), (IDictionary<string, string>)null, "4.0", collection);
-                project.FullPath = FileUtilities.GetTemporaryFile();
+                Project project = new Project(
+                    XmlReader.Create(new StringReader(content)),
+                    (IDictionary<string, string>)null,
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                    collection)
+                { FullPath = FileUtilities.GetTemporaryFile() };
                 project.Save();
                 File.Delete(project.FullPath);
 
-                BuildParameters parameters = new BuildParameters(collection);
-                parameters.Loggers = loggers;
-                parameters.ShutdownInProcNodeOnBuildFinish = true;
+                BuildParameters parameters = new BuildParameters(collection)
+                {
+                    Loggers = loggers,
+                    ShutdownInProcNodeOnBuildFinish = true
+                };
 
-                BuildRequestData data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(), "4.0", new string[] { }, null);
+                BuildRequestData data = new BuildRequestData(
+                    project.FullPath,
+                    new Dictionary<string, string>(),
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                    new string[] { },
+                    null);
                 manager = new BuildManager();
                 BuildResult result = manager.Build(parameters, data);
 

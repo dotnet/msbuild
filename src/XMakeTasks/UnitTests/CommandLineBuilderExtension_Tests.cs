@@ -2,14 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
-using NUnit.Framework;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -45,7 +43,8 @@ namespace Microsoft.Build.UnitTests
                     new string[] { "Name", "Private" },
                     new bool[] { false, true }
                 );
-                Assert.AreEqual(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
+                Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/myswitch:MyResource.bmp,Kenny,Private"),
+                    c.ToString());
             }
             catch (ArgumentException e)
             {
@@ -93,7 +92,10 @@ namespace Microsoft.Build.UnitTests
                 new string[] { "Name", "HintPath", "Access" },
                 null
             );
-            Assert.AreEqual(@"/myswitch:MySoundEffect.wav,Kenny /myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch(@"/myswitch:MySoundEffect.wav,Kenny ")
+                + CommandLineBuilder.FixCommandLineSwitch(@"/myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public"),
+                c.ToString());
         }
     }
 }

@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using NUnit.Framework;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
@@ -42,6 +39,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void TestStripTypeLibNumber()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("COM is only found on Windows");
+            }
+
             Assert.AreEqual(@"C:\test\typelib1.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib1.dll", new FileExists(FileExistsMock)));
             Assert.AreEqual(@"C:\test\typelib2\2.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib2\2.dll", new FileExists(FileExistsMock)));
             Assert.AreEqual(@"C:\test\typelib3.\3dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib3.\3dll", new FileExists(FileExistsMock)));

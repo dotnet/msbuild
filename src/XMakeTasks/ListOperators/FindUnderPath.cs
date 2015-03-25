@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Globalization;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -90,7 +89,9 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                conePath = OpportunisticIntern.InternStringIfPossible(System.IO.Path.GetFullPath(_path.ItemSpec));
+                conePath =
+                    OpportunisticIntern.InternStringIfPossible(
+                        System.IO.Path.GetFullPath(FileUtilities.FixFilePath(_path.ItemSpec)));
                 conePath = FileUtilities.EnsureTrailingSlash(conePath);
             }
             catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
@@ -112,7 +113,9 @@ namespace Microsoft.Build.Tasks
                 string fullPath;
                 try
                 {
-                    fullPath = OpportunisticIntern.InternStringIfPossible(System.IO.Path.GetFullPath(item.ItemSpec));
+                    fullPath =
+                        OpportunisticIntern.InternStringIfPossible(
+                            System.IO.Path.GetFullPath(FileUtilities.FixFilePath(item.ItemSpec)));
                 }
                 catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
                 {

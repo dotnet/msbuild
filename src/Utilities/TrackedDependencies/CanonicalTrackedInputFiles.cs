@@ -3,14 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Framework;
-using System.IO;
-using Microsoft.Build.Shared;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Threading.Tasks;
+
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+
+using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.Utilities
 {

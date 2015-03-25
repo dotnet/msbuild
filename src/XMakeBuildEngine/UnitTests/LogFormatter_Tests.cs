@@ -2,13 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
-using System.Collections;
-using NUnit.Framework;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using System.Text.RegularExpressions;
 using System.Globalization;
+
+using Microsoft.Build.BackEnd.Logging;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {

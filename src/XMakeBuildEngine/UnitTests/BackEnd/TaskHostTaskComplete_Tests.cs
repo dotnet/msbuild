@@ -6,16 +6,14 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+using NUnit.Framework;
 using TaskHostPacketHelpers = Microsoft.Build.UnitTests.BackEnd.TaskHostConfiguration_Tests.TaskHostPacketHelpers;
 
 namespace Microsoft.Build.UnitTests.BackEnd

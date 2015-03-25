@@ -3,16 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Xml;
-using NUnit.Framework;
-using System.Threading;
-using System.Collections;
 using System.Resources;
+using System.Threading;
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
+
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests.TrackedDependencies
 {
@@ -3639,16 +3640,24 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 Path.GetFullPath("TestFiles\\one.obj"),
             });
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(
+                DependencyTestHelper.MockTask,
+                DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")),
+                false);
             // Sleep once, so that NTFS has enough time to register a file modified time change
             Thread.Sleep(sleepTimeMilliseconds);
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
-                "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-            });
+            File.WriteAllLines(
+                "TestFiles\\one.write.tlog",
+                new string[]
+                    {
+                        "#Command some-command", "^" + Path.GetFullPath("TestFiles\\two.cpp"),
+                        Path.GetFullPath("TestFiles\\two.obj"),
+                    });
 
-            FlatTrackingData outputs2 = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
+            FlatTrackingData outputs2 = new FlatTrackingData(
+                DependencyTestHelper.MockTask,
+                DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")),
+                false);
 
             // We should not use the cached dependency table, since it has been updated since it was last read from disk
             Assert.IsTrue(outputs.DependencyTable != outputs2.DependencyTable);

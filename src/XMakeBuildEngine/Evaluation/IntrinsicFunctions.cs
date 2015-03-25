@@ -7,15 +7,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Reflection;
+using System.Text.RegularExpressions;
 
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Collections.Concurrent;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
@@ -206,6 +202,23 @@ namespace Microsoft.Build.Evaluation
                     // This may throw - and that's fine as the user will receive a controlled version
                     // of that error.
                     RegistryView view = (RegistryView)Enum.Parse(typeof(RegistryView), viewAsString, true);
+
+                    if (!NativeMethodsShared.IsWindows && !keyName.StartsWith("HKEY_CURRENT_USER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Fake common requests to HKLM that we can resolve
+
+
+                        // See if this asks for a specific SDK
+                        var m = Regex.Match(keyName,
+                            @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$",
+                            RegexOptions.IgnoreCase);
+                        if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return Path.Combine(NativeMethodsShared.FrameworkBasePath, m.Groups[0].Value) + Path.DirectorySeparatorChar;
+                        }
+
+                        return string.Empty;
+                    }
 
                     using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
                     {

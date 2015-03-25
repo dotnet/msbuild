@@ -174,12 +174,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Assert.AreEqual("2.0", project.GetPropertyValue("msbuildtoolsversion"));
 
-                project.Xml.ToolsVersion = "4.0";
+                project.Xml.ToolsVersion = ObjectModelHelpers.MSBuildDefaultToolsVersion;
                 Assert.AreEqual("2.0", project.GetPropertyValue("msbuildtoolsversion"));
 
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual("4.0", project.GetPropertyValue("msbuildtoolsversion"));
+                Assert.AreEqual(
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                    project.GetPropertyValue("msbuildtoolsversion"));
             }
             finally
             {

@@ -47,6 +47,11 @@ namespace Microsoft.Build.Tasks
         private NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA _data;
 
         /// <summary>
+        /// The data info for CLR file info.
+        /// </summary>
+        private FileInfo _dataInfo;
+
+        /// <summary>
         /// Whether data is reliable.
         /// False means that we tried to get it, but failed. Only Reset will get it again.
         /// Null means we didn't try yet.
@@ -91,7 +96,9 @@ namespace Microsoft.Build.Tasks
                     var length = (new FileInfo(_filename)).Length;
                 }
 
-                return ((_data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_READONLY) != 0);
+                return NativeMethodsShared.IsWindows
+                           ? ((_data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_READONLY) != 0)
+                           : ((_dataInfo.IsReadOnly));
             }
         }
 
@@ -159,7 +166,7 @@ namespace Microsoft.Build.Tasks
             get
             {
                 // Could cache this as conversion can be expensive
-                return LastWriteTimeUtcFast.ToLocalTime();
+                return NativeMethodsShared.IsWindows ? LastWriteTimeUtcFast.ToLocalTime() : _dataInfo.LastWriteTime;
             }
         }
 
@@ -180,7 +187,10 @@ namespace Microsoft.Build.Tasks
                     return new DateTime(1601, 1, 1);
                 }
 
-                return DateTime.FromFileTimeUtc(((long)_data.ftLastWriteTimeHigh << 0x20) | _data.ftLastWriteTimeLow);
+                return NativeMethodsShared.IsWindows
+                           ? DateTime.FromFileTimeUtc(
+                               ((long)_data.ftLastWriteTimeHigh << 0x20) | _data.ftLastWriteTimeLow)
+                           : _dataInfo.LastWriteTimeUtc;
             }
         }
 
@@ -207,7 +217,9 @@ namespace Microsoft.Build.Tasks
                     var length = (new FileInfo(_filename)).Length;
                 }
 
-                return (((long)_data.fileSizeHigh << 0x20) | _data.fileSizeLow);
+                return NativeMethodsShared.IsWindows
+                           ? (((long)_data.fileSizeHigh << 0x20) | _data.fileSizeLow)
+                           : _dataInfo.Length;
             }
         }
 
@@ -239,7 +251,9 @@ namespace Microsoft.Build.Tasks
                     var length = (new FileInfo(_filename)).Length;
                 }
 
-                return ((_data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0);
+                return NativeMethodsShared.IsWindows
+                           ? ((_data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0)
+                           : ((_dataInfo.Attributes & FileAttributes.Directory) != 0);
             }
         }
 
@@ -249,6 +263,7 @@ namespace Microsoft.Build.Tasks
         internal void Reset()
         {
             _data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+            _dataInfo = null;
             _dataIsGood = null;
         }
 
@@ -262,51 +277,68 @@ namespace Microsoft.Build.Tasks
             {
                 _dataIsGood = false;
                 _filename = FileUtilities.AttemptToShortenPath(_filename); // This is no-op unless the path actually is too long
-                _data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
 
-                // THIS COPIED FROM THE BCL:
-                //
-                // For floppy drives, normally the OS will pop up a dialog saying
-                // there is no disk in drive A:, please insert one.  We don't want that. 
-                // SetErrorMode will let us disable this, but we should set the error
-                // mode back, since this may have wide-ranging effects.
-                int oldMode = NativeMethodsShared.SetErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */);
+                int oldMode = 0;
+
+                if (NativeMethodsShared.IsWindows)
+                {
+                    _data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+
+                    // THIS COPIED FROM THE BCL:
+                    //
+                    // For floppy drives, normally the OS will pop up a dialog saying
+                    // there is no disk in drive A:, please insert one.  We don't want that. 
+                    // SetErrorMode will let us disable this, but we should set the error
+                    // mode back, since this may have wide-ranging effects.
+                    oldMode = NativeMethodsShared.SetErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */);
+                }
 
                 bool success = false;
                 _fileOrDirectoryExists = true;
 
                 try
                 {
-                    success = NativeMethodsShared.GetFileAttributesEx(_filename, 0, ref _data);
-
-                    if (!success)
+                    if (NativeMethodsShared.IsWindows)
                     {
-                        int error = Marshal.GetLastWin32Error();
+                        success = NativeMethodsShared.GetFileAttributesEx(_filename, 0, ref _data);
 
-                        // File not found is the most common case, for example we're copying
-                        // somewhere without a file yet. Don't do something like FileInfo.Exists to
-                        // get a nice error, or we're doing IO again! Don't even format our own string:
-                        // that turns out to be unacceptably expensive here as well. Set a flag for this particular case.
-                        //
-                        // Also, when not under debugger (!) it will give error == 3 for path too long. Make that consistently throw instead.
-                        if ((error == 2 /* ERROR_FILE_NOT_FOUND */ || error == 3 /* ERROR_PATH_NOT_FOUND */) &&
-                            _filename.Length <= NativeMethodsShared.MAX_PATH)
+                        if (!success)
                         {
-                            _fileOrDirectoryExists = false;
-                            return;
+                            int error = Marshal.GetLastWin32Error();
+
+                            // File not found is the most common case, for example we're copying
+                            // somewhere without a file yet. Don't do something like FileInfo.Exists to
+                            // get a nice error, or we're doing IO again! Don't even format our own string:
+                            // that turns out to be unacceptably expensive here as well. Set a flag for this particular case.
+                            //
+                            // Also, when not under debugger (!) it will give error == 3 for path too long. Make that consistently throw instead.
+                            if ((error == 2 /* ERROR_FILE_NOT_FOUND */|| error == 3 /* ERROR_PATH_NOT_FOUND */)
+                                && _filename.Length <= NativeMethodsShared.MAX_PATH)
+                            {
+                                _fileOrDirectoryExists = false;
+                                return;
+                            }
+
+                            // Throw nice message as far as we can. At this point IO is OK.
+                            var length = new FileInfo(_filename).Length;
+
+                            // Otherwise this will give at least something
+                            NativeMethodsShared.ThrowExceptionForErrorCode(error);
+                            ErrorUtilities.ThrowInternalErrorUnreachable();
                         }
-
-                        // Throw nice message as far as we can. At this point IO is OK.
-                        var length = new FileInfo(_filename).Length;
-
-                        // Otherwise this will give at least something
-                        NativeMethodsShared.ThrowExceptionForErrorCode(error);
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                    }
+                    else
+                    {
+                        _dataInfo = new FileInfo(_filename);
+                        _fileOrDirectoryExists = _dataInfo.Exists;
                     }
                 }
                 finally
                 {
-                    NativeMethodsShared.SetErrorMode(oldMode);
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        NativeMethodsShared.SetErrorMode(oldMode);
+                    }
                 }
 
                 _dataIsGood = true;

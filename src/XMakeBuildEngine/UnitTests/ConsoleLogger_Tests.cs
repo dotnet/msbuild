@@ -2,23 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Text;
-using System.IO;
-using System.Reflection;
 using System.Collections;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
 
-using NUnit.Framework;
-
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 
+using NUnit.Framework;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -165,7 +162,7 @@ namespace Microsoft.Build.UnitTests
 
         private class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void SuiteSetup()
         {
             _environment = new Dictionary<string, string>();
@@ -2490,7 +2487,7 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void TestNewLineAfterProjectFinished()
         {
-            bool runningWithCharDevice = IsRunningWithCharacterFileType();
+            bool runningWithCharDevice = NativeMethodsShared.IsWindows ? IsRunningWithCharacterFileType() : false;
             for (int i = 0; i < 3; i++)
             {
                 Console.Out.WriteLine("Iteration of I is {" + i + "}");

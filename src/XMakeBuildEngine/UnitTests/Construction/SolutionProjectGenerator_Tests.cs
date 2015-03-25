@@ -181,8 +181,6 @@ namespace Microsoft.Build.UnitTests.Construction
         /// to force it to be used.  
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DefaultSubToolsetIfSolutionVersionSubToolsetDoesntExist()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
@@ -209,7 +207,15 @@ namespace Microsoft.Build.UnitTests.Construction
             Toolset t = ProjectCollection.GlobalProjectCollection.GetToolset(instances[0].ToolsVersion);
 
             Assert.AreEqual(t.DefaultSubToolsetVersion, instances[0].SubToolsetVersion);
-            Assert.AreEqual(t.DefaultSubToolsetVersion, instances[0].GetPropertyValue("VisualStudioVersion"));
+
+            if (t.DefaultSubToolsetVersion != null)
+            {
+                Assert.AreEqual(t.DefaultSubToolsetVersion, instances[0].GetPropertyValue("VisualStudioVersion"));
+            }
+            else
+            {
+                Assert.AreEqual(String.Empty, instances[0].GetPropertyValue("VisualStudioVersion"));
+            }
         }
 
         /// <summary>
@@ -1295,8 +1301,6 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestTargetFrameworkPaths1()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)

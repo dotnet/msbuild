@@ -2,18 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 
-using NUnit.Framework;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
-using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
+
+using NUnit.Framework;
+
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -27,7 +26,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void BasicParseFirstProjectLine()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -50,7 +49,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void ParseFirstProjectLine_VC()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -71,7 +70,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void ParseFirstProjectLine_VC2()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -92,7 +91,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void ParseFirstProjectLineWithDifferentSpacing()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -114,7 +113,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void ParseFirstProjectLine_InvalidProject()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -457,7 +456,7 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
             string proj2Path = Path.Combine(Path.GetTempPath(), "someproj2.etp");
-            string proj3Path = Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest" + Path.DirectorySeparatorChar + "someproj3.etp");
+            string proj3Path = Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest", "someproj3.etp");
             try
             {
                 // Create the first .etp project file
@@ -502,7 +501,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         <VERSION>1.00</VERSION>
                         <References>
                             <Reference>
-                                <FILE>..\SomeFolder\ClassLibrary1.csproj</FILE>
+                                <FILE>" + Path.Combine("..", "SomeFolder", "ClassLibrary1.csproj") + @"</FILE>
                                 <GUIDPROJECTID>{83D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FF}</GUIDPROJECTID>
                             </Reference>
                         </References>
@@ -526,7 +525,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 Assert.AreEqual(solution.ProjectsInOrder[0].RelativePath, @"someproj.etp");
                 Assert.AreEqual(solution.ProjectsInOrder[1].RelativePath, @"someproj2.etp");
                 Assert.AreEqual(solution.ProjectsInOrder[2].RelativePath, @"ETPProjUpgradeTest\someproj3.etp");
-                Assert.AreEqual(solution.ProjectsInOrder[3].RelativePath, @"ETPProjUpgradeTest\..\SomeFolder\ClassLibrary1.csproj");
+                Assert.AreEqual(solution.ProjectsInOrder[3].RelativePath,
+                    Path.Combine("ETPProjUpgradeTest", "..", "SomeFolder", "ClassLibrary1.csproj"));
             }
             // Delete the files created during the test
             finally
@@ -628,7 +628,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void ParseFirstProjectLineWhereProjectNameHasSpecialCharacters()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine

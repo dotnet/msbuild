@@ -2,20 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
+using System.IO;
 using System.Text;
-using System.Threading;
 
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Collections;
+
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 
@@ -844,7 +842,8 @@ namespace Microsoft.Build.BackEnd
                 // specified.  For example, both @(Foo) and @(Foo->'%(Filename).obj) will return items of type 'Foo'.  If the item in question
                 // is discrete, itemVectorContents will be null.
 
-                ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(_project /* no item type specified; use item type of vector itself */ );
+                ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(
+                    _project /* no item type specified; use item type of vector itself */);
 
                 bool isTransformExpression;
                 IList<ProjectItemInstance> itemVectorContents = bucket.Expander.ExpandSingleItemVectorExpressionIntoItems(item, itemFactory, ExpanderOptions.ExpandItems, true /* include null entries from transforms */, out isTransformExpression, elementLocation);
@@ -1005,7 +1004,7 @@ namespace Microsoft.Build.BackEnd
             //         possibly the outputs list isn't actually the shortest list. However it always is the shortest
             //         in the cases I've seen, and adding this optimization would make the code hard to read.
 
-            string oldestOutput = EscapingUtilities.UnescapeAll(outputs[0].ToString());
+            string oldestOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[0].ToString()));
             ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[0]);
 
             DateTime oldestOutputFileTime = DateTime.MinValue;
@@ -1027,7 +1026,7 @@ namespace Microsoft.Build.BackEnd
             if (oldestOutputFileTime == DateTime.MinValue)
             {
                 // First output is missing: we must build the target
-                string arbitraryInput = EscapingUtilities.UnescapeAll(inputs[0].ToString());
+                string arbitraryInput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(inputs[0].ToString()));
                 ErrorUtilities.ThrowIfTypeDoesNotImplementToString(inputs[0]);
                 dependencyAnalysisDetailEntry = new DependencyAnalysisLogDetail(arbitraryInput, oldestOutput, null, null, OutofdateReason.MissingOutput);
                 return true;
@@ -1035,7 +1034,7 @@ namespace Microsoft.Build.BackEnd
 
             for (int i = 1; i < outputs.Count; i++)
             {
-                string candidateOutput = EscapingUtilities.UnescapeAll(outputs[i].ToString());
+                string candidateOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[i].ToString()));
                 ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[i]);
                 DateTime candidateOutputFileTime = DateTime.MinValue;
                 try
@@ -1056,7 +1055,8 @@ namespace Microsoft.Build.BackEnd
                 if (candidateOutputFileTime == DateTime.MinValue)
                 {
                     // An output is missing: we must build the target
-                    string arbitraryInput = EscapingUtilities.UnescapeAll(inputs[0].ToString());
+                    string arbitraryInput =
+                        EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(inputs[0].ToString()));
                     ErrorUtilities.ThrowIfTypeDoesNotImplementToString(inputs[0]);
                     dependencyAnalysisDetailEntry = new DependencyAnalysisLogDetail(arbitraryInput, candidateOutput, null, null, OutofdateReason.MissingOutput);
                     return true;
@@ -1073,7 +1073,7 @@ namespace Microsoft.Build.BackEnd
             // Now compare the oldest output with each input and break out if we find one newer.
             foreach (T input in inputs)
             {
-                string unescapedInput = EscapingUtilities.UnescapeAll(input.ToString());
+                string unescapedInput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input.ToString()));
                 ErrorUtilities.ThrowIfTypeDoesNotImplementToString(input);
                 DateTime inputFileTime = DateTime.MaxValue;
                 try
@@ -1168,8 +1168,8 @@ namespace Microsoft.Build.BackEnd
         {
             bool inputDoesNotExist;
             bool outputDoesNotExist;
-            input = EscapingUtilities.UnescapeAll(input);
-            output = EscapingUtilities.UnescapeAll(output);
+            input = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input));
+            output = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(output));
             bool outOfDate = (CompareLastWriteTimes(input, output, out inputDoesNotExist, out outputDoesNotExist) == 1) || inputDoesNotExist;
 
             // Only if we are not logging just critical events should we be gathering full details

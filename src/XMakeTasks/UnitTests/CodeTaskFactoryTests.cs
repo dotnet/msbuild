@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using NUnit.Framework;
-using Microsoft.Build.Evaluation;
 using System.IO;
 using System;
-using System.Collections.Generic;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.CodeDom.Compiler;
 using Microsoft.Build.Shared;
@@ -114,6 +111,7 @@ namespace Microsoft.Build.UnitTests
         /// it's picked up from the GAC, where it is anyway, so there's no need to redirect. 
         /// </summary>
         [Test]
+        [Ignore("FEATURE: LEGACY TASKS")]
         public void BuildTaskSimpleCodeFactory_NoAssemblyNameRedirect()
         {
             string projectFileContents = @"

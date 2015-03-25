@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
         // Reals can take many different forms: 1.1, .1, 1.1e6, etc.
         // If you turn this on, please create test for the other forms too.
         [Test]
-        [Ignore] // "Reals aren't supported yet."
+        [Ignore("Reals aren't supported yet.")]
         public void RealLiteral1() { AssertTokenize("1.1\x0d", ".RealLiteral.Whitespace"); }
 
         // Char literals aren't supported yet.
@@ -205,11 +205,11 @@ namespace Microsoft.Build.UnitTests
         public void CharLiteral1() { AssertTokenize("'c'\x0d", ".CharLiteral.Whitespace"); }
 
         [Test]
-        [Ignore] // "Escape sequences aren't supported"
+        [Ignore("Escape sequences aren't supported")]
         public void CharLiteralIllegalEscapeSequence() { AssertTokenize("'\\z'\x0d", ".SyntaxErrorIllegalEscapeSequence"); }
 
         [Test]
-        [Ignore] // "Escape sequences aren't supported"
+        [Ignore("Escape sequences aren't supported")]
         public void CharLiteralHexEscapeSequence() { AssertTokenize("'\\x0022a'\x0d", "'\"a'\x0d", ".CharLiteral.Whitespace"); }
 
         // Check string literals

@@ -6,15 +6,15 @@
 //-----------------------------------------------------------------------
 
 using System.Reflection;
-using System.Security.Permissions;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 #pragma warning disable 618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, Flags = SecurityPermissionFlag.Execution)]
 #pragma warning restore 618
 
-#if (STANDALONEBUILD)
+#if (STANDALONEBUILD || MONO)
 [assembly: AssemblyVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion)]
 [assembly: InternalsVisibleTo("Microsoft.Build.Engine.UnitTests")]
 #else
@@ -30,6 +30,8 @@ using System.Runtime.InteropServices;
 #endif
 // DO NOT expose Internals to "Microsoft.Build.UnitTests.OM.OrcasCompatibility" as this assembly is supposed to only see public interface
 
+#if !MONO
 // This will enable passing the SafeDirectories flag to any P/Invoke calls/implementations within the assembly, 
 // so that we don't run into known security issues with loading libraries from unsafe locations 
 [assembly: DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#endif

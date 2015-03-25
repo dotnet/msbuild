@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectItemDefinitionElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -15,20 +17,20 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectItemDefinitionElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectItemDefinitionElement_Tests
     {
         /// <summary>
         /// Read item definition with no children
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNoChildren()
         {
             string content = @"
@@ -49,7 +51,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an item definition with a child
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadBasic()
         {
             string content = @"
@@ -79,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Orcas inadvertently did not check for reserved item types (like "Choose") in item definitions,
         /// as we do for item types in item groups. So we do not fail here.
         /// </remarks>
-        [TestMethod]
+        [Test]
         public void ReadBuiltInElementName()
         {
             string content = @"
@@ -96,7 +98,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an item definition with several metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadMetadata()
         {
             string content = @"
@@ -130,7 +132,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();

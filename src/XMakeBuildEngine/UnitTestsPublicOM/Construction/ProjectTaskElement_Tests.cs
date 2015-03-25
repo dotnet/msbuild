@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectTaskElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -10,8 +12,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -19,13 +20,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectTaskElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectTaskElement_Tests
     {
         /// <summary>
         /// Read task with no parameters
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNoParameters()
         {
             string content = @"
@@ -47,7 +48,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read task with continue on error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadContinueOnError()
         {
             string content = @"
@@ -66,7 +67,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read task with condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadCondition()
         {
             string content = @"
@@ -81,11 +82,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.AreEqual("c", task.Condition);
         }
-        
+
         /// <summary>
         /// Read task with invalid child
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidChild()
         {
@@ -107,7 +108,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Although MSBuild does not set these on tasks, they 
         /// are visible in the XML objects for editing purposes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadEmptyParameter()
         {
             string content = @"
@@ -128,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read task with parameters
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadParameters()
         {
             string content = @"
@@ -154,7 +155,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Change a parameter value on the task
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetParameterValue()
         {
             ProjectTaskElement task = GetBasicTask();
@@ -170,7 +171,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set a parameter to null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullParameterValue()
         {
@@ -182,7 +183,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set a parameter with the reserved name 'continueonerror'
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetInvalidParameterNameContinueOnError()
         {
@@ -194,7 +195,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set a parameter with the reserved name 'condition'
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetInvalidParameterNameCondition()
         {
@@ -206,7 +207,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set a parameter using a null name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullParameterName()
         {
@@ -218,7 +219,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add a parameter to the task
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNotExistingParameter()
         {
             ProjectTaskElement task = GetBasicTask();
@@ -234,7 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove a parameter from the task
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveExistingParameter()
         {
             ProjectTaskElement task = GetBasicTask();
@@ -253,7 +254,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// This should not throw.
         /// </remarks>
-        [TestMethod]
+        [Test]
         public void RemoveNonExistingParameter()
         {
             ProjectTaskElement task = GetBasicTask();
@@ -267,7 +268,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set continue on error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetContinueOnError()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -282,7 +283,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();

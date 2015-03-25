@@ -828,6 +828,7 @@ namespace Microsoft.Build.BackEnd
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "We're trying to get rid of memory because we're running low, so we need to collect NOW in order to free it up ASAP")]
         private void CheckMemoryUsage()
         {
+#if !MONO
             // Jeffrey Richter suggests that when the memory load in the system exceeds 80% it is a good
             // idea to start finding ways to unload unnecessary data to prevent memory starvation.  We use this metric in
             // our calculations below.
@@ -880,6 +881,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+#endif
         }
 
         /// <summary>

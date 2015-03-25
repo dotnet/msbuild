@@ -3,14 +3,11 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Collections;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 using NUnit.Framework;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
@@ -82,16 +79,16 @@ namespace Microsoft.Build.UnitTests
         {
             MatchDriver
             (
-                @"Source\**",
+                "Source" + Path.DirectorySeparatorChar + "**",
                 new string[]  // Files that exist and should match.
                 {
-                    @"Source\Bart.txt",
-                    @"Source\Sub\Homer.txt",
+                    "Source" + Path.DirectorySeparatorChar + "Bart.txt",
+                    "Source" + Path.DirectorySeparatorChar + "Sub" + Path.DirectorySeparatorChar + "Homer.txt",
                 },
                 new string[]  // Files that exist and should not match.
                 {
-                    @"Destination\Bart.txt",
-                    @"Destination\Sub\Homer.txt",
+                    "Destination" + Path.DirectorySeparatorChar + "Bart.txt",
+                    "Destination" + Path.DirectorySeparatorChar + "Sub" + Path.DirectorySeparatorChar + "Homer.txt",
                 },
                 null
             );
@@ -128,6 +125,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetLongFileNameForShortLocalPath()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"D:\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
@@ -164,6 +166,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetLongFileNameForShortUncPath()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"\\server\share\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
@@ -200,6 +207,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetLongFileNameForRelativePath()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"LONGDI~1\LONGSU~1\LONGFI~1.TXT",
@@ -218,6 +230,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetLongFileNameForRelativePathPreservesTrailingSlash()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"LONGDI~1\LONGSU~1\",
@@ -236,6 +253,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetLongFileNameForRelativePathPreservesExtraSlashes()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"LONGDI~1\\LONGSU~1\\",
@@ -254,6 +276,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetLongFileNameForMixedLongAndShort()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"c:\apple\banana\tomato\pomegr~1\orange\",
@@ -273,6 +300,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetLongFileNameWherePartOfThePathDoesntExist()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"c:\apple\banana\tomato\pomegr~1\orange\chocol~1\vanila~1",
@@ -783,7 +815,7 @@ namespace Microsoft.Build.UnitTests
                         string candidateDirectoryName = "";
                         if (normalizedCandidate.IndexOfAny(FileMatcher.directorySeparatorCharacters) != -1)
                         {
-                            candidateDirectoryName = Path.GetDirectoryName(normalizedCandidate) + @"\";
+                            candidateDirectoryName = Path.GetDirectoryName(normalizedCandidate) + Path.DirectorySeparatorChar;
                         }
 
                         // Does the candidate directory match the requested path?
@@ -933,28 +965,32 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 string normalized = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
+                if (Path.DirectorySeparatorChar != '\\')
+                {
+                    normalized = path.Replace("\\", Path.DirectorySeparatorChar.ToString());
+                }
                 // Replace leading UNC.
-                if (normalized.Substring(0, 2) == @"\\")
+                else if (normalized.Substring(0, 2) == @"\\")
                 {
                     normalized = "<:UNC:>" + normalized.Substring(2);
                 }
 
                 // Preserve parent-directory markers.
-                normalized = normalized.Replace(@"..\", "<:PARENT:>");
+                normalized = normalized.Replace(@".." + Path.DirectorySeparatorChar, "<:PARENT:>");
 
 
                 // Just get rid of doubles enough to satisfy our test cases.
-                normalized = normalized.Replace(@"\\", @"\");
-                normalized = normalized.Replace(@"\\", @"\");
-                normalized = normalized.Replace(@"\\", @"\");
+                string doubleSeparator = Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString();
+                normalized = normalized.Replace(doubleSeparator, Path.DirectorySeparatorChar.ToString());
+                normalized = normalized.Replace(doubleSeparator, Path.DirectorySeparatorChar.ToString());
+                normalized = normalized.Replace(doubleSeparator, Path.DirectorySeparatorChar.ToString());
 
                 // Strip any .\
-                normalized = normalized.Replace(@".\", "");
+                normalized = normalized.Replace(@"." + Path.DirectorySeparatorChar, "");
 
                 // Put back the preserved markers.
                 normalized = normalized.Replace("<:UNC:>", @"\\");
-                normalized = normalized.Replace("<:PARENT:>", @"..\");
+                normalized = normalized.Replace("<:PARENT:>", @".." + Path.DirectorySeparatorChar);
 
                 return normalized;
             }
@@ -1156,6 +1192,10 @@ namespace Microsoft.Build.UnitTests
                 out filenamePart,
                 new FileMatcher.GetFileSystemEntries(GetFileSystemEntriesLoopBack)
             );
+
+            expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
+            expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+            expectedFilenamePart = FileUtilities.FixFilePath(expectedFilenamePart);
 
             if
                 (

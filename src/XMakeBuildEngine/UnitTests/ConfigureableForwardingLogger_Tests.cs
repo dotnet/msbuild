@@ -1,14 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.BackEnd.Logging;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -45,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [TestFixtureSetUp]
-        public static void FixtureSetup(TestContext testContext)
+        public static void FixtureSetup()
         {
             BuildEventContext context = new BuildEventContext(1, 2, 3, 4);
             s_error.BuildEventContext = context;

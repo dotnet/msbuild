@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" InitialTargets=""i1;i2"">
@@ -98,14 +98,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" InitialTargets=""i2"">
@@ -142,14 +142,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" InitialTargets=""i1"">
@@ -186,14 +186,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -304,7 +304,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -315,14 +315,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -374,7 +374,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -417,7 +417,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--</ImportGroup>-->
@@ -475,7 +475,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -487,7 +487,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -497,14 +497,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   <Import Project=""p3"">
 
-" + Directory.GetCurrentDirectory() + @"\p3
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p3
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -514,7 +514,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--</ImportGroup>-->
@@ -548,7 +548,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
      @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" DefaultTargets=""d1"">
@@ -556,28 +556,28 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   <Import Project=""p3"">
 
-" + Directory.GetCurrentDirectory() + @"\p3
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p3
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
      @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" DefaultTargets=""d2"">
@@ -617,28 +617,28 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   <Import Project=""p3"">
 
-" + Directory.GetCurrentDirectory() + @"\p3
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p3
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -669,7 +669,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -699,17 +699,17 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 Directory.CreateDirectory(directory);
 
                 xml0 = ProjectRootElement.Create("p1");
-                xml0.AddImport(directory + "\\*.targets");
+                xml0.AddImport(directory + Path.DirectorySeparatorChar + "*.targets");
 
-                xml1 = ProjectRootElement.Create(directory + "\\1.targets");
+                xml1 = ProjectRootElement.Create(directory + Path.DirectorySeparatorChar + "1.targets");
                 xml1.AddProperty("p", "v1");
                 xml1.Save();
 
-                xml2 = ProjectRootElement.Create(directory + "\\2.targets");
+                xml2 = ProjectRootElement.Create(directory + Path.DirectorySeparatorChar + "2.targets");
                 xml2.AddProperty("p", "v2");
                 xml2.Save();
 
-                xml3 = ProjectRootElement.Create(directory + "\\3.xxxxxx");
+                xml3 = ProjectRootElement.Create(directory + Path.DirectorySeparatorChar + "3.xxxxxx");
                 xml3.AddProperty("p", "v3");
                 xml3.Save();
 
@@ -723,7 +723,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -756,7 +756,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");

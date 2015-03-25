@@ -7,17 +7,12 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Threading;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
+
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 
 using NUnit.Framework;
 
-using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -31,8 +26,6 @@ namespace Microsoft.Build.UnitTests
         /// Check that the ARM flag is passed to the compiler when targeting ARM.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TargetARM()
         {
             string file = null;
@@ -57,7 +50,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
                  logger
@@ -85,8 +78,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -111,7 +102,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
                  logger
@@ -137,8 +128,7 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void ExplicitAnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -164,7 +154,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
                  logger
@@ -190,8 +180,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -222,7 +210,7 @@ namespace Microsoft.Build.UnitTests
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
                  logger
@@ -248,8 +236,7 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void ExplicitAnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -281,7 +268,7 @@ namespace Microsoft.Build.UnitTests
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
                  logger
@@ -307,8 +294,7 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void AnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -333,7 +319,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
                  logger
@@ -359,8 +345,7 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void ExplicitAnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -386,7 +371,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
                  logger
@@ -436,7 +421,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
                  logger
@@ -462,8 +447,7 @@ namespace Microsoft.Build.UnitTests
         /// targeting .NET 4.0 do not get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void ExplicitAnyCPU40ExeProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -489,7 +473,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
                  logger
@@ -515,8 +499,7 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void AnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -547,7 +530,7 @@ namespace Microsoft.Build.UnitTests
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
                  logger
@@ -573,8 +556,7 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void ExplicitAnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -606,7 +588,7 @@ namespace Microsoft.Build.UnitTests
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
                  logger
@@ -632,8 +614,7 @@ namespace Microsoft.Build.UnitTests
         /// not supported for library projects, if Prefer32Bit is explicitly set, we should still respect that. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void AnyCPULibraryProjectIs32BitPreferredIfPrefer32BitSet()
         {
             string file = null;
@@ -660,7 +641,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                    </Project>
                 ",
                  logger
@@ -686,8 +667,7 @@ namespace Microsoft.Build.UnitTests
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void AnyCPUProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -712,7 +692,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`" + file + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                    </Project>
                 ",
                  logger
@@ -738,8 +718,7 @@ namespace Microsoft.Build.UnitTests
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        //[Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void AnyCPUJupiterProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -766,7 +745,7 @@ namespace Microsoft.Build.UnitTests
                       </ItemGroup>
                       <Import Project=`$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets` Condition=`Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                       <!-- Fall back to CSharp targets for the sake of this test if the Jupiter targets don't exist, since what we're testing can be equally well resolved by either -->
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
                  logger
@@ -792,8 +771,6 @@ namespace Microsoft.Build.UnitTests
         /// Validate that the GetFrameworkPaths target 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void TestGetFrameworkPaths()
         {
             MockLogger logger = new MockLogger();
@@ -829,8 +806,6 @@ namespace Microsoft.Build.UnitTests
         /// Validate that the GetFrameworkPaths target 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestTargetFrameworkPaths()
         {
             string[] targetFrameworkVersions = { "v2.0", "v3.0", "v3.5", "v4.0", "v4.5", "" };
@@ -925,7 +900,7 @@ namespace Microsoft.Build.UnitTests
                         <None Include=`" + files[1] + @"` />
                         <Content Include=`" + files[2] + @"` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                       <Target Name=`AfterBuild`>
                         <Message Text=`%(Compile.Identity): [%(Compile.Link)]` />
                         <Message Text=`%(None.Identity): [%(None.Link)]` />
@@ -965,7 +940,7 @@ namespace Microsoft.Build.UnitTests
         public void SynthesizeLinkMetadataForItemsOnWhitelist()
         {
             string[] files = null;
-            string outputPath = Path.GetTempPath() + "\\" + Guid.NewGuid().ToString("N");
+            string outputPath = Path.GetTempPath() + Path.DirectorySeparatorChar + Guid.NewGuid().ToString("N");
             string directoryToDelete = null;
 
             try
@@ -1009,7 +984,7 @@ namespace Microsoft.Build.UnitTests
                         <SynthesizeLinkMetadata>true</SynthesizeLinkMetadata>
                       </PropertyGroup>
                       <Import Project=`" + files[3] + @"` />
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                       <Target Name=`AfterBuild`>
                         <Message Text=`%(Compile.Identity): [%(Compile.Link)]` />
                         <Message Text=`%(None.Identity): [%(None.Link)]` />
@@ -1023,8 +998,8 @@ namespace Microsoft.Build.UnitTests
                 project.Build();
 
                 logger.AssertLogContains(String.Format(@"{0}: []", classPath));
-                logger.AssertLogContains(String.Format(@"{0}: [SubFolder\File1.txt]", textFilePath));
-                logger.AssertLogContains(String.Format(@"{0}: [SubFolder\Content1.foo]", contentPath));
+                logger.AssertLogContains(String.Format(@"{0}: [SubFolder" + Path.DirectorySeparatorChar + "File1.txt]", textFilePath));
+                logger.AssertLogContains(String.Format(@"{0}: [SubFolder" + Path.DirectorySeparatorChar + "Content1.foo]", contentPath));
             }
             finally
             {
@@ -1090,7 +1065,7 @@ namespace Microsoft.Build.UnitTests
                         <SynthesizeLinkMetadata>false</SynthesizeLinkMetadata>
                       </PropertyGroup>
                       <Import Project=`" + files[3] + @"` />
-                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                       <Target Name=`AfterBuild`>
                         <Message Text=`%(Compile.Identity): [%(Compile.Link)]` />
                         <Message Text=`%(None.Identity): [%(None.Link)]` />
@@ -1144,7 +1119,7 @@ namespace Microsoft.Build.UnitTests
                         <EmbeddedResource Include=`Resource1.txt` />
                         <EmbeddedResource Include=`Resource2.resx` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
                     </Project>
                 "); 
 
@@ -1479,7 +1454,7 @@ namespace Microsoft.Build.UnitTests
                 Project p0 = ObjectModelHelpers.CreateInMemoryProject(@"
     
                         <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`> 
-                            <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.Targets` />
+                            <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
                         </Project>
 
                     ");
@@ -1487,7 +1462,7 @@ namespace Microsoft.Build.UnitTests
                 Project p1 = ObjectModelHelpers.CreateInMemoryProject(@"
     
                         <Project DefaultTargets=`Build` ToolsVersion=`4.0` xmlns=`msbuildnamespace`> 
-                           <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.Targets` />
+                           <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
                         </Project>
 
                     ");
@@ -1537,7 +1512,7 @@ namespace Microsoft.Build.UnitTests
                       <ItemGroup>
                         <Compile Include=`Class1.cs` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.Targets` />
+                      <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
                    </Project>
                 ");            
             
@@ -1580,7 +1555,7 @@ namespace Microsoft.Build.UnitTests
                         <EmbeddedResource Include=`Resource2.resx` />
                         <EmbeddedResource Include=`Resource2.fr.resx` />
                       </ItemGroup>
-                      <Import Project=`$(MSBuildBinPath)\Microsoft.VisualBasic.Targets` />
+                      <Import Project=`$(MSBuildBinPath)\Microsoft.VisualBasic.targets` />
                     </Project>
                 ");            
 
@@ -1773,7 +1748,7 @@ namespace Microsoft.Build.UnitTests
                         <None Include=`foo\app.config` Condition=`'$(case)'&lt;=4`/>
                         <Content Include=`bar\app.config` Condition=`'$(case)'&lt;=5`/>
                       </ItemGroup>
-                      <Import Project=`$(MSBuildBinPath)\Microsoft.VisualBasic.Targets` />
+                      <Import Project=`$(MSBuildBinPath)\Microsoft.VisualBasic.targets` />
                     </Project>
                 ", null);
 
@@ -1833,7 +1808,7 @@ namespace Microsoft.Build.UnitTests
                         <None Include=`..\..\app.config`/>
                         <None Include=`.\app.config`/>
                       </ItemGroup>
-                      <Import Project=`$(MSBuildBinPath)\Microsoft.VisualBasic.Targets` />
+                      <Import Project=`$(MSBuildBinPath)\Microsoft.VisualBasic.targets` />
                     </Project>
                 ", null);
 
@@ -1861,7 +1836,7 @@ namespace Microsoft.Build.UnitTests
                         <None Include=`c:\foo\app.config`/>
                         <Content Include=`d:\bar\app.config`/>
                       </ItemGroup>
-                      <Import Project=`$(MSBuildBinPath)\Microsoft.VisualBasic.Targets` />
+                      <Import Project=`$(MSBuildBinPath)\Microsoft.VisualBasic.targets` />
                     </Project>
                 ", null);
 
@@ -2191,7 +2166,7 @@ namespace Microsoft.Build.UnitTests
         /// which contains the appropriate project configurations.
         /// </summary>
         [Test]
-        [Ignore("Need J# to be in the v3.5 folder")]
+        //[Ignore("Need J# to be in the v3.5 folder")]
         public void SolutionConfigurationWithDifferentProjectConfigurations()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();

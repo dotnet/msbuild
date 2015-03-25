@@ -2,24 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Xml;
 
-using NUnit.Framework;
-
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
@@ -1208,7 +1204,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[$(global)]'/>
                   </Target>
                 </Project>
-            "))), globalProperties, "4.0");
+            "))), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             ProjectInstance p = project.CreateProjectInstance();
 
@@ -1224,7 +1220,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p = project.CreateProjectInstance();
             Assert.AreEqual("v0", p.GetProperty("global").EvaluatedValue);
         }
-
 
         [Test]
         public void PropertiesAreRevertedAfterBuild()
@@ -2082,12 +2077,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 <Target Name='t'>
                     <ItemGroup>
                         <i1 Include='" + files.First() + ";" + files.ElementAt(1) + @";other'/> 
-                        <i1 Remove='$(temp)\*.tmp'/>
+                        <i1 Remove='$(temp)" + Path.DirectorySeparatorChar + @"*.tmp'/>
                     </ItemGroup>
                 </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
-                properties.Set(ProjectPropertyInstance.Create("TEMP", Environment.GetEnvironmentVariable("TEMP")));
+                properties.Set(
+                    ProjectPropertyInstance.Create(
+                        "TEMP",
+                        NativeMethodsShared.IsWindows ? Environment.GetEnvironmentVariable("TEMP") : Path.GetTempPath()));
                 Lookup lookup = LookupHelpers.CreateLookup(properties);
                 ExecuteTask(task, lookup);
 
@@ -2925,7 +2923,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                    <Target Name='a'>
                      <ItemGroup>
                         <Content Include='a.dll' />
-                        <Content Include='" + directoryForTest + @"\..\**'  Condition=""'%(Content.Extension)' == '.dll'""/>
+                        <Content Include='" + Path.Combine(directoryForTest, "..", "**") + @"'  Condition=""'%(Content.Extension)' == '.dll'""/>
                     </ItemGroup>
                          <Message Text='[%(Content.Identity)]->[%(Content.Extension)]->[%(Content.RecursiveDir)]' Importance='High'/>
                      </Target>
@@ -2933,7 +2931,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 bool success = p.Build(new string[] { "a" }, new ILogger[] { logger });
                 Assert.IsTrue(success);
                 logger.AssertLogContains("[a.dll]->[.dll]->[]");
-                logger.AssertLogContains("[" + directoryForTest + @"\..\Test\a.dll]->[.dll]->[Test\]");
+                logger.AssertLogContains(
+                    "[" + Path.Combine(directoryForTest, "..", "Test", "a.dll") + @"]->[.dll]->[Test"
+                    + Path.DirectorySeparatorChar + "]");
             }
             finally
             {

@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProtectImports_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -14,14 +16,14 @@ using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
     /// Tests for protecting imported files while editing
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProtectImports_Tests
     {
         #region Constants
@@ -91,14 +93,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Import filename
         /// </summary>
-        private string importFilename;
+        private string _importFilename;
 
         #region Test lifetime
 
         /// <summary>
         /// Configures the overall test.
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             string importContents =
@@ -120,19 +122,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>";
 
             importContents = Expand(importContents);
-            importFilename = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile() + ".targets";
-            File.WriteAllText(importFilename, importContents);
+            _importFilename = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile() + ".targets";
+            File.WriteAllText(_importFilename, importContents);
         }
 
         /// <summary>
         /// Undoes the test configuration.
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void Teardown()
         {
-            if (File.Exists(importFilename))
+            if (File.Exists(_importFilename))
             {
-                File.Delete(importFilename);
+                File.Delete(_importFilename);
             }
         }
 
@@ -143,7 +145,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests against edits into imported properties thru the property itself.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void PropertySetViaProperty()
         {
@@ -159,7 +161,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Instead of editing the existing property, because it originated
         /// in an imported file, it should create a new one in the main project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertySetViaProject()
         {
             Project project = GetProject();
@@ -173,7 +175,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests against edits into imported properties thru the property itself.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void PropertyRemove()
         {
@@ -191,10 +193,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests imported item type change.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void ItemImportedChangeType()
-        {            
+        {
             Project project = GetProject();
             ProjectItem item = GetImportedItem(project);
 
@@ -205,7 +207,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests imported item renaming.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void ItemImportedRename()
         {
@@ -215,11 +217,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // This should throw
             item.Rename("NewItemName");
         }
-        
+
         /// <summary>
         /// Tests imported item SetUnevaluatedValue.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void ItemImportedSetUnevaluatedValue()
         {
@@ -233,7 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests imported item removal.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void ItemImportedRemove()
         {
@@ -247,7 +249,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests project item type change.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemProjectChangeType()
         {
             Project project = GetProject();
@@ -261,7 +263,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests project item renaming.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemProjectRename()
         {
             Project project = GetProject();
@@ -275,7 +277,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests project item SetUnevaluatedValue.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemProjectSetUnevaluatedValue()
         {
             Project project = GetProject();
@@ -289,7 +291,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests project item removal.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemProjectRemove()
         {
             Project project = GetProject();
@@ -307,7 +309,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting existing metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void MetadataImportSetViaProject()
         {
@@ -321,7 +323,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void MetadataImportAdd()
         {
@@ -331,17 +333,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // This should throw
             item.SetMetadataValue("NewMetadata", "NewImportedMetadataValue");
         }
-        
+
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void MetadataImportSetViaMetadata()
         {
             Project project = GetProject();
             ProjectMetadata metadata = GetImportedMetadata(project);
-            
+
             // This should throw
             metadata.UnevaluatedValue = NewValue;
         }
@@ -349,7 +351,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests removing metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void MetadataImportRemove()
         {
@@ -363,7 +365,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting existing metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataProjectSetViaItem()
         {
             Project project = GetProject();
@@ -377,7 +379,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataProjectAdd()
         {
             Project project = GetProject();
@@ -392,7 +394,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataProjectSetViaMetadata()
         {
             Project project = GetProject();
@@ -408,7 +410,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests removing metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataProjectRemove()
         {
             Project project = GetProject();
@@ -426,7 +428,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void DefinitionMetadataImportSetViaMetadata()
         {
@@ -440,7 +442,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests removing metadata in imported item definition.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void DefinitionMetadataImportRemove()
         {
@@ -454,7 +456,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting existing metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefinitionMetadataProjectSetViaProject()
         {
             Project project = GetProject();
@@ -468,7 +470,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefinitionMetadataProjectSetViaMetadata()
         {
             Project project = GetProject();
@@ -482,7 +484,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests removing metadata in import.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefinitionMetadataProjectRemove()
         {
             Project project = GetProject();
@@ -506,7 +508,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <returns>Expanded string.</returns>
         private string Expand(string original)
         {
-            string expanded = original.Replace("$importFilename", importFilename);
+            string expanded = original.Replace("$importFilename", _importFilename);
             expanded = expanded.Replace("$importedMetadataName", ImportedMetadataName);
             expanded = expanded.Replace("$importedMetadataValue", ImportedMetadataValue);
             expanded = expanded.Replace("$itemName", ItemName);
@@ -531,7 +533,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.IsTrue(items.Count() == 1, "Wrong number of items in the import.");
 
             ProjectItem item = items.First();
-            Assert.AreEqual(importFilename, item.Xml.ContainingProject.FullPath, "Item was not found in the imported project.");
+            Assert.AreEqual(_importFilename, item.Xml.ContainingProject.FullPath, "Item was not found in the imported project.");
 
             return item;
         }
@@ -552,7 +554,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             return metadata;
         }
-        
+
         /// <summary>
         /// Gets the test templetized metadata from the import.
         /// </summary>
@@ -586,7 +588,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             return metadata;
         }
-        
+
         /// <summary>
         /// Creates a new project from expanding the template contents.
         /// </summary>
@@ -620,7 +622,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private ProjectProperty GetProperty(Project project)
         {
             ProjectProperty property = project.GetProperty(PropertyName);
-            Assert.AreEqual(importFilename, property.Xml.ContainingProject.FullPath, "Property was not found in the imported project.");
+            Assert.AreEqual(_importFilename, property.Xml.ContainingProject.FullPath, "Property was not found in the imported project.");
             Assert.IsTrue(property.IsImported, "IsImported property was not set.");
             return property;
         }
@@ -640,7 +642,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             return item;
         }
-        
+
         /// <summary>
         /// Gets the test metadata from the project.
         /// </summary>

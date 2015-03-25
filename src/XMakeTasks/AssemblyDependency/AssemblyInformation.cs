@@ -2,14 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Collections;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
 using System.Reflection;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+using System.Linq;
+
 using Microsoft.Build.Shared;
 using System.Text;
 using System.Runtime.Versioning;
@@ -30,11 +29,17 @@ namespace Microsoft.Build.Tasks
         private string _sourceFile;
         private FrameworkName _frameworkName;
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
+        private readonly Assembly _assembly;
 
         // Borrowed from genman.
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
         private const int GENMAN_ENUM_TOKEN_BUF_SIZE = 16; // 128 from genman seems too big.
+
+        static AssemblyInformation()
+        {
+            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ReflectionOnlyAssemblyResolve;
+        }
 
         /// <summary>
         /// Construct an instance for a source file.
@@ -46,9 +51,53 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrowArgumentNull(sourceFile, "sourceFile");
             _sourceFile = sourceFile;
 
-            // Create the metadata dispenser and open scope on the source file.
-            _metadataDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
-            _assemblyImport = (IMetaDataAssemblyImport)_metadataDispenser.OpenScope(sourceFile, 0, ref s_importerGuid);
+            if (NativeMethodsShared.IsWindows)
+            {
+                // Create the metadata dispenser and open scope on the source file.
+                _metadataDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
+                _assemblyImport = (IMetaDataAssemblyImport)_metadataDispenser.OpenScope(sourceFile, 0, ref s_importerGuid);
+            }
+            else
+            {
+                _assembly = Assembly.ReflectionOnlyLoadFrom(sourceFile);
+            }
+        }
+
+        private static Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            string[] nameParts = args.Name.Split(',');
+            Assembly assembly = null;
+
+            if (args.RequestingAssembly != null)
+            {
+                var location = args.RequestingAssembly.Location;
+                var newLocation = Path.Combine(Path.GetDirectoryName(location), nameParts[0].Trim() + ".dll");
+
+                try
+                {
+                    if (File.Exists(newLocation))
+                    {
+                        assembly = Assembly.ReflectionOnlyLoadFrom(newLocation);
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            // Let's try to automatically load it
+            if (assembly == null)
+            {
+                try
+                {
+                    assembly = Assembly.ReflectionOnlyLoad(args.Name);
+                }
+                catch
+                {
+                }
+            }
+
+            return assembly;
         }
 
         /// <summary>
@@ -126,6 +175,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="path">Path to the assembly.</param>
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
+        /// <param name="frameworkName">Gets the assembly name.</param>
         internal static void GetAssemblyMetadata
         (
             string path,
@@ -138,8 +188,8 @@ namespace Microsoft.Build.Tasks
             using (import = new AssemblyInformation(path))
             {
                 dependencies = import.Dependencies;
-                scatterFiles = import.Files;
                 frameworkName = import.FrameworkNameAttribute;
+                scatterFiles = NativeMethodsShared.IsWindows ? import.Files : null;
             }
         }
 
@@ -158,10 +208,20 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Determine if an file is a winmd file or not.
         /// </summary>
-        internal static bool IsWinMDFile(string fullPath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd)
+        internal static bool IsWinMDFile(
+            string fullPath,
+            GetAssemblyRuntimeVersion getAssemblyRuntimeVersion,
+            FileExists fileExists,
+            out string imageRuntimeVersion,
+            out bool isManagedWinmd)
         {
             imageRuntimeVersion = String.Empty;
             isManagedWinmd = false;
+
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return false;
+            }
 
             // May be null or empty is the file was never resolved to a path on disk.
             if (!String.IsNullOrEmpty(fullPath) && fileExists(fullPath))
@@ -169,7 +229,9 @@ namespace Microsoft.Build.Tasks
                 imageRuntimeVersion = getAssemblyRuntimeVersion(fullPath);
                 if (!String.IsNullOrEmpty(imageRuntimeVersion))
                 {
-                    bool containsWindowsRuntime = imageRuntimeVersion.IndexOf("WindowsRuntime", StringComparison.OrdinalIgnoreCase) >= 0;
+                    bool containsWindowsRuntime = imageRuntimeVersion.IndexOf(
+                        "WindowsRuntime",
+                        StringComparison.OrdinalIgnoreCase) >= 0;
 
                     if (containsWindowsRuntime)
                     {
@@ -187,6 +249,36 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private FrameworkName GetFrameworkName()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                CustomAttributeData attr = null;
+
+                foreach (CustomAttributeData a in _assembly.GetCustomAttributesData())
+                {
+                    try
+                    {
+                        if (a.AttributeType.Equals(typeof(TargetFrameworkAttribute)))
+                        {
+                            attr = a;
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                object name = null;
+                if (attr != null)
+                {
+                    name =
+                        attr.NamedArguments.FirstOrDefault(
+                            t =>
+                            t.MemberName.Equals("FrameworkDisplayName", StringComparison.InvariantCultureIgnoreCase));
+                }
+                return name == null ? null : name as FrameworkName;
+            }
+
             FrameworkName frameworkAttribute = null;
             try
             {
@@ -228,10 +320,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected override void DisposeUnmanagedResources()
         {
-            if (_assemblyImport != null)
-                Marshal.ReleaseComObject(_assemblyImport);
-            if (_metadataDispenser != null)
-                Marshal.ReleaseComObject(_metadataDispenser);
+            if (NativeMethodsShared.IsWindows)
+            {
+                if (_assemblyImport != null)
+                    Marshal.ReleaseComObject(_assemblyImport);
+                if (_metadataDispenser != null)
+                    Marshal.ReleaseComObject(_metadataDispenser);
+            }
         }
 
         /// <summary>
@@ -276,6 +371,12 @@ namespace Microsoft.Build.Tasks
         private AssemblyNameExtension[] ImportAssemblyDependencies()
         {
             ArrayList asmRefs = new ArrayList();
+
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return _assembly.GetReferencedAssemblies().Select(a => new AssemblyNameExtension(a)).ToArray();
+            }
+
             IntPtr asmRefEnum = IntPtr.Zero;
             UInt32[] asmRefTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
             UInt32 fetched;
@@ -285,14 +386,28 @@ namespace Microsoft.Build.Tasks
                 // Enum chunks of refs in 16-ref blocks until we run out.
                 do
                 {
-                    _assemblyImport.EnumAssemblyRefs(ref asmRefEnum, asmRefTokens, (uint)asmRefTokens.Length, out fetched);
+                    _assemblyImport.EnumAssemblyRefs(
+                        ref asmRefEnum,
+                        asmRefTokens,
+                        (uint)asmRefTokens.Length,
+                        out fetched);
 
                     for (uint i = 0; i < fetched; i++)
                     {
                         // Determine the length of the string to contain the name first.
                         IntPtr hashDataPtr, pubKeyPtr;
                         UInt32 hashDataLength, pubKeyBytes, asmNameLength, flags;
-                        _assemblyImport.GetAssemblyRefProps(asmRefTokens[i], out pubKeyPtr, out pubKeyBytes, null, 0, out asmNameLength, IntPtr.Zero, out hashDataPtr, out hashDataLength, out flags);
+                        _assemblyImport.GetAssemblyRefProps(
+                            asmRefTokens[i],
+                            out pubKeyPtr,
+                            out pubKeyBytes,
+                            null,
+                            0,
+                            out asmNameLength,
+                            IntPtr.Zero,
+                            out hashDataPtr,
+                            out hashDataLength,
+                            out flags);
                         // Allocate assembly name buffer.
                         char[] asmNameBuf = new char[asmNameLength + 1];
                         IntPtr asmMetaPtr = IntPtr.Zero;
@@ -302,9 +417,25 @@ namespace Microsoft.Build.Tasks
                             // Allocate metadata structure.
                             asmMetaPtr = AllocAsmMeta();
                             // Retrieve the assembly reference properties.
-                            _assemblyImport.GetAssemblyRefProps(asmRefTokens[i], out pubKeyPtr, out pubKeyBytes, asmNameBuf, (uint)asmNameBuf.Length, out asmNameLength, asmMetaPtr, out hashDataPtr, out hashDataLength, out flags);
+                            _assemblyImport.GetAssemblyRefProps(
+                                asmRefTokens[i],
+                                out pubKeyPtr,
+                                out pubKeyBytes,
+                                asmNameBuf,
+                                (uint)asmNameBuf.Length,
+                                out asmNameLength,
+                                asmMetaPtr,
+                                out hashDataPtr,
+                                out hashDataLength,
+                                out flags);
                             // Construct the assembly name and free metadata structure.
-                            AssemblyNameExtension asmName = ConstructAssemblyName(asmMetaPtr, asmNameBuf, asmNameLength, pubKeyPtr, pubKeyBytes, flags);
+                            AssemblyNameExtension asmName = ConstructAssemblyName(
+                                asmMetaPtr,
+                                asmNameBuf,
+                                asmNameLength,
+                                pubKeyPtr,
+                                pubKeyBytes,
+                                flags);
                             // Add the assembly name to the reference list.
                             asmRefs.Add(asmName);
                         }
@@ -330,6 +461,11 @@ namespace Microsoft.Build.Tasks
         /// <returns>The extra files of assembly dependencies.</returns>
         private string[] ImportFiles()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return new string[0];
+            }
+
             ArrayList files = new ArrayList();
             IntPtr fileEnum = IntPtr.Zero;
             UInt32[] fileTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];

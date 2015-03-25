@@ -92,9 +92,11 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.IsTrue(!success);
-                Assert.AreEqual(2, t.DirectoriesCreated.Length);
+                // Since Unix pretty much does not have invalid characters,
+                // the invalid name is not really invalid
+                Assert.AreEqual(NativeMethodsShared.IsWindows ? 2 : 3, t.DirectoriesCreated.Length);
                 Assert.AreEqual(dir, t.DirectoriesCreated[0].ItemSpec);
-                Assert.AreEqual(dir2, t.DirectoriesCreated[1].ItemSpec);
+                Assert.AreEqual(dir2, t.DirectoriesCreated[NativeMethodsShared.IsWindows ? 1 : 2].ItemSpec);
                 Assert.IsTrue
                 (
                     engine.Log.Contains

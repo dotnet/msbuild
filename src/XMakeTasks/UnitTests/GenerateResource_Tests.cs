@@ -4,13 +4,13 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Collections;
+
 using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
+
 using System.Text;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
@@ -1413,7 +1413,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 GenerateResource t = Utilities.CreateTask();
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
-                t.StateFile = new TaskItem("||invalid filename||");
+                t.StateFile = new TaskItem("||//invalid filename||");
 
                 // Should still succeed
                 Assert.IsTrue(t.Execute());
@@ -2333,7 +2333,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
     public class References
     {
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
@@ -2508,7 +2508,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// Assembly.LoadFrom instead.
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
@@ -2691,8 +2691,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                     possiblyQuotedResourcesFile = "\"" + resourcesFile + "\"";
                 }
 
-                Utilities.AssertLogContains(t,
-                    " /compile " + possiblyQuotedResxFile + "," + possiblyQuotedResourcesFile);
+                Utilities.AssertLogContains(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch("/compile ") + possiblyQuotedResxFile + ","
+                    + possiblyQuotedResourcesFile);
             }
             finally
             {
@@ -2728,12 +2730,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                     possiblyQuotedResourcesFile = "\"" + resourcesFile + "\"";
                 }
 
-                Utilities.AssertLogContains(t,
-                    " /useSourcePath /publicClass /r:baz /r:jazz " +
-                    possiblyQuotedResxFile +
-                    " " +
-                    possiblyQuotedResourcesFile +
-                    " /str:\"C#\",,,");
+                Utilities.AssertLogContains(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch("/useSourcePath ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/publicClass ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/r:baz ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/r:jazz ") + possiblyQuotedResxFile + " "
+                    + possiblyQuotedResourcesFile + " " + CommandLineBuilder.FixCommandLineSwitch("/str:\"C#\",,,"));
             }
             finally
             {
@@ -2771,12 +2774,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                     possiblyQuotedResourcesFile = "\"" + resourcesFile + "\"";
                 }
 
-                Utilities.AssertLogContains(t,
-                    " /useSourcePath /r:baz /r:jazz " +
-                    possiblyQuotedResxFile +
-                    " " +
-                    possiblyQuotedResourcesFile +
-                    " /str:\"C#\",,wagwag,boo");
+                Utilities.AssertLogContains(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch("/useSourcePath ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/r:baz ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/r:jazz ") + possiblyQuotedResxFile + " "
+                    + possiblyQuotedResourcesFile + " "
+                    + CommandLineBuilder.FixCommandLineSwitch("/str:\"C#\",,wagwag,boo"));
             }
             finally
             {
@@ -2829,7 +2833,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 }
 
                 Utilities.AssertLogContains(t,
-                    " /compile " +
+                    CommandLineBuilder.FixCommandLineSwitch("/compile ") +
                     possiblyQuotedResxFile +
                     "," +
                     possiblyQuotedResourcesFile +
@@ -3152,7 +3156,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 // The linked file may have a different case than reported by the filesystem
                 // simulate this by lower-casing our file before writing it into the resx.
-                resgenFileContents.Append(linkedBitmap.ToUpper(System.Globalization.CultureInfo.InvariantCulture));
+                resgenFileContents.Append(
+                    NativeMethodsShared.IsWindows
+                        ? linkedBitmap.ToUpper(System.Globalization.CultureInfo.InvariantCulture)
+                        : linkedBitmap);
 
                 resgenFileContents.Append(
                      ";System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>\xd\xa"
@@ -3220,7 +3227,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             bmp[0x3e] = 0x80;
 
             File.Delete(smallestBitmapFile);
-            File.WriteAllBytes(smallestBitmapFile.ToUpperInvariant(), bmp);
+            File.WriteAllBytes(
+                NativeMethodsShared.IsWindows ? smallestBitmapFile.ToUpperInvariant() : smallestBitmapFile,
+                bmp);
             return smallestBitmapFile;
         }
 

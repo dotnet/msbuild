@@ -257,17 +257,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projectFile, projectFileContents.Replace('`', '"'));
 
             string defaultToolsVersion = null;
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
-            {
-                defaultToolsVersion = "4.0";
-            }
-            else
-            {
-                defaultToolsVersion = "2.0";
-            }
+            defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
+                                      ? ObjectModelHelpers.MSBuildDefaultToolsVersion
+                                      : "2.0";
 
-
-            BuildRequestConfiguration config = new BuildRequestConfiguration(configId, new BuildRequestData(projectFile, new Dictionary<string, string>(), "4.0", new string[0], null), defaultToolsVersion);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(
+                configId,
+                new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string>(),
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                    new string[0],
+                    null),
+                defaultToolsVersion);
             return config;
         }
 

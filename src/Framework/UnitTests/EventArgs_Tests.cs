@@ -6,14 +6,12 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.IO;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
 using NUnit.Framework;
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
 {
@@ -32,10 +30,10 @@ namespace Microsoft.Build.UnitTests
         private static GenericBuildEventArgs s_baseGenericEvent = null;
 
         /// <summary>
-        /// Setup the text, this method is run ONCE for the entire text fixture
+        /// Setup the test, this method is run ONCE for the entire test fixture
         /// </summary>
         [TestFixtureSetUp]
-        public static void Setup(TestContext context)
+        public static void Setup()
         {
             s_baseGenericEvent = new GenericBuildEventArgs("Message", "HelpKeyword", "senderName");
             s_baseGenericEvent.BuildEventContext = new BuildEventContext(9, 8, 7, 6);
@@ -64,7 +62,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify a whidby project started event can be deserialized, the whidby event is stored in a serialized base64 string.
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("FEATURE: LEGACY TASKS")]
         // Ignore: Type in serialized string targets MSBuild retail public key, will not de-serialize
         public void TestDeserialization()
         {

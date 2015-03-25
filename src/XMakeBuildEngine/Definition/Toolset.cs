@@ -10,8 +10,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Xml;
 using System.Linq;
+using System.Xml;
+
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -489,6 +490,11 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    return false;
+                }
+
                 if (s_dev10IsInstalled == null)
                 {
                     try

@@ -294,4 +294,806 @@ namespace Microsoft.Build.UnitTests.QA
 
                             <Target Name='t1' >
                                 <QAMockTaskForIntegrationTests TaskShouldError='true' />
-            
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t0", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t0", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Success, null);
+        }
+
+        /// <summary>
+        /// Target1 executeserror with stop on error. Target1 has OnError to execute target2 and target3
+        /// </summary>
+        [TestMethod]
+        public void MultipleOnErrorTargetIsBuiltOnDependsOnTarget()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2;t3' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Success, null);
+            r1.ValidateNonPrimaryTargetEndResult("t3", TargetResultCode.Success, null);
+        }
+
+        /// <summary>
+        /// Target1 executes task1 which does not error. Target1 has OnError to execute target2
+        /// </summary>
+        [TestMethod]
+        public void OnErrorTargetIsNotBuiltInNonErrorCondition()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1' >
+                                <QAMockTaskForIntegrationTests />
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Success, null);
+            r1.ValidateTargetDidNotBuild("t2");
+        }
+
+        /// <summary>
+        /// Target1 executes task1. Task1 has an error with continue on error. Target1 has OnError to execute target2
+        /// </summary>
+        [TestMethod]
+        public void OnErrorTargetIsNotBuiltWithContinueOnError()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' ContinueOnError='true'/>
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+            this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Success, null);
+            r1.ValidateTargetDidNotBuild("t2");
+        }
+
+        /// <summary>
+        /// Target1 which executes task1. Task1 has an error with stop on error. Target1 has OnError to execute target2 and target3
+        /// </summary>
+        [TestMethod]
+        public void MultipleOnErrorTargetIsBuilt()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2;t3' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Success, null);
+            r1.ValidateNonPrimaryTargetEndResult("t3", TargetResultCode.Success, null);
+        }
+
+        /// <summary>
+        /// Target1 executes task1. Task1 has an error with Stop on error. Target1 has OnError to execute target2 but is above task1
+        /// (OnError is above the failing task)
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProjectFileException))]
+        public void OnErrorIsDefinedAboveTheFailingTask()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+               @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <OnError ExecuteTargets='t2' />
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateTargetDidNotBuild("t2");
+        }
+
+        /// <summary>
+        /// Request builds target1 and target2. Target2 has an error and calls target1
+        /// </summary>
+        [TestMethod]
+        public void OnErrorTargetIsATargetAlreadyBuilt()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t1' />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1;t2", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Success, null);
+            r1.ValidateTargetEndResult("t2", TargetResultCode.Failure, null);
+        }
+
+        /// <summary>
+        /// Initial target has target1. Target1 has an error and contains OnError which builds target2
+        /// </summary>
+        [TestMethod]
+        public void OnErrorTargetInvolvingInitialTarget()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace' InitialTargets='t1'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", null, out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Success, null);
+        }
+
+        /// <summary>
+        /// Default target has target1. Target1 has an error and contains OnError which builds target2
+        /// </summary>
+        [TestMethod]
+        public void OnErrorTargetInvolvingDefaultTarget()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace' DefaultTargets='t1'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", null, out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Success, null);
+        }
+
+        /// <summary>
+        /// Target1 which fails has an OnError with target2 and target3 where target2 has a task with stop on error and has OnError.
+        /// Target3 is also executed
+        /// </summary>
+        [TestMethod]
+        public void ErrorInFirstOnErrorTarget()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2;t3' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t4' />
+                            </Target>
+
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                            <Target Name='t4' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t3", TargetResultCode.Success, null);
+            r1.ValidateNonPrimaryTargetEndResult("t4", TargetResultCode.Success, null);
+        }
+
+        /// <summary>
+        /// Target1 which fails has an OnError with target2 and target3 where target2 has a task with stop on error and has OnError.
+        /// Target3 is executed in this case
+        /// </summary>
+        [TestMethod]
+        public void ErrorInFirstOnErrorTarget2()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2;t3' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true'/>
+                                <OnError ExecuteTargets='t4' />
+                            </Target>
+
+                            <Target Name='t4' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Success, null);
+            r1.ValidateNonPrimaryTargetEndResult("t3", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t4", TargetResultCode.Success, null);
+        }
+
+        /// <summary>
+        /// Target1 which fails has an OnError with target2 and target3 where target2 also errors and has OnError
+        /// </summary>
+        [TestMethod]
+        public void ContinueOnErrorInFirstOnErrorTarget()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2;t3' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests />
+                            </Target>
+                                
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t4' />
+                            </Target>
+
+                            <Target Name='t4' />
+
+                        </Project>"),
+            this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResults();
+
+            r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t3", TargetResultCode.Failure, null);
+            r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Success, null);
+            r1.ValidateNonPrimaryTargetEndResult("t4", TargetResultCode.Success, null);
+        }
+
+
+        /// <summary>
+        /// Circular dependency with OnError
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProjectFileException))]
+        public void CircularDependency()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true'/>
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t1' />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResultsThrowException();
+        }
+
+        /// <summary>
+        /// Circular dependency with OnError where OnError also has an OnError
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProjectFileException))]
+        public void CircularDependencyChain1()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true'/>
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t3' />
+                            </Target>
+
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResultsThrowException();
+        }
+
+        /// <summary>
+        /// Circular dependency with OnError where OnError also has an OnError
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProjectFileException))]
+        public void CircularDependencyChain2()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true'/>
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t3' />
+                            </Target>
+
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t1' />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResultsThrowException();
+        }
+
+        /// <summary>
+        /// Circular dependency with OnError where OnError also has an OnError
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProjectFileException))]
+        public void CircularDependencyChain3()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true'/>
+                                <OnError ExecuteTargets='t3' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t3' />
+                            </Target>
+
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResultsThrowException();
+        }
+
+        /// <summary>
+        /// Circular dependency with OnError where OnError also has an OnError
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProjectFileException))]
+        public void CircularDependencyChain4()
+        {
+            string projectFileContents = String.Format(ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                            <UsingTask TaskName='QAMockTaskForIntegrationTests' AssemblyFile='{0}' />
+
+                            <Target Name='t1'>
+                                <QAMockTaskForIntegrationTests TaskShouldError='true'/>
+                                <OnError ExecuteTargets='t3' />
+                            </Target>
+
+                            <Target Name='t2' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t1' />
+                            </Target>
+
+                            <Target Name='t3' >
+                                <QAMockTaskForIntegrationTests TaskShouldError='true' />
+                                <OnError ExecuteTargets='t2' />
+                            </Target>
+
+                        </Project>"),
+                this.assemblyPath);
+
+            ProjectInstance projectInstance = null;
+            RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
+
+            r1.SubmitBuildRequest();
+
+            r1.WaitForResultsThrowException();
+        }
+
+        #endregion
+
+        #region Private Helper
+
+        /// <summary>
+        /// Creates a projectinstance from a string which contains the project file contents
+        /// </summary>
+        private ProjectInstance GenerateProjectInstanceFromXml(string projectFileContents)
+        {
+            Project projectDefinition = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            return projectDefinition.CreateProjectInstance();
+        }
+
+        /// <summary>
+        /// Given a string containing the project file content return a RequestBuilder with all the information of the project
+        /// populated.
+        /// </summary>
+        private RequestDefinition GetRequestUsingProject(string projectFileContents, string projectName, string targetName, out ProjectInstance project)
+        {
+            ProjectDefinition p1 = new ProjectDefinition(projectName);
+            project = p1.MSBuildProjectInstance = GenerateProjectInstanceFromXml(projectFileContents);
+            string[] targetNames = null;
+            if (targetName != null)
+            {
+                targetNames = targetName.Split(';');
+            }
+
+            projectName = System.IO.Path.Combine(this.tempPath, projectName);
+            RequestDefinition r1 = new RequestDefinition(projectName, "2.0", targetNames, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            r1.ProjectDefinition = p1;
+
+            return r1;
+        }
+   
+        #endregion
+    }
+
+    /// <summary>
+    /// Mock task implementation which will be used by the above tests
+    /// </summary>
+    public class QAMockTaskForIntegrationTests : Microsoft.Build.Framework.ITask
+    {
+        #region Private data
+
+        /// <summary>
+        /// Task host
+        /// </summary>
+        private Microsoft.Build.Framework.ITaskHost taskHost;
+
+        /// <summary>
+        /// Build engine
+        /// </summary>
+        private Microsoft.Build.Framework.IBuildEngine buildEngine;
+
+        /// <summary>
+        /// Expected output
+        /// </summary>
+        private string expectedOutput;
+
+        /// <summary>
+        /// Task should show an exception
+        /// </summary>
+        private bool taskShouldThrow;
+
+        /// <summary>
+        /// Task should return false from Execute indicating error
+        /// </summary>
+        private bool taskShouldError;
+
+        #endregion
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public QAMockTaskForIntegrationTests()
+        {
+            this.taskShouldError = false;
+            this.taskShouldThrow = false;
+            this.expectedOutput = String.Empty;
+        }
+
+
+        #region ITask Members
+
+        /// <summary>
+        /// BuildEngine that can be used to access some engine capabilities like building project
+        /// </summary>
+        public Microsoft.Build.Framework.IBuildEngine BuildEngine
+        {
+            get
+            {
+                return this.buildEngine;
+            }
+            set
+            {
+                this.buildEngine = value;
+            }
+        }
+
+        /// <summary>
+        /// Task Host
+        /// </summary>
+        public Microsoft.Build.Framework.ITaskHost HostObject
+        {
+            get
+            {
+                return this.taskHost;
+            }
+            set
+            {
+                this.taskHost = value;
+            }
+        }
+
+        /// <summary>
+        /// Expected output to populate
+        /// </summary>
+        public string ExpectedOutput
+        {
+            set
+            {
+                this.expectedOutput = value;
+            }
+        }
+
+        /// <summary>
+        /// If the task should succeed or fail
+        /// </summary>
+        public bool TaskShouldError
+        {
+            set
+            {
+                this.taskShouldError = value;
+            }
+        }
+
+        /// <summary>
+        /// Expected output to populate
+        /// </summary>
+        public bool TaskShouldThrowException
+        {
+            set
+            {
+                this.taskShouldThrow = value;
+            }
+        }
+
+        /// <summary>
+        /// Output from the task which is set to the expected output
+        /// </summary>
+        [Microsoft.Build.Framework.Output]
+        public string TaskOutput
+        {
+            get
+            {
+                return this.expectedOutput;
+            }
+        }
+
+        /// <summary>
+        /// Execution of the task
+        /// </summary>
+        public bool Execute()
+        {
+            if (this.taskShouldThrow)
+            {
+                throw new QAMockTaskForIntegrationTestsException();
+            }
+
+            if (this.taskShouldError)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Exception object for the mock task 
+    /// </summary>
+    [Serializable]
+    public class QAMockTaskForIntegrationTestsException : Exception
+    {
+        public QAMockTaskForIntegrationTestsException()
+            : base("QAMockTaskForIntegrationTestsException")
+        {
+        }
+    }
+}

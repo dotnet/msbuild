@@ -2,21 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using NUnit.Framework;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.BackEnd;
-using System.IO;
+using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -290,11 +287,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> globalProperties =
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties["ThreeIn"] = "3";
             globalProperties["BazIn"] = "bazfile";
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectBody)), globalProperties, "4.0", new ProjectCollection());
+            Project project = new Project(
+                XmlReader.Create(new StringReader(projectBody)),
+                globalProperties,
+                ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                new ProjectCollection());
             project.FullPath = "foo";
             ProjectInstance instance = project.CreateProjectInstance();
             BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, new string[] { }, null), "2.0");
@@ -392,7 +394,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             globalProperties["ThreeIn"] = "3";
             globalProperties["BazIn"] = "bazfile";
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectBody)), globalProperties, "4.0", new ProjectCollection());
+            Project project = new Project(XmlReader.Create(new StringReader(projectBody)), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
             project.FullPath = "foo";
             ProjectInstance instance = project.CreateProjectInstance();
             BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, new string[] { }, null), "2.0");

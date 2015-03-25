@@ -3,10 +3,9 @@
 
 #region Using directives
 using System;
-using NUnit.Framework;
 using Microsoft.Build.Shared;
 
-
+using NUnit.Framework;
 #endregion
 namespace Microsoft.Build.UnitTests
 {

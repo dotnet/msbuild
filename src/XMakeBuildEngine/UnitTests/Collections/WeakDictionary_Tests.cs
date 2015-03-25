@@ -121,6 +121,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [ExpectedException(typeof(KeyNotFoundException))]
         public void IndexerRemovesDeadValue()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+            }
+
             object k = new Object();
             object v = new Object();
 
@@ -140,6 +145,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Test]
         public void ContainsRemovesDeadValue()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+            }
+
             Console.WriteLine("Fixed contains test ..");
 
             Object k = new Object();
@@ -163,6 +173,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Test]
         public void TryGetRemovesDeadValue()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+            }
+
             object k = new Object();
             object v = new Object();
 
@@ -185,6 +200,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Test]
         public void KeysCollectable()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+            }
+
             string k1 = new string('k', 1000000);
             string v1 = new string('v', 1000000);
 
@@ -215,6 +235,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Test]
         public void ValuesCollectable()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+            }
+
             string k1 = new string('k', 1000000);
             string v1 = new string('v', 1000000);
 
@@ -245,6 +270,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Test]
         public void ExplicitScavenge()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+            }
+
             object k1 = new Object();
             object v1 = new Object();
 

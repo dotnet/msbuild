@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
-using System.Collections;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using NUnit.Framework;
-using Microsoft.Build.Framework;
+using System.Runtime.Serialization.Formatters.Binary;
+
 using Microsoft.Build.Exceptions;
-using System.Text.RegularExpressions;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -57,8 +54,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that nesting an IPFE copies the error code
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ErrorCodeShouldAppearForCircularDependency()
         {
             string file = Path.GetTempPath() + Guid.NewGuid().ToString("N");

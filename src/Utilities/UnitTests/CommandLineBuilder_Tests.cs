@@ -3,12 +3,12 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections;
-using NUnit.Framework;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -26,7 +26,9 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitch("/a");
             c.AppendSwitch("-b");
-            Assert.AreEqual("/a -b", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/a ") + CommandLineBuilder.FixCommandLineSwitch("-b"),
+                c.ToString());
         }
 
         /*
@@ -39,7 +41,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/animal:", "dog");
-            Assert.AreEqual("/animal:dog", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch("/animal:dog"), c.ToString());
         }
 
         /*
@@ -52,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/animal:", "dog and pony");
-            Assert.AreEqual("/animal:\"dog and pony\"", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch("/animal:\"dog and pony\""), c.ToString());
         }
 
         /// <summary>
@@ -63,7 +65,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/animal:", (ITaskItem)new TaskItem("dog and pony"));
-            Assert.AreEqual("/animal:\"dog and pony\"", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch("/animal:\"dog and pony\""), c.ToString());
         }
 
         /*
@@ -76,7 +78,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchUnquotedIfNotNull("/animal:", "dog and pony");
-            Assert.AreEqual("/animal:dog and pony", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch("/animal:dog and pony"), c.ToString());
         }
 
         /*
@@ -88,11 +90,11 @@ namespace Microsoft.Build.UnitTests
         public void AppendTwoStringsEnsureNoSpace()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendFileNamesIfNotNull(new string[] { "Form1.resx", @"built\Form1.resources" }, ",");
+            c.AppendFileNamesIfNotNull(new string[] { "Form1.resx", FileUtilities.FixFilePath("built\\Form1.resources") }, ",");
 
             // There shouldn't be a space before or after the comma
             // Tools like resgen require comma-delimited lists to be bumped up next to each other.
-            Assert.AreEqual(@"Form1.resx,built\Form1.resources", c.ToString());
+            Assert.AreEqual(FileUtilities.FixFilePath(@"Form1.resx,built\Form1.resources"), c.ToString());
         }
 
         /*
@@ -122,7 +124,9 @@ namespace Microsoft.Build.UnitTests
             c.AppendFileNamesIfNotNull(new string[] { "-Mercury.cs", "-Venus.cs", "-Earth.cs" }, " ");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual(@".\-Mercury.cs .\-Venus.cs .\-Earth.cs", c.ToString());
+            Assert.AreEqual("." + Path.DirectorySeparatorChar + "-Mercury.cs ." +
+                Path.DirectorySeparatorChar + "-Venus.cs ." +
+                Path.DirectorySeparatorChar + "-Earth.cs", c.ToString());
         }
 
         /// <summary>
@@ -135,7 +139,7 @@ namespace Microsoft.Build.UnitTests
             c.AppendFileNamesIfNotNull(new TaskItem[] { new TaskItem("-Mercury.cs"), null, new TaskItem("Venus.cs"), new TaskItem("-Earth.cs") }, " ");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual(@".\-Mercury.cs  Venus.cs .\-Earth.cs", c.ToString());
+            Assert.AreEqual("." + Path.DirectorySeparatorChar + "-Mercury.cs  Venus.cs ." + Path.DirectorySeparatorChar + "-Earth.cs", c.ToString());
         }
 
         /*
@@ -179,7 +183,10 @@ namespace Microsoft.Build.UnitTests
             c.AppendSwitchIfNotNull("/switch:", new string[] { "Mer cury.cs", "Ve nus.cs", "Ear th.cs" }, ",");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something /switch:\"Mer cury.cs\",\"Ve nus.cs\",\"Ear th.cs\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ")
+                + CommandLineBuilder.FixCommandLineSwitch("/switch:\"Mer cury.cs\",\"Ve nus.cs\",\"Ear th.cs\""),
+                c.ToString());
         }
 
         /// <summary>
@@ -193,7 +200,10 @@ namespace Microsoft.Build.UnitTests
             c.AppendSwitchIfNotNull("/switch:", new TaskItem[] { new TaskItem("Mer cury.cs"), null, new TaskItem("Ve nus.cs"), new TaskItem("Ear th.cs") }, ",");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something /switch:\"Mer cury.cs\",,\"Ve nus.cs\",\"Ear th.cs\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ")
+                + CommandLineBuilder.FixCommandLineSwitch("/switch:\"Mer cury.cs\",,\"Ve nus.cs\",\"Ear th.cs\""),
+                c.ToString());
         }
 
         /// <summary>
@@ -207,7 +217,10 @@ namespace Microsoft.Build.UnitTests
             c.AppendSwitchUnquotedIfNotNull("/switch:", new string[] { "Mer cury.cs", "Ve nus.cs", "Ear th.cs" }, ",");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something /switch:Mer cury.cs,Ve nus.cs,Ear th.cs", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ")
+                + CommandLineBuilder.FixCommandLineSwitch("/switch:Mer cury.cs,Ve nus.cs,Ear th.cs"),
+                c.ToString());
         }
 
         /// <summary>
@@ -221,7 +234,10 @@ namespace Microsoft.Build.UnitTests
             c.AppendSwitchUnquotedIfNotNull("/switch:", new TaskItem[] { new TaskItem("Mer cury.cs"), null, new TaskItem("Ve nus.cs"), new TaskItem("Ear th.cs") }, ",");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something /switch:Mer cury.cs,,Ve nus.cs,Ear th.cs", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ")
+                + CommandLineBuilder.FixCommandLineSwitch("/switch:Mer cury.cs,,Ve nus.cs,Ear th.cs"),
+                c.ToString());
         }
 
         /// <summary>
@@ -237,7 +253,9 @@ namespace Microsoft.Build.UnitTests
             c.AppendFileNameIfNotNull("Mer cury.cs");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something .\\-Mercury.cs Mercury.cs \"Mer cury.cs\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ." + Path.DirectorySeparatorChar + "-Mercury.cs Mercury.cs \"Mer cury.cs\""),
+                c.ToString());
         }
 
         /// <summary>
@@ -253,7 +271,9 @@ namespace Microsoft.Build.UnitTests
             c.AppendFileNameIfNotNull((ITaskItem)new TaskItem("Mer cury.cs"));
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something .\\-Mercury.cs Mercury.cs \"Mer cury.cs\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ." + Path.DirectorySeparatorChar + "-Mercury.cs Mercury.cs \"Mer cury.cs\""),
+                c.ToString());
         }
 
         /// <summary>
@@ -278,7 +298,10 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", "LSYSTEM_COMPATIBLE_ASSEMBLY_NAME=L\"Microsoft.Windows.SystemCompatible\"");
-            Assert.AreEqual("/D\"LSYSTEM_COMPATIBLE_ASSEMBLY_NAME=L\\\"Microsoft.Windows.SystemCompatible\\\"\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch(
+                    "/D\"LSYSTEM_COMPATIBLE_ASSEMBLY_NAME=L\\\"Microsoft.Windows.SystemCompatible\\\"\""),
+                c.ToString());
         }
 
         /// <summary>
@@ -289,7 +312,9 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"ASSEMBLY_KEY_FILE=""c:\\foo\\FinalKeyFile.snk""");
-            Assert.AreEqual(@"/D""ASSEMBLY_KEY_FILE=\""c:\\foo\\FinalKeyFile.snk\""""", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch(@"/D""ASSEMBLY_KEY_FILE=\""c:\\foo\\FinalKeyFile.snk\"""""),
+                c.ToString());
         }
 
         /// <summary>
@@ -300,7 +325,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"""A B"" and ""C""");
-            Assert.AreEqual(@"/D""\""A B\"" and \""C\""""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""\""A B\"" and \""C\"""""), c.ToString());
         }
 
         /// <summary>
@@ -311,7 +336,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"A \B");
-            Assert.AreEqual(@"/D""A \B""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""A \B"""), c.ToString());
         }
 
         /// <summary>
@@ -322,7 +347,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"A"" \""B");
-            Assert.AreEqual(@"/D""A\"" \\\""B""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""A\"" \\\""B"""), c.ToString());
         }
 
         /// <summary>
@@ -333,7 +358,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchUnquotedIfNotNull("/D", @"A"" \""B");
-            Assert.AreEqual(@"/DA"" \""B", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/DA"" \""B"), c.ToString());
         }
 
         /// <summary>
@@ -345,7 +370,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"A B\");
-            Assert.AreEqual(@"/D""A B\\""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""A B\\"""), c.ToString());
         }
 
         /// <summary>
@@ -356,7 +381,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"AB\");
-            Assert.AreEqual(@"/DAB\", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/DAB\"), c.ToString());
         }
 
         /// <summary>
@@ -367,7 +392,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder(/* do not quote hyphens*/);
             c.AppendSwitchIfNotNull("/D", @"foo-bar");
-            Assert.AreEqual(@"/Dfoo-bar", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/Dfoo-bar"), c.ToString());
         }
 
         /// <summary>
@@ -378,7 +403,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder(true /* quote hyphens*/);
             c.AppendSwitchIfNotNull("/D", @"foo-bar");
-            Assert.AreEqual(@"/D""foo-bar""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""foo-bar"""), c.ToString());
         }
 
         /// <summary>
@@ -389,7 +414,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder(true);
             c.AppendSwitchIfNotNull("/D", new TaskItem(@"foo-bar"));
-            Assert.AreEqual(@"/D""foo-bar""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""foo-bar"""), c.ToString());
         }
 
         /// <summary>
@@ -400,7 +425,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder(true);
             c.AppendSwitchUnquotedIfNotNull("/D", new TaskItem(@"foo-bar"));
-            Assert.AreEqual(@"/Dfoo-bar", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/Dfoo-bar"), c.ToString());
         }
 
         /// <summary>

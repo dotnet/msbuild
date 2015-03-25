@@ -1695,8 +1695,6 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void MSBuildCallDoesNotAffectCallingProjectsDefinitions()
         {
             string otherProject = null;
@@ -1753,8 +1751,6 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DefaultMetadataTravelWithTargetOutputs()
         {
             string otherProject = null;

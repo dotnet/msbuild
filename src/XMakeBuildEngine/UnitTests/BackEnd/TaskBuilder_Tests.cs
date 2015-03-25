@@ -589,8 +589,6 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NullMetadataOnOutputItems()
         {
             string customTaskPath = CustomTaskHelper.GetAssemblyForTask(s_nullMetadataTaskContents);
@@ -615,7 +613,7 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("FEATURE: LEGACY TASKS")]
         // Ignore: Test requires installed toolset.
         public void NullMetadataOnLegacyOutputItems()
         {
@@ -651,8 +649,6 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NullMetadataOnOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -693,7 +689,7 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("FEATURE: LEGACY TASKS")]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
@@ -748,7 +744,7 @@ namespace ItemCreationTask
         /// which didn't support the defining project metadata.  
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("FEATURE: LEGACY TASKS")]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ValidateDefiningProjectMetadataOnTaskOutputs_LegacyItems()
         {
@@ -805,8 +801,6 @@ namespace ItemCreationTask
         /// Tests an MTA task with an exception.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestSTAThreadNotRequiredWithException()
         {
             TestSTATask(false, false, true);
@@ -816,8 +810,6 @@ namespace ItemCreationTask
         /// Tests an MTA task with failure.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestSTAThreadNotRequiredWithFailure()
         {
             TestSTATask(false, true, false);

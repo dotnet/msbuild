@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
     [TestFixture]
     sealed public class SdkToolsPathUtility_Tests
     {
-        private string _defaultSdkToolsPath = "C:\\ProgramFiles\\WIndowsSDK\\bin";
+        private string _defaultSdkToolsPath = NativeMethodsShared.IsWindows ? "C:\\ProgramFiles\\WIndowsSDK\\bin" : "/ProgramFiles/WindowsSDK/bin";
         private TaskLoggingHelper _log = null;
         private string _toolName = "MyTool.exe";
         private MockEngine _mockEngine = null;
@@ -197,6 +197,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void VerifyErrorWithIllegalChars()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("No invalid path characters under Unix");
+            }
+
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, "./?><;)(*&^%$#@!", _toolName, _log, true);
             Assert.IsNull(toolPath);
             _mockEngine.AssertLogContains("MSB3666");
@@ -331,7 +336,7 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             private bool ExistsOnlyInX64(string filePath)
             {
-                return string.Equals(Path.GetDirectoryName(filePath), _sdkToolsPath + "\\x64", StringComparison.OrdinalIgnoreCase);
+                return string.Equals(Path.GetDirectoryName(filePath), Path.Combine(_sdkToolsPath, "x64"), StringComparison.OrdinalIgnoreCase);
             }
 
             /// <summary>
@@ -339,7 +344,7 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             private bool ExistsOnlyInIa64(string filePath)
             {
-                return string.Equals(Path.GetDirectoryName(filePath), _sdkToolsPath + "\\ia64", StringComparison.OrdinalIgnoreCase);
+                return string.Equals(Path.GetDirectoryName(filePath), Path.Combine(_sdkToolsPath, "ia64"), StringComparison.OrdinalIgnoreCase);
             }
 
             /// <summary>

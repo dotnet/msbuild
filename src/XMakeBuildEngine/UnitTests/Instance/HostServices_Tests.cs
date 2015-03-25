@@ -9,9 +9,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+
 using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
@@ -403,7 +405,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 </Project>
 ");
 
-            Project project = new Project(new XmlTextReader(new StringReader(contents)), new Dictionary<string, string>(), "4.0");
+            Project project = new Project(new XmlTextReader(new StringReader(contents)), new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
             project.FullPath = fileName;
             ProjectInstance instance = project.CreateProjectInstance();
 
@@ -425,7 +427,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Dictionary<string, string> globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globals["UniqueDummy"] = Guid.NewGuid().ToString();
 
-            Project project = ProjectCollection.GlobalProjectCollection.LoadProject(new XmlTextReader(new StringReader(contents)), globals, "4.0");
+            Project project =
+                ProjectCollection.GlobalProjectCollection.LoadProject(
+                    new XmlTextReader(new StringReader(contents)),
+                    globals,
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion);
             project.FullPath = fileName;
 
             return project;

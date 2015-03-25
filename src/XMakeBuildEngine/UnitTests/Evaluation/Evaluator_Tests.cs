@@ -6,29 +6,24 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Xml;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Xml;
+
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 using NUnit.Framework;
 
-using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.BackEnd;
-using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
+using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -64,11 +59,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Test]
         public void VerifyExistsInMemoryProjecs()
         {
+            string fooPath = NativeMethodsShared.IsWindows ? "c:\temp\foo.import" : "/temp/foo.import";
+            string barPath = NativeMethodsShared.IsWindows ? "c:\temp\bar.import" : "/temp/bar.import";
             string projXml = ObjectModelHelpers.CleanupFileContents(@"
                                 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
-                                    <Import Project=""c:\temp\foo.import"" Condition=""Exists('c:\temp\foo.import')""/>
-                                    <ImportGroup Condition=""Exists('c:\temp\bar.import')"">
-                                          <Import Project=""c:\temp\bar.import"" />
+                                    <Import Project=""" + fooPath + @""" Condition=""Exists('" + fooPath + @"')""/>
+                                    <ImportGroup Condition=""Exists('" + barPath + @"')"">
+                                          <Import Project=""" + barPath + @""" />
                                     </ImportGroup>
                                 </Project>");
 
@@ -94,7 +91,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             // add in-memory project c:\temp\foo.import
             Project fooImport = new Project(XmlReader.Create(new StringReader(fooXml)));
-            fooImport.FullPath = @"c:\temp\foo.import";
+            fooImport.FullPath = fooPath;
 
             // force reevaluation
             project.MarkDirty();
@@ -106,7 +103,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             // add in-memory project c:\temp\bar.import
             Project barImport = new Project(XmlReader.Create(new StringReader(barXml)));
-            barImport.FullPath = @"c:\temp\bar.import";
+            barImport.FullPath = barPath;
 
             // force reevaluation
             project.MarkDirty();
@@ -896,7 +893,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(XmlReader.Create(new StringReader(manifest)), null, null, pc, ProjectLoadSettings.RecordDuplicateButNotCircularImports);
 
                 // In the list returned by ImportsIncludingDuplicates, check if there are any imports that are imported by importPath2.
-                bool circularImportsAreRecorded = project.ImportsIncludingDuplicates.Any(resolvedImport => String.Equals(resolvedImport.ImportingElement.ContainingProject.FullPath, importPath2, StringComparison.OrdinalIgnoreCase));
+                bool circularImportsAreRecorded = project.ImportsIncludingDuplicates.Any(resolvedImport => string.Equals(resolvedImport.ImportingElement.ContainingProject.FullPath, importPath2, StringComparison.OrdinalIgnoreCase));
 
                 // Even though, the text in importPath2 contains exactly one import, namely importPath1, it should not be recorded since
                 // importPath1 introduces a circular dependency when traversing depth-first from the project.
@@ -1006,12 +1003,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 directory = Path.Combine(Path.GetTempPath(), "fol$der");
-                directory2 = Path.Combine(Path.GetTempPath(), "fol$der\\fol$der2");
+                directory2 = Path.Combine(Path.GetTempPath(), "fol$der" + Path.DirectorySeparatorChar + "fol$der2");
                 Directory.CreateDirectory(directory2);
 
-                string importPathRelativeEscaped = "fol$(x)$der2\\Escap%3beab$(x)leChar$ac;tersInI*tPa?h";
-                string importRelative1 = "fol$der2\\Escap;eableChar$ac;tersInImportPath";
-                string importRelative2 = "fol$der2\\Escap;eableChar$ac;tersInI_XXXX_tPath";
+                string importPathRelativeEscaped = Path.Combine("fol$(x)$der2", "Escap%3beab$(x)leChar$ac;tersInI*tPa?h");
+                string importRelative1 = Path.Combine("fol$der2", "Escap;eableChar$ac;tersInImportPath");
+                string importRelative2 = Path.Combine("fol$der2", "Escap;eableChar$ac;tersInI_XXXX_tPath");
                 importPath1 = Path.Combine(directory, importRelative1);
                 importPath2 = Path.Combine(directory, importRelative2);
 
@@ -1066,27 +1063,34 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Test]
         public void MSBuildThisFileProperties()
         {
-            ProjectRootElement main = ProjectRootElement.Create(@"c:\a\p.proj");
-            main.AddImport(@"c:\a\t1.targets");
-            main.AddImport(@"c:\a\b\t2.targets");
-            main.AddImport(@"c:\t3.targets");
+            string targets1FileName = NativeMethodsShared.IsWindows ? @"c:\a\t1.targets" : "/a/t1.targets";
+            string aDirName = NativeMethodsShared.IsWindows ? @"c:\a\" : "/a/";
+            string targets2FileName = NativeMethodsShared.IsWindows ? @"c:\a\b\t2.targets" : "/a/b/t2.targets";
+            string bDirName = NativeMethodsShared.IsWindows ? @"c:\a\b\" : "/a/b/";
+            string targets3FileName = NativeMethodsShared.IsWindows ? @"c:\t3.targets" : "/t3.targets";
+            string rootDirName = NativeMethodsShared.IsWindows ? @"c:\" : "/";
+            string aProjName = NativeMethodsShared.IsWindows ? @"c:\a\p.proj" : "/a/p.proj";
+            ProjectRootElement main = ProjectRootElement.Create(aProjName);
+            main.AddImport(targets1FileName);
+            main.AddImport(targets2FileName);
+            main.AddImport(targets3FileName);
             ProjectTargetElement target0 = main.AddTarget("t0");
-            AddPropertyDumpTasks(@"c:\a\p.proj", target0);
+            AddPropertyDumpTasks(aProjName, target0);
             main.InitialTargets = "t0";
 
-            ProjectRootElement import1 = ProjectRootElement.Create(@"c:\a\t1.targets");
+            ProjectRootElement import1 = ProjectRootElement.Create(targets1FileName);
             ProjectTargetElement target1 = import1.AddTarget("t1");
-            AddPropertyDumpTasks(@"c:\a\t1.targets", target1);
+            AddPropertyDumpTasks(targets1FileName, target1);
             import1.InitialTargets = "t1";
 
-            ProjectRootElement import2 = ProjectRootElement.Create(@"c:\a\b\t2.targets");
+            ProjectRootElement import2 = ProjectRootElement.Create(targets2FileName);
             ProjectTargetElement target2 = import2.AddTarget("t2");
-            AddPropertyDumpTasks(@"c:\a\b\t2.targets", target2);
+            AddPropertyDumpTasks(targets2FileName, target2);
             import2.InitialTargets = "t2";
 
-            ProjectRootElement import3 = ProjectRootElement.Create(@"c:\t3.targets");
+            ProjectRootElement import3 = ProjectRootElement.Create(targets3FileName);
             ProjectTargetElement target3 = import3.AddTarget("t3");
-            AddPropertyDumpTasks(@"c:\t3.targets", target3);
+            AddPropertyDumpTasks(targets3FileName, target3);
             import3.InitialTargets = "t3";
 
             Project project = new Project(main);
@@ -1113,33 +1117,33 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // MSBuildProjectExtension=           .proj
             // MSBuildProjectFullPath=            C:\a.proj
             // MSBuildProjectName=                a
-            logger.AssertLogContains(@"c:\a\p.proj: MSBuildThisFileDirectory=c:\a\");
-            logger.AssertLogContains(@"c:\a\p.proj: MSBuildThisFileDirectoryNoRoot=a\");
-            logger.AssertLogContains(@"c:\a\p.proj: MSBuildThisFile=p.proj");
-            logger.AssertLogContains(@"c:\a\p.proj: MSBuildThisFileExtension=.proj");
-            logger.AssertLogContains(@"c:\a\p.proj: MSBuildThisFileFullPath=c:\a\p.proj");
-            logger.AssertLogContains(@"c:\a\p.proj: MSBuildThisFileName=p");
+            logger.AssertLogContains(aProjName + @": MSBuildThisFileDirectory=" + aDirName);
+            logger.AssertLogContains(aProjName + @": MSBuildThisFileDirectoryNoRoot=a" + Path.DirectorySeparatorChar);
+            logger.AssertLogContains(aProjName + @": MSBuildThisFile=p.proj");
+            logger.AssertLogContains(aProjName + @": MSBuildThisFileExtension=.proj");
+            logger.AssertLogContains(aProjName + @": MSBuildThisFileFullPath=" + aProjName);
+            logger.AssertLogContains(aProjName + @": MSBuildThisFileName=p");
 
-            logger.AssertLogContains(@"c:\a\t1.targets: MSBuildThisFileDirectory=c:\a\");
-            logger.AssertLogContains(@"c:\a\t1.targets: MSBuildThisFileDirectoryNoRoot=a\");
-            logger.AssertLogContains(@"c:\a\t1.targets: MSBuildThisFile=t1.targets");
-            logger.AssertLogContains(@"c:\a\t1.targets: MSBuildThisFileExtension=.targets");
-            logger.AssertLogContains(@"c:\a\t1.targets: MSBuildThisFileFullPath=c:\a\t1.targets");
-            logger.AssertLogContains(@"c:\a\t1.targets: MSBuildThisFileName=t1");
+            logger.AssertLogContains(targets1FileName + @": MSBuildThisFileDirectory=" + aDirName);
+            logger.AssertLogContains(targets1FileName + @": MSBuildThisFileDirectoryNoRoot=a" + Path.DirectorySeparatorChar);
+            logger.AssertLogContains(targets1FileName + @": MSBuildThisFile=t1.targets");
+            logger.AssertLogContains(targets1FileName + @": MSBuildThisFileExtension=.targets");
+            logger.AssertLogContains(targets1FileName + @": MSBuildThisFileFullPath=" + targets1FileName);
+            logger.AssertLogContains(targets1FileName + @": MSBuildThisFileName=t1");
 
-            logger.AssertLogContains(@"c:\a\b\t2.targets: MSBuildThisFileDirectory=c:\a\b\");
-            logger.AssertLogContains(@"c:\a\b\t2.targets: MSBuildThisFileDirectoryNoRoot=a\b\");
-            logger.AssertLogContains(@"c:\a\b\t2.targets: MSBuildThisFile=t2.targets");
-            logger.AssertLogContains(@"c:\a\b\t2.targets: MSBuildThisFileExtension=.targets");
-            logger.AssertLogContains(@"c:\a\b\t2.targets: MSBuildThisFileFullPath=c:\a\b\t2.targets");
-            logger.AssertLogContains(@"c:\a\b\t2.targets: MSBuildThisFileName=t2");
+            logger.AssertLogContains(targets2FileName + @": MSBuildThisFileDirectory=" + bDirName);
+            logger.AssertLogContains(targets2FileName + @": MSBuildThisFileDirectoryNoRoot=a" + Path.DirectorySeparatorChar + "b" + Path.DirectorySeparatorChar);
+            logger.AssertLogContains(targets2FileName + @": MSBuildThisFile=t2.targets");
+            logger.AssertLogContains(targets2FileName + @": MSBuildThisFileExtension=.targets");
+            logger.AssertLogContains(targets2FileName + @": MSBuildThisFileFullPath=" + targets2FileName);
+            logger.AssertLogContains(targets2FileName + @": MSBuildThisFileName=t2");
 
-            logger.AssertLogContains(@"c:\t3.targets: MSBuildThisFileDirectory=c:\");
-            logger.AssertLogContains(@"c:\t3.targets: MSBuildThisFileDirectoryNoRoot=");
-            logger.AssertLogContains(@"c:\t3.targets: MSBuildThisFile=t3.targets");
-            logger.AssertLogContains(@"c:\t3.targets: MSBuildThisFileExtension=.targets");
-            logger.AssertLogContains(@"c:\t3.targets: MSBuildThisFileFullPath=c:\t3.targets");
-            logger.AssertLogContains(@"c:\t3.targets: MSBuildThisFileName=t3");
+            logger.AssertLogContains(targets3FileName + @": MSBuildThisFileDirectory=" + rootDirName);
+            logger.AssertLogContains(targets3FileName + @": MSBuildThisFileDirectoryNoRoot=");
+            logger.AssertLogContains(targets3FileName + @": MSBuildThisFile=t3.targets");
+            logger.AssertLogContains(targets3FileName + @": MSBuildThisFileExtension=.targets");
+            logger.AssertLogContains(targets3FileName + @": MSBuildThisFileFullPath=" + targets3FileName);
+            logger.AssertLogContains(targets3FileName + @": MSBuildThisFileName=t3");
         }
 
         /// <summary>
@@ -1185,7 +1189,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectPropertyElement xml1 = project.Xml.Properties.First();
             Assert.AreEqual("2;2", property.EvaluatedValue);
             Assert.AreEqual("1", property.Predecessor.Predecessor.EvaluatedValue);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, property.Predecessor.Predecessor.Xml));
+            Assert.AreEqual(true, object.ReferenceEquals(xml1, property.Predecessor.Predecessor.Xml));
             Assert.AreEqual(null, property.Predecessor.Predecessor.Predecessor);
         }
 
@@ -1193,14 +1197,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Predecessors and imports
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: In-line Utilities function not found.
-
         public void PropertyPredecessorsAndImports()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion' >
-                        <Import Project='$(MSBuildToolsPath)\microsoft.common.targets'/>
+                        <Import Project='$(MSBuildToolsPath)\Microsoft.Common.targets'/>
                         <PropertyGroup>
                           <!-- Case insensitive -->
                           <OUTdir>1</OUTdir>
@@ -1213,7 +1214,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectRootElement importXml = ProjectRootElement.Open(project.Items.ElementAt(0).Xml.ContainingProject.FullPath);
             ProjectRootElement predecessorXmlRoot = project.GetProperty("outdir").Predecessor.Xml.ContainingProject;
 
-            Assert.AreEqual(true, Object.ReferenceEquals(importXml, predecessorXmlRoot));
+            Assert.AreEqual(true, object.ReferenceEquals(importXml, predecessorXmlRoot));
         }
 
         /// <summary>
@@ -1226,7 +1227,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // so there's a potential predecessor but it's not just overwritten
             string content = ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion' >
-                        <Import Project='$(MSBuildToolsPath)\microsoft.common.targets'/>
+                        <Import Project='$(MSBuildToolsPath)\Microsoft.Common.targets'/>
                     </Project>");
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
@@ -1262,7 +1263,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("1", metadatum.Predecessor.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.ItemDefinitions.ElementAt(0).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
+            Assert.AreEqual(true, object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
             Assert.AreEqual(null, metadatum.Predecessor.Predecessor.Predecessor);
         }
 
@@ -1320,10 +1321,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("1", metadatum.Predecessor.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.ItemDefinitions.ElementAt(0).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
+            Assert.AreEqual(true, object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
 
             ProjectMetadataElement xml2 = project.Xml.Items.ElementAt(0).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml2, metadatum.Predecessor.Xml));
+            Assert.AreEqual(true, object.ReferenceEquals(xml2, metadatum.Predecessor.Xml));
 
             Assert.AreEqual(null, metadatum.Predecessor.Predecessor.Predecessor);
         }
@@ -1357,7 +1358,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("1", metadatum.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.Items.ElementAt(1).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
+            Assert.AreEqual(true, object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
 
             Assert.AreEqual(null, metadatum.Predecessor.Predecessor);
         }
@@ -1388,7 +1389,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.AreEqual("1", metadatum.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.Items.ElementAt(0).Metadata.ElementAt(0);
-            Assert.AreEqual(true, Object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
+            Assert.AreEqual(true, object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
 
             Assert.AreEqual(null, metadatum.Predecessor.Predecessor);
         }
@@ -1454,8 +1455,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 ProjectMetadata predecessor = project.GetItems("i").ElementAt(0).GetMetadata("m").Predecessor;
 
-                Assert.AreEqual(true, Object.ReferenceEquals(import, predecessor.Xml.ContainingProject));
-                Assert.AreEqual(true, Object.ReferenceEquals(project.Xml, predecessor.Predecessor.Xml.ContainingProject));
+                Assert.AreEqual(true, object.ReferenceEquals(import, predecessor.Xml.ContainingProject));
+                Assert.AreEqual(true, object.ReferenceEquals(project.Xml, predecessor.Predecessor.Xml.ContainingProject));
             }
             finally
             {
@@ -1544,11 +1545,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                 {
-                    Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                    Assert.Fail(string.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                 }
                 else if (!property.Equals(propertyFromAllEvaluated))
                 {
-                    Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                    Assert.Fail(string.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                 }
             }
 
@@ -1627,7 +1628,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Assert.AreEqual(6, project.AllEvaluatedItems.Count());
                 Assert.AreEqual("i1", project.AllEvaluatedItems.ElementAt(0).EvaluatedInclude);
-                Assert.AreEqual(String.Empty, project.AllEvaluatedItems.ElementAt(0).GetMetadataValue("m"));
+                Assert.AreEqual(string.Empty, project.AllEvaluatedItems.ElementAt(0).GetMetadataValue("m"));
                 Assert.AreEqual("j1", project.AllEvaluatedItems.ElementAt(1).EvaluatedInclude);
                 Assert.AreEqual("m1", project.AllEvaluatedItems.ElementAt(1).GetMetadataValue("m"));
                 Assert.AreEqual("i3", project.AllEvaluatedItems.ElementAt(2).EvaluatedInclude);
@@ -1736,7 +1737,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
-                        <Import Project='$(MSBuildToolsPath)\microsoft.common.targets'/>
+                        <Import Project='$(MSBuildToolsPath)\Microsoft.Common.targets'/>
                     </Project>");
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
@@ -1839,7 +1840,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string directory = Path.Combine(Path.GetTempPath(), "ImportWildcardsRelative");
             string directory2 = Path.Combine(directory, "sub");
             Directory.CreateDirectory(directory2);
-            VerifyImportTargetRelativePath(directory, directory2, new string[] { @"**\*.targets" });
+            VerifyImportTargetRelativePath(directory, directory2, new string[] { Path.Combine("**", "*.targets") });
         }
 
         /// <summary>
@@ -1851,7 +1852,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string directory = Path.Combine(Path.GetTempPath(), "ImportWildcardsRelative2");
             string directory2 = Path.Combine(directory, "sub");
             Directory.CreateDirectory(directory2);
-            VerifyImportTargetRelativePath(directory, directory2, new string[] { directory2 + "\\*.targets", directory + "\\*.targets" });
+            VerifyImportTargetRelativePath(
+                directory,
+                directory2,
+                new string[] { Path.Combine(directory2, "*.targets"), Path.Combine(directory, "*.targets") });
         }
 
         /// <summary>
@@ -1863,7 +1867,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string directory = Path.Combine(Path.GetTempPath(), "ImportWildcardsRelative3");
             string directory2 = Path.Combine(directory, "sub");
             Directory.CreateDirectory(directory2);
-            VerifyImportTargetRelativePath(directory, directory2, new string[] { directory2 + "\\..\\*.targets", directory + "\\.\\sub\\*.targets" });
+            VerifyImportTargetRelativePath(
+                directory,
+                directory2,
+                new string[]
+                    {
+                        Path.Combine(directory2, "..", "*.targets"), Path.Combine(
+                            directory,
+                            ".",
+                            "sub",
+                            "*.targets")
+                    });
         }
 
         /// <summary>
@@ -1978,7 +1992,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // Need to create a new project collection object in order to pick up the new environment variables.
                 Project project = new Project(new ProjectCollection());
 
-                Assert.AreEqual(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + @"\MSBuild", project.GetPropertyValue(specialPropertyName));
+                string msbuildPath = NativeMethodsShared.IsWindows ?
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + Path.DirectorySeparatorChar + "MSBuild" :
+                    "MSBuild";
+                Assert.AreEqual(msbuildPath, project.GetPropertyValue(specialPropertyName));
             }
             finally
             {
@@ -2101,7 +2118,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath32", null);
                 Project project = new Project(new ProjectCollection());
 
-                Assert.AreEqual(expected + @"\MSBuild", project.GetPropertyValue("MSBuildExtensionsPath32"));
+                string msbuildPath = NativeMethodsShared.IsWindows ? Path.Combine(expected, "MSBuild") : "MSBuild";
+                Assert.AreEqual(msbuildPath, project.GetPropertyValue("MSBuildExtensionsPath32"));
             }
             finally
             {
@@ -2154,7 +2172,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Test]
         public void MSBuildExtensionsPath64Default()
         {
-            string expected = String.Empty;
+            string expected = string.Empty;
 
             // If we are on a 32 bit machine then this variable will be null.
             string programFiles32 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
@@ -2163,14 +2181,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // only set in 32-bit windows on 64-bit machines
                 expected = Environment.GetEnvironmentVariable("ProgramW6432");
 
-                if (String.IsNullOrEmpty(expected))
+                if (string.IsNullOrEmpty(expected))
                 {
                     // 64-bit window on a 64-bit machine -- ProgramFiles is correct
                     expected = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
                 }
             }
 
-            if (!String.IsNullOrEmpty(expected))
+            if (!string.IsNullOrEmpty(expected))
             {
                 expected = expected + @"\MSBuild";
             }
@@ -2278,16 +2296,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Test]
         public void ReservedProjectProperties()
         {
-            string file = @"c:\foo\bar.csproj";
+            string file = NativeMethodsShared.IsWindows ? @"c:\foo\bar.csproj" : "/foo/bar.csproj";
+            string dir = NativeMethodsShared.IsWindows ? @"c:\foo" : "/foo";
             ProjectRootElement xml = ProjectRootElement.Create(file);
             xml.DefaultTargets = "Build";
             Project project = new Project(xml);
 
-            Assert.AreEqual(@"c:\foo", project.GetPropertyValue("MSBuildProjectDirectory"));
+            Assert.AreEqual(dir, project.GetPropertyValue("MSBuildProjectDirectory"));
             Assert.AreEqual(@"foo", project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
             Assert.AreEqual("bar.csproj", project.GetPropertyValue("MSBuildProjectFile"));
             Assert.AreEqual(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
-            Assert.AreEqual(@"c:\foo\bar.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
+            Assert.AreEqual(file, project.GetPropertyValue("MSBuildProjectFullPath"));
             Assert.AreEqual("bar", project.GetPropertyValue("MSBuildProjectName"));
         }
 
@@ -2297,15 +2316,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Test]
         public void ReservedProjectPropertiesAtRoot()
         {
-            string file = @"c:\bar.csproj";
+            string file = NativeMethodsShared.IsWindows ? @"c:\bar.csproj" : "/bar.csproj";
+            string dir = NativeMethodsShared.IsWindows ? @"c:\" : "/";
             ProjectRootElement xml = ProjectRootElement.Create(file);
             Project project = new Project(xml);
 
-            Assert.AreEqual(@"c:\", project.GetPropertyValue("MSBuildProjectDirectory"));
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
+            Assert.AreEqual(dir, project.GetPropertyValue("MSBuildProjectDirectory"));
+            Assert.AreEqual(string.Empty, project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
             Assert.AreEqual("bar.csproj", project.GetPropertyValue("MSBuildProjectFile"));
             Assert.AreEqual(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
-            Assert.AreEqual(@"c:\bar.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
+            Assert.AreEqual(file, project.GetPropertyValue("MSBuildProjectFullPath"));
             Assert.AreEqual("bar", project.GetPropertyValue("MSBuildProjectName"));
         }
 
@@ -2315,12 +2335,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Test]
         public void ReservedProjectPropertiesOnUNCRoot()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("UNC is only available under Windows");
+            }
+
             string uncFile = @"\\foo\bar\baz.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(uncFile);
             Project project = new Project(xml);
 
             Assert.AreEqual(@"\\foo\bar", project.GetPropertyValue("MSBuildProjectDirectory"));
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
+            Assert.AreEqual(string.Empty, project.GetPropertyValue("MSBuildProjectDirectoryNoRoot"));
             Assert.AreEqual("baz.csproj", project.GetPropertyValue("MSBuildProjectFile"));
             Assert.AreEqual(".csproj", project.GetPropertyValue("MSBuildProjectExtension"));
             Assert.AreEqual(@"\\foo\bar\baz.csproj", project.GetPropertyValue("MSBuildProjectFullPath"));
@@ -2333,6 +2358,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Test]
         public void ReservedProjectPropertiesOnUNC()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("UNC is only available under Windows");
+            }
+
             string uncFile = @"\\foo\bar\baz\biz.csproj";
             ProjectRootElement xml = ProjectRootElement.Create(uncFile);
             Project project = new Project(xml);
@@ -2363,22 +2393,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
                               </Project>");
 
             // Setup a project collection which asks for 4 nodes
-            ProjectCollection collection = new ProjectCollection
-                              (
-                                   ProjectCollection.GlobalProjectCollection.GlobalProperties,
-                                   ProjectCollection.GlobalProjectCollection.Loggers,
+            ProjectCollection collection =
+                new ProjectCollection(
+                    ProjectCollection.GlobalProjectCollection.GlobalProperties,
+                    ProjectCollection.GlobalProjectCollection.Loggers,
                                    null,
                                    ProjectCollection.GlobalProjectCollection.ToolsetLocations,
                                    4,
-                                   false
-                               );
+                    false);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), new Dictionary<string, string>(), "4.0", collection);
+            Project project = new Project(XmlReader.Create(new StringReader(content)), new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, collection);
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
             Assert.AreEqual(true, result);
-            logger.AssertLogContains(String.Format("[{0}]", 4));
+            logger.AssertLogContains(string.Format("[{0}]", 4));
         }
 
         /// <summary>
@@ -2403,7 +2432,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
             Assert.AreEqual(true, result);
-            logger.AssertLogContains(String.Format("[{0}]", 1));
+            logger.AssertLogContains(string.Format("[{0}]", 1));
         }
 
         /// <summary>
@@ -2427,7 +2456,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
             Assert.AreEqual(true, result);
-            logger.AssertLogContains(String.Format("[{0}]", FrameworkLocationHelper.programFiles32));
+            logger.AssertLogContains(string.Format("[{0}]", FrameworkLocationHelper.programFiles32));
         }
 
         /// <summary>
@@ -3193,8 +3222,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// still receive the original value of the global property. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void VerifyGlobalPropertyPassedToP2P()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3257,8 +3284,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// global property.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void VerifyLocalPropertyPropagatesIfExplicitlyPassedToP2P()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3323,6 +3348,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Test]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("TODO: Under Unix this fails unexpectedly");
+            }
+
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVerson");
             try
             {
@@ -4003,7 +4033,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             subToolsets.Add("FakeSubToolset", new SubToolset("FakeSubToolset", fakeSubToolsetProperties));
             subToolsets.Add("11.0", new SubToolset("11.0", subToolset11Properties));
 
-            Toolset parentToolset = projectCollection.GetToolset("4.0");
+            Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             Toolset fakeToolset = new Toolset("Fake", parentToolset.ToolsPath, properties, projectCollection, subToolsets, parentToolset.OverrideTasksPath);
 

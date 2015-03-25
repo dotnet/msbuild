@@ -1,17 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System;
-using System.Text;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
+
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.Evaluation
@@ -94,7 +90,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     char lastCharacter = expandedValue[expandedValue.Length - 1];
                     // Either back or forward slashes satisfy the function: this is useful for URL's
-                    return (lastCharacter == Path.DirectorySeparatorChar || lastCharacter == Path.AltDirectorySeparatorChar);
+                    return (lastCharacter == Path.DirectorySeparatorChar || lastCharacter == Path.AltDirectorySeparatorChar || lastCharacter == '\\');
                 }
                 else
                 {
@@ -121,10 +117,18 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="function">Function name for errors</param>
         /// <param name="argumentNode">Argument to be expanded</param>
+        /// <param name="isFilePath">True if this is afile name and the path should be normalized</param>
         /// <returns>Scalar result</returns>
-        private string ExpandArgumentForScalarParameter(string function, GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state)
+        private string ExpandArgumentForScalarParameter(string function, GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state,
+            bool isFilePath = true)
         {
             string argument = argumentNode.GetUnexpandedValue(state);
+
+            // Fix path before expansion
+            if (isFilePath)
+            {
+                argument = FileUtilities.FixFilePath(argument);
+            }
 
             IList<TaskItem> items;
 

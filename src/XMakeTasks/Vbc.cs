@@ -5,22 +5,18 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Collections.Specialized;
 using System.Collections.Generic;
-using System.Resources;
-using System.Reflection;
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Hosting;
 using Microsoft.Build.Tasks.InteropUtilities;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

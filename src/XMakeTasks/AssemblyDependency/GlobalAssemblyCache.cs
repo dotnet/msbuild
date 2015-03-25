@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.IO;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -165,24 +164,33 @@ namespace Microsoft.Build.Tasks
             // Extra checks for PInvoke-destined data.
             ErrorUtilities.VerifyThrowArgumentNull(strongName, "assemblyName");
 
-            IAssemblyCache assemblyCache;
+            string value;
 
-            uint hr = NativeMethods.CreateAssemblyCache(out assemblyCache, 0);
+            if (NativeMethodsShared.IsWindows)
+            {
+                IAssemblyCache assemblyCache;
 
-            ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
+                uint hr = NativeMethods.CreateAssemblyCache(out assemblyCache, 0);
 
-            ASSEMBLY_INFO assemblyInfo = new ASSEMBLY_INFO();
-            assemblyInfo.cbAssemblyInfo = (uint)Marshal.SizeOf(typeof(ASSEMBLY_INFO));
+                ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
 
-            assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
+                ASSEMBLY_INFO assemblyInfo = new ASSEMBLY_INFO();
+                assemblyInfo.cbAssemblyInfo = (uint)Marshal.SizeOf(typeof(ASSEMBLY_INFO));
 
-            if (assemblyInfo.cbAssemblyInfo == 0) return null;
+                assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
 
-            assemblyInfo.pszCurrentAssemblyPathBuf = new string(new char[assemblyInfo.cchBuf]);
+                if (assemblyInfo.cbAssemblyInfo == 0) return null;
 
-            assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
+                assemblyInfo.pszCurrentAssemblyPathBuf = new string(new char[assemblyInfo.cchBuf]);
 
-            String value = assemblyInfo.pszCurrentAssemblyPathBuf;
+                assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
+
+                value = assemblyInfo.pszCurrentAssemblyPathBuf;
+            }
+            else
+            {
+                value = NativeMethods.AssemblyCacheEnum.AssemblyPathFromStrongName(strongName);
+            }
 
             return value;
         }

@@ -2,15 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Diagnostics;
 using NUnit.Framework;
 using System.Text;
 
-using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using System.IO;
-using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -179,19 +175,19 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetDirectoryWithTrailingSlash()
         {
-            Assert.AreEqual(@"c:\", FileUtilities.GetDirectory(@"c:\"));
-            Assert.AreEqual(@"c:\", FileUtilities.GetDirectory(@"c:\foo"));
-            Assert.AreEqual(@"c:", FileUtilities.GetDirectory(@"c:"));
-            Assert.AreEqual(@"\", FileUtilities.GetDirectory(@"\"));
-            Assert.AreEqual(@"\", FileUtilities.GetDirectory(@"\foo"));
-            Assert.AreEqual(@"..\", FileUtilities.GetDirectory(@"..\foo"));
-            Assert.AreEqual(@"\foo\", FileUtilities.GetDirectory(@"\foo\"));
-            Assert.AreEqual(@"\\server\share", FileUtilities.GetDirectory(@"\\server\share"));
-            Assert.AreEqual(@"\\server\share\", FileUtilities.GetDirectory(@"\\server\share\"));
-            Assert.AreEqual(@"\\server\share\", FileUtilities.GetDirectory(@"\\server\share\file"));
-            Assert.AreEqual(@"\\server\share\directory\", FileUtilities.GetDirectory(@"\\server\share\directory\"));
-            Assert.AreEqual(@"foo\", FileUtilities.GetDirectory(@"foo\bar"));
-            Assert.AreEqual(@"\foo\bar\", FileUtilities.GetDirectory(@"\foo\bar\"));
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:\" : "/", FileUtilities.GetDirectory(NativeMethodsShared.IsWindows ? @"c:\" : "/"));
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:\" : "/", FileUtilities.GetDirectory(NativeMethodsShared.IsWindows ? @"c:\foo" : "/foo"));
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:" : "/", FileUtilities.GetDirectory(NativeMethodsShared.IsWindows ? @"c:" : "/"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"\"), FileUtilities.GetDirectory(@"\"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"\"), FileUtilities.GetDirectory(@"\foo"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"..\"), FileUtilities.GetDirectory(@"..\foo"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"\foo\"), FileUtilities.GetDirectory(@"\foo\"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"\\server\share"), FileUtilities.GetDirectory(@"\\server\share"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"\\server\share\"), FileUtilities.GetDirectory(@"\\server\share\"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"\\server\share\"), FileUtilities.GetDirectory(@"\\server\share\file"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"\\server\share\directory\"), FileUtilities.GetDirectory(@"\\server\share\directory\"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo\"), FileUtilities.GetDirectory(@"foo\bar"));
+            Assert.AreEqual(FileUtilities.FixFilePath(@"\foo\bar\"), FileUtilities.GetDirectory(@"\foo\bar\"));
             Assert.AreEqual(String.Empty, FileUtilities.GetDirectory("foo"));
         }
 
@@ -212,14 +208,14 @@ namespace Microsoft.Build.UnitTests
         public void EnsureTrailingSlash()
         {
             // Doesn't have a trailing slash to start with.
-            Assert.AreEqual(@"foo\bar\", FileUtilities.EnsureTrailingSlash(@"foo\bar"), "test 1");
-            Assert.AreEqual(@"foo/bar\", FileUtilities.EnsureTrailingSlash(@"foo/bar"), "test 2");
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar"), "test 1");
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar"), "test 2");
 
             // Already has a trailing slash to start with.
-            Assert.AreEqual(@"foo/bar/", FileUtilities.EnsureTrailingSlash(@"foo/bar/"), "test 3");
-            Assert.AreEqual(@"foo\bar\", FileUtilities.EnsureTrailingSlash(@"foo\bar\"), "test 4");
-            Assert.AreEqual(@"foo/bar\", FileUtilities.EnsureTrailingSlash(@"foo/bar\"), "test 5");
-            Assert.AreEqual(@"foo\bar/", FileUtilities.EnsureTrailingSlash(@"foo\bar/"), "test 5");
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/"), "test 3");
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\"), "test 4");
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\"), "test 5");
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/"), "test 5");
         }
 
         /// <summary>
@@ -302,15 +298,31 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetExecutablePath()
         {
-            string path = Path.Combine(Environment.CurrentDirectory, "msbuild.exe").ToLowerInvariant();
+            string path;
 
-            string configPath = FileUtilities.CurrentExecutableConfigurationFilePath.ToLowerInvariant();
-            string directoryName = FileUtilities.CurrentExecutableDirectory.ToLowerInvariant();
-            string executablePath = FileUtilities.CurrentExecutablePath.ToLowerInvariant();
+            // If FileUtilities knows we are running tests, it will return the assembly path, not the
+            // module path
+            if (FileUtilities.RunningTests)
+            {
+                path =
+                    Path.Combine(
+                        Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath)
+                            .TrimEnd(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }),
+                        "MSBuild.exe");
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
+                NativeMethodsShared.GetModuleFileName(NativeMethodsShared.NullHandleRef, sb, sb.Capacity);
+                path = sb.ToString();
+            }
 
-            Assert.AreEqual(configPath, executablePath + ".config");
-            Assert.AreEqual(path, executablePath);
-            Assert.AreEqual(directoryName, Path.GetDirectoryName(path));
+            string configPath = FileUtilities.CurrentExecutableConfigurationFilePath;
+            string directoryName = FileUtilities.CurrentExecutableDirectory;
+            string executablePath = FileUtilities.CurrentExecutablePath;
+            Assert.IsTrue(string.Compare(configPath, executablePath + ".config", StringComparison.OrdinalIgnoreCase) == 0);
+            Assert.IsTrue(string.Compare(path, executablePath, StringComparison.OrdinalIgnoreCase) == 0);
+            Assert.IsTrue(string.Compare(directoryName, Path.GetDirectoryName(path), StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         [Test]
@@ -484,11 +496,23 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void DirectoryExistsNoThrowTooLongWithDots()
         {
-            int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
+            string path = Path.Combine(Environment.SystemDirectory, "..", "..", "..") + Path.DirectorySeparatorChar;
+            if (NativeMethodsShared.IsWindows)
+            {
+                path += Environment.SystemDirectory.Substring(3);
+            }
+
+            int length = path.Length;
 
             string longPart = new string('x', 260 - length); // We want the shortest that is > max path.
 
-            string inputPath = Environment.SystemDirectory + @"\" + longPart + @"\..\..\..\" + Environment.SystemDirectory.Substring(3);
+            string inputPath = Path.Combine(new[] { Environment.SystemDirectory, longPart, "..", "..", ".." })
+                               + Path.DirectorySeparatorChar;
+            if (NativeMethodsShared.IsWindows)
+            {
+                path += Environment.SystemDirectory.Substring(3);
+            }
+
             Console.WriteLine(inputPath.Length);
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists

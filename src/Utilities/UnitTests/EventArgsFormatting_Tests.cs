@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
+#pragma warning disable 0219
+
 namespace Microsoft.Build.UnitTests
 {
     [TestFixture]

@@ -2,17 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Globalization;
-using System.Resources;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
 
 using NUnit.Framework;
 
@@ -329,6 +323,11 @@ namespace Microsoft.Build.UnitTests
         [ExpectedException(typeof(FileLoadException))]
         public void CreateAssemblyNameExtensionWithNoSimpleName()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono does not throw on this string");
+            }
+
             AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
         }
 
@@ -340,6 +339,11 @@ namespace Microsoft.Build.UnitTests
         [ExpectedException(typeof(FileLoadException))]
         public void CreateAssemblyNameExtensionWithNoSimpleName2()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono does not throw on this string");
+            }
+
             AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             extension2.PartialNameCompare(extension);

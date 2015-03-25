@@ -3,13 +3,14 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Security.AccessControl;
-using NUnit.Framework;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -201,6 +202,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void ReadNoAccess()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("The security API is not the same under Unix");
+            }
+
             string file = FileUtilities.GetTemporaryFile();
             try
             {

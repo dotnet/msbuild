@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests
         {
             string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
             Directory.CreateDirectory(dir);
-            xmlInputPath = dir + "\\doc.xml";
+            xmlInputPath = dir + Path.DirectorySeparatorChar + "doc.xml";
             using (StreamWriter sw = new StreamWriter(xmlInputPath, false))
             {
                 sw.Write(xmlFile);

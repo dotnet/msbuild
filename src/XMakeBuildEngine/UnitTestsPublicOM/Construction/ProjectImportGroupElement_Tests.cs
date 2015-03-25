@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectImportGroupElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -17,8 +19,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -26,14 +27,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectImportGroupElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectImportGroupElement_Tests
     {
         /// <summary>
         /// Tests that an import is added at the end of the file
         /// when no import group exists
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddImportWhenNoImportGroupExists()
         {
             string content = @"
@@ -43,7 +44,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-        
+
             project.AddImport("b.proj");
 
             string expectedContent = @"
@@ -52,7 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         <Import Project='b.proj' />
                     </Project>
                 ";
-                
+
             Helpers.CompareProjectXml(expectedContent, project.RawXml);
         }
 
@@ -60,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Tests that an import is added to (the last) (non-conditioned)
         /// import group if one exists
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddImportToLastImportGroupWithNoCondition()
         {
             string content = @"
@@ -84,7 +85,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
             project.AddImport("e.proj");
-            
+
             string expectedContent = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Import Project='a.proj' />
@@ -111,7 +112,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Tests that an import is added at the end of the file
         /// when no import group exists
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddImportOnlyConditionedImportGroupsExist()
         {
             string content = @"
@@ -129,7 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
             project.AddImport("d.proj");
-            
+
             string expectedContent = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Import Project='a.proj' />
@@ -145,11 +146,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Helpers.CompareProjectXml(expectedContent, project.RawXml);
         }
-    
+
         /// <summary>
         /// Read project with no imports
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNone()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -179,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read import group with a contained import that has no no project attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidChildMissingProject()
         {
@@ -198,7 +199,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Checks that an InvalidProjectFileException is thrown when an invalid
         /// child type is placed inside an ImportGroup.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidChildType()
         {
@@ -217,7 +218,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Checks that an InvalidProjectFileException is thrown when an ImportGroup is placed
         /// inside an invalid parent.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidParentType()
         {
@@ -235,7 +236,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read import group with unexpected attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -251,7 +252,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read basic valid import group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadBasic()
         {
             string content = @"
@@ -279,7 +280,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Multiple import groups should all show up in the project's imports
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadMultipleImportGroups()
         {
             string content = @"
@@ -298,12 +299,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
             List<ProjectImportGroupElement> importGroups = Helpers.MakeList(project.ImportGroups);
-            
+
             Assert.AreEqual(2, importGroups.Count);
             Assert.AreEqual(2, importGroups[0].Count);
             Assert.AreEqual(1, importGroups[1].Count);
             Assert.AreEqual("second", importGroups[1].Label);
-            
+
             Assert.AreEqual(3, imports.Count);
             Assert.AreEqual("i1.proj", imports[0].Project);
             Assert.AreEqual("i2.proj", imports[1].Project);
@@ -314,7 +315,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set valid project on import
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetProjectValid()
         {
             string content = @"
@@ -339,7 +340,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set invalid empty project value on import
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetProjectInvalidEmpty()
         {
@@ -363,7 +364,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -380,7 +381,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the label value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetLabel()
         {
             ProjectRootElement project = ProjectRootElement.Create();

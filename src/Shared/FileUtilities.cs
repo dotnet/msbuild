@@ -2,21 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Security;
-using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Globalization;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Shared
 {
@@ -25,7 +21,7 @@ namespace Microsoft.Build.Shared
     /// PERF\COVERAGE NOTE: Try to keep classes in 'shared' as granular as possible. All the methods in 
     /// each class get pulled into the resulting assembly.
     /// </summary>
-    static internal partial class FileUtilities
+    internal static partial class FileUtilities
     {
         // A list of possible test runners. If the program running has one of these substrings in the name, we assume
         // this is a test harness.
@@ -62,8 +58,9 @@ namespace Microsoft.Build.Shared
             var program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
 
             // Check if it matches the pattern
-            s_runningTests = program != null &&
-                           s_testRunners.Any(s => program.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) == -1);
+            s_runningTests = program != null
+                           && s_testRunners.Any(
+                               s => program.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) == -1);
 
             // Does not look like it's a test, but check the process name
             if (!s_runningTests)
@@ -190,6 +187,7 @@ namespace Microsoft.Build.Shared
         /// <returns>A path with a slash.</returns>
         internal static string EnsureTrailingSlash(string fileSpec)
         {
+            fileSpec = FixFilePath(fileSpec);
             if (fileSpec.Length > 0 && !EndsWithSlash(fileSpec))
             {
                 fileSpec += Path.DirectorySeparatorChar;
@@ -203,6 +201,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string EnsureNoLeadingSlash(string path)
         {
+            path = FixFilePath(path);
             if (path.Length > 0 && IsSlash(path[0]))
             {
                 path = path.Substring(1);
@@ -216,6 +215,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string EnsureNoTrailingSlash(string path)
         {
+            path = FixFilePath(path);
             if (EndsWithSlash(path))
             {
                 path = path.Substring(0, path.Length - 1);
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Shared
             {
                 int i = fullPath.Length;
                 while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar) ;
-                return fullPath.Substring(0, i);
+                return FixFilePath(fullPath.Substring(0, i));
             }
             return null;
         }
@@ -311,98 +311,113 @@ namespace Microsoft.Build.Shared
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
 
-            int errorCode = 0; // 0 == success in Win32
+            if (NativeMethodsShared.IsWindows)
+            {
+                int errorCode = 0; // 0 == success in Win32
 
 #if _DEBUG
-            // Just to make sure and exercise the code that sets the correct buffer size
-            // we'll start out with it deliberately too small
-            int lenDir = 1;
+                // Just to make sure and exercise the code that sets the correct buffer size
+                // we'll start out with it deliberately too small
+                int lenDir = 1;
 #else
-            int lenDir = MaxPath;
+                int lenDir = MaxPath;
 #endif
 
-            char* finalBuffer = stackalloc char[lenDir + 1]; // One extra for the null terminator
+                char* finalBuffer = stackalloc char[lenDir + 1]; // One extra for the null terminator
 
-            int length = NativeMethodsShared.GetFullPathName(path, lenDir + 1, finalBuffer, IntPtr.Zero);
-            errorCode = Marshal.GetLastWin32Error();
-
-            // If the length returned from GetFullPathName is greater than the length of the buffer we've
-            // allocated, then reallocate the buffer with the correct size, and repeat the call
-            if (length > lenDir)
-            {
-                lenDir = length;
-                char* tempBuffer = stackalloc char[lenDir];
-                finalBuffer = tempBuffer;
-                length = NativeMethodsShared.GetFullPathName(path, lenDir, finalBuffer, IntPtr.Zero);
+                int length = NativeMethodsShared.GetFullPathName(path, lenDir + 1, finalBuffer, IntPtr.Zero);
                 errorCode = Marshal.GetLastWin32Error();
-                // If we find that the length returned from GetFullPathName is longer than the buffer capacity, then
-                // something very strange is going on!
-                ErrorUtilities.VerifyThrow(length <= lenDir, "Final buffer capacity should be sufficient for full path name and null terminator.");
-            }
 
-            if (length > 0)
-            {
-                // In order to prevent people from taking advantage of our ability to extend beyond MaxPath
-                // since it is unlikely that the CLR fix will be a complete removal of maxpath madness
-                // we reluctantly have to restrict things here.
-                if (length >= MaxPath)
+                // If the length returned from GetFullPathName is greater than the length of the buffer we've
+                // allocated, then reallocate the buffer with the correct size, and repeat the call
+                if (length > lenDir)
                 {
-                    throw new PathTooLongException(path);
+                    lenDir = length;
+                    char* tempBuffer = stackalloc char[lenDir];
+                    finalBuffer = tempBuffer;
+                    length = NativeMethodsShared.GetFullPathName(path, lenDir, finalBuffer, IntPtr.Zero);
+                    errorCode = Marshal.GetLastWin32Error();
+                    // If we find that the length returned from GetFullPathName is longer than the buffer capacity, then
+                    // something very strange is going on!
+                    ErrorUtilities.VerifyThrow(
+                        length <= lenDir,
+                        "Final buffer capacity should be sufficient for full path name and null terminator.");
                 }
 
-                // Avoid creating new strings unnecessarily
-                string finalFullPath = AreStringsEqual(finalBuffer, length, path) ? path : new string(finalBuffer, startIndex: 0, length: length);
-
-                // We really don't care about extensions here, but Path.HasExtension provides a great way to
-                // invoke the CLR's invalid path checks (these are independent of path length)
-                Path.HasExtension(finalFullPath);
-
-                if (finalFullPath.StartsWith(@"\\", StringComparison.Ordinal))
+                if (length > 0)
                 {
-                    // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
-                    // and security checks for strings like \\?\GlobalRoot
-                    int startIndex = 2;
-                    while (startIndex < finalFullPath.Length)
+                    // In order to prevent people from taking advantage of our ability to extend beyond MaxPath
+                    // since it is unlikely that the CLR fix will be a complete removal of maxpath madness
+                    // we reluctantly have to restrict things here.
+                    if (length >= MaxPath)
                     {
-                        if (finalFullPath[startIndex] == '\\')
+                        throw new PathTooLongException(path);
+                    }
+
+                    // Avoid creating new strings unnecessarily
+                    string finalFullPath = AreStringsEqual(finalBuffer, length, path) ? path : new string(
+                                               finalBuffer,
+                                               startIndex: 0,
+                                               length: length);
+
+                    // We really don't care about extensions here, but Path.HasExtension provides a great way to
+                    // invoke the CLR's invalid path checks (these are independent of path length)
+                    Path.HasExtension(finalFullPath);
+
+                    if (finalFullPath.StartsWith(@"\\", StringComparison.Ordinal))
+                    {
+                        // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
+                        // and security checks for strings like \\?\GlobalRoot
+                        int startIndex = 2;
+                        while (startIndex < finalFullPath.Length)
                         {
-                            startIndex++;
-                            break;
+                            if (finalFullPath[startIndex] == '\\')
+                            {
+                                startIndex++;
+                                break;
+                            }
+                            else
+                            {
+                                startIndex++;
+                            }
                         }
-                        else
+
+                        /*
+                          From Path.cs in the CLR
+                          Throw an ArgumentException for paths like \\, \\server, \\server\
+                          This check can only be properly done after normalizing, so
+                          \\foo\.. will be properly rejected.  Also, reject \\?\GLOBALROOT\
+                          (an internal kernel path) because it provides aliases for drives.
+
+                          throw new ArgumentException(Environment.GetResourceString("Arg_PathIllegalUNC"));
+
+                           // Check for \\?\Globalroot, an internal mechanism to the kernel
+                           // that provides aliases for drives and other undocumented stuff.
+                           // The kernel team won't even describe the full set of what
+                           // is available here - we don't want managed apps mucking 
+                           // with this for security reasons.
+                        */
+                        if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(
+                                @"\\?\globalroot",
+                                StringComparison.OrdinalIgnoreCase) != -1)
                         {
-                            startIndex++;
+                            finalFullPath = Path.GetFullPath(finalFullPath);
                         }
                     }
 
-                    /*
-                      From Path.cs in the CLR
-                      Throw an ArgumentException for paths like \\, \\server, \\server\
-                      This check can only be properly done after normalizing, so
-                      \\foo\.. will be properly rejected.  Also, reject \\?\GLOBALROOT\
-                      (an internal kernel path) because it provides aliases for drives.
-
-                      throw new ArgumentException(Environment.GetResourceString("Arg_PathIllegalUNC"));
-
-                       // Check for \\?\Globalroot, an internal mechanism to the kernel
-                       // that provides aliases for drives and other undocumented stuff.
-                       // The kernel team won't even describe the full set of what
-                       // is available here - we don't want managed apps mucking 
-                       // with this for security reasons.
-                    */
-                    if (startIndex == finalFullPath.Length || finalFullPath.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1)
-                    {
-                        finalFullPath = Path.GetFullPath(finalFullPath);
-                    }
+                    return finalFullPath;
                 }
 
-                return finalFullPath;
-            }
-            else
-            {
                 NativeMethodsShared.ThrowExceptionForErrorCode(errorCode);
                 return null;
             }
+
+            return FixFilePath(Path.GetFullPath(path));
+        }
+
+        internal static string FixFilePath(string path)
+        {
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
         }
 
         /// <summary>
@@ -412,7 +427,7 @@ namespace Microsoft.Build.Shared
         /// <returns>directory path</returns>
         internal static string GetDirectory(string fileSpec)
         {
-            string directory = Path.GetDirectoryName(fileSpec);
+            string directory = Path.GetDirectoryName(FixFilePath(fileSpec));
 
             // if file-spec is a root directory e.g. c:, c:\, \, \\server\share
             // NOTE: Path.GetDirectoryName also treats invalid UNC file-specs as root directories e.g. \\, \\server
@@ -504,13 +519,21 @@ namespace Microsoft.Build.Shared
 
                 if (s_executablePath == null)
                 {
-                    StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
-                    if (NativeMethodsShared.GetModuleFileName(NativeMethodsShared.NullHandleRef, sb, sb.Capacity) == 0)
+                    if (NativeMethodsShared.IsWindows)
                     {
-                        throw new System.ComponentModel.Win32Exception();
+                        StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
+                        if (NativeMethodsShared.GetModuleFileName(NativeMethodsShared.NullHandleRef, sb, sb.Capacity) == 0)
+                        {
+                            throw new System.ComponentModel.Win32Exception();
+                        }
+                        s_executablePath = sb.ToString();
                     }
-
-                    s_executablePath = sb.ToString();
+                    else
+                    {
+                        s_executablePath = Environment.GetCommandLineArgs()[0] ?? Path.Combine(
+                            Path.GetDirectoryName(ExecutingAssemblyPath) ?? Environment.CurrentDirectory,
+                            "MSBuild.exe");
+                    }
                 }
 
                 return s_executablePath;
@@ -524,7 +547,9 @@ namespace Microsoft.Build.Shared
         {
             get
             {
-                return Path.GetDirectoryName(CurrentExecutablePath);
+                return
+                    (Path.GetDirectoryName(CurrentExecutablePath) ?? CurrentExecutablePath).TrimEnd(
+                        new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
             }
         }
 
@@ -549,12 +574,12 @@ namespace Microsoft.Build.Shared
         internal static string GetFullPath(string fileSpec, string currentDirectory)
         {
             // Sending data out of the engine into the filesystem, so time to unescape.
-            fileSpec = EscapingUtilities.UnescapeAll(fileSpec);
+            fileSpec = FixFilePath(EscapingUtilities.UnescapeAll(fileSpec));
 
             // Data coming back from the filesystem into the engine, so time to escape it back.
             string fullPath = EscapingUtilities.Escape(NormalizePath(Path.Combine(currentDirectory, fileSpec)));
 
-            if (!EndsWithSlash(fullPath))
+            if (NativeMethodsShared.IsWindows && !EndsWithSlash(fullPath))
             {
                 Match drive = FileUtilitiesRegex.DrivePattern.Match(fileSpec);
                 Match UNCShare = FileUtilitiesRegex.UNCPattern.Match(fullPath);
@@ -602,7 +627,7 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                File.Delete(path);
+                File.Delete(FixFilePath(path));
             }
             catch (Exception ex)
             {
@@ -637,6 +662,8 @@ namespace Microsoft.Build.Shared
 
             retryCount = retryCount < 1 ? 2 : retryCount;
             retryTimeOut = retryTimeOut < 1 ? 500 : retryTimeOut;
+
+            path = FixFilePath(path);
 
             for (int i = 0; i < retryCount; i++)
             {
@@ -674,7 +701,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                result = Path.IsPathRooted(path);
+                result = Path.IsPathRooted(FixFilePath(path));
             }
             catch (Exception ex)
             {
@@ -698,7 +725,7 @@ namespace Microsoft.Build.Shared
         /// for directories) was called - but with the advantage that a FileInfo object is returned
         /// that can be queried (e.g., for LastWriteTime) without hitting the disk again.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <returns>FileInfo around path if it is an existing /file/, else null</returns>
         internal static FileInfo GetFileInfoNoThrow(string filePath)
         {
@@ -739,19 +766,31 @@ namespace Microsoft.Build.Shared
         internal static bool DirectoryExistsNoThrow(string fullPath)
         {
             fullPath = AttemptToShortenPath(fullPath);
-
-            NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
-
-            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-            if (success)
+            if (NativeMethodsShared.IsWindows)
             {
-                return ((data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0);
+                NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
+
+                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+                if (success)
+                {
+                    return ((data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0);
+                }
+
+                return false;
             }
-
-            return false;
+            else
+            {
+                try
+                {
+                    return Directory.Exists(fullPath);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
         }
-
 
         /// <summary>
         /// Returns if the directory exists
@@ -761,17 +800,28 @@ namespace Microsoft.Build.Shared
         internal static bool FileExistsNoThrow(string fullPath)
         {
             fullPath = AttemptToShortenPath(fullPath);
-
-            NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
-
-            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-            if (success)
+            if (NativeMethodsShared.IsWindows)
             {
-                return ((data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0);
+                NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
+
+                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+                if (success)
+                {
+                    return ((data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0);
+                }
+
+                return false;
             }
 
-            return false;
+            try
+            {
+                return File.Exists(fullPath);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -783,13 +833,26 @@ namespace Microsoft.Build.Shared
         internal static bool FileOrDirectoryExistsNoThrow(string fullPath)
         {
             fullPath = AttemptToShortenPath(fullPath);
+            if (NativeMethodsShared.IsWindows)
+            {
+                NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
 
-            NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
+                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
 
-            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-
-            return success;
+                return success;
+            }
+            else
+            {
+                try
+                {
+                    return File.Exists(fullPath) || Directory.Exists(fullPath);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
         }
 
         /// <summary>
@@ -841,7 +904,7 @@ namespace Microsoft.Build.Shared
                 return path;
             }
 
-            Uri baseUri = new Uri(FileUtilities.EnsureTrailingSlash(basePath), UriKind.Absolute); // May throw UriFormatException
+            Uri baseUri = new Uri(EnsureTrailingSlash(basePath), UriKind.Absolute); // May throw UriFormatException
 
             Uri pathUri = CreateUriFromPath(path);
 
@@ -895,7 +958,7 @@ namespace Microsoft.Build.Shared
                 path = GetFullPathNoThrow(path);
             }
 
-            return path;
+            return FixFilePath(path);
         }
 
         /// <summary>

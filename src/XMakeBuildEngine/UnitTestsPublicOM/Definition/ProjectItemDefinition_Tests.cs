@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectItemDefinition_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -15,21 +17,22 @@ using Microsoft.Build.Evaluation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
     /// Tests for ProjectItemDefinition
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectItemDefinition_Tests
     {
         /// <summary>
         /// Add metadata; should add to an existing item definition group that has item definitions of the same item type
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddMetadataExistingItemDefinitionGroup()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -56,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set metadata with property expression; should be expanded
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetMetadata()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -76,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Access metadata when there isn't any
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyMetadataCollection()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -96,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set metadata get collection
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetMetadataCollection()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -116,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to update metadata on imported item definition should fail
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void UpdateMetadataImported()
         {
@@ -147,7 +150,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Attempt to add new metadata on imported item definition should succeed,
         /// creating a new item definition in the main project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetMetadataImported()
         {
             string file = null;
@@ -177,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </i>
   </ItemDefinitionGroup>
   <Import Project=""{0}"" />
-</Project>"), 
+</Project>"),
                    file
                    );
 
@@ -195,8 +198,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// order to use this metadata, either qualify it by specifying %(h.m), or ensure that all items in this list define a value
         /// for this metadata."
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Test]
+        [Category("serialize")]
         public void BatchingConsidersItemDefinitionMetadata()
         {
             string content =
@@ -229,7 +232,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// <summary>
         /// Expand built-in metadata "late"
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandBuiltInMetadataAtPointOfUse()
         {
             string content =
@@ -241,7 +244,7 @@ ObjectModelHelpers.CleanupFileContents(
     </i>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <i Include='c:\a\b.ext'/>
+    <i Include='" + (NativeMethodsShared.IsWindows ? @"c:\a\b.ext" : "/a/b.ext") + @"'/>
   </ItemGroup>
 </Project>");
 
@@ -254,7 +257,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// <summary>
         /// Expand built-in metadata "late"
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandBuiltInMetadataAtPointOfUse_ReferToMetadataAbove()
         {
             string content =
@@ -267,7 +270,7 @@ ObjectModelHelpers.CleanupFileContents(
     </i>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <i Include='c:\a\b.ext'/>
+    <i Include='" + (NativeMethodsShared.IsWindows ? @"c:\a\b.ext" : "/a/b.ext") + @"'/>
   </ItemGroup>
 </Project>");
 
@@ -280,7 +283,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// <summary>
         /// Expand built-in metadata "late"
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandBuiltInMetadataAtPointOfUse_MixtureOfCustomAndBuiltIn()
         {
             string content =
@@ -293,7 +296,7 @@ ObjectModelHelpers.CleanupFileContents(
     </i>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <i Include='c:\a\b.ext'/>
+    <i Include='" + (NativeMethodsShared.IsWindows ? @"c:\a\b.ext" : "/a/b.ext") + @"'/>
   </ItemGroup>
 </Project>");
 
@@ -307,7 +310,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Custom metadata expressions on metadata on an ItemDefinitionGroup is still always
         /// expanded right there.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandBuiltInMetadataAtPointOfUse_CustomEvaluationNeverDelayed()
         {
             string content =
@@ -321,7 +324,7 @@ ObjectModelHelpers.CleanupFileContents(
     </i>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <i Include='c:\a\b.ext'>
+    <i Include='" + (NativeMethodsShared.IsWindows ? @"c:\a\b.ext" : "/a/b.ext") + @"'>
       <n>n3</n>
     </i>
   </ItemGroup>
@@ -337,7 +340,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// A custom metadata that bizarrely expands to a built in metadata expression should
         /// not evaluate again.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandBuiltInMetadataAtPointOfUse_DoNotDoubleEvaluate()
         {
             string content =
@@ -366,7 +369,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Items created from other items should still have the built-in metadata expanded
         /// on them, not the original items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandBuiltInMetadataAtPointOfUse_CopyItems()
         {
             string content =
@@ -393,7 +396,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Items created from other items should still have the built-in metadata expanded
         /// on them, not the original items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandBuiltInMetadataAtPointOfUse_UseInTransform()
         {
             string content =
@@ -420,8 +423,8 @@ ObjectModelHelpers.CleanupFileContents(
         /// Items created from other items should still have the built-in metadata expanded
         /// on them, not the original items.
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Test]
+        [Category("serialize")]
         public void ExpandBuiltInMetadataAtPointOfUse_UseInBatching()
         {
             string content =
@@ -462,7 +465,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionMetadataCondition()
         {
@@ -483,7 +486,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExpandBuiltInMetadataAtPointOfUse_UnquotedBuiltInProhibitedOnItemDefinitionMetadataCondition()
         {
@@ -504,7 +507,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionCondition()
         {
@@ -525,7 +528,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionGroupCondition()
         {
@@ -546,7 +549,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionMetadataCondition()
         {
@@ -567,7 +570,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionCondition()
         {
@@ -588,7 +591,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionGroupCondition()
         {
@@ -609,7 +612,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// Built-in metadata is prohibited in item definition conditions.
         /// Ideally it would also be late evaluated, but that's too difficult. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExpandBuiltInMetadataAtPointOfUse_UnquotedQualifiedBuiltInProhibitedOnItemDefinitionCondition()
         {
@@ -629,7 +632,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// <summary>
         /// Custom metadata is allowed in item definition conditions.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandBuiltInMetadataAtPointOfUse_UnquotedQualifiedCustomAllowedOnItemDefinitionCondition()
         {
             string content =

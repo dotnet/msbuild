@@ -6,13 +6,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.Reflection;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
@@ -49,13 +45,16 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.assemblyFile);
+                return
+                    FileUtilities.FixFilePath(
+                        ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.assemblyFile));
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.assemblyName);
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(AssemblyName), "OM_EitherAttributeButNotBoth", XmlElement.Name, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName);
+                value = FileUtilities.FixFilePath(value);
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.assemblyFile, value);
                 MarkDirty("Set usingtask AssemblyFile {0}", value);
             }
@@ -271,7 +270,7 @@ namespace Microsoft.Build.Construction
 
             if (!String.IsNullOrEmpty(assemblyFile))
             {
-                usingTask.AssemblyFile = assemblyFile;
+                usingTask.AssemblyFile = FileUtilities.FixFilePath(assemblyFile);
             }
             else
             {

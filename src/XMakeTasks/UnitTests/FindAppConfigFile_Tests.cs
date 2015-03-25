@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Build.Utilities;
 using NUnit.Framework;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.UnitTests
@@ -49,7 +50,7 @@ namespace Microsoft.Build.UnitTests
             f.SecondaryList = new ITaskItem[] { new TaskItem("foo\\app.config"), new TaskItem("xxx") };
             f.TargetPath = "targetpath";
             Assert.IsTrue(f.Execute());
-            Assert.AreEqual("foo\\app.config", f.AppConfigFile.ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath("foo\\app.config"), f.AppConfigFile.ItemSpec);
             Assert.AreEqual("targetpath", f.AppConfigFile.GetMetadata("TargetPath"));
         }
 
@@ -75,7 +76,7 @@ namespace Microsoft.Build.UnitTests
             f.TargetPath = "targetpath";
             Assert.IsTrue(f.Execute());
             // Should ignore the invalid paths
-            Assert.AreEqual(@"foo\\app.config", f.AppConfigFile.ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo\\app.config"), f.AppConfigFile.ItemSpec);
         }
 
         // For historical reasons, we should return the last one in the list

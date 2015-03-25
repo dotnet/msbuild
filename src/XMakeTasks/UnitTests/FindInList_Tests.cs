@@ -2,12 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Utilities;
-using NUnit.Framework;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -117,7 +118,7 @@ namespace Microsoft.Build.UnitTests
             f.MatchFileNameOnly = true;
             f.List = new ITaskItem[] { new TaskItem(@"c:\foo\a.cs"), new TaskItem("b.cs") };
             Assert.IsTrue(f.Execute());
-            Assert.AreEqual(@"c:\foo\a.cs", f.ItemFound.ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"c:\foo\a.cs"), f.ItemFound.ItemSpec);
         }
 
         [Test]
@@ -132,7 +133,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(f.Execute());
             Console.WriteLine(e.Log);
             // Should ignore the invalid paths
-            Assert.AreEqual(@"foo\a.cs", f.ItemFound.ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo\a.cs"), f.ItemFound.ItemSpec);
         }
     }
 }

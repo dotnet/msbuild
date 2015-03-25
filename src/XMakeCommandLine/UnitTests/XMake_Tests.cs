@@ -38,6 +38,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("c=d", parameters[1]);
         }
 
+#if !MONO
         [Test]
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {
@@ -90,6 +91,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.IsTrue(switches.HaveErrors());
         }
+#endif
 
         /*
          * Quoting Rules:
@@ -838,8 +840,6 @@ namespace Microsoft.Build.UnitTests
         /// take priority over any other response files.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ResponseFileInProjectDirectoryFoundImplicitly()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));

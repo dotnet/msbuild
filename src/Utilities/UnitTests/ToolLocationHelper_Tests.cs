@@ -1,24 +1,24 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#pragma warning disable 0219
+
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Collections;
-using NUnit.Framework;
+
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
-using System.Collections.Generic;
-using System.Diagnostics;
-
-using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
-using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
-using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+using Microsoft.Build.Utilities;
 using Microsoft.Win32;
+
+using NUnit.Framework;
+
+using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
+using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -213,7 +213,9 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetFrameworkIdentifiersNoReferenceAssemblies()
         {
-            IList<string> installedIdentifiers = ToolLocationHelper.GetFrameworkIdentifiers("f:\\IDontExistAtAll");
+            IList<string> installedIdentifiers =
+                ToolLocationHelper.GetFrameworkIdentifiers(
+                    NativeMethodsShared.IsWindows ? "f:\\IDontExistAtAll" : "/IDontExistAtAll");
             Assert.IsTrue(installedIdentifiers.Count == 0);
         }
 
@@ -223,7 +225,10 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void HighestVersionOfTargetFrameworkIdentifierRootDoesNotExist()
         {
-            FrameworkNameVersioning highestMoniker = ToolLocationHelper.HighestVersionOfTargetFrameworkIdentifier("f:\\IDontExistAtAll", ".UnKNownFramework");
+            FrameworkNameVersioning highestMoniker =
+                ToolLocationHelper.HighestVersionOfTargetFrameworkIdentifier(
+                    NativeMethodsShared.IsWindows ? "f:\\IDontExistAtAll" : "/IDontExistAtAll",
+                    ".UnKNownFramework");
             Assert.IsNull(highestMoniker);
         }
 
@@ -235,7 +240,7 @@ namespace Microsoft.Build.UnitTests
         {
             string tempPath = Path.GetTempPath();
             string testPath = Path.Combine(tempPath, "HighestVersionOfTargetFrameworkIdentifierRootNoVersions");
-            string nonVersionFolder = Path.Combine(testPath, ".UnknownFramework\\NotAVersion");
+            string nonVersionFolder = Path.Combine(testPath, ".UnknownFramework", "NotAVersion");
 
             if (!Directory.Exists(nonVersionFolder))
             {
@@ -246,7 +251,6 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(highestMoniker);
         }
 
-
         /// <summary>
         /// If a directory contains multiple versions make sure we pick the highest one.
         /// </summary>
@@ -255,10 +259,9 @@ namespace Microsoft.Build.UnitTests
         {
             string tempPath = Path.GetTempPath();
             string testPath = Path.Combine(tempPath, "HighestVersionOfTargetFrameworkIdentifierRootMultipleVersions");
-            string folder10 = Path.Combine(testPath, ".UnknownFramework\\v1.0");
-            string folder20 = Path.Combine(testPath, ".UnknownFramework\\v2.0");
-            string folder40 = Path.Combine(testPath, ".UnknownFramework\\v4.0");
-
+            string folder10 = Path.Combine(testPath, ".UnknownFramework", "v1.0");
+            string folder20 = Path.Combine(testPath, ".UnknownFramework", "v2.0");
+            string folder40 = Path.Combine(testPath, ".UnknownFramework", "v4.0");
 
             if (!Directory.Exists(folder10))
             {
@@ -275,7 +278,8 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(folder40);
             }
 
-            FrameworkNameVersioning highestMoniker = ToolLocationHelper.HighestVersionOfTargetFrameworkIdentifier(testPath, ".UnKNownFramework");
+            FrameworkNameVersioning highestMoniker =
+                ToolLocationHelper.HighestVersionOfTargetFrameworkIdentifier(testPath, ".UnknownFramework");
             Assert.IsNotNull(highestMoniker);
             Assert.IsTrue(highestMoniker.Version.Major == 4);
         }
@@ -373,7 +377,7 @@ namespace Microsoft.Build.UnitTests
                     new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
                     SharedDotNetFrameworkArchitecture.Current
                 );
-            Assert.AreEqual(@"{runtime-base}\v1.2.x86dbg", path);
+            Assert.AreEqual(Path.Combine("{runtime-base}", "v1.2.x86dbg"), path);
         }
 
         /*
@@ -386,13 +390,13 @@ namespace Microsoft.Build.UnitTests
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
                 (
-                    @"{runtime-base}\v1.3.x86dbg",    // Simulate "Orcas" as the current runtime.
-                    "v1.2",                          // But we're looking for "Whidbey"
+                    Path.Combine("{runtime-base}", "v1.3.x86dbg"),        // Simulate "Orcas" as the current runtime.}
+                    "v1.2",                                              // But we're looking for "Whidbey"
                     new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
                     new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
                     SharedDotNetFrameworkArchitecture.Current
                 );
-            Assert.AreEqual(@"{runtime-base}\v1.2.x86fre", path);
+            Assert.AreEqual(Path.Combine("{runtime-base}", "v1.2.x86fre"), path);
         }
 
         /*
@@ -405,14 +409,14 @@ namespace Microsoft.Build.UnitTests
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
                 (
-                    @"{runtime-base}\v1.1.x86dbg",    // Simulate "Everett" as the current runtime.
-                    "v1.2",                          // But we're looking for "Whidbey"
+                    Path.Combine("{runtime-base}", "v1.1.x86dbg"),       // Simulate "Everett" as the current runtime.
+                    "v1.2",                                              // But we're looking for "Whidbey"
                     new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
                     new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
                     SharedDotNetFrameworkArchitecture.Current
                 );
 
-            Assert.AreEqual(@"{runtime-base}\v1.2.x86fre", path);
+            Assert.AreEqual(Path.Combine("{runtime-base}", "v1.2.x86fre"), path);
         }
 
         /*
@@ -425,8 +429,8 @@ namespace Microsoft.Build.UnitTests
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
                 (
-                    @"{runtime-base}\v1.1",  // Simulate "everett" as the current runtime
-                    "v1.3",                 // And we're trying to find "orchas" runtime which isn't installed.
+                    Path.Combine(@"{runtime-base}", "v1.1"),             // Simulate "everett" as the current runtime
+                    "v1.3",                                              // And we're trying to find "orchas" runtime which isn't installed.
                     new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
                     new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
                     SharedDotNetFrameworkArchitecture.Current
@@ -748,6 +752,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetPathToDotNetFrameworkSdk()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("Program Files is not supported under Unix");
+            }
+
             // Test out of range .net version.
             foreach (var vsVersion in EnumVisualStudioVersions())
             {
@@ -827,6 +836,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetPathToWindowsSdk()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("Registry access is not supported under Unix");
+            }
+
             // Test out of range .net version.
             foreach (var vsVersion in EnumVisualStudioVersions())
             {
@@ -911,7 +925,7 @@ namespace Microsoft.Build.UnitTests
   ";
 
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires installed toolset.
         public void VerifyToolsetAndToolLocationHelperAgree()
         {
@@ -967,7 +981,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires installed toolset.
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
         {
@@ -1010,7 +1024,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires installed toolset.
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs10()
         {
@@ -1055,7 +1069,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires installed toolset.
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs11()
         {
@@ -1113,7 +1127,9 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GenerateReferencAssemblyPathAllElements()
         {
-            string targetFrameworkRootPath = "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework";
+            string targetFrameworkRootPath = NativeMethodsShared.IsWindows
+                                                 ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
+                                                 : "/usr/lib";
             string targetFrameworkIdentifier = "Compact Framework";
             Version targetFrameworkVersion = new Version("1.0");
             string targetFrameworkProfile = "PocketPC";
@@ -1132,7 +1148,9 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GenerateReferencAssemblyPathNoProfile()
         {
-            string targetFrameworkRootPath = "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework";
+            string targetFrameworkRootPath = NativeMethodsShared.IsWindows
+                                                 ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
+                                                 : "/usr/lib";
             string targetFrameworkIdentifier = "Compact Framework";
             Version targetFrameworkVersion = new Version("1.0");
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, String.Empty);
@@ -1151,7 +1169,9 @@ namespace Microsoft.Build.UnitTests
         [ExpectedException(typeof(InvalidOperationException))]
         public void GenerateReferencAssemblyInvalidProfile()
         {
-            string targetFrameworkRootPath = "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework";
+            string targetFrameworkRootPath = NativeMethodsShared.IsWindows
+                                                 ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
+                                                 : "/usr/lib";
             string targetFrameworkIdentifier = "Compact Framework";
             Version targetFrameworkVersion = new Version("1.0");
             string targetFrameworkProfile = "PocketPC" + new String(Path.GetInvalidFileNameChars());
@@ -1169,7 +1189,9 @@ namespace Microsoft.Build.UnitTests
         [ExpectedException(typeof(InvalidOperationException))]
         public void GenerateReferencAssemblyInvalidIdentifier()
         {
-            string targetFrameworkRootPath = "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework";
+            string targetFrameworkRootPath = NativeMethodsShared.IsWindows
+                                                 ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
+                                                 : "/usr/lib";
             string targetFrameworkIdentifier = "Compact Framework" + new String(Path.GetInvalidFileNameChars());
             Version targetFrameworkVersion = new Version("1.0");
             string targetFrameworkProfile = "PocketPC";
@@ -1189,7 +1211,9 @@ namespace Microsoft.Build.UnitTests
         {
             string pathTooLong = new String('a', 500);
 
-            string targetFrameworkRootPath = "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework";
+            string targetFrameworkRootPath = NativeMethodsShared.IsWindows
+                                                 ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
+                                                 : "/usr/lib";
             string targetFrameworkIdentifier = "Compact Framework" + pathTooLong;
             Version targetFrameworkVersion = new Version("1.0");
             string targetFrameworkProfile = "PocketPC";
@@ -1211,7 +1235,7 @@ namespace Microsoft.Build.UnitTests
         public void ChainReferenceAssembliesRedistExistsNoRedistList()
         {
             string path = ToolLocationHelper.ChainReferenceAssemblyPath(@"PathDoesNotExistSoICannotChain");
-            Assert.IsNull(path, " Expected the path to be null when the path to the FrameworkList.xml does not exist");
+            Assert.IsNullOrEmpty(path, " Expected the path to be null when the path to the FrameworkList.xml does not exist");
         }
 
         /// <summary>
@@ -1231,9 +1255,9 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistExistsChain");
 
-            string redist41Directory = Path.Combine(tempDirectory, "v4.1\\RedistList\\");
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
             string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
-            string redist40Directory = Path.Combine(tempDirectory, "v4.0\\RedistList\\");
+            string redist40Directory = Path.Combine(tempDirectory, "v4.0", "RedistList") + Path.DirectorySeparatorChar;
             string redist40 = Path.Combine(redist40Directory, "FrameworkList.xml");
             try
             {
@@ -1273,7 +1297,7 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistExistsNoInclude");
 
-            string redist41Directory = Path.Combine(tempDirectory, "v4.1\\RedistList\\");
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
             string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
             try
             {
@@ -1303,7 +1327,7 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistExistsNoInclude");
 
-            string redist41Directory = Path.Combine(tempDirectory, "v4.1\\RedistList\\");
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
             string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
             try
             {
@@ -1333,7 +1357,7 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistExistsNoFileList");
 
-            string redist41Directory = Path.Combine(tempDirectory, "v4.1\\RedistList\\");
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
             string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
             try
             {
@@ -1361,7 +1385,7 @@ namespace Microsoft.Build.UnitTests
             string redistString40 = "GARBAGE";
             string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistExistsBadFile");
 
-            string redist40Directory = Path.Combine(tempDirectory, "v4.0\\RedistList\\");
+            string redist40Directory = Path.Combine(tempDirectory, "v4.0", "RedistList") + Path.DirectorySeparatorChar;
             string redist40 = Path.Combine(redist40Directory, "FrameworkList.xml");
             try
             {
@@ -1392,7 +1416,7 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistPointsToInvalidInclude");
 
-            string redist41Directory = Path.Combine(tempDirectory, "v4.1\\RedistList\\");
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
             string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
             string tempDirectoryPath = Path.Combine(tempDirectory, "v4.1");
             try
@@ -1427,7 +1451,7 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistInvalidPathChars");
 
-            string redist41Directory = Path.Combine(tempDirectory, "v4.1\\RedistList\\");
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
             string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
             string tempDirectoryPath = Path.Combine(tempDirectory, "v4.1");
             try
@@ -1460,7 +1484,7 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistPathTooLong");
 
-            string redist41Directory = Path.Combine(tempDirectory, "v4.1\\RedistList\\");
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
             string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
             string tempDirectoryPath = Path.Combine(tempDirectory, "v4.1");
             try
@@ -1569,11 +1593,13 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "DisplayNameGeneration");
 
-            string framework40Directory = Path.Combine(tempDirectory, "MyFramework\\v4.0\\");
+            string framework40Directory = Path.Combine(tempDirectory, "MyFramework", "v4.0")
+                                          + Path.DirectorySeparatorChar;
             string framework40redistDirectory = Path.Combine(framework40Directory, "RedistList");
             string framework40RedistList = Path.Combine(framework40redistDirectory, "FrameworkList.xml");
 
-            string framework39Directory = Path.Combine(tempDirectory, "MyFramework\\v3.9\\Profile\\Client");
+            string framework39Directory =
+                Path.Combine(new[] { tempDirectory, "MyFramework", "v3.9", "Profile", "Client" });
             string framework39redistDirectory = Path.Combine(framework39Directory, "RedistList");
             string framework39RedistList = Path.Combine(framework39redistDirectory, "FrameworkList.xml");
 
@@ -1625,11 +1651,13 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "GetPathToReferenceAssembliesWithRootGoodWithChain");
 
-            string framework41Directory = Path.Combine(tempDirectory, "MyFramework\\v4.1\\");
+            string framework41Directory = Path.Combine(tempDirectory, "MyFramework", "v4.1")
+                                          + Path.DirectorySeparatorChar;
             string framework41redistDirectory = Path.Combine(framework41Directory, "RedistList");
             string framework41RedistList = Path.Combine(framework41redistDirectory, "FrameworkList.xml");
 
-            string framework40Directory = Path.Combine(tempDirectory, "MyFramework\\v4.0\\");
+            string framework40Directory = Path.Combine(tempDirectory, "MyFramework", "v4.0")
+                                          + Path.DirectorySeparatorChar;
             string framework40redistDirectory = Path.Combine(framework40Directory, "RedistList");
             string framework40RedistList = Path.Combine(framework40redistDirectory, "FrameworkList.xml");
 
@@ -1662,7 +1690,6 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
-
 
         /// <summary>
         /// Test the case where the root path is a string but the framework name is null. 
@@ -1779,6 +1806,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void TestGenerateProgramFiles32()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("Program Files is not supported under Unix");
+            }
+
             string programFilesX86Original = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
             string programFiles = Environment.GetEnvironmentVariable("ProgramFiles");
             try
@@ -1804,6 +1836,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void TestGeneratedReferenceAssemblyPath()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("No ProgramFiles known location outside Windows");
+            }
+
             string programFiles32 = FrameworkLocationHelper.GenerateProgramFiles32();
             string referenceAssemblyRoot = FrameworkLocationHelper.GenerateProgramFilesReferenceAssemblyRoot();
             string pathToCombineWith = "Reference Assemblies\\Microsoft\\Framework";
@@ -2287,6 +2324,11 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetAssemblyFoldersExInfoTest()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("No Registry access if not under Windows");
+            }
+
             SetupAssemblyFoldersExTestConditionRegistryKey();
             IList<AssemblyFoldersExInfo> directories = null;
             try
@@ -2619,7 +2661,7 @@ namespace Microsoft.Build.UnitTests
         #region TestMethods
 
         [TestFixtureSetUp]
-        public static void ClassInit(TestContext context)
+        public static void ClassInit()
         {
             s_fakeStructureRoot = MakeFakeSDKStructure();
             s_fakeStructureRoot2 = MakeFakeSDKStructure2();
@@ -2709,9 +2751,19 @@ namespace Microsoft.Build.UnitTests
                 // Targeting version higher than exists, however since we are using a russian doll model for extension sdks we will return ones in lower versions of the targeted platform.
                 sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new string[] { s_fakeStructureRoot }, null, "MyPlatform", new Version(4, 0));
                 Assert.IsTrue(sdks.ContainsKey("MyAssembly, Version=1.0"));
-                Assert.IsTrue(sdks["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\3.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+                Assert.IsTrue(
+                    sdks["MyAssembly, Version=1.0"].Equals(
+                        Path.Combine(
+                            new[] { s_fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                        + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase));
                 Assert.IsTrue(sdks.ContainsKey("AnotherAssembly, Version=1.0"));
-                Assert.IsTrue(sdks["AnotherAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\4.0\\ExtensionSDKs\\AnotherAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+                Assert.IsTrue(
+                    sdks["AnotherAssembly, Version=1.0"].Equals(
+                        Path.Combine(
+                            new[] { s_fakeStructureRoot, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0" })
+                        + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase));
                 Assert.IsTrue(sdks.Count == 2);
 
                 // Identifier exists but no extensions are in sdks this version or lower
@@ -2738,13 +2790,27 @@ namespace Microsoft.Build.UnitTests
                 IDictionary<string, string> sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new string[] { s_fakeStructureRoot }, null, "FOO", new Version(1, 0));
                 Assert.IsTrue(sdks.Count == 0);
 
+                string targetPath =
+                    Path.Combine(new[] { s_fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar;
+
                 // Identifier exists
-                string path = ToolLocationHelper.GetPlatformExtensionSDKLocation("MyAssembly, Version=1.0", "MyPlatform", new Version(3, 0), new string[] { s_fakeStructureRoot }, null);
-                Assert.IsTrue(path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\3.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+                string path = ToolLocationHelper.GetPlatformExtensionSDKLocation(
+                    "MyAssembly, Version=1.0",
+                    "MyPlatform",
+                    new Version(3, 0),
+                    new string[] { s_fakeStructureRoot },
+                    null);
+                Assert.IsTrue(path.Equals(targetPath, StringComparison.OrdinalIgnoreCase));
 
                 // Identifier exists in lower version
-                path = ToolLocationHelper.GetPlatformExtensionSDKLocation("MyAssembly, Version=1.0", "MyPlatform", new Version(4, 0), new string[] { s_fakeStructureRoot }, null);
-                Assert.IsTrue(path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\3.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+                path = ToolLocationHelper.GetPlatformExtensionSDKLocation(
+                    "MyAssembly, Version=1.0",
+                    "MyPlatform",
+                    new Version(4, 0),
+                    new string[] { s_fakeStructureRoot },
+                    null);
+                Assert.IsTrue(path.Equals(targetPath, StringComparison.OrdinalIgnoreCase));
 
                 // Identifier does not exist
                 path = ToolLocationHelper.GetPlatformExtensionSDKLocation("Something, Version=1.0", "MyPlatform", new Version(4, 0), new string[] { s_fakeStructureRoot }, null);
@@ -2765,7 +2831,9 @@ namespace Microsoft.Build.UnitTests
         public void ResolveFromDirectoryPathTooLong()
         {
             // Try a path too long, which does not exist
-            string tooLongPath = "C:\\" + new String('g', 1800);
+            string tooLongPath = NativeMethodsShared.IsWindows
+                                     ? ("C:\\" + new string('g', 1800))
+                                     : ("/" + new string('g', 10000));
             List<string> paths = new List<string>() { tooLongPath };
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
@@ -2779,6 +2847,11 @@ namespace Microsoft.Build.UnitTests
         [ExpectedException(typeof(ArgumentException))]
         public void ResolveFromDirectoryInvalidChar()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("No invalid characters on Unix");
+            }
+
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
             // Try a path with invalid chars which does not exist
@@ -2798,7 +2871,7 @@ namespace Microsoft.Build.UnitTests
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
             // Try a regular path which does not exist.
-            string normalDirectory = "c:\\SDKPath";
+            string normalDirectory = NativeMethodsShared.IsWindows ? "c:\\SDKPath" : "/SDKPath";
             List<string> paths = new List<string>() { normalDirectory };
             ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform);
             Assert.IsTrue(targetPlatform.Count == 0);
@@ -2846,10 +2919,10 @@ namespace Microsoft.Build.UnitTests
             string frameworkPathPattern2 = @"ExtensionSDKs\MyFramework";
 
             string frameworkPath = Path.Combine(tmpRootDirectory, frameworkPathPattern);
-            string manifestFile = Path.Combine(frameworkPath, "sdkManifest.xml");
+            string manifestFile = Path.Combine(frameworkPath, "SDKManifest.xml");
 
             string frameworkPath2 = Path.Combine(tmpRootDirectory, frameworkPathPattern2);
-            string manifestFile2 = Path.Combine(frameworkPath, "sdkManifest.xml");
+            string manifestFile2 = Path.Combine(frameworkPath, "SDKManifest.xml");
 
             try
             {
@@ -2995,7 +3068,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(manifestPath);
 
-                string manifestFile = Path.Combine(manifestPath, "sdkManifest.xml");
+                string manifestFile = Path.Combine(manifestPath, "SDKManifest.xml");
 
 
                 string manifestPlatformSDK = @"
@@ -3132,7 +3205,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(manifestPath);
 
-                string manifestFile = Path.Combine(manifestPath, "sdkManifest.xml");
+                string manifestFile = Path.Combine(manifestPath, "SDKManifest.xml");
 
                 string manifestExtensionSDK = @"
                 <FileList
@@ -3167,7 +3240,7 @@ namespace Microsoft.Build.UnitTests
                 </FileList>";
 
                 File.WriteAllText(manifestFile, manifestExtensionSDK);
-                ExtensionSDK extensionSDK = new ExtensionSDK(String.Format("CppUnitTestFramework, Version={0}", ObjectModelHelpers.MSBuildDefaultToolsVersion), manifestPath);
+                ExtensionSDK extensionSDK = new ExtensionSDK(string.Format("CppUnitTestFramework, Version={0}", ObjectModelHelpers.MSBuildDefaultToolsVersion), manifestPath);
 
                 Assert.AreEqual(extensionSDK.Identifier, "CppUnitTestFramework");
                 Assert.AreEqual(extensionSDK.MaxPlatformVersion, new Version("8.0"));
@@ -3258,8 +3331,10 @@ namespace Microsoft.Build.UnitTests
         public void VerifyGetInstalledSDKLocations()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations");
-            string platformDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\");
-            string sdkDirectory = Path.Combine(platformDirectory, "ExtensionSDKs\\SDkWithManifest\\2.0\\");
+            string platformDirectory = Path.Combine(testDirectoryRoot, "MyPlatform", "8.0")
+                                       + Path.DirectorySeparatorChar;
+            string sdkDirectory = Path.Combine(platformDirectory, "ExtensionSDKs", "SDkWithManifest", "2.0")
+                                  + Path.DirectorySeparatorChar;
 
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -3287,8 +3362,8 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(testDirectoryRoot);
                 Directory.CreateDirectory(sdkDirectory);
-                File.WriteAllText(Path.Combine(platformDirectory, "sdkManifest.xml"), "HI");
-                File.WriteAllText(Path.Combine(sdkDirectory, "sdkManifest.xml"), "HI");
+                File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), "HI");
+                File.WriteAllText(Path.Combine(sdkDirectory, "SDKManifest.xml"), "HI");
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
@@ -3329,8 +3404,10 @@ namespace Microsoft.Build.UnitTests
         public void VerifyGetInstalledSDKLocations2()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations2");
-            string platformDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\");
-            string sdkDirectory = Path.Combine(platformDirectory, "ExtensionSDKs\\SDkWithManifest\\2.0\\");
+            string platformDirectory = Path.Combine(testDirectoryRoot, "MyPlatform", "8.0")
+                                       + Path.DirectorySeparatorChar;
+            string sdkDirectory = Path.Combine(platformDirectory, "ExtensionSDKs", "SDkWithManifest", "2.0")
+                                  + Path.DirectorySeparatorChar;
 
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -3361,8 +3438,8 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(testDirectoryRoot);
                 Directory.CreateDirectory(sdkDirectory);
-                File.WriteAllText(Path.Combine(platformDirectory, "sdkManifest.xml"), platformSDKManifestContents);
-                File.WriteAllText(Path.Combine(sdkDirectory, "sdkManifest.xml"), "HI");
+                File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), platformSDKManifestContents);
+                File.WriteAllText(Path.Combine(sdkDirectory, "SDKManifest.xml"), "HI");
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
@@ -3401,8 +3478,10 @@ namespace Microsoft.Build.UnitTests
         public void VerifyGetInstalledSDKLocations3()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations3");
-            string platformDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\");
-            string sdkDirectory = Path.Combine(platformDirectory, "ExtensionSDKs\\SDkWithManifest\\2.0\\");
+            string platformDirectory = Path.Combine(testDirectoryRoot, "MyPlatform", "8.0")
+                                       + Path.DirectorySeparatorChar;
+            string sdkDirectory = Path.Combine(platformDirectory, "ExtensionSDKs", "SDkWithManifes", "2.0")
+                                  + Path.DirectorySeparatorChar;
 
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -3438,11 +3517,14 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                RegistryKey folderKey = baseKey.CreateSubKey(registryKey + @"\MyPlatform\v8.0\ExtensionSDKS\SDKWithManifest\2.0");
-                folderKey.SetValue("", Path.Combine(testDirectoryRoot, sdkDirectory));
+                if (NativeMethodsShared.IsWindows)
+                {
+                    RegistryKey folderKey = baseKey.CreateSubKey(registryKey + @"\MyPlatform\v8.0\ExtensionSDKS\SDKWithManifest\2.0");
+                    folderKey.SetValue("", Path.Combine(testDirectoryRoot, sdkDirectory));
 
-                folderKey = baseKey.CreateSubKey(registryKey + @"\MyPlatform\v8.0");
-                folderKey.SetValue("", Path.Combine(testDirectoryRoot, platformDirectory));
+                    folderKey = baseKey.CreateSubKey(registryKey + @"\MyPlatform\v8.0");
+                    folderKey.SetValue("", Path.Combine(testDirectoryRoot, platformDirectory));
+                }
 
 
                 if (Directory.Exists(testDirectoryRoot))
@@ -3452,8 +3534,8 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(testDirectoryRoot);
                 Directory.CreateDirectory(sdkDirectory);
-                File.WriteAllText(Path.Combine(sdkDirectory, "sdkManifest.xml"), "HI");
-                File.WriteAllText(Path.Combine(platformDirectory, "sdkManifest.xml"), platformSDKManifestContents);
+                File.WriteAllText(Path.Combine(sdkDirectory, "SDKManifest.xml"), "HI");
+                File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), platformSDKManifestContents);
 
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
@@ -3477,7 +3559,10 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    baseKey.DeleteSubKeyTree(registryKey);
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        baseKey.DeleteSubKeyTree(registryKey);
+                    }
                 }
                 catch (Exception)
                 {
@@ -3505,18 +3590,40 @@ namespace Microsoft.Build.UnitTests
             TargetPlatformSDK key = new TargetPlatformSDK("Windows", new Version("1.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 2);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows\\1.0\\"), StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "Windows", "1.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("Windows", new Version("2.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 2);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "Windows", "2.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=4.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=4.0"].Equals(Path.Combine(s_fakeStructureRoot2, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\4.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=4.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot2, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "4.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             // Windows kits special case is only in registry
             key = new TargetPlatformSDK("MyPlatform", new Version("6.0"), null);
@@ -3526,39 +3633,71 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(targetPlatforms[key].Path == null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 1);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("AnotherAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["AnotherAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\4.0\\ExtensionSDKs\\AnotherAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["AnotherAssembly, Version=1.0"].Equals(
+                    Path.Combine(
+                        new[] { s_fakeStructureRoot, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("3.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 1);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\3.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "MyPlatform", "3.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\3.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("2.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 1);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "MyPlatform", "2.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\2.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("1.0"), null);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "MyPlatform", "1.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 0);
 
             key = new TargetPlatformSDK("MyPlatform", new Version("8.0"), null);
-            Assert.AreEqual(Path.Combine(s_fakeStructureRoot, "MyPlatform\\8.0\\"), targetPlatforms[key].Path);
+            Assert.AreEqual(
+                Path.Combine(s_fakeStructureRoot, "MyPlatform", "8.0") + Path.DirectorySeparatorChar,
+                targetPlatforms[key].Path);
             Assert.AreEqual(0, targetPlatforms[key].ExtensionSDKs.Count);
             Assert.AreEqual(3, targetPlatforms[key].Platforms.Count);
-            Assert.IsTrue(targetPlatforms[key].ContainsPlatform("PlatformAssembly", "0.1.2.3"));
-            Assert.AreEqual(Path.Combine(s_fakeStructureRoot, "MyPlatform\\8.0\\Platforms\\PlatformAssembly\\0.1.2.3\\"), targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"]);
+            Assert.IsTrue(targetPlatforms[key].ContainsPlatform("Twilight", "0.1.2.3"));
+            Assert.AreEqual(
+                Path.Combine(new[] { s_fakeStructureRoot, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3" })
+                + Path.DirectorySeparatorChar,
+                targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"]);
             Assert.IsTrue(targetPlatforms[key].ContainsPlatform("PlatformAssembly", "1.2.3.0"));
             Assert.IsTrue(targetPlatforms[key].ContainsPlatform("Sparkle", "3.3.3.3"));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("9.0"), null);
-            Assert.AreEqual(Path.Combine(s_fakeStructureRoot, "MyPlatform\\9.0\\"), targetPlatforms[key].Path);
+            Assert.AreEqual(
+                Path.Combine(s_fakeStructureRoot, "MyPlatform", "9.0") + Path.DirectorySeparatorChar,
+                targetPlatforms[key].Path);
             Assert.AreEqual(0, targetPlatforms[key].ExtensionSDKs.Count);
             Assert.AreEqual(1, targetPlatforms[key].Platforms.Count);
             Assert.IsTrue(targetPlatforms[key].ContainsPlatform("PlatformAssembly", "0.1.2.3"));
-            Assert.AreEqual(Path.Combine(s_fakeStructureRoot, "MyPlatform\\9.0\\Platforms\\PlatformAssembly\\0.1.2.3\\"), targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"]);
+            Assert.AreEqual(
+                Path.Combine(new[] { s_fakeStructureRoot, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3" })
+                + Path.DirectorySeparatorChar,
+                targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"]);
         }
 
         /// <summary>
@@ -3568,23 +3707,47 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void ResolveSDKFromRegistry()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("No registry unless under Windows");
+            }
+
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+
             ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, s_openBaseKey, new FileExists(File.Exists));
             ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.LocalMachine, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, s_openBaseKey, new FileExists(File.Exists));
 
             TargetPlatformSDK key = new TargetPlatformSDK("Windows", new Version("1.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 2);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "Windows", "1.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["FlutterShy, Version=1.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("FlutterShy, Version=2.0"));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("Windows", new Version("2.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 1);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "Windows", "2.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("5.0"), null);
             Assert.IsTrue(targetPlatforms.ContainsKey(key));
@@ -3592,20 +3755,40 @@ namespace Microsoft.Build.UnitTests
 
             key = new TargetPlatformSDK("MyPlatform", new Version("6.0"), null);
             Assert.IsTrue(targetPlatforms.ContainsKey(key));
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows Kits\\6.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "Windows Kits", "6.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("4.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 1);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0\\"), StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0")
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("FlutterShy, Version=1.0"));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
+                    Path.Combine(
+                        new[]
+                            {
+                                s_fakeStructureRoot, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs",
+                                "MyAssembly", "1.0"
+                            }) + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("9.0"), null);
-            Assert.AreEqual(Path.Combine(s_fakeStructureRoot, "MyPlatform\\9.0\\"), targetPlatforms[key].Path);
+            Assert.AreEqual(
+                Path.Combine(s_fakeStructureRoot, "MyPlatform", "9.0") + Path.DirectorySeparatorChar,
+                targetPlatforms[key].Path);
             Assert.AreEqual(0, targetPlatforms[key].ExtensionSDKs.Count);
             Assert.AreEqual(1, targetPlatforms[key].Platforms.Count);
             Assert.IsTrue(targetPlatforms[key].ContainsPlatform("PlatformAssembly", "0.1.2.3"));
-            Assert.AreEqual(Path.Combine(s_fakeStructureRoot, "MyPlatform\\9.0\\Platforms\\PlatformAssembly\\0.1.2.3\\"), targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"]);
+            Assert.AreEqual(
+                Path.Combine(new[] { s_fakeStructureRoot, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3" })
+                + Path.DirectorySeparatorChar,
+                targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"]);
         }
 
         /// <summary>
@@ -3621,26 +3804,51 @@ namespace Microsoft.Build.UnitTests
             List<string> paths = new List<string>() { s_fakeStructureRoot };
 
             ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatforms);
-            ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, s_openBaseKey, new FileExists(File.Exists));
-            ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.LocalMachine, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, s_openBaseKey, new FileExists(File.Exists));
+
+            if (!NativeMethodsShared.IsWindows)
+            {
+                ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, s_openBaseKey, new FileExists(File.Exists));
+                ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.LocalMachine, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, s_openBaseKey, new FileExists(File.Exists));
+            }
 
             TargetPlatformSDK key = new TargetPlatformSDK("Windows", new Version("1.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 2);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "Windows", "1.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("Windows", new Version("2.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 1);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "Windows", "2.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].Equals(Path.Combine(s_fakeStructureRoot, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("6.0"), null);
             Assert.IsTrue(targetPlatforms.ContainsKey(key));
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows Kits\\6.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "Windows Kits", "6.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("5.0"), null);
             Assert.IsTrue(targetPlatforms.ContainsKey(key));
@@ -3649,26 +3857,59 @@ namespace Microsoft.Build.UnitTests
 
             key = new TargetPlatformSDK("MyPlatform", new Version("4.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 2);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0")
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
+                    Path.Combine(
+                        new[]
+                            {
+                                s_fakeStructureRoot, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs",
+                                "FlutterShy", "1.0"
+                            }) + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("AnotherAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["AnotherAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\4.0\\ExtensionSDKs\\AnotherAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["AnotherAssembly, Version=1.0"].Equals(
+                    Path.Combine(
+                        new[] { s_fakeStructureRoot, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0" }),
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("3.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 1);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\3.0\\"), StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\3.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "MyPlatform", "3.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("2.0"), null);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 1);
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\2.0\\"), StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\2.0\\ExtensionSDKs\\MyAssembly\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "MyAssembly", "2.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].Equals(
+                    Path.Combine(new[] { s_fakeStructureRoot, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
 
             key = new TargetPlatformSDK("MyPlatform", new Version("1.0"), null);
-            Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(
+                targetPlatforms[key].Path.Equals(
+                    Path.Combine(s_fakeStructureRoot, "MyPlatform", "1.0") + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(targetPlatforms[key].ExtensionSDKs.Count == 0);
         }
 
@@ -3763,7 +4004,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "true");
-                var sdks = ToolLocationHelper.GetTargetPlatformSdks(new string[] { s_fakeStructureRoot }, null);
+                var sdks = ToolLocationHelper.GetTargetPlatformSdks(new[] { s_fakeStructureRoot }, null);
 
                 Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                 foreach (TargetPlatformSDK sdk in sdks)
@@ -3772,19 +4013,34 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 TargetPlatformSDK key = new TargetPlatformSDK("Windows", new Version("1.0"), null);
-                Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+                Assert.IsTrue(
+                    targetPlatforms[key].Path.Equals(
+                        Path.Combine(s_fakeStructureRoot, "Windows", "1.0") + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase));
 
                 key = new TargetPlatformSDK("Windows", new Version("2.0"), null);
-                Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "Windows\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+                Assert.IsTrue(
+                    targetPlatforms[key].Path.Equals(
+                        Path.Combine(s_fakeStructureRoot, "Windows", "2.0") + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase));
 
                 key = new TargetPlatformSDK("MyPlatform", new Version("3.0"), null);
-                Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\3.0\\"), StringComparison.OrdinalIgnoreCase));
+                Assert.IsTrue(
+                    targetPlatforms[key].Path.Equals(
+                        Path.Combine(s_fakeStructureRoot, "MyPlatform", "3.0") + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase));
 
                 key = new TargetPlatformSDK("MyPlatform", new Version("2.0"), null);
-                Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\2.0\\"), StringComparison.OrdinalIgnoreCase));
+                Assert.IsTrue(
+                    targetPlatforms[key].Path.Equals(
+                        Path.Combine(s_fakeStructureRoot, "MyPlatform", "2.0") + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase));
 
                 key = new TargetPlatformSDK("MyPlatform", new Version("1.0"), null);
-                Assert.IsTrue(targetPlatforms[key].Path.Equals(Path.Combine(s_fakeStructureRoot, "MyPlatform\\1.0\\"), StringComparison.OrdinalIgnoreCase));
+                Assert.IsTrue(
+                    targetPlatforms[key].Path.Equals(
+                        Path.Combine(s_fakeStructureRoot, "MyPlatform", "1.0") + Path.DirectorySeparatorChar,
+                        StringComparison.OrdinalIgnoreCase));
 
                 key = new TargetPlatformSDK("MyPlatform", new Version("5.0"), null);
                 Assert.IsTrue(!targetPlatforms.ContainsKey(key));
@@ -3805,8 +4061,9 @@ namespace Microsoft.Build.UnitTests
         {
             // This is the mockup layout for SDKs before One Core SDK.
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetPreOneCoreSDKPropsLocation");
-            string platformDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\");
-            string propsDirectory = Path.Combine(platformDirectory, "DesignTime\\CommonConfiguration\\Neutral");
+            string platformDirectory = Path.Combine(testDirectoryRoot, "MyPlatform", "8.0")
+                                       + Path.DirectorySeparatorChar;
+            string propsDirectory = Path.Combine(platformDirectory, "DesignTime", "CommonConfiguration", "Neutral");
 
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -3826,9 +4083,12 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (RegistryKey platformKey = baseKey.CreateSubKey(registryKey + @"\MyPlatform\v8.0"))
+                if (NativeMethodsShared.IsWindows)
                 {
-                    platformKey.SetValue("InstallationFolder", platformDirectory);
+                    using (RegistryKey platformKey = baseKey.CreateSubKey(registryKey + @"\MyPlatform\v8.0"))
+                    {
+                        platformKey.SetValue("InstallationFolder", platformDirectory);
+                    }
                 }
 
                 if (Directory.Exists(testDirectoryRoot))
@@ -3839,7 +4099,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(testDirectoryRoot);
                 Directory.CreateDirectory(propsDirectory);
 
-                File.WriteAllText(Path.Combine(platformDirectory, "sdkManifest.xml"), "Test");
+                File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), "Test");
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents, null);
 
@@ -3853,13 +4113,14 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    baseKey.DeleteSubKeyTree(registryKey);
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        baseKey.DeleteSubKeyTree(registryKey);
+                    }
                 }
-
                 catch (Exception)
                 {
                 }
-
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -3877,8 +4138,10 @@ namespace Microsoft.Build.UnitTests
         {
             // This is the mockup layout for One Core SDK. 
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetOneCoreSDKPropsLocation");
-            string platformDirectory = Path.Combine(testDirectoryRoot, "OneCoreSDK\\1.0\\");
-            string propsDirectory = Path.Combine(platformDirectory, "DesignTime\\CommonConfiguration\\Neutral\\MyPlatform\\0.8.0.0");
+            string platformDirectory = Path.Combine(testDirectoryRoot, "OneCoreSDK", "1.0") + Path.DirectorySeparatorChar;
+            string propsDirectory =
+                Path.Combine(
+                    new[] { platformDirectory, "DesignTime", "CommonConfiguration", "Neutral", "MyPlatform", "0.8.0.0" });
 
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -3898,9 +4161,12 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (RegistryKey platformKey = baseKey.CreateSubKey(registryKey + @"\OneCoreSDK\1.0"))
+                if (NativeMethodsShared.IsWindows)
                 {
-                    platformKey.SetValue("InstallationFolder", platformDirectory);
+                    using (RegistryKey platformKey = baseKey.CreateSubKey(registryKey + @"\OneCoreSDK\1.0"))
+                    {
+                        platformKey.SetValue("InstallationFolder", platformDirectory);
+                    }
                 }
 
                 if (Directory.Exists(testDirectoryRoot))
@@ -3911,7 +4177,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(testDirectoryRoot);
                 Directory.CreateDirectory(propsDirectory);
 
-                File.WriteAllText(Path.Combine(platformDirectory, "sdkManifest.xml"), "Test");
+                File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), "Test");
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents, null);
 
@@ -3925,13 +4191,14 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    baseKey.DeleteSubKeyTree(registryKey);
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        baseKey.DeleteSubKeyTree(registryKey);
+                    }
                 }
-
                 catch (Exception)
                 {
                 }
-
                 if (Directory.Exists(testDirectoryRoot))
                 {
                     FileUtilities.DeleteDirectoryNoThrow(testDirectoryRoot, true);
@@ -4077,64 +4344,134 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Good
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0\\ExtensionSDKs\\MyAssembly\\1.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "WindowsKits\\6.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\5.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\4.0\\ExtensionSDKs\\AnotherAssembly\\1.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\3.0\\ExtensionSDKs\\MyAssembly\\1.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\2.0\\ExtensionSDKs\\MyAssembly\\1.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\1.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\8.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\8.0\\Platforms\\PlatformAssembly\\0.1.2.3"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\8.0\\Platforms\\PlatformAssembly\\1.2.3.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\8.0\\Platforms\\Sparkle\\3.3.3.3"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\9.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\9.0\\Platforms\\PlatformAssembly\\0.1.2.3"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\9.0\\PlatformAssembly\\Sparkle"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\9.0\\Platforms\\PlatformAssembly\\Sparkle"));
+                Directory.CreateDirectory(
+                    Path.Combine(tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0"));
+                Directory.CreateDirectory(
+                    Path.Combine(tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0"));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" }));
+                Directory.CreateDirectory(
+                    Path.Combine(
+                        new[]
+                            {
+                                tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs",
+                                "MyAssembly", "1.0"
+                            }));
+                Directory.CreateDirectory(Path.Combine(tempPath, "WindowsKits", "6.0"));
+                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "5.0"));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0" }));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" }));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0" }));
+                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "1.0"));
+                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "8.0"));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3" }));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "1.2.3.0" }));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "8.0", "Platforms", "Sparkle", "3.3.3.3" }));
+                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "9.0"));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3" }));
+                Directory.CreateDirectory(Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "PlatformAssembly", "Sparkle" }));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "Sparkle" }));
 
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0", "sdkmanifest.xml"), "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml" }),
+                    "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0", "SDKManifest.xml" }),
+                    "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0", "SDKManifest.xml" }),
+                    "Hello");
 
-                File.WriteAllText(Path.Combine(tempPath, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0\\ExtensionSDKs\\MyAssembly\\1.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\1.0", "sdkmanifest.xml"), manifestPlatformSDK1);
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\2.0", "sdkmanifest.xml"), manifestPlatformSDK2);
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\4.0\\ExtensionSDKs\\AnotherAssembly\\1.0", "sdkmanifest.xml"), manifestExtensionSDK2);
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\3.0", "sdkmanifest.xml"), manifestPlatformSDK3);
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\2.0", "sdkmanifest.xml"), manifestPlatformSDK4);
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\3.0\\ExtensionSDKs\\MyAssembly\\1.0", "sdkmanifest.xml"), manifestExtensionSDK1);
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\2.0\\ExtensionSDKs\\MyAssembly\\1.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\1.0", "sdkmanifest.xml"), manifestPlatformSDK5);
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "SDKManifest.xml" }),
+                    "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[]
+                            {
+                                tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs",
+                                "MyAssembly", "1.0", "SDKManifest.xml"
+                            }),
+                    "Hello");
+                File.WriteAllText(Path.Combine(tempPath, "Windows", "1.0", "SDKManifest.xml"), manifestPlatformSDK1);
+                File.WriteAllText(Path.Combine(tempPath, "Windows", "2.0", "SDKManifest.xml"), manifestPlatformSDK2);
+                File.WriteAllText(
+                    Path.Combine(
+                        new[]
+                            { tempPath, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0", "SDKManifest.xml" }),
+                    manifestExtensionSDK2);
+                File.WriteAllText(Path.Combine(tempPath, "MyPlatform", "3.0", "SDKManifest.xml"), manifestPlatformSDK3);
+                File.WriteAllText(Path.Combine(tempPath, "MyPlatform", "2.0", "SDKManifest.xml"), manifestPlatformSDK4);
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml" }),
+                    manifestExtensionSDK1);
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml" }),
+                    "Hello");
+                File.WriteAllText(Path.Combine(tempPath, "MyPlatform", "1.0", "SDKManifest.xml"), manifestPlatformSDK5);
 
                 // Contains a couple of sub-platforms
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\8.0", "sdkmanifest.xml"), manifestPlatformSDK6);
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\8.0\\Platforms\\PlatformAssembly\\0.1.2.3", "Platform.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\8.0\\Platforms\\PlatformAssembly\\1.2.3.0", "Platform.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\8.0\\Platforms\\Sparkle\\3.3.3.3", "Platform.xml"), "Hello");
+                File.WriteAllText(
+                    Path.Combine(tempPath, "MyPlatform", "8.0", "SDKManifest.xml"),
+                    manifestPlatformSDK6);
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3", "Platform.xml" }),
+                    "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "1.2.3.0", "Platform.xml" }),
+                    "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "MyPlatform", "8.0", "Platforms", "Sparkle", "3.3.3.3", "Platform.xml" }),
+                    "Hello");
 
                 // Contains invalid sub-platforms as well as valid ones
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\9.0", "sdkmanifest.xml"), manifestPlatformSDK7);
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\9.0\\Platforms\\PlatformAssembly\\0.1.2.3", "Platform.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\9.0\\PlatformAssembly\\Sparkle", "Platform.xml"), "Hello"); // not under the Platforms directory
-                File.WriteAllText(Path.Combine(tempPath, "MyPlatform\\9.0\\Platforms\\PlatformAssembly\\Sparkle", "Platform.xml"), "Hello"); // bad version
-                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform\\9.0\\Platforms\\Sparkle\\3.3.3.3")); // no platform.xml
+                File.WriteAllText(Path.Combine(tempPath, "MyPlatform", "9.0", "SDKManifest.xml"), manifestPlatformSDK7);
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3", "Platform.xml" }),
+                    "Hello");
+                File.WriteAllText(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "PlatformAssembly", "Sparkle", "Platform.xml" }),
+                    "Hello"); // not under the Platforms directory
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "Sparkle", "Platform.xml" }),
+                    "Hello"); // bad version
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "Platforms", "Sparkle", "3.3.3.3" })); // no platform.xml
 
                 //Bad because of v in the sdk version
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\AnotherAssembly\\v1.1"));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "AnotherAssembly", "v1.1" }));
 
                 //Bad because no extensionsdks directory under the platform version
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v3.0\\"));
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows", "v3.0") + Path.DirectorySeparatorChar);
 
                 // Bad because the directory under the identifier is not a version
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\NotAVersion\\"));
+                Directory.CreateDirectory(
+                    Path.Combine(tempPath, "Windows", "NotAVersion") + Path.DirectorySeparatorChar);
 
                 // Bad because the directory under the identifier is not a version
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\NotAVersion\\ExtensionSDKs\\Assembly\\1.0"));
+                Directory.CreateDirectory(
+                    Path.Combine(
+                        new[] { tempPath, "Windows", "NotAVersion", "ExtensionSDKs", "Assembly", "1.0" }));
             }
             catch (Exception)
             {
@@ -4154,13 +4491,25 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Good
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\4.0"));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" }));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" }));
+                Directory.CreateDirectory(
+                    Path.Combine(new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "4.0" }));
 
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\4.0", "sdkmanifest.xml"), "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml" }),
+                    "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0", "SDKManifest.xml" }),
+                    "Hello");
+                File.WriteAllText(
+                    Path.Combine(
+                        new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "4.0", "SDKManifest.xml" }),
+                    "Hello");
             }
             catch (Exception)
             {
@@ -4185,77 +4534,77 @@ namespace Microsoft.Build.UnitTests
         {
             if (baseKey == Registry.CurrentUser)
             {
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "Windows", "MyPlatform" };
+                    return new[] { "Windows", "MyPlatform" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "v1.0", "1.0" };
+                    return new[] { "v1.0", "1.0" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return new string[] { "MyAssembly" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return new string[] { "MyAssembly" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\FlutterShy", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "v1.1", "1.0", "2.0", "3.0" };
+                    return new[] { "v1.1", "1.0", "2.0", "3.0" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs\FlutterShy", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "2.0" };
+                    return new[] { "2.0" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "4.0", "5.0", "6.0", "9.0" };
+                    return new[] { "4.0", "5.0", "6.0", "9.0" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return new string[] { "MyAssembly" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\5.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\5.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { String.Empty };
+                    return new[] { string.Empty };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs\FlutterShy", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "1.0" };
+                    return new[] { "1.0" };
                 }
             }
 
             if (baseKey == Registry.LocalMachine)
             {
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "Windows" };
+                    return new[] { "Windows" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "v2.0" };
+                    return new[] { "v2.0" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "MyAssembly" };
+                    return new[] { "MyAssembly" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0\ExtensionSDKs\FlutterShy", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "3.0" };
+                    return new[] { "3.0" };
                 }
             }
 
@@ -4273,53 +4622,54 @@ namespace Microsoft.Build.UnitTests
         {
             if (baseKey == Registry.CurrentUser)
             {
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly\1.0", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    return Path.Combine(s_fakeStructureRoot, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0");
-                }
-                // This has a v in the sdk version and should not be found but we need a real path incase it is so it will show up in the returned list and fail the test.
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly\v1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly\1.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0");
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs\MyAssembly\2.0", StringComparison.OrdinalIgnoreCase) == 0)
+                // This has a v in the sdk version and should not be found but we need a real path in case it is so it will show up in the returned list and fail the test.
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly\v1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return Path.Combine(s_fakeStructureRoot, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0");
+                }
+
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs\MyAssembly\2.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0");
                 }
 
                 // This has a set of bad char in the returned directory so it should not be allowed.
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly\3.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly\3.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return s_fakeStructureRoot + @"\Windows\1.0\ExtensionSDKs\MyAssembly\<>?/";
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\5.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\5.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "MyPlatform\\5.0");
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0");
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\6.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\6.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "Windows Kits\\6.0");
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\9.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\9.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "MyPlatform\\9.0");
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs\MyAssembly\1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs\MyAssembly\1.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "SomeOtherPlace\\MyPlatformOtherLocation\\4.0\\ExtensionSDKs\\MyAssembly\\1.0");
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "Windows\\1.0");
                 }
@@ -4327,12 +4677,12 @@ namespace Microsoft.Build.UnitTests
 
             if (baseKey == Registry.LocalMachine)
             {
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0\ExtensionSDKs\MyAssembly\3.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0\ExtensionSDKs\MyAssembly\3.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0");
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v2.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     return Path.Combine(s_fakeStructureRoot, "Windows\\2.0");
                 }

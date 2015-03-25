@@ -10,6 +10,7 @@ using System.Collections;
 
 using Microsoft.Build.Framework;
 using NUnit.Framework;
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
 {
@@ -28,7 +29,7 @@ namespace Microsoft.Build.UnitTests
         /// Setup for text fixture, this is run ONCE for the entire test fixture
         /// </summary>
         [TestFixtureSetUp]
-        public static void FixtureSetup(TestContext context)
+        public static void FixtureSetup()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(2, 3, 4, 5);
             s_baseProjectStartedEvent = new ProjectStartedEventArgs(1, "Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null, parentBuildEventContext);

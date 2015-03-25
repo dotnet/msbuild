@@ -79,6 +79,13 @@ namespace Microsoft.Build.Shared
                         // Apply the appdomain settings to the new appdomain before creating it
                         appDomainInfo.SetConfigurationBytes(currentAppdomainBytes);
 
+                        // This helps us to find the assemblies when we're running tests and the
+                        // appdomain was not configured fully.
+                        if (currentAppdomainBytes == null)
+                        {
+                            appDomainInfo.ApplicationBase = FileUtilities.CurrentExecutableDirectory;
+                        }
+
                         AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
                         s_resolverLoadedType = loadedType;
 

@@ -2,18 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using NUnit.Framework;
+using System.Security.AccessControl;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.AccessControl;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -1719,8 +1717,8 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogDoesntContain("MSB3027");
-            Assert.AreEqual(copyFunctor.FilesCopiedSuccessfully[0].Name, "c:\\source");
-            Assert.AreEqual(copyFunctor.FilesCopiedSuccessfully[1].Name, "c:\\source2");
+            Assert.AreEqual(copyFunctor.FilesCopiedSuccessfully[0].Name, FileUtilities.FixFilePath("c:\\source"));
+            Assert.AreEqual(copyFunctor.FilesCopiedSuccessfully[1].Name, FileUtilities.FixFilePath("c:\\source2"));
         }
 
         /// <summary>

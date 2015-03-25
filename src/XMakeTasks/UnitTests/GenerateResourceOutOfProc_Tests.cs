@@ -2,17 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+
 using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
-using System.Text;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
@@ -2286,7 +2283,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
     public class References
     {
         [Test]
-        [Ignore] // "ResGen.exe is claiming there is a null reference -- have contacted CDF about the issue"
+        [Ignore("ResGen.exe is claiming there is a null reference -- have contacted CDF about the issue")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2460,7 +2457,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// absolute path).  The fix was to use Assembly.LoadFrom instead.
         /// </summary>
         [Test]
-        [Ignore] // "ResGen.exe is claiming there is a null reference -- have contacted CDF about the issue"
+        [Ignore("ResGen.exe is claiming there is a null reference -- have contacted CDF about the issue")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2631,7 +2628,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // Since this is resgen 4.0, will be in a response-file, which is line-delineated
                 // and doesn't like spaces in filenames. 
-                Utilities.AssertLogContains(t, "/compile");
+                Utilities.AssertLogContains(t, CommandLineBuilder.FixCommandLineSwitch("/compile"));
                 Utilities.AssertLogContains(t, resxFile + "," + resourcesFile);
             }
             finally
@@ -2668,12 +2665,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                     possiblyQuotedResourcesFile = "\"" + resourcesFile + "\"";
                 }
 
-                Utilities.AssertLogContains(t,
-                    " /useSourcePath /publicClass /r:baz /r:jazz " +
-                    possiblyQuotedResxFile +
-                    " " +
-                    possiblyQuotedResourcesFile +
-                    " /str:\"C#\",,,");
+                Utilities.AssertLogContains(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch("/useSourcePath ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/publicClass ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/r:baz ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/r:jazz ") + possiblyQuotedResxFile + " "
+                    + possiblyQuotedResourcesFile + " " + CommandLineBuilder.FixCommandLineSwitch("/str:\"C#\",,,"));
             }
             finally
             {
@@ -2711,12 +2709,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                     possiblyQuotedResourcesFile = "\"" + resourcesFile + "\"";
                 }
 
-                Utilities.AssertLogContains(t,
-                    " /useSourcePath /r:baz /r:jazz " +
-                    possiblyQuotedResxFile +
-                    " " +
-                    possiblyQuotedResourcesFile +
-                    " /str:\"C#\",,wagwag,boo");
+                Utilities.AssertLogContains(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch("/useSourcePath ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/r:baz ")
+                    + CommandLineBuilder.FixCommandLineSwitch("/r:jazz ") + possiblyQuotedResxFile + " "
+                    + possiblyQuotedResourcesFile + " "
+                    + CommandLineBuilder.FixCommandLineSwitch("/str:\"C#\",,wagwag,boo"));
             }
             finally
             {
@@ -2745,7 +2744,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // Since this is resgen 4.0, will be in a response-file, which is line-delineated
                 // and doesn't like spaces in filenames. 
-                Utilities.AssertLogContains(t, "/compile");
+                Utilities.AssertLogContains(t, CommandLineBuilder.FixCommandLineSwitch("/compile"));
                 Utilities.AssertLogContains(t, resxFile + "," + resourcesFile);
                 Utilities.AssertLogContains(t, resxFile1 + "," + resourcesFile1);
             }
@@ -2856,7 +2855,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.SdkToolsPath = sdkToolsPath;
                 Assert.IsTrue(t.Execute(), "Task should have completed succesfully");
 
-                Utilities.AssertLogContains(t, "/compile");
+                Utilities.AssertLogContains(t, CommandLineBuilder.FixCommandLineSwitch("/compile"));
                 foreach (ITaskItem i in sources)
                 {
                     Utilities.AssertLogContains(t, i.ItemSpec);

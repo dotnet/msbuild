@@ -3,15 +3,13 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Globalization;
-
-using NUnit.Framework;
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -229,18 +227,17 @@ End Namespace
         public void RootnamespaceWithCulture()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
-                    @"SubFolder\MyForm.en-GB.ResX",
-                    null,    // Link file name
+                CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
+                    FileUtilities.FixFilePath(@"SubFolder\MyForm.en-GB.ResX"),
+                    null,
+                    // Link file name
                     true,
-                    "RootNamespace",        // Root namespace
+                    "RootNamespace",
+                    // Root namespace
                     null,
                     null,
                     null,
-                    null
-
-                );
+                    null);
 
             Assert.AreEqual("RootNamespace.MyForm.en-GB", result);
         }
@@ -275,18 +272,15 @@ End Namespace
         public void BitmapWithRootNamespace()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
-                    @"SubFolder\SplashScreen.bmp",
-                    null,    // Link file name
+                CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
+                    FileUtilities.FixFilePath(@"SubFolder\SplashScreen.bmp"),
+                    null,             // Link file name
                     true,
-                    "RootNamespace",        // Root namespace
+                    "RootNamespace", // Root namespace
                     null,
                     null,
                     null,
-                    null
-
-                );
+                    null);
 
             Assert.AreEqual("RootNamespace.SplashScreen.bmp", result);
         }
@@ -298,20 +292,17 @@ End Namespace
         public void CulturedBitmapWithRootNamespace()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
-                    @"SubFolder\SplashScreen.fr.bmp",
-                    null,    // Link file name
+                CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
+                    FileUtilities.FixFilePath(@"SubFolder\SplashScreen.fr.bmp"),
+                    null,             // Link file name
                     true,
-                    "RootNamespace",        // Root namespace
+                    "RootNamespace",  // Root namespace
                     null,
                     null,
                     null,
-                    null
+                    null);
 
-                );
-
-            Assert.AreEqual(@"fr\RootNamespace.SplashScreen.bmp", result);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"fr\RootNamespace.SplashScreen.bmp"), result);
         }
 
         /// <summary>
@@ -321,18 +312,15 @@ End Namespace
         public void CulturedBitmapWithRootNamespaceNoDirectoryPrefix()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
-                    @"SubFolder\SplashScreen.fr.bmp",
-                    null,    // Link file name
+                CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
+                    FileUtilities.FixFilePath(@"SubFolder\SplashScreen.fr.bmp"),
+                    null,             // Link file name
                     false,
-                    "RootNamespace",        // Root namespace
+                    "RootNamespace",  // Root namespace
                     null,
                     null,
                     null,
-                    null
-
-                );
+                    null);
 
             Assert.AreEqual(@"RootNamespace.SplashScreen.bmp", result);
         }
@@ -584,17 +572,15 @@ End Namespace
         public void CulturedResourcesFileWithRootNamespaceWithinSubfolder()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
-                    @"SubFolder\MyResource.fr.resources",
-                    null,    // Link file name
+                CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
+                    FileUtilities.FixFilePath(@"SubFolder\MyResource.fr.resources"),
+                    null,             // Link file name
                     false,
-                    "RootNamespace",        // Root namespace
+                    "RootNamespace",  // Root namespace
                     null,
                     null,
                     null,
-                    null
-                );
+                    null);
 
             Assert.AreEqual(@"RootNamespace.MyResource.fr.resources", result);
         }

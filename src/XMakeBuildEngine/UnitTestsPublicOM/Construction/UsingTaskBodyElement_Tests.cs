@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="UsingTaskBodyElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -14,8 +16,7 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -23,13 +24,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectUsingTaskElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class UsingTaskBodyElement_Tests
     {
         /// <summary>
         /// Read simple task body
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadBody()
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();
@@ -41,7 +42,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read task body with an invalid attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -60,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Create a task body outside of a using task
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void CreateBodyOutsideUsingTask()
         {
@@ -78,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set body value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValue()
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();
@@ -92,7 +93,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set body value to empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyValue()
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();
@@ -106,7 +107,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set body value to null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullValue()
         {
@@ -118,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Verify setting the value of evaluate to null will wipe out the element and then the property will return true by default.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEvaluateAttributeToNull()
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();

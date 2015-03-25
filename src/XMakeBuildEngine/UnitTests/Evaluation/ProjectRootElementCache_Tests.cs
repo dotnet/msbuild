@@ -5,17 +5,15 @@
 // <summary>Tests for ProjectRootElementCache</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Microsoft.Build.Execution;
-using NUnit.Framework;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
-using System.Collections;
 using System;
-using Microsoft.Build.Construction;
+using System.Collections.Generic;
 using System.IO;
+
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {
@@ -73,8 +71,9 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         [Test]
         public void AddEntry()
         {
-            ProjectRootElement projectRootElement = ProjectRootElement.Create("c:\\foo");
-            ProjectRootElement projectRootElement2 = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => { throw new InvalidOperationException(); }, true);
+            string rootedPath = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
+            ProjectRootElement projectRootElement = ProjectRootElement.Create(rootedPath);
+            ProjectRootElement projectRootElement2 = ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get(rootedPath, (p, c) => { throw new InvalidOperationException(); }, true);
 
             Assert.AreSame(projectRootElement, projectRootElement2);
         }
@@ -85,6 +84,11 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         [Test]
         public void AddEntryStrongReference()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono has conservative GC, does not collect everything immediately");
+            }
+
             ProjectRootElement projectRootElement = ProjectRootElement.Create("c:\\foo");
 
             projectRootElement = null;
@@ -105,7 +109,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Tests that only a limited number of strong references are held
         /// </summary>
         [Test]
-        [Ignore] // "This test seems to be flaky depending on when garbage collection happened"
+        [Ignore("This test seems to be flaky depending on when garbage collection happens")]
         public void AddManyEntriesNotAllStrongReferences()
         {
             List<string> paths = new List<string>(55);

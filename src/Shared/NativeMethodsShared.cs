@@ -2,17 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
@@ -317,6 +312,124 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static int MAX_PATH = 260;
 
+        /// <summary>
+        /// Gets a flag indicating if we are running under a Unix-like system (Mac, Linux, etc.)
+        /// </summary>
+        internal static bool IsUnixLike
+        {
+            get
+            {
+                var env = Environment.OSVersion.Platform;
+                return env == PlatformID.MacOSX || env == PlatformID.Unix;
+            }
+        }
+
+        /// <summary>
+        /// Gets a flag indicating if we are running under a Unix system (Mac is not included)
+        /// </summary>
+        internal static bool IsUnix
+        {
+            get
+            {
+                return Environment.OSVersion.Platform == PlatformID.Unix;
+            }
+        }
+
+        /// <summary>
+        /// Gets a flag indicating if we are running under MONO
+        /// </summary>
+        internal static bool IsMono
+        {
+            get
+            {
+                return Type.GetType("Mono.Runtime") != null;
+            }
+        }
+
+        /// <summary>
+        /// Gets a flag indicating if we are running under some version of Windows
+        /// </summary>
+        internal static bool IsWindows
+        {
+            get
+            {
+                return !IsUnixLike;
+            }
+        }
+
+        /// <summary>
+        /// Gets a flag indicating if we are running under Mac OSX
+        /// </summary>
+        internal static bool IsOSX
+        {
+            get
+            {
+                return Environment.OSVersion.Platform == PlatformID.MacOSX;
+            }
+        }
+
+        /// <summary>
+        /// Gets a string for the current OS. This matches the OS env variable
+        /// for Windows (Windows_NT).
+        /// </summary>
+        internal static string OSName
+        {
+            get
+            {
+                return IsUnix ? "Unix" : (IsOSX ? "OSX" : "Windows_NT");
+            }
+        }
+
+        /// <summary>
+        /// The base directory for all framework paths in Mono
+        /// </summary>
+        private static string s_frameworkBasePath;
+
+        /// <summary>
+        /// The directory of the current framework
+        /// </summary>
+        private static string s_frameworkCurrentPath;
+
+        /// <summary>
+        /// Gets the currently running framework path
+        /// </summary>
+        internal static string FrameworkCurrentPath
+        {
+            get
+            {
+                if (s_frameworkCurrentPath == null)
+                {
+                    s_frameworkCurrentPath =
+                        Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(string)).Location)
+                        ?? string.Empty;
+                }
+
+                return s_frameworkCurrentPath;
+            }
+        }
+
+        /// <summary>
+        /// Gets the base directory of all Mono frameworks
+        /// </summary>
+        internal static string FrameworkBasePath
+        {
+            get
+            {
+                if (s_frameworkBasePath == null)
+                {
+                    var dir = FrameworkCurrentPath;
+                    if (dir != string.Empty)
+                    {
+                        dir = Path.GetDirectoryName(dir);
+                    }
+
+                    s_frameworkBasePath = dir ?? string.Empty;
+                }
+
+                return s_frameworkBasePath;
+            }
+        }
+
         #endregion
 
         #region Set Error Mode (copied from BCL)
@@ -370,25 +483,32 @@ namespace Microsoft.Build.Shared
             // there
 
             fileModifiedTimeUtc = DateTime.MinValue;
-            WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
 
-            success = GetFileAttributesEx(fullPath, 0, ref data);
-            if (success)
+            if (IsWindows)
             {
-                if ((data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
+                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
+
+                success = GetFileAttributesEx(fullPath, 0, ref data);
+                if (success)
                 {
-                    long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
-                    fileModifiedTimeUtc = DateTime.FromFileTimeUtc(dt);
+                    if ((data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
+                    {
+                        long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
+                        fileModifiedTimeUtc = DateTime.FromFileTimeUtc(dt);
+                    }
+                    else
+                    {
+                        // Path does not point to a directory
+                        success = false;
+                    }
                 }
-                else
-                {
-                    // Path does not point to a directory
-                    success = false;
-                }
+
+                return success;
             }
 
-            return success;
+            fileModifiedTimeUtc = Directory.GetLastWriteTimeUtc(fullPath);
+            return true;
         }
 
         /// <summary>
@@ -396,6 +516,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetShortFilePath(string path)
         {
+            if (!IsWindows)
+            {
+                return path;
+            }
+
             if (path != null)
             {
                 int length = GetShortPathName(path, null, 0);
@@ -430,6 +555,11 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static string GetLongFilePath(string path)
         {
+            if (IsUnixLike)
+            {
+                return path;
+            }
+
             if (path != null)
             {
                 int length = GetLongPathName(path, null, 0);
@@ -456,7 +586,7 @@ namespace Microsoft.Build.Shared
 
             return path;
         }
-
+#if !MONO
         /// <summary>
         /// Retrieves the current global memory status.
         /// </summary>
@@ -471,7 +601,7 @@ namespace Microsoft.Build.Shared
 
             return status;
         }
-
+#endif
         /// <summary>
         /// Get the last write time of the fullpath to the file. 
         /// If the file does not exist, then DateTime.MinValue is returned
@@ -481,14 +611,21 @@ namespace Microsoft.Build.Shared
         internal static DateTime GetLastWriteFileUtcTime(string fullPath)
         {
             DateTime fileModifiedTime = DateTime.MinValue;
-            WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
-
-            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-            if (success)
+            if (IsWindows)
             {
-                long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
-                fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
+                bool success = false;
+
+                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+                if (success)
+                {
+                    long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
+                    fileModifiedTime = DateTime.FromFileTimeUtc(dt);
+                }
+            }
+            else if (File.Exists(fullPath))
+            {
+                fileModifiedTime = File.GetLastWriteTimeUtc(fullPath);
             }
 
             return fileModifiedTime;
@@ -537,45 +674,62 @@ namespace Microsoft.Build.Shared
         /// <returns>The location of the file, or null if file not found.</returns>
         internal static string FindOnPath(string filename)
         {
-            StringBuilder pathBuilder = new StringBuilder(MAX_PATH + 1);
-            string pathToFile = null;
-
-            // we may need to make two attempts because there's a small chance
-            // the buffer may not be sized correctly the first time
-            for (int i = 0; i < 2; i++)
+            if (IsWindows)
             {
-                uint result = SearchPath
-                                (
-                                    null /* search the system path */,
-                                    filename /* look for this file */,
-                                    null /* don't add an extra extension to the filename when searching */,
-                                    pathBuilder.Capacity /* size of buffer */,
-                                    pathBuilder /* buffer to write path into */,
-                                    null /* don't want pointer to filename in the return path */
-                                );
+                StringBuilder pathBuilder = new StringBuilder(MAX_PATH + 1);
+                string pathToFile = null;
 
-                // if the buffer is not big enough
-                if (result > pathBuilder.Capacity)
+                // we may need to make two attempts because there's a small chance
+                // the buffer may not be sized correctly the first time
+                for (int i = 0; i < 2; i++)
                 {
-                    ErrorUtilities.VerifyThrow(i == 0, "We should not have to resize the buffer twice.");
+                    uint result = SearchPath
+                                    (
+                                        null /* search the system path */,
+                                        filename /* look for this file */,
+                                        null /* don't add an extra extension to the filename when searching */,
+                                        pathBuilder.Capacity /* size of buffer */,
+                                        pathBuilder /* buffer to write path into */,
+                                        null /* don't want pointer to filename in the return path */
+                                    );
 
-                    // resize the buffer and try again
-                    pathBuilder.Capacity = (int)result;
+                    // if the buffer is not big enough
+                    if (result > pathBuilder.Capacity)
+                    {
+                        ErrorUtilities.VerifyThrow(i == 0, "We should not have to resize the buffer twice.");
+
+                        // resize the buffer and try again
+                        pathBuilder.Capacity = (int)result;
+                    }
+                    else if (result > 0)
+                    {
+                        // file was found, so don't make another attempt
+                        pathToFile = pathBuilder.ToString();
+                        break;
+                    }
+                    else
+                    {
+                        // file was not found, so quit
+                        break;
+                    }
                 }
-                else if (result > 0)
-                {
-                    // file was found, so don't make another attempt
-                    pathToFile = pathBuilder.ToString();
-                    break;
-                }
-                else
-                {
-                    // file was not found, so quit
-                    break;
-                }
+                return pathToFile;
             }
+            else
+            {
+                // Get path from the environment and split on colons
+                var paths = Environment.GetEnvironmentVariable("PATH").Split(':');
+                foreach (var path in paths)
+                {
+                    string filePath = Path.Combine(path, filename);
+                    if (!string.IsNullOrEmpty(path) && File.Exists(filePath))
+                    {
+                        return filePath;
+                    }
+                }
 
-            return pathToFile;
+                return null;
+            }
         }
 
         /// <summary>
@@ -747,17 +901,15 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static string GetCurrentDirectory()
         {
-            StringBuilder sb = new StringBuilder(MAX_PATH);
-            int pathLength = GetCurrentDirectory(MAX_PATH, sb);
+            if (IsWindows)
+            {
+                StringBuilder sb = new StringBuilder(MAX_PATH);
+                int pathLength = GetCurrentDirectory(MAX_PATH, sb);
 
-            if (pathLength > 0)
-            {
-                return sb.ToString();
+                return pathLength > 0 ? sb.ToString() : null;
             }
-            else
-            {
-                return null;
-            }
+
+            return Directory.GetCurrentDirectory();
         }
 
         #endregion
@@ -840,9 +992,27 @@ namespace Microsoft.Build.Shared
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SetCurrentDirectory")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool SetCurrentDirectory(string path);
+        internal static extern bool SetCurrentDirectoryWindows(string path);
+
+        internal static bool SetCurrentDirectory(string path)
+        {
+            if (IsWindows)
+            {
+                return SetCurrentDirectoryWindows(path);
+            }
+
+            // Make sure this does not throw
+            try
+            {
+                Directory.SetCurrentDirectory(path);
+            }
+            catch
+            {
+            }
+            return true;
+        }
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]

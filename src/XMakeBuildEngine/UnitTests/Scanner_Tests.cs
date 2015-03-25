@@ -2,12 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
-using System.Reflection;
-using NUnit.Framework;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {

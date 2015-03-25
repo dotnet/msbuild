@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectOutputElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -10,8 +12,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -19,13 +20,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Test the ProjectOutputElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectOutputElement_Tests
     {
         /// <summary>
         /// Read an output item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOutputItem()
         {
             ProjectOutputElement output = GetOutputItem();
@@ -40,7 +41,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadOutputProperty()
         {
             ProjectOutputElement output = GetOutputProperty();
@@ -55,7 +56,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with missing itemname and propertyname
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidOutputWithoutPropertyOrItem()
         {
@@ -76,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with reserved property name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidReservedOutputPropertyName()
         {
@@ -97,7 +98,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with missing taskparameter
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidOutputWithoutTaskName()
         {
@@ -118,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with missing taskparameter
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidOutputWithEmptyTaskName()
         {
@@ -139,7 +140,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with child element
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidOutputWithChildElement()
         {
@@ -162,7 +163,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with propertyname but an empty itemname attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidPropertyValueItemBlank()
         {
@@ -183,7 +184,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with an itemname but an empty propertyname attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidItemValuePropertyBlank()
         {
@@ -204,7 +205,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Modify the condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetOutputPropertyCondition()
         {
             ProjectOutputElement output = GetOutputProperty();
@@ -218,7 +219,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Modify the property name value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetOutputPropertyName()
         {
             ProjectOutputElement output = GetOutputProperty();
@@ -232,7 +233,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to set the item name value when property name is set
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetOutputPropertyItemType()
         {
@@ -244,7 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the item name value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetOutputItemItemType()
         {
             ProjectOutputElement output = GetOutputItem();
@@ -258,7 +259,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to set the property name when the item name is set
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetOutputItemPropertyName()
         {

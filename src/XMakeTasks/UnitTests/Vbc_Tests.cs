@@ -2,16 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
 using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
@@ -40,7 +37,7 @@ namespace Microsoft.Build.UnitTests
             reference.SetMetadata("Alias", "Foo");
 
             t.References = new TaskItem[] { reference };
-            CommandLine.ValidateHasParameter(t, "/reference:System.Xml.dll");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/reference:System.Xml.dll"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
@@ -52,7 +49,7 @@ namespace Microsoft.Build.UnitTests
         {
             Vbc t = new Vbc();
             t.BaseAddress = "&H00001000";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:00001000");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:00001000"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
@@ -64,7 +61,7 @@ namespace Microsoft.Build.UnitTests
         {
             Vbc t = new Vbc();
             t.BaseAddress = "&h00001000";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:00001000");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:00001000"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
@@ -76,7 +73,7 @@ namespace Microsoft.Build.UnitTests
         {
             Vbc t = new Vbc();
             t.BaseAddress = "0x0000FFFF";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:0000FFFF");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:0000FFFF"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
@@ -88,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         {
             Vbc t = new Vbc();
             t.BaseAddress = "0X00001000";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:00001000");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:00001000"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
@@ -100,7 +97,7 @@ namespace Microsoft.Build.UnitTests
         {
             Vbc t = new Vbc();
             t.BaseAddress = "285212672";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:11000000");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:11000000"));
         }
 
         /// <summary>
@@ -111,7 +108,7 @@ namespace Microsoft.Build.UnitTests
         {
             Vbc t = new Vbc();
             t.BaseAddress = "3555454580";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:D3EBEE74");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:D3EBEE74"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it throws
@@ -135,8 +132,8 @@ namespace Microsoft.Build.UnitTests
             t.DocumentationFile = "foo.xml";
             t.GenerateDocumentation = true;
 
-            int firstParamLocation = CommandLine.ValidateHasParameter(t, "/doc+");
-            int secondParamLocation = CommandLine.ValidateHasParameter(t, "/doc:foo.xml");
+            int firstParamLocation = CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/doc+"));
+            int secondParamLocation = CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/doc:foo.xml"));
 
             Assert.IsTrue(secondParamLocation > firstParamLocation, "The order of the /doc switches is incorrect.");
         }
@@ -148,8 +145,8 @@ namespace Microsoft.Build.UnitTests
         {
             Vbc t = new Vbc();
 
-            t.AdditionalLibPaths = new string[] { @"c:\xmake\", @"c:\msbuild" };
-            CommandLine.ValidateHasParameter(t, @"/libpath:c:\xmake\,c:\msbuild");
+            t.AdditionalLibPaths = new[] { @"c:\xmake\", @"c:\msbuild" };
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/libpath:c:\xmake\,c:\msbuild"));
         }
 
         // Tests the "NoVBRuntimeReference" parameter on the Vbc task, and confirms that it sets
@@ -160,12 +157,12 @@ namespace Microsoft.Build.UnitTests
             Vbc t = new Vbc();
 
             t.NoVBRuntimeReference = true;
-            CommandLine.ValidateHasParameter(t, @"/novbruntimeref");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/novbruntimeref"));
 
             Vbc t2 = new Vbc();
 
             t2.NoVBRuntimeReference = false;
-            CommandLine.ValidateNoParameterStartsWith(t2, @"/novbruntimeref");
+            CommandLine.ValidateNoParameterStartsWith(t2, CommandLineBuilder.FixCommandLineSwitch(@"/novbruntimeref"));
         }
 
         // Tests the "Verbosity" parameter on the Vbc task, and confirms that it sets
@@ -176,7 +173,7 @@ namespace Microsoft.Build.UnitTests
             Vbc t = new Vbc();
 
             t.Verbosity = "QUIET";
-            CommandLine.ValidateHasParameter(t, @"/QUIET");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/QUIET"));
         }
 
         // Tests the "Verbosity" parameter on the Vbc task, and confirms that it sets
@@ -187,7 +184,7 @@ namespace Microsoft.Build.UnitTests
             Vbc t = new Vbc();
 
             t.Verbosity = "verbose";
-            CommandLine.ValidateHasParameter(t, @"/verbose");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/verbose"));
         }
 
         // Tests the "Platform" parameter on the Vbc task, and confirms that it sets
@@ -208,39 +205,39 @@ namespace Microsoft.Build.UnitTests
         {
             // Implicit "anycpu"
             Vbc t = new Vbc();
-            CommandLine.ValidateNoParameterStartsWith(t, @"/platform:");
+            CommandLine.ValidateNoParameterStartsWith(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:"));
             t = new Vbc();
             t.Prefer32Bit = false;
-            CommandLine.ValidateNoParameterStartsWith(t, @"/platform:");
+            CommandLine.ValidateNoParameterStartsWith(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:"));
             t = new Vbc();
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu32bitpreferred");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu32bitpreferred"));
 
             // Explicit "anycpu"
             t = new Vbc();
             t.Platform = "anycpu";
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu"));
             t = new Vbc();
             t.Platform = "anycpu";
             t.Prefer32Bit = false;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu"));
             t = new Vbc();
             t.Platform = "anycpu";
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu32bitpreferred");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu32bitpreferred"));
 
             // Explicit "x86"
             t = new Vbc();
             t.Platform = "x86";
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
             t = new Vbc();
             t.Platform = "x86";
             t.Prefer32Bit = false;
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
             t = new Vbc();
             t.Platform = "x86";
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
         }
 
         // Tests the "HighEntropyVA" parameter on the Vbc task, and confirms that it
@@ -347,22 +344,28 @@ namespace Microsoft.Build.UnitTests
 
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, "/codepage:5");
-            CommandLine.ValidateHasParameter(t, "/debug+");
-            CommandLine.ValidateHasParameter(t, "/delaysign+");
-            CommandLine.ValidateHasParameter(t, "/filealign:9");
-            CommandLine.ValidateHasParameter(t, "/nologo");
-            CommandLine.ValidateHasParameter(t, "/optimize+");
-            CommandLine.ValidateHasParameter(t, "/warnaserror+");
-            CommandLine.ValidateHasParameter(t, "/utf8output");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/codepage:5"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/debug+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/delaysign+"));
+            if (NativeMethodsShared.IsWindows)
+            {
+                CommandLine.ValidateHasParameter(t, "/filealign:9");
+                CommandLine.ValidateHasParameter(t, "/nologo");
+            }
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/optimize+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/warnaserror+"));
+            if (NativeMethodsShared.IsWindows)
+            {
+                CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/utf8output"));
+            }
 
-            CommandLine.ValidateHasParameter(t, "/doc+");
-            CommandLine.ValidateHasParameter(t, "/nowarn");
-            CommandLine.ValidateHasParameter(t, "/optionexplicit+");
-            CommandLine.ValidateHasParameter(t, "/optionstrict+");
-            CommandLine.ValidateHasParameter(t, "/removeintchecks+");
-            CommandLine.ValidateHasParameter(t, "/netcf");
-            CommandLine.ValidateHasParameter(t, "/optioninfer+");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/doc+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/nowarn"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/optionexplicit+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/optionstrict+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/removeintchecks+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/netcf"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/optioninfer+"));
         }
 
         /***********************************************************************
@@ -373,7 +376,7 @@ namespace Microsoft.Build.UnitTests
          *
          **********************************************************************/
         [Test]
-        [Ignore]
+        [Ignore("Disabled pending decision whether to support host objects")]
         public void VbcHostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -443,7 +446,7 @@ namespace Microsoft.Build.UnitTests
             public void AdditionalLibPaths()
             {
                 Vbc t = new Vbc();
-                t.AdditionalLibPaths = new string[] { @"parm /out:c:\windows\system32\notepad.exe" };
+                t.AdditionalLibPaths = new[] { @"parm /out:c:\windows\system32\notepad.exe" };
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
@@ -451,7 +454,7 @@ namespace Microsoft.Build.UnitTests
             public void AddModules()
             {
                 Vbc t = new Vbc();
-                t.AddModules = new string[] { @"parm /out:c:\windows\system32\notepad.exe" };
+                t.AddModules = new[] { @"parm /out:c:\windows\system32\notepad.exe" };
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
@@ -473,7 +476,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             [Test]
-            [Ignore] // Because constants may legitimately contains quotes _and_ we've cut security, we decided to let DefineConstants be passed through literally.
+            [Ignore("Because constants may legitimately contains quotes _and_ we've cut security, we decided to let DefineConstants be passed through literally.")]
             public void DefineConstants()
             {
                 Vbc t = new Vbc();
@@ -947,7 +950,7 @@ namespace Microsoft.Build.UnitTests
                 MockEngine engine = new MockEngine();
                 Vbc t = new Vbc();
                 t.BuildEngine = engine;
-                t.PdbFile = "||{}}{<>?$$%^&*()!@#$%`~.pdb";
+                t.PdbFile = "||{}}{<>?$$%^&*()!@#$%`~/.pdb";
                 t.MovePdbFileIfNecessary(outputAssemblyPath);
 
                 FileInfo oldPDBInfo = new FileInfo(outputAssemblyPath);
@@ -982,7 +985,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem("Foo.dll")
             };
 
-            CommandLine.ValidateHasParameter(vbc, "/analyzer:Foo.dll");
+            CommandLine.ValidateHasParameter(vbc, CommandLineBuilder.FixCommandLineSwitch("/analyzer:Foo.dll"));
         }
 
         [Test]
@@ -1161,7 +1164,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem("web.config")
             };
 
-            CommandLine.ValidateHasParameter(vbc, "/additionalfile:web.config");
+            CommandLine.ValidateHasParameter(vbc, CommandLineBuilder.FixCommandLineSwitch("/additionalfile:web.config"));
         }
 
         [Test]

@@ -2,23 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
-using System.IO;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
+using System.Linq;
 using System.Reflection;
-
-using NUnit.Framework;
-
-using Microsoft.Build.UnitTests;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using FileUtilities = Microsoft.Build.Shared.FileUtilities;
+
+using NUnit.Framework;
+
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
+using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 
@@ -94,6 +92,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// a string parameter of a task, in this case the Message task.
         /// </summary>
         [Test]
+        //[Ignore("FEATURE: TASKHOST")]
         public void SemicolonInPropertyPassedIntoStringParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -144,6 +143,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// an ITaskItem[] task parameter.
         /// </summary>
         [Test]
+        //[Ignore("FEATURE: TASKHOST")]
         public void SemicolonInPropertyPassedIntoITaskItemParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
@@ -512,8 +512,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// they only get unescaped when fed into a subsequent task.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void InferEscapedOutputsFromTask()
         {
             string inputFile = null;
@@ -556,8 +554,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// as an escaped percent sign.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ItemTransformContainingSemicolon()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -583,8 +579,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// as an escaped percent sign.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -646,8 +640,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// won't be unescaped.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void GlobalPropertyWithEscapedCharacters()
         {
             MockLogger logger = new MockLogger();
@@ -672,8 +664,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// literally, not as a wildcard
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void EscapedWildcardsShouldNotBeExpanded()
         {
             MockLogger logger = new MockLogger();
@@ -708,8 +698,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// literally, not as a wildcard
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
             MockLogger logger = new MockLogger();
@@ -775,8 +763,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// same name.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TargetNamesAlwaysUnescaped_Override()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -908,7 +894,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInConfiguration()
         {
@@ -968,7 +954,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInConfiguration_UsingTaskHost()
         {
@@ -1038,7 +1024,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInAssemblyName()
         {
@@ -1092,7 +1078,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInAssemblyName_UsingTaskHost()
         {
@@ -1156,7 +1142,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DollarSignInAssemblyName()
         {
@@ -1210,7 +1196,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DollarSignInAssemblyName_UsingTaskHost()
         {
@@ -1274,7 +1260,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInSourceCodeFilename()
         {
@@ -1328,7 +1314,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInSourceCodeFilename_UsingTaskHost()
         {
@@ -1394,7 +1380,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SolutionWithLotsaCrazyCharacters()
         {
@@ -1591,7 +1577,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Test]
-        [Ignore]
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SolutionWithLotsaCrazyCharacters_UsingTaskHost()
         {

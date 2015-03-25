@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore] // "This should be a syntax error. But we can't tell because the preprocessor doesn't work yet."
+        [Ignore("This should be a syntax error. But we can't tell because the preprocessor doesn't work yet.")]
         public void NamelessNamespaceSyntaxError()
         {
             AssertParse("namespace { class MyClass {} }", null);
@@ -136,49 +136,49 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Ignore("This should be a syntax error, but since the preprocessor isn't working, we can't be sure.")]
         public void NamespaceDotDotSyntaxError()
         {
             AssertParse("namespace poo..i { class MyClass {} }", null);
         }
 
         [Test]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Ignore("This should be a syntax error, but since the preprocessor isn't working, we can't be sure.")]
         public void DotNamespaceSyntaxError()
         {
             AssertParse("namespace .i { class MyClass {} }", null);
         }
 
         [Test]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Ignore("This should be a syntax error, but since the preprocessor isn't working, we can't be sure.")]
         public void NamespaceDotNamespaceSyntaxError()
         {
             AssertParse("namespace i { namespace .j {class MyClass {}} }", null);
         }
 
         [Test]
-        [Ignore] // "This should be a syntax error, but we'd have to look-ahead past the class name."
+        [Ignore("This should be a syntax error, but we'd have to look-ahead past the class name.")]
         public void NamespaceClassDotClassSyntaxError()
         {
             AssertParse("namespace i { namespace j {class a.b {}} }", null);
         }
 
         [Test]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Ignore("This should be a syntax error, but since the preprocessor isn't working, we can't be sure.")]
         public void NamespaceCloseScopeSyntaxError()
         {
             AssertParse("namespace i } class a {} }", null);
         }
 
         [Test]
-        [Ignore] // "If we went to the trouble of tracking open and closing scopes, we really should do something like build up a parse tree. Too much hassle, just for this simple function."
+        [Ignore("If we went to the trouble of tracking open and closing scopes, we really should do something like build up a parse tree. Too much hassle, just for this simple function.")]
         public void NamespaceEmbeddedScopeSyntaxError()
         {
             AssertParse("namespace i { {} class a {} }", null);
         }
 
         [Test]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Ignore("This should be a syntax error, but since the preprocessor isn't working, we can't be sure.")]
         public void ScopelessNamespaceSyntaxError()
         {
             AssertParse("namespace i; namespace j { class a {} }", null);
@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore] // "For this to pass, we need to support every kind of Char token in the tokenizer"
+        [Ignore("For this to pass, we need to support every kind of Char token in the tokenizer")]
         public void ClassAttributeCharIsCloseScope()
         {
             AssertParse("namespace i { [MyChar('\x0000')] class a { } }", "i.a");
@@ -329,7 +329,7 @@ namespace i
         }
 
         [Test]
-        [Ignore] // "Preprocessor is not yet implemented."
+        [Ignore("Preprocessor is not yet implemented.")]
         public void PreprocessorNamespaceInFalsePreprocessorBlock()
         {
             AssertParse

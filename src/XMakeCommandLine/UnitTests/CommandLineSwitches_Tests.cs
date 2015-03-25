@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unquoteParameters);
         }
 
-
+#if !MONO
         [Test]
         public void NodeReuseParametersIdentificationTests()
         {
@@ -321,6 +321,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNotNull(missingParametersErrorMessage);
             Assert.IsTrue(unquoteParameters);
         }
+#endif
 
         [Test]
         public void ProjectSwitchIdentificationTests()
@@ -602,6 +603,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
+#if !MONO
         [Test]
         public void MaxCPUCountSwitchIdentificationTests()
         {
@@ -639,6 +641,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNotNull(missingParametersErrorMessage);
             Assert.IsTrue(unquoteParameters);
         }
+#endif
 
         [Test]
         public void ValidateSwitchIdentificationTests()

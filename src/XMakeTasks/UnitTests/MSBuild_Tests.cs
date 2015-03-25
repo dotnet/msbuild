@@ -38,8 +38,6 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Environment.CurrentDirectory;
@@ -220,8 +218,6 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that nonexistent projects are skipped when requested
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SkipNonexistentProjects()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -257,8 +253,6 @@ namespace Microsoft.Build.UnitTests
         /// DDB # 125831
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SkipNonexistentProjectsBuildingInParallel()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -290,8 +284,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void LogErrorWhenBuildingVCProj()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -338,8 +330,7 @@ namespace Microsoft.Build.UnitTests
         /// property value and so he can't escape it himself.
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();

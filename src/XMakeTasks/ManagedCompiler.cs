@@ -3,18 +3,9 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Resources;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -207,8 +198,6 @@ namespace Microsoft.Build.Tasks
             get { return (ITaskItem[])Bag["ResponseFiles"]; }
         }
 
-
-
         public ITaskItem[] Sources
         {
             set
@@ -344,8 +333,8 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            commandLine.AppendSwitchIfNotNull("/addmodule:", this.AddModules, ",");
-            commandLine.AppendSwitchWithInteger("/codepage:", this.Bag, "CodePage");
+            commandLine.AppendSwitchIfNotNull(NativeMethodsShared.IsWindows ? "/addmodule:" : "-addmodule:", this.AddModules, ",");
+            commandLine.AppendSwitchWithInteger(NativeMethodsShared.IsWindows ? "/codepage:" : "-codepage:", this.Bag, "CodePage");
 
             ConfigureDebugProperties();
 
@@ -354,28 +343,47 @@ namespace Microsoft.Build.Tasks
             // /debug+ is just a shorthand for /debug:full.  And /debug- is just a shorthand for /debug:none.
 
             commandLine.AppendPlusOrMinusSwitch("/debug", this.Bag, "EmitDebugInformation");
-            commandLine.AppendSwitchIfNotNull("/debug:", this.DebugType);
+
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchIfNotNull("/debug:", this.DebugType);
+            }
 
             commandLine.AppendPlusOrMinusSwitch("/delaysign", this.Bag, "DelaySign");
 
-            commandLine.AppendSwitchWithInteger("/filealign:", this.Bag, "FileAlignment");
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchWithInteger("/filealign:", this.Bag, "FileAlignment");
+            }
             commandLine.AppendSwitchIfNotNull("/keycontainer:", this.KeyContainer);
             commandLine.AppendSwitchIfNotNull("/keyfile:", this.KeyFile);
-            // If the strings "LogicalName" or "Access" ever change, make sure to search/replace everywhere in vsproject.
-            commandLine.AppendSwitchIfNotNull("/linkresource:", this.LinkResources, new string[] { "LogicalName", "Access" });
-            commandLine.AppendWhenTrue("/nologo", this.Bag, "NoLogo");
-            commandLine.AppendWhenTrue("/nowin32manifest", this.Bag, "NoWin32Manifest");
+            if (NativeMethodsShared.IsWindows)
+            {
+                // If the strings "LogicalName" or "Access" ever change, make sure to search/replace everywhere in vsproject.
+                commandLine.AppendSwitchIfNotNull("/linkresource:", this.LinkResources, new string[] { "LogicalName", "Access" });
+                commandLine.AppendWhenTrue("/nologo", this.Bag, "NoLogo");
+                commandLine.AppendWhenTrue("/nowin32manifest", this.Bag, "NoWin32Manifest");
+            }
             commandLine.AppendPlusOrMinusSwitch("/optimize", this.Bag, "Optimize");
             commandLine.AppendSwitchIfNotNull("/out:", this.OutputAssembly);
-            commandLine.AppendSwitchIfNotNull("/ruleset:", this.CodeAnalysisRuleSet);
-            commandLine.AppendSwitchIfNotNull("/subsystemversion:", this.SubsystemVersion);
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchIfNotNull("/ruleset:", this.CodeAnalysisRuleSet);
+                commandLine.AppendSwitchIfNotNull("/subsystemversion:", this.SubsystemVersion);
+            }
             // If the strings "LogicalName" or "Access" ever change, make sure to search/replace everywhere in vsproject.
             commandLine.AppendSwitchIfNotNull("/resource:", this.Resources, new string[] { "LogicalName", "Access" });
             commandLine.AppendSwitchIfNotNull("/target:", this.TargetType);
             commandLine.AppendPlusOrMinusSwitch("/warnaserror", this.Bag, "TreatWarningsAsErrors");
-            commandLine.AppendWhenTrue("/utf8output", this.Bag, "Utf8Output");
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendWhenTrue("/utf8output", this.Bag, "Utf8Output");
+            }
             commandLine.AppendSwitchIfNotNull("/win32icon:", this.Win32Icon);
-            commandLine.AppendSwitchIfNotNull("/win32manifest:", this.Win32Manifest);
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchIfNotNull("/win32manifest:", this.Win32Manifest);
+            }
 
             // Append the analyzers.
             this.AddAnalyzersToCommandLine(commandLine);

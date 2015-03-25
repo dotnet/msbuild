@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         private static string s_cacheDirectory = Path.Combine(Path.GetTempPath(), "GetSDKReferenceFiles");
 
         [TestFixtureSetUp]
-        public static void ClassSetup(TestContext context)
+        public static void ClassSetup()
         {
             s_fakeSDKStructureRoot = CreateFakeSDKReferenceAssemblyDirectory1(out s_sdkDirectory);
             s_fakeSDKStructureRoot2 = CreateFakeSDKReferenceAssemblyDirectory2(out s_sdkDirectory2);

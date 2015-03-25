@@ -28,7 +28,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The most current ToolsVersion known to this version of MSBuild. 
         /// </summary>
-        internal const string CurrentToolsVersion = CurrentVisualStudioVersion;
+        internal static string CurrentToolsVersion = CurrentVisualStudioVersion;
 
         /// <summary>
         /// The most current ToolsVersion known to this version of MSBuild as a Version object. 

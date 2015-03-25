@@ -2,26 +2,24 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Configuration;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Resources;
 using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading;
-using System.Xml;
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 #endif
@@ -33,7 +31,6 @@ using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -129,7 +126,12 @@ namespace Microsoft.Build.CommandLine
             }
             catch (TypeInitializationException ex)
             {
-                if (ex.InnerException == null || ex.InnerException.GetType() != typeof(ConfigurationErrorsException))
+                if (ex.InnerException == null
+#if MONO
+                )
+#else
+                    || ex.InnerException.GetType() != typeof(ConfigurationErrorsException))
+#endif
                 {
                     throw;
                 }
@@ -441,7 +443,7 @@ namespace Microsoft.Build.CommandLine
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
-
+#if !MONO
             string debugFlag = Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART");
             if (debugFlag == "1")
             {
@@ -452,17 +454,17 @@ namespace Microsoft.Build.CommandLine
                 // Sometimes easier to attach rather than deal with JIT prompt
                 Console.ReadLine();
             }
-
+#endif
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, "commandLine");
 
             ExitType exitType = ExitType.Success;
 
-            ConsoleCancelEventHandler cancelHandler = new ConsoleCancelEventHandler(Console_CancelKeyPress);
+            ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
             try
             {
 #if (!STANDALONEBUILD)
                 // Enable CodeMarkers for MSBuild.exe
-                CodeMarkers.Instance.InitPerformanceDll(CodeMarkerApp.MSBUILDPERF, @"Software\Microsoft\MSBuild\4.0");
+                CodeMarkers.Instance.InitPerformanceDll(CodeMarkerApp.MSBUILDPERF,  String.Format(CultureInfo.InvariantCulture, @"Software\Microsoft\MSBuild\{0}", MSBuildConstants.CurrentProductVersion));
 #endif
 #if MSBUILDENABLEVSPROFILING 
                 string startMSBuildExe = String.Format(CultureInfo.CurrentCulture, "Running MSBuild.exe with command line {0}", commandLine);
@@ -520,6 +522,7 @@ namespace Microsoft.Build.CommandLine
                         recursing: false
                         ))
                 {
+#if !MONO
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
                     // However we want to give a hint to anyone who is building single proc without realizing it that there
                     // is a better way.
@@ -527,7 +530,7 @@ namespace Microsoft.Build.CommandLine
                     {
                         Console.WriteLine(ResourceUtilities.FormatResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
-
+#endif
                     if (preprocessWriter != null || debugger)
                     {
                         // Indicate to the engine that it can NOT toss extraneous file content: we want to 
@@ -1231,13 +1234,15 @@ namespace Microsoft.Build.CommandLine
         /// response files, including the auto-response file.
         /// </summary>
         /// <param name="commandLine"></param>
+        /// <param name="switchesFromAutoResponseFile"></param>
+        /// <param name="switchesNotFromAutoResponseFile"></param>
         /// <returns>Combined bag of switches.</returns>
         private static void GatherAllSwitches(string commandLine, out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile)
         {
             // split the command line on (unquoted) whitespace
             ArrayList commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
             // discard the first piece, because that's the path to the executable -- the rest are args
-            s_exeName = QuotingUtilities.Unquote((string)commandLineArgs[0]);
+            s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote((string)commandLineArgs[0]));
 
             if (!s_exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
             {
@@ -1286,7 +1291,13 @@ namespace Microsoft.Build.CommandLine
                         string switchParameters;
 
                         // all switches should start with - or / unless a project is being specified
-                        if (!unquotedCommandLineArg.StartsWith("-", StringComparison.Ordinal) && !unquotedCommandLineArg.StartsWith("/", StringComparison.Ordinal))
+                        if (!unquotedCommandLineArg.StartsWith("-", StringComparison.Ordinal)
+#if MONO
+                            )
+#else
+                            && !unquotedCommandLineArg.StartsWith("/", StringComparison.Ordinal)
+                        )
+#endif
                         {
                             switchName = null;
                             // add a (fake) parameter indicator for later parsing
@@ -1435,7 +1446,7 @@ namespace Microsoft.Build.CommandLine
         {
             try
             {
-                string responseFile = unquotedCommandLineArg.Substring(1);
+                string responseFile = FileUtilities.FixFilePath(unquotedCommandLineArg.Substring(1));
 
                 if (responseFile.Length == 0)
                 {
@@ -1698,10 +1709,12 @@ namespace Microsoft.Build.CommandLine
             {
                 ShowHelpMessage();
             }
+#if !MONO
             else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
                 StartLocalNode(commandLineSwitches);
             }
+#endif
             else
             {
                 // if help switch is not set, and errors were found, abort (don't process the remaining switches)
@@ -1768,13 +1781,13 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out which properties have been set on the command line
                     globalProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property]);
-
+#if !MONO
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
                     // figure out if we shold reuse nodes
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-
+#endif
                     // determine what if any writer to preprocess to
                     preprocessWriter = null;
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))
@@ -1892,7 +1905,7 @@ namespace Microsoft.Build.CommandLine
 
             return writer;
         }
-
+#if !MONO
         /// <summary>
         /// Uses the input from thinNodeMode switch to start a local node server
         /// </summary>
@@ -1983,6 +1996,7 @@ namespace Microsoft.Build.CommandLine
         {
  	        Microsoft.Build.BuildEngine.LocalNode.StartLocalNodeServer(nodeNumber);
         }
+#endif
 #endif
 
         /// <summary>
@@ -2148,8 +2162,8 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
-                InitializationException.VerifyThrow(File.Exists(parameters[0]), "ProjectNotFoundError", parameters[0]);
-                projectFile = parameters[0];
+                projectFile = FileUtilities.FixFilePath(parameters[0]);
+                InitializationException.VerifyThrow(File.Exists(projectFile), "ProjectNotFoundError", projectFile);
             }
 
             return projectFile;
@@ -2532,7 +2546,7 @@ namespace Microsoft.Build.CommandLine
                 // Check to see if the logfile parameter has been set, if not set it to the current directory
                 string logFileParameter = ExtractAnyLoggerParameter(fileParameters, "logfile");
 
-                string logFileName = ExtractAnyParameterValue(logFileParameter);
+                string logFileName = FileUtilities.FixFilePath(ExtractAnyParameterValue(logFileParameter));
 
                 try
                 {
@@ -2627,7 +2641,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Internal for unit testing only
         /// </remarks> 
-        /// <param name="parameters"></param>
+        /// <param name="value"></param>
         /// <returns>The logger verbosity level.</returns>
         internal static LoggerVerbosity ProcessVerbositySwitch(string value)
         {
@@ -2731,6 +2745,8 @@ namespace Microsoft.Build.CommandLine
         /// Parse a command line logger argument into a LoggerDescription structure
         /// </summary>
         /// <param name="parameter">the command line string</param>
+        /// <param name="unquotedParameter">the command line string</param>
+        /// <param name="verbosity">logging verbosity</param>
         /// <returns></returns>
         private static LoggerDescription ParseLoggingParameter(string parameter, string unquotedParameter, LoggerVerbosity verbosity)
         {
@@ -2794,9 +2810,10 @@ namespace Microsoft.Build.CommandLine
             }
 
             // figure out whether the assembly's identity (strong/weak name), or its filename/path is provided
-            if (File.Exists(loggerAssemblySpec))
+            string testFile = FileUtilities.FixFilePath(loggerAssemblySpec);
+            if (File.Exists(testFile))
             {
-                loggerAssemblyFile = loggerAssemblySpec;
+                loggerAssemblyFile = testFile;
             }
             else
             {
@@ -2891,9 +2908,10 @@ namespace Microsoft.Build.CommandLine
             foreach (string parameter in parameters)
             {
                 InitializationException.VerifyThrow(schemaFile == null, "MultipleSchemasError", parameter);
-                InitializationException.VerifyThrow(File.Exists(parameter), "SchemaNotFoundError", parameter);
+                string fileName = FileUtilities.FixFilePath(parameter);
+                InitializationException.VerifyThrow(File.Exists(fileName), "SchemaNotFoundError", fileName);
 
-                schemaFile = Path.Combine(Directory.GetCurrentDirectory(), parameter);
+                schemaFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
             }
 
             return schemaFile;
@@ -2949,7 +2967,9 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_3_SwitchesHeader"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_9_TargetSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_10_PropertySwitch"));
+#if !MONO
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_17_MaximumCPUSwitch"));
+#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_23_ToolsVersionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_12_VerbositySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_13_ConsoleLoggerParametersSwitch"));
@@ -2961,16 +2981,18 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
+#if !MONO
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
+#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
 
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));
-
+#if !MONO
             if (CommandLineSwitches.IsParameterlessSwitch("debug"))
             {
                 Console.WriteLine(AssemblyResources.GetString("HelpMessage_27_DebuggerSwitch"));
             }
-
+#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

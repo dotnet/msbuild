@@ -38,6 +38,11 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    return String.Empty;
+                }
+
                 if (s_currentProcessArchitectureInitialized)
                 {
                     return s_currentProcessArchitecture;
