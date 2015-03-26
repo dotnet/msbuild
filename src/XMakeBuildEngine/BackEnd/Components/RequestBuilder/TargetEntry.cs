@@ -662,7 +662,6 @@ namespace Microsoft.Build.BackEnd
                 DataCollection.CommentMarkProfile(8801, endTargetBuild);
             }
 #endif
-            return;
         }
 
         /// <summary>
