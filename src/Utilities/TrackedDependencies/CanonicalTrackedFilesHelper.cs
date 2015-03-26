@@ -84,7 +84,7 @@ namespace Microsoft.Build.Utilities
             requestedFilename = String.Empty;
 
             // No output files for the source were tracked
-            // safely assume that this is becuase we didn't track them because they were'nt compiled
+            // safely assume that this is because we didn't track them because they weren't compiled
             if ((files == null) || (files.Length == 0))
             {
                 allExist = false;

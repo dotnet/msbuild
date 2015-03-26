@@ -146,7 +146,7 @@ namespace Microsoft.Build.Utilities
         private static object s_locker = new Object();
 
         /// <summary>
-        /// Cache the results of calling the GetPathToRefernceAssemblies so that we do not recalculate it every time we call the method
+        /// Cache the results of calling the GetPathToReferenceAssemblies so that we do not recalculate it every time we call the method
         /// </summary>
         private static Dictionary<string, IList<string>> s_cachedReferenceAssemblyPaths;
 
@@ -1752,7 +1752,7 @@ namespace Microsoft.Build.Utilities
         /// Returns the paths to the reference assemblies location for the given framework version relative to a given targetFrameworkRoot.
         /// The method will not check to see if the path exists or not.
         /// </summary>
-        /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assembies will be
+        /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
         /// </param>
         /// <param name="frameworkName">A frameworkName class which represents a TargetFrameworkMoniker. This cannot be null.</param>
@@ -2238,7 +2238,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a registy location enumerate the registry and find the installed SDKs.
+        /// Given a registry location enumerate the registry and find the installed SDKs.
         /// </summary>
         internal static void GatherSDKsFromRegistryImpl(Dictionary<TargetPlatformSDK, TargetPlatformSDK> platformMonikers, string registryKeyRoot, RegistryView registryView, RegistryHive registryHive, GetRegistrySubKeyNames getRegistrySubKeyNames, GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue, OpenBaseKey openBaseKey, FileExists fileExists)
         {

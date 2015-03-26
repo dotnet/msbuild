@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Default delegate to get the path based on a fusion name.
         /// </summary>
-        internal static readonly GetPathFromFusionName pathFromFusionName = new GetPathFromFusionName(RetreivePathFromFusionName);
+        internal static readonly GetPathFromFusionName pathFromFusionName = new GetPathFromFusionName(RetrievePathFromFusionName);
 
         /// <summary>
         /// Default delegate to get the gac enumerator.
@@ -160,7 +160,7 @@ namespace Microsoft.Build.Tasks
         /// Given a fusion name get the path to the assembly on disk.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Microsoft.Build.Tasks.IAssemblyCache.QueryAssemblyInfo(System.UInt32,System.String,Microsoft.Build.Tasks.ASSEMBLY_INFO@)", Justification = "We use the out parameters to determine if we got a good assembly back or not")]
-        internal static string RetreivePathFromFusionName(string strongName)
+        internal static string RetrievePathFromFusionName(string strongName)
         {
             // Extra checks for PInvoke-destined data.
             ErrorUtilities.VerifyThrowArgumentNull(strongName, "assemblyName");

@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests
             newGenericEvent = new BuildFinishedEventArgs(null, null, false);
             newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
             VerifyGenericEventArg(genericEvent, newGenericEvent);
-            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeded to Match");
+            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeeded to Match");
 
             // Test using null strings
             _stream.Position = 0;
@@ -242,7 +242,7 @@ namespace Microsoft.Build.UnitTests
             newGenericEvent = new BuildFinishedEventArgs("Something", "Something", false);
             newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
             VerifyGenericEventArg(genericEvent, newGenericEvent);
-            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeded to Match");
+            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeeded to Match");
         }
 
         [TestMethod]
@@ -518,7 +518,7 @@ namespace Microsoft.Build.UnitTests
             long streamReadEndPosition = _stream.Position;
             Assert.IsTrue(streamWriteEndPosition == streamReadEndPosition, "Stream End Positions Should Match");
             VerifyGenericEventArg(genericEvent, newGenericEvent);
-            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeded to Match");
+            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeeded to Match");
             Assert.IsTrue(string.Compare(genericEvent.ProjectFile, newGenericEvent.ProjectFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected ProjectFile to Match");
 
             // Test with empty strings
@@ -537,7 +537,7 @@ namespace Microsoft.Build.UnitTests
             streamReadEndPosition = _stream.Position;
             Assert.IsTrue(streamWriteEndPosition == streamReadEndPosition, "Stream End Positions Should Match");
             VerifyGenericEventArg(genericEvent, newGenericEvent);
-            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeded to Match");
+            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeeded to Match");
             Assert.IsTrue(string.Compare(genericEvent.ProjectFile, newGenericEvent.ProjectFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected ProjectFile to Match");
 
             // Test with null strings
@@ -557,7 +557,7 @@ namespace Microsoft.Build.UnitTests
             streamReadEndPosition = _stream.Position;
             Assert.IsTrue(streamWriteEndPosition == streamReadEndPosition, "Stream End Positions Should Match");
             VerifyGenericEventArg(genericEvent, newGenericEvent);
-            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeded to Match");
+            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeeded to Match");
             Assert.IsTrue(string.Compare(genericEvent.ProjectFile, newGenericEvent.ProjectFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected ProjectFile to Match");
         }
 
@@ -699,7 +699,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.AreEqual(genericEvent.Items, newGenericEvent.Items, "Expected Properties to match");
             Assert.AreEqual(genericEvent.Properties, newGenericEvent.Properties, "Expected Properties to match");
-            Assert.AreEqual(genericEvent.ParentProjectBuildEventContext, newGenericEvent.ParentProjectBuildEventContext, "Expected ParentEvent Contextes to match");
+            Assert.AreEqual(genericEvent.ParentProjectBuildEventContext, newGenericEvent.ParentProjectBuildEventContext, "Expected ParentEvent Contexts to match");
             Assert.AreEqual(genericEvent.ProjectId, newGenericEvent.ProjectId, "Expected ProjectId to Match");
             Assert.IsTrue(string.Compare(genericEvent.ProjectFile, newGenericEvent.ProjectFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected ProjectFile to Match");
             Assert.IsTrue(string.Compare(genericEvent.TargetNames, newGenericEvent.TargetNames, StringComparison.OrdinalIgnoreCase) == 0, "Expected TargetNames to Match");
@@ -834,7 +834,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private static void VerifyTargetFinished(TargetFinishedEventArgs genericEvent, TargetFinishedEventArgs newGenericEvent)
         {
-            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeded to Match");
+            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeeded to Match");
             Assert.IsTrue(string.Compare(genericEvent.ProjectFile, newGenericEvent.ProjectFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected ProjectFile to Match");
             Assert.IsTrue(string.Compare(genericEvent.TargetFile, newGenericEvent.TargetFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected TargetFile to Match");
             Assert.IsTrue(string.Compare(genericEvent.TargetName, newGenericEvent.TargetName, StringComparison.OrdinalIgnoreCase) == 0, "Expected TargetName to Match");
@@ -972,7 +972,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private static void VerifyTaskFinished(TaskFinishedEventArgs genericEvent, TaskFinishedEventArgs newGenericEvent)
         {
-            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeded to Match");
+            Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeeded to Match");
             Assert.IsTrue(string.Compare(genericEvent.ProjectFile, newGenericEvent.ProjectFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected ProjectFile to Match");
             Assert.IsTrue(string.Compare(genericEvent.TaskFile, newGenericEvent.TaskFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected TaskFile to Match");
             Assert.IsTrue(string.Compare(genericEvent.TaskName, newGenericEvent.TaskName, StringComparison.OrdinalIgnoreCase) == 0, "Expected TaskName to Match");

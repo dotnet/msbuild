@@ -60,7 +60,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// </summary>
         /// <remarks>
         /// This field is mandatory and is culture invariant. Current accepted values are <c>ProjectFile</c>
-        /// and <c>UserFile</c>. <c>ProjectFile</c> causes the property value to be writted to and read from
+        /// and <c>UserFile</c>. <c>ProjectFile</c> causes the property value to be written to and read from
         /// the project manifest file or the property sheet (depending on which node in the solution explorer/property manager
         /// window is used to spawn the property pages UI). <c>UserFile</c> causes the property value to be written to and
         /// read from the .user file.

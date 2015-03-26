@@ -73,7 +73,7 @@ namespace Microsoft.Build.Collections
         private bool _immutable;
 
         /// <summary>
-        /// We need a static contructor to retrieve the running ProcessorArchitecture that way we can
+        /// We need a static constructor to retrieve the running ProcessorArchitecture that way we can
         /// Avoid using optimized code that will not run correctly on IA64 due to alignment issues
         /// </summary>
         static MSBuildNameIgnoreCaseComparer()

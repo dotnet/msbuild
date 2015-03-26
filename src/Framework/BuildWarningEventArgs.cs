@@ -209,7 +209,7 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
-            #region SubCatetory
+            #region SubCategory
             if (reader.ReadByte() == 0)
             {
                 _subcategory = null;

@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:   AppendTwoStringsEnsureNoSpace
         *
-        * When appending two comma-delimted strings, there should be no space before the comma.
+        * When appending two comma-delimited strings, there should be no space before the comma.
         */
         [TestMethod]
         public void AppendTwoStringsEnsureNoSpace()

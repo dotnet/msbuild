@@ -930,7 +930,7 @@ namespace Microsoft.Build.UnitTests
                             // Verify build did not build second project which has the message SecondProject
                             mockEngine.AssertLogDoesntContain("SecondProject");
                             // Verify the correct msbuild task messages are in the log
-                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 0 Epected BuildInParallel to be false");
+                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 0 Expected BuildInParallel to be false");
                             break;
                         case 1:
                             // Verify setting BuildInParallel to true and StopOnFirstFailure to 
@@ -941,7 +941,7 @@ namespace Microsoft.Build.UnitTests
                             // Verify build did  build second project which has the message SecondProject
                             mockEngine.AssertLogContains("SecondProject");
                             // Verify the correct msbuild task messages are in the log
-                            Assert.IsTrue(msbuildTask.BuildInParallel, "Iteration of 1 Epected BuildInParallel to be true");
+                            Assert.IsTrue(msbuildTask.BuildInParallel, "Iteration of 1 Expected BuildInParallel to be true");
                             break;
                         case 2:
                             // Verify setting BuildInParallel to false and StopOnFirstFailure to 
@@ -952,7 +952,7 @@ namespace Microsoft.Build.UnitTests
                             // Verify build did not build second project which has the message SecondProject
                             mockEngine.AssertLogDoesntContain("SecondProject");
                             // Verify the correct msbuild task messages are in the log
-                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 2 Epected BuildInParallel to be false");
+                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 2 Expected BuildInParallel to be false");
                             break;
 
                         case 3:
@@ -964,11 +964,11 @@ namespace Microsoft.Build.UnitTests
                             // Verify build did build second project which has the message SecondProject
                             mockEngine.AssertLogContains("SecondProject");
                             // Verify the correct msbuild task messages are in the log
-                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 3 Epected BuildInParallel to be false");
+                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 3 Expected BuildInParallel to be false");
                             break;
                     }
                     // The build should fail as the first project has an error
-                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally
@@ -1030,7 +1030,7 @@ namespace Microsoft.Build.UnitTests
                             // Verify build did build second project which has the message SecondProject
                             mockEngine.AssertLogContains("SecondProject");
                             // Verify the correct msbuild task messages are in the log
-                            Assert.IsTrue(msbuildTask.BuildInParallel, "Iteration of 0 Epected BuildInParallel to be true");
+                            Assert.IsTrue(msbuildTask.BuildInParallel, "Iteration of 0 Expected BuildInParallel to be true");
                             break;
                         case 1:
                             // Verify setting BuildInParallel to true and StopOnFirstFailure to 
@@ -1041,7 +1041,7 @@ namespace Microsoft.Build.UnitTests
                             // Verify build did build second project which has the message SecondProject
                             mockEngine.AssertLogContains("SecondProject");
                             // Verify the correct msbuild task messages are in the log
-                            Assert.IsTrue(msbuildTask.BuildInParallel, "Iteration of 1 Epected BuildInParallel to be true");
+                            Assert.IsTrue(msbuildTask.BuildInParallel, "Iteration of 1 Expected BuildInParallel to be true");
                             break;
                         case 2:
                             // Verify setting BuildInParallel to false and StopOnFirstFailure to 
@@ -1052,7 +1052,7 @@ namespace Microsoft.Build.UnitTests
                             // Verify build did not build second project which has the message SecondProject
                             mockEngine.AssertLogDoesntContain("SecondProject");
                             // Verify the correct msbuild task messages are in the log
-                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 2 Epected BuildInParallel to be false");
+                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 2 Expected BuildInParallel to be false");
                             break;
 
                         case 3:
@@ -1064,11 +1064,11 @@ namespace Microsoft.Build.UnitTests
                             // Verify build did build second project which has the message SecondProject
                             mockEngine.AssertLogContains("SecondProject");
                             // Verify the correct msbuild task messages are in the log
-                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 3 Epected BuildInParallel to be false");
+                            Assert.IsFalse(msbuildTask.BuildInParallel, "Iteration of 3 Expected BuildInParallel to be false");
                             break;
                     }
                     // The build should fail as the first project has an error
-                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally
@@ -1238,7 +1238,7 @@ namespace Microsoft.Build.UnitTests
                     }
 
                     // The build should fail as the first project has an error
-                    Assert.IsFalse(success, "Iteration of i:" + i + "Build Succeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i:" + i + "Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally

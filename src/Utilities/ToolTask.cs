@@ -831,7 +831,7 @@ namespace Microsoft.Build.Utilities
 
                 // turn on the Process.Exited event
                 proc.EnableRaisingEvents = true;
-                // sign up for the exit notifcation
+                // sign up for the exit notification
                 proc.Exited += new EventHandler(ReceiveExitNotification);
 
                 // turn on async stderr notifications

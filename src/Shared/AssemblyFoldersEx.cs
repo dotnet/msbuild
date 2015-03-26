@@ -83,7 +83,7 @@ namespace Microsoft.Build.Shared
             *  32 bit OS:           
             *        32 bit process:
             *            Targeting 64 bit, or X86, or MSIL:
-            *                Look in the default registy which is the 32 bit hive
+            *                Look in the default registry which is the 32 bit hive
             */
 
             // Under WOW64 the HKEY_CURRENT_USER\SOFTWARE key is shared. This means the values are the same in the 64 bit and 32 bit views. This means we only need to get one view of this key.
@@ -307,7 +307,7 @@ namespace Microsoft.Build.Shared
         ///         1) Check to see if the string is a version
         ///             If the string is not a version we will check to see if the string starts with the framework we are targeting,
         ///             if it does we will add it to a list which will be added at the end 
-        ///             of the versions list, if not it gets ignored. We do this to stay compatible to what we have been doing since whidby.
+        ///             of the versions list, if not it gets ignored. We do this to stay compatible to what we have been doing since whidbey.
         ///             
         ///             If the string is a version
         ///                 We check to see if the version is a valid target framework version. Meaning.  It has a Maj.Minor version and may have 
@@ -323,7 +323,7 @@ namespace Microsoft.Build.Shared
         ///                 
         ///         Since the dictionary is sorted in reverse order to generate the list to return we do the following:
         ///         Go through the list of dictionary entries 
-        ///             For each entry sort the list in reverse alphabetical order and add the entries in their internal list to the listToreturn. 
+        ///             For each entry sort the list in reverse alphabetical order and add the entries in their internal list to the listToreturn.
         ///
         ///         This way we have a reverse sorted list of all of the version keys.
         /// </summary>

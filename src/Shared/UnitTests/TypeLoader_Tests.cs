@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Make sure if no typeName is passed in then pick the first type which matches the desired typefilter.
-        /// This has been in since whidby but there has been no test for it and it was broken in the last refactoring of TypeLoader.
+        /// This has been in since whidbey but there has been no test for it and it was broken in the last refactoring of TypeLoader.
         /// This test is to prevent that from happening again.
         /// </summary>
         [TestMethod]

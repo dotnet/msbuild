@@ -14,14 +14,14 @@ namespace Microsoft.Build.Utilities
 {
     /// <summary>
     /// This class is the filetracking log interpreter for .write. tracking logs in canonical form
-    /// Canoncial .write. logs need to be rooted, since the outputs need to be associated with an input.
+    /// Canonical .write. logs need to be rooted, since the outputs need to be associated with an input.
     /// </summary>
     public class CanonicalTrackedOutputFiles
     {
         #region Member Data
         // The output dependency table
         private Dictionary<string, Dictionary<string, DateTime>> _dependencyTable;
-        // The .write. trackg log files
+        // The .write. tracking log files
         private ITaskItem[] _tlogFiles;
         // The TaskLoggingHelper that we log progress to
         private TaskLoggingHelper _log;

@@ -41,7 +41,7 @@ namespace Microsoft.Build.Framework.XamlTypes
 
         /// <summary>
         /// The collection of <see cref="Rule"/> instances this <see cref="RuleBag"/> instance contains.
-        /// Must have atleast one <see cref="Rule"/>.
+        /// Must have at least one <see cref="Rule"/>.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This has shipped in Framework, which is especially important to keep binary compatible, so we can't change it now")]
         public List<Rule> Rules

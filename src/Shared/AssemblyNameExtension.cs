@@ -39,7 +39,7 @@ namespace Microsoft.Build.Shared
         PublicKeyToken = 8, // 0000 0000 0000 1000
 
         /// <summary>
-        /// When doing a comparison   A.PartialComapare(B, Default) compare all fields of A which are not null with B.
+        /// When doing a comparison   A.PartialCompare(B, Default) compare all fields of A which are not null with B.
         /// </summary>
         Default = 15, // 0000 0000 0000 1111
     }

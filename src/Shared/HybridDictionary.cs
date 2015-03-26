@@ -104,7 +104,7 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Serialization consturctor.
+        /// Serialization constructor.
         /// </summary>
         public HybridDictionary(SerializationInfo info, StreamingContext context)
         {

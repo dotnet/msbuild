@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
     {
         #region Data
 
-        // Create a delegate to test the GetPRocessId method when using GetProcAddress
+        // Create a delegate to test the GetProcessId method when using GetProcAddress
         private delegate uint GetProcessIdDelegate();
 
         #endregion
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests
                 GetProcessIdDelegate processIdDelegate = (GetProcessIdDelegate)Marshal.GetDelegateForFunctionPointer(processHandle, typeof(GetProcessIdDelegate));
                 uint processId = processIdDelegate();
 
-                //Make sure the return value is the same as retreived from the .net methods to make sure everything works
+                //Make sure the return value is the same as retrieved from the .net methods to make sure everything works
                 Assert.AreEqual((uint)Process.GetCurrentProcess().Id, processId, "Expected the .net processId to match the one from GetCurrentProcessId");
             }
             finally

@@ -822,7 +822,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version140), pathToSdkV4InstallRootOnVS14);
         }
 
-#pragma warning disable 618 //The test below tests a deprecated API. We disable the warning for obsolete methods for this paricular test
+#pragma warning disable 618 //The test below tests a deprecated API. We disable the warning for obsolete methods for this particular test
 
         [TestMethod]
         public void GetPathToWindowsSdk()
