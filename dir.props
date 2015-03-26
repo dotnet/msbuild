@@ -24,6 +24,7 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('\/'.ToCharArray()))"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
+    <NugetRestoreCommand Condition="'$(OS)' != 'Windows_NT'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
   </PropertyGroup>
   
   <!-- Set default Configuration and Platform -->

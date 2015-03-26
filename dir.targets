@@ -44,39 +44,20 @@
   <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_RestoreBuildTools" />
 
   <Target Name="_RestoreBuildTools"
-          Condition="'$(OS)' == 'Windows_NT'"
           Inputs="$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)dir.props"
           Outputs="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll;$(NugetToolPath)">
 
     <DownloadFile FileName="$(NuGetToolPath)"
                   Address="http://nuget.org/nuget.exe" 
-                  Condition="!Exists('$(NuGetToolPath)')" />
+                  Condition="!Exists('$(NuGetToolPath)') AND '$(OS)' == 'Windows_NT'" />
+
+    <Exec Command="curl -sSL --create-dirs -s -o $(NuGetToolPath) https://api.nuget.org/downloads/nuget.exe" Condition="!Exists('$(NuGetToolPath)') AND '$(OS)' != 'Windows_NT'" />
 
     <!-- Restore build tools -->
     <!-- 
     <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget/packages.config&quot;" StandardOutputImportance="Low" />
     -->    
     <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget/packages.config&quot;" />
-    <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
-           Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
-  </Target>
-
-  <Target Name="_RestoreBuildTools"
-          Condition="'$(OS)' != 'Windows_NT'"
-          Inputs="$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)dir.props"
-          Outputs="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll;$(NugetToolPath)">
-
-    <MakeDir Directories="$(NuGetDir)" Condition="!Exists('$(NuGetDir)')" />
-
-    <Exec Command="curl -s -o $(NuGetToolPath) https://api.nuget.org/downloads/nuget.exe" Condition="!Exists('$(NuGetToolPath)')" />
-
-    <Exec Command="chmod +x $(NuGetToolPath)" />
-
-    <!-- Restore build tools -->
-    <!-- 
-    <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget/packages.config&quot;" StandardOutputImportance="Low" />
-    -->    
-    <Exec Command="mono $(NugetRestoreCommand) &quot;$(SourceDir).nuget/packages.config&quot;" />
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
   </Target>
