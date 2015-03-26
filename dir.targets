@@ -50,7 +50,7 @@
 
     <DownloadFile FileName="$(NuGetToolPath)"
                   Address="http://nuget.org/nuget.exe" 
-                  Condition="'$(OS)' == 'Windows_NT' AND !Exists('$(NuGetToolPath)')" />
+                  Condition="!Exists('$(NuGetToolPath)')" />
 
     <!-- Restore build tools -->
     <!-- 
