@@ -15,6 +15,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -175,8 +176,25 @@ namespace Microsoft.Build.Evaluation
 
                     if (!string.IsNullOrEmpty(libraryPath))
                     {
-                        var r = new Regex(libraryPath + Path.DirectorySeparatorChar + @"\d+\.\d+");
-                        foreach (var d in Directory.GetDirectories(libraryPath).Where(d => r.IsMatch(d)))
+                        // The 4.0 toolset is installed in the framework directory
+                        var v4dir = ToolLocationHelper.GetPathToDotNetFramework (TargetDotNetFrameworkVersion.Version40);
+                        if (v4dir != null)
+                        {
+                            toolsets.Add(
+                                "4.0",
+                                new Toolset(
+                                    "4.0",
+                                    v4dir,
+                                    environmentProperties,
+                                    globalProperties,
+                                    currentDir,
+                                    string.Empty));
+                        }
+
+                        // Other toolsets are installed in the xbuild directory
+                        var xbuildToolsetsDir = Path.Combine(libraryPath, "mono", "xbuild");
+                        var r = new Regex(xbuildToolsetsDir + Path.DirectorySeparatorChar + @"\d+\.\d+");
+                        foreach (var d in Directory.GetDirectories(xbuildToolsetsDir).Where(d => r.IsMatch(d)))
                         {
                             var version = Path.GetFileName(d);
                             if (version != null && !toolsets.ContainsKey(version))
@@ -185,7 +203,7 @@ namespace Microsoft.Build.Evaluation
                                     version,
                                     new Toolset(
                                         version,
-                                        d,
+                                        Path.Combine(d,"bin"),
                                         environmentProperties,
                                         globalProperties,
                                         currentDir,
