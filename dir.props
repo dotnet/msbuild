@@ -15,6 +15,7 @@
 
   <!-- Common nuget properties -->
   <PropertyGroup>
+    <NuGetDir>$(PackagesDir)</NuGetDir>
     <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
     <NuGetConfigFile>$(SourceDir).nuget$([System.IO.Path]::DirectorySeparatorChar)NuGet.Config</NuGetConfigFile>
     <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
