@@ -168,10 +168,6 @@ namespace Microsoft.Build.Evaluation
                     var props = new PropertyDictionary<ProjectPropertyInstance>();
 
                     var libraryPath = NativeMethodsShared.FrameworkBasePath;
-                    if (!string.IsNullOrEmpty(libraryPath))
-                    {
-                        libraryPath = Path.GetDirectoryName(libraryPath);
-                    }
 
                     if (!string.IsNullOrEmpty(libraryPath))
                     {
@@ -191,7 +187,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         // Other toolsets are installed in the xbuild directory
-                        var xbuildToolsetsDir = Path.Combine(libraryPath, "mono", "xbuild");
+                        var xbuildToolsetsDir = Path.Combine(libraryPath, "xbuild");
                         var r = new Regex(xbuildToolsetsDir + Path.DirectorySeparatorChar + @"\d+\.\d+");
                         foreach (var d in Directory.GetDirectories(xbuildToolsetsDir).Where(d => r.IsMatch(d)))
                         {
