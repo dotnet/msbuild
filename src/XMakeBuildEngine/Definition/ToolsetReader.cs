@@ -15,7 +15,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -177,7 +176,7 @@ namespace Microsoft.Build.Evaluation
                     if (!string.IsNullOrEmpty(libraryPath))
                     {
                         // The 4.0 toolset is installed in the framework directory
-                        var v4dir = ToolLocationHelper.GetPathToDotNetFramework (TargetDotNetFrameworkVersion.Version40);
+                        var v4dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current);
                         if (v4dir != null)
                         {
                             toolsets.Add(
