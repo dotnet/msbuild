@@ -336,30 +336,37 @@ namespace Microsoft.Build.Tasks
         /// <returns>The CLR runtime version or empty if the path does not exist.</returns>
         internal static string GetRuntimeVersion(string path)
         {
-            StringBuilder runtimeVersion = null;
-            uint hresult = 0;
-            uint actualBufferSize = 0;
+            if (NativeMethodsShared.IsWindows)
+            {
+                StringBuilder runtimeVersion = null;
+                uint hresult = 0;
+                uint actualBufferSize = 0;
 #if _DEBUG
-            // Just to make sure and exercise the code that doubles the size
-            // every time GetRequestedRuntimeInfo fails due to insufficient buffer size.
-            int bufferLength = 1;
+                // Just to make sure and exercise the code that doubles the size
+                // every time GetRequestedRuntimeInfo fails due to insufficient buffer size.
+                int bufferLength = 1;
 #else
-            int bufferLength = 11; // 11 is the length of a runtime version and null terminator v2.0.50727/0
+                int bufferLength = 11; // 11 is the length of a runtime version and null terminator v2.0.50727/0
 #endif
-            do
-            {
-                runtimeVersion = new StringBuilder(bufferLength);
-                hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out actualBufferSize);
-                bufferLength = bufferLength * 2;
-            } while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
+                do
+                {
+                    runtimeVersion = new StringBuilder(bufferLength);
+                    hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out actualBufferSize);
+                    bufferLength = bufferLength * 2;
+                } while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
 
-            if (hresult == NativeMethodsShared.S_OK && runtimeVersion != null)
-            {
-                return runtimeVersion.ToString();
+                if (hresult == NativeMethodsShared.S_OK && runtimeVersion != null)
+                {
+                    return runtimeVersion.ToString();
+                }
+                else
+                {
+                    return String.Empty;
+                }
             }
             else
             {
-                return String.Empty;
+                return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
             }
         }
 
@@ -590,6 +597,172 @@ namespace Microsoft.Build.Tasks
                 Marshal.DestroyStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
                 Marshal.FreeCoTaskMem(asmMetaPtr);
             }
+        }
+    }
+
+    /// <summary>
+    /// Managed implementation of a reader for getting the runtime version of an assembly
+    /// </summary>
+    static class ManagedRuntimeVersionReader
+    {
+        class HeaderInfo
+        {
+            public uint VirtualAddress;
+            public uint Size;
+            public uint FileOffset;
+        }
+
+        /// <summary>
+        /// Given a path get the CLR runtime version of the file
+        /// </summary>
+        /// <param name="path">path to the file</param>
+        /// <returns>The CLR runtime version or empty if the path does not exist or the file is not an assembly.</returns>
+        public static string GetRuntimeVersion(string path)
+        {
+            using (var sr = new BinaryReader(File.OpenRead(path)))
+            {
+                if (!File.Exists(path))
+                    return string.Empty;
+                
+                try
+                {
+                    const uint PEHeaderPointerOffset = 0x3c;
+                    const uint PEHeaderSize = 20;
+                    const uint OptionalPEHeaderSize = 224;
+                    const uint OptionalPEPlusHeaderSize = 240;
+                    const uint SectionHeaderSize = 40;
+
+                    // There must be room for at least the PE header offset and size, and sections
+                    if (sr.BaseStream.Length < PEHeaderPointerOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize)
+                        return string.Empty;
+
+                    // PE header
+                    sr.BaseStream.Position = PEHeaderPointerOffset;
+                    var peHeaderOffset = sr.ReadUInt32();
+
+                    if (peHeaderOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize >= sr.BaseStream.Length)
+                        return string.Empty;
+
+                    sr.BaseStream.Position = peHeaderOffset;
+                    if (!ReadBytes(sr, (byte)'P', (byte)'E', 0, 0)) // PE header signature
+                        return string.Empty;
+
+                    peHeaderOffset += 4; // Skip signature
+
+                    // Read the number of sections
+                    sr.BaseStream.Position = peHeaderOffset + 2;
+                    var numberOfSections = sr.ReadUInt16();
+                    if (numberOfSections > 96)
+                        return string.Empty; // There can't be more than 96 sections, something is wrong
+
+                    // Optional header start
+                    var optionalHeaderOffset = peHeaderOffset + PEHeaderSize;
+
+                    uint cliHeaderRvaOffset;
+                    uint optionalPEHeaderSize;
+
+                    // Get the offset to the CLI header RVA. That's in the optional header,
+                    // which can have two formats, PE32 or PE32+
+                    sr.BaseStream.Position = optionalHeaderOffset;
+                    var magicNumber = sr.ReadUInt16();
+
+                    if (magicNumber == 0x10b) // PE32
+                    {
+                        optionalPEHeaderSize = OptionalPEHeaderSize;
+                        cliHeaderRvaOffset = optionalHeaderOffset + 208;
+                    }
+                    else if (magicNumber == 0x20b) // PE32+
+                    {
+                        optionalPEHeaderSize = OptionalPEPlusHeaderSize;
+                        cliHeaderRvaOffset = optionalHeaderOffset + 224;
+                    }
+                    else
+                        return string.Empty;
+
+                    // Read the CLI header RVA
+                    sr.BaseStream.Position = cliHeaderRvaOffset;
+                    var cliHeaderRva = sr.ReadUInt32();
+                    if (cliHeaderRva == 0)
+                        return string.Empty; // No CLI section
+
+                    var sectionOffset = optionalHeaderOffset + optionalPEHeaderSize;
+
+                    var sections = new HeaderInfo [numberOfSections];
+                    for (int n = 0; n < numberOfSections; n++)
+                    {
+                        sr.BaseStream.Position = sectionOffset + 8;
+                        var sectionSize = sr.ReadUInt32();
+                        var sectionRva = sr.ReadUInt32();
+                        sr.BaseStream.Position = sectionOffset + 20;
+                        var sectionDataOffset = sr.ReadUInt32();
+                        sections[n] = new HeaderInfo {
+                            VirtualAddress = sectionRva,
+                            Size = sectionSize,
+                            FileOffset = sectionDataOffset
+                        };
+                        sectionOffset += SectionHeaderSize;
+                    }
+
+                    uint cliHeaderOffset = RvaToOffset(sections, cliHeaderRva);
+
+                    // CLI section not found
+                    if (cliHeaderOffset == 0)
+                        return string.Empty;
+
+                    sr.BaseStream.Position = cliHeaderOffset + 8;
+                    var metadataRva = sr.ReadUInt32();
+
+                    var metadataOffset = RvaToOffset(sections, metadataRva);
+                    if (metadataOffset == 0)
+                        return string.Empty;
+
+                    sr.BaseStream.Position = metadataOffset;
+                    if (!ReadBytes(sr, 0x42, 0x53, 0x4a, 0x42)) // Metadata root signature
+                        return string.Empty;
+
+                    // Read the version string length
+                    sr.BaseStream.Position = metadataOffset + 12;
+                    var length = sr.ReadInt32();
+                    if (length > 50 || length <= 0 || sr.BaseStream.Position + length >= sr.BaseStream.Length)
+                        return string.Empty;
+
+                    // Read the version string
+                    var v = Encoding.ASCII.GetString(sr.ReadBytes(length));
+                    if (v.Length < 2 || v[0] != 'v')
+                        return string.Empty;
+
+                    // Make sure it is a version number
+                    Version version;
+                    if (!Version.TryParse(v.Substring(1), out version))
+                        return string.Empty;
+                    return v;
+                }
+                catch
+                {
+                    // Something went wrong in spite of all checks. Corrupt file?
+                    return string.Empty;
+                }
+            }
+        }
+
+        static bool ReadBytes(BinaryReader r, params byte[] bytes)
+        {
+            for (int n = 0; n < bytes.Length; n++)
+            {
+                if (bytes[n] != r.ReadByte())
+                    return false;
+            }
+            return true;
+        }
+
+        static uint RvaToOffset(HeaderInfo[] sections, uint rva)
+        {
+            foreach (var s in sections)
+            {
+                if (rva >= s.VirtualAddress && rva < s.VirtualAddress + s.Size)
+                    return s.FileOffset + (rva - s.VirtualAddress);
+            }
+            return 0;
         }
     }
 }
