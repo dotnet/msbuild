@@ -15,6 +15,7 @@
 
   <!-- Common nuget properties -->
   <PropertyGroup>
+    <NuGetDir>$(PackagesDir)</NuGetDir>
     <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
     <NuGetConfigFile>$(SourceDir).nuget$([System.IO.Path]::DirectorySeparatorChar)NuGet.Config</NuGetConfigFile>
     <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
@@ -23,6 +24,7 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('\/'.ToCharArray()))"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
+    <NugetRestoreCommand Condition="'$(OS)' != 'Windows_NT'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
   </PropertyGroup>
   
   <!-- Set default Configuration and Platform -->
