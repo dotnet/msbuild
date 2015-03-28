@@ -1054,7 +1054,9 @@ namespace Microsoft.Build.Execution
             if (path != null && CheckMSBuildExeExistsAt(Path.Combine(path, "MSBuild.exe")))
             {
                 _nodeExeLocation = Path.Combine(path, "MSBuild.exe");
-            }            
+            }
+
+            // Well, we just can't find it.  Maybe they will only build in-proc and won't need it...
         }
 
         /// <summary>
