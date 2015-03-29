@@ -1452,7 +1452,7 @@ typedef enum _tagAssemblyComparisonResult
                     foreach (var dir in _gacDirectories)
                     {
                         var assemblyName = Path.GetFileName(dir);
-                        if (string.IsNullOrWhiteSpace(assemblyName))
+                        if (!string.IsNullOrWhiteSpace(assemblyName))
                         {
                             foreach (var version in Directory.EnumerateDirectories(dir))
                             {
@@ -1466,20 +1466,20 @@ typedef enum _tagAssemblyComparisonResult
                                         {
                                             Name = assemblyName,
                                             CultureInfo =
-                                                               string.IsNullOrWhiteSpace(
-                                                                   match.Groups[0].Captures[2].Value)
+                                                               !string.IsNullOrWhiteSpace(
+                                                                   match.Groups[2].Value)
                                                                    ? new CultureInfo(
-                                                                         match.Groups[0].Captures[2].Value)
+                                                                         match.Groups[2].Value)
                                                                    : CultureInfo.InvariantCulture
                                         };
-                                        if (!string.IsNullOrEmpty(match.Groups[0].Captures[1].Value))
+                                        if (!string.IsNullOrEmpty(match.Groups[1].Value))
                                         {
-                                            name.Version = new Version(match.Groups[0].Captures[1].Value);
+                                            name.Version = new Version(match.Groups[1].Value);
                                         }
-                                        if (!string.IsNullOrWhiteSpace(match.Groups[0].Captures[3].Value))
+                                        if (!string.IsNullOrWhiteSpace(match.Groups[3].Value))
                                         {
-                                            var value = match.Groups[0].Captures[3].Value;
-                                            name.SetPublicKey(
+                                            var value = match.Groups[3].Value;
+                                            name.SetPublicKeyToken(
                                                 Enumerable.Range(0, 16)
                                                     .Where(x => x % 2 == 0)
                                                     .Select(x => Convert.ToByte(value.Substring(x, 2), 16)).ToArray());
@@ -1526,9 +1526,9 @@ typedef enum _tagAssemblyComparisonResult
                         string.Format(
                             "{0}_{1}_{2}",
                             assemblyNameVersion.Version.ToString(4),
-                            assemblyNameVersion.CultureName,
-                            assemblyNameVersion.GetPublicKey()
-                                .Aggregate(new StringBuilder(), (builder, v) => builder.Append(v.ToString("X2")))),
+                            assemblyNameVersion.CultureName != "neutral" ? assemblyNameVersion.CultureName : string.Empty,
+                            assemblyNameVersion.GetPublicKeyToken()
+                                .Aggregate(new StringBuilder(), (builder, v) => builder.Append(v.ToString("x2")))),
                         assemblyNameVersion.Name + ".dll");
 
                     if (File.Exists(path))
