@@ -281,7 +281,7 @@ namespace Microsoft.Build.Shared
                 // Make sure the other side knows what sort of serialization is coming
                 translator.Translate(ref packetVersion);
 
-                bool eventCanSerializeItself = (methodInfo != null) ? true : false;
+                bool eventCanSerializeItself = methodInfo != null;
                 translator.Translate(ref eventCanSerializeItself);
 
                 if (eventCanSerializeItself)

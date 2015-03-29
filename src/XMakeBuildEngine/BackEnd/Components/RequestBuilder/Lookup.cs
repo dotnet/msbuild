@@ -1085,7 +1085,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public bool HasChanges
             {
-                get { return _modifications.Count > 0 || _keepOnlySpecified == true; }
+                get { return _modifications.Count > 0 || _keepOnlySpecified; }
             }
 
             /// <summary>

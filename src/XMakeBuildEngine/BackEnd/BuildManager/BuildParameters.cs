@@ -1057,7 +1057,6 @@ namespace Microsoft.Build.Execution
             }
 
             // Well, we just can't find it.  Maybe they will only build in-proc and won't need it...
-            return;
         }
 
         /// <summary>
