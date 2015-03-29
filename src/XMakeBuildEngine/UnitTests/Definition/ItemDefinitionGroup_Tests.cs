@@ -1215,6 +1215,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Item added to project should pick up the item
         /// definitions that project has.
+        /// </summary>
         [TestMethod]
         public void ProjectAddNewItemPicksUpProjectItemDefinitions()
         {
@@ -1237,6 +1238,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Item added to project should pick up the item
         /// definitions that project has.
+        /// </summary>
         [TestMethod]
         public void ProjectAddNewItemExistingGroupPicksUpProjectItemDefinitions()
         {

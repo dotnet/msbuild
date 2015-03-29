@@ -9,7 +9,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Represents a single <bindingRedirect> from the app.config file.
+    /// Represents a single &lt;bindingRedirect&gt; from the app.config file.
     /// </summary>
     internal sealed class BindingRedirect
     {
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The reader is positioned on a <bindingRedirect> element--read it.
+        /// The reader is positioned on a &lt;bindingRedirect&gt; element--read it.
         /// </summary>
         /// <param name="reader"></param>
         internal void Read(XmlTextReader reader)

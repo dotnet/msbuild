@@ -534,7 +534,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Add the set of paths for where sdk files should be found. Where <folderType> is redist, references, designtime
+        /// Add the set of paths for where sdk files should be found. Where &lt;folderType&gt; is redist, references, designtime
         /// </summary>
         private static void AddSDKPaths(string sdkRoot, string folderName, string targetConfiguration, string targetArchitecture, List<string> directories)
         {

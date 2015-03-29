@@ -3746,7 +3746,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            /// </summary>
             [TestMethod]
             public void ExistsOldVersionRange()
             {
@@ -4712,7 +4711,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             /// <summary>
             /// In this case,
-            /// - An app.config is passed in that has some missing information in <assemblyIdentity> element.
+            /// - An app.config is passed in that has some missing information in &lt;assemblyIdentity&gt; element.
             /// Expected:
             /// - An error and task failure.
             /// Rationale:

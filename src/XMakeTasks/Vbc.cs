@@ -350,7 +350,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// vbc.exe only takes the BaseAddress in hexadecimal format.  But we allow the caller
         /// of the task to pass in the BaseAddress in either decimal or hexadecimal format.
-        /// Examples of supported hex formats include "0x10000000" or "&H10000000".
+        /// Examples of supported hex formats include "0x10000000" or "&amp;H10000000".
         /// </summary>
         internal string GetBaseAddressInHex()
         {

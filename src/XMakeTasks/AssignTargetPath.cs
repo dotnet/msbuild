@@ -15,7 +15,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Create a new list of items that have <TargetPath> attributes if none was present in
+    /// Create a new list of items that have &lt;TargetPath&gt; attributes if none was present in
     /// the input.
     /// </summary>
     public class AssignTargetPath : TaskExtension

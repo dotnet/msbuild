@@ -152,6 +152,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static long assemblyTimestamp;
 
+        /// <summary>
         /// Current version of this MSBuild Engine assembly in the 
         /// form, e.g, "4.0"
         /// </summary>

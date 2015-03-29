@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
         /// <param name="executableExtensions">The filename extension of the assembly. Must be this or its no match.</param>
         /// <param name="hintPath">This reference's hintpath</param>
-        /// <param name="assemblyFolderKey">Like "hklm\Vendor RegKey" as provided to a reference by the <AssemblyFolderKey> on the reference in the project.</param>
+        /// <param name="assemblyFolderKey">Like "hklm\Vendor RegKey" as provided to a reference by the &lt;AssemblyFolderKey&gt; on the reference in the project.</param>
         /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
         /// <param name="resolvedSearchPath">Receives the searchPath that the reference was resolved at. Empty if not resolved.</param>
         /// <param name="userRequestedSpecificFile"> This will be true if the user requested a specific file.</param>

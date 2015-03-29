@@ -1515,6 +1515,7 @@ namespace Microsoft.Build.Shared
 
             /// <summary>
             /// Gets the full path of reference assemblies folder, which is the full path of .net framework for v1.1 and v2.0.
+            /// </summary>
             public override string GetPathToDotNetFrameworkReferenceAssemblies()
             {
                 return this.GetPathToDotNetFramework(DotNetFrameworkArchitecture.Current);
