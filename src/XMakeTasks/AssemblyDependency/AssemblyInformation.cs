@@ -623,7 +623,11 @@ namespace Microsoft.Build.Tasks
             {
                 if (!File.Exists(path))
                     return string.Empty;
-                
+
+                // This algorithm for getting the runtime version is based on
+                // the ECMA Standard 335: The Common Language Infrastructure (CLI)
+                // http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf
+
                 try
                 {
                     const uint PEHeaderPointerOffset = 0x3c;
@@ -632,37 +636,52 @@ namespace Microsoft.Build.Tasks
                     const uint OptionalPEPlusHeaderSize = 240;
                     const uint SectionHeaderSize = 40;
 
-                    // There must be room for at least the PE header offset and size, and sections
+                    // The PE file format is specified in section II.25
+
+                    // A PE image starts with an MS-DOS header followed by a PE signature, followed by the PE file header,
+                    // and then the PE optional header followed by PE section headers.
+                    // There must be room for all of that.
+
                     if (sr.BaseStream.Length < PEHeaderPointerOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize)
                         return string.Empty;
+                    
+                    // The PE format starts with an MS-DOS stub of 128 bytes.
+                    // At offset 0x3c in the DOS header is a 4-byte unsigned integer offset to the PE
+                    // signature (shall be “PE\0\0”), immediately followed by the PE file header
 
-                    // PE header
                     sr.BaseStream.Position = PEHeaderPointerOffset;
                     var peHeaderOffset = sr.ReadUInt32();
 
                     if (peHeaderOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize >= sr.BaseStream.Length)
                         return string.Empty;
 
+                    // The PE header is specified in section II.25.2
+                    // Read the PE header signature
+
                     sr.BaseStream.Position = peHeaderOffset;
-                    if (!ReadBytes(sr, (byte)'P', (byte)'E', 0, 0)) // PE header signature
+                    if (!ReadBytes(sr, (byte)'P', (byte)'E', 0, 0))
                         return string.Empty;
 
-                    peHeaderOffset += 4; // Skip signature
+                    // The PE header immediately follows the signature
+                    var peHeaderBase = peHeaderOffset + 4;
 
-                    // Read the number of sections
-                    sr.BaseStream.Position = peHeaderOffset + 2;
+                    // At offset 2 of the PE header there is the number of sections
+                    sr.BaseStream.Position = peHeaderBase + 2;
                     var numberOfSections = sr.ReadUInt16();
                     if (numberOfSections > 96)
                         return string.Empty; // There can't be more than 96 sections, something is wrong
 
-                    // Optional header start
-                    var optionalHeaderOffset = peHeaderOffset + PEHeaderSize;
+                    // Immediately after the PE Header is the PE Optional Header.
+                    // This header is optional in the general PE spec, but always
+                    // present in assembly files.
+                    // From this header we'll get the CLI header RVA, which is
+                    // at offset 208 for PE32, and at offset 224 for PE32+
+
+                    var optionalHeaderOffset = peHeaderBase + PEHeaderSize;
 
                     uint cliHeaderRvaOffset;
                     uint optionalPEHeaderSize;
 
-                    // Get the offset to the CLI header RVA. That's in the optional header,
-                    // which can have two formats, PE32 or PE32+
                     sr.BaseStream.Position = optionalHeaderOffset;
                     var magicNumber = sr.ReadUInt16();
 
@@ -680,16 +699,32 @@ namespace Microsoft.Build.Tasks
                         return string.Empty;
 
                     // Read the CLI header RVA
+
                     sr.BaseStream.Position = cliHeaderRvaOffset;
                     var cliHeaderRva = sr.ReadUInt32();
                     if (cliHeaderRva == 0)
                         return string.Empty; // No CLI section
 
+                    // Immediately following the optional header is the Section
+                    // Table, which contains a number of section headers.
+                    // Section headers are specified in section II.25.3
+
+                    // Each section header has the base RVA, size, and file
+                    // offset of the section. To find the file offset of the
+                    // CLI header we need to find a section that contains
+                    // its RVA, and the calculate the file offset using
+                    // the base file offset of the section.
+
                     var sectionOffset = optionalHeaderOffset + optionalPEHeaderSize;
+
+                    // Read all section headers, we need them to make RVA to
+                    // offset conversions.
 
                     var sections = new HeaderInfo [numberOfSections];
                     for (int n = 0; n < numberOfSections; n++)
                     {
+                        // At offset 8 of the section is the section size
+                        // and base RVA. At offset 20 there is the file offset
                         sr.BaseStream.Position = sectionOffset + 8;
                         var sectionSize = sr.ReadUInt32();
                         var sectionRva = sr.ReadUInt32();
@@ -709,12 +744,21 @@ namespace Microsoft.Build.Tasks
                     if (cliHeaderOffset == 0)
                         return string.Empty;
 
+                    // The CLI header is specified in section II.25.3.3.
+                    // It contains all of the runtime-specific data entries and other information.
+                    // From the CLI header we need to get the RVA of the metadata root,
+                    // which is located at offset 8.
+
                     sr.BaseStream.Position = cliHeaderOffset + 8;
                     var metadataRva = sr.ReadUInt32();
 
                     var metadataOffset = RvaToOffset(sections, metadataRva);
                     if (metadataOffset == 0)
                         return string.Empty;
+
+                    // The metadata root is specified in section II.24.2.1
+                    // The first 4 bytes contain a signature.
+                    // The version string is at offset 12.
 
                     sr.BaseStream.Position = metadataOffset;
                     if (!ReadBytes(sr, 0x42, 0x53, 0x4a, 0x42)) // Metadata root signature
@@ -723,11 +767,11 @@ namespace Microsoft.Build.Tasks
                     // Read the version string length
                     sr.BaseStream.Position = metadataOffset + 12;
                     var length = sr.ReadInt32();
-                    if (length > 50 || length <= 0 || sr.BaseStream.Position + length >= sr.BaseStream.Length)
+                    if (length > 255 || length <= 0 || sr.BaseStream.Position + length >= sr.BaseStream.Length)
                         return string.Empty;
 
                     // Read the version string
-                    var v = Encoding.ASCII.GetString(sr.ReadBytes(length));
+                    var v = Encoding.UTF8.GetString(sr.ReadBytes(length));
                     if (v.Length < 2 || v[0] != 'v')
                         return string.Empty;
 
