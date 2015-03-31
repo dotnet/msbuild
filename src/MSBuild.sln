@@ -6,8 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Framework", "Framework\Microsoft.Build.Framework.csproj", "{571F09DB-A81A-4444-945C-6F7B530054CD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Utilities", "Utilities\Microsoft.Build.Utilities.csproj", "{828566EE-6F6A-4EF4-98B0-513F7DF9C628}"
+	ProjectSection(ProjectDependencies) = postProject
+		{571F09DB-A81A-4444-945C-6F7B530054CD} = {571F09DB-A81A-4444-945C-6F7B530054CD}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build", "XMakeBuildEngine\Microsoft.Build.csproj", "{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}"
+	ProjectSection(ProjectDependencies) = postProject
+		{571F09DB-A81A-4444-945C-6F7B530054CD} = {571F09DB-A81A-4444-945C-6F7B530054CD}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuild", "XMakeCommandLine\MSBuild.csproj", "{23C9FD0E-70C5-4F1F-B08A-D2774240FB51}"
 EndProject
@@ -32,6 +38,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{760FF85D-8BEB-4992-8095-A9678F88FD47}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskUsageLogger", "..\Samples\TaskUsageLogger\TaskUsageLogger.csproj", "{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}"
+	ProjectSection(ProjectDependencies) = postProject
+		{571F09DB-A81A-4444-945C-6F7B530054CD} = {571F09DB-A81A-4444-945C-6F7B530054CD}
+		{828566EE-6F6A-4EF4-98B0-513F7DF9C628} = {828566EE-6F6A-4EF4-98B0-513F7DF9C628}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
