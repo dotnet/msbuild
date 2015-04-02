@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
     public class CommandLineSwitchesTests
     {
         [TestFixtureSetUp]
-        public static void Setup(TestContext testContext)
+        public static void Setup()
         {
             // Make sure resources are initialized
             MSBuildApp.Initialize();

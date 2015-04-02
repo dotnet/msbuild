@@ -41,7 +41,11 @@
     Needed to avoid the IntialTargets from having an Output which ends up getting
     added to the output references when you have a project to project reference.
   -->
-  <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_RestoreBuildTools" />
+  <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_DisplayBuildInfo;_RestoreBuildTools" />
+
+  <Target Name="_DisplayBuildInfo">
+    <Message Importance="High" Text="Build binary target directory: '$(BaseOutputPathWithConfig)'" />
+  </Target>
 
   <Target Name="_RestoreBuildTools"
           Inputs="$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)dir.props"
