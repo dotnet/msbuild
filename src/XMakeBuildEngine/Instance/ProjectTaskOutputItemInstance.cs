@@ -5,8 +5,6 @@
 // <summary>Represents a task output item tag for build purposes.</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using Microsoft.Build.Construction;

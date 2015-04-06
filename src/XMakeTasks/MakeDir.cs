@@ -3,12 +3,8 @@
 
 using System;
 using System.IO;
-using System.Diagnostics;
-using System.Resources;
-using System.Reflection;
 using System.Collections;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 

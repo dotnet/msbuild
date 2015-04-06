@@ -9,7 +9,7 @@ using Microsoft.Build.Shared;
 using System;
 using System.Xml;
 using System.Collections.Generic;
-using System.Globalization;
+
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
 

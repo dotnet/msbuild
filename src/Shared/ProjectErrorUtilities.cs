@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Xml;
 
 /******************************************************************************
  * 
@@ -16,7 +15,6 @@ using System.Xml;
  * 
  ******************************************************************************/
 using Microsoft.Build.Debugging;
-using Microsoft.Build.Evaluation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.Shared

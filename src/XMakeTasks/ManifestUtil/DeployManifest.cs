@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using System.Collections.Generic;

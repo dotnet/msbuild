@@ -3,18 +3,9 @@
 
 using System;
 using System.IO;
-using System.Security;
-using System.Collections;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Text.RegularExpressions;
-using System.Text;
-using System.Threading;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Shared
 {

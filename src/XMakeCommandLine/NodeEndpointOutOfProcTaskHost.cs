@@ -5,8 +5,6 @@
 // <summary>Implementation of a node endpoint for out-of-proc nodes.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO.Pipes;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;

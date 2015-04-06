@@ -6,7 +6,6 @@ using System.IO;
 using System.Xml;
 using System.Xml.Schema;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.CommandLine

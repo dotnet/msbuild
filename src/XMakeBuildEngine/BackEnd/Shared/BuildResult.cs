@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution

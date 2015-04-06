@@ -2,17 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;

@@ -7,14 +7,7 @@
 
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using System.Resources;
 using System.Reflection;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {

@@ -7,23 +7,12 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Xml;
 using System.Diagnostics;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.IO.Pipes;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Globalization;
-using System.Xml.Serialization;
-using System.Security;
-using System.Security.Policy;
-using System.Security.Permissions;
-using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
 

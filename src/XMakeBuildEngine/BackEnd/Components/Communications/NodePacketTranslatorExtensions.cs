@@ -6,19 +6,8 @@
 // can't put in INodePacketTranslator.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using System.Globalization;
 
 namespace Microsoft.Build.BackEnd
 {

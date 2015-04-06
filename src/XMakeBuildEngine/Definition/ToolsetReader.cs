@@ -6,15 +6,12 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
-using Microsoft.Win32;
 
 using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;

@@ -5,10 +5,6 @@
 // <summary>Forwarding logger which forwards all events</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Text;
-using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 

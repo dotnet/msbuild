@@ -3,13 +3,6 @@
 
 using System;
 using System.IO;
-using System.Diagnostics;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

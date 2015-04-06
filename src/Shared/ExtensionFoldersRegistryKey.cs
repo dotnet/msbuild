@@ -6,8 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.Build.Shared;
-using Microsoft.Win32;
 
 namespace Microsoft.Build.Shared
 {

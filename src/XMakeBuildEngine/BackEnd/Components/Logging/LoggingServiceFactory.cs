@@ -4,10 +4,6 @@
 // <summary>Factory to create components of the type LoggingService</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Logging

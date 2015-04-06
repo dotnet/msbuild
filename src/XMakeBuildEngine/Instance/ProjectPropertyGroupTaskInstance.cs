@@ -5,12 +5,10 @@
 // <summary>Wraps an unevaluated propertygroup under a target.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 
 using Microsoft.Build.Construction;
 

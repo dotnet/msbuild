@@ -3,7 +3,6 @@
 
 using System;
 using System.Xml;
-using System.Xml.Schema;
 
 namespace Microsoft.Build.Shared
 {

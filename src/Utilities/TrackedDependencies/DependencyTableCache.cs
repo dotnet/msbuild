@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using System.Text;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 

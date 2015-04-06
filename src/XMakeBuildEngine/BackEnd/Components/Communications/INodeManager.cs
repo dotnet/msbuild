@@ -5,8 +5,6 @@
 // <summary>Interface for the node manager.</summary>
 //-----------------------------------------------------------------------using System;
 
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd

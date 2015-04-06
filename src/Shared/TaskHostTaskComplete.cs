@@ -9,10 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
-using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd

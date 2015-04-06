@@ -4,9 +4,6 @@
 // <summary>Interface for the build component host.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;

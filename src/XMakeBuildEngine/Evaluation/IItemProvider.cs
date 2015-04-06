@@ -5,10 +5,7 @@
 // <summary>Interface for an item provider which can be used with the Expander</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {

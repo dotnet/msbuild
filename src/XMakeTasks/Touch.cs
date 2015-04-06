@@ -4,12 +4,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
-using System.Resources;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks

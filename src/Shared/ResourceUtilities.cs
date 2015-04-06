@@ -6,12 +6,11 @@ using System.Resources;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Text.RegularExpressions;
+
 #if DEBUG && !BUILDING_DF_LKG
-using Microsoft.Build.Framework;
+
 #endif
-using System.Reflection;
-using System.Text;
+
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared

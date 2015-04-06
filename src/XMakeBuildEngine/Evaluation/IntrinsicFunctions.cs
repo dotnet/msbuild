@@ -7,15 +7,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Reflection;
 
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Collections.Concurrent;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters

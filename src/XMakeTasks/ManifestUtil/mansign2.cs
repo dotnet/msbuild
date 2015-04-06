@@ -6,8 +6,6 @@
 // mansign.cs
 //
 
-using System;
-using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;
@@ -18,7 +16,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.Pkcs;
 using Microsoft.Win32;
 
-using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace System.Deployment.Internal.CodeSigning
 {

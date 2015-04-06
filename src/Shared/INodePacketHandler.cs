@@ -5,8 +5,6 @@
 // <summary>Interface for node packet handlers.</summary>
 //-----------------------------------------------------------------------using System;
 
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.BackEnd
 {

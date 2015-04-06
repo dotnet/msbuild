@@ -3,11 +3,7 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.IO;
-using System.Globalization;
-using System.Reflection;
-using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;

@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using System;
 

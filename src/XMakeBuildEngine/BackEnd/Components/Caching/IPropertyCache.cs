@@ -5,8 +5,6 @@
 // <summary>Interface for a property cache.</summary>
 //-----------------------------------------------------------------------using System;
 
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.BackEnd
 {

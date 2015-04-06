@@ -9,7 +9,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using System;
-using System.Collections;
 using System.Diagnostics;
 
 namespace Microsoft.Build.Execution

@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows.Markup;
-using System.Xml;
 
 namespace Microsoft.Build.Framework.XamlTypes
 {

@@ -3,11 +3,7 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Resources;
-using System.Reflection;
 using System.Collections;
-using System.Diagnostics;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 

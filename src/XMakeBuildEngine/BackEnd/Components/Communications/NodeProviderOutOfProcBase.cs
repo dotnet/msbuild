@@ -9,19 +9,14 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 

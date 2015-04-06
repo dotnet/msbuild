@@ -5,12 +5,10 @@
 // <summary>Wraps an unevaluated item under an itemgroup in a target.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 
 using Microsoft.Build.Construction;
 
