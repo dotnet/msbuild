@@ -1,0 +1,11 @@
+version: '{build}'
+os: Visual Studio 2015 CTP 6
+build_script:
+- ps: >-
+    cinst pscx -y
+    Import-Module 'C:\Program Files (x86)\PowerShell Community Extensions\Pscx3\Pscx\Pscx.psd1'
+    Invoke-BatchFile "$env:vs140comntools\vsvars32.bat"
+    copy 'C:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Extensions\AppVeyor*' 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Extensions'
+    .\build.cmd
+test:
+  assemblies: bin\Windows_NT\Debug\*.UnitTests.dll
