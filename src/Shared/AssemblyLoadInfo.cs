@@ -7,7 +7,6 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Shared

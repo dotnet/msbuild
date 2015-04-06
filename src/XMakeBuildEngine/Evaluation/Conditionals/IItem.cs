@@ -5,10 +5,6 @@
 // <summary>Interface representing an item without exposing its type.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Evaluation

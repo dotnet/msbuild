@@ -9,16 +9,13 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Resources;
 using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading;
-using System.Xml;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -33,7 +30,6 @@ using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.CommandLine
 {

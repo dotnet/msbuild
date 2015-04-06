@@ -2,12 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.Win32;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {

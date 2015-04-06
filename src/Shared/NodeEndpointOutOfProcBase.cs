@@ -7,19 +7,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Security.Permissions;
 
 namespace Microsoft.Build.BackEnd
 {

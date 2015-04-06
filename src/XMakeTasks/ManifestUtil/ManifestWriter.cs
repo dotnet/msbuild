@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Build.Shared;
 

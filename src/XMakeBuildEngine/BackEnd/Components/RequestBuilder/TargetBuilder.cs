@@ -8,12 +8,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Text;
 using System.Threading;
-using System.Xml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;

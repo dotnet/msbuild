@@ -5,9 +5,7 @@
 // <summary>Interface representing a configuration cache.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.BackEnd
 {

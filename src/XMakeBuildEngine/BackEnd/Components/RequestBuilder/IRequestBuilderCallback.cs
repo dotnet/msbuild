@@ -5,9 +5,6 @@
 // <summary>Interface used by the TargetBuilder to communicate with the RequestBuilder.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using System.Threading.Tasks;

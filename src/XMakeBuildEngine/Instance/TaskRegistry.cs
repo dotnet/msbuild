@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;

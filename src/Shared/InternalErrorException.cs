@@ -8,7 +8,7 @@
 
 using System;
 using System.Diagnostics;
-using System.Security.Permissions; // for SecurityPermissionAttribute
+// for SecurityPermissionAttribute
 using System.Runtime.Serialization;
 
 namespace Microsoft.Build.Shared

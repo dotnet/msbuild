@@ -3,12 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Framework;

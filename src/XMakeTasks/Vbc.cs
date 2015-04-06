@@ -5,12 +5,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Collections.Specialized;
 using System.Collections.Generic;
-using System.Resources;
-using System.Reflection;
 using System.Globalization;
-using System.Text.RegularExpressions;
+
 
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;

@@ -14,7 +14,6 @@ using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {

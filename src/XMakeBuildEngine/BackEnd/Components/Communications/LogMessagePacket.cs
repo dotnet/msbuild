@@ -5,16 +5,11 @@
 // <summary>NodePackets which are used for node communication</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Reflection;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 
 namespace Microsoft.Build.BackEnd
 {

@@ -6,8 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;

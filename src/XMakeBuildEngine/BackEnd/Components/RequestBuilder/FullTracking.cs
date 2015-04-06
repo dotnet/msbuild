@@ -10,7 +10,6 @@ using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 
 namespace Microsoft.Build.BackEnd
 {

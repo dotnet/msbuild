@@ -5,8 +5,6 @@
 // <summary>A struct of three objects</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Build.Collections
 {

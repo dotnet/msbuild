@@ -4,11 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Security;
-using System.Security.Permissions;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;

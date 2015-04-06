@@ -12,7 +12,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
 
 namespace Microsoft.Build.Tasks
 {

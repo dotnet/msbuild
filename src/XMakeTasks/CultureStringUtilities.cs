@@ -3,7 +3,6 @@
 
 using System.Globalization;
 using System;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.Tasks
 {

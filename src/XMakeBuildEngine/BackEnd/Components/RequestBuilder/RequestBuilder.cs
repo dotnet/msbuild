@@ -8,17 +8,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Globalization;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Evaluation;
@@ -31,7 +26,6 @@ using Microsoft.Internal.Performance;
 using Microsoft.VisualStudio.Profiler;
 #endif
 #endif
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 

@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Collections;
-using System.Diagnostics;
-using System.Globalization;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;

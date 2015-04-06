@@ -3,7 +3,6 @@
 
 using System;
 using System.Xml;
-using System.Collections;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks

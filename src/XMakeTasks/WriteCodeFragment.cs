@@ -12,8 +12,6 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Diagnostics.CodeAnalysis;

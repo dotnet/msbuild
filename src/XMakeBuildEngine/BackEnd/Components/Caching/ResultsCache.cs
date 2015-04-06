@@ -8,8 +8,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 

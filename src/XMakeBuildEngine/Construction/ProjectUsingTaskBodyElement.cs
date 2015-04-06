@@ -5,14 +5,11 @@
 // <summary>Definition of ProjectUsingTaskBodyElement class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
-using Utilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.Construction
 {

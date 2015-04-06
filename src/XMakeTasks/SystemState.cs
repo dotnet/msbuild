@@ -3,17 +3,11 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Reflection;
 using System.Collections;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using System.Globalization;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;

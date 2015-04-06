@@ -5,7 +5,6 @@
 // <summary>An object containing properties of a sub-toolset.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 

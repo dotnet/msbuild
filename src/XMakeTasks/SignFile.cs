@@ -3,12 +3,8 @@
 
 #region Using directives
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Security;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;

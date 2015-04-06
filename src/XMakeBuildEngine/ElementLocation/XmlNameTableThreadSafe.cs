@@ -5,11 +5,8 @@
 // <summary>XmlNameTable that is thread safe for concurrent users.</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Shared;
 using System;
 using System.Xml;
-using System.Diagnostics;
-using System.Threading;
 
 namespace Microsoft.Build.Construction
 {

@@ -5,7 +5,6 @@
 // <summary>Shared Visual Studio related constants.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 
 namespace Microsoft.Build.Shared
 {

@@ -6,12 +6,8 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using Microsoft.Build.Shared;
-using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 namespace Microsoft.Build.BackEnd
 {

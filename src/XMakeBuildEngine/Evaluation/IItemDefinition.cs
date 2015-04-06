@@ -5,9 +5,6 @@
 // <summary>Interface representing item definition objects for use by the Evaulator.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Evaluation
