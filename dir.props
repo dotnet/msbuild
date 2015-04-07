@@ -10,19 +10,19 @@
     <BinDir>$(ProjectDir)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
     <PackagesDir>$(ProjectDir)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
-    <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(MSBuildToolsVersion)$([System.IO.Path]::DirectorySeparatorChar)lib$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
+    <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(MSBuildToolsVersion),"lib")$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
   </PropertyGroup>
 
   <!-- Common nuget properties -->
   <PropertyGroup>
     <NuGetDir>$(PackagesDir)</NuGetDir>
     <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
-    <NuGetConfigFile>$(SourceDir).nuget$([System.IO.Path]::DirectorySeparatorChar)NuGet.Config</NuGetConfigFile>
+    <NuGetConfigFile>$([System.IO.Path]::Combine("$(SourceDir).nuget","NuGet.Config"))</NuGetConfigFile>
     <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
-    <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('\/'.ToCharArray()))"</NugetRestoreCommand>
+    <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('\'))"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
     <NugetRestoreCommand Condition="'$(OS)' != 'Windows_NT'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
   </PropertyGroup>
@@ -67,10 +67,10 @@
 
   <!-- Setup the default output and intermediate paths -->
   <PropertyGroup>
-    <BaseOutputPath>$(ProjectDir)bin$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPath>
+    <BaseOutputPath>$(BinDir)</BaseOutputPath>
     <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath)$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
     <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseOutputPath)$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
-    <OutputPath>$(BaseOutputPathWithConfig)$([System.IO.Path]::DirectorySeparatorChar)</OutputPath>
+    <OutputPath>$(BaseOutputPathWithConfig)</OutputPath>
 
     <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
