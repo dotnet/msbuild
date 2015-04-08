@@ -173,7 +173,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // The 4.0 toolset is installed in the framework directory
                         var v4dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current);
-                        if (v4dir != null)
+                        if (v4dir != null && !toolsets.ContainsKey("4.0"))
                         {
                             toolsets.Add(
                                 "4.0",
