@@ -4,7 +4,7 @@ use strict;
 use Getopt::Long;
 use Data::Dumper;
 use File::Path qw(make_path);
-use File::Spec::Functions qw(rel2abs catfile);
+use File::Spec::Functions qw(rel2abs catfile canonpath);
 use File::Basename;
 use FindBin qw($RealBin);
 use Cwd qw(abs_path);
@@ -49,7 +49,7 @@ USAGE
 # Quick check if we are in the right place and that mono is installed
 # (just checking for solution and xbuild presence)
 die ("Solution $solutionToBuild does not exist\n") unless -e $solutionToBuild;
-die ("xbuild was not found") unless -e "/usr/bin/xbuild";
+die ("xbuild was not found") unless $^O eq "MSWin32" || -e "/usr/bin/xbuild";
 
 my $buildRoot;
 my $runTests;
@@ -86,10 +86,10 @@ if ($allSteps) {
 my $nunitConsole;
 if ($runTests) {
     # Find the nunit console program
-    my $n = `which nunit-console`;
+    my $n = ($^O eq 'MSWin32') ? `where nunit-console` : `which nunit-console`;
     chomp $n;
     
-    die ("Tests are requested, but nunit-console was not found") unless -e "/usr/bin/nunit-console";
+    die ("Tests are requested, but nunit-console was not found") unless -e $n;
     
     # Resolve any links
     $nunitConsole = abs_path($n);
@@ -98,6 +98,26 @@ if ($runTests) {
     $nunitConsole = $n if -e $n;
 }
 
+my $slash;
+my $installedBuild;
+
+if ($^O eq "MSWin32") {
+    # Find the nunit console program
+    my @n = `where msbuild`;
+    print "For MSBuild: got @n[0]\n";
+    chomp @n;
+    print "Chomped MSBuild: got @n[0]\n";
+    
+    die ("Installed MSBuild was not found") unless -e @n[0];
+   
+    # Resolve any links
+    $installedBuild = abs_path(@n[0]);
+    $slash = '\\';
+}
+else {
+    $installedBuild = '/usr/bin/xbuild';
+    $slash = '/';
+}
 
 # Find the location where we're going to store results
 # If no root is specifed, use the script location (we'll create
@@ -106,7 +126,7 @@ if ($runTests) {
 # If root is specified, make a dated subdirectory there. That
 # will be our root.
 if (!$buildRoot) {
-    $buildRoot = $RealBin;
+    $buildRoot = canonpath($RealBin);
 }
 else {
     $buildRoot = catfile(rel2abs($buildRoot), DATETIME);
@@ -115,32 +135,28 @@ else {
     make_path($buildRoot);
 }
 
-# Make some paths
-my $binRoot = catfile($buildRoot, "bin", "");
-my $verBinRoot = catfile($buildRoot, "bin-verify", "");
-my $packageRoot = catfile ($buildRoot, "packages", "");
-my $verPackageRoot = catfile ($buildRoot, "packages-verify", "");
-
 # The regex to parse build logs
-my $extractRegex = qr!^\s*Build binary target directory: '($buildRoot.+?)/?'!;
+(my $tmpRoot = $buildRoot) =~ s!\\!\\\\!g;
+print "buildRoot: $buildRoot, tmpRoot: $tmpRoot\n";
+my $extractRegex = qr!^\s*Build binary target directory: '($tmpRoot.+?)[\\/]?'!;
 
 my $msbuildPath;
 my $exitCode;
 my $errorCount;
 
 # Run the first build
-($exitCode, $errorCount, $msbuildPath) = runbuild('xbuild', '', '/');
+($exitCode, $errorCount, $msbuildPath) = runbuild("\"$installedBuild\"", '', '/', ($^O ne "MSWin32"));
 
 die ("Build with xbuild failed (code $exitCode)") unless $exitCode == 0;
 die ("Build with xbuild failed (error count $errorCount") unless $errorCount == 0;
-die ("Build succeeded, but MSBuild.exe binary was not found") unless -e $msbuildPath;
+die ("Build succeeded, but MSBuild.exe binary was not found at $msbuildPath") unless -e $msbuildPath;
 
 # Use the MSBuild.exe we created and rebuild (if requested)
 if ($verification) {
     my $MSBuildProgram = catfile($msbuildPath, 'MSBuild.exe');
-    $MSBuildProgram = 'mono ' . $MSBuildProgram if $^O == "MSWin32";
+    $MSBuildProgram = 'mono ' . "\"$MSBuildProgram\"" unless $^O eq "MSWin32";
     my $newMSBuildPath;
-    ($exitCode, $errorCount, $newMSBuildPath) = runbuild($MSBuildProgram, '-verify', '-');
+    ($exitCode, $errorCount, $newMSBuildPath) = runbuild($MSBuildProgram, '-verify', '-', 0);
     die ("Build with msbuild failed (code $exitCode)") unless $exitCode == 0;
     die ("Build with msbuild failed (error count $errorCount") unless $errorCount == 0;
     print "New MSBuild path: $newMSBuildPath\n";
@@ -159,20 +175,26 @@ if ($runTests) {
 #   suffix -- appended to log and output directory names
 #   switch -- either - or /
 sub runbuild {
-    die ('runbuild sub was not called correctly') unless @_ == 3;
-    my ($program, $suffix, $switch) = @_;
+    die ('runbuild sub was not called correctly') unless @_ == 4;
+    my ($program, $suffix, $switch, $overrideToolset) = @_;
 
     # Get paths of output directories and the log
-    my $binDir = catfile($buildRoot, "bin$suffix", "");
-    my $packagesDir = catfile ($buildRoot, "packages$suffix", "");
+    (my $binDir = catfile($buildRoot, "bin$suffix")) =~ s:(?<![\/])$:$slash:;
+    #$binDir =~ s:(?<![\/])$:\\:;
+    print "BinDir = $binDir\n";
+    (my $packagesDir = catfile ($buildRoot, "packages$suffix")) =~ s:(?<![\/])$:$slash:;
     my $logFile = catfile($buildRoot, "MSBuild${suffix}.log");
 
     # If we need to rebuild, add a switch for the task
     my $rebuildSwitch = $fullBuild ? "${switch}t:Rebuild " : "";
 
+    # Except on Windows, we need to specifiy 4.0 toolse
+    my $toolSet = $overrideToolset ? "${switch}tv:4.0 " : "";
+    my $configSwitch = $^O eq "MSWin32" ? "${switch}p:Configuration=Debug " : "${switch}p:Configuration=Debug-MONO ";
+    
     # Generate and print the command we run
-    my $command = "$program ${switch}nologo ${switch}v:q ${switch}tv:4.0 $rebuildSwitch " .
-                  "${switch}p:Configuration=Debug-MONO " .
+    my $command = "$program ${switch}nologo ${switch}v:q " .
+                  "$rebuildSwitch $configSwitch $toolSet " . 
                   "${switch}p:BinDir=$binDir ${switch}p:PackagesDir=$packagesDir " .
                   "${switch}fl \"${switch}flp:LogFile=$logFile;V=diag\" $solutionToBuild";
     print $command . "\n" unless $silent;
@@ -220,7 +242,7 @@ sub runtests {
     my $outputFile = catfile($testResultsDir, 'TestOutput.txt');
 
     # Build the command to run the test
-    my $command = "$nunitConsole -xml:$xmlResultFile " . join (' ', @files);
+    my $command = "\"$nunitConsole\" -xml:$xmlResultFile " . join (' ', @files);
     print $command . "\n" unless $silent;
 
     # Run it silently
@@ -235,10 +257,10 @@ sub runtests {
     if (open LOG, '<', $xmlResultFile) {
         m/$testRegex/ && ($1 eq 'True' ? $testsSucceeded++ : $testsFailed++) for <LOG>;
         close (LOG);
+        my $testsRan = $testsSucceeded + $testsFailed;
+        print "Tests ran: $testsRan, tests succeeded: $testsSucceeded, tests failed: $testsFailed\n" unless $silent;
     }
     else {
-        print "Warning: Cannot open log file $xmlResultFile: $!" if $! && !$silent;
+        print "Warning: Cannot open log file $xmlResultFile: $!\n" if $! && !$silent;
     }
-    my $testsRan = $testsSucceeded + $testsFailed;
-    print "Tests ran: $testsRan, tests succeeded: $testsSucceeded, tests failed: $testsFailed\n" unless $silent;
 }
