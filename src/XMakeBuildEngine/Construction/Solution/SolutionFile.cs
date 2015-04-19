@@ -1318,6 +1318,11 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
+                if (String.IsNullOrWhiteSpace(str))
+                {
+                    continue;
+                }
+
                 Match match = s_crackPropertyLine.Match(str);
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseNestedProjectError");
@@ -1360,6 +1365,11 @@ namespace Microsoft.Build.Construction
                 if ((str == null) || (str == "EndGlobalSection"))
                 {
                     break;
+                }
+
+                if (String.IsNullOrWhiteSpace(str))
+                {
+                    continue;
                 }
 
                 string[] configurationNames = str.Split(nameValueSeparators);
@@ -1419,6 +1429,11 @@ namespace Microsoft.Build.Construction
                 if ((str == null) || (str == "EndGlobalSection"))
                 {
                     break;
+                }
+
+                if (String.IsNullOrWhiteSpace(str))
+                {
+                    continue;
                 }
 
                 string[] nameValue = str.Split(new char[] { '=' });
