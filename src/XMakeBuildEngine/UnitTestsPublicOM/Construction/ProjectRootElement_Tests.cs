@@ -589,10 +589,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             try
             {
                 Environment.CurrentDirectory = Path.GetTempPath(); // should be used for project.DirectoryPath; it must exist
+                // Use the *real* current directory for constructing the path
+                var curDir = Environment.CurrentDirectory;
 
                 string file = "bar" + Path.DirectorySeparatorChar + "foo.proj";
-                string path = Path.Combine(Path.GetTempPath(), file);
-                directory = Path.Combine(Path.GetTempPath(), "bar");
+                string path = Path.Combine(curDir, file);
+                directory = Path.Combine(curDir, "bar");
 
                 project.Save(file); // relative path: file and a single directory only; should create the "bar" part
 
