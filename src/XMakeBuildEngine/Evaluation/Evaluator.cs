@@ -1308,6 +1308,7 @@ namespace Microsoft.Build.Evaluation
             if (!NativeMethodsShared.IsWindows)
             {
                 builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.osName, NativeMethodsShared.OSName));
+                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.frameworkToolsRoot,  NativeMethodsShared.FrameworkBasePath));
             }
 
             if (String.IsNullOrEmpty(_projectRootElement.FullPath))

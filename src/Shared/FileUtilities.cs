@@ -421,6 +421,75 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// If on Unix, convert backslashes to slashes for strings that resemble paths.
+        /// The heuristic is if something resembles paths (contains slashes) check if the
+        /// first segment exists and is a directory.
+        /// Use a native shared method to massage file path. If the file is adjusted,
+        /// that qualifies is as a path.
+        /// </summary>
+        internal static string MaybeAdjustFilePath(string value)
+        {
+            // Don't bother with arrays or properties or network paths, or those that
+            // have no slashes.
+            if (NativeMethodsShared.IsWindows || string.IsNullOrWhiteSpace(value) ||
+                value.StartsWith("$(") || value.StartsWith("@(") || value.StartsWith("\\\\") ||
+                value.IndexOfAny(new [] {'/', '\\'}) == -1)
+            {
+                return value;
+            }
+
+            // For Unix-like systems, we may want to convert backslashes to slashes
+            string newValue = Regex.Replace(value, @"[\\/]+", "/");
+
+            string quote = string.Empty;
+            // Find the part of the name we want to check, that is remove quotes, if present
+            string checkValue = newValue;
+            if (newValue.Length > 2)
+            {
+                if (newValue.StartsWith("'"))
+                {
+                    if (newValue.EndsWith("'"))
+                    {
+                        checkValue = newValue.Substring(1, newValue.Length - 2);
+                        quote = "'";
+                    }
+                }
+                else if (newValue.StartsWith("\"") && newValue.EndsWith("\""))
+                {
+                    checkValue = newValue.Substring(1, newValue.Length - 2);
+                    quote = "\"";
+                }
+            }
+
+            // See if we have a framework path and adjust it if needed
+            if (checkValue.StartsWith("/"))
+            {
+                var adjustedValue = NativeMethodsShared.FixFrameworkPath(checkValue);
+
+                if (adjustedValue != null)
+                {
+                    return quote + adjustedValue + quote;
+                }
+            }
+
+            var firstSlash = checkValue.IndexOf('/');
+            // The first slash will either be at the beginning of the string or after the first directory name
+            if (firstSlash == 0)
+            {
+                firstSlash = checkValue.Substring(1).IndexOf('/') + 1;
+            }
+
+            if (firstSlash > 0 && Directory.Exists(checkValue.Substring(0, firstSlash)))
+            {
+                return newValue;
+            }
+
+            return value;
+        }
+
+
+
+        /// <summary>
         /// Extracts the directory from the given file-spec.
         /// </summary>
         /// <param name="fileSpec">The filespec.</param>

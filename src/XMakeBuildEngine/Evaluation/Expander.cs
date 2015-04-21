@@ -253,6 +253,7 @@ namespace Microsoft.Build.Evaluation
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
+            result = FileUtilities.MaybeAdjustFilePath(result);
 
             return result;
         }
@@ -320,6 +321,7 @@ namespace Microsoft.Build.Evaluation
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _usedUninitializedProperties);
+            expression = FileUtilities.MaybeAdjustFilePath(expression);
 
             List<T> result = new List<T>();
 
@@ -1017,7 +1019,7 @@ namespace Microsoft.Build.Evaluation
                 // If we have only a single result, then just return it
                 if (results == null && expression.Length == sourceIndex)
                 {
-                    return lastResult;
+                    return lastResult == null ? null : FileUtilities.MaybeAdjustFilePath(lastResult.ToString());
                 }
                 else
                 {
@@ -1042,14 +1044,14 @@ namespace Microsoft.Build.Evaluation
                             // Create a combined result string from the result components that we've gathered
                             foreach (object component in results)
                             {
-                                result.Append(component.ToString());
+                                result.Append(FileUtilities.MaybeAdjustFilePath(component.ToString()));
                             }
                         }
 
                         // Append the last result we collected (it wasn't added to the list)
                         if (lastResult != null)
                         {
-                            result.Append(lastResult.ToString());
+                            result.Append(FileUtilities.MaybeAdjustFilePath(lastResult.ToString()));
                         }
 
                         // And if we couldn't find anymore property tags in the expression,
