@@ -36,7 +36,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The environment properties used to read the toolset.
         /// </summary>
-        private PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
+        private readonly PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
 
         /// <summary>
         /// Constructor
@@ -172,16 +172,23 @@ namespace Microsoft.Build.Evaluation
                     if (!string.IsNullOrEmpty(libraryPath))
                     {
                         // The 4.0 toolset is installed in the framework directory
-                        var v4dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current);
-                        if (v4dir != null && !toolsets.ContainsKey("4.0"))
+                        var v4Dir =
+                            FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current);
+                        if (v4Dir != null && !toolsets.ContainsKey("4.0"))
                         {
+                            // Create standard properties. On Mono they are well known
+                            PropertyDictionary<ProjectPropertyInstance> buildProperties =
+                                CreateStandardProperties(globalProperties, "4.0", libraryPath, v4Dir);
+
                             toolsets.Add(
                                 "4.0",
                                 new Toolset(
                                     "4.0",
-                                    v4dir,
+                                    v4Dir,
+                                    buildProperties,
                                     environmentProperties,
                                     globalProperties,
+                                    null,
                                     currentDir,
                                     string.Empty));
                         }
@@ -192,15 +199,22 @@ namespace Microsoft.Build.Evaluation
                         foreach (var d in Directory.GetDirectories(xbuildToolsetsDir).Where(d => r.IsMatch(d)))
                         {
                             var version = Path.GetFileName(d);
+                            var binPath = Path.Combine(d, "bin");
                             if (version != null && !toolsets.ContainsKey(version))
                             {
+                                // Create standard properties. On Mono they are well known
+                                PropertyDictionary<ProjectPropertyInstance> buildProperties =
+                                    CreateStandardProperties(globalProperties, version, xbuildToolsetsDir, binPath);
+
                                 toolsets.Add(
                                     version,
                                     new Toolset(
                                         version,
-                                        Path.Combine(d,"bin"),
+                                        binPath,
+                                        buildProperties,
                                         environmentProperties,
                                         globalProperties,
+                                        null,
                                         currentDir,
                                         string.Empty));
                             }
@@ -456,6 +470,7 @@ namespace Microsoft.Build.Evaluation
                 InvalidToolsetDefinitionException.Throw("ConflictingValuesOfMSBuildToolsPath", toolsVersion.Name, toolsVersion.Source.LocationString);
             }
 
+            AppendStandardProperties(properties, globalProperties, toolsVersion.Name, null, toolsPath);
             Toolset toolset = null;
 
             try
@@ -468,6 +483,101 @@ namespace Microsoft.Build.Evaluation
             }
 
             return toolset;
+        }
+
+        /// <summary>
+        /// Create a dictionary with standard properties.
+        /// </summary>
+        private static PropertyDictionary<ProjectPropertyInstance> CreateStandardProperties(
+            PropertyDictionary<ProjectPropertyInstance> globalProperties,
+            string version,
+            string root,
+            string toolsPath)
+        {
+            // Create standard properties. On Mono they are well known
+            if (!NativeMethodsShared.IsMono)
+            {
+                return null;
+            }
+
+            PropertyDictionary<ProjectPropertyInstance> buildProperties =
+                new PropertyDictionary<ProjectPropertyInstance>();
+            AppendStandardProperties(buildProperties, globalProperties, version, root, toolsPath);
+            return buildProperties;
+        }
+
+        /// <summary>
+        /// Appends standard properties to a dictionary. These properties are read from
+        /// the registry under Windows (they are a part of a toolset definition).
+        /// </summary>
+        private static void AppendStandardProperties(
+            PropertyDictionary<ProjectPropertyInstance> properties,
+            PropertyDictionary<ProjectPropertyInstance> globalProperties,
+            string version,
+            string root,
+            string toolsPath)
+        {
+            if (NativeMethodsShared.IsMono)
+            {
+                var v4Dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current)
+                            + Path.DirectorySeparatorChar;
+                var v35Dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current)
+                             + Path.DirectorySeparatorChar;
+
+                if (root == null)
+                {
+                    var libraryPath = NativeMethodsShared.FrameworkBasePath;
+                    if (toolsPath.StartsWith(libraryPath))
+                    {
+                        root = Path.GetDirectoryName(toolsPath);
+                        if (toolsPath.EndsWith("bin"))
+                        {
+                            root = Path.GetDirectoryName(root);
+                        }
+                    }
+                    else
+                    {
+                        root = libraryPath;
+                    }
+                }
+
+                root += Path.DirectorySeparatorChar;
+
+                // Global properties cannot be overwritten
+                if (globalProperties["FrameworkSDKRoot"] == null && properties["FrameworkSDKRoot"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("FrameworkSDKRoot", root, true, false));
+                }
+                if (globalProperties["MSBuildToolsRoot"] == null && properties["MSBuildToolsRoot"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("MSBuildToolsRoot", root, true, false));
+                }
+                if (globalProperties["MSBuildFrameworkToolsPath"] == null
+                    && properties["MSBuildFrameworkToolsPath"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath", toolsPath, true, false));
+                }
+                if (globalProperties["MSBuildFrameworkToolsPath32"] == null
+                    && properties["MSBuildFrameworkToolsPath32"] == null)
+                {
+                    properties.Set(
+                        ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath32", toolsPath, true, false));
+                }
+                if (globalProperties["MSBuildRuntimeVersion"] == null && properties["MSBuildRuntimeVersion"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("MSBuildRuntimeVersion", version, true, false));
+                }
+                if (!string.IsNullOrEmpty(v35Dir) && globalProperties["SDK35ToolsPath"] == null
+                    && properties["SDK35ToolsPath"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("SDK35ToolsPath", v35Dir, true, false));
+                }
+                if (!string.IsNullOrEmpty(v4Dir) && globalProperties["SDK40ToolsPath"] == null
+                    && properties["SDK40ToolsPath"] == null)
+                {
+                    properties.Set(ProjectPropertyInstance.Create("SDK40ToolsPath", v4Dir, true, false));
+                }
+            }
         }
 
         /// <summary>

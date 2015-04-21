@@ -48,6 +48,7 @@ namespace Microsoft.Build.Internal
         internal const string localAppData = "LocalAppData";
         internal const string assemblyVersion = "MSBuildAssemblyVersion";
         internal const string osName = "OS";
+        internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";
 
         /// <summary>
         /// Lookup for reserved property names
