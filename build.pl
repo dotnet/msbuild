@@ -39,6 +39,7 @@ Options:
  verify    - rebuild the source with the binaries generated
              by the xbuild.
  tests     - run the tests.
+ runTestName - name of the nunit test to run (used with -tests)
  all       - shorthand for -verify and -tests flags.
  quiet     - don't show any build output, only summaries
  silent    - show nothing, not even summaries
@@ -55,6 +56,7 @@ die ("xbuild was not found") unless $^O eq "MSWin32" || -e $xbuild;
 
 my $buildRoot;
 my $runTests;
+my $runTestName;
 my $verification;
 my $quiet;
 my $silent;
@@ -66,6 +68,7 @@ die $usage unless GetOptions(
                              'root=s' => \$buildRoot,
                              'verify' => \$verification,
                              'tests' => \$runTests,
+                             'runTestName=s' => \$runTestName,
                              'quiet' => \$quiet,
                              'silent' => \$silent,
                              'fullBuild' => \$fullBuild,
@@ -244,7 +247,12 @@ sub runtests {
     my $outputFile = catfile($testResultsDir, 'TestOutput.txt');
 
     # Build the command to run the test
-    my $command = "\"$nunitConsole\" -xml:$xmlResultFile " . join (' ', @files);
+    my $command = '';
+    if ($runTestName) {
+        $command = "\"$nunitConsole\" -run:$runTestName -xml:$xmlResultFile " . join (' ', @files);
+    } else {
+        $command = "\"$nunitConsole\" -xml:$xmlResultFile " . join (' ', @files);
+    }
     print $command . "\n" unless $silent;
 
     # Run it silently
