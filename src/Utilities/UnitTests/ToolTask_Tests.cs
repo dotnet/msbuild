@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
-                    : @"-c ""echo 'Main.cs(17,20): error CS0168: The variable \'foo\' is declared but never used'""";
+                    : @"-c ""echo \""Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used\""""";
 
                 Assert.IsFalse(t.Execute());
 
