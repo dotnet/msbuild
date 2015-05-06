@@ -42,6 +42,20 @@
   -->
   <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_RestoreBuildTools" />
 
+  <Target Name="_CopyCompilers" AfterTargets="_RestoreBuildTools" Condition="'$(UseRoslynCompilers)' == 'true'">
+    <ItemGroup>
+      <BuildFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\build\*" />
+      <ToolsFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\tools\*" />
+    </ItemGroup>
+    
+    <Copy
+      SourceFiles="@(BuildFiles);@(ToolsFiles)"
+      DestinationFolder="$(OutputPath)tools"
+      SkipUnchangedFiles="true"
+    />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="find '$(OutputPath)tools' -name &quot;*.exe&quot; -exec chmod &quot;+x&quot; '{}' ';'" />
+  </Target>
+
   <Target Name="_RestoreBuildTools"
           Inputs="$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)dir.props"
           Outputs="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll;$(NugetToolPath)">
