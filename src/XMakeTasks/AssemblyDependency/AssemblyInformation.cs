@@ -251,6 +251,13 @@ namespace Microsoft.Build.Tasks
         {
             if (!NativeMethodsShared.IsWindows)
             {
+                if (String.Equals(Environment.GetEnvironmentVariable("MONO29679"), "1", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Getting custom attributes in CoreFx contract assemblies is busted
+                    // https://bugzilla.xamarin.com/show_bug.cgi?id=29679
+                    return null;
+                }
+
                 CustomAttributeData attr = null;
 
                 foreach (CustomAttributeData a in _assembly.GetCustomAttributesData())
