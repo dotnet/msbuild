@@ -1291,13 +1291,7 @@ namespace Microsoft.Build.CommandLine
                         string switchParameters;
 
                         // all switches should start with - or / unless a project is being specified
-                        if (!unquotedCommandLineArg.StartsWith("-", StringComparison.Ordinal)
-#if MONO
-                            )
-#else
-                            && !unquotedCommandLineArg.StartsWith("/", StringComparison.Ordinal)
-                        )
-#endif
+                        if (!unquotedCommandLineArg.StartsWith("-", StringComparison.Ordinal) && (!unquotedCommandLineArg.StartsWith("/", StringComparison.Ordinal) || LooksLikeUnixFilePath(unquotedCommandLineArg)))
                         {
                             switchName = null;
                             // add a (fake) parameter indicator for later parsing
@@ -1360,6 +1354,30 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// If on Unix, check if the string looks like a file path.
+        /// The heuristic is if something resembles paths (contains slashes) check if the
+        /// first segment exists and is a directory.
+        /// </summary>
+        private static bool LooksLikeUnixFilePath(string value)
+        {
+#if MONO
+            var firstSlash = value.IndexOf('/');
+
+            // The first slash will either be at the beginning of the string or after the first directory name 
+            if (firstSlash == 0)
+            {
+                firstSlash = value.Substring(1).IndexOf('/') + 1;
+            }
+
+            if (firstSlash > 0 && System.IO.Directory.Exists(value.Substring(0, firstSlash)))
+            {
+                return true;
+            }
+#endif
+            return false;
         }
 
         /// <summary>
