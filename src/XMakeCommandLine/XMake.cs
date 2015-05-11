@@ -1291,13 +1291,7 @@ namespace Microsoft.Build.CommandLine
                         string switchParameters;
 
                         // all switches should start with - or / unless a project is being specified
-                        if (!unquotedCommandLineArg.StartsWith("-", StringComparison.Ordinal)
-#if MONO
-                            )
-#else
-                            && !unquotedCommandLineArg.StartsWith("/", StringComparison.Ordinal)
-                        )
-#endif
+                        if (!unquotedCommandLineArg.StartsWith("-", StringComparison.Ordinal) && (!unquotedCommandLineArg.StartsWith("/", StringComparison.Ordinal) || FileUtilities.LooksLikeUnixFilePath(unquotedCommandLineArg)))
                         {
                             switchName = null;
                             // add a (fake) parameter indicator for later parsing
