@@ -261,7 +261,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : "-c 'echo Who made you king anyways' 1>&2";
+                                                : "-c \"echo 'Who made you king anyways' 1>&2\"";
 
                 Assert.IsTrue(t.Execute());
 
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : "-c 'echo Who made you king anyways' 1>&2";
+                                                : "-c \"echo 'Who made you king anyways' 1>&2\"";
 
                 Assert.IsFalse(t.Execute());
 
