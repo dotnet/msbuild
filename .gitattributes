@@ -52,7 +52,7 @@
 *.bat	wintext
 *.rsp	wintext
 *.sample wintext
-
+*.pl	text eol=auto
 
 # Sources (Binary)
 *.doc  binary
