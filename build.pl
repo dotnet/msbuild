@@ -48,8 +48,10 @@ USAGE
 
 # Quick check if we are in the right place and that mono is installed
 # (just checking for solution and xbuild presence)
+my $xbuild = ($^O eq 'MSWin32') ? `where xbuild` : `which xbuild`;
+chomp $xbuild;
 die ("Solution $solutionToBuild does not exist\n") unless -e $solutionToBuild;
-die ("xbuild was not found") unless $^O eq "MSWin32" || -e "/usr/bin/xbuild";
+die ("xbuild was not found") unless $^O eq "MSWin32" || -e $xbuild;
 
 my $buildRoot;
 my $runTests;
@@ -115,7 +117,7 @@ if ($^O eq "MSWin32") {
     $slash = '\\';
 }
 else {
-    $installedBuild = '/usr/bin/xbuild';
+    $installedBuild = $xbuild;
     $slash = '/';
 }
 
