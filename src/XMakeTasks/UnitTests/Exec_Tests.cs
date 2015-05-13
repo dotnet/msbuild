@@ -312,7 +312,12 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void BogusCustomRegexesCauseOneErrorEach()
         {
-            Exec exec = PrepareExec("echo Some output & echo Some output & echo Some output & echo Some output ");
+            Exec exec;
+            if (NativeMethodsShared.IsWindows)
+                exec = PrepareExec("echo Some output & echo Some output & echo Some output & echo Some output ");
+            else
+                exec = PrepareExec("echo Some output ; echo Some output ; echo Some output ; echo Some output ");
+
             exec.CustomErrorRegularExpression = "~!@#$%^_)(*&^%$#@@#XF &%^%T$REd((((([[[[";
             exec.CustomWarningRegularExpression = "*";
             bool result = exec.Execute();
@@ -326,7 +331,12 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void CustomErrorRegexSupplied()
         {
-            Exec exec = PrepareExec("echo Some output & echo ALERT:This is an error & echo Some more output");
+            string cmdLine;
+            if (NativeMethodsShared.IsWindows)
+                cmdLine = "echo Some output & echo ALERT:This is an error & echo Some more output";
+            else
+                cmdLine = "echo Some output ; echo ALERT:This is an error ; echo Some more output";
+            Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
 
             MockEngine e = (MockEngine)exec.BuildEngine;
@@ -334,7 +344,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(0, e.Errors);
             e.AssertLogContains("ALERT:This is an error");
 
-            exec = PrepareExec("echo Some output & echo ALERT:This is an error & echo Some more output");
+            exec = PrepareExec(cmdLine);
             exec.CustomErrorRegularExpression = ".*ALERT.*";
             result = exec.Execute();
 
@@ -347,7 +357,13 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void CustomWarningRegexSupplied()
         {
-            Exec exec = PrepareExec("echo Some output & echo YOOHOO:This is a warning & echo Some more output");
+            string cmdLine;
+            if (NativeMethodsShared.IsWindows)
+                cmdLine = "echo Some output & echo YOOHOO:This is a warning & echo Some more output";
+            else
+                cmdLine = "echo Some output ; echo YOOHOO:This is a warning ; echo Some more output";
+
+            Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
 
             MockEngine e = (MockEngine)exec.BuildEngine;
@@ -356,7 +372,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(0, e.Warnings);
             e.AssertLogContains("YOOHOO:This is a warning");
 
-            exec = PrepareExec("echo Some output & echo YOOHOO:This is a warning & echo Some more output");
+            exec = PrepareExec(cmdLine);
             exec.CustomWarningRegularExpression = ".*YOOHOO.*";
             result = exec.Execute();
 
@@ -370,7 +386,13 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void ErrorsAndWarningsWithIgnoreStandardErrorWarningFormatTrue()
         {
-            Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning");
+            string cmdLine;
+            if (NativeMethodsShared.IsWindows)
+                cmdLine = "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning";
+            else
+                cmdLine = "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning";
+
+            Exec exec = PrepareExec(cmdLine);
             exec.IgnoreStandardErrorWarningFormat = true;
             bool result = exec.Execute();
 
@@ -382,7 +404,13 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void CustomAndStandardErrorsAndWarnings()
         {
-            Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning & echo YOGI & echo BEAR & echo some content");
+            string cmdLine;
+            if (NativeMethodsShared.IsWindows)
+                cmdLine = "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning & echo YOGI & echo BEAR & echo some content";
+            else
+                cmdLine = "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning ; echo YOGI ; echo BEAR ; echo some content";
+
+            Exec exec = PrepareExec(cmdLine);
             exec.CustomWarningRegularExpression = ".*BEAR.*";
             exec.CustomErrorRegularExpression = ".*YOGI.*";
             bool result = exec.Execute();
@@ -428,7 +456,13 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void NoDuplicateMessagesWhenCustomRegexAndRegularRegexBothMatch()
         {
-            Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning ");
+            string cmdLine;
+            if (NativeMethodsShared.IsWindows)
+                cmdLine = "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning ";
+            else
+                cmdLine = "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning ";
+
+            Exec exec = PrepareExec(cmdLine);
             exec.CustomErrorRegularExpression = ".*canonicale.*";
             exec.CustomWarningRegularExpression = ".*canonicalw.*";
             bool result = exec.Execute();
