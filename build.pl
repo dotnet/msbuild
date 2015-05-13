@@ -39,6 +39,7 @@ Options:
  verify    - rebuild the source with the binaries generated
              by the xbuild.
  tests     - run the tests.
+ package   - create NuGet package
  all       - shorthand for -verify and -tests flags.
  quiet     - don't show any build output, only summaries
  silent    - show nothing, not even summaries
@@ -56,6 +57,7 @@ my $runTests;
 my $verification;
 my $quiet;
 my $silent;
+my $createPackage;
 my $fullBuild;
 my $allSteps;
 my $help;
@@ -64,6 +66,7 @@ die $usage unless GetOptions(
                              'root=s' => \$buildRoot,
                              'verify' => \$verification,
                              'tests' => \$runTests,
+                             'package' => \$createPackage,
                              'quiet' => \$quiet,
                              'silent' => \$silent,
                              'fullBuild' => \$fullBuild,
@@ -188,13 +191,16 @@ sub runbuild {
     # If we need to rebuild, add a switch for the task
     my $rebuildSwitch = $fullBuild ? "${switch}t:Rebuild " : "";
 
+    # If we need to create NuGet package, add a witch for the property
+    my $packageProperty = $createPackage ? "${switch}p:BuildNugetPackage=true " : "";
+
     # Except on Windows, we need to specifiy 4.0 toolse
     my $toolSet = $overrideToolset ? "${switch}tv:4.0 " : "";
     my $configSwitch = $^O eq "MSWin32" ? "${switch}p:Configuration=Debug " : "${switch}p:Configuration=Debug-MONO ";
     
     # Generate and print the command we run
     my $command = "$program ${switch}nologo ${switch}v:q " .
-                  "$rebuildSwitch $configSwitch $toolSet " . 
+                  "$rebuildSwitch $configSwitch $toolSet $packageProperty" .
                   "${switch}p:BinDir=$binDir ${switch}p:PackagesDir=$packagesDir " .
                   "${switch}fl \"${switch}flp:LogFile=$logFile;V=diag\" $solutionToBuild";
     print $command . "\n" unless $silent;
