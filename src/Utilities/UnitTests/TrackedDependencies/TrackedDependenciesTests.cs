@@ -8,6 +8,7 @@ using System.Resources;
 using System.Threading;
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
@@ -20,7 +21,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
     [TestFixture]
     sealed public class TrackedDependenciesTests
     {
-        private const int sleepTimeMilliseconds = 100;
+        private readonly int sleepTimeMilliseconds = NativeMethodsShared.IsWindows ? 100 : 1000;
 
         [SetUp]
         public void SetupTestEnvironment()
