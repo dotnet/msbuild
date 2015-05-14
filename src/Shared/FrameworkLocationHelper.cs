@@ -801,9 +801,19 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GenerateProgramFilesReferenceAssemblyRoot()
         {
-            string combinedPath = NativeMethodsShared.IsWindows
-                                      ? Path.Combine(programFiles32, "Reference Assemblies\\Microsoft\\Framework")
-                                      : Path.Combine(NativeMethodsShared.FrameworkBasePath, "xbuild-frameworks");
+            string combinedPath = Environment.GetEnvironmentVariable("ReferenceAssemblyRoot");
+            if (!String.IsNullOrEmpty(combinedPath))
+            {
+                combinedPath = Path.GetFullPath(combinedPath);
+                if (Directory.Exists(combinedPath))
+                {
+                    return combinedPath;
+                }
+            }
+
+            combinedPath = NativeMethodsShared.IsWindows
+                               ? Path.Combine(programFiles32, "Reference Assemblies\\Microsoft\\Framework")
+                               : Path.Combine(NativeMethodsShared.FrameworkBasePath, "xbuild-frameworks");
 
             return Path.GetFullPath(combinedPath);
         }
