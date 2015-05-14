@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
-                    : @"-c ""echo 'Main.cs(17,20): error CS0168: The variable \'foo\' is declared but never used'""";
+                    : @"-c ""echo \""Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used\""""";
 
                 Assert.IsFalse(t.Execute());
 
@@ -261,7 +261,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : "-c 'echo Who made you king anyways' 1>&2";
+                                                : "-c \"echo 'Who made you king anyways' 1>&2\"";
 
                 Assert.IsTrue(t.Execute());
 
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : "-c 'echo Who made you king anyways' 1>&2";
+                                                : "-c \"echo 'Who made you king anyways' 1>&2\"";
 
                 Assert.IsFalse(t.Execute());
 
