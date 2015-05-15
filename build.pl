@@ -42,6 +42,8 @@ Options:
  package   - create NuGet package
  testName  - name of the nunit test to run (used with -tests).
              Use full name, including the namespace.
+ fixture   - name of the nunit test fixture to be run (used
+             with -tests)
  all       - shorthand for -verify and -tests flags.
  quiet     - don't show any build output, only summaries
  silent    - show nothing, not even summaries
@@ -59,6 +61,7 @@ die ("xbuild was not found") unless $^O eq "MSWin32" || -e $xbuild;
 my $buildRoot;
 my $runTests;
 my $testName;
+my $fixture;
 my $verification;
 my $quiet;
 my $silent;
@@ -73,6 +76,7 @@ die $usage unless GetOptions(
                              'tests' => \$runTests,
                              'package' => \$createPackage,
                              'testName=s' => \$testName,
+                             'fixture=s' => \$fixture,
                              'quiet' => \$quiet,
                              'silent' => \$silent,
                              'fullBuild' => \$fullBuild,
@@ -257,6 +261,8 @@ sub runtests {
     my $command = '';
     if ($testName) {
         $command = "\"$nunitConsole\" -run:$testName -xml:$xmlResultFile " . join (' ', @files);
+    } elsif ($fixture) {
+        $command = "\"$nunitConsole\" -fixture:$fixture -xml:$xmlResultFile " . join (' ', @files);
     } else {
         $command = "\"$nunitConsole\" -xml:$xmlResultFile " . join (' ', @files);
     }
