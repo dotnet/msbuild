@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests
             int originalTempFileCount = tempFiles.Length;
 
             // Now run the Exec task on a simple command.
-            Exec exec = PrepareExec("echo Four days 'till ZBB!");
+            Exec exec = PrepareExec("echo Four days till ZBB!");
             bool result = exec.Execute();
 
             // Get the new count of temp files.
