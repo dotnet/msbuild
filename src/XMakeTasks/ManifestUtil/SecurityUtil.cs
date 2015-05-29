@@ -654,6 +654,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
+                if (cert.PrivateKey == null)
+                    throw new InvalidOperationException(resources.GetString("SignFile.CertMissingPrivateKey"));
+
                 if (cert.PrivateKey.GetType() != typeof(RSACryptoServiceProvider))
                     throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
                 try
