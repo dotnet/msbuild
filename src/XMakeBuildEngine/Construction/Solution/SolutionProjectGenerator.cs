@@ -1136,7 +1136,13 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddMetaprojectTargetForManagedProject(ProjectInstance traversalProject, ProjectInstance metaprojectInstance, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration, string targetName, string outputItem)
         {
-            ProjectTargetInstance target = metaprojectInstance.AddTarget(targetName ?? "Build", String.Empty, String.Empty, String.Empty, null, String.Empty, String.Empty, false /* legacy target returns behaviour */);
+            string outputItemAsItem = null;
+            if (!String.IsNullOrEmpty(outputItem))
+            {
+                outputItemAsItem = "@(" + outputItem + ")";
+            }
+
+            ProjectTargetInstance target = metaprojectInstance.AddTarget(targetName ?? "Build", String.Empty, String.Empty, outputItemAsItem, null, String.Empty, String.Empty, false /* legacy target returns behaviour */);
 
             AddReferencesBuildTask(metaprojectInstance, target, targetName, outputItem);
 

@@ -628,6 +628,116 @@ EndGlobal
         }
 
         /// <summary>
+        /// Generated project metaproj should declare its outputs for relay.
+        /// Here B depends on C
+        /// </summary>
+        /// <seealso href="https://github.com/Microsoft/msbuild/issues/69">
+        /// MSBuild should generate metaprojects that merge the outputs of the individual MSBuild invocations
+        /// </seealso>
+        [TestMethod]
+        public void SolutionConfigurationWithDependenciesRelaysItsOutputs()
+        {
+            #region Large strings representing solution & projects
+            const string solutionFileContents =
+                @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 11
+Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `B.csproj`, `{881C1674-4ECA-451D-85B6-D7C59B7F16FA}`
+	ProjectSection(ProjectDependencies) = postProject
+		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
+	EndProjectSection
+EndProject
+Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `C`, `C.csproj`, `{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}`
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = preSolution
+		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.Build.0 = Release|Any CPU
+		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+";
+            const string projectBravoFileContents =
+                    @"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                            <Target Name='Build' Outputs='@(ComputedQuestion)'>
+                                <ItemGroup>
+                                    <ComputedQuestion Include='What do you get if you multiply six by nine' />
+                                </ItemGroup>
+                            </Target>
+                        </Project>
+                    ";
+            const string projectCharlieFileContents =
+                    @"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
+                            <Target Name='Build' Outputs='@(ComputedAnswer)'>
+                                <ItemGroup>
+                                    <ComputedAnswer Include='42' />
+                                </ItemGroup>
+                            </Target>
+                        </Project>
+                    ";
+            const string automaticProjectFileContents = @"
+<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='compile' xmlns='msbuildnamespace'>
+	<Target Name='compile'>
+		<MSBuild Projects='B.csproj' Targets='Build'>
+			<Output
+				TaskParameter='TargetOutputs'
+				ItemName='BravoProjectOutputs' />
+		</MSBuild>
+		<Message Importance='high' Text='BravoProjectOutputs: @(BravoProjectOutputs)' />
+		<MSBuild Projects='C.csproj' Targets='Build'>
+			<Output
+				TaskParameter='TargetOutputs'
+				ItemName='CharlieProjectOutputs' />
+		</MSBuild>
+		<Message Importance='high' Text='CharlieProjectOutputs: @(CharlieProjectOutputs)' />
+		<MSBuild Projects='B.csproj.metaproj' Targets='Build'>
+			<Output
+				TaskParameter='TargetOutputs'
+				ItemName='BravoMetaProjectOutputs' />
+		</MSBuild>
+		<Message Importance='high' Text='BravoMetaProjectOutputs: @(BravoMetaProjectOutputs)' />
+		<Error Condition=` '@(CharlieProjectOutputs);@(BravoProjectOutputs)' != '@(BravoMetaProjectOutputs)' ` Text='Metaproj must relay outputs' />
+	</Target>
+</Project>";
+            #endregion
+            // arrange
+            var logger = new MockLogger();
+            var loggers = new List<ILogger>(1) {logger};
+            var solutionFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("MSBuildIssue.sln", solutionFileContents);
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("B.csproj", projectBravoFileContents);
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("C.csproj", projectCharlieFileContents);
+            var solution = new SolutionFile {FullPath = solutionFile};
+            solution.ParseSolutionFile();
+
+            // act
+            var instances = SolutionProjectGenerator.Generate(solution, null, null, new BuildEventContext(0, 0, 0, 0), null);
+
+            // assert
+            var projectBravoMetaProject = instances[1];
+            Assert.IsFalse(projectBravoMetaProject.Targets.Any(kvp => kvp.Value.Outputs.Equals("@()")), "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case.");
+            // saves the in-memory metaproj to disk
+            projectBravoMetaProject.ToProjectRootElement().Save(projectBravoMetaProject.FullPath);
+            var automaticProjectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("automatic.msbuild", automaticProjectFileContents);
+            var automaticProject = new Project(automaticProjectFile);
+            var buildResult = automaticProject.Build(loggers);
+            Assert.AreEqual(true, buildResult, String.Join(Environment.NewLine, logger.Errors.Select(beea => beea.Message)));
+        }
+
+        /// <summary>
         /// Test the SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration method
         /// </summary>
         [TestMethod]
