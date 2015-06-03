@@ -179,6 +179,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", null);
         }
 
+        protected static readonly string s_rootPathPrefix = NativeMethodsShared.IsWindows ? "C:\\" : Path.VolumeSeparatorChar.ToString();
+        protected static readonly string s_myProjectPath = Path.Combine(s_rootPathPrefix, "MyProject");
+
+        protected static readonly string s_myVersion20Path = Path.Combine(s_rootPathPrefix, "WINNT", "Microsoft.NET", "Framework", "v2.0.MyVersion");
+        protected static readonly string s_myVersion40Path = Path.Combine(s_rootPathPrefix, "WINNT", "Microsoft.NET", "Framework", "v4.0.MyVersion");
+        protected static readonly string s_myVersion90Path = Path.Combine(s_rootPathPrefix, "WINNT", "Microsoft.NET", "Framework", "v9.0.MyVersion");
+
+        protected static readonly string s_myVersionPocket20Path = s_myVersion20Path + ".PocketPC";
+
+        protected static readonly string s_myMissingAssemblyAbsPath = Path.Combine(s_rootPathPrefix, "MyProject", "MyMissingAssembly.dll");
+        protected static readonly string s_myMissingAssemblyRelPath = Path.Combine("MyProject", "MyMissingAssembly.dll");
+        protected static readonly string s_myPrivateAssemblyRelPath = Path.Combine("MyProject", "MyPrivateAssembly.exe");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -186,11 +199,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             "{RawFileName}",
             "{CandidateAssemblyFiles}",
-            @"c:\MyProject",
+            s_myProjectPath,
             @"c:\MyComponents\misc\",
             @"c:\MyComponents\1.0",
             @"c:\MyComponents\2.0",
-            @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion",
+            s_myVersion20Path,
             @"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}",
             "{AssemblyFolders}",
             "{HintPathFromItem}"
@@ -281,33 +294,33 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\Frameworks\IndirectDependsOnFoo35Framework.dll",
                 Path.Combine(Path.GetTempPath(), @"RawFileNameRelative\System.Xml.dll"),
                 Path.Combine(Path.GetTempPath(), @"RelativeAssemblyFiles\System.Xml.dll"),
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Data.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.pdb",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.xml",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\en\System.Xml.resources.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\en\System.Xml.resources.pdb",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\en\System.Xml.resources.config",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\xx\System.Xml.resources.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\en-GB\System.Xml.resources.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\en-GB\System.Xml.resources.pdb",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\en-GB\System.Xml.resources.config",
-                @"c:\MyProject\MyPrivateAssembly.exe",
-                @"c:\MyProject\MyCopyLocalAssembly.dll",
-                @"c:\MyProject\MyDontCopyLocalAssembly.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\BadImage.dll",            // An assembly that will give a BadImageFormatException from GetAssemblyName
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\BadImage.pdb",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\MyGacAssembly.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\MyGacAssembly.pdb",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\xx\MyGacAssembly.resources.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v4.0.MyVersion\System.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v9.0.MyVersion\System.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\mscorlib.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC\mscorlib.dll",
+                Path.Combine(s_myVersion20Path, "System.Data.dll"),
+                Path.Combine(s_myVersion20Path, "System.Xml.dll"),
+                Path.Combine(s_myVersion20Path, "System.Xml.pdb"),
+                Path.Combine(s_myVersion20Path, "System.Xml.xml"),
+                Path.Combine(s_myVersion20Path, "en", "System.Xml.resources.dll"),
+                Path.Combine(s_myVersion20Path, "en", "System.Xml.resources.pdb"),
+                Path.Combine(s_myVersion20Path, "en", "System.Xml.resources.config"),
+                Path.Combine(s_myVersion20Path, "xx", "System.Xml.resources.dll"),
+                Path.Combine(s_myVersion20Path, "en-GB", "System.Xml.resources.dll"),
+                Path.Combine(s_myVersion20Path, "en-GB", "System.Xml.resources.pdb"),
+                Path.Combine(s_myVersion20Path, "en-GB", "System.Xml.resources.config"),
+                Path.Combine(s_rootPathPrefix, s_myPrivateAssemblyRelPath),
+                Path.Combine(s_myProjectPath, "MyCopyLocalAssembly.dll"),
+                Path.Combine(s_myProjectPath, "MyDontCopyLocalAssembly.dll"),
+                Path.Combine(s_myVersion20Path, "BadImage.dll"),            // An assembly that will give a BadImageFormatException from GetAssemblyName
+                Path.Combine(s_myVersion20Path, "BadImage.pdb"),
+                Path.Combine(s_myVersion20Path, "MyGacAssembly.dll"),
+                Path.Combine(s_myVersion20Path, "MyGacAssembly.pdb"),
+                Path.Combine(s_myVersion20Path, "xx", "MyGacAssembly.resources.dll"),
+                Path.Combine(s_myVersion20Path, "System.dll"),
+                Path.Combine(s_myVersion40Path, "System.dll"),
+                Path.Combine(s_myVersion90Path, "System.dll"),
+                Path.Combine(s_myVersion20Path, "mscorlib.dll"),
+                Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"),
                 @"C:\myassemblies\My.Assembly.dll",
-                @"c:\MyProject\mscorlib.dll",                                            // This is an mscorlib.dll that has no metadata (i.e. GetAssemblyName returns null)
-                @"c:\MyProject\System.Data.dll",                                         // This is a System.Data.dll that has the wrong pkt, it shouldn't be matched.
+                Path.Combine(s_myProjectPath, "mscorlib.dll"),                           // This is an mscorlib.dll that has no metadata (i.e. GetAssemblyName returns null)
+                Path.Combine(s_myProjectPath, "System.Data.dll"),                        // This is a System.Data.dll that has the wrong pkt, it shouldn't be matched.
                 @"C:\MyComponents\MyGrid.dll",                                           // A vendor component that we should find in the registry.
                 @"C:\MyComponentsA\CustomComponent.dll",                                           // A vendor component that we should find in the registry.
                 @"C:\MyComponentsB\CustomComponent.dll",                                           // A vendor component that we should find in the registry.
@@ -334,7 +347,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"C:\MyComponentServicePack\MyControlWithServicePack.dll",               // The service pack 1 version of the control
                 @"C:\MyComponentBase\MyControlWithServicePack.dll",                      // The non-service pack version of the control.
                 @"C:\MyComponentServicePack2\MyControlWithServicePack.dll",              // The service pack 1 version of the control
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC\mscorlib.dll",  // A devices mscorlib.
+                Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"),  // A devices mscorlib.
                 @"c:\MyLibraries\A.dll",
                 @"c:\MyExecutableLibraries\A.exe",
                 @"c:\MyLibraries\B.dll",
@@ -758,7 +771,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Now specify the remaining files.
             string[] existentDirs = new string[]
             {
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion",
+                s_myVersion20Path,
                 @"c:\SGenDependeicies",
                 Path.GetTempPath()
             };
@@ -783,7 +796,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns>A set of subdirectories</returns>
         internal static string[] GetDirectories(string path, string pattern)
         {
-            if (path.EndsWith(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion"))
+            if (path.EndsWith(s_myVersion20Path))
             {
                 string[] paths = new string[] {
                     Path.Combine(path, "en"), Path.Combine(path, "en-GB"), Path.Combine(path, "xx")
@@ -952,17 +965,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\BadImage.dll", StringComparison.OrdinalIgnoreCase) == 0
+                String.Compare(path, Path.Combine(s_myVersion20Path, "BadImage.dll"), StringComparison.OrdinalIgnoreCase) == 0
             )
             {
-                throw new System.BadImageFormatException(@"The format of the file 'c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\BadImage.dll' is invalid");
+                throw new System.BadImageFormatException(@"The format of the file '" + Path.Combine(s_myVersion20Path, "BadImage.dll") + "' is invalid");
             }
 
             if
             (
-                String.Compare(path, @"c:\MyProject\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0
-                || String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0
-                || String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0
+                String.Compare(path, Path.Combine(s_myProjectPath, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                || String.Compare(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                || String.Compare(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
             )
             {
                 // This is an mscorlib.dll with no metadata.
@@ -971,8 +984,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0
-                || String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0
+                String.Compare(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                || String.Compare(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
             )
             {
                 // This is an mscorlib.dll with no metadata.
@@ -1098,45 +1111,45 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension(AssemblyRef.SystemXml);
             }
 
-            if (String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.XML.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myVersion20Path, "System.XML.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension(AssemblyRef.SystemXml);
             }
 
             // This is an assembly with an earlier version.
-            if (String.Compare(path, @"c:\MyProject\System.Xml.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myProjectPath, "System.Xml.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension(AssemblyRef.SystemXml);
             }
 
             // This is an assembly with an incorrect PKT.
-            if (String.Compare(path, @"c:\MyProject\System.Data.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=A77a5c561934e089");
             }
 
-            if (path.EndsWith(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\MyGacAssembly.dll"))
+            if (path.EndsWith(Path.Combine(s_myVersion20Path, "MyGacAssembly.dll")))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyGacAssembly, Version=9.2.3401.1, Culture=neutral, PublicKeyToken=a6694b450823df78");
             }
 
-            if (String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("System, VeRSion=2.0.0.0, Culture=neutRAl, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v4.0.MyVersion\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myVersion40Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("System, VeRSion=4.0.0.0, Culture=neutRAl, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v9.0.MyVersion\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myVersion90Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("System, VeRSion=9.0.0.0, Culture=neutRAl, PublicKeyToken=b77a5c561934e089");
@@ -1144,7 +1157,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Data.dll", StringComparison.OrdinalIgnoreCase) == 0
+                String.Compare(path, Path.Combine(s_myVersion20Path, "System.Data.dll"), StringComparison.OrdinalIgnoreCase) == 0
             )
             {
                 // Simulate a strongly named assembly.
@@ -1842,7 +1855,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension[] { };
             }
 
-            if (String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1938,8 +1951,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0
-                || String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0
+                String.Compare(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                || String.Compare(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
             )
             {
                 return new AssemblyNameExtension[]
@@ -2114,7 +2127,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyProject\MyMissingAssembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_myMissingAssemblyAbsPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 throw new FileNotFoundException(path);
             }
@@ -2233,7 +2246,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -2242,7 +2255,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v4.0.MyVersion\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myVersion40Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -2251,7 +2264,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\WINNT\Microsoft.NET\Framework\v9.0.MyVersion\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myVersion90Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -3095,8 +3108,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 MockEngine e = new MockEngine();
 
-                string actualFrameworkDirectory = @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion";
-                string alternativeFrameworkDirectory = @"c:\WINNT\Microsoft.NET\Framework\v4.0.MyVersion";
+                string actualFrameworkDirectory = s_myVersion20Path;
+                string alternativeFrameworkDirectory = s_myVersion40Path;
 
                 ITaskItem[] items = new TaskItem[] { new TaskItem(Path.Combine(actualFrameworkDirectory, "System.dll")) };
 
@@ -6295,8 +6308,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             List<string> additionalPaths = new List<string>();
             additionalPaths.Add(@"c:\MyComponents\4.0Component\");
-            additionalPaths.Add(@"c:\WINNT\Microsoft.NET\Framework\v4.0.MyVersion");
-            additionalPaths.Add(@"c:\WINNT\Microsoft.NET\Framework\v9.0.MyVersion\");
+            additionalPaths.Add(s_myVersion40Path);
+            additionalPaths.Add(s_myVersion90Path + Path.DirectorySeparatorChar);
 
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -6336,8 +6349,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             List<string> additionalPaths = new List<string>();
             additionalPaths.Add(@"c:\MyComponents\4.0Component\");
-            additionalPaths.Add(@"c:\WINNT\Microsoft.NET\Framework\v4.0.MyVersion");
-            additionalPaths.Add(@"c:\WINNT\Microsoft.NET\Framework\v9.0.MyVersion\");
+            additionalPaths.Add(s_myVersion40Path);
+            additionalPaths.Add(s_myVersion90Path + Path.DirectorySeparatorChar);
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
@@ -7622,7 +7635,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Construct a list of assembly files.
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
-                new TaskItem(@"c:\MyProject\MyMissingAssembly.dll")
+                new TaskItem(s_myMissingAssemblyAbsPath)
             };
 
             // Also construct a set of assembly names to pass in.
@@ -7653,7 +7666,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.BuildEngine = engine;
             t.AssemblyFiles = assemblyFiles;
             t.Assemblies = assemblyNames;
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
             Execute(t);
 
@@ -7673,7 +7686,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Process the primary items.
             foreach (ITaskItem item in t.ResolvedFiles)
             {
-                if (String.Compare(item.ItemSpec, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.XML.dll", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Compare(item.ItemSpec, Path.Combine(s_myVersion20Path, "System.XML.dll"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     systemXmlFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
@@ -7699,7 +7712,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
                     AssertNoCase("false", item.GetMetadata("CopyLocal"));
                 }
-                else if (item.ItemSpec.EndsWith(@"MyProject\MyPrivateAssembly.exe"))
+                else if (item.ItemSpec.EndsWith(s_myPrivateAssemblyRelPath))
                 {
                     myPrivateAssemblyFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
@@ -7720,7 +7733,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
                     AssertNoCase("false", item.GetMetadata("CopyLocal"));
                 }
-                else if (item.ItemSpec.EndsWith(@"MyProject\MyMissingAssembly.dll"))
+                else if (item.ItemSpec.EndsWith(s_myMissingAssemblyRelPath))
                 {
                     missingAssemblyFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
@@ -7732,13 +7745,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     AssertNoCase("true", item.GetMetadata("CopyLocal"));
                     AssertNoCase("MyMissingAssembly", item.GetMetadata("FusionName"));
                 }
-                else if (String.Compare(item.ItemSpec, @"c:\MyProject\System.Xml.dll", StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Compare(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Xml.dll"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     // The version of System.Xml.dll in C:\MyProject is an older version.
                     // This version is not a match. When want the current version which should have been in a different directory.
                     Assert.Fail("Wrong version of System.Xml.dll matched--version was wrong");
                 }
-                else if (String.Compare(item.ItemSpec, @"c:\MyProject\System.Data.dll", StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Compare(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     // The version of System.Data.dll in C:\MyProject has an incorrect PKT
                     // This version is not a match.
@@ -7792,14 +7805,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Process the satellites.
             foreach (ITaskItem item in t.SatelliteFiles)
             {
-                if (String.Compare(item.ItemSpec, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\en\System.XML.resources.pdb", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Compare(item.ItemSpec, Path.Combine(s_myVersion20Path, "en", "System.XML.resources.pdb"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     enSatellitePdbFound = true;
                     Assert.IsTrue(item.GetMetadata(ItemMetadataNames.imageRuntime).Length == 0);
                     Assert.IsTrue(item.GetMetadata(ItemMetadataNames.winMDFile).Length == 0);
                     Assert.IsTrue(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length == 0);
                 }
-                else if (String.Compare(item.ItemSpec, @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\en-GB\System.XML.resources.pdb", StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Compare(item.ItemSpec, Path.Combine(s_myVersion20Path, "en-GB", "System.XML.resources.pdb"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     engbSatellitePdbFound = true;
                     Assert.IsTrue(item.GetMetadata(ItemMetadataNames.imageRuntime).Length == 0);
@@ -7885,7 +7898,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Construct a list of assembly files.
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
-                new TaskItem(@"c:\MyProject\MyMissingAssembly.dll")
+                new TaskItem(s_myMissingAssemblyAbsPath)
             };
 
             assemblyFiles[0].SetMetadata("Private", "true");
@@ -7915,7 +7928,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // expected ItemSpecs for corresponding assemblies
             string[] expectedItemSpec =
             {
-                @"MyProject\MyMissingAssembly.dll",         // MyMissingAssembly
+                s_myMissingAssemblyRelPath,                 // MyMissingAssembly
                 @"MyProject\MyCopyLocalAssembly.dll",       // MyCopyLocalAssembly
                 @"MyProject\MyDontCopyLocalAssembly.dll",   // MyDontCopyLocalAssembly
             };
@@ -8000,7 +8013,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
 
             bool succeeded = Execute(t);
@@ -8035,7 +8048,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblies;
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
             Execute(t);
 
@@ -8093,7 +8106,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblies;
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
             t.AllowedRelatedFileExtensions = new string[] { @".licenses", ".xml" }; //no .pdb or .config
             Execute(t);
@@ -8404,14 +8417,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
             t.SearchPaths = new string[]
             {
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion"
+                s_myVersionPocket20Path,
+                s_myVersion20Path
             };
 
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC\mscorlib.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -9059,8 +9072,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 "{RawFileName}",
                 "{CandidateAssemblyFiles}",
-                @"c:\MyProject",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion",
+                s_myProjectPath,
+                s_myVersion20Path,
                 @"{Registry:Software\Microsoft\.NETCompactFramework,v2.0,PocketPC\AssemblyFoldersEx,OSVersion=4.0.0:Platform=3C41C503-53EF-4c2a-8DD4-A8217CAD115E}",
                 "{AssemblyFolders}",
                 "{HintPathFromItem}"
@@ -9097,8 +9110,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 "{RawFileName}",
                 "{CandidateAssemblyFiles}",
-                @"c:\MyProject",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion",
+                s_myProjectPath,
+                s_myVersion20Path,
                 @"{Registry:Software\Microsoft\.NETCompactFramework,v2.0,PocketPC\AssemblyFoldersEx,OSVersion=5.1.0:Platform=3C41C503-53EF-4c2a-8DD4-A8217CAD115E}",
                 "{AssemblyFolders}",
                 "{HintPathFromItem}"
@@ -9383,8 +9396,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 "{RawFileName}",
                 "{CandidateAssemblyFiles}",
-                @"c:\MyProject",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion",
+                s_myProjectPath,
+                s_myVersion20Path,
                 @"{Registry:Software\Microsoft\.NETCompactFramework,v2.0,PocketPC\AssemblyFoldersEx,Platform=3C41C503-X-4c2a-8DD4-A8217CAD115E}",
                 "{AssemblyFolders}",
                 "{HintPathFromItem}"
@@ -9456,12 +9469,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies = new ITaskItem[] { new TaskItem("System.XML") };
             t.SearchPaths = new string[] { "{CandidateAssemblyFiles}" };
-            t.CandidateAssemblyFiles = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll" };
+            t.CandidateAssemblyFiles = new string[] { Path.Combine(s_myVersion20Path, "System.Xml.dll") };
 
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
 
@@ -9478,7 +9491,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             item.SetMetadata("RequiredTargetFramework", "v4.0.255");
             t.Assemblies = new ITaskItem[] { item };
             t.SearchPaths = new string[] { "{CandidateAssemblyFiles}" };
-            t.CandidateAssemblyFiles = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll" };
+            t.CandidateAssemblyFiles = new string[] { Path.Combine(s_myVersion20Path, "System.Xml.dll") };
             t.TargetFrameworkVersion = "v4.0";
             Execute(t);
 
@@ -9498,12 +9511,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             item.SetMetadata("RequiredTargetFramework", "v4.0.255");
             t.Assemblies = new ITaskItem[] { item };
             t.SearchPaths = new string[] { "{CandidateAssemblyFiles}" };
-            t.CandidateAssemblyFiles = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll" };
+            t.CandidateAssemblyFiles = new string[] { Path.Combine(s_myVersion20Path, "System.Xml.dll") };
             t.TargetFrameworkVersion = "v4.0.256";
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -9523,14 +9536,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 @"NonUI\testDirectoryRoot\.hiddenfile",
                 @"NonUI\testDirectoryRoot\.dll",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll"
+                Path.Combine(s_myVersion20Path, "System.Xml.dll")
             };
 
             bool succeeded = Execute(t);
 
             Assert.IsTrue(succeeded);
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
 
             // For {CandidateAssemblyFiles} we don't even want to see a comment logged for files with non-standard extensions.
             // This is because {CandidateAssemblyFiles} is very likely to contain non-assemblies and its best not to clutter
@@ -9563,12 +9576,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = new MockEngine();
 
-            t.Assemblies = new ITaskItem[] { new TaskItem(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll") };
+            t.Assemblies = new ITaskItem[] { new TaskItem(Path.Combine(s_myVersion20Path, "System.Xml.dll")) };
             t.SearchPaths = new string[]
             {
                 "{RawFileName}",
                 "{CandidateAssemblyFiles}",
-                @"C:\MyProject",
+                s_myProjectPath,
                 "{TargetFrameworkDirectory}",
                 @"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}",
                 "{AssemblyFolders}",
@@ -9579,7 +9592,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -10166,7 +10179,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = new MockEngine();
 
-            ITaskItem taskItem = new TaskItem(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll");
+            ITaskItem taskItem = new TaskItem(Path.Combine(s_myVersion20Path, "System.Xml.dll"));
             taskItem.SetMetadata("SpecificVersion", "false");
 
             t.Assemblies = new ITaskItem[] { taskItem };
@@ -10178,7 +10191,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -10191,7 +10204,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = new MockEngine();
 
-            ITaskItem taskItem = new TaskItem(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll");
+            ITaskItem taskItem = new TaskItem(Path.Combine(s_myVersion20Path, "System.Xml.dll"));
             taskItem.SetMetadata("SpecificVersion", "true");
 
             t.Assemblies = new ITaskItem[] { taskItem };
@@ -10203,7 +10216,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -10218,19 +10231,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies = new ITaskItem[]
             {
-                new TaskItem(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Xml.dll"),
+                new TaskItem(Path.Combine(s_myVersion20Path, "System.Xml.dll")),
                 new TaskItem(@"System.Data")
             };
 
             t.SearchPaths = new string[]
             {
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion",
+                s_myVersion20Path,
             };
 
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Data.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Data.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -10247,7 +10260,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.BuildEngine = engine;
 
             TaskItem item = new TaskItem(@"c:\DoesntExist\System.Xml.dll");
-            item.SetMetadata("HintPath", @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Data.dll");
+            item.SetMetadata("HintPath", Path.Combine(s_myVersion20Path, "System.Data.dll"));
             item.SetMetadata("SpecificVersion", "true");
             t.Assemblies = new ITaskItem[] { item };
             t.SearchPaths = new string[]
@@ -10435,8 +10448,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("BadImage")
             };
             t.Assemblies[0].SetMetadata("Private", "true");
-            t.SearchPaths = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.SearchPaths = new string[] { s_myVersion20Path };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             Execute(t);
 
@@ -10502,14 +10515,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = new ITaskItem[] { new TaskItem(AssemblyRef.SystemData) };
             t.SearchPaths = new string[]
             {
-                @"c:\MyProject",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion"
+                s_myProjectPath,
+                s_myVersion20Path
             };
 
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Data.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Data.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -10525,13 +10538,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = new ITaskItem[] { new TaskItem(AssemblyRef.SystemData) };
             t.SearchPaths = new string[]
             {
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion"
+                s_myVersion20Path
             };
 
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.Data.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.Data.dll"), t.ResolvedFiles[0].ItemSpec);
             Assert.AreEqual("false", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
         }
 
@@ -10565,7 +10578,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
             Execute(t);
             Assert.AreEqual(@"true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
@@ -10619,7 +10632,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
             Execute(t);
 
@@ -10704,7 +10717,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyLibraries", @"c:\MyLibraries\v1", @"c:\MyLibraries\v2"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
 
@@ -10766,7 +10779,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\Regress444809", @"c:\Regress444809\v2"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
             ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Strings", Assembly.GetExecutingAssembly());
@@ -10813,7 +10826,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\Regress444809", @"c:\Regress444809\v2"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
 
@@ -10853,7 +10866,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyLibraries", @"c:\MyLibraries\v1", @"c:\MyLibraries\v2"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
 
@@ -10896,7 +10909,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
 
@@ -10934,7 +10947,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
 
@@ -10977,7 +10990,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
 
@@ -11017,7 +11030,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
 
@@ -11155,7 +11168,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion\System.XML.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myVersion20Path, "System.XML.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -11492,7 +11505,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion" };
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
 
@@ -12222,8 +12235,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 "{RawFileName}",
                 "{CandidateAssemblyFiles}",
-                @"c:\MyProject",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion",
+                s_myProjectPath,
+                s_myVersion20Path,
                 @"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}",
                 "{AssemblyFolders}",
                 "{HintPathFromItem}"
@@ -12360,8 +12373,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 "{RawFileName}",
                 "{CandidateAssemblyFiles}",
-                @"c:\MyProject",
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion",
+                s_myProjectPath,
+                s_myVersion20Path,
                 @"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}",
                 "{AssemblyFolders}",
                 "{HintPathFromItem}"
