@@ -16049,7 +16049,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         private static void GenerateRedistAndProfileXmlLocations(string fullRedistContents, string profileListContents, out string profileRedistList, out string fullRedistList, string fullFrameworkDirectory, string targetFrameworkDirectory)
         {
-            fullRedistList = Path.Combine(fullFrameworkDirectory, "RedistList\\FrameworkList.xml");
+            fullRedistList = Path.Combine(fullFrameworkDirectory, "RedistList", "FrameworkList.xml");
             string redistDirectory = Path.GetDirectoryName(fullRedistList);
             if (Directory.Exists(redistDirectory))
             {
@@ -16060,7 +16060,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             File.WriteAllText(fullRedistList, fullRedistContents);
 
-            profileRedistList = Path.Combine(targetFrameworkDirectory, "RedistList\\FrameworkList.xml");
+            profileRedistList = Path.Combine(targetFrameworkDirectory, "RedistList", "FrameworkList.xml");
 
             redistDirectory = Path.GetDirectoryName(profileRedistList);
             if (Directory.Exists(redistDirectory))
