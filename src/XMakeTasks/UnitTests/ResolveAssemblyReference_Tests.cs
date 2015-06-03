@@ -15755,7 +15755,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string profileRedistList = String.Empty;
             string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "Verifyp2pAndProfile");
-            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles\\Client");
+            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
 
             string fullRedistListContents =
             "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -15803,7 +15803,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string profileRedistList = String.Empty;
             string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "Verifyp2pAndProfile");
-            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles\\Client");
+            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
 
             string fullRedistListContents =
             "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -15853,7 +15853,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string profileRedistList = String.Empty;
             string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "VerifyClientProfileRedistListAndProfileList");
-            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles\\Client");
+            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
             try
             {
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
@@ -15900,7 +15900,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string profileRedistList = String.Empty;
             string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "VerifyClientProfileRedistListAndProfileList2");
-            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles\\Client");
+            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
             try
             {
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
@@ -15948,7 +15948,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string profileRedistList = String.Empty;
             string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "VerifyAssemblyInGacButNotInProfileIsNotResolved");
-            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles\\Client");
+            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
             useFrameworkFileExists = true;
             string fullRedistListContents =
             "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -16002,7 +16002,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string profileRedistList = String.Empty;
             string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "VerifyProfileErrorsAreLogged");
-            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles\\Client");
+            string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
             try
             {
                 string fullRedistListContentsErrors =
