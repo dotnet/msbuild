@@ -7717,7 +7717,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     AssertNoCase("NOPE", item.GetMetadata(ItemMetadataNames.winMDFile));
                     AssertNoCase("IMPL", item.GetMetadata(ItemMetadataNames.winmdImplmentationFile));
                 }
-                else if (item.ItemSpec.EndsWith(@"v2.0.MyVersion\System.Data.dll"))
+                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "System.Data.dll")))
                 {
                     systemDataFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
@@ -7725,7 +7725,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     AssertNoCase("false", item.GetMetadata("CopyLocal"));
                     AssertNoCase("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", item.GetMetadata("FusionName"));
                 }
-                else if (item.ItemSpec.EndsWith(@"v2.0.MyVersion\MyGacAssembly.dll"))
+                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "MyGacAssembly.dll")))
                 {
                     myGacAssemblyFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
@@ -7739,14 +7739,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
                     AssertNoCase("true", item.GetMetadata("CopyLocal"));
                 }
-                else if (item.ItemSpec.EndsWith(@"MyProject\MyCopyLocalAssembly.dll"))
+                else if (item.ItemSpec.EndsWith(Path.Combine("MyProject", "MyCopyLocalAssembly.dll")))
                 {
                     myCopyLocalAssemblyFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
                     AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
                     AssertNoCase("true", item.GetMetadata("CopyLocal"));
                 }
-                else if (item.ItemSpec.EndsWith(@"MyProject\MyDontCopyLocalAssembly.dll"))
+                else if (item.ItemSpec.EndsWith(Path.Combine("MyProject", "MyDontCopyLocalAssembly.dll")))
                 {
                     myDontCopyLocalAssemblyFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
@@ -7787,7 +7787,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Process the dependencies.
             foreach (ITaskItem item in t.ResolvedDependencyFiles)
             {
-                if (item.ItemSpec.EndsWith(@"v2.0.MyVersion\SysTem.dll"))
+                if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "SysTem.dll")))
                 {
                     systemFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
@@ -7795,7 +7795,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     AssertNoCase("false", item.GetMetadata("CopyLocal"));
                     AssertNoCase("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", item.GetMetadata("FusionName"));
                 }
-                else if (item.ItemSpec.EndsWith(@"v2.0.MyVersion\mscorlib.dll"))
+                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "mscorlib.dll")))
                 {
                     mscorlibFound = true;
                     AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
@@ -7949,8 +7949,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string[] expectedItemSpec =
             {
                 s_myMissingAssemblyRelPath,                 // MyMissingAssembly
-                @"MyProject\MyCopyLocalAssembly.dll",       // MyCopyLocalAssembly
-                @"MyProject\MyDontCopyLocalAssembly.dll",   // MyDontCopyLocalAssembly
+                Path.Combine("MyProject", "MyCopyLocalAssembly.dll"),       // MyCopyLocalAssembly
+                Path.Combine("MyProject", "MyDontCopyLocalAssembly.dll"),   // MyDontCopyLocalAssembly
             };
 
             // matrix of expected CopyLocal value per assembly per framwork
