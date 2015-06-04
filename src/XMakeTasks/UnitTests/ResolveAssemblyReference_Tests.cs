@@ -192,6 +192,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_myMissingAssemblyRelPath = Path.Combine("MyProject", "MyMissingAssembly.dll");
         protected static readonly string s_myPrivateAssemblyRelPath = Path.Combine("MyProject", "MyPrivateAssembly.exe");
 
+        protected static readonly string s_frameworksPath = Path.Combine(s_rootPathPrefix, "Frameworks");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -286,12 +288,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static List<string> s_existentFiles = new List<string>
             {
-                @"c:\Frameworks\DependsOnFoo4Framework.dll",
-                @"c:\Frameworks\DependsOnFoo45Framework.dll",
-                @"c:\Frameworks\DependsOnFoo35Framework.dll",
-                @"c:\Frameworks\IndirectDependsOnFoo45Framework.dll",
-                @"c:\Frameworks\IndirectDependsOnFoo4Framework.dll",
-                @"c:\Frameworks\IndirectDependsOnFoo35Framework.dll",
+                Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"),
+                Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"),
+                Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"),
+                Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"),
+                Path.Combine(s_frameworksPath, "IndirectDependsOnFoo4Framework.dll"),
+                Path.Combine(s_frameworksPath, "IndirectDependsOnFoo35Framework.dll"),
                 Path.Combine(Path.GetTempPath(), @"RawFileNameRelative\System.Xml.dll"),
                 Path.Combine(Path.GetTempPath(), @"RelativeAssemblyFiles\System.Xml.dll"),
                 Path.Combine(s_myVersion20Path, "System.Data.dll"),
@@ -997,17 +999,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 throw new FileNotFoundException(path);
             }
 
-            if (String.Compare(path, @"c:\Frameworks\DependsOnFoo45Framework.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnFoo45Framework, Version=4.5.0.0, PublicKeyToken=null, Culture=Neutral");
             }
 
-            if (String.Compare(path, @"c:\Frameworks\DependsOnFoo4Framework.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnFoo4Framework, Version=4.0.0.0, PublicKeyToken=null, Culture=Neutral");
             }
 
-            if (String.Compare(path, @"c:\Frameworks\DependsOnFoo35Framework.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnFoo35Framework, Version=3.5.0.0, PublicKeyToken=null, Culture=Neutral");
             }
@@ -1674,27 +1676,27 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             FrameworkNameVersioning frameworkName = null;
 
-            if (String.Equals(path, @"c:\Frameworks\DependsOnFoo4Framework.dll", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(path, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 frameworkName = new FrameworkNameVersioning("FoO, Version=v4.0");
             }
-            else if (String.Equals(path, @"c:\Frameworks\DependsOnFoo45Framework.dll", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(path, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 frameworkName = new FrameworkNameVersioning("FoO, Version=v4.5");
             }
-            else if (String.Equals(path, @"c:\Frameworks\DependsOnFoo35Framework.dll", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(path, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 frameworkName = new FrameworkNameVersioning("FoO, Version=v3.5");
             }
-            else if (String.Equals(path, @"c:\Frameworks\IndirectDependsOnFoo4Framework.dll", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo4Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 frameworkName = new FrameworkNameVersioning("FoO, Version=v4.0");
             }
-            else if (String.Equals(path, @"c:\Frameworks\IndirectDependsOnFoo45Framework.dll", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 frameworkName = new FrameworkNameVersioning("FoO, Version=v4.0");
             }
-            else if (String.Equals(path, @"c:\Frameworks\IndirectDependsOnFoo35Framework.dll", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo35Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 frameworkName = new FrameworkNameVersioning("FoO, Version=v4.0");
             }
@@ -1709,7 +1711,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns>The array of dependent assembly names.</returns>
         internal static AssemblyNameExtension[] GetDependencies(string path)
         {
-            if (String.Compare(path, @"c:\Frameworks\IndirectDependsOnFoo4Framework.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo4Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1717,7 +1719,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Frameworks\IndirectDependsOnFoo45Framework.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1725,7 +1727,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Frameworks\IndirectDependsOnFoo35Framework.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo35Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -5524,13 +5526,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "BAR, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "BAR";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\DependsOnFoo4Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5551,13 +5553,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=v4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\DependsOnFoo35Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5578,13 +5580,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\DependsOnFoo4Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5608,13 +5610,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\DependsOnFoo45Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5635,15 +5637,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=v4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
             Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\IndirectDependsOnFoo35Framework.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\Frameworks\DependsOnFoo35Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo35Framework.dll")), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5664,15 +5666,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
             Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\IndirectDependsOnFoo4Framework.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\Frameworks\DependsOnFoo4Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo4Framework.dll")), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5696,15 +5698,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
             Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\IndirectDependsOnFoo45Framework.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\Frameworks\DependsOnFoo45Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll")), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5727,7 +5729,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t, false);
 
             Assert.IsTrue(e.Warnings == 1, "One warning expected in this scenario.");
@@ -5757,7 +5759,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             t.IgnoreTargetFrameworkAttributeVersionMismatch = true;
             Execute(t);
 
@@ -5765,8 +5767,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
             Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\IndirectDependsOnFoo45Framework.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\Frameworks\DependsOnFoo45Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll")), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5789,7 +5791,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             t.IgnoreTargetFrameworkAttributeVersionMismatch = true;
 
             Execute(t);
@@ -5797,7 +5799,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\DependsOnFoo45Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll")), "Expected to find assembly, but didn't.");
         }
 
 
@@ -5821,7 +5823,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t, false);
 
             Assert.IsTrue(e.Warnings == 1, "One warning expected in this scenario.");
@@ -5854,7 +5856,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.FindDependencies = false;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
             t.TargetFrameworkMonikerDisplayName = "Foo";
-            t.SearchPaths = new string[] { @"c:\Frameworks\" };
+            t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
 
 
@@ -5862,7 +5864,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
             Assert.AreEqual(0, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\Frameworks\DependsOnFoo45Framework.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll")), "Expected to find assembly, but didn't.");
         }
     }
 
