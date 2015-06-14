@@ -2,36 +2,29 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
+    [TestFixture]
     public class FullyQualifiedBuildRequest_Tests
     {
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
         }
 
-        [TestMethod]
+        [Test]
         public void TestConstructorGood()
         {
             BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null);
@@ -44,20 +37,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorBad1()
         {
             FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(null, new string[1] { "foo" }, true);
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorBad2()
         {
             FullyQualifiedBuildRequest request = new FullyQualifiedBuildRequest(new BuildRequestConfiguration(new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null), "2.0"), null, true);
         }
 
-        [TestMethod]
+        [Test]
         public void TestProperties()
         {
             BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "tools", new string[0], null);

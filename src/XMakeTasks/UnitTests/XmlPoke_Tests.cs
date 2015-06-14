@@ -11,7 +11,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ using System.Xml;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class XmlPoke_Tests
     {
         private string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
   <method AccessModifier='public static' Name='GetVal' />
 </class>";
 
-        [TestMethod]
+        [Test]
         public void PokeWithNamespace()
         {
             MockEngine engine = new MockEngine(true);
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PokeNoNamespace()
         {
             MockEngine engine = new MockEngine(true);
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PokeAttribute()
         {
             MockEngine engine = new MockEngine(true);
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PokeChildren()
         {
             MockEngine engine = new MockEngine(true);
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PokeMissingParams()
         {
             MockEngine engine = new MockEngine(true);
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ErrorInNamespaceDecl()
         {
             MockEngine engine = new MockEngine(true);
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(executeResult, "Execution should've failed");
         }
 
-        [TestMethod]
+        [Test]
         public void PokeNoNSWPrefixedQueryError()
         {
             MockEngine engine = new MockEngine(true);
@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Log.Contains("MSB3732"), "Engine log should contain error code MSB3732 " + engine.Log);
         }
 
-        [TestMethod]
+        [Test]
         public void MissingNamespaceParameters()
         {
             MockEngine engine = new MockEngine(true);
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PokeElement()
         {
             MockEngine engine = new MockEngine(true);
@@ -319,7 +319,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PokeWithoutUsingTask()
         {
             string projectContents = @"
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests
         {
             string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
             Directory.CreateDirectory(dir);
-            xmlInputPath = dir + "\\doc.xml";
+            xmlInputPath = dir + Path.DirectorySeparatorChar + "doc.xml";
             using (StreamWriter sw = new StreamWriter(xmlInputPath, false))
             {
                 sw.Write(xmlFile);

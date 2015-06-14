@@ -2,20 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
-using Microsoft.Build.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class LoggerDescription_Tests
     {
-        [TestMethod]
+        [Test]
         public void LoggerDescriptionCustomSerialization()
         {
             string className = "Class";

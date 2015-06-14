@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
     using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
-    [TestClass]
+    [TestFixture]
     public class BuildRequestEngine_Tests
     {
         private delegate void EndpointOperationDelegate(NodeEndpointInProc endpoint);
@@ -274,7 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private int _nodeRequestId;
         private int _globalRequestId;
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _host = new MockHost();
@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ConfigureEngine(_engine);
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             if (_engine.Status != BuildRequestEngineStatus.Uninitialized)
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that the engine properly shuts down even if there is an active build request.
         /// This should cause that request to cancel and fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEngineShutdownWhileActive()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -354,7 +354,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that issuing a simple request results in a successful completion.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSimpleBuildScenario()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that a project which has project dependencies can issue and consume them through the
         /// engine interface.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBuildWithChildren()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -434,7 +434,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that a project can issue a build request with an unresolved configuration and that if we resolve it,
         /// the build will continue and complete successfully.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBuildWithNewConfiguration()
         {
             BuildRequestData data = new BuildRequestData(Path.GetFullPath("TestFile"), new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
         }
 
-        [TestMethod]
+        [Test]
         public void TestShutdown()
         {
         }

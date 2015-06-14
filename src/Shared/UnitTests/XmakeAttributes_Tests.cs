@@ -2,17 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class XmakeAttributesTest
     {
-        [TestMethod]
+        [Test]
         public void TestIsSpecialTaskAttribute()
         {
             Assert.IsFalse(XMakeAttributes.IsSpecialTaskAttribute("NotAnAttribute"));
@@ -23,7 +22,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(XMakeAttributes.IsSpecialTaskAttribute(XMakeAttributes.msbuildRuntime));
         }
 
-        [TestMethod]
+        [Test]
         public void TestIsBadlyCasedSpecialTaskAttribute()
         {
             Assert.IsFalse(XMakeAttributes.IsBadlyCasedSpecialTaskAttribute("NotAnAttribute"));
@@ -38,7 +37,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(XMakeAttributes.IsBadlyCasedSpecialTaskAttribute("msbuildarchitecture"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestIsNonBatchingTargetAttribute()
         {
             Assert.IsFalse(XMakeAttributes.IsNonBatchingTargetAttribute("NotAnAttribute"));
@@ -47,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(XMakeAttributes.IsNonBatchingTargetAttribute(XMakeAttributes.condition));
         }
 
-        [TestMethod]
+        [Test]
         public void TestRuntimeValuesMatch()
         {
             Assert.IsTrue(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildRuntimeValues.currentRuntime));
@@ -59,7 +58,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.clr4, XMakeAttributes.MSBuildRuntimeValues.clr2));
         }
 
-        [TestMethod]
+        [Test]
         public void TestMergeRuntimeValues()
         {
             string mergedRuntime = null;
@@ -83,7 +82,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(mergedRuntime);
         }
 
-        [TestMethod]
+        [Test]
         public void TestArchitectureValuesMatch()
         {
             string currentArchitecture = Environment.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x64 : XMakeAttributes.MSBuildArchitectureValues.x86;
@@ -98,7 +97,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(XMakeAttributes.ArchitectureValuesMatch(XMakeAttributes.MSBuildArchitectureValues.x64, XMakeAttributes.MSBuildArchitectureValues.x86));
         }
 
-        [TestMethod]
+        [Test]
         public void TestMergeArchitectureValues()
         {
             string mergedArchitecture = null;

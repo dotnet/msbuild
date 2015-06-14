@@ -14,7 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// This is the unit test for the TargetBuilder.  This particular test is confined to just using the
     /// actual TargetBuilder, and uses a mock TaskBuilder on which TargetBuilder depends.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TargetBuilder_Tests : IRequestBuilderCallback
     {
         /// <summary>
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Sets up to run tests.  Creates the host object.
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _nodeRequestId = 1;
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Executed after all tests are run.
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             File.Delete("testProject.proj");
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Runs the constructor.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConstructor()
         {
             TargetBuilder builder = new TargetBuilder();
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Runs a "simple" build with no dependencies and no outputs.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSimpleBuild()
         {
             ProjectInstance project = CreateTestProject();
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Runs a build with a target which depends on one other target.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDependencyBuild()
         {
             ProjectInstance project = CreateTestProject();
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a project with a dependency which will be skipped because its up-to-date.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDependencyBuildWithSkip()
         {
             ProjectInstance project = CreateTestProject();
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test is currently ignored because the error tasks aren't implemented yet (due to needing the task builder.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDependencyBuildWithError()
         {
             ProjectInstance project = CreateTestProject();
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensure that skipped targets only infer outputs once
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SkippedTargetsShouldOnlyInferOutputsOnce()
         {
             MockLogger logger = new MockLogger();
@@ -265,7 +265,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test empty before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestLegacyCallTarget()
         {
             string projectBody = @"
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// BeforeTargets specifies a missing target. Should not warn or error. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsMissing()
         {
             string content = @"
@@ -322,7 +322,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// BeforeTargets specifies a missing target. Should not warn or error. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsMissingRunsOthers()
         {
             string content = @"
@@ -354,7 +354,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// AfterTargets specifies a missing target. Should not warn or error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsMissing()
         {
             string content = @"
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// AfterTargets specifies a missing target. Should not warn or error. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsMissingRunsOthers()
         {
             string content = @"
@@ -413,7 +413,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test empty before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsEmpty()
         {
             string projectBody = @"
@@ -438,7 +438,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsSingle()
         {
             string projectBody = @"
@@ -463,7 +463,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets on an escaped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsEscaped()
         {
             string projectBody = @"
@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsSingleWithError()
         {
             string projectBody = @"
@@ -517,7 +517,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsSingleWithErrorAndParent()
         {
             string projectBody = @"
@@ -551,7 +551,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test multiple before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsWithTwoReferringToOne()
         {
             string projectBody = @"
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test multiple before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsWithOneReferringToTwo()
         {
             string projectBody = @"
@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test before target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsSkip()
         {
             string projectBody = @"
@@ -637,7 +637,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test before target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeTargetsDependencyOrdering()
         {
             string projectBody = @"
@@ -672,7 +672,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsEmpty()
         {
             string projectBody = @"
@@ -697,7 +697,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsSkip()
         {
             string projectBody = @"
@@ -722,7 +722,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsSingleWithError()
         {
             string projectBody = @"
@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsSingleWithErrorAndParent()
         {
             string projectBody = @"
@@ -792,7 +792,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a normal target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsSingle()
         {
             string projectBody = @"
@@ -817,7 +817,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a target name which needs escaping
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsEscaped()
         {
             string projectBody = @"
@@ -842,7 +842,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsWithTwoReferringToOne()
         {
             string projectBody = @"
@@ -872,7 +872,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsWithOneReferringToTwo()
         {
             string projectBody = @"
@@ -902,7 +902,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAfterTargetsWithDependencyOrdering()
         {
             string projectBody = @"
@@ -936,7 +936,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestComplexOrdering()
         {
             string projectBody = @"
@@ -986,7 +986,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestComplexOrdering2()
         {
             string projectBody = @"
@@ -1045,7 +1045,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeAndAfterWithErrorTargets()
         {
             string projectBody = @"
@@ -1086,7 +1086,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBeforeAndAfterOverrides()
         {
             string projectBody = @"
@@ -1130,7 +1130,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that if before and after targets skip, the main target still runs (bug 476908)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSkippingBeforeAndAfterTargets()
         {
             string projectBody = @"
@@ -1160,7 +1160,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that a circular dependency within a CallTarget call correctly propogates the failure.  Bug 502570.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestCircularDependencyInCallTarget()
         {
             string projectContents = @"
@@ -1183,7 +1183,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that cancel with no entries after building does not fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestCancelWithNoEntriesAfterBuild()
         {
             string projectBody = @"

@@ -31,12 +31,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    <Choose>
       <When Condition="'$(MSBuildAssemblyVersion)' == ''">
          <PropertyGroup>
-            <NetFrameworkTargetsPath>$(MSBuildFrameworkToolsPath)\Microsoft.NetFramework.targets</NetFrameworkTargetsPath>
+            <NetFrameworkTargetsPath>$(MSBuildFrameworkToolsPath)\Microsoft.NETFramework.targets</NetFrameworkTargetsPath>
          </PropertyGroup>
       </When>
       <Otherwise>
          <PropertyGroup>
-            <NetFrameworkTargetsPath>$(MSBuildToolsPath)\Microsoft.NetFramework.CurrentVersion.targets</NetFrameworkTargetsPath>
+            <NetFrameworkTargetsPath>$(MSBuildToolsPath)\Microsoft.NETFramework.CurrentVersion.targets</NetFrameworkTargetsPath>
          </PropertyGroup>
       </Otherwise>
    </Choose>

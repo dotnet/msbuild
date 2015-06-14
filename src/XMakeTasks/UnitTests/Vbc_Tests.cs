@@ -2,17 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -22,7 +19,7 @@ namespace Microsoft.Build.UnitTests
      * Test the Vbc task in various ways.
      *
      */
-    [TestClass]
+    [TestFixture]
     sealed public class VbcTests
     {
         /// <summary>
@@ -31,7 +28,7 @@ namespace Microsoft.Build.UnitTests
         /// not support assembly aliases, so we want to make sure that we don't try
         /// to pass an assembly alias into vbc.exe.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void References()
         {
             Vbc t = new Vbc();
@@ -40,83 +37,83 @@ namespace Microsoft.Build.UnitTests
             reference.SetMetadata("Alias", "Foo");
 
             t.References = new TaskItem[] { reference };
-            CommandLine.ValidateHasParameter(t, "/reference:System.Xml.dll");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/reference:System.Xml.dll"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
         // the /baseaddress switch on the command-line correctly.  The catch here is that
         // "vbc.exe" only supports passing in hex values, but the task may be passed
         // in hex or decimal.
-        [TestMethod]
+        [Test]
         public void BaseAddressHex1()
         {
             Vbc t = new Vbc();
             t.BaseAddress = "&H00001000";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:00001000");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:00001000"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
         // the /baseaddress switch on the command-line correctly.  The catch here is that
         // "vbc.exe" only supports passing in hex values, but the task may be passed
         // in hex or decimal.
-        [TestMethod]
+        [Test]
         public void BaseAddressHex2()
         {
             Vbc t = new Vbc();
             t.BaseAddress = "&h00001000";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:00001000");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:00001000"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
         // the /baseaddress switch on the command-line correctly.  The catch here is that
         // "vbc.exe" only supports passing in hex values, but the task may be passed
         // in hex or decimal.
-        [TestMethod]
+        [Test]
         public void BaseAddressHex3()
         {
             Vbc t = new Vbc();
             t.BaseAddress = "0x0000FFFF";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:0000FFFF");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:0000FFFF"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
         // the /baseaddress switch on the command-line correctly.  The catch here is that
         // "vbc.exe" only supports passing in hex values, but the task may be passed
         // in hex or decimal.
-        [TestMethod]
+        [Test]
         public void BaseAddressHex4()
         {
             Vbc t = new Vbc();
             t.BaseAddress = "0X00001000";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:00001000");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:00001000"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it sets
         // the /baseaddress switch on the command-line correctly.  The catch here is that
         // "vbc.exe" only supports passing in hex values, but the task may be passed
         // in hex or decimal.
-        [TestMethod]
+        [Test]
         public void BaseAddressDecimal()
         {
             Vbc t = new Vbc();
             t.BaseAddress = "285212672";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:11000000");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:11000000"));
         }
 
         /// <summary>
         /// Test the hex parsing code with a large integer value (unsigned int in size)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BaseAddressLargeDecimal()
         {
             Vbc t = new Vbc();
             t.BaseAddress = "3555454580";
-            CommandLine.ValidateHasParameter(t, "/baseaddress:D3EBEE74");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/baseaddress:D3EBEE74"));
         }
 
         // Tests the "BaseAddress" parameter on the Vbc task, and confirms that it throws
         // an exception when an invalid string is passed in.
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void BaseAddressInvalid()
         {
@@ -127,7 +124,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "GenerateDocumentation" and "DocumentationFile" parameters on the Vbc task,
         // and confirms that it sets the /doc switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void DocumentationFile()
         {
             Vbc t = new Vbc();
@@ -135,64 +132,64 @@ namespace Microsoft.Build.UnitTests
             t.DocumentationFile = "foo.xml";
             t.GenerateDocumentation = true;
 
-            int firstParamLocation = CommandLine.ValidateHasParameter(t, "/doc+");
-            int secondParamLocation = CommandLine.ValidateHasParameter(t, "/doc:foo.xml");
+            int firstParamLocation = CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/doc+"));
+            int secondParamLocation = CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/doc:foo.xml"));
 
             Assert.IsTrue(secondParamLocation > firstParamLocation, "The order of the /doc switches is incorrect.");
         }
 
         // Tests the "AdditionalLibPaths" parameter on the Vbc task, and confirms that it sets
         // the /lib switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void AdditionaLibPaths()
         {
             Vbc t = new Vbc();
 
-            t.AdditionalLibPaths = new string[] { @"c:\xmake\", @"c:\msbuild" };
-            CommandLine.ValidateHasParameter(t, @"/libpath:c:\xmake\,c:\msbuild");
+            t.AdditionalLibPaths = new[] { @"c:\xmake\", @"c:\msbuild" };
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/libpath:c:\xmake\,c:\msbuild"));
         }
 
         // Tests the "NoVBRuntimeReference" parameter on the Vbc task, and confirms that it sets
         // the /novbruntimeref switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void NoVBRuntimeReference()
         {
             Vbc t = new Vbc();
 
             t.NoVBRuntimeReference = true;
-            CommandLine.ValidateHasParameter(t, @"/novbruntimeref");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/novbruntimeref"));
 
             Vbc t2 = new Vbc();
 
             t2.NoVBRuntimeReference = false;
-            CommandLine.ValidateNoParameterStartsWith(t2, @"/novbruntimeref");
+            CommandLine.ValidateNoParameterStartsWith(t2, CommandLineBuilder.FixCommandLineSwitch(@"/novbruntimeref"));
         }
 
         // Tests the "Verbosity" parameter on the Vbc task, and confirms that it sets
         // the /quiet switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void VerbosityQuiet()
         {
             Vbc t = new Vbc();
 
             t.Verbosity = "QUIET";
-            CommandLine.ValidateHasParameter(t, @"/QUIET");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/QUIET"));
         }
 
         // Tests the "Verbosity" parameter on the Vbc task, and confirms that it sets
         // the /verbose switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void VerbosityVerbose()
         {
             Vbc t = new Vbc();
 
             t.Verbosity = "verbose";
-            CommandLine.ValidateHasParameter(t, @"/verbose");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/verbose"));
         }
 
         // Tests the "Platform" parameter on the Vbc task, and confirms that it sets
         // the /platform switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void Platform()
         {
             Vbc t = new Vbc();
@@ -203,49 +200,49 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "Platform" and "Prefer32Bit" parameter combinations on the Vbc task,
         // and confirms that it sets the /platform switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void PlatformAndPrefer32Bit()
         {
             // Implicit "anycpu"
             Vbc t = new Vbc();
-            CommandLine.ValidateNoParameterStartsWith(t, @"/platform:");
+            CommandLine.ValidateNoParameterStartsWith(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:"));
             t = new Vbc();
             t.Prefer32Bit = false;
-            CommandLine.ValidateNoParameterStartsWith(t, @"/platform:");
+            CommandLine.ValidateNoParameterStartsWith(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:"));
             t = new Vbc();
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu32bitpreferred");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu32bitpreferred"));
 
             // Explicit "anycpu"
             t = new Vbc();
             t.Platform = "anycpu";
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu"));
             t = new Vbc();
             t.Platform = "anycpu";
             t.Prefer32Bit = false;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu"));
             t = new Vbc();
             t.Platform = "anycpu";
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu32bitpreferred");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu32bitpreferred"));
 
             // Explicit "x86"
             t = new Vbc();
             t.Platform = "x86";
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
             t = new Vbc();
             t.Platform = "x86";
             t.Prefer32Bit = false;
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
             t = new Vbc();
             t.Platform = "x86";
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
         }
 
         // Tests the "HighEntropyVA" parameter on the Vbc task, and confirms that it
         // sets the /highentropyva switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void HighEntropyVA()
         {
             // Implicit /highentropyva-
@@ -265,7 +262,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "SubsystemVersion" parameter on the Vbc task, and confirms that it sets
         // the /subsystemversion switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void SubsystemVersion()
         {
             Vbc t = new Vbc();
@@ -290,7 +287,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "Verbosity" parameter on the Vbc task, and confirms that it
         // does not add any command-line switches when verbosity is set to normal.
-        [TestMethod]
+        [Test]
         public void VerbosityNormal()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -307,7 +304,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "Verbosity" parameter on the Vbc task, and confirms that it
         // throws an error when an invalid value is passed in.
-        [TestMethod]
+        [Test]
         public void VerbosityBogus()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -321,7 +318,7 @@ namespace Microsoft.Build.UnitTests
         // Check all parameters that are based on ints, bools and other value types.
         // This is because parameters with these types go through a not-so-typesafe check
         // for existence in the property bag.
-        [TestMethod]
+        [Test]
         public void FlagsAndInts()
         {
             Vbc t = new Vbc();
@@ -347,22 +344,28 @@ namespace Microsoft.Build.UnitTests
 
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, "/codepage:5");
-            CommandLine.ValidateHasParameter(t, "/debug+");
-            CommandLine.ValidateHasParameter(t, "/delaysign+");
-            CommandLine.ValidateHasParameter(t, "/filealign:9");
-            CommandLine.ValidateHasParameter(t, "/nologo");
-            CommandLine.ValidateHasParameter(t, "/optimize+");
-            CommandLine.ValidateHasParameter(t, "/warnaserror+");
-            CommandLine.ValidateHasParameter(t, "/utf8output");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/codepage:5"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/debug+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/delaysign+"));
+            if (NativeMethodsShared.IsWindows)
+            {
+                CommandLine.ValidateHasParameter(t, "/filealign:9");
+                CommandLine.ValidateHasParameter(t, "/nologo");
+            }
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/optimize+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/warnaserror+"));
+            if (NativeMethodsShared.IsWindows)
+            {
+                CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/utf8output"));
+            }
 
-            CommandLine.ValidateHasParameter(t, "/doc+");
-            CommandLine.ValidateHasParameter(t, "/nowarn");
-            CommandLine.ValidateHasParameter(t, "/optionexplicit+");
-            CommandLine.ValidateHasParameter(t, "/optionstrict+");
-            CommandLine.ValidateHasParameter(t, "/removeintchecks+");
-            CommandLine.ValidateHasParameter(t, "/netcf");
-            CommandLine.ValidateHasParameter(t, "/optioninfer+");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/doc+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/nowarn"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/optionexplicit+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/optionstrict+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/removeintchecks+"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/netcf"));
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/optioninfer+"));
         }
 
         /***********************************************************************
@@ -372,8 +375,8 @@ namespace Microsoft.Build.UnitTests
          * the task to make sure the host object is called appropriately.
          *
          **********************************************************************/
-        [TestMethod]
-        [Ignore]
+        [Test]
+        [Ignore("Disabled pending decision whether to support host objects")]
         public void VbcHostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -392,7 +395,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(vbcHostObject.CompileMethodWasCalled);
         }
 
-        [TestMethod]
+        [Test]
         public void VbcHostObjectNotUsedIfToolNameSpecified()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -406,7 +409,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(vbc.UseAlternateCommandLineToolToExecute());
         }
 
-        [TestMethod]
+        [Test]
         public void VbcHostObjectNotUsedIfToolPathSpecified()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -428,10 +431,10 @@ namespace Microsoft.Build.UnitTests
          * with with whitespace and other special characters to try to fool
          * us into spawning Vbc.exe while bypassing security
          */
-        [TestClass]
+        [TestFixture]
         sealed public class VbcCrossParameterInjection
         {
-            [TestMethod]
+            [Test]
             public void Win32Icon()
             {
                 Vbc t = new Vbc();
@@ -439,23 +442,23 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void AdditionalLibPaths()
             {
                 Vbc t = new Vbc();
-                t.AdditionalLibPaths = new string[] { @"parm /out:c:\windows\system32\notepad.exe" };
+                t.AdditionalLibPaths = new[] { @"parm /out:c:\windows\system32\notepad.exe" };
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void AddModules()
             {
                 Vbc t = new Vbc();
-                t.AddModules = new string[] { @"parm /out:c:\windows\system32\notepad.exe" };
+                t.AddModules = new[] { @"parm /out:c:\windows\system32\notepad.exe" };
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             [ExpectedException(typeof(ArgumentException))]
             public void BaseAddress()
             {
@@ -464,7 +467,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void DebugType()
             {
                 Vbc t = new Vbc();
@@ -472,8 +475,8 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
-            [Ignore] // Because constants may legitimately contains quotes _and_ we've cut security, we decided to let DefineConstants be passed through literally.
+            [Test]
+            [Ignore("Because constants may legitimately contains quotes _and_ we've cut security, we decided to let DefineConstants be passed through literally.")]
             public void DefineConstants()
             {
                 Vbc t = new Vbc();
@@ -481,7 +484,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void DocumentationFile()
             {
                 Vbc t = new Vbc();
@@ -489,7 +492,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void KeyContainer()
             {
                 Vbc t = new Vbc();
@@ -497,7 +500,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void KeyFile()
             {
                 Vbc t = new Vbc();
@@ -505,7 +508,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void LinkResources()
             {
                 Vbc t = new Vbc();
@@ -513,7 +516,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void MainEntryPoint()
             {
                 Vbc t = new Vbc();
@@ -521,7 +524,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void OutputAssembly()
             {
                 Vbc t = new Vbc();
@@ -529,7 +532,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateHasParameter(t, @"/out:parm1 /out:c:\windows\system32\notepad.exe");
             }
 
-            [TestMethod]
+            [Test]
             public void References()
             {
                 Vbc t = new Vbc();
@@ -541,7 +544,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void Resources()
             {
                 Vbc t = new Vbc();
@@ -553,7 +556,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void ResponseFiles()
             {
                 Vbc t = new Vbc();
@@ -564,7 +567,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void TargetType()
             {
                 Vbc t = new Vbc();
@@ -572,7 +575,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void ToolPath()
             {
                 Vbc t = new Vbc();
@@ -580,7 +583,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void Win32Resource()
             {
                 Vbc t = new Vbc();
@@ -588,7 +591,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void Imports()
             {
                 Vbc t = new Vbc();
@@ -596,7 +599,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void OptionCompare()
             {
                 Vbc t = new Vbc();
@@ -604,7 +607,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void RootNamespace()
             {
                 Vbc t = new Vbc();
@@ -612,7 +615,7 @@ namespace Microsoft.Build.UnitTests
                 CommandLine.ValidateNoParameterStartsWith(t, "/out");
             }
 
-            [TestMethod]
+            [Test]
             public void SdkPath()
             {
                 Vbc t = new Vbc();
@@ -621,7 +624,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void OptionStrictOffNowarnsUndefined()
         {
             Vbc t = new Vbc();
@@ -630,7 +633,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "/optionstrict:custom"); // we should be custom if no warnings are disabled
         }
 
-        [TestMethod]
+        [Test]
         public void OptionStrictOffNowarnsEmpty()
         {
             Vbc t = new Vbc();
@@ -639,7 +642,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "/optionstrict:custom"); // we shuold be custom if no warnings are disabled
         }
 
-        [TestMethod]
+        [Test]
         public void OptionStrictOffNoWarnsPresent()
         {
             // When the below warnings are set to NONE, we are effectively Option Strict-.  But because we don't want the msbuild task
@@ -653,7 +656,7 @@ namespace Microsoft.Build.UnitTests
             t.DisabledWarnings = "/nowarn:41999,42016,42017,42018,42019,42020,42021,42022,42032,42036";
         }
 
-        [TestMethod]
+        [Test]
         public void OptionStrictOnNoWarnsUndefined()
         {
             Vbc t = new Vbc();
@@ -662,7 +665,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "/optionstrict+");
         }
 
-        [TestMethod]
+        [Test]
         public void OptionStrictOnNoWarnsPresent()
         {
             Vbc t = new Vbc();
@@ -672,7 +675,7 @@ namespace Microsoft.Build.UnitTests
             t.DisabledWarnings = "/nowarn:41999";
         }
 
-        [TestMethod]
+        [Test]
         public void OptionStrictType1()
         {
             Vbc t = new Vbc();
@@ -681,7 +684,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateContains(t, "/optionstrict+ /optionstrict:custom", true);
         }
 
-        [TestMethod]
+        [Test]
         public void OptionStrictType2()
         {
             Vbc t = new Vbc();
@@ -690,7 +693,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateDoesNotContain(t, "/optionstrict-", true);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleResponseFiles()
         {
             Vbc t = new Vbc();
@@ -704,7 +707,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateContains(t, "@1.rsp @2.rsp @3.rsp @4.rsp", true);
         }
 
-        [TestMethod]
+        [Test]
         public void SingleResponseFile()
         {
             Vbc t = new Vbc();
@@ -715,7 +718,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "@1.rsp");
         }
 
-        [TestMethod]
+        [Test]
         public void ParseError_StandardVbcError()
         {
             Vbc t = new Vbc();
@@ -736,7 +739,7 @@ namespace Microsoft.Build.UnitTests
             (t.BuildEngine as MockEngine).AssertLogContains("(5,5)");
         }
 
-        [TestMethod]
+        [Test]
         public void ParseError_StandardVbcErrorWithColon()
         {
             Vbc t = new Vbc();
@@ -757,7 +760,7 @@ namespace Microsoft.Build.UnitTests
             (t.BuildEngine as MockEngine).AssertLogContains("(5,8)");
         }
 
-        [TestMethod]
+        [Test]
         public void ParseError_ProjectLevelVbcError()
         {
             Vbc t = new Vbc();
@@ -771,7 +774,7 @@ namespace Microsoft.Build.UnitTests
             (t.BuildEngine as MockEngine).AssertLogContains("BC30573");
         }
 
-        [TestMethod]
+        [Test]
         public void ParseError_ProjectLevelVbcErrorFollowedByStandard()
         {
             Vbc t = new Vbc();
@@ -795,7 +798,7 @@ namespace Microsoft.Build.UnitTests
             (t.BuildEngine as MockEngine).AssertLogContains("BC30800");
         }
 
-        [TestMethod]
+        [Test]
         public void ParseError_StandardVbcErrorFollowedByProjectLevel()
         {
             Vbc t = new Vbc();
@@ -819,7 +822,7 @@ namespace Microsoft.Build.UnitTests
             (t.BuildEngine as MockEngine).AssertLogContains("BC30800");
         }
 
-        [TestMethod]
+        [Test]
         public void ParseError_TwoProjectLevelErrors()
         {
             Vbc t = new Vbc();
@@ -840,7 +843,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         ///  Make sure that if we pass a name of a pdb file to the task that it corrrectly moves the file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MovePDBFile_GoodName()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "MovePDBFile_GoodName");
@@ -884,7 +887,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         ///  Make sure if the file already exists that the move still happens.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MovePDBFile_SameNameandFileAlreadyExists()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "MovePDBFile_SmeNameandFileAlreadyExists");
@@ -925,7 +928,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         ///  Make sure that if we pass a name of a pdb file to the task that it corrrectly moves the file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MovePDBFile_BadFileName()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "MovePDBFile_BadFileName");
@@ -947,7 +950,7 @@ namespace Microsoft.Build.UnitTests
                 MockEngine engine = new MockEngine();
                 Vbc t = new Vbc();
                 t.BuildEngine = engine;
-                t.PdbFile = "||{}}{<>?$$%^&*()!@#$%`~.pdb";
+                t.PdbFile = "||{}}{<>?$$%^&*()!@#$%`~/.pdb";
                 t.MovePdbFileIfNecessary(outputAssemblyPath);
 
                 FileInfo oldPDBInfo = new FileInfo(outputAssemblyPath);
@@ -965,7 +968,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void NoAnalyzers_CommandLine()
         {
             Vbc vbc = new Vbc();
@@ -973,7 +976,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateNoParameterStartsWith(vbc, "/analyzer");
         }
 
-        [TestMethod]
+        [Test]
         public void Analyzer_CommandLine()
         {
             Vbc vbc = new Vbc();
@@ -982,10 +985,10 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem("Foo.dll")
             };
 
-            CommandLine.ValidateHasParameter(vbc, "/analyzer:Foo.dll");
+            CommandLine.ValidateHasParameter(vbc, CommandLineBuilder.FixCommandLineSwitch("/analyzer:Foo.dll"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleAnalyzers_CommandLine()
         {
             Vbc vbc = new Vbc();
@@ -999,7 +1002,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(vbc, "/analyzer:Bar.dll");
         }
 
-        [TestMethod]
+        [Test]
         public void NoAnalyzer_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1021,7 +1024,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(vbcHostObject.Analyzers);
         }
 
-        [TestMethod]
+        [Test]
         public void Analyzer_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1049,7 +1052,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Foo.dll", vbcHostObject.Analyzers[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleAnalyzers_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1079,7 +1082,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Bar.dll", vbcHostObject.Analyzers[1].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void NoRuleSet_CommandLine()
         {
             Vbc vbc = new Vbc();
@@ -1087,7 +1090,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateNoParameterStartsWith(vbc, "/ruleset");
         }
 
-        [TestMethod]
+        [Test]
         public void RuleSet_CommandLine()
         {
             Vbc vbc = new Vbc();
@@ -1096,7 +1099,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(vbc, "/ruleset:Bar.ruleset");
         }
 
-        [TestMethod]
+        [Test]
         public void NoRuleSet_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1119,7 +1122,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(vbcHostObject.RuleSet);
         }
 
-        [TestMethod]
+        [Test]
         public void RuleSet_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1144,7 +1147,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Bar.ruleset", vbcHostObject.RuleSet);
         }
 
-        [TestMethod]
+        [Test]
         public void NoAdditionalFiles_CommandLine()
         {
             Vbc vbc = new Vbc();
@@ -1152,7 +1155,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateNoParameterStartsWith(vbc, "/additionalfile");
         }
 
-        [TestMethod]
+        [Test]
         public void AdditionalFiles_CommandLine()
         {
             Vbc vbc = new Vbc();
@@ -1161,10 +1164,10 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem("web.config")
             };
 
-            CommandLine.ValidateHasParameter(vbc, "/additionalfile:web.config");
+            CommandLine.ValidateHasParameter(vbc, CommandLineBuilder.FixCommandLineSwitch("/additionalfile:web.config"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleAdditionalFiles_CommandLine()
         {
             Vbc vbc = new Vbc();
@@ -1178,7 +1181,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(vbc, "/additionalfile:web.config");
         }
 
-        [TestMethod]
+        [Test]
         public void NoAdditionalFile_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1201,7 +1204,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(vbcHostObject.AdditionalFiles);
         }
 
-        [TestMethod]
+        [Test]
         public void AdditionalFile_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -1230,7 +1233,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("web.config", vbcHostObject.AdditionalFiles[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleAdditionalFiles_HostObject()
         {
             IBuildEngine2 mockEngine = new MockEngine();

@@ -7,13 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
-
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -22,6 +17,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
+using NUnit.Framework;
 namespace Microsoft.Build.UnitTests
 {
     /*
@@ -30,12 +26,12 @@ namespace Microsoft.Build.UnitTests
      * Utility methods for unit tests that work through the object model.
      *
      */
-    public static class ObjectModelHelpers
+    internal static class ObjectModelHelpers
     {
         private const string msbuildNamespace = "http://schemas.microsoft.com/developer/msbuild/2003";
-        private const string msbuildDefaultToolsVersion = MSBuildConstants.CurrentToolsVersion;
-        private const string msbuildAssemblyVersion = MSBuildConstants.CurrentAssemblyVersion;
-        private const string currentVisualStudioVersion = MSBuildConstants.CurrentVisualStudioVersion;
+        private static string msbuildDefaultToolsVersion = MSBuildConstants.CurrentToolsVersion;
+        private static string msbuildAssemblyVersion = MSBuildConstants.CurrentAssemblyVersion;
+        private static string currentVisualStudioVersion = MSBuildConstants.CurrentVisualStudioVersion;
 
         /// <summary>
         /// Return the the current Visual Studio version
@@ -1218,7 +1214,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception ex)
             {
-                Assert.IsInstanceOfType(ex, expectedExceptionType);
+                Assert.That(ex, Is.InstanceOf(expectedExceptionType));
                 Console.WriteLine("Caught '{0}'", ex.Message);
                 return;
             }
@@ -1309,7 +1305,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static string SleepCommandInMilliseconds(int milliseconds)
         {
-            return String.Format(@"@for /l %25%25i in (1,1,{0}) do @dir %25windir%25 > nul", milliseconds / 10);
+            return
+                string.Format(
+                    NativeMethodsShared.IsWindows
+                        ? @"@for /l %25%25i in (1,1,{0}) do @dir %25windir%25 > nul"
+                        : "for i in {{1..{0}}}; do ls /bin > /dev/null; done",
+                    milliseconds / 10);
         }
 
         /// <summary>

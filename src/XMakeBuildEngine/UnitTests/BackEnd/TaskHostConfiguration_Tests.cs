@@ -11,7 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Unit Tests for TaskHostConfiguration packet.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TaskHostConfiguration_Tests
     {
         /// <summary>
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that an exception is thrown when the task name is null. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ConstructorWithNullName()
         {
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that an exception is thrown when the task name is empty. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ConstructorWithEmptyName()
         {
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ConstructorWithNullLocation()
         {
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is empty
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ConstructorWithEmptyLocation()
         {
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test the valid constructors.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestValidConstructors()
         {
             TaskHostConfiguration config = new TaskHostConfiguration(1, Environment.CurrentDirectory, null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", @"c:\MyTasks\MyTask.dll", null);
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is null. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithNullDictionary()
         {
             TaskHostConfiguration config = new TaskHostConfiguration(1, Environment.CurrentDirectory, null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", @"c:\MyTasks\MyTask.dll", null);
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is empty. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithEmptyDictionary()
         {
             TaskHostConfiguration config = new TaskHostConfiguration(1, Environment.CurrentDirectory, null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", @"c:\MyTasks\MyTask.dll", new Dictionary<string, object>());
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains just value types. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithValueTypesInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithITaskItemInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithITaskItemArrayInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();

@@ -2,41 +2,35 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
+    [TestFixture]
     public class BuildRequestEntry_Tests
     {
         private int _nodeRequestId;
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _nodeRequestId++;
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
         }
 
-        [TestMethod]
+        [Test]
         public void TestConstructorGood()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0] { });
@@ -49,13 +43,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorBad()
         {
             BuildRequestEntry entry = new BuildRequestEntry(null, null);
         }
 
-        [TestMethod]
+        [Test]
         public void TestSimpleStateProgression()
         {
             // Start in Ready
@@ -104,7 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(entry.Result, result);
         }
 
-        [TestMethod]
+        [Test]
         public void TestResolveConfiguration()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
@@ -126,7 +120,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(entry.State, BuildRequestEntryState.Ready);
         }
 
-        [TestMethod]
+        [Test]
         public void TestMultipleWaitingRequests()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
@@ -156,7 +150,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(entry.State, BuildRequestEntryState.Ready);
         }
 
-        [TestMethod]
+        [Test]
         public void TestMixedWaitingRequests()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
@@ -192,7 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestNoReadyToWaiting()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
@@ -206,7 +200,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestNoReadyToComplete()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
@@ -221,7 +215,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestNoWaitingToComplete()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
@@ -243,7 +237,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestNoCompleteToWaiting()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
@@ -263,7 +257,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             entry.WaitForResult(waitingRequest1);
         }
 
-        [TestMethod]
+        [Test]
         public void TestResultsWithNoMatch1()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });

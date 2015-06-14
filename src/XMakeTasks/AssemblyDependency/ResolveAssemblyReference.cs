@@ -3,19 +3,15 @@
 
 using System;
 using System.IO;
+using System.Globalization;
+using System.Text;
 using System.Diagnostics;
-using System.Resources;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Globalization;
-using System.Text;
 
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -24,6 +20,8 @@ using LogExclusionReason = Microsoft.Build.Tasks.ReferenceTable.LogExclusionReas
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using System.Xml.Linq;
+
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

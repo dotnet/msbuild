@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
     using System.Threading.Tasks;
 
-    [TestClass]
+    [TestFixture]
     public class RequestBuilder_Tests
     {
         private AutoResetEvent _newBuildRequestsEvent;
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _nodeRequestId = 1;
@@ -61,20 +61,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _requestBuilder.OnNewBuildRequests += this.NewBuildRequestsCallback;
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             ((IBuildComponent)_requestBuilder).ShutdownComponent();
             _host = null;
         }
 
-        [TestMethod]
+        [Test]
         public void TestConstructor()
         {
             // The call to Setup will test this.
         }
 
-        [TestMethod]
+        [Test]
         public void TestSimpleBuildRequest()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestSimpleBuildRequestCancelled()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestRequestWithReference()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestRequestWithReferenceCancelled()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestMissingProjectFile()
         {
             TestTargetBuilder targetBuilder = (TestTargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
@@ -257,17 +257,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projectFile, projectFileContents.Replace('`', '"'));
 
             string defaultToolsVersion = null;
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
-            {
-                defaultToolsVersion = "4.0";
-            }
-            else
-            {
-                defaultToolsVersion = "2.0";
-            }
+            defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
+                                      ? ObjectModelHelpers.MSBuildDefaultToolsVersion
+                                      : "2.0";
 
-
-            BuildRequestConfiguration config = new BuildRequestConfiguration(configId, new BuildRequestData(projectFile, new Dictionary<string, string>(), "4.0", new string[0], null), defaultToolsVersion);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(
+                configId,
+                new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string>(),
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                    new string[0],
+                    null),
+                defaultToolsVersion);
             return config;
         }
 

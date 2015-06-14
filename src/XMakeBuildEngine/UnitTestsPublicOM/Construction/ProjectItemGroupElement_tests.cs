@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectItemGroupElement_tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -15,20 +17,20 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Test the ProjectItemGroupElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectItemGroupElement_tests
     {
         /// <summary>
         /// Read item groups in an empty project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNoItemGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -39,7 +41,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an empty item group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadEmptyItemGroup()
         {
             string content = @"
@@ -57,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an item group with two item children
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadItemGroupTwoItems()
         {
             string content = @"
@@ -82,7 +84,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -99,7 +101,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the Label value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetLabel()
         {
             ProjectRootElement project = ProjectRootElement.Create();

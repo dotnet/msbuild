@@ -8,7 +8,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
@@ -23,15 +23,17 @@ using InternalUtilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
-    [TestClass]
+    [TestFixture]
     public class ToolsetState_Tests
     {
-        [TestMethod]
+        [Test]
         public void OverrideTasksAreFoundInOverridePath()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             ProjectCollection e = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "c:\\msbuildoverridetasks", new DirectoryExists(this.directoryExists));
+            string dir = NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2";
+            string overrideDir = NativeMethodsShared.IsWindows ? "c:\\msbuildoverridetasks" : "/msbuildoverridetasks";
+            Toolset t = new Toolset("toolsversionname", dir, new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), overrideDir, new DirectoryExists(this.directoryExists));
 
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
@@ -68,7 +70,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideTaskPathIsRelative()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -86,7 +88,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideTaskPathHasInvalidChars()
         {
             ProjectCollection e = new ProjectCollection();
@@ -102,7 +104,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains("MSB4194");
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideTaskPathHasTooLongOfAPath()
         {
             string tooLong = "c:\\" + new string('C', 6000);
@@ -120,7 +122,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideTaskPathIsNotFound()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -138,11 +140,19 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceString("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultTasksAreFoundInToolsPath()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), null, new DirectoryExists(this.directoryExists));
+            Toolset t = new Toolset(
+                "toolsversionname",
+                NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2",
+                new PropertyDictionary<ProjectPropertyInstance>(),
+                new ProjectCollection(),
+                new DirectoryGetFiles(this.getFiles),
+                new LoadXmlFromPath(this.loadXmlFromPath),
+                null,
+                new DirectoryExists(this.directoryExists));
 
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(null, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
@@ -161,7 +171,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void WarningLoggedIfNoDefaultTasksFound()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -184,7 +194,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidToolPath()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -204,7 +214,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Make sure when we read in the tasks files off disk that they come in in a sorted order so that there is a deterministric way of 
         /// figurting out the order the files were read in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyTasksFilesAreInSortedOrder()
         {
             //Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -212,20 +222,36 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            string[] foundFiles = Toolset.GetTaskFiles(new DirectoryGetFiles(this.getFiles), service, BuildEventContext.Invalid, "*.tasks", "c:\\directory1\\directory2", String.Empty);
-            string[] foundoverrideFiles = Toolset.GetTaskFiles(new DirectoryGetFiles(this.getFiles), service, BuildEventContext.Invalid, "*.overridetasks", "c:\\msbuildoverridetasks", String.Empty);
+            string dir = NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2";
+            string overrideDir = NativeMethodsShared.IsWindows ? "c:\\msbuildoverridetasks" : "/msbuildoverridetasks";
+            string[] foundFiles = Toolset.GetTaskFiles(
+                new DirectoryGetFiles(this.getFiles),
+                service,
+                BuildEventContext.Invalid,
+                "*.tasks",
+                dir,
+                String.Empty);
+            string[] foundoverrideFiles = Toolset.GetTaskFiles(
+                new DirectoryGetFiles(this.getFiles),
+                service,
+                BuildEventContext.Invalid,
+                "*.overridetasks",
+                overrideDir,
+                String.Empty);
 
             List<string> sortedTasksExpectedPaths = new List<string>();
             List<string> sortedOverrideExpectedPaths = new List<string>();
 
             foreach (DefaultTasksFile file in _defaultTasksFileCandidates)
             {
-                if (Path.GetDirectoryName(file.Path).Equals("c:\\directory1\\directory2", StringComparison.OrdinalIgnoreCase) && file.Path.EndsWith(".tasks", StringComparison.OrdinalIgnoreCase))
+                if (Path.GetDirectoryName(file.Path).Equals(dir, StringComparison.OrdinalIgnoreCase)
+                    && file.Path.EndsWith(".tasks", StringComparison.OrdinalIgnoreCase))
                 {
                     sortedTasksExpectedPaths.Add(file.Path);
                 }
 
-                if (Path.GetDirectoryName(file.Path).Equals("c:\\msbuildoverridetasks", StringComparison.OrdinalIgnoreCase) && file.Path.EndsWith(".overridetasks", StringComparison.OrdinalIgnoreCase))
+                if (Path.GetDirectoryName(file.Path).Equals(overrideDir, StringComparison.OrdinalIgnoreCase)
+                    && file.Path.EndsWith(".overridetasks", StringComparison.OrdinalIgnoreCase))
                 {
                     sortedOverrideExpectedPaths.Add(file.Path);
                 }
@@ -248,7 +274,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionTooHighMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -285,7 +311,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionMissingLowMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -318,7 +344,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionMissingMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -351,7 +377,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void InvalidToolsVersion()
         {
@@ -373,7 +399,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -412,7 +438,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Validate that a custom defined toolset is honored
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void CustomToolsVersionIsHonored()
@@ -454,7 +480,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist()
         {
             ProjectCollection p = new ProjectCollection();
@@ -482,7 +508,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFromEnvironmentVariable()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -520,7 +546,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionFromEnvironmentVariable()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -558,7 +584,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionMappedToCurrent_CreateProjectInstance()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -599,7 +625,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_CreateProjectInstance()
         {
             ProjectCollection p = new ProjectCollection();
@@ -628,7 +654,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFromEnvironmentVariable_CreateProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -668,7 +694,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionFromEnvironmentVariable_CreateProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -709,7 +735,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionMappedToCurrent_ProjectInstance()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -750,7 +776,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_ProjectInstance()
         {
             ProjectCollection p = new ProjectCollection();
@@ -779,7 +805,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionFromEnvironmentVariable_ProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -819,7 +845,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidToolsVersionFromEnvironmentVariable_ProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -859,10 +885,18 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Inline tasks found in a .tasks file only have properties expanded.
         /// (When they are in a regular MSBuild file, items are also expanded.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InlineTasksInDotTasksFile()
         {
-            Toolset t = new Toolset("t", "c:\\inline", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), null, new DirectoryExists(directoryExists));
+            Toolset t = new Toolset(
+                "t",
+                NativeMethodsShared.IsWindows ? "c:\\inline" : "/inline",
+                new PropertyDictionary<ProjectPropertyInstance>(),
+                new ProjectCollection(),
+                new DirectoryGetFiles(this.getFiles),
+                new LoadXmlFromPath(this.loadXmlFromPath),
+                null,
+                new DirectoryExists(directoryExists));
 
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(null, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
@@ -890,7 +924,9 @@ namespace Microsoft.Build.UnitTests.Definition
             // Cause an exception if the path is invalid
             Path.GetFileName(path);
 
-            string pathWithoutTrailingSlash = path.EndsWith("\\") ? path.Substring(0, path.Length - 1) : path;
+            string pathWithoutTrailingSlash = path.EndsWith(Path.DirectorySeparatorChar.ToString())
+                                                  ? path.Substring(0, path.Length - 1)
+                                                  : path;
             //NOTE: the Replace calls below are a very minimal attempt to convert a basic, cmd.exe-style wildcard
             //into something Regex.IsMatch will know how to use.
             string finalPattern = "^" + pattern.Replace(".", "\\.").Replace("*", "[\\w\\W]*") + "$";
@@ -918,52 +954,72 @@ namespace Microsoft.Build.UnitTests.Definition
         private readonly Dictionary<string, string> _defaultTasksFileMap;
 
         private DefaultTasksFile[] _defaultTasksFileCandidates =
-            { new DefaultTasksFile(
-                      "c:\\directory1\\directory2\\a.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            {
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\directory1\\directory2\\a.tasks"
+                                         : "/directory1/directory2/a.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='a1' AssemblyName='a' />
                             <UsingTask TaskName='a2' AssemblyName='a' />
                             <UsingTask TaskName='a3' AssemblyName='a' />
                             <UsingTask TaskName='a4' AssemblyName='a' />
                        </Project>"),
-              new DefaultTasksFile("c:\\directory1\\directory2\\b.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\directory1\\directory2\\b.tasks"
+                                         : "/directory1/directory2/b.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='b1' AssemblyName='b' />
                        </Project>"),
-              new DefaultTasksFile("c:\\directory1\\directory2\\c.tasksfile",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\directory1\\directory2\\c.tasksfile"
+                                         : "/directory1/directory2/c.taskfile",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='c1' AssemblyName='c' />
                        </Project>"),
-              new DefaultTasksFile("c:\\directory1\\directory2\\directory3\\d.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\directory1\\directory2\\directory3\\d.tasks"
+                                         : "/directory1/directory2/directory3/d.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='d1' AssemblyName='d' />
                        </Project>"),
-              new DefaultTasksFile("c:\\directory1\\directory2\\e.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\directory1\\directory2\\e.tasks"
+                                         : "/directory1/directory2/e.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='e1' AssemblyName='e' />
                        </Project>"),
-              new DefaultTasksFile("d:\\directory1\\directory2\\f.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "d:\\directory1\\directory2\\f.tasks"
+                                         : "/d/directory1/directory2/f.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='f1' AssemblyName='f' />
                        </Project>"),
-              new DefaultTasksFile("c:\\directory1\\directory2\\g.custom.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\directory1\\directory2\\g.custom.tasks"
+                                         : "/directory1/directory2/g.custom.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='g1' AssemblyName='g' />
                             <UsingTask TaskName='g2' AssemblyName='g' />
                             <UsingTask TaskName='g3' AssemblyName='g' />
                        </Project>"),
-              new DefaultTasksFile("c:\\somepath\\1.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\somepath\\1.tasks"
+                                         : "/somepath/1.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='11' AssemblyName='1' />
                             <UsingTask TaskName='12' AssemblyName='1' />
                             <UsingTask TaskName='13' AssemblyName='1' />
                        </Project>"),
-              new DefaultTasksFile("c:\\somepath\\2.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\somepath\\2.tasks"
+                                         : "/somepath/2.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='21' AssemblyName='2' />
                        </Project>"),
-              new DefaultTasksFile("c:\\inline\\inlinetasks.tasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\inline\\inlinetasks.tasks"
+                                         : "/inline/inlinetasks.tasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='t2' AssemblyName='an' Condition='true' TaskFactory='AssemblyFactory' Runtime='CLR2' Architecture='x86' RequiredRuntime='2.0' RequiredPlatform='x86'>
                                 <ParameterGroup>
                                    <MyParameter ParameterType='System.String' Output='true' Required='false'/>
@@ -973,18 +1029,22 @@ namespace Microsoft.Build.UnitTests.Definition
                                 </Task>
                             </UsingTask>
                        </Project>"),
-              new DefaultTasksFile("c:\\msbuildoverridetasks\\1.overridetasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\msbuildoverridetasks\\1.overridetasks"
+                                         : "/msbuildoverridetasks/1.overridetasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='a1' AssemblyName='o' />
                             <UsingTask TaskName='oa1' AssemblyName='o' />
                             <UsingTask TaskName='oa2' AssemblyName='o' />
                             <UsingTask TaskName='og1' AssemblyName='o' />
                         </Project>"),
-               new DefaultTasksFile("c:\\msbuildoverridetasks\\2.overridetasks",
-                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                new DefaultTasksFile(NativeMethodsShared.IsWindows
+                                         ? "c:\\msbuildoverridetasks\\2.overridetasks"
+                                         : "/msbuildoverridetasks/2.overridetasks",
+                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='ooo' AssemblyName='o' />
                         </Project>")
-};
+            };
 
         public struct DefaultTasksFile
         {

@@ -7,8 +7,6 @@
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
-
-
 #else
 using System;
 using System.Diagnostics;

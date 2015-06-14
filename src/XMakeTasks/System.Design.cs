@@ -17,7 +17,6 @@ using System.Security.Permissions;
 
 using System.ComponentModel;
 
-
 namespace Microsoft.Build.Tasks
 {
     [AttributeUsage(AttributeTargets.All)]

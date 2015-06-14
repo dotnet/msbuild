@@ -2,17 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using NUnit.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class TypeLoader_Tests
     {
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             Assert.IsTrue(TypeLoader.IsPartialTypeNameMatch("Csc", "csc")); // ==> exact match
@@ -27,13 +27,13 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(TypeLoader.IsPartialTypeNameMatch("MyTasks.ATask\\\\\\.Csc", "Csc")); // ==> no match
         }
 
-        [TestMethod]
+        [Test]
         public void Regress_Mutation_TrailingPartMustMatch()
         {
             Assert.IsFalse(TypeLoader.IsPartialTypeNameMatch("Microsoft.Build.Tasks.Csc", "Vbc"));
         }
 
-        [TestMethod]
+        [Test]
         public void Regress_Mutation_ParameterOrderDoesntMatter()
         {
             Assert.IsTrue(TypeLoader.IsPartialTypeNameMatch("Csc", "Microsoft.Build.Tasks.Csc"));
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure that when we load multiple types out of the same assembly with different typefilters that both the fullyqualified name matching and the 
         /// partial name matching still work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress640476PartialName()
         {
             string forwardingLoggerLocation = typeof(Microsoft.Build.Logging.ConfigurableForwardingLogger).Assembly.Location;
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure that when we load multiple types out of the same assembly with different typefilters that both the fullyqualified name matching and the 
         /// partial name matching still work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress640476FullyQualifiedName()
         {
             Type forwardingLoggerType = typeof(Microsoft.Build.Logging.ConfigurableForwardingLogger);
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
         /// This has been in since whidbey but there has been no test for it and it was broken in the last refactoring of TypeLoader.
         /// This test is to prevent that from happening again.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoTypeNamePicksFirstType()
         {
             Type forwardingLoggerType = typeof(Microsoft.Build.Logging.ConfigurableForwardingLogger);

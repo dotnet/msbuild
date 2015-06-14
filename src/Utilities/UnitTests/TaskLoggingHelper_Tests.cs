@@ -6,7 +6,7 @@ using System.IO;
 using System.Resources;
 using System.Reflection;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -14,10 +14,10 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class TaskLoggingHelperTests
     {
-        [TestMethod]
+        [Test]
         public void CheckMessageCode()
         {
             Task t = new MockTask();
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests
         /// in this method returning true and passing a non canonical message results in it returning 
         /// false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckMessageFromStreamParsesErrorsAndMessagesCorrectly()
         {
             IBuildEngine2 mockEngine = new MockEngine();
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(t.Log.LogMessagesFromStream(sr, MessageImportance.High));
         }
 
-        [TestMethod]
+        [Test]
         public void LogCommandLine()
         {
             MockEngine mockEngine = new MockEngine();
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
         /// This verifies that we don't try to run FormatString on a string
         /// that isn't a resource (if we did, the unmatched curly would give an exception)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogMessageWithUnmatchedCurly()
         {
             MockEngine mockEngine = new MockEngine();
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("{4");
         }
 
-        [TestMethod]
+        [Test]
         public void LogFromResources()
         {
             MockEngine mockEngine = new MockEngine();
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(mockEngine.Log.Contains("Be nice or I wipe your harddrive foo"));
         }
 
-        [TestMethod]
+        [Test]
         public void CheckLogMessageFromFile()
         {
             string file = null;
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void CheckResourcesRegistered()
         {
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the LogErrorFromException & LogWarningFromException methods
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestLogFromException()
         {
             string message = "exception message";

@@ -11,9 +11,6 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Diagnostics.CodeAnalysis;
@@ -21,6 +18,8 @@ using System.Text;
 using System.Configuration;
 using System.Security;
 using System.Collections.Generic;
+
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

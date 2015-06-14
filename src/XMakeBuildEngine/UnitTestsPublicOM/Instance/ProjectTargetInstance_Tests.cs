@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectTargetInstance_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -13,20 +15,20 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for ProjectTargetInstance
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectTargetInstance_Tests
     {
         /// <summary>
         /// Test accessors
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Accessors()
         {
             ProjectTargetInstance target = GetSampleTargetInstance();
@@ -49,7 +51,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Evaluation of a project with more than one target with the same name
         /// should skip all but the last one.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetOverride()
         {
             ProjectRootElement projectXml = ProjectRootElement.Create();
@@ -69,7 +71,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// should skip all but the last one.  This is true even if the targets
         /// involved only have the same unescaped name (Orcas compat)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetOverride_Escaped()
         {
             ProjectRootElement projectXml = ProjectRootElement.Create();
@@ -89,7 +91,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// should skip all but the last one.  This is true even if the targets
         /// involved only have the same unescaped name (Orcas compat)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetOverride_Escaped2()
         {
             ProjectRootElement projectXml = ProjectRootElement.Create();
@@ -108,7 +110,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Verify that targets from a saved, but subsequently edited, project
         /// provide the correct full path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FileLocationAvailableEvenAfterEdits()
         {
             string path = null;
@@ -129,7 +131,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             finally
             {
                 File.Delete(path);
-            }            
+            }
         }
 
         /// <summary>

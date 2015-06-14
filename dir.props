@@ -12,23 +12,25 @@
    <!-- Common repo directories -->
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
-    <SourceDir>$(ProjectDir)src\</SourceDir>
-    <BinDir>$(ProjectDir)bin\</BinDir>
-    <TestWorkingDir>$(BinDir)tests\</TestWorkingDir>
-    <PackagesDir>$(ProjectDir)packages\</PackagesDir>
-    <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
+    <SourceDir>$(ProjectDir)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
+    <BinDir>$(ProjectDir)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
+    <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
+    <PackagesDir>$(ProjectDir)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
+    <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(MSBuildToolsVersion),"lib")$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
   </PropertyGroup>
 
   <!-- Common nuget properties -->
   <PropertyGroup>
+    <NuGetDir>$(PackagesDir)</NuGetDir>
     <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
-    <NuGetConfigFile>$(SourceDir).nuget\NuGet.Config</NuGetConfigFile>
+    <NuGetConfigFile>$([System.IO.Path]::Combine("$(SourceDir).nuget","NuGet.Config"))</NuGetConfigFile>
     <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('\'))"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
+    <NugetRestoreCommand Condition="'$(OS)' != 'Windows_NT'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
   </PropertyGroup>
   
   <!-- Set default Configuration and Platform -->
@@ -44,11 +46,23 @@
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD;MONO</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD;MONO</DefineConstants>
   </PropertyGroup>
 
   <!-- Setup some common paths -->
@@ -59,17 +73,17 @@
 
   <!-- Setup the default output and intermediate paths -->
   <PropertyGroup>
-    <BaseOutputPath>$(ProjectDir)bin\</BaseOutputPath>
-    <BaseOutputPathWithConfig>$(BaseOutputPath)$(OS)\$(Configuration)\</BaseOutputPathWithConfig>
-    <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$(BaseOutputPath)$(Platform)\$(OS)\$(Configuration)\</BaseOutputPathWithConfig>
-    <OutputPath>$(BaseOutputPathWithConfig)\</OutputPath>
+    <BaseOutputPath>$(BinDir)</BaseOutputPath>
+    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath)$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+    <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseOutputPath)$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+    <OutputPath>$(BaseOutputPathWithConfig)</OutputPath>
 
-    <BaseIntermediateOutputPath>$(BaseOutputPath)obj\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(MSBuildProjectName)\$(OS)\$(Configuration)\</IntermediateOutputPath>
-    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$(BaseIntermediateOutputPath)$(MSBuildProjectName)\$(Platform)\$(OS)\$(Configuration)\</IntermediateOutputPath>
+    <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
     
-    <TestPath>$(TestWorkingDir)$(MSBuildProjectName)\$(OS)\$(Configuration)\</TestPath>
-    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$(TestWorkingDir)$(MSBuildProjectName)\$(Platform)\$(OS)\$(Configuration)\</TestPath>
+    <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
+    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
   </PropertyGroup>
 
 </Project>

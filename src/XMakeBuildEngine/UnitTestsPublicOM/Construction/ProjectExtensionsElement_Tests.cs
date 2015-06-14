@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectExtensionsElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -10,8 +12,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -20,13 +21,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     // <summary>Tests for the ProjectExtensionsElement class.</summary>
     /// Tests for the  class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectExtensionsElement_Tests
     {
         /// <summary>
         /// Read ProjectExtensions with some child
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Read()
         {
             string content = @"
@@ -46,7 +47,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read ProjectExtensions with invalid Condition attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidCondition()
         {
@@ -57,12 +58,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
             ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-         }
+        }
 
         /// <summary>
         /// Read project with more than one ProjectExtensions
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidDuplicate()
         {
@@ -80,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set valid content
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValid()
         {
             ProjectExtensionsElement extensions = GetEmptyProjectExtensions();
@@ -95,7 +96,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null content
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNull()
         {
@@ -107,7 +108,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Delete by ID 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DeleteById()
         {
             string content = @"
@@ -132,7 +133,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Get by ID 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetById()
         {
             string content = @"
@@ -157,7 +158,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set by ID on not existing ID
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetById()
         {
             string content = @"
@@ -179,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set by ID on existing ID
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetByIdWhereItAlreadyExists()
         {
             string content = @"

@@ -4,10 +4,7 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
-using System.Globalization;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -94,12 +91,13 @@ namespace Microsoft.Build.Tasks
         )
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
-            string embeddedFileName = linkFileName;
+            string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
             if (embeddedFileName == null || embeddedFileName.Length == 0)
             {
-                embeddedFileName = fileName;
+                embeddedFileName = FileUtilities.FixFilePath(fileName);
             }
 
+            dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
 
             // If the item has a culture override, respect that. 

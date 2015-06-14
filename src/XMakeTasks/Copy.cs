@@ -3,11 +3,7 @@
 
 using System;
 using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
 using System.Threading;
 using System.Runtime.InteropServices;
 
@@ -243,8 +239,8 @@ namespace Microsoft.Build.Tasks
         /// Copy one file from source to destination. Create the target directory if necessary and 
         /// leave the file read-write.
         /// </summary>
-        /// <param name="sourceFile"></param>
-        /// <param name="destinationFile"></param>
+        /// <param name="sourceFileState"></param>
+        /// <param name="destinationFileState"></param>
         /// <returns>Return true to indicate success, return false to indicate failure and NO retry, return NULL to indicate retry.</returns>
         private bool? CopyFileWithLogging
         (
@@ -543,8 +539,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Copy source to destination, unless SkipUnchangedFiles is true and they are equivalent.
         /// </summary>
-        /// <param name="sourceFile"></param>
-        /// <param name="destinationFile"></param>
+        /// <param name="sourceFileState"></param>
+        /// <param name="destinationFileState"></param>
         /// <param name="copyFile"></param>
         /// <returns></returns>
         private bool DoCopyIfNecessary(FileState sourceFileState, FileState destinationFileState, CopyFileWithState copyFile)

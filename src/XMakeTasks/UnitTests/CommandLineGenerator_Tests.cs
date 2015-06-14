@@ -4,14 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Markup;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.Build.Tasks.Xaml;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class CommandLineGenerator_Tests
     {
         private const string testXamlFile = @"<?xml version='1.0' encoding='utf-8'?>
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests a command line generated from all of the specified switch values.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicCommandLine()
         {
             CommandLineGenerator generator = CreateGenerator();
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests a command line generated from a specific template
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TemplatedCommandLine()
         {
             CommandLineGenerator generator = CreateGenerator();
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests a command line generated from a specific template is not case sensitive on the parameter names.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TemplateParametersAreCaseInsensitive()
         {
             CommandLineGenerator generator = CreateGenerator();
@@ -130,6 +130,7 @@ namespace Microsoft.Build.UnitTests
 
         private CommandLineGenerator CreateGenerator()
         {
+#if !MONO
             Rule rule = XamlReader.Parse(testXamlFile) as Rule;
 
             Dictionary<string, Object> switchValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -152,6 +153,9 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineGenerator generator = new CommandLineGenerator(rule, switchValues);
             return generator;
+#else
+            return new CommandLineGenerator(new Rule(), new Dictionary<string, object>());
+#endif
         }
 
         private class TaskItem : ITaskItem

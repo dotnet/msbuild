@@ -2,22 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text;
 using System.Resources;
 using System.Threading;
-using System.Reflection;
 using System.Diagnostics;
 using System.ComponentModel;
-using System.Globalization;
-using System.Runtime.InteropServices;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Diagnostics.CodeAnalysis;
+
+using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.Utilities
 {
@@ -601,7 +600,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>path to the tool, or null</returns>
         private string ComputePathToTool()
         {
-            string pathToTool;
+            string pathToTool = null;
 
             if (UseCommandProcessor)
             {
@@ -613,7 +612,8 @@ namespace Microsoft.Build.Utilities
                 // If the project author passed in a ToolPath, always use that.
                 pathToTool = Path.Combine(ToolPath, ToolExe);
             }
-            else
+
+            if (string.IsNullOrWhiteSpace(pathToTool) || (ToolPath == null && !File.Exists(pathToTool)))
             {
                 // Otherwise, try to find the tool ourselves.
                 pathToTool = GenerateFullPathToTool();
@@ -1471,32 +1471,51 @@ namespace Microsoft.Build.Utilities
                 // If there are response file commands, then we need a response file later.
                 string batchFileContents = commandLineCommands;
                 string responseFileCommands = GenerateResponseFileCommands();
+                bool runningOnWindows = NativeMethodsShared.IsWindows;
 
                 if (UseCommandProcessor)
                 {
-                    ToolExe = "cmd.exe";
-
-                    // Generate the temporary batch file
-                    // May throw IO-related exceptions
-                    _temporaryBatchFile = FileUtilities.GetTemporaryFile(".cmd");
-
-                    File.AppendAllText(_temporaryBatchFile, commandLineCommands, EncodingUtilities.CurrentSystemOemEncoding);
-
-                    string batchFileForCommandLine = _temporaryBatchFile;
-
-                    // If for some crazy reason the path has a & character and a space in it
-                    // then get the short path of the temp path, which should not have spaces in it
-                    // and then escape the &
-                    if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                    if (runningOnWindows) // we are Windows
                     {
-                        batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                        batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
+                        ToolExe = "cmd.exe";
+                        // Generate the temporary batch file
+                        // May throw IO-related exceptions
+                        _temporaryBatchFile = FileUtilities.GetTemporaryFile(".cmd");
+                    }
+                    else
+                    {
+                        ToolExe = "/bin/sh";
+                        // Generate the temporary batch file
+                        // May throw IO-related exceptions
+                        _temporaryBatchFile = FileUtilities.GetTemporaryFile(".sh");
                     }
 
-                    commandLineCommands = "/C \"" + batchFileForCommandLine + "\"";
-                    if (EchoOff)
+                    if (!runningOnWindows)
                     {
-                        commandLineCommands = "/Q " + commandLineCommands;
+                        File.AppendAllText(_temporaryBatchFile, "#!/bin/bash\n"); // first line for UNIX is ANSI
+                        // This is a hack..!
+                        File.AppendAllText(_temporaryBatchFile, commandLineCommands.Replace('\\', Path.DirectorySeparatorChar), EncodingUtilities.CurrentSystemOemEncoding);
+                    }
+                    else
+                    {
+                        File.AppendAllText(_temporaryBatchFile, commandLineCommands, EncodingUtilities.CurrentSystemOemEncoding);
+
+                        string batchFileForCommandLine = _temporaryBatchFile;
+
+                        // If for some crazy reason the path has a & character and a space in it
+                        // then get the short path of the temp path, which should not have spaces in it
+                        // and then escape the &
+                        if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                        {
+                            batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
+                            batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
+                        }
+
+                        commandLineCommands = "/C \"" + batchFileForCommandLine + "\"";
+                        if (EchoOff)
+                        {
+                            commandLineCommands = "/Q " + commandLineCommands;
+                        }
                     }
                 }
 
@@ -1557,6 +1576,12 @@ namespace Microsoft.Build.Utilities
                     {
                         alreadyLoggedEnvironmentHeader = LogEnvironmentVariable(alreadyLoggedEnvironmentHeader, (string)variable.Key, (string)variable.Value);
                     }
+                }
+
+                if (!runningOnWindows)
+                {
+                    commandLineCommands = commandLineCommands.Replace('\\', Path.DirectorySeparatorChar);
+                    responseFileCommands = responseFileCommands.Replace('\\', Path.DirectorySeparatorChar);
                 }
 
                 if (UseCommandProcessor)

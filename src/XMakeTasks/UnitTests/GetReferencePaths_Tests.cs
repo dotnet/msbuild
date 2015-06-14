@@ -8,7 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -21,13 +21,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the task which gets the reference assembly paths for a given target framework version / moniker
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class GetReferenceAssmeblyPath_Tests
     {
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGeneralFrameworkMonikerGood()
         {
             string targetFrameworkMoniker = ".NetFramework, Version=v4.5";
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGeneralFrameworkMonikerGoodWithRoot()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithRoot");
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGeneralFrameworkMonikerGoodWithRootWithProfile()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithRootWithProfile");
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the target framework moniker is null. Expect there to be an error logged.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGeneralFrameworkMonikerNull()
         {
             MockEngine engine = new MockEngine();
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the target framework moniker is empty. Expect there to be an error logged.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGeneralFrameworkMonikerNonExistent()
         {
             MockEngine engine = new MockEngine();
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGeneralFrameworkMonikerGoodWithInvalidIncludePath()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithInvalidIncludePath");
@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in but there is a problem with the RedistList.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGeneralFrameworkMonikerGoodWithInvalidCharInIncludePath()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithInvalidCharInIncludePath");

@@ -29,6 +29,8 @@ using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
 namespace Microsoft.Build.Execution
 {
+    using Utilities = Microsoft.Build.Internal.Utilities;
+
     /// <summary>
     /// This class represents all of the settings which must be specified to start a build.
     /// </summary>

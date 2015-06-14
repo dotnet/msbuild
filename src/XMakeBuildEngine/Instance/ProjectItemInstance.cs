@@ -12,6 +12,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.IO;
+
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
@@ -802,8 +804,8 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, "includeEscaped");
                 ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, "includeBeforeWildcardExpansionEscaped");
 
-                _includeEscaped = includeEscaped;
-                _includeBeforeWildcardExpansionEscaped = includeBeforeWildcardExpansionEscaped;
+                _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
+                _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
                 _directMetadata = (directMetadata == null || directMetadata.Count == 0) ? null : directMetadata; // If the metadata was all removed, toss the dictionary
                 _itemDefinitions = itemDefinitions;
                 _projectDirectory = projectDirectory;
@@ -2003,6 +2005,12 @@ namespace Microsoft.Build.Execution
                 public TaskItem CreateItem(string includeEscaped, ProjectItemInstance baseItem, string definingProject)
                 {
                     TaskItem item = new TaskItem(baseItem);
+
+                    if (Path.DirectorySeparatorChar != '\\' && includeEscaped != null && includeEscaped.IndexOf('\\') > -1)
+                    {
+                        includeEscaped = includeEscaped.Replace('\\', '/');
+                    }
+
                     item.IncludeEscaped = includeEscaped;
 
                     return item;

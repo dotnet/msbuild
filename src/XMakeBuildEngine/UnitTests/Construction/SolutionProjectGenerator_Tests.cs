@@ -10,7 +10,7 @@ using System.IO;
 using System.Xml;
 using System.Linq;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
@@ -31,19 +31,19 @@ using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    [TestClass]
+    [TestFixture]
     public class SolutionProjectGenerator_Tests
     {
         private string _originalVisualStudioVersion = null;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             // Save off the value for use during cleanup
             _originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
         }
 
-        [TestCleanup]
+        [TearDown]
         public void Cleanup()
         {
             // Need to make sure the environment is cleared up for later tests
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Verify the AddNewErrorWarningMessageElement method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddNewErrorWarningMessageElement()
         {
             MockLogger logger = new MockLogger();
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure we properly set the ToolsVersion attribute on the in-memory project based
         /// on the Solution File Format Version.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmitToolsVersionAttributeToInMemoryProject9()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure we properly set the ToolsVersion attribute on the in-memory project based
         /// on the Solution File Format Version.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmitToolsVersionAttributeToInMemoryProject10()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -180,9 +180,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure that if the solution file version doesn't map to a sub-toolset version, we won't try 
         /// to force it to be used.  
         /// </summary>
-        [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Test]
         public void DefaultSubToolsetIfSolutionVersionSubToolsetDoesntExist()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
@@ -209,14 +207,22 @@ namespace Microsoft.Build.UnitTests.Construction
             Toolset t = ProjectCollection.GlobalProjectCollection.GetToolset(instances[0].ToolsVersion);
 
             Assert.AreEqual(t.DefaultSubToolsetVersion, instances[0].SubToolsetVersion);
-            Assert.AreEqual(t.DefaultSubToolsetVersion, instances[0].GetPropertyValue("VisualStudioVersion"));
+
+            if (t.DefaultSubToolsetVersion != null)
+            {
+                Assert.AreEqual(t.DefaultSubToolsetVersion, instances[0].GetPropertyValue("VisualStudioVersion"));
+            }
+            else
+            {
+                Assert.AreEqual(String.Empty, instances[0].GetPropertyValue("VisualStudioVersion"));
+            }
         }
 
         /// <summary>
         /// Test to make sure that if the solution version corresponds to an existing sub-toolset version, 
         /// barring other factors that might override, the sub-toolset will be based on the solution version. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SubToolsetSetBySolutionVersion()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
@@ -251,7 +257,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version, 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionBasedSubToolsetVersionOverriddenByEnvironment()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", "ABC");
@@ -282,7 +288,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SolutionPassesSubToolsetToChildProjects2()
@@ -430,7 +436,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure that, when we're not TV 4.0 -- which even for Dev11 solutions we are not by default -- that we
         /// do not pass VisualStudioVersion down to the child projects.  
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SolutionDoesntPassSubToolsetToChildProjects()
@@ -500,7 +506,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Verify that we throw the appropriate error if the solution declares a dependency 
         /// on a project that doesn't exist.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void SolutionWithMissingDependencies()
         {
@@ -544,7 +550,7 @@ EndGlobal
         /// Blob should contain dependency info
         /// Here B depends on C
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionConfigurationWithDependencies()
         {
             string solutionFileContents =
@@ -634,7 +640,7 @@ EndGlobal
         /// <seealso href="https://github.com/Microsoft/msbuild/issues/69">
         /// MSBuild should generate metaprojects that merge the outputs of the individual MSBuild invocations
         /// </seealso>
-        [TestMethod]
+        [Test]
         public void SolutionConfigurationWithDependenciesRelaysItsOutputs()
         {
             #region Large strings representing solution & projects
@@ -740,7 +746,7 @@ EndGlobal
         /// <summary>
         /// Test the SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAddPropertyGroupForSolutionConfiguration()
         {
             string solutionFileContents =
@@ -813,7 +819,7 @@ EndGlobal
         /// <summary>
         /// Make sure that BuildProjectInSolution is set to true of the Build.0 entry is in the solution configuration.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAddPropertyGroupForSolutionConfigurationBuildProjectInSolutionSet()
         {
             string solutionFileContents =
@@ -857,7 +863,7 @@ EndGlobal
         /// <summary>
         /// Make sure that BuildProjectInSolution is set to false of the Build.0 entry is in the solution configuration.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAddPropertyGroupForSolutionConfigurationBuildProjectInSolutionNotSet()
         {
             string solutionFileContents =
@@ -901,7 +907,7 @@ EndGlobal
         /// In this bug, SkipNonexistentProjects was always set to 'Build'. It should be 'Build' for metaprojects and 'True' for everything else.
         /// The repro below has one of each case. WebProjects can't build so they are set as SkipNonexistentProjects='Build'
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress751742_SkipNonexistentProjects()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -976,7 +982,7 @@ EndGlobal
         /// if set when building a solution, will be specified as the ToolsVersion on the MSBuild task when
         /// building the projects contained within the solution.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionOverrideShouldBeSpecifiedOnMSBuildTaskInvocations()
         {
             string solutionFileContents =
@@ -1042,7 +1048,7 @@ EndGlobal
         /// <summary>
         /// Make sure that whatever the solution ToolsVersion is, it gets mapped to all its metaprojs, too. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionWithDependenciesHasCorrectToolsVersionInMetaprojs()
         {
             string solutionFileContents =
@@ -1112,7 +1118,7 @@ EndGlobal
         /// <summary>
         /// Test the SolutionProjectGenerator.Generate method has its toolset redirected correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolsVersionOverrideCausesToolsetRedirect()
         {
             string solutionFileContents =
@@ -1160,7 +1166,7 @@ EndGlobal
         /// <summary>
         /// Test the SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDisambiguateProjectTargetName()
         {
             string solutionFileContents =
@@ -1248,7 +1254,7 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing default configuration/platform values for solutions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConfigurationPlatformDefaults1()
         {
             string solutionFileContents =
@@ -1286,7 +1292,7 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing default configuration/platform values for solutions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConfigurationPlatformDefaults2()
         {
             string solutionFileContents =
@@ -1316,7 +1322,7 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing default Venus configuration values for solutions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestVenusConfigurationDefaults()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1344,7 +1350,7 @@ EndGlobal
         /// <summary>
         /// Tests that the correct value for TargetFrameworkVersion gets set when creating Venus solutions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VenusSolutionDefaultTargetFrameworkVersion()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1381,7 +1387,7 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTargetFrameworkPaths0()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkSdkV20 != null)
@@ -1404,9 +1410,7 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Test]
         public void TestTargetFrameworkPaths1()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1430,7 +1434,7 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTargetFrameworkPaths2()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1477,7 +1481,7 @@ EndGlobal
         /// <summary>
         /// Test the PredictActiveSolutionConfigurationName method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestPredictSolutionConfigurationName()
         {
             string solutionFileContents =
@@ -1513,7 +1517,7 @@ EndGlobal
         /// <summary>
         /// Verifies that the SolutionProjectGenerator will correctly escape project file paths
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionGeneratorEscapingProjectFilePaths()
         {
             string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
@@ -1560,7 +1564,7 @@ EndGlobal
         /// <summary>
         /// Verifies that the SolutionProjectGenerator will emit a solution file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionGeneratorCanEmitSolutions()
         {
             string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
@@ -1626,7 +1630,7 @@ EndGlobal
         /// Make sure that we output a warning and don't build anything when we're given an invalid
         /// solution configuration and SkipInvalidConfigurations is set to true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSkipInvalidConfigurationsCase()
         {
             string tmpFileName = FileUtilities.GetTemporaryFile();
@@ -1703,7 +1707,7 @@ EndGlobal
         /// <summary>
         /// When we have a bad framework moniker we expect the build to fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BadFrameworkMonkierExpectBuildToFail()
         {
             string tmpFileName = FileUtilities.GetTemporaryFile();
@@ -1795,7 +1799,7 @@ EndGlobal
         /// When we have a bad framework moniker we expect the build to fail. In this case we are passing a poorly formatted framework moniker.
         /// This will test the exception path where the framework name is invalid rather than just not .netFramework
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BadFrameworkMonkierExpectBuildToFail2()
         {
             string tmpFileName = FileUtilities.GetTemporaryFile();
@@ -1887,7 +1891,7 @@ EndGlobal
         /// Bug indicated that when a target framework version greater than 4.0 was used then the solution project generator would crash.
         /// this test is to make sure the fix is not regressed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTargetFrameworkVersionGreaterThan4()
         {
             string tmpFileName = FileUtilities.GetTemporaryFile();

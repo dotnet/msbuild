@@ -2,23 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Globalization;
-using System.Resources;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AssemblyNameEx_Tests
     {
         /// <summary>
@@ -107,7 +101,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General base name comparison validator.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CompareBaseName()
         {
             // For each pair of assembly strings...
@@ -142,7 +136,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General compareTo validator
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CompareTo()
         {
             // For each pair of assembly strings...
@@ -203,7 +197,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ExerciseMiscMethods()
         {
             AssemblyNameExtension a1 = s_producers[0](s_assemblyStrings[0]);
@@ -216,7 +210,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNotNull(a1.ToString());
         }
 
-        [TestMethod]
+        [Test]
         public void EscapeDisplayNameCharacters()
         {
             // /// Those characters are Equals(=), Comma(,), Quote("), Apostrophe('), Backslash(\).
@@ -228,7 +222,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General equals comparison validator.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Equals()
         {
             // For each pair of assembly strings...
@@ -269,7 +263,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// General equals comparison validator when we are ignoring the version numbers in the name.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualsIgnoreVersion()
         {
             // For each pair of assembly strings...
@@ -309,7 +303,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This repros a bug that was found while coding AssemblyNameExtension.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CompareBaseNameRealCase1()
         {
             AssemblyNameExtension a1 = ProduceAsBoth("System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -325,10 +319,15 @@ namespace Microsoft.Build.UnitTests
         /// Verify an exception is thrown when the simple name is not in the itemspec.
         /// 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(FileLoadException))]
         public void CreateAssemblyNameExtensionWithNoSimpleName()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono does not throw on this string");
+            }
+
             AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
         }
 
@@ -336,10 +335,15 @@ namespace Microsoft.Build.UnitTests
         /// Verify an exception is thrown when the simple name is not in the itemspec.
         /// 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(FileLoadException))]
         public void CreateAssemblyNameExtensionWithNoSimpleName2()
         {
+            if (NativeMethodsShared.IsMono)
+            {
+                Assert.Ignore("Mono does not throw on this string");
+            }
+
             AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             extension2.PartialNameCompare(extension);
@@ -349,7 +353,7 @@ namespace Microsoft.Build.UnitTests
         /// Create an assembly name extension providing the name, version, culture, and public key. Also test cases
         /// where the public key is the only item specified
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CreateAssemblyNameWithNameAndVersionCulturePublicKey()
         {
             AssemblyNameExtension extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
@@ -385,7 +389,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure processor architecture is seen when it is in the string.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CreateAssemblyNameWithNameAndProcessorArchitecture()
         {
             AssemblyNameExtension extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, ProcessorArchitecture=MSIL");
@@ -408,7 +412,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify partial matching on the simple name works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAssemblyPatialMatchSimpleName()
         {
             AssemblyNameExtension assemblyNameToMatch = new AssemblyNameExtension("System.Xml");
@@ -428,7 +432,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify partial matching on the simple name and version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAssemblyPatialMatchSimpleNameVersion()
         {
             AssemblyNameExtension assemblyNameToMatchVersion = new AssemblyNameExtension("System.Xml, Version=10.0.0.0");
@@ -472,7 +476,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify partial matching on the simple name and culture
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAssemblyPatialMatchSimpleNameCulture()
         {
             AssemblyNameExtension assemblyNameToMatchCulture = new AssemblyNameExtension("System.Xml, Culture=en");
@@ -516,7 +520,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify partial matching on the simple name and PublicKeyToken
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAssemblyPatialMatchSimpleNamePublicKeyToken()
         {
             AssemblyNameExtension assemblyNameToMatchPublicToken = new AssemblyNameExtension("System.Xml, PublicKeyToken=b03f5f7f11d50a3a");
@@ -560,7 +564,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify partial matching on the simple name and retargetable
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestAssemblyPartialMatchSimpleNameRetargetable()
         {
             AssemblyNameExtension assemblyNameToMatchRetargetable = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes");
@@ -611,7 +615,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure that our assemblyNameComparers correctly work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyNameComparers()
         {
             AssemblyNameExtension a = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes");
@@ -643,7 +647,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure the reverse version comparer will compare the version in a way that would sort them in reverse order. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyReverseVersionComparer()
         {
             AssemblyNameExtension x = new AssemblyNameExtension("System, Version=2.0.0.0");

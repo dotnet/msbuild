@@ -2,49 +2,45 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
+    [TestFixture]
     public class BuildRequest_Tests
     {
         private int _nodeRequestId;
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _nodeRequestId = 1;
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
         }
 
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorBad()
         {
             BuildRequest request = CreateNewBuildRequest(0, null);
         }
 
-        [TestMethod]
+        [Test]
         public void TestConstructorGood()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
         }
 
-        [TestMethod]
+        [Test]
         public void TestConfigurationId()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
@@ -57,7 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(-1, request3.ConfigurationId);
         }
 
-        [TestMethod]
+        [Test]
         public void TestConfigurationResolved()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
@@ -70,7 +66,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.IsFalse(request3.IsConfigurationResolved);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTargets()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
@@ -83,14 +79,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual("a", request2.Targets[0]);
         }
 
-        [TestMethod]
+        [Test]
         public void TestPacketType()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
             Assert.AreEqual(NodePacketType.BuildRequest, request.Type);
         }
 
-        [TestMethod]
+        [Test]
         public void TestResolveConfigurationGood()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
@@ -100,7 +96,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestResolveConfigurationBad()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0] { });
@@ -108,14 +104,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Test]
         public void TestResolveConfigurationBad2()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
             request.ResolveConfiguration(-1);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTranslation()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[] { "alpha", "omega" });

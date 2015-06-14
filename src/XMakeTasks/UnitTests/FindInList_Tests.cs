@@ -2,19 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class FindInList_Tests
     {
-        [TestMethod]
+        [Test]
         public void FoundCaseInsensitive()
         {
             FindInList f = new FindInList();
@@ -25,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("A.CS", f.ItemFound.ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void FoundCaseSensitive()
         {
             FindInList f = new FindInList();
@@ -37,7 +38,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("a.cs", f.ItemFound.ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void NotFoundCaseSensitive()
         {
             FindInList f = new FindInList();
@@ -49,7 +50,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(null, f.ItemFound);
         }
 
-        [TestMethod]
+        [Test]
         public void ReturnsFirstOne()
         {
             FindInList f = new FindInList();
@@ -68,7 +69,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Given two items (distinguished with metadata) verify that the last one is picked.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReturnsLastOne()
         {
             FindInList f = new FindInList();
@@ -85,7 +86,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(item2.GetMetadata("id"), f.ItemFound.GetMetadata("id"));
         }
 
-        [TestMethod]
+        [Test]
         public void ReturnsLastOneEmptyList()
         {
             FindInList f = new FindInList();
@@ -97,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(null, f.ItemFound);
         }
 
-        [TestMethod]
+        [Test]
         public void NotFound()
         {
             FindInList f = new FindInList();
@@ -108,7 +109,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(null, f.ItemFound);
         }
 
-        [TestMethod]
+        [Test]
         public void MatchFileNameOnly()
         {
             FindInList f = new FindInList();
@@ -117,10 +118,10 @@ namespace Microsoft.Build.UnitTests
             f.MatchFileNameOnly = true;
             f.List = new ITaskItem[] { new TaskItem(@"c:\foo\a.cs"), new TaskItem("b.cs") };
             Assert.IsTrue(f.Execute());
-            Assert.AreEqual(@"c:\foo\a.cs", f.ItemFound.ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"c:\foo\a.cs"), f.ItemFound.ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void MatchFileNameOnlyWithAnInvalidPath()
         {
             FindInList f = new FindInList();
@@ -132,7 +133,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(f.Execute());
             Console.WriteLine(e.Log);
             // Should ignore the invalid paths
-            Assert.AreEqual(@"foo\a.cs", f.ItemFound.ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"foo\a.cs"), f.ItemFound.ItemSpec);
         }
     }
 }

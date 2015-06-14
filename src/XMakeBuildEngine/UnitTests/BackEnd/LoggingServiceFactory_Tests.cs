@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
@@ -16,13 +16,13 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     ///Test the Factory to create components of the type LoggingService
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class LoggingServiceFactory_Tests
     {
         /// <summary>
         /// Verify we can create a synchronous LoggingService
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestCreateSynchronousLogger()
         {
             LoggingServiceFactory factory = new LoggingServiceFactory(LoggerMode.Synchronous, 1);
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify we can create a Asynchronous LoggingService
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestCreateAsynchronousLogger()
         {
             LoggingServiceFactory factory = new LoggingServiceFactory(LoggerMode.Asynchronous, 1);

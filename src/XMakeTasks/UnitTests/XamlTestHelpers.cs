@@ -4,7 +4,7 @@
 using Microsoft.CSharp;
 using Microsoft.Build.Tasks.Xaml;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using System;
 using System.CodeDom;

@@ -2,22 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Security.AccessControl;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.AccessControl;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public abstract class Copy_Tests
     {
         public bool useHardLinks = false;
@@ -40,7 +38,7 @@ namespace Microsoft.Build.UnitTests
         /// There are a couple of environment variables that can affect the operation of the Copy
         /// task.  Make sure none of them are set. 
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
@@ -55,7 +53,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Restore the environment variables we cleared out at the beginning of the test. 
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", _alwaysOverwriteReadOnlyFiles);
@@ -70,7 +68,7 @@ namespace Microsoft.Build.UnitTests
         * If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
         * have the same date and time.
         */
-        [TestMethod]
+        [Test]
         public void DontCopyOverSameFile()
         {
             string file = FileUtilities.GetTemporaryFile();
@@ -117,7 +115,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotNormallyCopyOverReadOnlyFile()
         {
             string source = FileUtilities.GetTemporaryFile();
@@ -173,7 +171,7 @@ namespace Microsoft.Build.UnitTests
         /// If MSBUILDALWAYSOVERWRITEREADONLYFILES is set, then overwrite read-only even when 
         /// OverwriteReadOnlyFiles is false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyOverReadOnlyFileEnvironmentOverride()
         {
             string source = FileUtilities.GetTemporaryFile();
@@ -232,7 +230,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If MSBUILDALWAYSRETRY is set, keep retrying the copy. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AlwaysRetryCopyEnvironmentOverride()
         {
             string source = FileUtilities.GetTemporaryFile();
@@ -297,7 +295,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyOverReadOnlyFileParameterIsSet()
         {
             string source = FileUtilities.GetTemporaryFile();
@@ -350,7 +348,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyOverReadOnlyFileParameterIsSetWithDestinationFolder()
         {
             string source1 = FileUtilities.GetTemporaryFile();
@@ -424,7 +422,7 @@ namespace Microsoft.Build.UnitTests
          * If OnlyCopyIfDifferent is set to "true" then we should still copy over files that
          * have different dates or sizes.
          */
-        [TestMethod]
+        [Test]
         public void DoCopyOverDifferentFile()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -479,7 +477,7 @@ namespace Microsoft.Build.UnitTests
          * If OnlyCopyIfDifferent is set to "true" then we should still copy over files that
          * don't exist.
          */
-        [TestMethod]
+        [Test]
         public void DoCopyOverNonExistentFile()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -525,7 +523,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotRetryCopyNotSupportedException()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -565,7 +563,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file does not exist
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotRetryCopyNonExistentSourceFile()
         {
             string sourceFile = "Nannanacat";
@@ -610,7 +608,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file is a folder
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotRetryCopyWhenSourceIsFolder()
         {
             string sourceFile = Path.GetTempPath();
@@ -655,7 +653,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Most important case is when destination is locked
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoRetryWhenDestinationLocked()
         {
             string destinationFile = Path.GetTempFileName();
@@ -699,7 +697,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When destination is inaccessible due to ACL, do NOT retry
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotRetryWhenDestinationLockedDueToAcl()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "DoNotRetryWhenDestinationLockedDueToAcl");
@@ -771,7 +769,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the destination file is a folder
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotRetryCopyWhenDestinationFolderIsFile()
         {
             string destinationFile = FileUtilities.GetTemporaryFile();
@@ -815,7 +813,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the destination file is a folder
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotRetryCopyWhenDestinationFileIsFolder()
         {
             string destinationFile = Path.GetTempPath();
@@ -875,7 +873,7 @@ namespace Microsoft.Build.UnitTests
         /// CopiedFiles should only include files that were successfully copied 
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutputsOnlyIncludeSuccessfulCopies()
         {
             string temp = Path.GetTempPath();
@@ -963,7 +961,7 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyFileOnItself()
         {
             string temp = Path.GetTempPath();
@@ -1033,7 +1031,7 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false. Variation with different casing/relativeness.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyFileOnItself2()
         {
             string currdir = Environment.CurrentDirectory;
@@ -1083,7 +1081,7 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false. Variation with a second copy failure.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyFileOnItselfAndFailACopy()
         {
             string temp = Path.GetTempPath();
@@ -1136,7 +1134,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyToDestinationFolder()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -1208,7 +1206,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyDoubleEscapableFileToDestinationFolder()
         {
             string sourceFileEscaped = Path.GetTempPath() + "a%253A_" + Guid.NewGuid().ToString("N") + ".txt";
@@ -1274,7 +1272,7 @@ namespace Microsoft.Build.UnitTests
         /// Copying duplicates should only perform the actual copy once for each unique source/destination pair
         /// but should still produce outputs for all specified source/destination pairs.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyWithDuplicatesUsingFolder()
         {
             string tempPath = Path.GetTempPath();
@@ -1327,7 +1325,7 @@ namespace Microsoft.Build.UnitTests
         /// Copying duplicates should only perform the actual copy once for each unique source/destination pair
         /// but should still produce outputs for all specified source/destination pairs.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyWithDuplicatesUsingFiles()
         {
             string tempPath = Path.GetTempPath();
@@ -1396,7 +1394,7 @@ namespace Microsoft.Build.UnitTests
         /// DestinationFiles should only include files that were successfully copied 
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DestinationFilesLengthNotEqualSourceFilesLength()
         {
             string temp = Path.GetTempPath();
@@ -1454,7 +1452,7 @@ namespace Microsoft.Build.UnitTests
         /// If the destination path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -1496,7 +1494,7 @@ namespace Microsoft.Build.UnitTests
         /// If the source path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
         {
             string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -1529,7 +1527,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If the SourceFiles parameter is given invalid path characters, make sure the task exits gracefully.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExitGracefullyOnInvalidPathCharacters()
         {
             Copy t = new Copy();
@@ -1553,7 +1551,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that we error for retries less than 0
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidRetryCount()
         {
             Copy t = new Copy();
@@ -1578,7 +1576,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that we error for retry delay less than 0
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidRetryDelayCount()
         {
             Copy t = new Copy();
@@ -1605,7 +1603,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that we do not log the retrying warning if we didn't request
         /// retries.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FailureWithNoRetries()
         {
             Copy t = new Copy();
@@ -1632,7 +1630,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Retrying default
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultRetriesIs10()
         {
             Copy t = new Copy();
@@ -1644,7 +1642,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Delay default
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultRetryDelayIs1000()
         {
             Copy t = new Copy();
@@ -1655,7 +1653,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Hardlink default
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultNoHardlink()
         {
             Copy t = new Copy();
@@ -1668,7 +1666,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that we get the one retry we ask for after the first attempt fails,
         /// and we get appropriate messages.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SuccessAfterOneRetry()
         {
             Copy t = new Copy();
@@ -1696,7 +1694,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that after a successful retry we continue to the next file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SuccessAfterOneRetryContinueToNextFile()
         {
             Copy t = new Copy();
@@ -1719,15 +1717,15 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogDoesntContain("MSB3027");
-            Assert.AreEqual(copyFunctor.FilesCopiedSuccessfully[0].Name, "c:\\source");
-            Assert.AreEqual(copyFunctor.FilesCopiedSuccessfully[1].Name, "c:\\source2");
+            Assert.AreEqual(copyFunctor.FilesCopiedSuccessfully[0].Name, FileUtilities.FixFilePath("c:\\source"));
+            Assert.AreEqual(copyFunctor.FilesCopiedSuccessfully[1].Name, FileUtilities.FixFilePath("c:\\source2"));
         }
 
         /// <summary>
         /// The copy delegate can return false, or throw on failure.
         /// This test tests returning false.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TooFewRetriesReturnsFalse()
         {
             Copy t = new Copy();
@@ -1755,7 +1753,7 @@ namespace Microsoft.Build.UnitTests
         /// The copy delegate can return false, or throw on failure.
         /// This test tests the throw case.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TooFewRetriesThrows()
         {
             Copy t = new Copy();
@@ -1852,7 +1850,7 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
-    [TestClass]
+    [TestFixture]
     public class CopyNotHardLink_Tests : Copy_Tests
     {
         public CopyNotHardLink_Tests()
@@ -1861,7 +1859,7 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
-    [TestClass]
+    [TestFixture]
     public class CopyHardLink_Tests : Copy_Tests
     {
         public CopyHardLink_Tests()
@@ -1872,7 +1870,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyToDestinationFolderWithHardLinkCheck()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -1950,7 +1948,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Flaky test
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
@@ -2052,7 +2050,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Flaky test
         public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()

@@ -2,32 +2,31 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
-using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
+
+using NUnit.Framework;
+
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    [TestClass]
+    [TestFixture]
     public class SolutionFile_Tests
     {
         /// <summary>
         /// Test just the most basic, plain vanilla first project line.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicParseFirstProjectLine()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -45,12 +44,12 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test that the first project line of a project with the C++ project guid and an 
         /// extension of vcproj is seen as invalid.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ParseFirstProjectLine_VC()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -67,11 +66,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// arbitrary extension is seen as valid -- we assume that all C++ projects except 
         /// .vcproj are MSBuild format. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseFirstProjectLine_VC2()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -88,11 +87,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// A slightly more complicated test where there is some different whitespace.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseFirstProjectLineWithDifferentSpacing()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -110,11 +109,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// First project line with an empty project name.  This is somewhat malformed, but we should
         /// still behave reasonably instead of crashing.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseFirstProjectLine_InvalidProject()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -131,7 +130,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test ParseEtpProject function.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseEtpProject()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
@@ -182,7 +181,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test CanBeMSBuildFile
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CanBeMSBuildFile()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
@@ -259,7 +258,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test ParseEtpProject function.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseNestedEtpProjectSingleLevel()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
@@ -323,7 +322,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestVSAndSolutionVersionParsing()
         {
             // Create the SolutionFile object
@@ -452,12 +451,12 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test ParseEtpProject function.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseNestedEtpProjectMultipleLevel()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
             string proj2Path = Path.Combine(Path.GetTempPath(), "someproj2.etp");
-            string proj3Path = Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest" + Path.DirectorySeparatorChar + "someproj3.etp");
+            string proj3Path = Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest", "someproj3.etp");
             try
             {
                 // Create the first .etp project file
@@ -502,7 +501,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         <VERSION>1.00</VERSION>
                         <References>
                             <Reference>
-                                <FILE>..\SomeFolder\ClassLibrary1.csproj</FILE>
+                                <FILE>" + Path.Combine("..", "SomeFolder", "ClassLibrary1.csproj") + @"</FILE>
                                 <GUIDPROJECTID>{83D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FF}</GUIDPROJECTID>
                             </Reference>
                         </References>
@@ -526,7 +525,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 Assert.AreEqual(solution.ProjectsInOrder[0].RelativePath, @"someproj.etp");
                 Assert.AreEqual(solution.ProjectsInOrder[1].RelativePath, @"someproj2.etp");
                 Assert.AreEqual(solution.ProjectsInOrder[2].RelativePath, @"ETPProjUpgradeTest\someproj3.etp");
-                Assert.AreEqual(solution.ProjectsInOrder[3].RelativePath, @"ETPProjUpgradeTest\..\SomeFolder\ClassLibrary1.csproj");
+                Assert.AreEqual(solution.ProjectsInOrder[3].RelativePath,
+                    Path.Combine("ETPProjUpgradeTest", "..", "SomeFolder", "ClassLibrary1.csproj"));
             }
             // Delete the files created during the test
             finally
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Ensure that a malformed .etp proj file listed in the .SLN file results in an
         /// InvalidProjectFileException.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MalformedEtpProjFile()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
@@ -599,7 +599,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Ensure that a missing .etp proj file listed in the .SLN file results in an
         /// InvalidProjectFileException.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MissingEtpProjFile()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
@@ -624,11 +624,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test some characters that are valid in a file name but that also could be
         /// considered a delimiter by a parser. Does quoting work for special characters?
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseFirstProjectLineWhereProjectNameHasSpecialCharacters()
         {
             SolutionFile p = new SolutionFile();
-            p.FullPath = "c:\\foo.sln";
+            p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine
@@ -674,7 +674,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// InvalidProjectFileException.
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void BadVersionStamp()
         {
             string solutionFileContents =
@@ -690,7 +690,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Expected version numbers less than 7 to cause an invalid project file exception.
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void VersionTooLow()
         {
             string solutionFileContents =
@@ -706,7 +706,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Ensure that an unsupported version greater than the current maximum (10) in the .SLN file results in a
         /// comment indicating we will try and continue
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UnsupportedVersion()
         {
             string solutionFileContents =
@@ -720,7 +720,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.IsTrue(String.Equals((string)solution.SolutionParserComments[0], ResourceUtilities.FormatResourceString("UnrecognizedSolutionComment", "999"), StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void Version9()
         {
             string solutionFileContents =
@@ -734,7 +734,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.AreEqual(9, solution.Version);
         }
 
-        [TestMethod]
+        [Test]
         public void Version10()
         {
             string solutionFileContents =
@@ -752,7 +752,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to parse a very basic .sln file to validate that description property in a solution file 
         /// is properly handled.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionFileWithDescriptionInformation()
         {
             string solutionFileContents =
@@ -791,7 +791,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests the parsing of a very basic .SLN file with three independent projects.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicSolution()
         {
             string solutionFileContents =
@@ -862,7 +862,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Exercises solution folders, and makes sure that samely named projects in different
         /// solution folders will get correctly uniquified.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionFolders()
         {
             string solutionFileContents =
@@ -948,7 +948,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Parses solution configuration file that contains empty or whitespace lines
         /// to simulate a possible source control merge scenario.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionConfigurationWithEmptyLines()
         {
             string solutionFileContents =
@@ -1011,7 +1011,7 @@ namespace Microsoft.Build.UnitTests.Construction
             {
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             }
-            catch (InvalidProjectFileException ex)
+            catch (InvalidProjectFileException)
             {
                 Assert.Fail();
             }
@@ -1021,7 +1021,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Tests situation where there's a nonexistent project listed in the solution folders.  We should 
         /// error with a useful message. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MissingNestedProject()
         {
             string solutionFileContents =
@@ -1081,7 +1081,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Verifies that we correctly identify solution folders and mercury non-buildable projects both as 
         /// "non-building"  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuildableProjects()
         {
             string solutionFileContents =
@@ -1231,7 +1231,7 @@ EndGlobal
         /// Verifies that hand-coded project-to-project dependencies listed in the .SLN file
         /// are correctly recognized by our solution parser.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionDependencies()
         {
             string solutionFileContents =
@@ -1306,7 +1306,7 @@ EndGlobal
         /// Tests to see that all the data/properties are correctly parsed out of a Venus
         /// project in a .SLN.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VenusProject()
         {
             string solutionFileContents =
@@ -1401,7 +1401,7 @@ EndGlobal
         /// Tests to see that our solution parser correctly recognizes a Venus project that
         /// sits inside a solution folder.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VenusProjectInASolutionFolder()
         {
             string solutionFileContents =
@@ -1452,7 +1452,7 @@ EndGlobal
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple mixed C#/VC solution
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionConfigurations()
         {
             string solutionFileContents =
@@ -1527,7 +1527,7 @@ EndGlobal
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple C# application
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionConfigurationsNoMixedPlatform()
         {
             string solutionFileContents =
@@ -1589,7 +1589,7 @@ EndGlobal
         /// There can be only one '=' character in a sln cfg entry, separating two identical names
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void ParseInvalidSolutionConfigurations1()
         {
             string solutionFileContents =
@@ -1614,7 +1614,7 @@ EndGlobal
         /// There can be only one '=' character in a sln cfg entry, separating two identical names
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void ParseInvalidSolutionConfigurations2()
         {
             string solutionFileContents =
@@ -1639,7 +1639,7 @@ EndGlobal
         /// Solution configurations must include the platform part
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void ParseInvalidSolutionConfigurations3()
         {
             string solutionFileContents =
@@ -1663,7 +1663,7 @@ EndGlobal
         /// Make sure the project configurations in solution configurations get parsed correctly 
         /// for a simple mixed C#/VC solution
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseProjectConfigurationsInSolutionConfigurations1()
         {
             string solutionFileContents =
@@ -1761,7 +1761,7 @@ EndGlobal
         /// Make sure the project configurations in solution configurations get parsed correctly 
         /// for a more tricky solution
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseProjectConfigurationsInSolutionConfigurations2()
         {
             string solutionFileContents =

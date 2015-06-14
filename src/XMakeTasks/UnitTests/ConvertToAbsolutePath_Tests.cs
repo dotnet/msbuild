@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
@@ -12,13 +12,13 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class ConvertToAbsolutePath_Tests
     {
         /// <summary>
         /// Passing in a relative path (expecting an absolute back)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RelativePath()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file.temp", "foo");
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing in a relative path (expecting an absolute back)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RelativePathWithEscaping()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file%3A.temp", "foo");
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing in a absolute path (expecting an absolute back)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AbsolutePath()
         {
             string fileName = ObjectModelHelpers.CreateFileInTempProjectDirectory("file.temp", "foo");
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing in a relative path that doesn't exist (expecting sucess)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FakeFile()
         {
             ConvertToAbsolutePath t = new ConvertToAbsolutePath();

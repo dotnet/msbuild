@@ -15,7 +15,6 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using System.CodeDom;
 using System.CodeDom.Compiler;
@@ -30,6 +29,8 @@ using System.Runtime.Remoting;
 using Microsoft.Internal.Performance;
 #endif
 using System.Runtime.Versioning;
+
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -885,7 +886,13 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                _resgenPath = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, "Resgen.exe", Log, ExecuteAsTool);
+                _resgenPath = SdkToolsPathUtility.GeneratePathToTool(
+                    SdkToolsPathUtility.FileInfoExists,
+                    Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
+                    SdkToolsPath,
+                    "resgen.exe",
+                    Log,
+                    ExecuteAsTool);
             }
 
             if (null == _resgenPath && !ExecuteAsTool)
@@ -2530,13 +2537,15 @@ namespace Microsoft.Build.Tasks
 
                 if (currentOutputDirectory != null &&
                     currentOutputDirectoryAlreadyExisted == false)
-                { // Do not annoy the user by removing an empty directory we did not create.
+                {
+                    // Do not annoy the user by removing an empty directory we did not create.
                     try
                     {
                         Directory.Delete(currentOutputDirectory); // Remove output directory if empty
                     }
                     catch (Exception e)
-                    { // Fail silently (we are not even checking if the call to File.Delete succeeded)
+                    {
+                        // Fail silently (we are not even checking if the call to File.Delete succeeded)
                         if (ExceptionHandling.IsCriticalException(e))
                         {
                             throw;

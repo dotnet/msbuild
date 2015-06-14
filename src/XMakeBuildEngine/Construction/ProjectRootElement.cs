@@ -16,7 +16,6 @@ using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -51,7 +50,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Constant for default (empty) project file.
         /// </summary>
-        private const string EmptyProjectFileContent = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Project ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
+        private static string EmptyProjectFileContent = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Project ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
 
         /// <summary>
         /// The singleton delegate that loads projects into the ProjectRootElement
@@ -1369,7 +1368,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskElement AddUsingTask(string name, string assemblyFile, string assemblyName)
         {
-            ProjectUsingTaskElement usingTask = CreateUsingTaskElement(name, assemblyFile, assemblyName);
+            ProjectUsingTaskElement usingTask = CreateUsingTaskElement(name, FileUtilities.FixFilePath(assemblyFile), assemblyName);
             AppendChild(usingTask);
 
             return usingTask;

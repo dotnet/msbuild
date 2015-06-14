@@ -82,7 +82,7 @@ namespace Microsoft.Build.Tasks
                                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                                 Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", directory.ItemSpec);
 
-                                Directory.CreateDirectory(directory.ItemSpec);
+                                Directory.CreateDirectory(FileUtilities.FixFilePath(directory.ItemSpec));
                             }
 
                             items.Add(directory);

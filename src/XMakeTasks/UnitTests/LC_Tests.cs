@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -12,13 +12,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Unit tests for the LC task
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class LC_Tests
     {
         /// <summary>
         /// Tests a simple case of valid arguments
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Doesn't work.
         public void SimpleValidArguments()

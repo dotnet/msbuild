@@ -2,17 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.IO;
-using System.Text;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -66,7 +57,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">The file name.</param>
         internal DependencyFile(string filename)
         {
-            _filename = filename;
+            _filename = FileUtilities.FixFilePath(filename);
 
             if (File.Exists(FileName))
             {

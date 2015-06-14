@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="Project_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -9,15 +11,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Xml;
+
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Build.UnitTests;
+using Microsoft.Build.Utilities;
 
+using NUnit.Framework;
+
+using Task = System.Threading.Tasks.Task;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
@@ -27,13 +34,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests for Project public members
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class Project_Tests
     {
         /// <summary>
         /// Clear out the global project collection
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -42,7 +49,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Clear out the global project collection
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -61,8 +68,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Since when the project file is saved it may be intented we want to make sure the indent charachters do not affect the evaluation against empty. 
         /// We test here newline, tab, and carriage return.
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Test]
+        [Category("serialize")]
         public void VerifyNewLinesAndTabsEvaluateToEmpty()
         {
             MockLogger mockLogger = new MockLogger();
@@ -71,7 +78,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <Project xmlns='msbuildnamespace'>
                        <PropertyGroup><NewLine>" + Environment.NewLine + Environment.NewLine + "</NewLine></PropertyGroup>" +
                        "<PropertyGroup><Tab>\t\t\t\t</Tab></PropertyGroup>" +
-                       "<PropertyGroup><CarriageReturn>\r\r\r\r</CarriageReturn></PropertyGroup>"+
+                       "<PropertyGroup><CarriageReturn>\r\r\r\r</CarriageReturn></PropertyGroup>" +
                         @"<PropertyGroup><Message1 Condition =""'$(NewLine)' == ''"">NewLineEvalAsEmpty</Message1></PropertyGroup>
                         <PropertyGroup><Message2 Condition =""'$(Tab)' == ''"">TabEvalAsEmpty</Message2></PropertyGroup>
                         <PropertyGroup><Message3 Condition =""'$(CarriageReturn)' == ''"">CarriageReturnEvalAsEmpty</Message3></PropertyGroup>
@@ -95,8 +102,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Make sure if we build a project and specify no loggers that the loggers registered on the project collection is the one used.
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Test]
+        [Category("serialize")]
         public void LogWithLoggersOnProjectCollection()
         {
             MockLogger mockLogger = new MockLogger();
@@ -121,8 +128,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Make sure if we build a project and specify we specify a custom logger that the custom logger is used instead of the one registered on the project collection.
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Test]
+        [Category("serialize")]
         public void LogWithLoggersOnProjectCollectionCustomOneUsed()
         {
             MockLogger mockLogger = new MockLogger();
@@ -149,14 +156,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Load a project from a file path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicFromFile()
         {
             string file = null;
 
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
 
                 string content = GetSampleProjectContent();
                 File.WriteAllText(file, content);
@@ -175,10 +182,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Load a project from a file path that has valid XML that does not 
         /// evaluate successfully; then trying again after fixing the file should succeed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FailedEvaluationClearsXmlCache()
         {
-            string file = Path.GetTempPath() + "\\" + Guid.NewGuid().ToString("N");
+            string file = Path.GetTempPath() + Path.DirectorySeparatorChar + Guid.NewGuid().ToString("N");
 
             try
             {
@@ -199,7 +206,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 // Verify that we don't now have invalid project XML left in the cache
                 // by writing out valid project XML and trying again;
                 // Don't save through the OM or the cache would get updated; do it directly
-                File.WriteAllText(file,  ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'/>"));
+                File.WriteAllText(file, ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'/>"));
 
                 project = new Project(file); // should not throw
             }
@@ -213,7 +220,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Reading from an XMLReader that has no content should throw the correct
         /// exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadFromEmptyReader1()
         {
@@ -225,11 +232,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Reading from an XMLReader that has no content should throw the correct
         /// exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadFromEmptyReader2()
         {
-            XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
+            XmlReader reader = XmlReader.Create(new StringReader(string.Empty));
             Project project = new Project(reader);
         }
 
@@ -237,7 +244,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Reading from an XMLReader that has no content should throw the correct
         /// exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadFromEmptyReader3()
         {
@@ -255,11 +262,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Reading from an XMLReader that was closed should throw the correct
         /// exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadFromClosedReader()
         {
-            XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
+            XmlReader reader = XmlReader.Create(new StringReader(string.Empty));
             reader.Close();
             Project project = new Project(reader);
         }
@@ -268,7 +275,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Reading from an XMLReader that has TWO valid root elements should work
         /// if it's already read past the first one.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadFromReaderTwoDocs()
         {
             string emptyProject = ObjectModelHelpers.CleanupFileContents(@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace""/>");
@@ -285,7 +292,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Import does not exist. Default case is an exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ImportDoesNotExistDefaultSettings()
         {
@@ -298,7 +305,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Import gives invalid uri exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ImportInvalidUriFormat()
         {
@@ -311,14 +318,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Necessary but not sufficient for MSBuild evaluation to be thread safe.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConcurrentLoadDoesNotCrash()
         {
             var tasks = new Task[500];
 
             for (int i = 0; i < tasks.Length; i++)
             {
-                tasks[i] = Task.Factory.StartNew(delegate() { new Project(); }); // Should not throw
+                tasks[i] = Task.Factory.StartNew(delegate () { new Project(); }); // Should not throw
             }
 
             Task.WaitAll(tasks);
@@ -327,7 +334,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Import does not exist but ProjectLoadSettings.IgnoreMissingImports was set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportDoesNotExistIgnoreMissingImports()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -339,14 +346,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project(xml, null, null, new ProjectCollection(), ProjectLoadSettings.IgnoreMissingImports);
 
             // Make sure some evaluation did occur
-            Assert.AreEqual("1", project.GetPropertyValue("q"));            
+            Assert.AreEqual("1", project.GetPropertyValue("q"));
         }
 
         /// <summary>
         /// When we try and access the ImportsIncludingDuplicates property on the project without setting 
         /// the correct projectloadsetting flag, we expect an invalidoperationexception.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void TryImportsIncludingDuplicatesExpectException()
         {
@@ -355,28 +362,28 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             IList<ResolvedImport> imports = project.ImportsIncludingDuplicates;
             Assert.AreEqual(0, imports.Count);
         }
-        
+
         /// <summary>
         /// Import self ignored
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportSelfIgnored()
         {
             string file = null;
-            
+
             try
             {
                 ProjectCollection collection = new ProjectCollection();
                 MockLogger logger = new MockLogger();
-                collection.RegisterLogger(logger);                
-                
+                collection.RegisterLogger(logger);
+
                 Project project = new Project(collection);
                 project.Xml.AddImport("$(MSBuildProjectFullPath)");
-                
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+
+                file = FileUtilities.GetTemporaryFile();
                 project.Save(file);
                 project.ReevaluateIfNecessary();
-                
+
                 logger.AssertLogContains("MSB4210"); // selfimport
             }
             finally
@@ -384,113 +391,113 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 File.Delete(file);
             }
         }
-        
+
         /// <summary>
         /// Import self indirectly ignored
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportSelfIndirectIgnored()
         {
             string file = null;
             string file2 = null;
-            
+
             try
             {
                 ProjectCollection collection = new ProjectCollection();
                 MockLogger logger = new MockLogger();
-                collection.RegisterLogger(logger);                
+                collection.RegisterLogger(logger);
 
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();                
-                file2 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
+                file2 = FileUtilities.GetTemporaryFile();
                 Project project = new Project(collection);
-                project.Xml.AddImport(file2);              
+                project.Xml.AddImport(file2);
                 project.Save(file);
-                
+
                 Project project2 = new Project(collection);
                 project2.Xml.AddImport(file);
                 project2.Save(file2);
-                
+
                 project.ReevaluateIfNecessary();
-                
+
                 logger.AssertLogContains("MSB4210"); // selfimport
             }
             finally
             {
                 File.Delete(file);
-                File.Delete(file2);                
+                File.Delete(file2);
             }
         }
-        
+
         /// <summary>
         /// Double import ignored
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoubleImportIgnored()
         {
             string file = null;
             string file2 = null;
-            
+
             try
             {
                 ProjectCollection collection = new ProjectCollection();
                 MockLogger logger = new MockLogger();
-                collection.RegisterLogger(logger);                
+                collection.RegisterLogger(logger);
 
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();                
-                file2 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
+                file2 = FileUtilities.GetTemporaryFile();
                 Project project = new Project(collection);
-                project.Xml.AddImport(file2);              
-                project.Xml.AddImport(file2);  
+                project.Xml.AddImport(file2);
+                project.Xml.AddImport(file2);
                 project.Save(file);
-                
+
                 Project project2 = new Project(collection);
                 project2.Save(file2);
-                
+
                 project.ReevaluateIfNecessary();
-                
+
                 logger.AssertLogContains("MSB4011"); // duplicate import
             }
             finally
             {
                 File.Delete(file);
-                File.Delete(file2);                
+                File.Delete(file2);
             }
-        } 
-        
+        }
+
         /// <summary>
         /// Double import ignored
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoubleImportIndirectIgnored()
         {
             string file = null;
             string file2 = null;
             string file3 = null;
-            
+
             try
             {
                 ProjectCollection collection = new ProjectCollection();
                 MockLogger logger = new MockLogger();
-                collection.RegisterLogger(logger);                
+                collection.RegisterLogger(logger);
 
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();                
-                file2 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
-                file3 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
-                
+                file = FileUtilities.GetTemporaryFile();
+                file2 = FileUtilities.GetTemporaryFile();
+                file3 = FileUtilities.GetTemporaryFile();
+
                 Project project = new Project(collection);
-                project.Xml.AddImport(file2);              
-                project.Xml.AddImport(file3);              
+                project.Xml.AddImport(file2);
+                project.Xml.AddImport(file3);
                 project.Save(file);
-                
+
                 Project project2 = new Project(collection);
                 project.Xml.AddImport(file3);
                 project2.Save(file2);
-                
+
                 Project project3 = new Project(collection);
                 project3.Save(file3);
-                
+
                 project.ReevaluateIfNecessary();
-                
+
                 logger.AssertLogContains("MSB4011"); // duplicate import
             }
             finally
@@ -499,12 +506,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 File.Delete(file2);
                 File.Delete(file3);
             }
-        }         
-        
+        }
+
         /// <summary>
         /// Basic created from backing XML
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicFromXml()
         {
             ProjectRootElement xml = GetSampleProjectRootElement();
@@ -517,7 +524,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Test Project from an XML with an import.
         /// Also verify the Imports collection on the evaluated Project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicFromXmlFollowImport()
         {
             string importContent = ObjectModelHelpers.CleanupFileContents(@"
@@ -557,13 +564,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         <Import Project='{0}'/>
                     </Project>");
 
-            projectFileContent = String.Format(projectFileContent, importPath);
+            projectFileContent = string.Format(projectFileContent, importPath);
 
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
             Project project = new Project(xml);
 
             Assert.AreEqual("v3", project.GetPropertyValue("p2"));
-           
+
             List<ProjectItem> items = Helpers.MakeList(project.GetItems("i"));
             Assert.AreEqual(4, items.Count);
             Assert.AreEqual("i1", items[0].EvaluatedInclude);
@@ -573,11 +580,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ResolvedImport> imports = project.Imports;
             Assert.AreEqual(1, imports.Count);
-            Assert.AreEqual(true, Object.ReferenceEquals(imports.First().ImportingElement, xml.Imports.ElementAt(0)));
+            Assert.AreEqual(true, object.ReferenceEquals(imports.First().ImportingElement, xml.Imports.ElementAt(0)));
 
             // We can take advantage of the fact that we will get the same ProjectRootElement from the cache if we try to
             // open it with a path; get that and then compare it to what project.Imports gave us.
-            Assert.AreEqual(true, Object.ReferenceEquals(imports.First().ImportedProject, ProjectRootElement.Open(importPath)));
+            Assert.AreEqual(true, object.ReferenceEquals(imports.First().ImportedProject, ProjectRootElement.Open(importPath)));
 
             // Test the logical project iterator
             List<ProjectElement> logicalElements = new List<ProjectElement>(project.GetLogicalProject());
@@ -590,7 +597,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Get items, transforms use correct directory base, ie., the project folder
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TransformsUseCorrectDirectory_Basic()
         {
             string file = null;
@@ -609,11 +616,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
                 project.Save(file);
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual(Path.Combine(Path.GetTempPath(), @"obj\i386\foo.dll"), project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                Assert.AreEqual(
+                    NativeMethodsShared.IsWindows
+                        ? Path.Combine(Path.GetTempPath(), @"obj\i386\foo.dll")
+                        : Path.Combine(Path.GetTempPath(), @"obj/i386/foo.dll"),
+                    project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
             }
             finally
             {
@@ -625,7 +636,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Get items, transforms use correct directory base, ie., the current
         /// directory at the time of load for a project that was not yet saved
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TransformsUseCorrectDirectory_Basic_NotSaved()
         {
             string projectFileContent = ObjectModelHelpers.CleanupFileContents(@"
@@ -641,14 +652,30 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project(xml);
             ProjectInstance projectInstance = new ProjectInstance(xml);
 
-            Assert.AreEqual(Path.Combine(Environment.CurrentDirectory, @"obj\i386\foo.dll"), project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-            Assert.AreEqual(Path.Combine(Environment.CurrentDirectory, @"obj\i386\foo.dll"), projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+            if (NativeMethodsShared.IsWindows)
+            {
+                Assert.AreEqual(
+                    Path.Combine(Environment.CurrentDirectory, @"obj\i386\foo.dll"),
+                    project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                Assert.AreEqual(
+                    Path.Combine(Environment.CurrentDirectory, @"obj\i386\foo.dll"),
+                    projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+            }
+            else
+            {
+                Assert.AreEqual(
+                    Path.Combine(Environment.CurrentDirectory, @"obj/i386/foo.dll"),
+                    project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                Assert.AreEqual(
+                    Path.Combine(Environment.CurrentDirectory, @"obj/i386/foo.dll"),
+                    projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+            }
         }
 
         /// <summary>
         /// Directory transform uses project directory
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TransformsUseCorrectDirectory_DirectoryTransform()
         {
             string file = null;
@@ -664,14 +691,30 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
                 xml.FullPath = file;
 
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
-                Assert.AreEqual(Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"), project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                Assert.AreEqual(Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"), projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                if (NativeMethodsShared.IsWindows)
+                {
+                    Assert.AreEqual(
+                        Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"),
+                        project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                    Assert.AreEqual(
+                        Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"),
+                        projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                }
+                else
+                {
+                    Assert.AreEqual(
+                        Path.Combine(Path.GetTempPath(), @"obj/i386/"),
+                        project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                    Assert.AreEqual(
+                        Path.Combine(Path.GetTempPath(), @"obj/i386/"),
+                        projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                }
             }
             finally
             {
@@ -682,7 +725,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Directory item function uses project directory
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TransformsUseCorrectDirectory_DirectoryItemFunction()
         {
             string file = null;
@@ -699,14 +742,30 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
                 xml.FullPath = file;
 
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
-                Assert.AreEqual(Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"), project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                Assert.AreEqual(Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"), projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                if (NativeMethodsShared.IsWindows)
+                {
+                    Assert.AreEqual(
+                        Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"),
+                        project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                    Assert.AreEqual(
+                        Path.Combine(Path.GetTempPath().Substring(3) /* remove c:\ */, @"obj\i386\"),
+                        projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                }
+                else
+                {
+                    Assert.AreEqual(
+                        Path.Combine(Path.GetTempPath(), @"obj/i386/"),
+                        project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                    Assert.AreEqual(
+                        Path.Combine(Path.GetTempPath(), @"obj/i386/"),
+                        projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                }
             }
             finally
             {
@@ -717,7 +776,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Directory item function uses project directory
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TransformsUseCorrectDirectory_DirectoryNameItemFunction()
         {
             string file = null;
@@ -725,7 +784,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             string projectFileContent = ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace'>
                         <ItemGroup>
-                            <IntermediateAssembly Include='obj\i386\foo.dll'/>
+                            <IntermediateAssembly Include='obj" + Path.DirectorySeparatorChar + "i386"
+                                                                               + Path.DirectorySeparatorChar
+                                                                               + @"foo.dll'/>
                             <BuiltProjectOutputGroupKeyOutput Include=""@(IntermediateAssembly->DirectoryName())""/>
                         </ItemGroup>
                     </Project>");
@@ -734,15 +795,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
                 xml.FullPath = file;
 
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
                 // Should be the full path to the directory
-                Assert.AreEqual(Path.Combine(Path.GetTempPath() /* remove c:\ */, @"obj\i386"), project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                Assert.AreEqual(Path.Combine(Path.GetTempPath() /* remove c:\ */, @"obj\i386"), projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                Assert.AreEqual(
+                    Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"),
+                    project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                Assert.AreEqual(
+                    Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"),
+                    projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
             }
             finally
             {
@@ -753,7 +818,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Global properties accessor
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetGlobalProperties()
         {
             ProjectRootElement xml = GetSampleProjectRootElement();
@@ -770,7 +835,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Global properties are cloned when passed in:
         /// subsequent changes have no effect
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GlobalPropertiesCloned()
         {
             ProjectRootElement xml = GetSampleProjectRootElement();
@@ -787,7 +852,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Global properties accessor when no global properties
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetGlobalPropertiesNone()
         {
             ProjectRootElement xml = GetSampleProjectRootElement();
@@ -800,14 +865,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Changing global properties should make the project a candidate
         /// for reevaluation.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChangeGlobalProperties()
         {
             Project project = new Project();
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("p", "v0");
             propertyElement.Condition = "'$(g)'=='v1'";
             project.ReevaluateIfNecessary();
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("p"));
+            Assert.AreEqual(string.Empty, project.GetPropertyValue("p"));
 
             Assert.AreEqual(true, project.SetGlobalProperty("g", "v1"));
             Assert.AreEqual(true, project.IsDirty);
@@ -819,7 +884,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Changing global property after reevaluation should not crash
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChangeGlobalPropertyAfterReevaluation()
         {
             Project project = new Project();
@@ -834,7 +899,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Test the SkipEvaluation functionality of ReevaluateIfNecessary
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SkipEvaluation()
         {
             Project project = new Project();
@@ -847,19 +912,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             propertyElement.Condition = "'$(g)'=='v1'";
             project.SetGlobalProperty("g", "v1");
             project.ReevaluateIfNecessary();
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("p1"));
+            Assert.AreEqual(string.Empty, project.GetPropertyValue("p1"));
 
             project.SkipEvaluation = false;
             project.SetGlobalProperty("g", "v1");
             project.ReevaluateIfNecessary();
-            Assert.AreEqual("v0", project.GetPropertyValue("p1"));           
+            Assert.AreEqual("v0", project.GetPropertyValue("p1"));
         }
 
         /// <summary>
         /// Setting property with same name as global property but after reevaluation should error
         /// because the property is global, not fail with null reference exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void ChangeGlobalPropertyAfterReevaluation2()
         {
@@ -872,7 +937,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Setting environment property should create a real property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChangeEnvironmentProperty()
         {
             Project project = new Project();
@@ -889,7 +954,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Setting a reserved property through the project should error nicely
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetReservedPropertyThroughProject()
         {
@@ -900,7 +965,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Changing global properties with some preexisting.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChangeGlobalPropertiesPreexisting()
         {
             Dictionary<string, string> initial = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -910,7 +975,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("pp", "vv");
             propertyElement.Condition = "'$(p0)'=='v0' and '$(p1)'=='v1b'";
             project.ReevaluateIfNecessary();
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("pp"));
+            Assert.AreEqual(string.Empty, project.GetPropertyValue("pp"));
 
             project.SetGlobalProperty("p1", "v1b");
             Assert.AreEqual(true, project.IsDirty);
@@ -924,7 +989,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Changing global properties with some preexisting from the project collection.
         /// Should not modify those on the project collection.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChangeGlobalPropertiesInitiallyFromProjectCollection()
         {
             Dictionary<string, string> initial = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -935,7 +1000,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("pp", "vv");
             propertyElement.Condition = "'$(p0)'=='v0' and '$(p1)'=='v1b'";
             project.ReevaluateIfNecessary();
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("pp"));
+            Assert.AreEqual(string.Empty, project.GetPropertyValue("pp"));
 
             project.SetGlobalProperty("p1", "v1b");
             Assert.AreEqual(true, project.IsDirty);
@@ -948,7 +1013,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Changing global property to the same value should not dirty the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChangeGlobalPropertiesSameValue()
         {
             Project project = new Project();
@@ -964,7 +1029,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Removing global properties should make the project a candidate
         /// for reevaluation.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveGlobalProperties()
         {
             Project project = new Project();
@@ -972,7 +1037,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             propertyElement.Condition = "'$(g)'==''";
             project.SetGlobalProperty("g", "v1");
             project.ReevaluateIfNecessary();
-            Assert.AreEqual(String.Empty, project.GetPropertyValue("p"));
+            Assert.AreEqual(string.Empty, project.GetPropertyValue("p"));
 
             bool existed = project.RemoveGlobalProperty("g");
             Assert.AreEqual(true, existed);
@@ -985,20 +1050,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove nonexistent global property should return false and not dirty the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveNonExistentGlobalProperties()
         {
             Project project = new Project();
             bool existed = project.RemoveGlobalProperty("x");
-            
+
             Assert.AreEqual(false, existed);
             Assert.AreEqual(false, project.IsDirty);
-        }         
+        }
 
         /// <summary>
         /// ToolsVersion accessor for explicitly specified
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsVersionExplicitlySpecified()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35) == null)
@@ -1008,25 +1073,28 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
 
             ProjectRootElement xml = GetSampleProjectRootElement();
-            Project project = new Project(xml, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "4.0");
+            Project project = new Project(
+                xml,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
-            Assert.AreEqual("4.0", project.ToolsVersion);
+            Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
         }
 
         /// <summary>
         /// ToolsVersion accessor when none was specified.
         /// Should not return the value on the project element.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsVersionNoneExplicitlySpecified()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
-            xml.ToolsVersion = String.Empty;
+            xml.ToolsVersion = string.Empty;
             xml.AddTarget("t");
 
             Project project = new Project(xml);
 
-            Assert.AreEqual(String.Empty, project.Xml.ToolsVersion);
+            Assert.AreEqual(string.Empty, project.Xml.ToolsVersion);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -1034,7 +1102,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// ToolsVersion defaults to 4.0
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsVersionFromProject()
         {
             Project project = new Project();
@@ -1046,7 +1114,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project.ToolsVersion should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectToolsVersion20Present()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20) == null)
@@ -1075,10 +1143,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project.ToolsVersion should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectToolsVersion20NotPresent()
         {
-            if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20)  != null)
+            if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20) != null)
             {
                 // "Requires 2.0 to NOT be installed"
                 return;
@@ -1099,7 +1167,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// $(MSBuildToolsVersion) should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MSBuildToolsVersionProperty()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20) == null)
@@ -1133,7 +1201,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// $(MSBuildToolsVersion) should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MSBuildToolsVersionProperty40()
         {
             Project project = new Project();
@@ -1146,7 +1214,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// that way, and maybe later it'll correspond to some known toolset. If the effective ToolsVersion was being
         /// gotten from the attribute, that'll be affected too; and thus might be bogus.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChangingToolsVersionAttributeToUnrecognizedValue()
         {
             Project project = new Project();
@@ -1159,7 +1227,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Test Project's surfacing of the sub-toolset version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetSubToolsetVersion()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -1168,14 +1236,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", null);
 
-                Project p = new Project(GetSampleProjectRootElement(), null, "4.0", new ProjectCollection());
+                Project p = new Project(GetSampleProjectRootElement(), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.ToolsVersion);
 
-                Toolset t = p.ProjectCollection.GetToolset("4.0");
+                Toolset t = p.ProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Assert.AreEqual(t.DefaultSubToolsetVersion, p.SubToolsetVersion);
-                Assert.AreEqual(t.DefaultSubToolsetVersion, p.GetPropertyValue("VisualStudioVersion"));
+
+                Assert.AreEqual(t.DefaultSubToolsetVersion ?? string.Empty, p.GetPropertyValue("VisualStudioVersion"));
             }
             finally
             {
@@ -1187,7 +1256,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Test Project's surfacing of the sub-toolset version when it is overridden by a value in the 
         /// environment 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -1196,9 +1265,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", "ABCD");
 
-                Project p = new Project(GetSampleProjectRootElement(), null, "4.0", new ProjectCollection());
+                Project p = new Project(GetSampleProjectRootElement(), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.ToolsVersion);
                 Assert.AreEqual("ABCD", p.SubToolsetVersion);
                 Assert.AreEqual("ABCD", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -1211,7 +1280,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a global property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetSubToolsetVersion_FromProjectGlobalProperties()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -1223,9 +1292,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("VisualStudioVersion", "ABCDE");
 
-                Project p = new Project(GetSampleProjectRootElement(), globalProperties, "4.0", new ProjectCollection());
+                Project p = new Project(GetSampleProjectRootElement(), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.ToolsVersion);
                 Assert.AreEqual("ABCDE", p.SubToolsetVersion);
                 Assert.AreEqual("ABCDE", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -1239,7 +1308,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for 
         /// getting the sub-toolset version. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetSubToolsetVersion_FromConstructor()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -1254,9 +1323,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 IDictionary<string, string> projectCollectionGlobalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 projectCollectionGlobalProperties.Add("VisualStudioVersion", "ABCDE");
 
-                Project p = new Project(GetSampleProjectRootElement(), globalProperties, "4.0", "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties), ProjectLoadSettings.Default);
+                Project p = new Project(GetSampleProjectRootElement(), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties), ProjectLoadSettings.Default);
 
-                Assert.AreEqual("4.0", p.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.ToolsVersion);
                 Assert.AreEqual("ABCDEF", p.SubToolsetVersion);
                 Assert.AreEqual("ABCDEF", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -1269,7 +1338,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Reevaluation should update the evaluation counter.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReevaluationCounter()
         {
             Project project = new Project();
@@ -1287,14 +1356,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Unload should not reset the evaluation counter.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReevaluationCounterUnload()
         {
             string path = null;
 
             try
             {
-                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFile();
                 ProjectRootElement.Create().Save(path);
 
                 Project project = new Project(path);
@@ -1315,14 +1384,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Modifying the XML of an imported file should cause the project
         /// to be dirtied.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportedXmlModified()
         {
             string path = null;
 
             try
             {
-                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFile();
                 ProjectRootElement import = ProjectRootElement.Create(path);
                 import.Save();
 
@@ -1357,7 +1426,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// To support certain corner cases, it is possible to explicitly mark a Project
         /// as dirty, so that reevaluate is productive.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExternallyMarkDirty()
         {
             Project project = new Project();
@@ -1378,13 +1447,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectProperty property2 = project.GetProperty("p");
 
-            Assert.AreEqual(false, Object.ReferenceEquals(property1, property2)); // different object indicates reevaluation occurred
+            Assert.AreEqual(false, object.ReferenceEquals(property1, property2)); // different object indicates reevaluation occurred
         }
 
         /// <summary>
         /// Basic test of getting items by their include
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemsByEvaluatedInclude()
         {
             Project project = new Project();
@@ -1407,7 +1476,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Basic test of getting items by their include
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemsByEvaluatedInclude_EvaluatedIncludeNeedsEscaping()
         {
             Project project = new Project();
@@ -1424,18 +1493,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             foreach (ProjectItem item in items)
             {
                 Assert.AreEqual("i&1", item.EvaluatedInclude);
-                Assert.IsTrue
-                    (
-                    String.Equals(item.ItemType, "i", StringComparison.OrdinalIgnoreCase) ||
-                    String.Equals(item.ItemType, "l", StringComparison.OrdinalIgnoreCase)
-                    );
+                Assert.IsTrue(
+                    string.Equals(item.ItemType, "i", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(item.ItemType, "l", StringComparison.OrdinalIgnoreCase));
             }
         }
 
         /// <summary>
         /// Verify none returned when none match
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemsByEvaluatedIncludeNone()
         {
             Project project = new Project();
@@ -1451,7 +1518,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests the tracking of virtual items from the construction to instance model, with the removal of a virtual item. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemsByEvaluatedIncludeAndExpansion()
         {
             List<string> filePaths = new List<string>();
@@ -1464,9 +1531,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 int maxFiles = 2;
                 for (int i = 0; i < maxFiles; i++)
                 {
-                    string fileName = String.Format("foo{0}.foo", i);
+                    string fileName = string.Format("foo{0}.foo", i);
                     string filePath = Path.Combine(testFileRoot, fileName);
-                    File.WriteAllText(filePath, String.Empty);
+                    File.WriteAllText(filePath, string.Empty);
                     filePaths.Add(filePath);
                 }
 
@@ -1475,7 +1542,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 count = Helpers.Count(projectConstruction.Items);
                 Assert.AreEqual(1, count, "Construction Model");
-                
+
                 Project project = new Project(projectConstruction);
 
                 count = Helpers.Count(project.GetItems("foo"));
@@ -1489,7 +1556,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     itemToRemove = item;
                     break;
                 }
-                
+
                 project.RemoveItem(itemToRemove);
                 count = Helpers.Count(project.GetItems("foo"));
                 Assert.AreEqual(1, count, "Evaluation Model, After Removal");
@@ -1512,11 +1579,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Directory.Delete(testFileRoot);
             }
         }
-        
+
         /// <summary>
         /// Reevaluation should update items-by-evaluated-include
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemsByEvaluatedIncludeReevaluation()
         {
             Project project = new Project();
@@ -1537,7 +1604,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Direct adds to the project (ie, not added by evaluation) should update
         /// items-by-evaluated-include
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemsByEvaluatedIncludeDirectAdd()
         {
             Project project = new Project();
@@ -1551,7 +1618,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Direct removes from the project (ie, not removed by evaluation) should update
         /// items-by-evaluated-include
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemsByEvaluatedIncludeDirectRemove()
         {
             Project project = new Project();
@@ -1565,7 +1632,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Choose, When has true condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChooseWhenTrue()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1592,7 +1659,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Choose, second When has true condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChooseSecondWhenTrue()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1627,7 +1694,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Choose, when has false condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChooseOtherwise()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1663,7 +1730,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Choose should be entered twice, once for properties and again for items.
         /// That means items should see properties defined below.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChooseTwoPasses()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1714,7 +1781,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Choose conditions are only evaluated once, on the property pass
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChooseEvaluateConditionOnlyOnce()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1742,7 +1809,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Choose items can see item definitions below
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChooseSeesItemDefinitions()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -1774,7 +1841,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// When build is disabled on the project, it shouldn't run, and should give MSB4112.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuildDisabled()
         {
             Project project = new Project();
@@ -1787,23 +1854,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.AreEqual(false, result);
 
-            Assert.IsTrue
-                (
+            Assert.IsTrue(
                 mockLogger.Errors[0].Code == "MSB4112",
-                "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
-                );
+                "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp.");
         }
 
         /// <summary>
         /// Building a nonexistent target should log an error and return false (not throw)
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Test]
+        [Category("serialize")]
         public void BuildNonExistentTarget()
         {
             Project project = new Project();
             MockLogger logger = new MockLogger();
-            bool result = project.Build(new string[] { "nonexistent" }, new List<ILogger>() { logger });
+            bool result = project.Build(new[] { "nonexistent" }, new List<ILogger>() { logger });
             Assert.AreEqual(false, result);
             Assert.AreEqual(1, logger.ErrorCount);
         }
@@ -1811,11 +1876,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// When Project.Build is invoked with custom loggers, those loggers should contain the result of any evaluation warnings and errors.
         /// </summary>
-        [TestMethod]
-        [TestCategory("serialize")]
+        [Test]
+        [Category("serialize")]
         public void BuildEvaluationUsesCustomLoggers()
         {
-            string importProjectContent = 
+            string importProjectContent =
                 ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'>
                 </Project>");
 
@@ -1857,24 +1922,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.AreEqual(true, result);
 
-            Assert.IsTrue
-                (
+            Assert.IsTrue(
                 mockLogger.WarningCount == 0,
-                "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
-                );
+                "Log should not contain MSB4011 because the build logger will not receive evaluation messages.");
 
-            Assert.IsTrue
-                (
+            Assert.IsTrue(
                 collectionLogger.Warnings[0].Code == "MSB4011",
-                "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
-                );
+                "Log should contain MSB4011 because the project collection logger should have been used for evaluation.");
         }
 
         /// <summary>
         /// UsingTask expansion should throw InvalidProjectFileException
         /// if it expands to nothing.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void UsingTaskExpansion1()
         {
@@ -1887,7 +1948,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// UsingTask expansion should throw InvalidProjectFileException
         /// if it expands to nothing.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void UsingTaskExpansion2()
         {
@@ -1900,7 +1961,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// UsingTask expansion should throw InvalidProjectFileException
         /// if it expands to nothing.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void UsingTaskExpansion3()
         {
@@ -1913,7 +1974,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Saving project should make it "clean" for saving
         /// but "dirty" for reevaluation if it was to a new location
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SavingProjectClearsDirtyBit()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'/>");
@@ -1925,7 +1986,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             string file = null;
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
                 project.Save(file);
             }
             finally
@@ -1943,7 +2004,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove an already removed item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveItemTwiceEvaluationProject()
         {
             string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1964,7 +2025,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove an updated item
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveItemOutdatedByUpdate()
         {
             string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1985,7 +2046,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove several items
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveSeveralItems()
         {
             string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2006,7 +2067,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove several items
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveSeveralItemsOfVariousTypes()
         {
             string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2031,7 +2092,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove items expanding itemlist expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveSeveralItemsExpandExpression()
         {
             string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2066,7 +2127,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Remove several items where removing the first one
         /// causes the second one to be detached
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveSeveralItemsFirstZombiesSecond()
         {
             string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2086,7 +2147,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Should not get null reference
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void RemoveItemsOneNull()
         {
@@ -2098,7 +2159,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Remove several items where removing the first one
         /// causes the second one to be detached
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void RemoveItemWrongProject()
         {
@@ -2116,7 +2177,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Remove an item that is no longer attached. For convenience,
         /// we just skip it.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveZombiedItem()
         {
             string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2138,7 +2199,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary> 
         /// Reserved property in project constructor should just throw
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void ReservedPropertyProjectConstructor()
         {
@@ -2151,7 +2212,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary> 
         /// Reserved property in project collection global properties should log an error then rethrow
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReservedPropertyProjectCollectionConstructor()
         {
@@ -2174,7 +2235,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary> 
         /// Invalid property (reserved name) in project collection global properties should log an error then rethrow
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReservedPropertyProjectCollectionConstructor2()
         {
@@ -2203,7 +2264,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// An item specified with "..\*" in b.targets should find b.targets
         /// as it was evaluated relative to the project file itself.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RelativePathsInItemsInTargetsFilesAreRelativeToProjectFile()
         {
             string directory = null;
@@ -2217,19 +2278,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 string projectPath = Path.Combine(subdirectory, "a.proj");
                 string targetsPath = Path.Combine(directory, "b.targets");
 
+                string unevaluatedInclude = ".." + Path.DirectorySeparatorChar + "*";
+                string evaluatedInclude = ".." + Path.DirectorySeparatorChar + "b.targets";
+
                 ProjectRootElement targetsXml = ProjectRootElement.Create(targetsPath);
-                targetsXml.AddItem("i", @"..\*");
+                targetsXml.AddItem("i", unevaluatedInclude);
                 targetsXml.Save();
 
                 ProjectRootElement projectXml = ProjectRootElement.Create(projectPath);
-                projectXml.AddImport(@"..\b.targets");
+                projectXml.AddImport(evaluatedInclude);
                 projectXml.Save();
 
                 Project project = new Project(projectPath);
-                
+
                 IEnumerable<ProjectItem> items = project.GetItems("i");
-                Assert.AreEqual(@"..\*", Helpers.GetFirst(items).UnevaluatedInclude);
-                Assert.AreEqual(@"..\b.targets", Helpers.GetFirst(items).EvaluatedInclude);
+                Assert.AreEqual(unevaluatedInclude, Helpers.GetFirst(items).UnevaluatedInclude);
+                Assert.AreEqual(evaluatedInclude, Helpers.GetFirst(items).EvaluatedInclude);
             }
             finally
             {
@@ -2240,7 +2304,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary> 
         /// Invalid property (space) in project collection global properties should log an error then rethrow
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReservedPropertyProjectCollectionConstructor3()
         {
@@ -2264,7 +2328,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Create a structure of various imports and verify that project.GetLogicalProject()
         /// walks through them correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VariousImports()
         {
             ProjectRootElement one = ProjectRootElement.Create("c:\\1.targets");
@@ -2292,14 +2356,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             List<ProjectElement> logicalProject = new List<ProjectElement>(project.GetLogicalProject());
 
             Assert.AreEqual(8, logicalProject.Count); // 4 properties + 4 property groups
-            Assert.AreEqual(true, Object.ReferenceEquals(zero, logicalProject[0].ContainingProject)); 
-            Assert.AreEqual(true, Object.ReferenceEquals(zero, logicalProject[1].ContainingProject)); 
-            Assert.AreEqual(true, Object.ReferenceEquals(one, logicalProject[2].ContainingProject));  
-            Assert.AreEqual(true, Object.ReferenceEquals(one, logicalProject[3].ContainingProject));  
-            Assert.AreEqual(true, Object.ReferenceEquals(three, logicalProject[4].ContainingProject));
-            Assert.AreEqual(true, Object.ReferenceEquals(three, logicalProject[5].ContainingProject));
-            Assert.AreEqual(true, Object.ReferenceEquals(two, logicalProject[6].ContainingProject));
-            Assert.AreEqual(true, Object.ReferenceEquals(two, logicalProject[7].ContainingProject)); 
+            Assert.AreEqual(true, object.ReferenceEquals(zero, logicalProject[0].ContainingProject));
+            Assert.AreEqual(true, object.ReferenceEquals(zero, logicalProject[1].ContainingProject));
+            Assert.AreEqual(true, object.ReferenceEquals(one, logicalProject[2].ContainingProject));
+            Assert.AreEqual(true, object.ReferenceEquals(one, logicalProject[3].ContainingProject));
+            Assert.AreEqual(true, object.ReferenceEquals(three, logicalProject[4].ContainingProject));
+            Assert.AreEqual(true, object.ReferenceEquals(three, logicalProject[5].ContainingProject));
+            Assert.AreEqual(true, object.ReferenceEquals(two, logicalProject[6].ContainingProject));
+            Assert.AreEqual(true, object.ReferenceEquals(two, logicalProject[7].ContainingProject));
 
             // Clear the cache
             project.ProjectCollection.UnloadAllProjects();
@@ -2309,7 +2373,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Create a structure containing a import statement such that the import statement results in more than one
         /// file being imported. Then, verify that project.GetLogicalProject() walks through them correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogicalProjectWithWildcardImport()
         {
             string myTempDir = Path.Combine(Path.GetTempPath() + "MyTempDir");
@@ -2338,12 +2402,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 List<ProjectElement> logicalProject = new List<ProjectElement>(project.GetLogicalProject());
 
                 Assert.AreEqual(6, logicalProject.Count); // 3 properties + 3 property groups
-                Assert.AreEqual(true, Object.ReferenceEquals(zero, logicalProject[0].ContainingProject)); // PropertyGroup
-                Assert.AreEqual(true, Object.ReferenceEquals(zero, logicalProject[1].ContainingProject)); // p = 0
-                Assert.AreEqual(true, Object.ReferenceEquals(one, logicalProject[2].ContainingProject));  // PropertyGroup
-                Assert.AreEqual(true, Object.ReferenceEquals(one, logicalProject[3].ContainingProject));  // p = 1
-                Assert.AreEqual(true, Object.ReferenceEquals(two, logicalProject[4].ContainingProject));  // PropertyGroup
-                Assert.AreEqual(true, Object.ReferenceEquals(two, logicalProject[5].ContainingProject));  // p = 2
+                Assert.AreEqual(true, object.ReferenceEquals(zero, logicalProject[0].ContainingProject)); // PropertyGroup
+                Assert.AreEqual(true, object.ReferenceEquals(zero, logicalProject[1].ContainingProject)); // p = 0
+                Assert.AreEqual(true, object.ReferenceEquals(one, logicalProject[2].ContainingProject));  // PropertyGroup
+                Assert.AreEqual(true, object.ReferenceEquals(one, logicalProject[3].ContainingProject));  // p = 1
+                Assert.AreEqual(true, object.ReferenceEquals(two, logicalProject[4].ContainingProject));  // PropertyGroup
+                Assert.AreEqual(true, object.ReferenceEquals(two, logicalProject[5].ContainingProject));  // p = 2
 
                 // Clear the cache
                 project.ProjectCollection.UnloadAllProjects();
@@ -2361,7 +2425,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Import of string that evaluates to empty should give InvalidProjectFileException
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ImportPropertyEvaluatingToEmpty()
         {
@@ -2376,7 +2440,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Import of string that evaluates to invalid path should cause InvalidProjectFileException
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ImportPropertyEvaluatingToInvalidPath()
         {

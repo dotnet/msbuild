@@ -7,24 +7,25 @@
 
 using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
+
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Tests for write code fragment task
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class WriteCodeFragment_Tests
     {
         /// <summary>
         /// Need an available language
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidLanguage()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -41,7 +42,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Need a language
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoLanguage()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -57,7 +58,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Need a location
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoFileOrDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -73,7 +74,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Combine file and directory
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CombineFileDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -95,7 +96,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ignore directory if file is rooted
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DirectoryAndRootedFile()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -104,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             task.Language = "c#";
             task.AssemblyAttributes = new TaskItem[] { new TaskItem("aa") };
 
-            string folder = Path.Combine(Path.GetTempPath(), "foo\\");
+            string folder = Path.Combine(Path.GetTempPath(), "foo" + Path.DirectorySeparatorChar);
             string file = Path.Combine(folder, "CombineFileDirectory.tmp");
             Directory.CreateDirectory(folder);
             task.OutputFile = new TaskItem(file);
@@ -123,7 +124,7 @@ namespace Microsoft.Build.UnitTests
         /// Given nothing to write, should succeed but
         /// produce no output file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoAttributesShouldEmitNoFile()
         {
             string file = Path.Combine(Path.GetTempPath(), "NoAttributesShouldEmitNoFile.tmp");
@@ -150,7 +151,7 @@ namespace Microsoft.Build.UnitTests
         /// Given nothing to write, should succeed but
         /// produce no output file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoAttributesShouldEmitNoFile2()
         {
             string file = Path.Combine(Path.GetTempPath(), "NoAttributesShouldEmitNoFile.tmp");
@@ -176,7 +177,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Bad file path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidFilePath()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -184,7 +185,7 @@ namespace Microsoft.Build.UnitTests
             task.BuildEngine = engine;
             task.Language = "c#";
             task.AssemblyAttributes = new TaskItem[] { new TaskItem("aa") };
-            task.OutputFile = new TaskItem("||invalid||");
+            task.OutputFile = new TaskItem("||//invalid||");
             bool result = task.Execute();
 
             Assert.AreEqual(false, result);
@@ -194,9 +195,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Bad directory path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidDirectoryPath()
         {
+            if (!NativeMethodsShared.IsUnixLike)
+            {
+                Assert.Ignore("No invalid characters on Unix");
+            }
+
             WriteCodeFragment task = new WriteCodeFragment();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -212,7 +218,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Parameterless attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneAttributeNoParams()
         {
             string file = Path.Combine(Path.GetTempPath(), "OneAttribute.tmp");
@@ -246,7 +252,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test with the VB language
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneAttributeNoParamsVb()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -270,7 +276,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// More than one attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoAttributes()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -297,7 +303,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Specify directory instead
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -320,7 +326,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Regular case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneAttributeTwoParams()
         {
             string file = Path.Combine(Path.GetTempPath(), "OneAttribute.tmp");
@@ -357,7 +363,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This produces invalid code, but the task works
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneAttributeTwoParamsSameName()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -380,7 +386,7 @@ namespace Microsoft.Build.UnitTests
         /// Some attributes only allow positional constructor arguments.
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneAttributePositionalParamInvalidSuffix()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -403,7 +409,7 @@ namespace Microsoft.Build.UnitTests
         /// Some attributes only allow positional constructor arguments.
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneAttributeTwoPositionalParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -432,7 +438,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// If a parameter is skipped, it's an error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneAttributeSkippedPositionalParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -455,7 +461,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// This test is for "_ParameterX"
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidNumber()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -478,7 +484,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// This test is for "_Parameter"
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoNumber()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -501,7 +507,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// These can also be combined with named params.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneAttributePositionalAndNamedParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();

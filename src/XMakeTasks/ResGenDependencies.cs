@@ -3,18 +3,13 @@
 
 using System;
 using System.Collections;
-using System.IO;
-using System.Text;
-using System.Xml;
-using System.Resources;
-using System.Reflection;
 using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+using System.IO;
+using System.Resources;
+using System.Xml;
+
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -78,7 +73,7 @@ namespace Microsoft.Build.Tasks
                     // cache whenever the base directory changes.  
                     _resXFiles.Clear();
                     _isDirty = true;
-                    _baseLinkedFileDirectory = value;
+                    _baseLinkedFileDirectory = FileUtilities.FixFilePath(value);
                 }
             }
         }
@@ -319,7 +314,7 @@ namespace Microsoft.Build.Tasks
                 Debug.Assert(_outputFiles != null, "OutputFiles hasn't been set");
                 foreach (string outputFileName in _outputFiles)
                 {
-                    FileInfo outputFile = new FileInfo(outputFileName);
+                    FileInfo outputFile = new FileInfo(FileUtilities.FixFilePath(outputFileName));
                     if (!outputFile.Exists || outputFile.LastWriteTime < this.LastModified)
                     {
                         return false;

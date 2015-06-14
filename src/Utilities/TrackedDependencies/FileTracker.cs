@@ -8,12 +8,11 @@ using System.Text;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Globalization;
 using System.Linq;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Runtime.InteropServices;
+using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.Utilities
 {

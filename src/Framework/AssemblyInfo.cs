@@ -32,12 +32,11 @@ using System.Windows.Markup;
 #pragma warning disable 618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, Flags = SecurityPermissionFlag.Execution)]
 #pragma warning restore 618
-[assembly: InternalsVisibleTo("Microsoft.Build.Framework.Unittest, PublicKey=002400000480000094000000060200000024000052534131000400000100010007d1fa57c4aed9f0a32e84aa0faefd0de9e8fd6aec8f87fb03766c834c99921eb23be79ad9d5dcc1dd9ad236132102900b723cf980957fc4e177108fc607774f29e8320e92ea05ece4e821c0a5efe8f1645c4c0c93c1ab99285d622caa652c1dfad63d745d6f2de5f17e5eaf0fc4963d261c8a12436518206dc093344d5ad293")]
-[assembly: InternalsVisibleTo("Microsoft.Build.Framework.Whidbey.Unittest, PublicKey=002400000480000094000000060200000024000052534131000400000100010007d1fa57c4aed9f0a32e84aa0faefd0de9e8fd6aec8f87fb03766c834c99921eb23be79ad9d5dcc1dd9ad236132102900b723cf980957fc4e177108fc607774f29e8320e92ea05ece4e821c0a5efe8f1645c4c0c93c1ab99285d622caa652c1dfad63d745d6f2de5f17e5eaf0fc4963d261c8a12436518206dc093344d5ad293")]
-#if STANDALONEBUILD
+#if STANDALONEBUILD || MONO
 [assembly: AssemblyVersion("14.1.0.0")]
 [assembly: InternalsVisibleTo("Microsoft.Build.Framework.UnitTests")]
-[assembly: InternalsVisibleTo("Microsoft.Build.Tasks.UnitTests")]
+#else
+[assembly: InternalsVisibleTo("Microsoft.Build.Framework.Unittest, PublicKey=002400000480000094000000060200000024000052534131000400000100010007d1fa57c4aed9f0a32e84aa0faefd0de9e8fd6aec8f87fb03766c834c99921eb23be79ad9d5dcc1dd9ad236132102900b723cf980957fc4e177108fc607774f29e8320e92ea05ece4e821c0a5efe8f1645c4c0c93c1ab99285d622caa652c1dfad63d745d6f2de5f17e5eaf0fc4963d261c8a12436518206dc093344d5ad293")]
 #endif
 
 // This is the assembly-level GUID, and the GUID for the TypeLib associated with
@@ -46,7 +45,8 @@ using System.Windows.Markup;
 [assembly: GuidAttribute("D8A9BA71-4724-481d-9CA7-0DA23A1D615C")]
 
 [assembly: XmlnsDefinition("http://schemas.microsoft.com/build/2009/properties", "Microsoft.Build.Framework.XamlTypes")]
-
+#if !MONO
 // This will enable passing the SafeDirectories flag to any P/Invoke calls/implementations within the assembly, 
 // so that we don't run into known security issues with loading libraries from unsafe locations 
 [assembly: DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#endif

@@ -10,9 +10,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
@@ -78,11 +75,18 @@ namespace Microsoft.Build.Collections
         /// </summary>
         static MSBuildNameIgnoreCaseComparer()
         {
-            NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
+            if (NativeMethodsShared.IsWindows)
+            {
+                NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
 
-            NativeMethodsShared.GetSystemInfo(ref systemInfo);
+                NativeMethodsShared.GetSystemInfo(ref systemInfo);
 
-            s_runningProcessorArchitecture = systemInfo.wProcessorArchitecture;
+                s_runningProcessorArchitecture = systemInfo.wProcessorArchitecture;
+            }
+            else
+            {
+                s_runningProcessorArchitecture = 0; //x86
+            }
         }
 
         /// <summary>

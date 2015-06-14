@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -15,30 +15,30 @@ using Microsoft.Build.Shared.LanguageParser;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class CSharpTokenizerTests
     {
         // Simple whitespace handling.
-        [TestMethod]
+        [Test]
         public void Empty() { AssertTokenize("", "", 0); }
-        [TestMethod]
+        [Test]
         public void OneSpace() { AssertTokenize(" ", " \x0d", ".Whitespace"); }
-        [TestMethod]
+        [Test]
         public void TwoSpace() { AssertTokenize("  ", "  \x0d", ".Whitespace"); }
-        [TestMethod]
+        [Test]
         public void Tab() { AssertTokenize("\t", "\t\x0d", ".Whitespace"); }
-        [TestMethod]
+        [Test]
         public void TwoTab() { AssertTokenize("\t\t", "\t\t\x0d", ".Whitespace"); }
-        [TestMethod]
+        [Test]
         public void SpaceTab() { AssertTokenize(" \t", " \t\x0d", ".Whitespace"); }
-        [TestMethod]
+        [Test]
         public void CrLf() { AssertTokenize("\x0d\x0a", ".Whitespace"); }
-        [TestMethod]
+        [Test]
         public void SpaceCrLfSpace() { AssertTokenize(" \x0d\x0a ", " \x0d\x0a \x0d", ".Whitespace"); }
         // From section 2.3.3 of the C# spec, these are also whitespace.
-        [TestMethod]
+        [Test]
         public void LineSeparator() { AssertTokenizeUnicode("\x2028", ".Whitespace"); }
-        [TestMethod]
+        [Test]
         public void ParagraphSeparator() { AssertTokenizeUnicode("\x2029", ".Whitespace"); }
 
         /*
@@ -47,67 +47,67 @@ namespace Microsoft.Build.UnitTests
                 Vertical tab character (U+000B)
                 Form feed character (U+000C)  
         */
-        [TestMethod]
+        [Test]
         public void SpecialWhitespace() { AssertTokenize("\x09\x0b\x0c\x0d", ".Whitespace"); }
 
         // One-line comments (i.e. those starting with //)
-        [TestMethod]
+        [Test]
         public void OneLineComment() { AssertTokenize("// My one line comment.\x0d", ".Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void SpaceOneLineComment() { AssertTokenize(" // My one line comment.\x0d", ".Whitespace.Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void OneLineCommentTab() { AssertTokenize(" //\tMy one line comment.\x0d", ".Whitespace.Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void OneLineCommentCr() { AssertTokenize("// My one line comment.\x0d", ".Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void OneLineCommentLf() { AssertTokenize("// My one line comment.\x0a", ".Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void OneLineCommentLineSeparator() { AssertTokenizeUnicode("// My one line comment.\x2028", ".Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void OneLineCommentParagraphSeparator() { AssertTokenizeUnicode("// My one line comment.\x2029", ".Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void OneLineCommentWithEmbeddedMultiLine() { AssertTokenize("// /*  */\x0d", ".Comment.Whitespace"); }
 
         // Multi-line comments (i.e those like /* */)
-        [TestMethod]
+        [Test]
         public void OneLineMultilineComment() { AssertTokenize("/* My comment. */\x0d", ".Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void MultilineComment() { AssertTokenize("/* My comment. \x0d\x0a Second Line*/\x0d", ".Comment.Whitespace", 3); }
-        [TestMethod]
+        [Test]
         public void MultilineCommentWithEmbeddedSingleLine() { AssertTokenize("/* // */\x0d", ".Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void LeftHalfOfUnbalanceMultilineComment() { AssertTokenize("/*\x0d", ".EndOfFileInsideComment"); }
-        [TestMethod]
+        [Test]
         public void LeftHalfOfUnbalanceMultilineCommentWithStuff() { AssertTokenize("/* unbalanced\x0d", ".EndOfFileInsideComment"); }
 
         // If the last character of the source file is a Control-Z character (U+001A), this character is deleted. 
-        [TestMethod]
+        [Test]
         public void NothingPlustControlZatEOF() { AssertTokenize("\x1A", "", "", 0); }
-        [TestMethod]
+        [Test]
         public void SomethingPlusControlZatEOF() { AssertTokenize("// My comment\x1A", "// My comment\x0d", ".Comment.Whitespace"); }
 
         // A carriage-return character (U+000D) is added to the end of the source file if that source file is non-empty and if the last character 
         // of the source file is not a carriage return (U+000D), a line feed (U+000A), a line separator (U+2028), or a paragraph separator 
         // (U+2029). 
-        [TestMethod]
+        [Test]
         public void NoEOLatEOF() { AssertTokenize("// My comment", "// My comment\x0d", ".Comment.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void NoEOLatEOFButFileIsEmpty() { AssertTokenize("", "", "", 0); }
 
         // An identifier that has a "_" embedded somewhere
-        [TestMethod]
+        [Test]
         public void IdentifierWithEmbeddedUnderscore() { AssertTokenize("_x_\xd", ".Identifier.Whitespace"); }
 
         // An identifier with a number
-        [TestMethod]
+        [Test]
         public void IdentifierWithNumber() { AssertTokenize("x3\xd", ".Identifier.Whitespace"); }
 
         // An non-identifier with a @ and a number
-        [TestMethod]
+        [Test]
         public void EscapedIdentifierWithNumber() { AssertTokenize("@3Identifier\xd", ".ExpectedIdentifier"); }
 
         // A very simple namespace and class.
-        [TestMethod]
+        [Test]
         public void NamespacePlusClass()
         {
             AssertTokenize
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // If a keyword has '@' in front, then its treated as an identifier. 
-        [TestMethod]
+        [Test]
         public void EscapedKeywordMakesIdentifier()
         {
             AssertTokenize
@@ -128,124 +128,124 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Check boolean literals
-        [TestMethod]
+        [Test]
         public void LiteralTrue() { AssertTokenize("true\x0d", ".BooleanLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void LiteralFalse() { AssertTokenize("false\x0d", ".BooleanLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void LiteralNull() { AssertTokenize("null\x0d", ".NullLiteral.Whitespace"); }
 
         // Check integer literals
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteral() { AssertTokenize("0x123F\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexUppercaseXIntegerLiteral() { AssertTokenize("0X1f23\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void IntegerLiteral() { AssertTokenize("123\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void InvalidHexIntegerWithNoneValid() { AssertTokenize("0xG\x0d", ".ExpectedValidHexDigit"); }
 
         // Hex literal long suffix: U u L l UL Ul uL ul LU Lu lU lu 
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralUpperU() { AssertTokenize("0x123FU\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralLowerU() { AssertTokenize("0x123Fu\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralUpperL() { AssertTokenize("0x123FL\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralLowerL() { AssertTokenize("0x123Fl\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralUpperUUpperL() { AssertTokenize("0x123FUL\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralUpperULowerL() { AssertTokenize("0x123FUl\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralLowerUUpperL() { AssertTokenize("0x123FuL\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralUpperLUpperU() { AssertTokenize("0x123FLU\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralUpperLLowerU() { AssertTokenize("0x123FLu\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralLowerLUpperU() { AssertTokenize("0x123FlU\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void HexIntegerLiteralLowerLLowerU() { AssertTokenize("0x123Flu\x0d", ".HexIntegerLiteral.Whitespace"); }
 
         // Decimal literal long suffix: U u L l UL Ul uL ul LU Lu lU lu 
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralUpperU() { AssertTokenize("1234U\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralLowerU() { AssertTokenize("1234u\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralUpperL() { AssertTokenize("1234L\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralLowerL() { AssertTokenize("1234l\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralUpperUUpperL() { AssertTokenize("1234UL\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralUpperULowerL() { AssertTokenize("1234Ul\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralLowerUUpperL() { AssertTokenize("1234uL\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralUpperLUpperU() { AssertTokenize("1234LU\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralUpperLLowerU() { AssertTokenize("1234Lu\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralLowerLUpperU() { AssertTokenize("1234lU\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void DecimalIntegerLiteralLowerLLowerU() { AssertTokenize("1234lu\x0d", ".DecimalIntegerLiteral.Whitespace"); }
 
         // Reals aren't supported yet.
         // Reals can take many different forms: 1.1, .1, 1.1e6, etc.
         // If you turn this on, please create test for the other forms too.
-        [TestMethod]
-        [Ignore] // "Reals aren't supported yet."
+        [Test]
+        [Ignore("Reals aren't supported yet.")]
         public void RealLiteral1() { AssertTokenize("1.1\x0d", ".RealLiteral.Whitespace"); }
 
         // Char literals aren't supported yet.
-        [TestMethod]
+        [Test]
         public void CharLiteral1() { AssertTokenize("'c'\x0d", ".CharLiteral.Whitespace"); }
 
-        [TestMethod]
-        [Ignore] // "Escape sequences aren't supported"
+        [Test]
+        [Ignore("Escape sequences aren't supported")]
         public void CharLiteralIllegalEscapeSequence() { AssertTokenize("'\\z'\x0d", ".SyntaxErrorIllegalEscapeSequence"); }
 
-        [TestMethod]
-        [Ignore] // "Escape sequences aren't supported"
+        [Test]
+        [Ignore("Escape sequences aren't supported")]
         public void CharLiteralHexEscapeSequence() { AssertTokenize("'\\x0022a'\x0d", "'\"a'\x0d", ".CharLiteral.Whitespace"); }
 
         // Check string literals
-        [TestMethod]
+        [Test]
         public void LiteralStringBasic() { AssertTokenize("\"string\"\x0d", ".StringLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void LiteralStringAllEscapes() { AssertTokenize("\"\\'\\\"\\\\\\0\\a\\b\\f\\n\\r\\t\\x0\\v\"\x0d", ".StringLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void LiteralStringUnclosed() { AssertTokenize("\"string\x0d", ".NewlineInsideString"); }
-        [TestMethod]
+        [Test]
         public void LiteralVerbatimStringBasic() { AssertTokenize("@\"string\"\x0d", "\"string\"\x0d", ".StringLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void LiteralVerbatimStringAllEscapes() { AssertTokenize("@\"\\a\\b\\c\"\x0d", "\"\\a\\b\\c\"\x0d", ".StringLiteral.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void LiteralVerbatimStringUnclosed() { AssertTokenize("@\"string\x0d", ".EndOfFileInsideString"); }
-        [TestMethod]
+        [Test]
         public void LiteralVerbatimStringQuoteEscapeSequence() { AssertTokenize("@\"\"\"\"\x0d", "\"\"\"\"\x0d", ".StringLiteral.Whitespace"); }
 
         // Single-digit operators and punctuators.
-        [TestMethod]
+        [Test]
         public void PunctuatorOpenBracket() { AssertTokenize("[\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void PunctuatorCloseBracket() { AssertTokenize("]\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void PunctuatorOpenParen() { AssertTokenize("(\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void PunctuatorCloseParen() { AssertTokenize(")\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void PunctuatorDot() { AssertTokenize(".\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void PunctuatorColon() { AssertTokenize(":\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [TestMethod]
+        [Test]
         public void PunctuatorSemicolon() { AssertTokenize(";\x0d", ".OperatorOrPunctuator.Whitespace"); }
 
         // Preprocessor.
-        [TestMethod]
+        [Test]
         public void Preprocessor() { AssertTokenize("#if\x0d", ".OpenConditionalDirective.Whitespace"); }
 
 

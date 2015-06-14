@@ -3,19 +3,16 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Collections;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class FileMatcherTest
     {
         /*
@@ -77,21 +74,21 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Simple test of the MatchDriver code.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicMatchDriver()
         {
             MatchDriver
             (
-                @"Source\**",
+                "Source" + Path.DirectorySeparatorChar + "**",
                 new string[]  // Files that exist and should match.
                 {
-                    @"Source\Bart.txt",
-                    @"Source\Sub\Homer.txt",
+                    "Source" + Path.DirectorySeparatorChar + "Bart.txt",
+                    "Source" + Path.DirectorySeparatorChar + "Sub" + Path.DirectorySeparatorChar + "Homer.txt",
                 },
                 new string[]  // Files that exist and should not match.
                 {
-                    @"Destination\Bart.txt",
-                    @"Destination\Sub\Homer.txt",
+                    "Destination" + Path.DirectorySeparatorChar + "Bart.txt",
+                    "Destination" + Path.DirectorySeparatorChar + "Sub" + Path.DirectorySeparatorChar + "Homer.txt",
                 },
                 null
             );
@@ -103,7 +100,7 @@ namespace Microsoft.Build.UnitTests
         ///        c:\?emp\foo
         /// 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress162390()
         {
             MatchDriver
@@ -125,9 +122,14 @@ namespace Microsoft.Build.UnitTests
         * Convert a short local path to a long path.
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameForShortLocalPath()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"D:\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
@@ -143,7 +145,7 @@ namespace Microsoft.Build.UnitTests
         * Convert a long local path to a long path (nop).
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameForLongLocalPath()
         {
             string longPath = FileMatcher.GetLongPathName
@@ -161,9 +163,14 @@ namespace Microsoft.Build.UnitTests
         * Convert a short UNC path to a long path.
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameForShortUncPath()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"\\server\share\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
@@ -179,7 +186,7 @@ namespace Microsoft.Build.UnitTests
         * Convert a long UNC path to a long path (nop)
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameForLongUncPath()
         {
             string longPath = FileMatcher.GetLongPathName
@@ -197,9 +204,14 @@ namespace Microsoft.Build.UnitTests
         * Convert a short relative path to a long path
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameForRelativePath()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"LONGDI~1\LONGSU~1\LONGFI~1.TXT",
@@ -215,9 +227,14 @@ namespace Microsoft.Build.UnitTests
         * Convert a short relative path with a trailing backslash to a long path
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameForRelativePathPreservesTrailingSlash()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"LONGDI~1\LONGSU~1\",
@@ -233,9 +250,14 @@ namespace Microsoft.Build.UnitTests
         * Convert a short relative path with doubled embedded backslashes to a long path
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameForRelativePathPreservesExtraSlashes()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"LONGDI~1\\LONGSU~1\\",
@@ -251,9 +273,14 @@ namespace Microsoft.Build.UnitTests
         * Only part of the path might be short.
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameForMixedLongAndShort()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"c:\apple\banana\tomato\pomegr~1\orange\",
@@ -270,9 +297,14 @@ namespace Microsoft.Build.UnitTests
         * as if they were already a long file name.
         * 
         */
-        [TestMethod]
+        [Test]
         public void GetLongFileNameWherePartOfThePathDoesntExist()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Short names are for Windows only");
+            }
+
             string longPath = FileMatcher.GetLongPathName
             (
                 @"c:\apple\banana\tomato\pomegr~1\orange\chocol~1\vanila~1",
@@ -282,41 +314,41 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(@"c:\apple\banana\tomato\pomegranate\orange\chocol~1\vanila~1", longPath);
         }
 
-        [TestMethod]
+        [Test]
         public void BasicMatch()
         {
             ValidateFileMatch("file.txt", "File.txt", false);
             ValidateNoFileMatch("file.txt", "File.bin", false);
         }
 
-        [TestMethod]
+        [Test]
         public void MatchSingleCharacter()
         {
             ValidateFileMatch("file.?xt", "File.txt", false);
             ValidateNoFileMatch("file.?xt", "File.bin", false);
         }
 
-        [TestMethod]
+        [Test]
         public void MatchMultipleCharacters()
         {
             ValidateFileMatch("*.txt", "*.txt", false);
             ValidateNoFileMatch("*.txt", "*.bin", false);
         }
 
-        [TestMethod]
+        [Test]
         public void SimpleRecursive()
         {
             ValidateFileMatch("**", ".\\File.txt", true);
         }
 
-        [TestMethod]
+        [Test]
         public void DotForCurrentDirectory()
         {
             ValidateFileMatch(".\\file.txt", ".\\File.txt", false);
             ValidateNoFileMatch(".\\file.txt", ".\\File.bin", false);
         }
 
-        [TestMethod]
+        [Test]
         public void DotDotForParentDirectory()
         {
             ValidateFileMatch("..\\..\\*.*", "..\\..\\File.txt", false);
@@ -325,7 +357,7 @@ namespace Microsoft.Build.UnitTests
             ValidateNoFileMatch("..\\..\\*.*", "..\\..\\dir1\\dir2\\File", false);
         }
 
-        [TestMethod]
+        [Test]
         public void ReduceDoubleSlashesBaseline()
         {
             // Baseline
@@ -335,7 +367,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [TestMethod]
+        [Test]
         public void ReduceDoubleSlashes()
         {
             ValidateFileMatch("f:\\\\dir1\\dir2\\file.txt", "f:\\dir1\\dir2\\file.txt", false);
@@ -346,7 +378,7 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch("..\\**\\./.\\*.cs", "..\\dir1\\dir2\\file.cs", true);
         }
 
-        [TestMethod]
+        [Test]
         public void DoubleSlashesOnBothSidesOfComparison()
         {
             ValidateFileMatch("f:\\\\dir1\\dir2\\file.txt", "f:\\\\dir1\\dir2\\file.txt", false, false);
@@ -357,7 +389,7 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch("..\\**\\./.\\*.cs", "..\\dir1/\\/\\/dir2\\file.cs", true, false);
         }
 
-        [TestMethod]
+        [Test]
         public void DecomposeDotSlash()
         {
             ValidateFileMatch("f:\\.\\dir1\\dir2\\file.txt", "f:\\dir1\\dir2\\file.txt", false);
@@ -373,7 +405,7 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch(".//.//dir1\\dir2\\file.txt", ".\\dir1\\dir2\\file.txt", false);
         }
 
-        [TestMethod]
+        [Test]
         public void RecursiveDirRecursive()
         {
             // Check that a wildcardpath of **\x\**\ matches correctly since, \**\ is a 
@@ -387,7 +419,7 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch(@"c:\foo\**\x\**\*.*", @"c:\foo\x\x\x\file.txt", true);
         }
 
-        [TestMethod]
+        [Test]
         public void Regress155731()
         {
             ValidateFileMatch(@"a\b\**\**\**\**\**\e\*", @"a\b\c\d\e\f.txt", true);
@@ -397,7 +429,7 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch(@"a\b\**\**\**\**\e\*", @"a\b\c\d\e\f.txt", true);
         }
 
-        [TestMethod]
+        [Test]
         public void ParentWithoutSlash()
         {
             // However, we don't wtool this to match,
@@ -413,7 +445,7 @@ namespace Microsoft.Build.UnitTests
                 );
         }
 
-        [TestMethod]
+        [Test]
         public void Unc()
         {
             // Check UNC functionality
@@ -452,7 +484,7 @@ namespace Microsoft.Build.UnitTests
                 );
         }
 
-        [TestMethod]
+        [Test]
         public void ExplicitToolCompatibility()
         {
             // Explicit ANT compatibility. These patterns taken from the ANT documentation.
@@ -478,7 +510,7 @@ namespace Microsoft.Build.UnitTests
             ValidateNoFileMatch("org/IIS/**/SourceSafe/*", "org/IISSourceSage/Entries", true);
         }
 
-        [TestMethod]
+        [Test]
         public void ExplicitToolIncompatibility()
         {
             // NOTE: Weirdly, ANT syntax is to match a file here.
@@ -492,7 +524,7 @@ namespace Microsoft.Build.UnitTests
             ValidateNoFileMatch("org\\", "org/IISSourceSage/Entries", false);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleStarStar()
         {
             // Multiple-** matches 
@@ -502,14 +534,14 @@ namespace Microsoft.Build.UnitTests
             ValidateNoFileMatch("c:\\**\\user1\\**\\*.*", "c:\\Documents and Settings//user\\NTUSER.DAT", true);
         }
 
-        [TestMethod]
+        [Test]
         public void RegressItemRecursionWorksAsExpected()
         {
             // Regress bug#54411:  Item recursion doesn't work as expected on "c:\foo\**"
             ValidateFileMatch("c:\\foo\\**", "c:\\foo\\two\\subfile.txt", true);
         }
 
-        [TestMethod]
+        [Test]
         public void IllegalPaths()
         {
             // Certain patterns are illegal.
@@ -524,7 +556,7 @@ namespace Microsoft.Build.UnitTests
             ValidateIllegal("<:\\**");
         }
 
-        [TestMethod]
+        [Test]
         public void IllegalTooLongPath()
         {
             string longString = new string('X', 500) + "*"; // need a wildcard to do anything
@@ -536,7 +568,7 @@ namespace Microsoft.Build.UnitTests
             // not certain that won't break something; this fix is merely to avoid a crash.
         }
 
-        [TestMethod]
+        [Test]
         public void SplitFileSpec()
         {
             /*************************************************************************************
@@ -552,7 +584,7 @@ namespace Microsoft.Build.UnitTests
             ValidateSplitFileSpec(@"**\test\**", "", @"**\test\**\", "*.*");
         }
 
-        [TestMethod]
+        [Test]
         public void Regress367780_CrashOnStarDotDot()
         {
             string workingPath = Path.Combine(Path.GetTempPath(), "Regress367780");
@@ -574,7 +606,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void Regress141071_StarStarSlashStarStarIsLiteral()
         {
             string workingPath = Path.Combine(Path.GetTempPath(), "Regress141071");
@@ -601,7 +633,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(result.Contains("MyFile.txt"));
         }
 
-        [TestMethod]
+        [Test]
         public void Regress14090_TrailingDotMatchesNoExtension()
         {
             string workingPath = Path.Combine(Path.GetTempPath(), "Regress141071");
@@ -629,14 +661,14 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1, files.Length);
         }
 
-        [TestMethod]
+        [Test]
         public void Regress14090_TrailingDotMatchesNoExtension_Part2()
         {
             ValidateFileMatch(@"c:\mydir\**\*.", @"c:\mydir\subdir\bing", true, /* simulate filesystem? */ false);
             ValidateNoFileMatch(@"c:\mydir\**\*.", @"c:\mydir\subdir\bing.txt", true);
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveProjectDirectory()
         {
             string[] strings = new string[1] { "c:\\1.file" };
@@ -783,7 +815,7 @@ namespace Microsoft.Build.UnitTests
                         string candidateDirectoryName = "";
                         if (normalizedCandidate.IndexOfAny(FileMatcher.directorySeparatorCharacters) != -1)
                         {
-                            candidateDirectoryName = Path.GetDirectoryName(normalizedCandidate) + @"\";
+                            candidateDirectoryName = Path.GetDirectoryName(normalizedCandidate) + Path.DirectorySeparatorChar;
                         }
 
                         // Does the candidate directory match the requested path?
@@ -933,28 +965,32 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 string normalized = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
+                if (Path.DirectorySeparatorChar != '\\')
+                {
+                    normalized = path.Replace("\\", Path.DirectorySeparatorChar.ToString());
+                }
                 // Replace leading UNC.
-                if (normalized.Substring(0, 2) == @"\\")
+                else if (normalized.Substring(0, 2) == @"\\")
                 {
                     normalized = "<:UNC:>" + normalized.Substring(2);
                 }
 
                 // Preserve parent-directory markers.
-                normalized = normalized.Replace(@"..\", "<:PARENT:>");
+                normalized = normalized.Replace(@".." + Path.DirectorySeparatorChar, "<:PARENT:>");
 
 
                 // Just get rid of doubles enough to satisfy our test cases.
-                normalized = normalized.Replace(@"\\", @"\");
-                normalized = normalized.Replace(@"\\", @"\");
-                normalized = normalized.Replace(@"\\", @"\");
+                string doubleSeparator = Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString();
+                normalized = normalized.Replace(doubleSeparator, Path.DirectorySeparatorChar.ToString());
+                normalized = normalized.Replace(doubleSeparator, Path.DirectorySeparatorChar.ToString());
+                normalized = normalized.Replace(doubleSeparator, Path.DirectorySeparatorChar.ToString());
 
                 // Strip any .\
-                normalized = normalized.Replace(@".\", "");
+                normalized = normalized.Replace(@"." + Path.DirectorySeparatorChar, "");
 
                 // Put back the preserved markers.
                 normalized = normalized.Replace("<:UNC:>", @"\\");
-                normalized = normalized.Replace("<:PARENT:>", @"..\");
+                normalized = normalized.Replace("<:PARENT:>", @".." + Path.DirectorySeparatorChar);
 
                 return normalized;
             }
@@ -1156,6 +1192,10 @@ namespace Microsoft.Build.UnitTests
                 out filenamePart,
                 new FileMatcher.GetFileSystemEntries(GetFileSystemEntriesLoopBack)
             );
+
+            expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
+            expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+            expectedFilenamePart = FileUtilities.FixFilePath(expectedFilenamePart);
 
             if
                 (

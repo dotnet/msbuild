@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectMetadataElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -10,8 +12,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -19,13 +20,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectMetadataElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectMetadataElement_Tests
     {
         /// <summary>
         /// Read simple metadatum
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadMetadata()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
@@ -38,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadatum with invalid attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -58,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadatum with invalid name characters (but legal xml)
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidName()
         {
@@ -78,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadatum with invalid built-in metadata name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidBuiltInName()
         {
@@ -98,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadatum with invalid built-in element name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidBuiltInElementName()
         {
@@ -118,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set metadatum value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValue()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
@@ -130,7 +131,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Rename
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetName()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
@@ -143,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Rename to same value should not mark dirty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNameSame()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
@@ -157,7 +158,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Rename to illegal name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetNameIllegal()
         {
@@ -169,7 +170,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set metadatum value to empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyValue()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
@@ -181,7 +182,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set metadatum value to null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullValue()
         {
@@ -193,7 +194,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is an ItemDefinitionGroup
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidItemExpressionInMetadata()
         {
@@ -213,7 +214,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is NOT an ItemDefinitionGroup
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadValidItemExpressionInMetadata()
         {
             string content = @"

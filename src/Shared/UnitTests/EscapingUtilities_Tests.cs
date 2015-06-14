@@ -2,20 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #region Using directives
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Shared;
 
-
+using NUnit.Framework;
 #endregion
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class EscapingUtilities_Tests
     {
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Unescape()
         {
             Assert.AreEqual("", EscapingUtilities.UnescapeAll(""));
@@ -37,7 +35,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Escape()
         {
             Assert.AreEqual("%2a", EscapingUtilities.Escape("*"));
@@ -48,7 +46,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UnescapeEscape()
         {
             string text;
@@ -65,7 +63,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EscapeUnescape()
         {
             string text;
@@ -80,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(text, EscapingUtilities.Escape(EscapingUtilities.UnescapeAll(text)));
         }
 
-        [TestMethod]
+        [Test]
         public void ContainsEscapedWildcards()
         {
             Assert.IsFalse(EscapingUtilities.ContainsEscapedWildcards("NoStarOrQMark"));

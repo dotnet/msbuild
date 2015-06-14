@@ -192,7 +192,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// SDKType found in the sdk manifest
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Want to keep same case as the attribute in sdkmanifest.xml")]
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Want to keep same case as the attribute in SDKManifest.xml")]
         public SDKType SDKType
         {
             get
@@ -204,7 +204,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// CopyRedistToSubDirectory specifies where the redist files should be copied to relative to the root of the package.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "SubDirectory", Justification = "Want to keep case compliant with the attributes in the sdkmanifest.xml")]
+        [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "SubDirectory", Justification = "Want to keep case compliant with the attributes in the SDKManifest.xml")]
         public string CopyRedistToSubDirectory
         {
             get;
@@ -661,7 +661,7 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// APPX manifest attribute
             /// </summary>
-            [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "APPX", Justification = "Want to keep same case as the attribute in sdkmanifest.xml")]
+            [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "APPX", Justification = "Want to keep same case as the attribute in SDKManifest.xml")]
             public const string APPX = "APPX";
 
             /// <summary>
@@ -672,7 +672,7 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// SDKType metadata name and manifest attribute
             /// </summary>
-            [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Want to keep same case as the attribute in sdkmanifest.xml")]
+            [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Want to keep same case as the attribute in SDKManifest.xml")]
             public const string SDKType = "SDKType";
 
             /// <summary>
@@ -683,7 +683,7 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// CopyRedistToSubDirectory metadata name and manifest attribute
             /// </summary>
-            [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "SubDirectory", Justification = "Want to keep same case as in sdkmanifest.sdk")]
+            [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "SubDirectory", Justification = "Want to keep same case as in SDKManifest.sdk")]
             public const string CopyRedistToSubDirectory = "CopyRedistToSubDirectory";
 
             /// <summary>

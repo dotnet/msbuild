@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectItem_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -12,27 +14,24 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
+
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
     /// Tests for ProjectItem
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectItem_Tests
     {
         /// <summary>
-        /// Gets or sets the test context, assigned by the MSTest test runner.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        /// <summary>
         /// Project getter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectGetter()
         {
             Project project = new Project();
@@ -44,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// No metadata, simple case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoMetadata()
         {
             string content = @"
@@ -67,7 +66,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Read off metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadMetadata()
         {
             string content = @"
@@ -97,7 +96,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Get metadata inherited from item definitions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetMetadataObjectsFromDefinition()
         {
             string content = @"
@@ -134,7 +133,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Get metadata values inherited from item definitions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetMetadataValuesFromDefinition()
         {
             string content = @"
@@ -164,7 +163,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Getting nonexistent metadata should return null
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetNonexistentMetadata()
         {
             ProjectItem item = GetOneItemFromFragment(@"<i Include='i0'/>");
@@ -175,7 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Getting value of nonexistent metadata should return String.Empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetNonexistentMetadataValue()
         {
             ProjectItem item = GetOneItemFromFragment(@"<i Include='i0'/>");
@@ -186,7 +185,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempting to set metadata with an invalid XML name should fail
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetInvalidXmlNameMetadata()
         {
@@ -198,7 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempting to set built-in metadata should fail
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetInvalidBuiltInMetadata()
         {
@@ -210,7 +209,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempting to set reserved metadata should fail
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetInvalidReservedMetadata()
         {
@@ -222,7 +221,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Metadata enumerator should only return custom metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataEnumeratorExcludesBuiltInMetadata()
         {
             ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
@@ -233,36 +232,42 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Read off built-in metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadata()
         {
-            ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
+            ProjectItem item =
+                GetOneItemFromFragment(
+                    NativeMethodsShared.IsWindows ? @"<i Include='c:\foo\bar.baz'/>" : @"<i Include='/foo/bar.baz'/>");
 
-            // c:\foo\bar.baz   %(FullPath)         = full path of item
-            // c:\              %(RootDir)          = root directory of item
-            // bar              %(Filename)         = item filename without extension
-            // .baz              %(Extension)        = item filename extension
-            // c:\foo\           %(RelativeDir)      = item directory as given in item-spec
-            // foo\              %(Directory)        = full path of item directory relative to root
-            // []                %(RecursiveDir)     = portion of item path that matched a recursive wildcard
-            // c:\foo\bar.baz    %(Identity)         = item-spec as given
-            // []                %(ModifiedTime)     = last write time of item
-            // []                %(CreatedTime)      = creation time of item
-            // []                %(AccessedTime)     = last access time of item
-            Assert.AreEqual(@"c:\foo\bar.baz", item.GetMetadataValue("FullPath"));
-            Assert.AreEqual(@"c:\", item.GetMetadataValue("RootDir"));
+            // c:\foo\bar.baz - /foo/bar.baz   %(FullPath)         = full path of item
+            // c:\ - /                         %(RootDir)          = root directory of item
+            // bar                             %(Filename)         = item filename without extension
+            // .baz                            %(Extension)        = item filename extension
+            // c:\foo\ - /foo/                 %(RelativeDir)      = item directory as given in item-spec
+            // foo\ - /foo/                    %(Directory)        = full path of item directory relative to root
+            // []                              %(RecursiveDir)     = portion of item path that matched a recursive wildcard
+            // c:\foo\bar.baz - /foo/bar.baz   %(Identity)         = item-spec as given
+            // []                              %(ModifiedTime)     = last write time of item
+            // []                              %(CreatedTime)      = creation time of item
+            // []                              %(AccessedTime)     = last access time of item
+            Assert.AreEqual(
+                NativeMethodsShared.IsWindows ? @"c:\foo\bar.baz" : "/foo/bar.baz",
+                item.GetMetadataValue("FullPath"));
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:\" : "/", item.GetMetadataValue("RootDir"));
             Assert.AreEqual(@"bar", item.GetMetadataValue("Filename"));
             Assert.AreEqual(@".baz", item.GetMetadataValue("Extension"));
-            Assert.AreEqual(@"c:\foo\", item.GetMetadataValue("RelativeDir"));
-            Assert.AreEqual(@"foo\", item.GetMetadataValue("Directory"));
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:\foo\" : "/foo/", item.GetMetadataValue("RelativeDir"));
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"foo\" : "/foo/", item.GetMetadataValue("Directory"));
             Assert.AreEqual(String.Empty, item.GetMetadataValue("RecursiveDir"));
-            Assert.AreEqual(@"c:\foo\bar.baz", item.GetMetadataValue("Identity"));
+            Assert.AreEqual(
+                NativeMethodsShared.IsWindows ? @"c:\foo\bar.baz" : "/foo/bar.baz",
+                item.GetMetadataValue("Identity"));
         }
 
         /// <summary>
         /// Check file-timestamp related metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTimes()
         {
             string path = null;
@@ -289,7 +294,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Test RecursiveDir metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RecursiveDirMetadata()
         {
             string directory = null;
@@ -315,9 +320,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 File.WriteAllText(file, String.Empty);
 
-                ProjectItem item = GetOneItemFromFragment("<i Include='" + directory + @"\**\*'/>");
+                ProjectItem item =
+                    GetOneItemFromFragment(
+                        "<i Include='" + directory + (NativeMethodsShared.IsWindows ? @"\**\*'/>" : "/**/*'/>"));
 
-                Assert.AreEqual(@"b\", item.GetMetadataValue("RecursiveDir"));
+                Assert.AreEqual(NativeMethodsShared.IsWindows ? @"b\" : "b/", item.GetMetadataValue("RecursiveDir"));
                 Assert.AreEqual("c", item.GetMetadataValue("Filename"));
             }
             finally
@@ -334,7 +341,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// (This is what requires that the original include fragment [before wildcard
         /// expansion] is stored in the item.)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RecursiveDirWithSemicolonSeparatedInclude()
         {
             string directory = null;
@@ -360,11 +367,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 File.WriteAllText(file, String.Empty);
 
-                IList<ProjectItem> items = GetItemsFromFragment("<i Include='i0;" + directory + @"\**\*;i2'/>");
+                IList<ProjectItem> items = GetItemsFromFragment("<i Include='i0;" + directory + (NativeMethodsShared.IsWindows ? @"\**\*;i2'/>" : "/**/*;i2'/>"));
 
                 Assert.AreEqual(3, items.Count);
                 Assert.AreEqual("i0", items[0].EvaluatedInclude);
-                Assert.AreEqual(@"b\", items[1].GetMetadataValue("RecursiveDir"));
+                Assert.AreEqual(NativeMethodsShared.IsWindows ? @"b\" : "b/", items[1].GetMetadataValue("RecursiveDir"));
                 Assert.AreEqual("i2", items[2].EvaluatedInclude);
             }
             finally
@@ -378,7 +385,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Basic exclude case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Exclude()
         {
             IList<ProjectItem> items = GetItemsFromFragment("<i Include='a;b' Exclude='b;c'/>");
@@ -390,7 +397,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Exclude against an include with item vectors in it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExcludeWithIncludeVector()
         {
             string content = @"
@@ -417,7 +424,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Exclude with item vectors against an include with item vectors in it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExcludeVectorWithIncludeVector()
         {
             string content = @"
@@ -445,7 +452,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Include and Exclude containing wildcards
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Wildcards()
         {
             string directory = null;
@@ -466,10 +473,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 File.WriteAllText(file2, String.Empty);
                 File.WriteAllText(file3, String.Empty);
 
-                IList<ProjectItem> items = GetItemsFromFragment(String.Format(@"<i Include='{0}\a.*' Exclude='{0}\*.1'/>", directory));
+                IList<ProjectItem> items = GetItemsFromFragment(String.Format(NativeMethodsShared.IsWindows ?
+                    @"<i Include='{0}\a.*' Exclude='{0}\*.1'/>" :
+                    @"<i Include='{0}/a.*' Exclude='{0}/*.1'/>", directory));
 
                 Assert.AreEqual(1, items.Count);
-                Assert.AreEqual(String.Format(@"{0}\a.2", directory), items[0].EvaluatedInclude);
+                Assert.AreEqual(String.Format(NativeMethodsShared.IsWindows ? @"{0}\a.2" : "{0}/a.2", directory), items[0].EvaluatedInclude);
             }
             finally
             {
@@ -484,7 +493,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Expression like @(x) should clone metadata, but metadata should still point at the original XML objects
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyFromWithItemListExpressionClonesMetadata()
         {
             string content = @"
@@ -521,7 +530,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// the changes, by design.
         /// Just to make sure we don't change that behavior, we test it here.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyFromWithItemListExpressionDoesNotCloneDefinitionMetadata()
         {
             string content = @"
@@ -572,7 +581,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Expression like @(x) should not clone metadata, for perf. See comment on test above.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyFromWithItemListExpressionClonesDefinitionMetadata_Variation()
         {
             string content = @"
@@ -614,7 +623,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.AreEqual("m2", project.ItemDefinitions["i"].GetMetadataValue("m")); // Should not have been affected
         }
-        
+
         /// <summary>
         /// Repeated copying of items with item definitions should cause the following order of precedence:
         /// 1) direct metadata on the item
@@ -622,7 +631,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// 3) item definition on the next item, and so on until
         /// 4) item definition metadata on the destination item itself
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyWithItemDefinition()
         {
             string content = @"
@@ -719,7 +728,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// 3) item definition on the next item, and so on until
         /// 4) item definition metadata on the destination item itself
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyWithItemDefinition2()
         {
             string content = @"
@@ -812,7 +821,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Metadata on items can refer to metadata above
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataReferringToMetadataAbove()
         {
             string content = @"
@@ -838,7 +847,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// NOTE: To work properly, this should batch. This is a temporary "patch" to make it work for now.
         /// It will only give correct results if there is exactly one item in the Include. Otherwise Batching would be needed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataExpression()
         {
             string content = @"
@@ -859,7 +868,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Qualified built in metadata should work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInQualifiedMetadataExpression()
         {
             string content = @"
@@ -880,7 +889,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Mis-qualified built in metadata should not work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMisqualifiedMetadataExpression()
         {
             string content = @"
@@ -901,7 +910,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Metadata condition should work correctly with built-in metadata 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataInMetadataCondition()
         {
             string content = @"
@@ -924,7 +933,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Metadata on item condition not allowed (currently)
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void BuiltInMetadataInItemCondition()
         {
@@ -942,13 +951,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Two items should each get their own values for built-in metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTwoItems()
         {
             string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
-                            <i Include='i1.cpp;c:\bar\i2.cpp'>
+                            <i Include='i1.cpp;" + (NativeMethodsShared.IsWindows ? @"c:\bar\i2.cpp" : "/bar/i2.cpp") + @"'>
                                 <m>%(Filename).obj</m>
                             </i>
                         </ItemGroup>
@@ -964,7 +973,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Items from another list, but with different metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentMetadataItemsFromOtherList()
         {
             string content = @"
@@ -991,7 +1000,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Items from another list, but with different metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentBuiltInMetadataItemsFromOtherList()
         {
             string content = @"
@@ -1016,7 +1025,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Two items coming from a transform
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTransformInInclude()
         {
             string content = @"
@@ -1041,7 +1050,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Transform in the metadata value; no bare metadata involved
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTransformInMetadataValue()
         {
             string content = @"
@@ -1066,7 +1075,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Transform in the metadata value; bare metadata involved
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTransformInMetadataValueBareMetadataPresent()
         {
             string content = @"
@@ -1091,7 +1100,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Metadata on items can refer to item lists
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataValueReferringToItems()
         {
             string content = @"
@@ -1114,7 +1123,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Metadata on items' conditions can refer to item lists
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataConditionReferringToItems()
         {
             string content = @"
@@ -1139,7 +1148,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Metadata on items' conditions can refer to other metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataConditionReferringToMetadataOnSameItem()
         {
             string content = @"
@@ -1164,7 +1173,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove a metadatum
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveMetadata()
         {
             Project project = new Project();
@@ -1184,7 +1193,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Attempt to remove a metadatum originating from an item definition.
         /// Should fail if it was not overridden.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveItemDefinitionMetadataMasked()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -1206,7 +1215,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Attempt to remove a metadatum originating from an item definition.
         /// Should fail if it was not overridden.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void RemoveItemDefinitionMetadataNotMasked()
         {
@@ -1222,7 +1231,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove a nonexistent metadatum
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveNonexistentMetadata()
         {
             Project project = new Project();
@@ -1238,7 +1247,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests removing built-in metadata.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void RemoveBuiltInMetadata()
         {
@@ -1254,7 +1263,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Simple rename
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Rename()
         {
             Project project = new Project();
@@ -1276,10 +1285,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Verifies that renaming a ProjectItem whose xml backing is a wildcard doesn't corrupt
         /// the MSBuild evaluation data.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RenameItemInProjectWithWildcards()
         {
-            string projectDirectory = Path.Combine(this.TestContext.TestRunDirectory, Path.GetRandomFileName());
+            string projectDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(projectDirectory);
             try
             {
@@ -1310,7 +1319,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Change item type
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ChangeItemType()
         {
             Project project = new Project();
@@ -1326,7 +1335,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Change item type to invalid value
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void ChangeItemTypeInvalid()
         {
@@ -1340,7 +1349,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to rename imported item should fail
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void RenameImported()
         {
@@ -1370,7 +1379,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to set metadata on imported item should fail
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetMetadataImported()
         {
@@ -1400,7 +1409,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to remove metadata on imported item should fail
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void RemoveMetadataImported()
         {

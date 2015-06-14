@@ -31,12 +31,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    <Choose>
       <When Condition="'$(MSBuildAssemblyVersion)' == ''">
          <PropertyGroup>
-            <NetFrameworkPropsPath>$(MSBuildFrameworkToolsPath)\Microsoft.NetFramework.props</NetFrameworkPropsPath>
+            <NetFrameworkPropsPath>$(MSBuildFrameworkToolsPath)\Microsoft.NETFramework.props</NetFrameworkPropsPath>
          </PropertyGroup>
       </When>
       <Otherwise>
          <PropertyGroup>
-            <NetFrameworkPropsPath>$(MSBuildToolsPath)\Microsoft.NetFramework.CurrentVersion.props</NetFrameworkPropsPath>
+            <NetFrameworkPropsPath>$(MSBuildToolsPath)\Microsoft.NETFramework.CurrentVersion.props</NetFrameworkPropsPath>
          </PropertyGroup>
       </Otherwise>
    </Choose>

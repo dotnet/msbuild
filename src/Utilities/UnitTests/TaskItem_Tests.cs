@@ -2,24 +2,25 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
+using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
+
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class TaskItemTests
     {
         // Make sure a TaskItem can be constructed using an ITaskItem
-        [TestMethod]
+        [Test]
         public void ConstructWithITaskItem()
         {
             TaskItem from = new TaskItem();
@@ -44,7 +45,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Make sure metadata can be cloned from an existing ITaskItem
-        [TestMethod]
+        [Test]
         public void CopyMetadataFromITaskItem()
         {
             TaskItem from = new TaskItem();
@@ -67,7 +68,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Big", to.GetMetadata("Bird"));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullITaskItem()
         {
@@ -81,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         /// Even without any custom metadata metadatanames should
         /// return the built in metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataNamesNoCustomMetadata()
         {
             TaskItem taskItem = new TaskItem("x");
@@ -96,7 +97,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(FileUtilities.ItemSpecModifiers.All.Length + 1, taskItem.MetadataCount);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullITaskItemCast()
         {
@@ -106,7 +107,7 @@ namespace Microsoft.Build.UnitTests
             // no NullReferenceException
         }
 
-        [TestMethod]
+        [Test]
         public void ConstructFromDictionary()
         {
             Hashtable h = new Hashtable();
@@ -122,7 +123,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("hello", t.GetMetadata("CUSTOM"));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void CannotChangeModifiers()
         {
@@ -140,7 +141,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void CannotRemoveModifiers()
         {
@@ -158,7 +159,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void CheckMetadataCount()
         {
             TaskItem t = new TaskItem("foo");
@@ -171,7 +172,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestFullPath()
         {
             TaskItem from = new TaskItem();
@@ -187,7 +188,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestRootDir()
         {
             TaskItem from = new TaskItem();
@@ -202,7 +203,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestFilename()
         {
             TaskItem from = new TaskItem();
@@ -214,7 +215,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestExtension()
         {
             TaskItem from = new TaskItem();
@@ -226,7 +227,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestRelativeDir()
         {
             TaskItem from = new TaskItem();
@@ -237,21 +238,24 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestDirectory()
         {
             TaskItem from = new TaskItem();
-            from.ItemSpec = @"c:\subdir\Monkey.txt";
-            Assert.AreEqual
-            (
-                @"subdir\",
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory)
-            );
+            from.ItemSpec = NativeMethodsShared.IsWindows ? @"c:\subdir\Monkey.txt" : "/subdir/Monkey.txt";
+            Assert.AreEqual(
+                NativeMethodsShared.IsWindows ? @"subdir\" : "/subdir/",
+                from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory));
         }
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestDirectoryUNC()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("UNC is not implemented except under Windows");
+            }
+
             TaskItem from = new TaskItem();
             from.ItemSpec = @"\\local\share\subdir\Monkey.txt";
             Assert.AreEqual
@@ -261,7 +265,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestRecursiveDir()
         {
             TaskItem from = new TaskItem();
@@ -273,7 +277,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void NonexistentRequestIdentity()
         {
             TaskItem from = new TaskItem();
@@ -285,7 +289,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void RequestTimeStamps()
         {
             TaskItem from = new TaskItem();
@@ -327,7 +331,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify metadata cannot be created with null name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void CreateNullNamedMetadata()
         {
@@ -338,7 +342,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify metadata cannot be created with empty name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void CreateEmptyNamedMetadata()
         {
@@ -350,7 +354,7 @@ namespace Microsoft.Build.UnitTests
         /// Create a TaskItem with a null metadata value -- this is allowed, but 
         /// internally converted to the empty string. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CreateTaskItemWithNullMetadata()
         {
             IDictionary<string, string> metadata = new Dictionary<string, string>();
@@ -364,7 +368,7 @@ namespace Microsoft.Build.UnitTests
         /// Set metadata value to null value -- this is allowed, but 
         /// internally converted to the empty string. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullMetadataValue()
         {
             TaskItem item = new TaskItem("bar");
@@ -375,7 +379,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that task items can be successfully constructed based on a task item from another appdomain.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoteTaskItem()
         {
             AppDomain appDomain = null;

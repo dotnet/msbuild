@@ -11,7 +11,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ using System.Xml;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class XmlPeek_Tests
     {
         private string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
 </class>
 ";
 
-        [TestMethod]
+        [Test]
         public void PeekWithNamespaceAttribute()
         {
             MockEngine engine = new MockEngine(true);
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PeekWithNamespaceNode()
         {
             MockEngine engine = new MockEngine(true);
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PeekWithNamespaceText()
         {
             MockEngine engine = new MockEngine(true);
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PeekNoNamespace()
         {
             MockEngine engine = new MockEngine(true);
@@ -161,7 +161,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PeekNoNSXmlContent()
         {
             MockEngine engine = new MockEngine(true);
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PeekNoNSXmlContentAndXmlInputError1()
         {
             MockEngine engine = new MockEngine(true);
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Log.Contains("MSB3741"), "Error message MSB3741 should fire");
         }
 
-        [TestMethod]
+        [Test]
         public void PeekNoNSXmlContentAndXmlInputError2()
         {
             MockEngine engine = new MockEngine(true);
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Log.Contains("MSB3741"), "Error message MSB3741 should fire");
         }
 
-        [TestMethod]
+        [Test]
         public void PeekNoNSWPrefixedQueryError()
         {
             MockEngine engine = new MockEngine(true);
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Log.Contains("MSB3743"), "Engine log should contain error code MSB3743");
         }
 
-        [TestMethod]
+        [Test]
         public void ErrorInNamespaceDecl()
         {
             MockEngine engine = new MockEngine(true);
@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(executeResult, "Execution should've failed");
         }
 
-        [TestMethod]
+        [Test]
         public void MissingNamespaceParameters()
         {
             MockEngine engine = new MockEngine(true);
@@ -294,7 +294,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PeekWithoutUsingTask()
         {
             string projectContents = @"
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
         {
             string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
             Directory.CreateDirectory(dir);
-            xmlInputPath = dir + "\\doc.xml";
+            xmlInputPath = dir + Path.DirectorySeparatorChar + "doc.xml";
             using (StreamWriter sw = new StreamWriter(xmlInputPath, false))
             {
                 sw.Write(xmlFile);

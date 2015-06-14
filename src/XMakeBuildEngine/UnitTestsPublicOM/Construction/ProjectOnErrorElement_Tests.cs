@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectOnErrorElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -15,8 +17,7 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -24,13 +25,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectOnErrorElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectOnErrorElement_Tests
     {
         /// <summary>
         /// Read a target containing only OnError
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadTargetOnlyContainingOnError()
         {
             ProjectOnErrorElement onError = GetOnError();
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read a target with two onerrors, and some tasks
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadTargetTwoOnErrors()
         {
             string content = @"
@@ -73,7 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// This was accidentally allowed in 2.0/3.5 but it should be an error now.
         /// </remarks>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadMissingExecuteTargets()
         {
@@ -98,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// This was accidentally allowed in 2.0/3.5 but it should be an error now.
         /// </remarks>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadEmptyExecuteTargets()
         {
@@ -120,7 +121,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror with invalid attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidUnexpectedAttribute()
         {
@@ -138,7 +139,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror with invalid child element
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidUnexpectedChild()
         {
@@ -158,7 +159,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidBeforeTask()
         {
@@ -177,7 +178,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidBeforePropertyGroup()
         {
@@ -196,7 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidBeforeItemGroup()
         {
@@ -215,7 +216,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set ExecuteTargets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetExecuteTargetsValid()
         {
             ProjectOnErrorElement onError = GetOnError();
@@ -228,7 +229,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set ExecuteTargets to null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidExecuteTargetsNull()
         {
@@ -240,7 +241,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set ExecuteTargets to empty string
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetInvalidExecuteTargetsEmpty()
         {
@@ -252,7 +253,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set on error condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -270,7 +271,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set on error executetargets value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetExecuteTargets()
         {
             ProjectRootElement project = ProjectRootElement.Create();

@@ -12,7 +12,7 @@ using System.Xml;
 using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 
@@ -21,13 +21,13 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Tests some manipulations of Project and ProjectCollection that require dealing with internal data. 
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class Project_Internal_Tests
     {
         /// <summary>
         /// Set default tools version; subsequent projects should use it 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetDefaultToolsVersion()
         {
             string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// 
         /// ... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReloadProjectWithInvalidToolsVersionInFile()
         {
             string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Project.ToolsVersion should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectToolsVersion20Present()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// $(MSBuildToolsVersion) should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MSBuildToolsVersionProperty()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -174,12 +174,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Assert.AreEqual("2.0", project.GetPropertyValue("msbuildtoolsversion"));
 
-                project.Xml.ToolsVersion = "4.0";
+                project.Xml.ToolsVersion = ObjectModelHelpers.MSBuildDefaultToolsVersion;
                 Assert.AreEqual("2.0", project.GetPropertyValue("msbuildtoolsversion"));
 
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual("4.0", project.GetPropertyValue("msbuildtoolsversion"));
+                Assert.AreEqual(
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                    project.GetPropertyValue("msbuildtoolsversion"));
             }
             finally
             {

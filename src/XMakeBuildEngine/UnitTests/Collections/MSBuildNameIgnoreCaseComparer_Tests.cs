@@ -11,20 +11,20 @@ using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for MSBuildNameIgnoreCaseComparer
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class MSBuildNameIgnoreCaseComparer_Tests
     {
         /// <summary>
         /// Verify default comparer works on the whole string
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultEquals()
         {
             Assert.AreEqual(true, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "foo"));
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Compare real expressions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MatchProperty()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Default comparer is immutable
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void Immutable()
         {
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Objects work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NonString()
         {
             Object o = new Object();
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Null 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Null1()
         {
             Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Null 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Null2()
         {
             Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Make sure we can handle the case where the dictionary is null.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void NullDictionary()
         {
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Invalid start 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void InvalidValue2()
         {
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Invalid small end 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void InvalidValue4()
         {
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Invalid large end 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void InvalidValue5()
         {
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// End past the end of other string
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualsEndPastEnd1()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Same values means one char
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualsSameStartEnd1()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -188,7 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Same values means one char
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualsSameStartEnd2()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Same values means one char
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualsSameStartEnd3()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Start at 0
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualsStartZero()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -245,7 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// End at end
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualsEndEnd()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Default get hash code
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultGetHashcode()
         {
             Assert.AreEqual(true, 0 == MSBuildNameIgnoreCaseComparer.Default.GetHashCode(null));
@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Indexed get hashcode
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IndexedGetHashcode1()
         {
             MSBuildNameIgnoreCaseComparer comparer = MSBuildNameIgnoreCaseComparer.Mutable;
@@ -328,7 +328,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Indexed get hashcode
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IndexedGetHashcode2()
         {
             MSBuildNameIgnoreCaseComparer comparer = MSBuildNameIgnoreCaseComparer.Mutable;
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Indexed get hashcode
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IndexedGetHashcode3()
         {
             MSBuildNameIgnoreCaseComparer comparer = MSBuildNameIgnoreCaseComparer.Mutable;

@@ -5,16 +5,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Resources;
 using System.Security;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
-
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

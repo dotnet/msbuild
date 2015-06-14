@@ -12,7 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -26,13 +26,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for the NodePacketTranslators
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class NodePacketTranslator_Tests
     {
         /// <summary>
         /// Tests the SerializationMode property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing bools.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeBool()
         {
             HelperTestSimpleType(false, true);
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing bytes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeByte()
         {
             byte val = 0x55;
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing shorts.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeShort()
         {
             short val = 0x55AA;
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing ints.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeInt()
         {
             int val = 0x55AA55AA;
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing strings.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeString()
         {
             HelperTestSimpleType("foo", null);
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing string arrays.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeStringArray()
         {
             HelperTestArray(new string[] { }, StringComparer.Ordinal);
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing string arrays.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeStringList()
         {
             HelperTestList(new List<string>(), StringComparer.Ordinal);
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing DateTimes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDateTime()
         {
             HelperTestSimpleType(new DateTime(), DateTime.Now);
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing using the DotNet serializer.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDotNet()
         {
             ArgumentNullException value = new ArgumentNullException("The argument was null", new InsufficientMemoryException());
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing using the DotNet serializer passing in null.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDotNetNull()
         {
             ArgumentNullException value = null;
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing an object with a default constructor.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeINodePacketSerializable()
         {
             DerivedClass value = new DerivedClass(1, 2);
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing an object with a default constructor passed as null.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeINodePacketSerializableNull()
         {
             DerivedClass value = null;
@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing an object requiring a factory to construct.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeWithFactory()
         {
             BaseClass value = new BaseClass(1);
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing an object requiring a factory to construct, passing null for the value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeWithFactoryNull()
         {
             BaseClass value = null;
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing an array of objects with default constructors.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeArray()
         {
             DerivedClass[] value = new DerivedClass[] { new DerivedClass(1, 2), new DerivedClass(3, 4) };
@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing an array of objects with default constructors, passing null for the array.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeArrayNull()
         {
             DerivedClass[] value = null;
@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing an array of objects requiring factories to construct.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeArrayWithFactory()
         {
             BaseClass[] value = new BaseClass[] { new BaseClass(1), new BaseClass(2) };
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing an array of objects requiring factories to construct, passing null for the array.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeArrayWithFactoryNull()
         {
             BaseClass[] value = null;
@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing a dictionary of { string, string }
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDictionaryStringString()
         {
             Dictionary<string, string> value = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -321,7 +321,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing a dictionary of { string, string }, passing null.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDictionaryStringStringNull()
         {
             Dictionary<string, string> value = null;
@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests serializing a dictionary of { string, T } where T requires a factory to construct and the dictionary
         /// requires a KeyComparer initializer.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDictionaryStringT()
         {
             Dictionary<string, BaseClass> value = new Dictionary<string, BaseClass>(StringComparer.OrdinalIgnoreCase);
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests serializing a dictionary of { string, T } where T requires a factory to construct and the dictionary
         /// requires a KeyComparer initializer, passing null for the dictionary.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDictionaryStringTNull()
         {
             Dictionary<string, BaseClass> value = null;
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests serializing a dictionary of { string, T } where T requires a factory to construct and the dictionary
         /// has a default constructor.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDictionaryStringTNoComparer()
         {
             Dictionary<string, BaseClass> value = new Dictionary<string, BaseClass>();
@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests serializing a dictionary of { string, T } where T requires a factory to construct and the dictionary
         /// has a default constructor, passing null for the dictionary.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSerializeDictionaryStringTNoComparerNull()
         {
             Dictionary<string, BaseClass> value = null;

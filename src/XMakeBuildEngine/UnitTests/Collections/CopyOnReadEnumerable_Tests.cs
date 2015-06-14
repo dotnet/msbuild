@@ -8,20 +8,20 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for CopyOnReadEnumerable
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class CopyOnReadEnumerable_Tests
     {
         /// <summary>
         /// Verify basic case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NonCloneableBackingCollection()
         {
             List<int> values = new List<int>(new int[] { 1, 2, 3 });
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Verify cloning case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneableBackingCollection()
         {
             List<Cloneable> values = new List<Cloneable>(new Cloneable[] { new Cloneable(), new Cloneable(), new Cloneable() });

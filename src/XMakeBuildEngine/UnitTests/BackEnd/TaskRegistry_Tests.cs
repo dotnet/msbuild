@@ -9,29 +9,27 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
-using System.Reflection;
+using Microsoft.Build.Tasks;
+
+using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Test the task registry
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TaskRegistry_Tests
     {
         /// <summary>
@@ -74,8 +72,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Set up this test class -- generate the test task assembly used by 
         /// several of the tests. 
         /// </summary>
-        [ClassInitialize]
-        public static void SetupClass(TestContext context)
+        [TestFixtureSetUp]
+        public static void SetupClass()
         {
             s_testTaskLocation = GetTestTaskAssemblyLocation();
         }
@@ -84,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Clean this test class up -- make sure the test task assembly we 
         /// generated has been deleted. 
         /// </summary>
-        [ClassCleanup]
+        [TestFixtureTearDown]
         public static void CleanupClass()
         {
             if (File.Exists(s_testTaskLocation))
@@ -96,7 +94,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Setup some logging services so we can see what is goign on.
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             s_loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1) as ILoggingService;
@@ -112,7 +110,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Expect:
         ///     One task to be registered and that it has the correct assembly information registered.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterTaskSimple()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -146,7 +144,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///     Expect only one task to be regisered under each task name
         ///     Expect the correct assembly information to be registered
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterMultipleTasksWithDifferentNames()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -188,7 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///         Expect two of the tasks to be under the same task name bucket
         ///         Expect the correct assembly information to be registered for each of the tasks
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterMultipleTasksSomeWithSameName()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -253,7 +251,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Expect:
         ///     Three tasks to be registered
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterMultipleTasksWithDifferentNamesFromSameAssembly()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -292,7 +290,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///     Three tasks to be registered
         ///     Two of the tasks should be in the same name bucket
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterMultipleTasksWithSameNameAndSameAssembly()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -320,7 +318,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Expected that an otherwise equivalent task will be recognized as a separate task if it has
         /// different task parameters set.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterTasksWithFactoryParameters()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -359,7 +357,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheTaskDoesNotExist_ExactMatch()
@@ -401,7 +399,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheTaskDoesNotExist_FuzzyMatch()
@@ -443,7 +441,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheMatchingTaskDoesNotExist_FuzzyMatch()
@@ -487,7 +485,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheMatchingTaskDoesNotExistOnFirstCallButDoesOnSecond()
@@ -531,7 +529,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Validate task retrieval and exact cache retrieval when attempting to load 
         /// a task with parameters. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheMatchingExactParameters()
@@ -610,7 +608,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// ever work, since we don't currently have a way to create a using task with 
         /// parameters other than those two. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheMatchingExactParameters_AdditionalParameters()
@@ -659,7 +657,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Test retrieving a matching task record using various parameter combinations when allowing 
         /// fuzzy matches.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters()
@@ -744,7 +742,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Test retrieving a matching task record using various parameter combinations when allowing 
         /// fuzzy matches.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_RecoverFromFailure()
@@ -804,7 +802,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// multiple using tasks registered for the same task, just with different parameter 
         /// sets. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_MultipleUsingTasks()
@@ -936,7 +934,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// there are multiple matches, if we are doing fuzzy matching, we should prefer the 
         /// record that's in the cache, even if it wasn't the original first record. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_MultipleUsingTasks_PreferCache()
@@ -990,7 +988,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Test retrieving a matching task record using various parameter combinations when allowing 
         /// fuzzy matches.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_ExactMatches()
@@ -1062,7 +1060,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// ever work, since we don't currently have a way to create a using task with 
         /// parameters other than those two. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_AdditionalParameters()
@@ -1135,7 +1133,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Expect:
         ///     Expanded property and item values to be correct for each of the attributes
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AllUsingTaskAttributesAreExpanded()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -1188,7 +1186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Expect:
         ///     Expect two of the conditions to evaluate to false causing two of the tasks to not be registered
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskRegisteredOnlyIfConditionIsTrue()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -1239,7 +1237,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when there are no child elements on the using task that there are no ParameterGroupAndTaskBody
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoChildrenElements()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -1268,7 +1266,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when there is a parametergroup that there is a ParameterGroupAndTaskBody but that there are no parameters in it.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyParameterGroup()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -1300,7 +1298,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when when multiple parameters are set that they show up in the parametergroup object
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MultipleGoodParameters()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -1351,7 +1349,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify passing a empty type parameter results in the default type of String being registered
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyTypeOnParameter()
         {
             string output = bool.TrueString;
@@ -1366,7 +1364,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify passing a null as a  type parameter results in the default type of String being registered
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NullTypeOnParameter()
         {
             string output = bool.TrueString;
@@ -1381,7 +1379,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when registering a randon type which is not allowed that we get an InvalidProjectFileException
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void RandomTypeOnParameter()
         {
@@ -1399,7 +1397,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///     ValueTypeArray
         ///     StringArray
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GoodValueTypeArrayInputOnInputParameter()
         {
             // Note output is false so these are only input parameters
@@ -1422,7 +1420,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when a class (other than string or ITaskItem) is attempted to be registered as an input parameter we get an invalid project file exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void BadArrayInputOnInputParameter()
         {
@@ -1439,7 +1437,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that value types and (string and ITaskItem classes) can be registered as input parameters
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GoodScalarTypeArrayInputOnInputParameter()
         {
             // Note output is false so these are only input parameters
@@ -1463,7 +1461,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify when a class which derives from ITask is attempted to be registered that we get an InvalidProjectFileException. 
         /// We only support ITaskItems and not their derived types as input parameters.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void BadScalarInputOnInputParameterDerivedFromITask()
         {
@@ -1480,7 +1478,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when a random scalar input class is attempted to be registered that we get an invalid proejct file exceptions.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void BadScalarInputOnInputParameter()
         {
@@ -1504,7 +1502,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///     ItaskItem[]
         ///     Types which are assignable to ITaskItem or ITaskItem[]
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GoodOutPutParameters()
         {
             // Notice output is true
@@ -1542,7 +1540,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that an arbitrary output type class which is not derived from ITaskItem is not allowed
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void BadOutputParameter()
         {
@@ -1559,7 +1557,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when the output parameter is not set that it defaults to false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyOutput()
         {
             string output = "";
@@ -1574,7 +1572,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when the output parameter is empty that it defaults to false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NullOutput()
         {
             string output = null;
@@ -1589,7 +1587,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that a random string which is not a boolean causes an invalid project file exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void RandomOutput()
         {
@@ -1605,7 +1603,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify an empty required value results in a default value of false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyRequired()
         {
             string output = bool.TrueString;
@@ -1620,7 +1618,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify a null required value results in a default value of false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NullRequired()
         {
             string output = bool.TrueString;
@@ -1635,7 +1633,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify a value which cannot be parsed to a boolean results in a invalidprojectfileexception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void RandomRequired()
         {
@@ -1651,7 +1649,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that expansion of the attributes works.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandedGoodParameters()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -1705,7 +1703,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that expansion of the evaluate attribute.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandedPropertyEvaluate()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -1729,7 +1727,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that expansion of the evaluate attribute.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExpandedItemEvaluate()
         {
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
@@ -1753,7 +1751,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when false is passed to evaluate value results in a false value being set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FalseEvaluateWithBody()
         {
             string body = "$(Property1)@(ThirdItem)$(Property2)";
@@ -1767,7 +1765,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when false is passed to evaluate value results in a false value being set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EvaluateWithBody()
         {
             string body = "$(Property1)@(ThirdItem)$(Property2)";
@@ -1785,7 +1783,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that a random string which is not a boolean causes an invalid project file exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void RandomEvaluate()
         {
@@ -1798,7 +1796,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when false is passed to evaluate value results in a false value being set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FalseEvaluate()
         {
             string evaluate = bool.FalseString;
@@ -1810,7 +1808,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify an empty evaluate value results in a default value of true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyEvaluate()
         {
             string evaluate = "";
@@ -1822,7 +1820,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify a null evaluate value results in a default value of true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NullEvaluate()
         {
             string evaluate = null;

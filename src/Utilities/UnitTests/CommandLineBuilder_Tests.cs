@@ -3,16 +3,16 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class CommandLineBuilderTest
     {
         /*
@@ -20,13 +20,15 @@ namespace Microsoft.Build.UnitTests
         *
         * Just append a simple switch.
         */
-        [TestMethod]
+        [Test]
         public void AppendSwitchSimple()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitch("/a");
             c.AppendSwitch("-b");
-            Assert.AreEqual("/a -b", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/a ") + CommandLineBuilder.FixCommandLineSwitch("-b"),
+                c.ToString());
         }
 
         /*
@@ -34,12 +36,12 @@ namespace Microsoft.Build.UnitTests
         *
         * Append a switch that has a string parameter.
         */
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithStringParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/animal:", "dog");
-            Assert.AreEqual("/animal:dog", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch("/animal:dog"), c.ToString());
         }
 
         /*
@@ -47,23 +49,23 @@ namespace Microsoft.Build.UnitTests
         *
         * This should trigger implicit quoting.
         */
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithSpacesInParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/animal:", "dog and pony");
-            Assert.AreEqual("/animal:\"dog and pony\"", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch("/animal:\"dog and pony\""), c.ToString());
         }
 
         /// <summary>
         /// Test for AppendSwitchIfNotNull for the ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithSpacesInParameterTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/animal:", (ITaskItem)new TaskItem("dog and pony"));
-            Assert.AreEqual("/animal:\"dog and pony\"", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch("/animal:\"dog and pony\""), c.ToString());
         }
 
         /*
@@ -71,12 +73,12 @@ namespace Microsoft.Build.UnitTests
         *
         * Implicit quoting should not happen.
         */
-        [TestMethod]
+        [Test]
         public void AppendLiteralSwitchWithSpacesInParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchUnquotedIfNotNull("/animal:", "dog and pony");
-            Assert.AreEqual("/animal:dog and pony", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch("/animal:dog and pony"), c.ToString());
         }
 
         /*
@@ -84,15 +86,15 @@ namespace Microsoft.Build.UnitTests
         *
         * When appending two comma-delimited strings, there should be no space before the comma.
         */
-        [TestMethod]
+        [Test]
         public void AppendTwoStringsEnsureNoSpace()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendFileNamesIfNotNull(new string[] { "Form1.resx", @"built\Form1.resources" }, ",");
+            c.AppendFileNamesIfNotNull(new string[] { "Form1.resx", FileUtilities.FixFilePath("built\\Form1.resources") }, ",");
 
             // There shouldn't be a space before or after the comma
             // Tools like resgen require comma-delimited lists to be bumped up next to each other.
-            Assert.AreEqual(@"Form1.resx,built\Form1.resources", c.ToString());
+            Assert.AreEqual(FileUtilities.FixFilePath(@"Form1.resx,built\Form1.resources"), c.ToString());
         }
 
         /*
@@ -100,7 +102,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Append several sources files using JoinAppend
         */
-        [TestMethod]
+        [Test]
         public void AppendSourcesArray()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -115,27 +117,29 @@ namespace Microsoft.Build.UnitTests
         *
         * Append several sources files starting with dashes using JoinAppend
         */
-        [TestMethod]
+        [Test]
         public void AppendSourcesArrayWithDashes()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendFileNamesIfNotNull(new string[] { "-Mercury.cs", "-Venus.cs", "-Earth.cs" }, " ");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual(@".\-Mercury.cs .\-Venus.cs .\-Earth.cs", c.ToString());
+            Assert.AreEqual("." + Path.DirectorySeparatorChar + "-Mercury.cs ." +
+                Path.DirectorySeparatorChar + "-Venus.cs ." +
+                Path.DirectorySeparatorChar + "-Earth.cs", c.ToString());
         }
 
         /// <summary>
         /// Test AppendFileNamesIfNotNull, the ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSourcesArrayWithDashesTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendFileNamesIfNotNull(new TaskItem[] { new TaskItem("-Mercury.cs"), null, new TaskItem("Venus.cs"), new TaskItem("-Earth.cs") }, " ");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual(@".\-Mercury.cs  Venus.cs .\-Earth.cs", c.ToString());
+            Assert.AreEqual("." + Path.DirectorySeparatorChar + "-Mercury.cs  Venus.cs ." + Path.DirectorySeparatorChar + "-Earth.cs", c.ToString());
         }
 
         /*
@@ -143,7 +147,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Append append and empty array. Result should be NOP.
         */
-        [TestMethod]
+        [Test]
         public void JoinAppendEmpty()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -158,7 +162,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Append append and empty array. Result should be NOP.
         */
-        [TestMethod]
+        [Test]
         public void JoinAppendNull()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -171,7 +175,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Append a switch with parameter array, quoting
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithParameterArrayQuoting()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -179,13 +183,16 @@ namespace Microsoft.Build.UnitTests
             c.AppendSwitchIfNotNull("/switch:", new string[] { "Mer cury.cs", "Ve nus.cs", "Ear th.cs" }, ",");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something /switch:\"Mer cury.cs\",\"Ve nus.cs\",\"Ear th.cs\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ")
+                + CommandLineBuilder.FixCommandLineSwitch("/switch:\"Mer cury.cs\",\"Ve nus.cs\",\"Ear th.cs\""),
+                c.ToString());
         }
 
         /// <summary>
         /// Append a switch with parameter array, quoting, ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithParameterArrayQuotingTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -193,13 +200,16 @@ namespace Microsoft.Build.UnitTests
             c.AppendSwitchIfNotNull("/switch:", new TaskItem[] { new TaskItem("Mer cury.cs"), null, new TaskItem("Ve nus.cs"), new TaskItem("Ear th.cs") }, ",");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something /switch:\"Mer cury.cs\",,\"Ve nus.cs\",\"Ear th.cs\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ")
+                + CommandLineBuilder.FixCommandLineSwitch("/switch:\"Mer cury.cs\",,\"Ve nus.cs\",\"Ear th.cs\""),
+                c.ToString());
         }
 
         /// <summary>
         /// Append a switch with parameter array, no quoting
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithParameterArrayNoQuoting()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -207,13 +217,16 @@ namespace Microsoft.Build.UnitTests
             c.AppendSwitchUnquotedIfNotNull("/switch:", new string[] { "Mer cury.cs", "Ve nus.cs", "Ear th.cs" }, ",");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something /switch:Mer cury.cs,Ve nus.cs,Ear th.cs", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ")
+                + CommandLineBuilder.FixCommandLineSwitch("/switch:Mer cury.cs,Ve nus.cs,Ear th.cs"),
+                c.ToString());
         }
 
         /// <summary>
         /// Append a switch with parameter array, no quoting, ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithParameterArrayNoQuotingTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -221,13 +234,16 @@ namespace Microsoft.Build.UnitTests
             c.AppendSwitchUnquotedIfNotNull("/switch:", new TaskItem[] { new TaskItem("Mer cury.cs"), null, new TaskItem("Ve nus.cs"), new TaskItem("Ear th.cs") }, ",");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something /switch:Mer cury.cs,,Ve nus.cs,Ear th.cs", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ")
+                + CommandLineBuilder.FixCommandLineSwitch("/switch:Mer cury.cs,,Ve nus.cs,Ear th.cs"),
+                c.ToString());
         }
 
         /// <summary>
         /// Appends a single file name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSingleFileName()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -237,13 +253,15 @@ namespace Microsoft.Build.UnitTests
             c.AppendFileNameIfNotNull("Mer cury.cs");
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something .\\-Mercury.cs Mercury.cs \"Mer cury.cs\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ." + Path.DirectorySeparatorChar + "-Mercury.cs Mercury.cs \"Mer cury.cs\""),
+                c.ToString());
         }
 
         /// <summary>
         /// Appends a single file name, ITaskItem version
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSingleFileNameTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
@@ -253,13 +271,15 @@ namespace Microsoft.Build.UnitTests
             c.AppendFileNameIfNotNull((ITaskItem)new TaskItem("Mer cury.cs"));
 
             // Managed compilers use this function to append sources files.
-            Assert.AreEqual("/something .\\-Mercury.cs Mercury.cs \"Mer cury.cs\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch("/something ." + Path.DirectorySeparatorChar + "-Mercury.cs Mercury.cs \"Mer cury.cs\""),
+                c.ToString());
         }
 
         /// <summary>
         /// Verify that we throw an exception correctly for the case where we don't have a switch name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void AppendSingleFileNameWithQuotes()
         {
@@ -273,141 +293,146 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trigger escaping of literal quotes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithLiteralQuotesInParameter()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", "LSYSTEM_COMPATIBLE_ASSEMBLY_NAME=L\"Microsoft.Windows.SystemCompatible\"");
-            Assert.AreEqual("/D\"LSYSTEM_COMPATIBLE_ASSEMBLY_NAME=L\\\"Microsoft.Windows.SystemCompatible\\\"\"", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch(
+                    "/D\"LSYSTEM_COMPATIBLE_ASSEMBLY_NAME=L\\\"Microsoft.Windows.SystemCompatible\\\"\""),
+                c.ToString());
         }
 
         /// <summary>
         /// Trigger escaping of literal quotes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithLiteralQuotesInParameter2()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"ASSEMBLY_KEY_FILE=""c:\\foo\\FinalKeyFile.snk""");
-            Assert.AreEqual(@"/D""ASSEMBLY_KEY_FILE=\""c:\\foo\\FinalKeyFile.snk\""""", c.ToString());
+            Assert.AreEqual(
+                CommandLineBuilder.FixCommandLineSwitch(@"/D""ASSEMBLY_KEY_FILE=\""c:\\foo\\FinalKeyFile.snk\"""""),
+                c.ToString());
         }
 
         /// <summary>
         /// Trigger escaping of literal quotes. This time, a double set of literal quotes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchWithLiteralQuotesInParameter3()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"""A B"" and ""C""");
-            Assert.AreEqual(@"/D""\""A B\"" and \""C\""""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""\""A B\"" and \""C\"""""), c.ToString());
         }
 
         /// <summary>
         /// When a value contains a backslash, it doesn't normally need escaping.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchContainingBackslash()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"A \B");
-            Assert.AreEqual(@"/D""A \B""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""A \B"""), c.ToString());
         }
 
         /// <summary>
         /// Backslashes before quotes need escaping themselves.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchContainingBackslashBeforeLiteralQuote()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"A"" \""B");
-            Assert.AreEqual(@"/D""A\"" \\\""B""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""A\"" \\\""B"""), c.ToString());
         }
 
         /// <summary>
         /// Don't quote if not asked to
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchUnquotedIfNotNull()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchUnquotedIfNotNull("/D", @"A"" \""B");
-            Assert.AreEqual(@"/DA"" \""B", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/DA"" \""B"), c.ToString());
         }
 
         /// <summary>
         /// When a value ends with a backslash, that certainly should be escaped if it's
         /// going to be quoted.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchEndingInBackslash()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"A B\");
-            Assert.AreEqual(@"/D""A B\\""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""A B\\"""), c.ToString());
         }
 
         /// <summary>
         /// Backslashes don't need to be escaped if the string isn't going to get quoted.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendNonQuotableSwitchEndingInBackslash()
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitchIfNotNull("/D", @"AB\");
-            Assert.AreEqual(@"/DAB\", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/DAB\"), c.ToString());
         }
 
         /// <summary>
         /// Quoting of hyphens
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchWithHyphen()
         {
             CommandLineBuilder c = new CommandLineBuilder(/* do not quote hyphens*/);
             c.AppendSwitchIfNotNull("/D", @"foo-bar");
-            Assert.AreEqual(@"/Dfoo-bar", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/Dfoo-bar"), c.ToString());
         }
 
         /// <summary>
         /// Quoting of hyphens 2
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendQuotableSwitchWithHyphenQuoting()
         {
             CommandLineBuilder c = new CommandLineBuilder(true /* quote hyphens*/);
             c.AppendSwitchIfNotNull("/D", @"foo-bar");
-            Assert.AreEqual(@"/D""foo-bar""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""foo-bar"""), c.ToString());
         }
 
         /// <summary>
         /// Appends an ITaskItem item spec as a parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder(true);
             c.AppendSwitchIfNotNull("/D", new TaskItem(@"foo-bar"));
-            Assert.AreEqual(@"/D""foo-bar""", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/D""foo-bar"""), c.ToString());
         }
 
         /// <summary>
         /// Appends an ITaskItem item spec as a parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendSwitchUnQuotedTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder(true);
             c.AppendSwitchUnquotedIfNotNull("/D", new TaskItem(@"foo-bar"));
-            Assert.AreEqual(@"/Dfoo-bar", c.ToString());
+            Assert.AreEqual(CommandLineBuilder.FixCommandLineSwitch(@"/Dfoo-bar"), c.ToString());
         }
 
         /// <summary>
         /// Odd number of literal quotes. This should trigger an exception, because command line parsers
         /// generally can't handle this case.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void AppendSwitchWithOddNumberOfLiteralQuotesInParameter()
         {
@@ -431,7 +456,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the else of VerifyThrowNOEmbeddedDouble quotes where the switch name is not empty or null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void TestVerifyThrowElse()
         {

@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectItemInstance_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -6,16 +8,17 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
@@ -24,7 +27,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectItemInstance public members
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectItemInstance_Tests
     {
         /// <summary>
@@ -35,7 +38,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Basic ProjectItemInstance without metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AccessorsWithoutMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -43,12 +46,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.AreEqual("i", item.ItemType);
             Assert.AreEqual("i1", item.EvaluatedInclude);
             Assert.AreEqual(false, item.Metadata.GetEnumerator().MoveNext());
-        } 
+        }
 
         /// <summary>
         /// Basic ProjectItemInstance with metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AccessorsWithMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -66,7 +69,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Get metadata not present
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetMissingMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -77,7 +80,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set include
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetInclude()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -88,7 +91,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set include to empty string
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetInvalidEmptyInclude()
         {
@@ -99,7 +102,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set include to invalid null value
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullInclude()
         {
@@ -110,7 +113,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Create an item with a metadatum that has a null value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CreateItemWithNullMetadataValue()
         {
             Project project = new Project();
@@ -126,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set metadata value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -137,7 +140,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set metadata value to empty string
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetMetadataEmptyString()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -149,7 +152,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Set metadata value to null value -- this is allowed, but 
         /// internally converted to the empty string. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullMetadataValue()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -160,7 +163,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set metadata with invalid empty name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullMetadataName()
         {
@@ -171,7 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set metadata with invalid empty name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetInvalidEmptyMetadataName()
         {
@@ -182,7 +185,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cast to ITaskItem
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CastToITaskItem()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -203,7 +206,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// maintained correctly.  Also creates a new Microsoft.Build.Utilities.TaskItem from the ProjectItemInstance
         /// and verifies that none of the information is lost.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ITaskItem2Operations()
         {
             Project project = new Project();
@@ -277,7 +280,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cast to ITaskItem
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CastToITaskItemNoMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -299,7 +302,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// No metadata, simple case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoMetadata()
         {
             string content = @"
@@ -322,7 +325,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Read off metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadMetadata()
         {
             string content = @"
@@ -355,10 +358,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// 
         /// Verify the Utilities task item gets the expanded metadata from the ItemDefintionGroup.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InstanceItemToUtilItemIDG()
         {
-                       string content = @"
+            string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemDefinitionGroup>
                             <i>
@@ -389,7 +392,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Get metadata values inherited from item definitions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetMetadataValuesFromDefinition()
         {
             string content = @"
@@ -422,7 +425,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Exclude against an include with item vectors in it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExcludeWithIncludeVector()
         {
             string content = @"
@@ -449,7 +452,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Exclude with item vectors against an include with item vectors in it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExcludeVectorWithIncludeVector()
         {
             string content = @"
@@ -477,7 +480,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Metadata on items can refer to metadata above
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataReferringToMetadataAbove()
         {
             string content = @"
@@ -503,7 +506,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// NOTE: To work properly, this should batch. This is a temporary "patch" to make it work for now.
         /// It will only give correct results if there is exactly one item in the Include. Otherwise Batching would be needed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataExpression()
         {
             string content = @"
@@ -524,7 +527,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Qualified built in metadata should work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInQualifiedMetadataExpression()
         {
             string content = @"
@@ -545,7 +548,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Mis-qualified built in metadata should not work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMisqualifiedMetadataExpression()
         {
             string content = @"
@@ -566,7 +569,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Metadata condition should work correctly with built-in metadata 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataInMetadataCondition()
         {
             string content = @"
@@ -589,7 +592,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Metadata on item condition not allowed (currently)
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void BuiltInMetadataInItemCondition()
         {
@@ -607,13 +610,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Two items should each get their own values for built-in metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTwoItems()
         {
             string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
-                            <i Include='i1.cpp;c:\bar\i2.cpp'>
+                            <i Include='i1.cpp;" + (NativeMethodsShared.IsWindows ? @"c:\bar\i2.cpp" : "/bar/i2.cpp") + @"'>
                                 <m>%(Filename).obj</m>
                             </i>
                         </ItemGroup>
@@ -629,7 +632,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Items from another list, but with different metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentMetadataItemsFromOtherList()
         {
             string content = @"
@@ -656,7 +659,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Items from another list, but with different metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentBuiltInMetadataItemsFromOtherList()
         {
             string content = @"
@@ -681,7 +684,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Two items coming from a transform
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTransformInInclude()
         {
             string content = @"
@@ -706,7 +709,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Transform in the metadata value; no bare metadata involved
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTransformInMetadataValue()
         {
             string content = @"
@@ -731,7 +734,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Transform in the metadata value; bare metadata involved
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BuiltInMetadataTransformInMetadataValueBareMetadataPresent()
         {
             string content = @"
@@ -756,7 +759,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Metadata on items can refer to item lists
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataValueReferringToItems()
         {
             string content = @"
@@ -779,7 +782,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Metadata on items' conditions can refer to item lists
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataConditionReferringToItems()
         {
             string content = @"
@@ -804,7 +807,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Metadata on items' conditions can refer to other metadata
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MetadataConditionReferringToMetadataOnSameItem()
         {
             string content = @"

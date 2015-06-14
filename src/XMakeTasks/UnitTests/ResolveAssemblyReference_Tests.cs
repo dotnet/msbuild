@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Resources;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
@@ -23,7 +23,7 @@ using System.Linq;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
-    [TestClass]
+    [TestFixture]
     public class ResolveAssemblyReferenceTestFixture
     {
         // Create the mocks.
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
   <File AssemblyName=""System.Dynamic"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.EnterpriseServices"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.IdentityModel"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
-  <File AssemblyName=""System.IdentityModel.Selectors"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" /> 
+  <File AssemblyName=""System.IdentityModel.Selectors"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.IO.Log"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Management"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Management.Instrumentation"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
   <File AssemblyName=""System.ServiceModel.Routing"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.ServiceModel.Web"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.ServiceProcess"" Version=""4.0.0.0"" PublicKeyToken=""b03f5f7f11d50a3a"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
-  <File AssemblyName=""System.Speech"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" /> 
+  <File AssemblyName=""System.Speech"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Transactions"" Version=""4.0.0.0"" PublicKeyToken=""b77a5c561934e089"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Web.Abstractions"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
   <File AssemblyName=""System.Web.ApplicationServices"" Version=""4.0.0.0"" PublicKeyToken=""31bf3856ad364e35"" Culture=""neutral"" ProcessorArchitecture=""MSIL"" InGac=""true"" />
@@ -167,13 +167,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 </FileList>"
 ;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", "1");
         }
 
-        [TestCleanup]
+        [TearDown]
         public void Cleanup()
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", null);
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"C:\MyComponentServicePack\MyControlWithServicePack.dll",               // The service pack 1 version of the control
                 @"C:\MyComponentBase\MyControlWithServicePack.dll",                      // The non-service pack version of the control.
                 @"C:\MyComponentServicePack2\MyControlWithServicePack.dll",              // The service pack 1 version of the control
-                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC\mscorlib.dll",  // A devices mscorlib. 
+                @"c:\WINNT\Microsoft.NET\Framework\v2.0.MyVersion.PocketPC\mscorlib.dll",  // A devices mscorlib.
                 @"c:\MyLibraries\A.dll",
                 @"c:\MyExecutableLibraries\A.exe",
                 @"c:\MyLibraries\B.dll",
@@ -776,7 +776,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// A mock delagate for Directory.GetDirectories. 
+        /// A mock delagate for Directory.GetDirectories.
         /// </summary>
         /// <param name="file">The file path.</param>
         /// <param name="file">The file pattern.</param>
@@ -1623,7 +1623,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Cached implementation. Given an assembly name, crack it open and retrieve the list of dependent 
+        /// Cached implementation. Given an assembly name, crack it open and retrieve the list of dependent
         /// assemblies and  the list of scatter files.
         /// </summary>
         /// <param name="path">Path to the assembly.</param>
@@ -2817,7 +2817,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Execute the task.
         /// </summary>
         /// <remarks>
-        /// NOTE! This test is not in fact completely isolated from its environment: it is reading the real redist lists. 
+        /// NOTE! This test is not in fact completely isolated from its environment: it is reading the real redist lists.
         /// </remarks>
         protected static bool Execute(ResolveAssemblyReference t)
         {
@@ -2825,7 +2825,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Execute the task. Without confirming that the number of files resolved with and without find dependencies is identical. 
+        /// Execute the task. Without confirming that the number of files resolved with and without find dependencies is identical.
         /// This is because profiles could cause the number of primary references to be different.
         /// </summary>
         protected static bool Execute(ResolveAssemblyReference t, bool buildConsistencyCheck)
@@ -2977,7 +2977,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
     namespace VersioningAndUnification.Prerequisite
     {
-        [TestClass]
+        [TestFixture]
         sealed public class StronglyNamedDependency : ResolveAssemblyReferenceTestFixture
         {
             /// <summary>
@@ -3001,7 +3001,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// We automatically unify FX dependencies.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void Exists()
             {
                 // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3059,10 +3059,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// - This should be an unresolved reference, we shouldn't fallback to the old version.
             /// Rationale:
             /// The fusion loader is going to want to respect the unified-to assembly. There's no point in
-            /// feeding it the wrong version, and the drawback is that builds would be different from 
+            /// feeding it the wrong version, and the drawback is that builds would be different from
             /// machine-to-machine.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void HighVersionDoesntExist()
             {
                 // Create the engine.
@@ -3090,7 +3090,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 );
             }
 
-            [TestMethod]
+            [Test]
             public void VerifyAssemblyPulledOutOfFrameworkDoesntGetFrameworkFileAttribute()
             {
                 MockEngine e = new MockEngine();
@@ -3153,7 +3153,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
     namespace VersioningAndUnification.AppConfig
     {
-        [TestClass]
+        [TestFixture]
         sealed public class FilePrimary : ResolveAssemblyReferenceTestFixture
         {
             /// <summary>
@@ -3167,11 +3167,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void Exists()
             {
                 // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3218,7 +3218,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <summary>
             /// Test the case where the appconfig has a malformed binding redirect version.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void BadAppconfigOldVersion()
             {
                 // Create the engine.
@@ -3271,7 +3271,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <summary>
             /// Test the case where the appconfig has a malformed binding redirect version.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void BadAppconfigNewVersion()
             {
                 // Create the engine.
@@ -3335,7 +3335,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, if the unified version is in the black list it should be removed and warned.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsPromotedDependencyInTheBlackList()
             {
                 string implicitRedistListContents =
@@ -3406,7 +3406,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <summary>
             /// In this case,
             /// - A single primary file reference to assembly version 1.0.0.0 was passed in.
-            /// - An app.config was passed in that promotes a *different* assembly version name from 
+            /// - An app.config was passed in that promotes a *different* assembly version name from
             //    1.0.0.0 to 2.0.0.0
             /// - Version 1.0.0.0 of the file exists.
             /// - Version 2.0.0.0 of the file exists.
@@ -3416,7 +3416,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// One entry in the app.config file should not be able to impact the mapping of an assembly
             /// with a different name.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsDifferentName()
             {
                 // Create the engine.
@@ -3465,11 +3465,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsOldVersionRange()
             {
                 // Create the engine.
@@ -3518,11 +3518,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void HighVersionDoesntExist()
             {
                 // Create the engine.
@@ -3570,10 +3570,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// -- The resulting assembly returned should be 2.0.0.0.
             /// Rationale:
             /// There's no way for the resolve algorithm to determine that the file reference corresponds
-            /// to a particular AssemblyName. Because of this, there's no way to determine that we want to 
+            /// to a particular AssemblyName. Because of this, there's no way to determine that we want to
             /// promote from 0.5.0.0 to 2.0.0.0. In this case, just use the assembly name that was passed in.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void LowVersionDoesntExist()
             {
                 // Create the engine.
@@ -3613,7 +3613,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-        [TestClass]
+        [TestFixture]
         sealed public class SpecificVersionPrimary : ResolveAssemblyReferenceTestFixture
         {
             /// <summary>
@@ -3627,11 +3627,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void Exists()
             {
                 // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3679,7 +3679,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <summary>
             /// In this case,
             /// - A single primary version-strict reference was passed in to assembly version 1.0.0.0
-            /// - An app.config was passed in that promotes a *different* assembly version name from 
+            /// - An app.config was passed in that promotes a *different* assembly version name from
             //    1.0.0.0 to 2.0.0.0
             /// - Version 1.0.0.0 of the file exists.
             /// - Version 2.0.0.0 of the file exists.
@@ -3688,11 +3688,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsDifferentName()
             {
                 // Create the engine.
@@ -3742,11 +3742,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsOldVersionRange()
             {
                 // Create the engine.
@@ -3796,11 +3796,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void HighVersionDoesntExist()
             {
                 // Create the engine.
@@ -3850,11 +3850,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified--even those that don't exist on disk. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void LowVersionDoesntExist()
             {
                 // Create the engine.
@@ -3893,7 +3893,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-        [TestClass]
+        [TestFixture]
         sealed public class NonSpecificVersionStrictPrimary : ResolveAssemblyReferenceTestFixture
         {
             /// <summary>
@@ -3917,11 +3917,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void Exists()
             {
                 // Create the engine.
@@ -3966,7 +3966,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <summary>
             /// In this case,
             /// - A single primary non-version-strict reference was passed in to assembly version 1.0.0.0
-            /// - An app.config was passed in that promotes a *different* assembly version name from 
+            /// - An app.config was passed in that promotes a *different* assembly version name from
             //    1.0.0.0 to 2.0.0.0
             /// - Version 1.0.0.0 of the file exists.
             /// - Version 2.0.0.0 of the file exists.
@@ -3976,7 +3976,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// One entry in the app.config file should not be able to impact the mapping of an assembly
             /// with a different name.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsDifferentName()
             {
                 // Create the engine.
@@ -4027,11 +4027,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsOldVersionRange()
             {
                 // Create the engine.
@@ -4081,11 +4081,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void HighVersionDoesntExist()
             {
                 // Create the engine.
@@ -4135,11 +4135,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Primary references are never unified--even those that don't exist on disk. This is because:
             /// (a) The user expects that a primary reference will be respected.
-            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+            /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
             ///     dependencies anyway to make things work consistently. This would be a significant
             ///     perf hit when loading large solutions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void LowVersionDoesntExist()
             {
                 // Create the engine.
@@ -4179,7 +4179,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-        [TestClass]
+        [TestFixture]
         sealed public class StronglyNamedDependency : ResolveAssemblyReferenceTestFixture
         {
             /// <summary>
@@ -4204,7 +4204,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Strongly named dependencies should unify according to the bindingRedirects in the app.config.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void Exists()
             {
                 // Create the engine.
@@ -4260,7 +4260,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, if the unified version is in the black list it should be removed and warned.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsPromotedDependencyInTheBlackList()
             {
                 string engineOnlySubset =
@@ -4332,17 +4332,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// In this case,
             /// - A single reference to DependsOnUnified was passed in.
             ///   - This assembly depends on version 1.0.0.0 of UnifyMe.
-            /// - An app.config was passed in that promotes a *different* assembly version name from 
+            /// - An app.config was passed in that promotes a *different* assembly version name from
             //    1.0.0.0 to 2.0.0.0
             /// - Version 1.0.0.0 of the file exists.
             /// - Version 2.0.0.0 of the file exists.
             /// Expected:
             /// -- The resulting assembly returned should be 1.0.0.0.
             /// Rationale:
-            /// An unrelated bindingRedirect in the app.config should have no bearing on unification 
+            /// An unrelated bindingRedirect in the app.config should have no bearing on unification
             /// of another file.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsDifferentName()
             {
                 // Create the engine.
@@ -4394,7 +4394,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, even
             /// if a range is involved.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsOldVersionRange()
             {
                 // Create the engine.
@@ -4450,7 +4450,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// The fusion loader is going to want to respect the app.config file. There's no point in
             /// feeding it the wrong version.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void HighVersionDoesntExist()
             {
                 // Create the engine.
@@ -4523,10 +4523,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Expected:
             /// - The resulting assembly returned should be 2.0.0.0.
             /// Rationale:
-            /// The lower (unified-from) version need not exist on disk (in fact we shouldn't even try to 
+            /// The lower (unified-from) version need not exist on disk (in fact we shouldn't even try to
             /// resolve it) in order to arrive at the correct answer.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void LowVersionDoesntExist()
             {
                 // Create the engine.
@@ -4576,7 +4576,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Can't proceed with a bad app.config.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void GarbageVersionInAppConfigFile()
             {
                 // Create the engine.
@@ -4614,13 +4614,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             /// <summary>
             /// In this case,
-            /// - An app.config is passed in that has a missing oldVersion in a bindingRedirect. 
+            /// - An app.config is passed in that has a missing oldVersion in a bindingRedirect.
             /// Expected:
             /// - An error and task failure.
             /// Rationale:
             /// Can't proceed with a bad app.config.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void GarbageAppConfigMissingOldVersion()
             {
                 // Create the engine.
@@ -4662,13 +4662,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             /// <summary>
             /// In this case,
-            /// - An app.config is passed in that has a missing newVersion in a bindingRedirect. 
+            /// - An app.config is passed in that has a missing newVersion in a bindingRedirect.
             /// Expected:
             /// - An error and task failure.
             /// Rationale:
             /// Can't proceed with a bad app.config.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void GarbageAppConfigMissingNewVersion()
             {
                 // Create the engine.
@@ -4717,7 +4717,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// Can't proceed with a bad app.config.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void GarbageAppConfigAssemblyNameMissingPKTAndCulture()
             {
                 // Create the engine.
@@ -4755,7 +4755,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             /// <summary>
             /// In this case,
-            /// - An app.config is specified 
+            /// - An app.config is specified
             /// *and*
             /// - AutoUnify=true.
             /// Expected:
@@ -4763,7 +4763,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// With the introduction of the GenerateBindingRedirects task, RAR now accepts AutoUnify and App.Config at the same time.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void AppConfigSpecifiedWhenAutoUnifyEqualsTrue()
             {
                 // Create the engine.
@@ -4810,7 +4810,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// App.config must exist if specifed.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void AppConfigDoesntExist()
             {
                 // Create the engine.
@@ -4838,7 +4838,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
     namespace VersioningAndUnification.AutoUnify
     {
-        [TestClass]
+        [TestFixture]
         sealed public class StronglyNamedDependency : ResolveAssemblyReferenceTestFixture
         {
             /// <summary>
@@ -4862,10 +4862,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Expected:
             /// - There should be exactly one UnifyMe dependency returned and it should be version 2.0.0.0.
             /// Rationale:
-            /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
+            /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly
             /// dependency seen.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void Exists()
             {
                 // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -4915,14 +4915,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// - The AutoUnify flag is set to 'true'.
             /// - Version 1.0.0.0 of UnifyMe exists.
             /// - Version 2.0.0.0 of UnifyMe exists.
-            ///   - DependsOnUnified 2.0.0.0 is on the black list. 
+            ///   - DependsOnUnified 2.0.0.0 is on the black list.
             /// Expected:
             /// - There should be exactly one UnifyMe dependency returned and it should be version 1.0.0.0.
             /// Rationale:
-            /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
+            /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly
             /// dependency seen. However if the higher assembly is a dependency of an assembly in the black list it should not be considered during unification.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsWithPrimaryReferenceOnBlackList()
             {
                 string implicitRedistListContents =
@@ -5002,10 +5002,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// - There should be exactly one UnifyMe dependency returned and it should be version 1.0.0.0.
             ///  Also there should be a warning about the primary reference DependsOnUnified 2.0.0.0 having a dependency which was in the black list.
             /// Rationale:
-            /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
+            /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly
             /// dependency seen. However if the higher assembly is a dependency of an assembly in the black list it should not be considered during unification.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsPromotedDependencyInTheBlackList()
             {
                 string implicitRedistListContents =
@@ -5083,11 +5083,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// - Version 2.0.0.0 of UnifyMe exists.
             ///   - UnifyMe 2.0.0.0 is on the black list because it is higher than what is in the redist list, 1.0.0.0 is also in a black list because it is not in the subset but is in the redist list.
             /// Expected:
-            /// - There should be no UnifyMe dependency returned 
+            /// - There should be no UnifyMe dependency returned
             /// There should be a warning indicating the primary reference DependsOnUnified 1.0.0.0 has a dependency that in the black list
             /// There should be a warning indicating the primary reference DependsOnUnified 2.0.0.0 has a dependency that in the black list
             /// </summary>
-            [TestMethod]
+            [Test]
             public void ExistsWithBothDependentReferenceOnBlackList()
             {
                 string implicitRedistListContents =
@@ -5162,7 +5162,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// AutoUnify works even when unifying multiple prior versions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void MultipleUnifiedFromNamesMiddlePrimaryOnBlackList()
             {
                 string implicitRedistListContents =
@@ -5242,7 +5242,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// AutoUnify works even when unifying multiple prior versions.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void MultipleUnifiedFromNames()
             {
                 // Create the engine.
@@ -5300,7 +5300,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// Rationale:
             /// AutoUnify works even when unifying prior versions that don't exist on disk.
             /// </summary>
-            [TestMethod]
+            [Test]
             public void LowVersionDoesntExist()
             {
                 // Create the engine.
@@ -5337,13 +5337,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class ReferenceTests : ResolveAssemblyReferenceTestFixture
     {
         /// <summary>
         /// Check to make sure if, the specific version metadata is set on a primary reference, that true is returned from CheckForSpecificMetadataOnParent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckForSpecificMetadataOnParent()
         {
             Reference reference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
@@ -5356,7 +5356,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Check to make sure if, the specific version metadata is set on all primary references which a dependency depends on, that true is returned from CheckForSpecificMetadataOnParent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckForSpecificMetadataOnParentAllParentsHaveMetadata()
         {
             Reference primaryReference1 = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
@@ -5383,7 +5383,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Check to make sure if, the specific version metadata is set on some primary references which a dependency depends on, that false is returned from CheckForSpecificMetadataOnParent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckForSpecificMetadataOnParentNotAllParentsHaveMetadata()
         {
             Reference primaryReference1 = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
@@ -5410,7 +5410,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Check to make sure if, the specific version metadata is set on some primary references which a dependency depends on, that false is returned from CheckForSpecificMetadataOnParent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckForSpecificMetadataOnParentNotAllParentsHaveMetadata2()
         {
             Reference primaryReference1 = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
@@ -5436,7 +5436,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Check to make sure if, the specific version metadata is set on some primary references which a dependency depends on, that true is returned from CheckForSpecificMetadataOnParent if the anyParentHasmetadata parameter is set to true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CheckForSpecificMetadataOnParentNotAllParentsHaveMetadata3()
         {
             Reference primaryReference1 = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
@@ -5465,10 +5465,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Test a few perf scenarios.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class Perf : ResolveAssemblyReferenceTestFixture
     {
-        [TestMethod]
+        [Test]
         public void AutoUnifyUsesMinimumIO()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -5489,13 +5489,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit test the cases where we need to determine if the target framework is greater than the current target framework through the use of the target framework attribute
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class VerifyTargetFrameworkAttribute : ResolveAssemblyReferenceTestFixture
     {
         /// <summary>
         /// Verify there are no warnings if the target framework identifier passed to rar and the target framework identifier in the dll do not match.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FrameworksDoNotMatch()
         {
             MockEngine e = new MockEngine();
@@ -5522,7 +5522,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if it is the same framework but we are a lower version. With a primary reference in the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LowerVersionSameFrameworkDirect()
         {
             MockEngine e = new MockEngine();
@@ -5549,7 +5549,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if it is the same framework and the same version and a direct reference
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SameVersionSameFrameworkDirect()
         {
             MockEngine e = new MockEngine();
@@ -5576,7 +5576,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if the reference was built for a higher framework but specific version is true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherVersionButSpecificVersionDirect()
         {
             MockEngine e = new MockEngine();
@@ -5606,7 +5606,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if it is the same framework but we are a lower version.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LowerVersionSameFrameworkInDirect()
         {
             MockEngine e = new MockEngine();
@@ -5635,7 +5635,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if it is the same framework and the same version.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SameVersionSameFrameworkInDirect()
         {
             MockEngine e = new MockEngine();
@@ -5664,7 +5664,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if it is the same framework and a higher version but specific version is true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherVersionButSpecificVersionInDirect()
         {
             MockEngine e = new MockEngine();
@@ -5696,7 +5696,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are warnings if there is an indirect reference to a dll that is higher that what the current target framework is.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherVersionInDirect()
         {
             MockEngine e = new MockEngine();
@@ -5726,7 +5726,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if there is an indirect reference to a dll that is higher that what the current target framework is but IgnoreFrameworkAttributeVersionMismatch is true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherVersionInDirectIgnoreMismatch()
         {
             MockEngine e = new MockEngine();
@@ -5758,7 +5758,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are no warnings if there is a direct reference to a dll that is higher that what the current target framework is but the property IgnoreFrameworkAttributeVersionMismatch is true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherVersionDirectIgnoreMismatch()
         {
             MockEngine e = new MockEngine();
@@ -5790,7 +5790,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify there are warnings if there is a direct reference to a dll that is higher that what the current target framework is.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherVersionDirect()
         {
             MockEngine e = new MockEngine();
@@ -5818,11 +5818,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify there are no warnings if there is a direct reference to a dll that is higher that what the current target framework is but 
-        /// find dependencies is false. This is because we do not want to add an extra read for this attribute during the project load phase. 
+        /// Verify there are no warnings if there is a direct reference to a dll that is higher that what the current target framework is but
+        /// find dependencies is false. This is because we do not want to add an extra read for this attribute during the project load phase.
         /// which has dependencies set to false.  A regular build or design time build has this set to true so we do the correct check.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherVersionDirectDependenciesFalse()
         {
             MockEngine e = new MockEngine();
@@ -5855,14 +5855,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit test the cases where we need to determine if the target framework is greater than the current target framework
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class VerifyTargetFrameworkHigherThanRedist : ResolveAssemblyReferenceTestFixture
     {
         /// <summary>
         /// Verify there are no warnings when the assembly being resolved is not in the redist list and only has dependencies to references in the redist list with the same
         /// version as is described in the redist list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetCurrentTargetFramework()
         {
             MockEngine e = new MockEngine();
@@ -5888,9 +5888,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// ReferenceVersion9 depends on mscorlib 9. However the redist list only allows 4.0 since framework unification for dependencies only
         /// allows upward unification this would result in a warning. Therefore we need to remap mscorlib 9 to 4.0
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemapAssemblyBasic()
         {
             MockEngine e = new MockEngine();
@@ -5932,10 +5932,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify an error is emitted when the reference itself is in the redist list but is a higher version that is described in the redist list. 
+        /// Verify an error is emitted when the reference itself is in the redist list but is a higher version that is described in the redist list.
         /// In this case ReferenceVersion9 is version=9.0.0.0 but in the redist we show its highest version as 4.0.0.0.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherThanHighestInRedistList()
         {
             MockEngine e = new MockEngine();
@@ -5960,10 +5960,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify that if the reference that is higher than the highest version in the redist list is an MSBuild assembly, we do 
+        /// Verify that if the reference that is higher than the highest version in the redist list is an MSBuild assembly, we do
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherThanHighestInRedistListForMSBuildAssembly()
         {
             MockEngine e = new MockEngine();
@@ -6009,7 +6009,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Expect no warning from a 3rd party redist list since they are not considered for multi targeting warnings.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherThanHighestInRedistList3rdPartyRedist()
         {
             MockEngine e = new MockEngine();
@@ -6035,7 +6035,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the same case as above except for add the specific version metadata to ignore the warning.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HigherThanHighestInRedistListWithSpecificVersionMetadata()
         {
             MockEngine e = new MockEngine();
@@ -6066,7 +6066,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify the case where the assembly itself is not in the redist list but it depends on an assembly which is in the redist list and is a higher version that what is listed in the redist list.
         /// In this case the assembly DependsOn9 depends on System 9.0.0.0 while the redist list only goes up to 4.0.0.0.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DependenciesHigherThanHighestInRedistList()
         {
             MockEngine e = new MockEngine();
@@ -6092,10 +6092,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify that if the reference that is higher than the highest version in the redist list is an MSBuild assembly, we do 
+        /// Verify that if the reference that is higher than the highest version in the redist list is an MSBuild assembly, we do
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DependenciesHigherThanHighestInRedistListForMSBuildAssembly()
         {
             MockEngine e = new MockEngine();
@@ -6143,7 +6143,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure when specific version is set to true and the dependencies of the reference are a higher version than what is in the redist list do not warn, do not unresolve
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DependenciesHigherThanHighestInRedistListSpecificVersionMetadata()
         {
             MockEngine e = new MockEngine();
@@ -6176,7 +6176,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// DependsOn9 and DependsOn9Also both depend on System, Version=9.0.0.0 one of the items has the SpecificVersion metadata set. In this case
         /// we expect to only see a warning from one of the assemblies.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoDependenciesHigherThanHighestInRedistListIgnoreOnOne()
         {
             MockEngine e = new MockEngine();
@@ -6210,7 +6210,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// DependsOn9 and DependsOn9Also both depend on System, Version=9.0.0.0. Both of the items has the specificVersion metadata set. In this case
         /// we expect to only see no warnings from the assemblies.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoDependenciesHigherThanHighestInRedistListIgnoreOnBoth()
         {
             MockEngine e = new MockEngine();
@@ -6240,10 +6240,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where two assemblies with different versions but the same name depend on an assembly which is in the redist list but has a higher version than 
+        /// Test the case where two assemblies with different versions but the same name depend on an assembly which is in the redist list but has a higher version than
         /// what is described in the redist list. We expect two warnings because both assemblies are goign to be resolved even though one of them will not be copy local.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoDependenciesSameNameDependOnHigherVersion()
         {
             MockEngine e = new MockEngine();
@@ -6272,10 +6272,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the project has two references, one of them has dependencies which are contained within the projects target framework
         /// and there is another reference which has dependencies on a future framework (this is the light up scenario assembly).
-        /// 
+        ///
         /// Make sure that if specific version is set on the lightup assembly that we do not unresolve it, and we also should not unify its dependencies.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MixedDependenciesSpecificVersionOnHigherVersionMetadataSet()
         {
             MockEngine e = new MockEngine();
@@ -6312,11 +6312,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the project has two references, one of them has dependencies which are contained within the projects target framework
         /// and there is another reference which has dependencies on a future framework (this is the light up scenario assembly).
-        /// 
+        ///
         /// Verify that if specific version is set on the other reference that we get the expected behavior:
         /// Un resolve the light up assembly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MixedDependenciesSpecificVersionOnLowerVersionMetadataSet()
         {
             MockEngine e = new MockEngine();
@@ -6355,13 +6355,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit test the cases where we need to determine if the target framework is greater than the current target framework
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class VerifyIgnoreVersionForFrameworkReference : ResolveAssemblyReferenceTestFixture
     {
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IgnoreVersionBasic()
         {
             MockEngine e = new MockEngine();
@@ -6415,7 +6415,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IgnoreVersionBasicTestMetadata()
         {
             MockEngine e = new MockEngine();
@@ -6468,7 +6468,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IgnoreVersionDisableIfSpecificVersionTrue()
         {
             MockEngine e = new MockEngine();
@@ -6498,7 +6498,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IgnoreVersionDisableIfHintPath()
         {
             MockEngine e = new MockEngine();
@@ -6531,13 +6531,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the InstalledSDKResolver task.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class InstalledSDKResolverFixture : ResolveAssemblyReferenceTestFixture
     {
         /// <summary>
         /// Verify that we do not find the winmd file even if it on the search path if the sdkname does not match something passed into the ResolvedSDKs property.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SDkNameNotInResolvedSDKListButOnSearchPath()
         {
             // Create the engine.
@@ -6565,7 +6565,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when we are trying to match a name which is is the reference assembly directory
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SDkNameMatchInRADirectory()
         {
             ResolveSDKFromRefereneAssemblyLocation("DebugX86SDKWinMD", @"C:\FakeSDK\References\Debug\X86\DebugX86SDKWinMD.Winmd");
@@ -6613,7 +6613,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class WinMDTests : ResolveAssemblyReferenceTestFixture
     {
         #region AssemblyInformationIsWinMDFile Tests
@@ -6621,7 +6621,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify a null file path passed in return the fact the file is not a winmd file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsWinMDFileNullFilePath()
         {
             string imageRuntime;
@@ -6633,7 +6633,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify if a empty file path is passed in that the file is not a winmd file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsWinMDFileEmptyFilePath()
         {
             string imageRuntime;
@@ -6645,7 +6645,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If the file does nto exist then we should report this is not a winmd file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsWinMDFileFileDoesNotExistFilePath()
         {
             string imageRuntime;
@@ -6657,7 +6657,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// The file exists and has the correct windowsruntime metadata, we should report this is a winmd file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsWinMDFileGoodFile()
         {
             string imageRuntime;
@@ -6669,7 +6669,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// This file is a mixed file with CLR and windowsruntime metadata we should report this is a winmd file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsWinMDFileMixedFile()
         {
             string imageRuntime;
@@ -6681,7 +6681,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// The file has only CLR metadata we should report this is not a winmd file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsWinMDFileCLROnlyFile()
         {
             string imageRuntime;
@@ -6693,7 +6693,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// The windows runtime string is not correctly formatted, report this is not a winmd file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsWinMDFileBadWindowsRuntimeFile()
         {
             string imageRuntime;
@@ -6705,7 +6705,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// We should report that a regluar net assembly is not a winmd file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsWinMDFileRegularNetAssemblyFile()
         {
             string imageRuntime;
@@ -6715,10 +6715,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// When a project to project reference is passed in we want to verify that 
-        /// the winmd references get the correct metadata applied to them 
+        /// When a project to project reference is passed in we want to verify that
+        /// the winmd references get the correct metadata applied to them
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyP2PHaveCorrectMetadataWinMD()
         {
             // Create the engine.
@@ -6776,10 +6776,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// When a project to project reference is passed in we want to verify that 
-        /// the winmd references get the correct metadata applied to them 
+        /// When a project to project reference is passed in we want to verify that
+        /// the winmd references get the correct metadata applied to them
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyP2PHaveCorrectMetadataWinMDManaged()
         {
             // Create the engine.
@@ -6814,10 +6814,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// When a project to project reference is passed in we want to verify that 
-        /// the winmd references get the correct metadata applied to them 
+        /// When a project to project reference is passed in we want to verify that
+        /// the winmd references get the correct metadata applied to them
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyP2PHaveCorrectMetadataNonWinMD()
         {
             // Create the engine.
@@ -6848,7 +6848,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when we reference a winmd file as a reference item make sure we ignore the mscorlib.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IgnoreReferenceToMscorlib()
         {
             // Create the engine.
@@ -6879,7 +6879,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when we reference a mixed winmd file that we do resolve the reference to the mscorlib
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MixedWinMDGoodReferenceToMscorlib()
         {
             // Create the engine.
@@ -6910,7 +6910,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when a winmd file depends on another winmd file that we do resolve the dependency
         /// </summary>
-        [TestMethod]
+        [Test]
         public void WinMdFileDependsOnAnotherWinMDFile()
         {
             // Create the engine.
@@ -6950,7 +6950,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// We have two dlls which depend on a winmd, the first dll does not have the winmd beside it, the second one does
         /// we want to make sure that the winmd file is resolved beside the second dll.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveWinmdBesideDll()
         {
             // Create the engine.
@@ -6979,10 +6979,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// We have a winmd file and a dll depend on a winmd, there are copies of the winmd beside each of the files. 
+        /// We have a winmd file and a dll depend on a winmd, there are copies of the winmd beside each of the files.
         /// we want to make sure that the winmd file is resolved beside the winmd since that is the first file resolved.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveWinmdBesideDll2()
         {
             // Create the engine.
@@ -7014,7 +7014,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify when a winmd file depends on another winmd file that itself has framework dependencies that we do not resolve any of the
         /// dependencies due to the winmd to winmd reference
         /// </summary>
-        [TestMethod]
+        [Test]
         public void WinMdFileDependsOnAnotherWinMDFileWithFrameworkDependencies()
         {
             // Create the engine.
@@ -7047,11 +7047,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Make sure when a dot net assembly depends on a WinMDFile that 
-        /// we get the winmd file resolved. Also make sure that if there is Implementation, ImageRuntime, or IsWinMD set on the dll that 
+        /// Make sure when a dot net assembly depends on a WinMDFile that
+        /// we get the winmd file resolved. Also make sure that if there is Implementation, ImageRuntime, or IsWinMD set on the dll that
         /// it does not get propigated to the winmd file dependency.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DotNetAssemblyDependsOnAWinMDFile()
         {
             // Create the engine.
@@ -7093,10 +7093,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header. 
+        /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header.
         /// This will always result in an error since the dll is malformed
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveWinmdWithInvalidPENativeDependency()
         {
             // Create the engine.
@@ -7128,7 +7128,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Resolve a winmd file which depends a native dll that matches the targeted architecture
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveWinmdWithArchitectureDependencyMatchingArchitecturesX86()
         {
             // Create the engine.
@@ -7160,7 +7160,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Resolve a winmd file which depends a native dll that matches the targeted architecture
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveWinmdWithArchitectureDependencyAnyCPUNative()
         {
             // Create the engine.
@@ -7192,10 +7192,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header. 
+        /// Resolve a winmd file which depends on a native implementation dll that has an invalid pe header.
         /// A warning or error is expected in the log depending on the WarnOrErrorOnTargetArchitecture property value.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveWinmdWithArchitectureDependency()
         {
             VerifyImplementationArchitecture("DependsOnX86", "MSIL", "X86", "Error");
@@ -7293,7 +7293,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when a winmd file depends on another winmd file that we resolve both and that the metadata is correct.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DotNetAssemblyDependsOnAWinMDFileWithVersion255()
         {
             // Create the engine.
@@ -7333,7 +7333,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class Miscellaneous : ResolveAssemblyReferenceTestFixture
     {
         private static List<string> s_assemblyFolderExTestVersions = new List<string>
@@ -7406,14 +7406,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Let us have the following dependency structure
-        /// 
+        ///
         /// X which is in the gac, depends on Z which is not in the GAC
-        /// 
+        ///
         /// Let copyLocalDependenciesWhenParentReferenceInGac be set to false
-        /// 
+        ///
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to false and the parent of Z is in the GAC
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyLocalDependenciesWhenParentReferenceInGacFalseAllParentsInGac()
         {
             // Create the engine.
@@ -7444,7 +7444,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
 
-        [TestMethod]
+        [Test]
         public void ValidateFrameworkNameError()
         {
             // Create the engine.
@@ -7473,15 +7473,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Let us have the following dependency structure
-        /// 
+        ///
         /// X which is in the gac, depends on Z which is not in the GAC
         /// Y which is not in the gac, depends on Z which is not in the GAC
-        /// 
+        ///
         /// Let copyLocalDependenciesWhenParentReferenceInGac be set to false
-        /// 
+        ///
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to false but one of the parents of Z is not in the GAC and Z is not in the gac we should be copy local
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyLocalDependenciesWhenParentReferenceInGacFalseSomeParentsInGac()
         {
             // Create the engine.
@@ -7515,7 +7515,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure that when we parse the runtime version that if there is a bad one we default to 2.0.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSetRuntimeVersion()
         {
             Version parsedVersion = ResolveAssemblyReference.SetTargetedRuntimeVersion("4.0.21006");
@@ -7527,14 +7527,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Let us have the following dependency structure
-        /// 
+        ///
         /// X which is in the gac, depends on Z which is not in the GAC
-        /// 
+        ///
         /// Let copyLocalDependenciesWhenParentReferenceInGac be set to true
-        /// 
+        ///
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to true and Z is not in the GAC it will be copy local true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyLocalDependenciesWhenParentReferenceInGacTrueAllParentsInGac()
         {
             // Create the engine.
@@ -7565,15 +7565,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Let us have the following dependency structure
-        /// 
+        ///
         /// X which is in the gac, depends on Z which is not in the GAC
         /// Y which is not in the gac, depends on Z which is not in the GAC
-        /// 
+        ///
         /// Let copyLocalDependenciesWhenParentReferenceInGac be set to true
-        /// 
+        ///
         /// Since copyLocalDependenciesWhenParentReferenceInGac is set to true and Z is not in the GAC it will be copy local true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CopyLocalDependenciesWhenParentReferenceInGacTrueSomeParentsInGac()
         {
             // Create the engine.
@@ -7607,7 +7607,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Very basic test.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -7740,7 +7740,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 else if (String.Compare(item.ItemSpec, @"c:\MyProject\System.Data.dll", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     // The version of System.Data.dll in C:\MyProject has an incorrect PKT
-                    // This version is not a match. 
+                    // This version is not a match.
                     Assert.Fail("Wrong version of System.Data.dll matched--public key token was wrong");
                 }
                 else
@@ -7841,7 +7841,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure the imageruntime is correctly returned.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetImageRuntimeVersion()
         {
             string imageRuntimeReportedByAsssembly = this.GetType().Assembly.ImageRuntimeVersion;
@@ -7854,7 +7854,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure the imageruntime is correctly returned.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetImageRuntimeVersionBadPath()
         {
             string realFile = FileUtilities.GetTemporaryFile();
@@ -7873,7 +7873,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When specifying "EmbedInteropTypes" on a project targeting Fx higher thatn v4.0 -
         /// CopyLocal should be overriden to false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmbedInteropTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -7989,7 +7989,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If items lists are empty, then this is a NOP not a failure.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NOPForEmptyItemLists()
         {
             // Create the engine.
@@ -8012,7 +8012,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If no related file extensions are input to RAR, .pdb and .xml should be used
         /// by default.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultAllowedRelatedFileExtensionsAreUsed()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -8070,7 +8070,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// RAR should use any given related file extensions.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InputAllowedRelatedFileExtensionsAreUsed()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -8165,7 +8165,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test with a standard path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimulateCreateProjectAgainstWhidbey()
         {
             SimulateCreateProjectAgainstWhidbey(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45));
@@ -8174,7 +8174,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test with a standard trailing-slash path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimulateCreateProjectAgainstWhidbeyWithTrailingSlash()
         {
             SimulateCreateProjectAgainstWhidbey(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45) + @"\");
@@ -8184,7 +8184,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Invalid candidate assembly files should not crash
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress286699_InvalidCandidateAssemblyFiles()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8204,7 +8204,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Invalid assembly files should not crash
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress286699_InvalidAssemblyFiles()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8224,7 +8224,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Invalid assemblies param should not crash
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress286699_InvalidAssembliesParameter()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8244,7 +8244,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Target framework path with a newline should not crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress286699_InvalidTargetFrameworkDirectory()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -8268,7 +8268,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Invalid search path should not crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress286699_InvalidSearchPath()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8288,7 +8288,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Invalid app.config path should not crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress286699_InvalidAppConfig()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8306,9 +8306,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Make sure that nonexistent references are just eliminated. 
+        /// Make sure that nonexistent references are just eliminated.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NonExistentReference()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8333,13 +8333,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///    Assembly B
         ///     Assembly Name: B, PKT=aaa, Version=bbb, Culture=ccc
         ///
-        /// A does _not_ want to load B because it simple name B does not match the 
+        /// A does _not_ want to load B because it simple name B does not match the
         /// B's assembly name.
         ///
         /// Because of this, we want to be sure that if A asks for B (as a simple name)
         /// that we don't find a strongly named assembly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void StrongWeakMismatchInDependency()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8360,7 +8360,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If an Item has a HintPath and there is a {HintPathFromItem} in the SearchPaths
         /// property, then the task should be able to resolve an assembly there.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UseSuppliedHintPath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -8393,7 +8393,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Devices frameworks files are signed with a different PK so there should be no unification
         /// with normal fx files.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress200872()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8416,7 +8416,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Do the most basic AssemblyFoldersEx resolve.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExBasic()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8436,7 +8436,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify that higher alphabetical values for a component are chosen over lower alphabetic values of a component.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExVerifyComponentFolderSorting()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8457,7 +8457,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If the target framework version provided by the targets file doesn't begin
         /// with the letter "v", we should tolerate it and treat it as if it does.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExTargetFrameworkVersionDoesNotBeginWithV()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8475,13 +8475,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target AMD64 and try to get an assembly out of the X86 directory.
         /// Expect it not to resolve and get a message on the console
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchDoesNotMatch()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8500,13 +8500,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Regress DevDiv Bugs 714052.
-        /// 
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        ///
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target MSIL and get an assembly out of the X86 directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchMSILX86()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8528,7 +8528,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a warning.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyProcessArchitectureMismatchWarning()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8552,7 +8552,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a warning.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyProcessArchitectureMismatchWarningDefault()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8575,7 +8575,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify if there is a mismatch between what the project targets and the architecture of the resolved primary reference log a error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyProcessArchitectureMismatchError()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8597,12 +8597,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target None and get an assembly out of the X86 directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchNoneX86()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8619,10 +8619,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// If we are targeting NONE and there are two assemblies with the same name then we want to pick the first one rather than look for an assembly which 
+        /// If we are targeting NONE and there are two assemblies with the same name then we want to pick the first one rather than look for an assembly which
         /// has a MSIL architecture or a NONE architecture. NONE means you do not care what architecure is picked.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchNoneMix()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8643,14 +8643,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
-        /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly. 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
+        /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly.
         /// When targeting MSIL we want to return the MSIL assembly even if we find one in a previous folder first.
         /// Target MSIL and get an assembly out of the MSIL directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchMSILLastFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8668,14 +8668,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
-        /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly. 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
+        /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly.
         /// When targeting None we want to return the MSIL assembly even if we find one in a previous folder first.
         /// Target None and get an assembly out of the MSIL directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchNoneLastFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8692,14 +8692,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,AssemblyFoldersEX}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
         }
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
-        /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly. 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
+        /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly.
         /// When targeting X86 we want to return the MSIL assembly even if we find one in a previous folder first.
         /// Target MSIL and get an assembly out of the MSIL directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchX86FirstFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8717,12 +8717,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target X86 and get an assembly out of the MSIL directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchX86MSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8739,12 +8739,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target X86 and get an assembly out of the None directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchX86None()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8761,12 +8761,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target None and get an assembly out of the None directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchNoneNone()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8782,12 +8782,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,None}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
         }
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target MSIL and get an assembly out of the None directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArcMSILNone()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8803,12 +8803,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,None}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
         }
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target None and get an assembly out of the MSIL directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchNoneMSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8825,12 +8825,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target MSIL and get an assembly out of the MSIL directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchMSILMSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8847,12 +8847,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving. 
-        /// 
+        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
+        ///
         /// Target X86 and get an assembly out of the X86 directory.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExProcessorArchMatches()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8872,11 +8872,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If the target framework version specified in the registry search path
         /// provided by the targets file has some bogus value, we should just ignore it.
-        /// 
+        ///
         /// This means if there are remaining search paths to inspect, we should
         /// carry on and inspect those.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExTargetFrameworkVersionBogusValue()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8901,7 +8901,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Tolerate keys like v2.0.x86chk.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress357227_AssemblyFoldersExAgainstRawDrop()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8921,7 +8921,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Matches that exist only in the HKLM hive.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExHKLM()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8940,7 +8940,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Matches that exist in both HKLM and HKCU should favor HKCU
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExHKCUTrumpsHKLM()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -8964,7 +8964,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// When matches that have v3.0 (future) and v2.0 (current) versions, the 2.0 version wins.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExFutureTargetNDPVersionsDontMatch()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8983,7 +8983,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If there is no v2.0 (current target NDP) match, then v1.0 should match.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExMatchBackVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9002,7 +9002,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If there is a 2.0 and a 1.0 then match 2.0.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExCurrentTargetVersionTrumpsPastTargetVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9021,7 +9021,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If a control has a service pack then that wins over the control itself
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExServicePackTrumpsBaseVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9041,7 +9041,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Conditions (OSVersion/Platform) can be passed in SearchPaths to filter the result.
         /// Test MaxOSVersion condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExConditionFilterMaxOS()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -9084,7 +9084,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Conditions (OSVersion/Platform) can be passed in SearchPaths to filter the result.
         /// Test MinOSVersion condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExConditionFilterMinOS()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9118,7 +9118,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.AreEqual(@"C:\V1Control\MyDeviceControlAssembly.dll", t.ResolvedFiles[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions10DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v1.0", s_assemblyFolderExTestVersions);
@@ -9129,7 +9129,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions20DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v2.0", s_assemblyFolderExTestVersions);
@@ -9141,7 +9141,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions30DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v3.0", s_assemblyFolderExTestVersions);
@@ -9157,7 +9157,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v3.0 BAZ", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersionsVDotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v", s_assemblyFolderExTestVersions);
@@ -9194,7 +9194,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[26].RegistryKey).Equals("v9999999999999999", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions35DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v3.5", s_assemblyFolderExTestVersions);
@@ -9212,7 +9212,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("V3.5.0.0.0", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions40DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0", s_assemblyFolderExTestVersions);
@@ -9230,7 +9230,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions400DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0.0", s_assemblyFolderExTestVersions);
@@ -9249,7 +9249,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions41DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.1", s_assemblyFolderExTestVersions);
@@ -9272,7 +9272,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions410DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.1.0", s_assemblyFolderExTestVersions);
@@ -9297,7 +9297,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
 
-        [TestMethod]
+        [Test]
         public void GatherVersions40255DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0.255", s_assemblyFolderExTestVersions);
@@ -9318,7 +9318,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions5DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v5.0", s_assemblyFolderExTestVersions);
@@ -9343,7 +9343,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[14].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersionsv5DotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v5", s_assemblyFolderExTestVersions);
@@ -9355,7 +9355,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v5", StringComparison.OrdinalIgnoreCase));
         }
 
-        [TestMethod]
+        [Test]
         public void GatherVersions35x86chkDotNet()
         {
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v3.5.0.x86chk", s_assemblyFolderExTestVersions);
@@ -9370,7 +9370,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Conditions (OSVersion/Platform) can be passed in SearchPaths to filter the result.
         /// Test Platform condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AssemblyFoldersExConditionFilterPlatform()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9446,7 +9446,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// CandidateAssemblyFiles are extra files passed in through the CandidateAssemblyFiles
         /// that should be considered for matching whem search paths contains {CandidateAssemblyFiles}
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CandidateAssemblyFiles()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9467,7 +9467,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure three part version numbers put on the required target framework do not cause a problem.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ThreePartVersionNumberRequiredFrameworkHigherThanTargetFramework()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9487,7 +9487,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure three part version numbers put on the required target framework do not cause a problem.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ThreePartVersionNumberRequiredFrameworkLowerThanTargetFramework()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9508,7 +9508,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Try a candidate assembly file that has an extension but no base name.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress242970()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -9550,7 +9550,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If a file name is passed in through the Assemblies parameter and the search paths contains {RawFileName}
         /// then try to resolve directly to that file name.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RawFileName()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -9582,11 +9582,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Make sure when there are duplicate entries in the redist list, with different versions of ingac (true and false) that we will not read in two entries, 
-        /// we will instead pick the one with ingac true and ignore the ingac false entry.   If there is one of more entries in the redist list with ingac false 
+        /// Make sure when there are duplicate entries in the redist list, with different versions of ingac (true and false) that we will not read in two entries,
+        /// we will instead pick the one with ingac true and ignore the ingac false entry.   If there is one of more entries in the redist list with ingac false
         /// and no entries with ingac true for a given assembly then we should only have one entry with ingac false.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDuplicateHandlingForRedistLists()
         {
             string fullRedistListContentsDuplicates =
@@ -9622,7 +9622,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure that if there are different SimpleName then they will not be considered duplicates.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDuplicateHandling()
         {
             string fullRedistListContentsDuplicates =
@@ -9638,7 +9638,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure that if there are different IsRedistRoot then they will not be considered duplicates.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDuplicateHandlingDifferentIsRedistRoot()
         {
             string fullRedistListContentsDuplicates =
@@ -9654,7 +9654,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure that if there are different IsRedistRoot then they will not be considered duplicates.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDuplicateHandlingDifferentName()
         {
             string fullRedistListContentsDuplicates =
@@ -9670,7 +9670,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure that if there are different culture then they will not be considered duplicates.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDuplicateHandlingDifferentCulture()
         {
             string fullRedistListContentsDuplicates =
@@ -9686,7 +9686,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure that if there are different public key tokens then they will not be considered duplicates.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDuplicateHandlingDifferentPublicKeyToken()
         {
             string fullRedistListContentsDuplicates =
@@ -9702,7 +9702,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure that if there are different retargetable flags then they will not be considered duplicates.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDuplicateHandlingDifferentRetargetable()
         {
             string fullRedistListContentsDuplicates =
@@ -9724,7 +9724,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure that if there are different versons that they are all picked
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDuplicateHandlingDifferentVersion()
         {
             string fullRedistListContentsDuplicates =
@@ -9779,7 +9779,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the basics of reading in the remapping section
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestRemappingSectionBasic()
         {
             string fullRedistListContents =
@@ -9819,7 +9819,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If there are multiple "To" elements under the "From" element then pick the first one.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MultipleToElementsUnderFrom()
         {
             string fullRedistListContents =
@@ -9860,7 +9860,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If there are two from tags which map to the same "To" element then we still need two entries.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentFromsToSameTo()
         {
             string fullRedistListContents =
@@ -9903,7 +9903,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If there are two identical entries then pick the first one
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DuplicateEntries()
         {
             string fullRedistListContents =
@@ -9945,7 +9945,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test if the remapping section is empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyRemapping()
         {
             string fullRedistListContents = "<Remap/>";
@@ -9974,7 +9974,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test if the we have a "from" element but no "to" element. We expect that to be ignored
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FromElementButNoToElement()
         {
             string fullRedistListContents =
@@ -10015,7 +10015,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test if the we have a "To" element but no "from" element. We expect that to be ignored
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToElementButNoFrom()
         {
             string fullRedistListContents =
@@ -10049,7 +10049,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If a relative file name is passed in through the Assemblies parameter and the search paths contains {RawFileName}
         /// then try to resolve directly to that file name and make it a full path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RawFileNameRelative()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10083,10 +10083,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// If a relative searchPath is passed in through the search path parameter 
+        /// If a relative searchPath is passed in through the search path parameter
         /// then try to resolve the file but make sure it is a full name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RelativeDirectoryResolver()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10121,7 +10121,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If a relative file name is passed in through the HintPath then try to resolve directly to that file name and make it a full path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void HintPathRelative()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10158,7 +10158,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure we do not crash if a raw file name is passed in and the specific version metadata is set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RawFileNameWithSpecificVersionFalse()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10183,7 +10183,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure we do not crash if a raw file name is passed in and the specific version metadata is set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RawFileNameWithSpecificVersionTrue()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10208,7 +10208,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If the user passed in a file name but no {RawFileName} was specified.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress363340_RawFileNameMissing()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10233,11 +10233,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// If the reference include looks like a file name rather than a properly formatted reference and a good hint path is provided, 
-        /// good means the hintpath points to a file which exists on disk. Then we were getting an exception 
+        /// If the reference include looks like a file name rather than a properly formatted reference and a good hint path is provided,
+        /// good means the hintpath points to a file which exists on disk. Then we were getting an exception
         /// because assemblyName was null and we were comparing the assemblyName from the hintPath to the null assemblyName.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress444793()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10269,7 +10269,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If a file name is passed in through the Assemblies parameter and the search paths contains {RawFileName}
         /// then try to resolve directly to that file name.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RawFileNameDoesntExist()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10291,7 +10291,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If a candidate file has a different base name, then this should not be a match.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CandidateAssemblyFilesDifferentBaseName()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10310,7 +10310,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Given a strong name, resolve it to a location in the GAC if possible.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveToGAC()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10328,7 +10328,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Given a strong name, resolve it to a location in the GAC if possible.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveToGACSpecificVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10346,11 +10346,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify that when we are calculating the search paths for a dependency that we take into account where the parent assembly was resolved from 
-        /// for example if the parent assembly was resolved from the GAC or AssemblyFolders then we do not want to look in the parent assembly directory 
+        /// Verify that when we are calculating the search paths for a dependency that we take into account where the parent assembly was resolved from
+        /// for example if the parent assembly was resolved from the GAC or AssemblyFolders then we do not want to look in the parent assembly directory
         /// instead we want to let the assembly be resolved normally so that the GAC and AF checks will work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParentAssemblyResolvedFromAForGac()
         {
             Hashtable parentReferenceFolderHash = new Hashtable();
@@ -10422,7 +10422,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Given a reference that resolves to a bad image, we should get a warning and
         /// no reference. We don't want an exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveBadImageInPrimary()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10455,7 +10455,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Given a reference that resolves to a bad image, we should get a message, no warning and
         /// no reference. We don't want an exception.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveBadImageInSecondary()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10491,7 +10491,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Test the case where the search path, earlier on, contains an assembly that almost matches
         /// but the PKT is wrong.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveReferenceThatHasWrongPKTInEarlierAssembly()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10514,7 +10514,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// FX assemblies should not be CopyLocal.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PrimaryFXAssemblyRefIsNotCopyLocal()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10538,7 +10538,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If an item is explictly Private=='true' (as opposed to implicitly when the attribute isn't set at all)
         /// then it should be CopyLocal true even if its in the FX directory
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PrivateItemInFrameworksGetsCopyLocalTrue()
         {
             // Create the engine.
@@ -10573,7 +10573,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If we have no framework directories passed in and an assembly is found outside of the GAC then it should be able to be copy local.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoFrameworkDirectoriesStillCopyLocal()
         {
             // Create the engine.
@@ -10599,7 +10599,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If an item has a bad value for a boolean attribute, report a nice error that indicates which attribute it was.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress284485_PrivateItemWithBogusValue()
         {
             // Create the engine.
@@ -10634,17 +10634,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
-        /// 
+        ///
         /// And neither D1 nor D2 are CopyLocal = true. In this case, both dependencies
         /// are kept because this will work in a SxS manner.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictBetweenNonCopyLocalDependencies()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10677,17 +10677,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
-        /// 
+        ///
         /// And both D1 and D2 are CopyLocal = true. This case is a warning because both
         /// assemblies can't be copied to the output directory.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictBetweenCopyLocalDependencies()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10733,7 +10733,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   Primary References
         ///         C
@@ -10744,12 +10744,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///        Depends on B
         ///   References - B
         ///        Depends on A version 2
-        /// 
-        /// 
+        ///
+        ///
         /// Expect to have some information indicating that C and B depend on two different versions of A and that the primary refrence which caused the problems
         /// are A and C.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictBetweenCopyLocalDependenciesRegress444809()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10780,7 +10780,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   Primary References
         ///         A version 20 (Un Resolved)
@@ -10790,11 +10790,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///        Depends on A version 2
         ///   References - D
         ///        Depends on A version 20
-        /// 
-        /// 
+        ///
+        ///
         /// Expect to have some information indicating that Primary reference A, Reference B and Reference D conflict.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictBetweenCopyLocalDependenciesRegress444809UnResolvedPrimaryReference()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10825,17 +10825,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
-        /// 
+        ///
         /// And both D1 and D2 are CopyLocal = true. In this case, there is no warning because
         /// AutoUnify is set to true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictBetweenCopyLocalDependenciesWithAutoUnify()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10863,19 +10863,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
         ///   References - D, version 1
-        /// 
+        ///
         /// Both D1 and D2 are CopyLocal. This is a warning because D1 is a lower version
-        /// than D2 so that can't unify. These means that eventually when they're copied 
+        /// than D2 so that can't unify. These means that eventually when they're copied
         /// to the output directory they'll conflict.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictWithBackVersionPrimary()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10911,7 +10911,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Even when AutoUnify is set we should see a warning since the binder will not allow
         /// an older version to satisfy a reference to a newer version.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictWithBackVersionPrimaryWithAutoUnify()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10946,19 +10946,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
         ///   References - D, version 2
-        /// 
+        ///
         /// Both D1 and D2 are CopyLocal. This is not an error because D2 is a higher version
         /// than D1 so that can unify. D2 should be output as a Primary and D1 should be output
         /// as a dependency.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictWithForeVersionPrimary()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -10989,15 +10989,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - D, version 1
         ///   References - D, version 2
-        /// 
-        /// Both D1 and D2 are CopyLocal. This is an error because both D1 and D2 can't be copied to 
-        /// the output directory. 
+        ///
+        /// Both D1 and D2 are CopyLocal. This is an error because both D1 and D2 can't be copied to
+        /// the output directory.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictBetweenBackAndForeVersionsCopyLocal()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11028,15 +11028,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - D, version 1
         ///   References - D, version 2
-        /// 
+        ///
         /// Neither D1 nor D2 are CopyLocal. This is a solveable conflict because D2 has a higher version
         /// than D1 and there won't be an output directory conflict.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictBetweenBackAndForeVersionsNotCopyLocal()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11063,16 +11063,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1, PKT=XXXX
         ///   References - C
         ///        Depends on D version 1, PKT=YYYY
-        /// 
+        ///
         /// We can't tell which should win because the PKTs are different. This should be an error.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictingDependenciesWithNonMatchingNames()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11096,18 +11096,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1, PKT=XXXX
         ///   References - C
         ///        Depends on D version 1, PKT=YYYY
         ///   References - D version 1, PKT=XXXX
-        /// 
+        ///
         /// D, PKT=XXXX should win because its referenced in the project.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConflictingDependenciesWithNonMatchingNamesAndHardReferenceInProject()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11133,10 +11133,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// A reference with a bogus version is provided. However, the user has chosen 
+        /// A reference with a bogus version is provided. However, the user has chosen
         /// SpecificVersion='false' so we match the first one we come across.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SpecificVersionFalse()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11161,7 +11161,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// A reference with a bogus version is provided and the user has chosen SpecificVersion=true.
         /// In this case, since there is no specific version that can be matched, no reference is returned.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SpecificVersionTrue()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11182,9 +11182,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// A reference with a bogus version is provided and the user has left off SpecificVersion.
-        /// In this case assume SpecificVersion=true implicitly. 
+        /// In this case assume SpecificVersion=true implicitly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SpecificVersionAbsent()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11205,7 +11205,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Unresolved primary references should result in warnings.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress199998()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11239,7 +11239,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Rationale:
         /// The user browsed to an .exe, so that's what we should give them.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExecutableExtensionEXE()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11278,7 +11278,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Rationale:
         /// The user browsed to a .dll, so that's what we should give them.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExecutableExtensionDLL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11318,7 +11318,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Rationale:
         /// Without an ExecutableExtension the first assembly out of .dll,.exe wins.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExecutableExtensionDefaultDLLFirst()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11356,7 +11356,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Rationale:
         /// Without an ExecutableExtension the first assembly out of .dll,.exe wins.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExecutableExtensionDefaultEXEFirst()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11397,7 +11397,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// - Fall back to SpecificVersion=false behavior.
         /// - Only match "A, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null". Note that all of our default VS projects have at least a version number.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleNameWithSpecificVersionTrue()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11435,7 +11435,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Rationale:
         /// If specific version is false, then we should match the first "A" that we find.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleNameWithSpecificVersionFalse()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11466,14 +11466,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this situation:
-        /// 
+        ///
         /// App
         ///   References - D, version 1, IrreleventKeyValue=poo.
-        /// 
-        /// There's plenty of junk that might end up in a fusion name that have nothing to do with 
+        ///
+        /// There's plenty of junk that might end up in a fusion name that have nothing to do with
         /// assembly resolution. Make sure we can tolerate this for primary references.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IrrelevantAssemblyNameElement()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11503,28 +11503,28 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Regress EVERETT QFE 626
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A (Private=undefined)
-        ///        Depends on D 
+        ///        Depends on D
         ///             Depends on E
         ///   References - D (Private=false)
-        /// 
+        ///
         /// - Reference A does not have a Private attribute, but resolves to CopyLocal=true.
         /// - Reference D has explicit Private=false.
         /// - D would normally be CopyLocal=true.
         /// - E would normally be CopyLocal=true.
-        /// 
+        ///
         /// Expected:
         /// - D should be CopyLocal=false because the of the matching Reference D which has explicit private=false.
         /// - E should be CopyLocal=false because it's a dependency of D which has explicit private=false.
-        /// 
+        ///
         /// Rationale:
         /// This is QFE 626. If the user has set "Copy Local" to "false" in VS (means Private=false)
         /// then even if this turns out to be a dependency too, we still shouldn't copy.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegressQFE626()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11564,7 +11564,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A (private=false)
         ///        Depends on D v1
@@ -11572,20 +11572,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///   References - B (private=true)
         ///        Depends on D v2
         ///             Depends on E
-        /// 
+        ///
         /// Reference A is explicitly Private=false.
         /// Reference B is explicitly Private=true.
         /// Dependencies D and E would normally be CopyLocal=true.
-        /// 
+        ///
         /// Expected:
         /// - D will be CopyLocal=false because it's dependency of A, which is private=false.
         /// - E will be CopyLocal=true because all source primary references aren't private=false.
-        /// 
+        ///
         /// Rationale:
         /// Dependencies will be CopyLocal=false if all source primary references are Private=false.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress265054()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11629,23 +11629,23 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Here's how you get into this situation:
-        /// 
+        ///
         /// App
-        ///   References - A 
-        ///   References - B 
+        ///   References - A
+        ///   References - B
         ///        Depends on A
-        /// 
+        ///
         ///    And, the following conditions.
         ///     Primary "A" has no explicit Version (i.e. it's a simple name)
         ///        Primary "A" *is not* resolved.
         ///        Dependency "A" *is* resolved.
-        /// 
+        ///
         /// Expected result:
         /// * No exceptions.
         /// * Build error about unresolved primary reference.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress312873_UnresolvedPrimaryWithResolveDependency()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11658,7 +11658,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("B"),
 
                 // We need a one more "A" because the bug was in a Compare function
-                // called by .Sort. We need enough items to guarantee that A with null version 
+                // called by .Sort. We need enough items to guarantee that A with null version
                 // will be on the left side of a compare.
                 new TaskItem("A")
 };
@@ -11676,18 +11676,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// We weren't handling scatter assemblies.
-        /// 
+        ///
         /// App
-        ///   References - A 
-        /// 
+        ///   References - A
+        ///
         ///    And, the following conditions.
         ///     Primary "A" has has two scatter files "M1" and "M2"
-        /// 
+        ///
         /// Expected result:
         /// * M1 and M2 should be output in ScatterFiles and CopyLocal.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress275161_ScatterAssemblies()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11737,25 +11737,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// We weren't handling scatter assemblies.
-        /// 
+        ///
         /// App
-        ///   References - A 
+        ///   References - A
         ///        Depends on B v1.0.0.0
         ///   References - B v2.0.0.0
-        ///        
-        /// 
+        ///
+        ///
         ///    And, the following conditions.
         ///    * All assemblies are resolved.
         /// * All assemblies are CopyLocal=true.
         /// * Notice the conflict between versions of B.
-        /// 
+        ///
         /// Expected result:
         /// * During conflict resolution, B v2.0.0.0 should win.
         /// * B v1.0.0.0 should still be listed in dependencies (there's not a strong case for this either way)
         /// * B v1.0.0.0 should be CopyLocal='false'
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress317975_LeftoverLowerVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11796,22 +11796,22 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Mscorlib is special in that it doesn't always have complete metadata. For example,
         /// GetAssemblyName can return null. This was confusing the {RawFileName} resolution path,
         /// which is fairly different from the other code paths.
-        /// 
+        ///
         /// App
         ///   References - "c:\path-to-mscorlib\mscorlib.dll" (Current FX)
-        /// 
+        ///
         /// Expected result:
         /// * Even though mscorlib.dll doesn't have an assembly name, we should be able to return
         ///   a result.
-        /// 
+        ///
         /// NOTES:
         /// * This test works because path-to-mscorlib is the same as the path to the FX folder.
         ///   Because of this, the hard-cache is used rather than actually calling GetAssemblyName
         ///   on mscorlib.dll. This isn't going to work in cases where mscorlib is from an FX other
         ///   than the current target. See the Part2 for a test that covers this other case.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress313086_Part1_MscorlibAsRawFilename()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11839,20 +11839,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Mscorlib is special in that it doesn't always have complete metadata. For example,
         /// GetAssemblyName can return null. This was confusing the {RawFileName} resolution path,
         /// which is fairly different from the other code paths.
-        /// 
+        ///
         /// App
         ///   References - "c:\path-to-mscorlib\mscorlib.dll" (non-Current FX)
-        /// 
+        ///
         /// Expected result:
         /// * Even though mscorlib.dll doesn't have an assembly name, we should be able to return
         ///   a result.
-        /// 
+        ///
         /// NOTES:
         /// * This test is covering the case where mscorlib.dll is coming from somewhere besides
         ///   the main (ie Whidbey) FX.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress313086_Part2_MscorlibAsRawFilename()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11880,7 +11880,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If a directory path is passed into AssemblyFiles, then we should warn and continue on.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress284466_DirectoryIntoAssemblyFiles()
         {
             // Create the engine.
@@ -11916,7 +11916,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If a relative assemblyFile is passed in resolve it as a full path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RelativeAssemblyFiles()
         {
             string testPath = Path.Combine(Path.GetTempPath(), @"RelativeAssemblyFiles");
@@ -11962,7 +11962,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Behave gracefully if a referenced assembly is inaccessible to the user.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress316906_UnauthorizedAccessViolation_PrimaryReferenceIsInaccessible()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -11993,7 +11993,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// In this case, the file is still resolved because it was passed in directly.
         /// There's no way to determine dependencies however.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress316906_UnauthorizedAccessViolation_PrimaryFileIsInaccessible()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12017,7 +12017,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Behave gracefully if a referenced assembly is inaccessible to the user.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress316906_UnauthorizedAccessViolation_PrimaryAsRawFileIsInaccessible()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12044,7 +12044,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If there's a SearhPath like {Registry:,,} then still behave nicely.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress269704_MissingRegistryElements()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12077,17 +12077,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// 3.  Create a C# console application.
         /// 4.  In the console app, add a File reference to Foo.dll.
         /// 5.  Build the console app.
-        /// 
+        ///
         /// RESULTS (before bugfix):
         /// ========================
         /// MSBUILD : warning : Couldn't resolve this reference.  Could not locate assembly "ClassLibrary1"
-        /// 
+        ///
         /// EXPECTED (after bugfix):
         /// ========================
-        /// We think it might be reasonable for the ResolveAssemblyReference task to correctly resolve 
+        /// We think it might be reasonable for the ResolveAssemblyReference task to correctly resolve
         /// this reference, especially given the fact that the HintPath was provided in the project file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress276548_AssemblyNameDifferentThanFusionName()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12121,7 +12121,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// When very long paths are passed in we should be robust.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress314573_VeryLongPaths()
         {
             string veryLongPath = @"C:\" + new String('a', 260);
@@ -12134,7 +12134,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies = new ITaskItem[]
             {
-                new TaskItem("A")                    // Resolved by HintPath        
+                new TaskItem("A")                    // Resolved by HintPath
             };
             t.Assemblies[0].SetMetadata
             (
@@ -12164,7 +12164,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Need to be robust in the face of assembly names with special characters.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress265003_EscapedCharactersInFusionName()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12174,7 +12174,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies = new ITaskItem[]
             {
-                new TaskItem("\\=A\\=, Version=2.0.0.0, Culture=neUtral, PublicKeyToken=b77a5c561934e089"), // Characters that should be escaped in fusion names: \ , " ' = 
+                new TaskItem("\\=A\\=, Version=2.0.0.0, Culture=neUtral, PublicKeyToken=b77a5c561934e089"), // Characters that should be escaped in fusion names: \ , " ' =
                 new TaskItem("__\\'ASP\\'dw0024ry")
             };
 
@@ -12199,10 +12199,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// If we're given bogus Include (one with characters that would normally need escaping) but we also 
+        /// If we're given bogus Include (one with characters that would normally need escaping) but we also
         /// have a hintpath, then go ahead and resolve anyway because we know what the path should be.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress284081_UnescapedCharactersInFusionNameWithHintPath()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12239,7 +12239,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Everett supported assembly names that had .dll at the end.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress366322_ReferencesWithFileExtensions()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12268,7 +12268,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Support for multiple framework directories.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress366814_MultipleFrameworksFolders()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12299,7 +12299,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// If the App.Config file has a bad .XML then handle it gracefully.
         /// (i.e. no exception is thrown from the task.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress271273_BogusAppConfig()
         {
             // Create the engine.
@@ -12338,9 +12338,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// The user might pass in a HintPath that has a trailing slash. Need to not crash.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress354669_HintPathWithTrailingSlash()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12370,7 +12370,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// The user might pass in a HintPath that has a trailing slash. Need to not crash.
-        /// 
+        ///
         ///    Assembly A
         ///     References: C, version 2
         ///
@@ -12379,9 +12379,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// There is an App.Config file that redirects all versions of C to V2.
         /// Assemblies A and B are both located via their HintPath.
-        /// 
-        /// </summary>        
-        [TestMethod]
+        ///
+        /// </summary>
+        [Test]
         public void Regress339786_CrossVersionsWithAppConfig()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12427,7 +12427,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// An older LKG of the CLR could throw a FileLoadException if it doesn't recognize
         /// the assembly. We need to support this for dogfooding purposes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress_DogfoodCLRThrowsFileLoadException()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12449,10 +12449,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// There was a bug in which any file mentioned in the InstalledAssemblyTables was automatically
-        /// considered to be a file present in the framework directory. This assumption was originally true, 
+        /// considered to be a file present in the framework directory. This assumption was originally true,
         /// but became false when Crystal Reports started putting their assemblies in this table.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress407623_RedistListDoesNotImplyPresenceInFrameworks()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12504,7 +12504,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If an invalid file name is passed to InstalledAssemblyTables we expect a warning even if no other redist lists are passed.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidCharsInInstalledAssemblyTable()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12527,19 +12527,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Here's how you get into this situation:
-        /// 
+        ///
         /// App
         ///   References - Microsoft.Build.Engine
         ///     Hintpath = C:\Regress435487\microsoft.build.engine.dll
-        /// 
+        ///
         ///    And, the following conditions.
         ///     microsoft.build.engine.dll has the redistlist InGac=true flag set.
-        /// 
+        ///
         /// Expected result:
         /// * For the assembly to be CopyLocal=true
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress435487_FxFileResolvedByHintPathShouldByCopyLocal()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12589,9 +12589,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when doing partial name matching with the assembly name that we also correctly do the partial name matching when trying to find
-        /// assemblies from the redist list. 
+        /// assemblies from the redist list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PartialNameMatchingFromRedist()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -12650,7 +12650,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void Regress46599_BogusInGACValueForAssemblyInRedistList()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12701,7 +12701,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.AreEqual(2, t.ResolvedFiles.Length, "Expected two resolved assemblies.");
         }
 
-        [TestMethod]
+        [Test]
         public void VerifyFrameworkFileMetadataFiles()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -12812,7 +12812,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
 
-        [TestMethod]
+        [Test]
         public void GetRedistListPathsFromDisk_ThrowsArgumentNullException()
         {
             bool caughtArgumentNullException = false;
@@ -12832,10 +12832,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the redist list is empty and we pass in an empty set of white lists
         /// We should return null as there is no point generating a white list if there is nothing to subtract from.
-        /// ResolveAssemblyReference will see this as null and log a warning indicating no redist assemblies were found therefore no black list could be 
+        /// ResolveAssemblyReference will see this as null and log a warning indicating no redist assemblies were found therefore no black list could be
         /// generated
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListEmptyAssemblyInfoNoRedistAssemblies()
         {
             RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[0]);
@@ -12849,7 +12849,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list genreated as there is nothing to subtract.
         /// Nothing meaning, we dont have any matching subset list files to say there are no good files.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListEmptyAssemblyInfoWithRedistAssemblies()
         {
             string redistFile = CreateGenericRedistList();
@@ -12874,7 +12874,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the subset lists cannot be read. The expectation is that the black list will be empty as we have no proper white lists to compare it to.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListNotFoundSubsetFiles()
         {
             string redistFile = CreateGenericRedistList();
@@ -12907,10 +12907,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where there is random goo in the subsetList file. Expect the file to not be read in and a warning indicating the file was skipped due to a read error. 
+        /// Test the case where there is random goo in the subsetList file. Expect the file to not be read in and a warning indicating the file was skipped due to a read error.
         /// This should also cause the white list to be empty as the badly formatted file was the only whitelist subset file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListGarbageSubsetListFiles()
         {
             string redistFile = CreateGenericRedistList();
@@ -12946,15 +12946,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Inputs:
         ///     Redist list which has entries and has a redist name
         ///     Subset list which has no redist name but has entries
-        /// 
+        ///
         /// Expected:
-        ///     Expect a warning that a redist list or subset list has no redist name. 
+        ///     Expect a warning that a redist list or subset list has no redist name.
         ///     There should be no black list generated as no sub set lists were read in.
-        /// 
+        ///
         /// Rational:
         ///     If we have no redist name to compare to the redist list redist name we cannot subtract the lists correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListNoSubsetListName()
         {
             string redistFile = CreateGenericRedistList();
@@ -12995,14 +12995,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Inputs:
         ///     Redist list which has entries but no redist name
         ///     Subset list which has a redist name and entries
-        /// 
+        ///
         /// Expected:
         ///     Expect no black list to be generated and no warnigns to be emitted
-        ///     
+        ///
         /// Rational:
         ///     Since the redist list name is null or empty we have no way of matching any subset list up to it.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListNullkRedistListName()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -13046,15 +13046,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Inputs:
         ///     Redist list which has entries and has a redist name
         ///     Subset list which has entries but has a different redist name than the redist list
-        /// 
+        ///
         /// Expected:
         ///     There should be no black list generated as no sub set lists with matching names were found.
-        /// 
+        ///
         /// Rational:
-        ///     If the redist name does not match then that subset list should not be subtracted from the redist list. 
+        ///     If the redist name does not match then that subset list should not be subtracted from the redist list.
         ///     We only add assemblies to the black list if there is a corosponding white list even if it is empty to inform us what assemblies are good and which are not.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListDifferentNameToSubSet()
         {
             string redistFile = CreateGenericRedistList();
@@ -13093,7 +13093,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Test the case where the subset list has the same name as the redist list but it has no entries In this case
         /// the black list should contain ALL redist list entries because there are no white list files to remove from the black list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListEmptySubsetMatchingName()
         {
             string redistFile = CreateGenericRedistList();
@@ -13130,11 +13130,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where, no redist assemblies are read in. 
-        /// In this case no blacklist can be generated. 
+        /// Test the case where, no redist assemblies are read in.
+        /// In this case no blacklist can be generated.
         /// We should get a warning informing us that we could not create a black list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListNoAssembliesinRedistList()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -13181,10 +13181,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where the subset list is a subset of the redist list. Make sure that 
+        /// Test the case where the subset list is a subset of the redist list. Make sure that
         /// even though there are two files in the redist list that only one shows up in the black list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListGoodListsSubsetIsSubsetOfRedist()
         {
             string redistFile = CreateGenericRedistList(); ;
@@ -13213,11 +13213,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where we generate a black list based on a set of subset file paths, and then ask for 
+        /// Test the case where we generate a black list based on a set of subset file paths, and then ask for
         /// another black list using the same file paths. We expect to get the exact same Hashtable out
         /// as it should be pulled from the cache.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListVerifyBlackListCache()
         {
             string redistFile = CreateGenericRedistList();
@@ -13254,11 +13254,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the white list and the redist list are identical
         /// In this case the black list should be empty.
-        /// 
-        /// We are also in a way testing the combining of subset files as we read in one assembly from two 
+        ///
+        /// We are also in a way testing the combining of subset files as we read in one assembly from two
         /// different subset lists while the redist list already contains both assemblies.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListGoodListsSubsetIsSameAsRedistList()
         {
             string redistFile = CreateGenericRedistList();
@@ -13290,12 +13290,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where the white list is a superset of the redist list. 
-        /// This means there are more assemblies in the white list than in the black list. 
-        /// 
+        /// Test the case where the white list is a superset of the redist list.
+        /// This means there are more assemblies in the white list than in the black list.
+        ///
         /// The black list should be empty.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListGoodListsSubsetIsSuperSet()
         {
             string redistFile = CreateGenericRedistList();
@@ -13332,10 +13332,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Check to see if comparing the assemblies in the redist list to the ones in the subset 
+        /// Check to see if comparing the assemblies in the redist list to the ones in the subset
         /// list are case sensitive or not, they should not be case sensitive.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListGoodListsCheckCaseInsensitive()
         {
             string redistFile = CreateGenericRedistList();
@@ -13367,7 +13367,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list genreated as there is nothing to subtract.
         /// Nothing meaning, we dont have any matching subset list files to say there are no good files.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RedistListGenerateBlackListGoodListsMultipleIdenticalAssembliesInRedistList()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -13407,7 +13407,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the framework directory is passed in as null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SubsetListFinderNullFrameworkDirectory()
         {
@@ -13418,7 +13418,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the subsetsToSearchFor are passed in as null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SubsetListFinderNullSubsetToSearchFor()
         {
@@ -13428,7 +13428,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the subsetsToSearchFor are an empty array
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SubsetListFinderEmptySubsetToSearchFor()
         {
             SubsetListFinder finder = new SubsetListFinder(new string[0]);
@@ -13438,13 +13438,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Verify that the method will not crash if there are empty string array elements, and that when we call the 
+        /// Verify that the method will not crash if there are empty string array elements, and that when we call the
         /// method twice with the same set of SubsetToSearchFor and TargetFrameworkDirectory that we get the exact same array back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SubsetListFinderVerifyEmptyInSubsetsToSearchForAndCaching()
         {
-            // Verify the program will not crach when an empty string is passed in and that when we call the method twice that we get the 
+            // Verify the program will not crach when an empty string is passed in and that when we call the method twice that we get the
             // exact same array of strings back.
             SubsetListFinder finder = new SubsetListFinder(new string[] { "Clent", string.Empty, "Bar" });
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
@@ -13459,7 +13459,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when we have valid subset files and their names are in the subsets to search for that we correctly find the files
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SubsetListFinderSubsetExists()
         {
             string frameworkDirectory = Path.Combine(ObjectModelHelpers.TempProjectDir, "SubsetListsTestExists");
@@ -13487,7 +13487,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify that if there are files of the correct name but of the wrong extension that they are not found.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SubsetListFinderNullSubsetExistsButNotXml()
         {
             string frameworkDirectory = Path.Combine(ObjectModelHelpers.TempProjectDir, "SubsetListsTestExistsNotXml");
@@ -13510,7 +13510,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void IgnoreDefaultInstalledAssemblyTables()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -13595,7 +13595,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// A null black list should be the same as an empty one.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTableNullBlackList()
         {
             TaskLoggingHelper log = new TaskLoggingHelper(new ResolveAssemblyReference());
@@ -13620,7 +13620,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where the blacklist is empty.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTableEmptyBlackList()
         {
             TaskLoggingHelper log = new TaskLoggingHelper(new ResolveAssemblyReference());
@@ -13645,7 +13645,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify the case where there are primary references in the reference table which are also in the black list
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTablePrimaryItemInBlackList()
         {
             MockEngine mockEngine = new MockEngine();
@@ -13684,7 +13684,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify the case where there are primary references in the reference table which are also in the black list
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTablePrimaryItemInBlackListSpecificVersionTrue()
         {
             MockEngine mockEngine = new MockEngine();
@@ -13723,7 +13723,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify the generation of the targetFrameworkSubSetName
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGenerateFrameworkName()
         {
             string[] targetFrameworks = new string[] { "Client" };
@@ -13762,7 +13762,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify the case where we just want to remove the references before conflict resolution and not print out the warning.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTablePrimaryItemInBlackListRemoveOnlyNoWarn()
         {
             MockEngine mockEngine = new MockEngine();
@@ -13800,7 +13800,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference : sqlDependencyReference is in black list
         /// expect to see one dependency warning message
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTableDependentItemsInBlackList()
         {
             ReferenceTable referenceTable;
@@ -13839,12 +13839,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference  
-        /// and enginePrimary->sqlDependencyReference: sqlDependencyReference is in black list  
+        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
+        /// and enginePrimary->sqlDependencyReference: sqlDependencyReference is in black list
         /// and systemxml->enginePrimary
         /// expect to see one dependency warning message
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTableDependentItemsInBlackList2()
         {
             ReferenceTable referenceTable;
@@ -13885,7 +13885,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Testing case  enginePrimary->XmlPrimary with XMLPrimary in the BL
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTablePrimaryToPrimaryDependencyWithOneInBlackList()
         {
             ReferenceTable referenceTable;
@@ -13927,7 +13927,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Testing case  enginePrimary->XmlPrimary->dataDependency with dataDependency in the BL
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTablePrimaryToPrimaryToDependencyWithOneInBlackList()
         {
             ReferenceTable referenceTable;
@@ -13975,11 +13975,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference 
-        /// and xmlPrimary->sqlDependencyReference: sqlDependencyReference is in black list 
+        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
+        /// and xmlPrimary->sqlDependencyReference: sqlDependencyReference is in black list
         /// expect to see one dependency warning message
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTableDependentItemsInBlackList3()
         {
             ReferenceTable referenceTable;
@@ -14022,11 +14022,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference 
+        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
         /// and xmlPrimary->dataDependencyReference: sqlDependencyReference is in black list
         /// expect to see one dependency warning message
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTableDependentItemsInBlackList4()
         {
             ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null, null, null, null, null, null, new Version("4.0"), null, null, null, true, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false);
@@ -14068,13 +14068,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference 
+        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
         /// enginePrimary -> dataDependencyReference
         /// xmlPrimaryReference ->DataDependency
         /// dataDependencyReference and sqlDependencyReference are in black list
         /// expect to see two dependency warning messages in the enginePrimaryCase and one in the xmlPrimarycase
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTableDependentItemsInBlackList5()
         {
             ReferenceTable referenceTable;
@@ -14133,14 +14133,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Testing case  
+        /// Testing case
         /// enginePrimary -> dataDependencyReference   also enginePrimary->sqlDependencyReference   specific version = true on the primary
         /// xmlPrimaryReference ->dataDependencyReference specific version = false on the primary
         /// dataDependencyReference and sqlDependencyReference is in the black list.
         /// Expect to see one dependency warning messages xmlPrimarycase and no message for enginePrimary
         /// Also expect to resolve all files except for xmlPrimaryReference
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReferenceTableDependentItemsInBlackListPrimaryWithSpecificVersion()
         {
             ReferenceTable referenceTable;
@@ -14233,7 +14233,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure we get an argument null exception when the profileName is set to null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestProfileNameNull()
         {
@@ -14244,7 +14244,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure we get an argument null exception when the ProfileFullFrameworkFolders is set to null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestProfileFullFrameworkFoldersFoldersNull()
         {
@@ -14255,7 +14255,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure we get an argument null exception when the ProfileFullFrameworkAssemblyTables is set to null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestProfileFullFrameworkAssemblyTablesNull()
         {
@@ -14266,7 +14266,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify that setting a subset and a profile at the same time will cause an error to be logged and rar to return false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProfileAndSubset1()
         {
             MockEngine mockEngine;
@@ -14283,7 +14283,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify that setting a subset and a profile at the same time will cause an error to be logged and rar to return false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProfileAndSubset2()
         {
             MockEngine mockEngine;
@@ -14299,10 +14299,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify setting certain combinations of Profile parameters will case an error to be logged and rar to fail execution.
-        /// 
+        ///
         /// Test the case where the profile name is not set and ProfileFullFrameworkFolders is set.
         ///</summary>
-        [TestMethod]
+        [Test]
         public void TestProfileParameterCombinations()
         {
             MockEngine mockEngine;
@@ -14314,10 +14314,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify when the frameworkdirectory metadata is not set on the ProfileFullFrameworkAssemblyTables that an 
+        /// Verify when the frameworkdirectory metadata is not set on the ProfileFullFrameworkAssemblyTables that an
         /// error is logged and rar fails.
         ///</summary>
-        [TestMethod]
+        [Test]
         public void TestFrameworkDirectoryMetadata()
         {
             MockEngine mockEngine;
@@ -14409,14 +14409,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// This test will verify the IgnoreDefaultInstalledSubsetTables property on the RAR task.
-        /// The property determines whether or not RAR will search the target framework directories under the subsetList folder for 
+        /// The property determines whether or not RAR will search the target framework directories under the subsetList folder for
         /// xml files matching the client subset names passed into the TargetFrameworkSubset property.
-        /// 
-        /// The default for the property is false, when the value is false RAR will search the SubsetList folder under the TargetFramework directories 
-        /// for the xml files with names in the TargetFrameworkSubset property.  When the value is true, RAR will not search the SubsetList directory. The only 
+        ///
+        /// The default for the property is false, when the value is false RAR will search the SubsetList folder under the TargetFramework directories
+        /// for the xml files with names in the TargetFrameworkSubset property.  When the value is true, RAR will not search the SubsetList directory. The only
         /// way to specify a TargetFrameworkSubset is to pass one to the InstalledAssemblySubsetTables property.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IgnoreDefaultInstalledSubsetTables()
         {
             string redistListPath = CreateGenericRedistList();
@@ -14503,10 +14503,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where there are no client subset names passed in but an InstalledDefaultSubsetTable 
+        /// Test the case where there are no client subset names passed in but an InstalledDefaultSubsetTable
         /// is passed in. We expect to use that.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoClientSubsetButInstalledSubTables()
         {
             string redistListPath = CreateGenericRedistList();
@@ -14551,7 +14551,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify the case where the installedSubsetTables are null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullInstalledSubsetTables()
         {
@@ -14562,7 +14562,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify the case where the targetFrameworkSubsets are null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullTargetFrameworkSubsets()
         {
@@ -14573,7 +14573,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify the case where the FulltargetFrameworkSubsetNames are null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void NullFullTargetFrameworkSubsetNames()
         {
@@ -14584,7 +14584,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Test the case where a non existent subset list path is used and no additional subsets are passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FakeSubsetListPathsNoAdditionalSubsets()
         {
             string redistListPath = CreateGenericRedistList();
@@ -14624,7 +14624,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// This test will verify when the full client name is passed in and it appears in the TargetFrameworkSubsetList, that the
         /// black list is not used.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveAssemblyReferenceVerifyFullClientName()
         {
             string redistListPath = CreateGenericRedistList();
@@ -14658,7 +14658,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// This test will verify when the full client name is passed in and it appears in the TargetFrameworkSubsetList, that the
         /// black list is not used.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveAssemblyReferenceVerifyFullClientNameWithSubsetTables()
         {
             string redistListPath = CreateGenericRedistList();
@@ -14694,7 +14694,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// This test will verify when the full client name is passed in and it appears in the TargetFrameworkSubsetList, that the
         /// black list is not used.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResolveAssemblyReferenceVerifyFullClientNameNoTablesPassedIn()
         {
             string redistListPath = CreateGenericRedistList();
@@ -14795,7 +14795,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             return success;
         }
 
-        [TestMethod]
+        [Test]
         public void DoNotAssumeFilesDescribedByRedistListExistOnDisk()
         {
             string redistListPath = CreateGenericRedistList();
@@ -14871,18 +14871,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Here's how you get into this situation:
-        /// 
+        ///
         /// App
         ///   References - A
-        /// 
+        ///
         ///    And, the following conditions.
         ///     $(ReferencePath) = c:\apath;:
-        /// 
+        ///
         /// Expected result:
         /// * Invalid paths should be ignored.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress397129_HandleInvalidDirectoriesAndFiles_Case1()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -14905,16 +14905,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Here's how you get into this situation:
-        /// 
+        ///
         /// App
-        ///   References - A 
+        ///   References - A
         ///        Hintpath=||invalidpath||
-        /// 
+        ///
         /// Expected result:
         /// * No exceptions.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress397129_HandleInvalidDirectoriesAndFiles_Case2()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -14939,18 +14939,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - Microsoft.Office.Interop.Excel
         ///        Depends on Office, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c
-        /// 
-        ///   References - MS.Internal.Test.Automation.Office.Excel 
+        ///
+        ///   References - MS.Internal.Test.Automation.Office.Excel
         ///        Depends on Office, Version=12.0.0.0, Culture=neutral, PublicKeyToken=94de0004b6e3fcc5
-        /// 
+        ///
         /// Notice that the two primaries have dependencies that only differ by PKT. Suggested redirects should
         /// only happen if the two assemblies differ by nothing but version.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress313747_FalseSuggestedRedirectsWhenAssembliesDifferOnlyByPkt()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -14976,18 +14976,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// (1) Primary reference A v 2.0.0.0 is found.
         /// (2) Primary reference B is found.
-        /// (3) Primary reference B depends on A v 1.0.0.0 
+        /// (3) Primary reference B depends on A v 1.0.0.0
         /// (4) Dependency A v 1.0.0.0 is not found.
         /// (5) App.Config does not contain a binding redirect from A v 1.0.0.0 -> 2.0.0.0
-        /// 
+        ///
         /// We need to warn and suggest an app.config entry because the runtime environment will require a binding
         /// redirect to function. Without a binding redirect, loading B will cause A.V1 to try to load. It won't be
         /// there and there won't be a binding redirect to point it at 2.0.0.0.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress442570_MissingBackVersionShouldWarn()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15015,19 +15015,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on B
         ///        Will be found by hintpath.
         ///   References -B
-        ///        No hintpath 
+        ///        No hintpath
         ///        Exists in A.dll's folder.
-        /// 
+        ///
         /// B.dll should be unresolved even though its in A's folder because primary resolution needs to work
         /// without looking at dependencies because of the load-time perf scenarios don't look at dependencies.
         /// We must be consistent between primaries resolved with FindDependencies=true and FindDependencies=false.
-        [TestMethod]
+        [Test]
         public void ByDesignRelatedTo454863_PrimaryReferencesDontResolveToParentFolders()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15053,7 +15053,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(!ContainsItem(t.ResolvedFiles, @"C:\Regress454863\B.dll"), "Expected B.dll to be *not* be resolved.");
         }
 
-        [TestMethod]
+        [Test]
         public void Regress393931_AllowAlternateAssemblyExtensions_Case1()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15085,7 +15085,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Allow alternate extension values to be passed in.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress393931_AllowAlternateAssemblyExtensions()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15117,17 +15117,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1 (but PKT=null)
         ///   References - B
         ///        Depends on D version 2 (but PKT=null)
-        /// 
+        ///
         /// There should be no suggested redirect because only strongly named assemblies can have
         /// binding redirects.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress387218_UnificationRequiresStrongName()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15159,16 +15159,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   References - A
         ///        Depends on D version 1 (but Culture=fr)
         ///   References - B
         ///        Depends on D version 2 (but Culture=en)
-        /// 
+        ///
         /// There should be no suggested redirect because assemblies with different cultures cannot unify.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress390219_UnificationRequiresSameCulture()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15199,7 +15199,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
 
-        [TestMethod]
+        [Test]
         public void SGenDependeicies()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15236,14 +15236,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Consider this dependency chain:
-        /// 
+        ///
         /// App
         ///   Has project reference to c:\Regress315619\A\MyAssembly.dll
         ///   Has project reference to c:\Regress315619\B\MyAssembly.dll
-        /// 
+        ///
         /// These two project references have different versions. Important: PKT is null.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress315619_TwoWeaklyNamedPrimariesIsInsoluble()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15274,18 +15274,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// This is a fix to help ClickOnce folks correctly display information about which
         /// redist components can be deployed.
-        /// 
+        ///
         /// Two new attributes are added to resolved references:
-        /// (1) IsRedistRoot (bool) -- The flag from the redist *.xml file. If there is no 
+        /// (1) IsRedistRoot (bool) -- The flag from the redist *.xml file. If there is no
         /// flag in the file then there will be no flag on the resulting item. This flag means
         /// "I am the UI representative for this entire redist". ClickOnce will use this to hide
         /// all other redist items and to show only this item.
-        /// 
+        ///
         /// (2) Redist (string) -- This the the value of FileList Redist from the *.xml file.
-        /// This string means "I am the unique name of this entire redist". 
-        /// 
+        /// This string means "I am the unique name of this entire redist".
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ForwardRedistRoot()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -15389,7 +15389,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Make sure the reverse assembly name comparer correctly sorts the assembly names in reverse order
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReverseAssemblyNameExtensionComparer()
         {
             IComparer sortByVersionDescending = new RedistList.SortByVersionDescending();
@@ -15413,7 +15413,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Check the Filtering based on Target Framework.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetFrameworkFiltering()
         {
             int resultSet = 0;
@@ -15433,7 +15433,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify the when a simple name is asked for that the assemblies are returned in sorted order by version.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyGetSimpleNamesIsSorted()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -15481,7 +15481,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If the assembly was found in a redis list which does not have the correct redist name , Microsoft-Windows-CLRCoreComp then we should not consider it a framework assembly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyInRedistListNonWindowsRedistName()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -15512,7 +15512,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If the assembly was found in a redis list which does have the correct redist name , Microsoft-Windows-CLRCoreComp then we should consider it a framework assembly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyInRedistListWindowsRedistName()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -15543,7 +15543,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// If the assembly was found in a redis list which does have the correct redist name , Microsoft-Windows-CLRCoreComp then we should consider it a framework assembly taking into account including partial matching
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyInRedistListPartialMatches()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -15586,7 +15586,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify when we ask if an assembly is in the redist list we get the right answer.
         /// The version should not be compared
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyInRedistListDiffVersion()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -15619,7 +15619,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify when we ask if an assembly is in the redist list we get the right answer.
         /// The public key is significant and should make the match not work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyInRedistListDiffPublicKey()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -15651,7 +15651,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify when we ask if an assembly is in the redist list we get the right answer.
         /// The Culture is significant and should make the match not work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyInRedistListDiffCulture()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -15683,7 +15683,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify when we ask if an assembly is in the redist list we get the right answer.
         /// The SimpleName is significant and should make the match not work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyInRedistListDiffSimpleName()
         {
             string redistFile = FileUtilities.GetTemporaryFile();
@@ -15714,7 +15714,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when a p2p (assemblies in the AssemblyFiles property) are passed to rar that we properly un-resolve them if they depend on references which are in the black list for the profile.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Verifyp2pAndProfile()
         {
             // Create a generic redist list with system.xml and microsoft.build.engine.
@@ -15762,7 +15762,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when a p2p (assemblies in the AssemblyFiles property) are passed to rar that we properly resolve them if they depend on references which are in the black list for the profile but have specific version set to true.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Verifyp2pAndProfile2()
         {
             // Create a generic redist list with system.xml and microsoft.build.engine.
@@ -15809,10 +15809,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify when a profile is used that assemblies not in the profile are excluded or have metadata attached to indicate there are dependencies 
+        /// Verify when a profile is used that assemblies not in the profile are excluded or have metadata attached to indicate there are dependencies
         /// which are not in the profile.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyClientProfileRedistListAndProfileList()
         {
             // Create a generic redist list with system.xml and microsoft.build.engine.
@@ -15854,12 +15854,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify when a profile is used that assemblies not in the profile are excluded or have metadata attached to indicate there are dependencies 
+        /// Verify when a profile is used that assemblies not in the profile are excluded or have metadata attached to indicate there are dependencies
         /// which are not in the profile.
-        /// 
+        ///
         /// Make sure the ProfileFullFrameworkAssemblyTable parameter works.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyClientProfileRedistListAndProfileList2()
         {
             // Create a generic redist list with system.xml and microsoft.build.engine.
@@ -15907,7 +15907,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When targeting a profile make sure that we do not resolve the assembly if we reference something from the full framework which is in the GAC.
         /// This will cover the same where we are referencing a full framework assembly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAssemblyInGacButNotInProfileIsNotResolved()
         {
             // Create a generic redist list with system.xml and microsoft.build.engine.
@@ -15957,11 +15957,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Make sure when reading in the full framework redist list or when reading in the white list xml files. 
+        /// Make sure when reading in the full framework redist list or when reading in the white list xml files.
         /// Errors in reading the file should be logged as warnings and no assemblies should be excluded.
-        /// 
+        ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyProfileErrorsAreLogged()
         {
             // Create a generic redist list with system.xml and microsoft.build.engine.
@@ -16043,7 +16043,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference GlobalAssemblyCache.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     sealed public class GlobalAssemblyCacheTests : ResolveAssemblyReferenceTestFixture
     {
         private const string system4 = "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
@@ -16061,16 +16061,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when the GAC enumerator returns
-        /// 
+        ///
         /// System, Version=4.0.0.0  Runtime=4.0xxxx
         /// System, Version=2.0.0.0  Runtime=2.0xxxx
         /// System, Version=1.0.0.0  Runtime=2.0xxxx
-        /// 
+        ///
         /// And we target 2.0 runtime that we get the Version 2.0.0.0 system.
-        /// 
+        ///
         /// This test two aspects. First that we get the correct runtime, second that we get the highest version for that assembly in the runtime.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifySimpleNamev2057020()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -16085,17 +16085,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when the GAC enumerator returns
-        /// 
+        ///
         /// System, Version=4.0.0.0  Runtime=4.0xxxx
         /// System, Version=2.0.0.0  Runtime=2.0xxxx
         /// System, Version=1.0.0.0  Runtime=2.0xxxx
-        /// 
+        ///
         /// And we target 2.0 runtime that we get the Version 2.0.0.0 system.
-        /// 
-        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used. 
+        ///
+        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifySimpleNamev2057020SpecificVersion()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -16109,16 +16109,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when the GAC enumerator returns
-        /// 
+        ///
         /// System, Version=2.0.0.0  Runtime=2.0xxxx
         /// System, Version=1.0.0.0  Runtime=2.0xxxx
-        /// 
+        ///
         /// And we target 2.0 runtime that we get the Version 2.0.0.0 system.
-        /// 
-        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used. 
+        ///
+        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyFusionNamev2057020SpecificVersion()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -16132,16 +16132,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when the GAC enumerator returns
-        /// 
+        ///
         /// System, Version=4.0.0.0  Runtime=4.0xxxx
         /// System, Version=2.0.0.0  Runtime=2.0xxxx
         /// System, Version=1.0.0.0  Runtime=2.0xxxx
-        /// 
+        ///
         /// And we target 4.0 runtime that we get the Version 4.0.0.0 system.
-        /// 
+        ///
         /// This test two aspects. First that we get the correct runtime, second that we get the highest version for that assembly in the runtime.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifySimpleNamev40()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -16155,17 +16155,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when the GAC enumerator returns
-        /// 
+        ///
         /// System, Version=4.0.0.0  Runtime=4.0xxxx
         /// System, Version=2.0.0.0  Runtime=2.0xxxx
         /// System, Version=1.0.0.0  Runtime=2.0xxxx
-        /// 
+        ///
         /// And we target 4.0 runtime that we get the Version 4.0.0.0 system.
-        /// 
-        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used. 
+        ///
+        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifySimpleNamev40SpecificVersion()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -16179,14 +16179,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Verify when the GAC enumerator returns
-        /// 
+        ///
         /// System, Version=4.0.0.0  Runtime=4.0xxxx
-        /// 
-        /// 
-        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used. 
+        ///
+        ///
+        /// Verify that by setting the wants sspecific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyFusionNamev40SpecificVersion()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -16199,9 +16199,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac. 
+        /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(FileLoadException))]
         public void VerifyEmptyPublicKeyspecificVersion()
         {
@@ -16211,9 +16211,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac. 
+        /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyNullPublicKey()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=null");
@@ -16222,9 +16222,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac. 
+        /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyNullPublicKeyspecificVersion()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=null");
@@ -16237,7 +16237,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When a processor architecture is on the end of a fusion name we were appending another processor architecture onto the end causing an invalid fusion name
         /// this was causing the GAC (api's) to crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyProcessorArchitectureDoesNotCrash()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
@@ -16249,7 +16249,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When a processor architecture is on the end of a fusion name we were appending another processor architecture onto the end causing an invalid fusion name
         /// this was causing the GAC (api's) to crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyProcessorArchitectureDoesNotCrashSpecificVersion()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
@@ -16261,7 +16261,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// See bug 648678,  when a processor architecture is on the end of a fusion name we were appending another processor architecture onto the end causing an invalid fusion name
         /// this was causing the GAC (api's) to crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyProcessorArchitectureDoesNotCrashFullFusionName()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
@@ -16273,7 +16273,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When a processor architecture is on the end of a fusion name we were appending another processor architecture onto the end causing an invalid fusion name
         /// this was causing the GAC (api's) to crash.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyProcessorArchitectureDoesNotCrashFullFusionNameSpecificVersion()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
@@ -16285,7 +16285,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         // System.Runtime dependency calculation tests
 
         // No dependency
-        [TestMethod]
+        [Test]
         public void SystemRuntimeDepends_No_Build()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -16330,7 +16330,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         // Direct dependency
-        [TestMethod]
+        [Test]
         public void SystemRuntimeDepends_Yes()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -16374,7 +16374,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         // Indirect dependency
-        [TestMethod]
+        [Test]
         public void SystemRuntimeDepends_Yes_Indirect()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();

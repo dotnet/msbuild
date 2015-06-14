@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectTargetElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -10,8 +12,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -19,13 +20,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Test the ProjectTargetElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectTargetElement_Tests
     {
         /// <summary>
         /// Create target with invalid name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void AddTargetInvalidName()
         {
@@ -36,7 +37,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read targets in an empty project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNoTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -46,7 +47,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an empty target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadEmptyTarget()
         {
             string content = @"
@@ -65,7 +66,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read attributes on the target element
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadParameters()
         {
             ProjectTargetElement target = GetTargetXml();
@@ -79,7 +80,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set attributes on the target element
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetParameters()
         {
             ProjectTargetElement target = GetTargetXml();
@@ -98,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null inputs on the target element
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullInputs()
         {
@@ -109,7 +110,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null outputs on the target element
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullOutputs()
         {
@@ -120,7 +121,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null dependsOnTargets on the target element
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullDependsOnTargets()
         {
@@ -131,7 +132,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null dependsOnTargets on the target element
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullKeepDuplicateOutputs()
         {
@@ -142,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set null condition on the target element
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullCondition()
         {
             ProjectTargetElement target = GetTargetXml();
@@ -154,7 +155,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read a target with a missing name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidMissingName()
         {
@@ -170,7 +171,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read a target with an invalid attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -186,7 +187,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an target with two task children
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadTargetTwoTasks()
         {
             ProjectTargetElement target = GetTargetXml();
@@ -205,7 +206,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetName()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -221,7 +222,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set inputs
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetInputs()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -237,7 +238,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set outputs
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetOutputs()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -253,7 +254,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set dependsontargets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetDependsOnTargets()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -269,7 +270,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -285,7 +286,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set KeepDuplicateOutputs attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetKeepDuplicateOutputs()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -302,7 +303,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Set return value.  Verify that setting to the empty string and null are
         /// both allowed and have distinct behaviour. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetReturns()
         {
             ProjectRootElement project = ProjectRootElement.Create();

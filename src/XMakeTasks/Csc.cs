@@ -2,12 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Resources;
 using System.Text;
 
 using Microsoft.Build.Framework;
@@ -33,6 +30,8 @@ namespace Microsoft.Build.Tasks
     public class Csc : ManagedCompiler
     {
         private bool _useHostCompilerIfAvailable = false;
+
+        private string _cscPath = null;
 
         #region Properties
 
@@ -172,7 +171,42 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return "csc2.exe";
+                if (_cscPath == null)
+                {
+                    string pathToTool = null;
+                    string[] names;
+
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        names = new[] { "csc2.exe", "csc.exe" };
+                    }
+                    else
+                    {
+                        names = new[] { "mcs.exe" };
+                    }
+
+                    foreach (var toolName in names)
+                    {
+                        pathToTool = ToolLocationHelper.GetPathToBuildToolsFile(
+                            toolName,
+                            ToolLocationHelper.CurrentToolsVersion);
+
+                        if (string.IsNullOrEmpty(pathToTool) || !File.Exists(pathToTool))
+                        {
+                            pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(
+                                toolName,
+                                TargetDotNetFrameworkVersion.VersionLatest);
+                        }
+
+                        if (!string.IsNullOrEmpty(pathToTool) && File.Exists(pathToTool))
+                        {
+                            _cscPath = pathToTool;
+                            return pathToTool;
+                        }
+                    }
+                }
+
+                return _cscPath;
             }
         }
 
@@ -201,27 +235,39 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         override protected internal void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
-            commandLine.AppendSwitchIfNotNull("/lib:", this.AdditionalLibPaths, ",");
-            commandLine.AppendPlusOrMinusSwitch("/unsafe", this.Bag, "AllowUnsafeBlocks");
-            commandLine.AppendPlusOrMinusSwitch("/checked", this.Bag, "CheckForOverflowUnderflow");
-            commandLine.AppendSwitchWithSplitting("/nowarn:", this.DisabledWarnings, ",", ';', ',');
-            commandLine.AppendWhenTrue("/fullpaths", this.Bag, "GenerateFullPaths");
-            commandLine.AppendSwitchIfNotNull("/langversion:", this.LangVersion);
-            commandLine.AppendSwitchIfNotNull("/moduleassemblyname:", this.ModuleAssemblyName);
-            commandLine.AppendSwitchIfNotNull("/pdb:", this.PdbFile);
-            commandLine.AppendPlusOrMinusSwitch("/nostdlib", this.Bag, "NoStandardLib");
-            commandLine.AppendSwitchIfNotNull("/platform:", this.PlatformWith32BitPreference);
-            commandLine.AppendSwitchIfNotNull("/errorreport:", this.ErrorReport);
-            commandLine.AppendSwitchWithInteger("/warn:", this.Bag, "WarningLevel");
-            commandLine.AppendSwitchIfNotNull("/doc:", this.DocumentationFile);
-            commandLine.AppendSwitchIfNotNull("/baseaddress:", this.BaseAddress);
-            commandLine.AppendSwitchUnquotedIfNotNull("/define:", this.GetDefineConstantsSwitch(this.DefineConstants));
-            commandLine.AppendSwitchIfNotNull("/win32res:", this.Win32Resource);
-            commandLine.AppendSwitchIfNotNull("/main:", this.MainEntryPoint);
-            commandLine.AppendSwitchIfNotNull("/appconfig:", this.ApplicationConfiguration);
-            commandLine.AppendWhenTrue("/errorendlocation", this.Bag, "ErrorEndLocation");
-            commandLine.AppendSwitchIfNotNull("/preferreduilang:", this.PreferredUILang);
-            commandLine.AppendPlusOrMinusSwitch("/highentropyva", this.Bag, "HighEntropyVA");
+            commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/lib:"), this.AdditionalLibPaths, ",");
+            commandLine.AppendPlusOrMinusSwitch(CommandLineBuilder.FixCommandLineSwitch("/unsafe"), this.Bag, "AllowUnsafeBlocks");
+            commandLine.AppendPlusOrMinusSwitch(CommandLineBuilder.FixCommandLineSwitch("/checked"), this.Bag, "CheckForOverflowUnderflow");
+            commandLine.AppendSwitchWithSplitting(CommandLineBuilder.FixCommandLineSwitch("/nowarn:"), this.DisabledWarnings, ",", ';', ',');
+            commandLine.AppendWhenTrue(CommandLineBuilder.FixCommandLineSwitch("/fullpaths"), this.Bag, "GenerateFullPaths");
+            commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/langversion:"), this.LangVersion);
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/moduleassemblyname:"), this.ModuleAssemblyName);
+                commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/pdb:"), this.PdbFile);
+            }
+            commandLine.AppendPlusOrMinusSwitch(CommandLineBuilder.FixCommandLineSwitch("/nostdlib"), this.Bag, "NoStandardLib");
+            commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/platform:"), this.PlatformWith32BitPreference);
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/errorreport:"), this.ErrorReport);
+            }
+            commandLine.AppendSwitchWithInteger(CommandLineBuilder.FixCommandLineSwitch("/warn:"), this.Bag, "WarningLevel");
+            commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/doc:"), this.DocumentationFile);
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/baseaddress:"), this.BaseAddress);
+            }
+            commandLine.AppendSwitchUnquotedIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/define:"), this.GetDefineConstantsSwitch(this.DefineConstants));
+            commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/win32res:"), this.Win32Resource);
+            commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/main:"), this.MainEntryPoint);
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/appconfig:"), this.ApplicationConfiguration);
+                commandLine.AppendWhenTrue(CommandLineBuilder.FixCommandLineSwitch("/errorendlocation"), this.Bag, "ErrorEndLocation");
+                commandLine.AppendSwitchIfNotNull(CommandLineBuilder.FixCommandLineSwitch("/preferreduilang:"), this.PreferredUILang);
+                commandLine.AppendPlusOrMinusSwitch(CommandLineBuilder.FixCommandLineSwitch("/highentropyva"), this.Bag, "HighEntropyVA");
+            }
 
             // If not design time build and the globalSessionGuid property was set then add a -globalsessionguid:<guid>
             bool designTime = false;
@@ -232,7 +278,7 @@ namespace Microsoft.Build.Tasks
             }
             if (!designTime)
             {
-                if (!string.IsNullOrWhiteSpace(this.VsSessionGuid))
+                if (NativeMethodsShared.IsWindows && !string.IsNullOrWhiteSpace(this.VsSessionGuid))
                 {
                     commandLine.AppendSwitchIfNotNull("/sqmsessionguid:", this.VsSessionGuid);
                 }
@@ -257,8 +303,16 @@ namespace Microsoft.Build.Tasks
             //      /warnaserror-
             // is just shorthand for:
             //      /warnaserror-:<all possible warnings>
-            commandLine.AppendSwitchWithSplitting("/warnaserror+:", this.WarningsAsErrors, ",", ';', ',');
-            commandLine.AppendSwitchWithSplitting("/warnaserror-:", this.WarningsNotAsErrors, ",", ';', ',');
+            commandLine.AppendSwitchWithSplitting(
+                CommandLineBuilder.FixCommandLineSwitch("/warnaserror+:"),
+                this.WarningsAsErrors,
+                ",",
+                ';',
+                ',');
+            if (NativeMethodsShared.IsWindows)
+            {
+                commandLine.AppendSwitchWithSplitting("/warnaserror-:", this.WarningsNotAsErrors, ",", ';', ',');
+            }
 
             // It's a good idea for the response file to be the very last switch passed, just 
             // from a predictability perspective.
@@ -307,14 +361,14 @@ namespace Microsoft.Build.Tasks
                 string aliasString = reference.GetMetadata(ItemMetadataNames.aliases);
 
 
-                string switchName = "/reference:";
+                string switchName = CommandLineBuilder.FixCommandLineSwitch("/reference:");
                 bool embed = MetadataConversionUtilities.TryConvertItemMetadataToBool
                     (
                         reference,
                         ItemMetadataNames.embedInteropTypes
                     );
 
-                if (embed == true)
+                if (NativeMethodsShared.IsWindows && embed == true)
                 {
                     switchName = "/link:";
                 }

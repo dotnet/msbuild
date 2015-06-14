@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -27,18 +27,18 @@ namespace Microsoft.Build.UnitTests.Construction
     /// <summary>
     /// Tests for the ElementLocation class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ElementLocation_Tests
     {
         /// <summary>
         /// Path to the common targets
         /// </summary>
-        private string _pathToCommonTargets = Path.Combine(FrameworkLocationHelper.PathToDotNetFrameworkV45, "microsoft.common.targets");
+        private string _pathToCommonTargets = Path.Combine(FrameworkLocationHelper.PathToDotNetFrameworkV45, "Microsoft.Common.targets");
 
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorTest1()
         {
             IElementLocation location = ElementLocation.Create("file", 65536, 0);
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorTest2()
         {
             IElementLocation location = ElementLocation.Create("file", 0, 65536);
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorTest3()
         {
             IElementLocation location = ElementLocation.Create("file", 65536, 65537);
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test equality
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Equality()
         {
             IElementLocation location1 = ElementLocation.Create("file", 65536, 65537);
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Check it will use large element location when it should.
         /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestLargeElementLocationUsedLargeColumn()
         {
             string file = null;
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Check it will use large element location when it should.
         /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestLargeElementLocationUsedLargeLine()
         {
             string file = null;
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests serialization.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializationTest()
         {
             IElementLocation location = ElementLocation.Create("file", 65536, 65537);
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying file, line and column.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorWithIndicesTest_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 65535, 65534);
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying file, negative line, column
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ConstructorWithNegativeIndicesTest1()
         {
@@ -201,7 +201,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying file, line, negative column
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ConstructorWithNegativeIndicesTest2n()
         {
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor with invalid null file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorTestNullFile()
         {
             IElementLocation location = ElementLocation.Create(null);
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorTest1_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 65535, 0);
@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorTest2_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 0, 65535);
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConstructorTest3_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 65535, 65534);
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests serialization.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializationTest_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 65535, 2);
@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test many of the getters
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LocationStringsMedleyReadOnlyLoad()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Save read only fails
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SaveReadOnly1()
         {
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Save read only fails
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SaveReadOnly2()
         {
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Save read only fails
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SaveReadOnly3()
         {
@@ -361,7 +361,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Save read only fails
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SaveReadOnly4()
         {

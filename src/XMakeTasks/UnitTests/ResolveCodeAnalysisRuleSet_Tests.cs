@@ -5,11 +5,11 @@ using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ResolveAnalyzerRuleSet_Tests
     {
         private class TemporaryFile : IDisposable
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_FullPath_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_FullPath_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_SimpleNameAlone_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_SimpleNameAndProjectDirectory_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_SimpleNameAndProjectDirectory_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_SimpleNameAndDirectories_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_SimpleNameAndDirectories_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_RelativePath_WithProject_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_RelativePath_WithProject_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_RelativePath_NoProject()
         {
             MockEngine mockEngine = new MockEngine();
@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_EmptyString()
         {
             MockEngine mockEngine = new MockEngine();
@@ -297,7 +297,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogDoesntContain("MSB3884");
         }
 
-        [TestMethod]
+        [Test]
         public void GetResolvedRuleSetPath_Null()
         {
             MockEngine mockEngine = new MockEngine();

@@ -16,11 +16,12 @@ using System.IO;
 
 using Microsoft.Build.Framework;
 using System.CodeDom;
-using Microsoft.Build.Utilities;
 using System.Globalization;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Shared;
 using System.Collections.Concurrent;
+
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -632,6 +633,23 @@ namespace Microsoft.Build.Tasks
                                 if (candidateAssembly != null)
                                 {
                                     candidateAssemblyLocation = candidateAssembly.Location;
+                                }
+                                else if (NativeMethodsShared.IsMono)
+                                {
+                                    string path = Path.Combine(
+                                        NativeMethodsShared.FrameworkCurrentPath,
+                                        "Facades",
+                                        Path.GetFileName(referenceAssembly));
+                                    if (!File.Exists(path))
+                                    {
+                                        var newPath = path + ".dll";
+                                        path = !File.Exists(newPath) ? path + ".exe" : newPath;
+                                    }
+                                    candidateAssembly = Assembly.UnsafeLoadFrom(path);
+                                    if (candidateAssembly != null)
+                                    {
+                                        candidateAssemblyLocation = candidateAssembly.Location;
+                                    }
                                 }
 #pragma warning restore 618
                             }

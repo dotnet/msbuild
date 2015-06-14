@@ -4,14 +4,14 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class Delete_Tests
     {
         /*
@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Make sure that attributes set on input items are forwarded to ouput items.
          */
-        [TestMethod]
+        [Test]
         public void AttributeForwarding()
         {
             Delete t = new Delete();

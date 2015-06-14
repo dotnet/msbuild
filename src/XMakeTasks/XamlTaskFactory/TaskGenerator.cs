@@ -2,21 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Specialized;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.IO;
+using System.Configuration;
 using System.Globalization;
 using System.CodeDom;
-using System.CodeDom.Compiler;
+
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Framework;
-using System.Configuration;
-using System.Resources;
-using System.Reflection;
 
 namespace Microsoft.Build.Tasks.Xaml
 {

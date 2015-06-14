@@ -24,6 +24,8 @@ using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.BackEnd
 {
+    using Utilities = Microsoft.Build.Internal.Utilities;
+
     /// <summary>
     /// A build request configuration represents all of the data necessary to know which project to build
     /// and the environment in which it should be built.
@@ -146,7 +148,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="data">The data containing the configuration information.</param>
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
         /// <param name="getToolset">Callback used to get a Toolset based on a ToolsVersion</param>
-        internal BuildRequestConfiguration(BuildRequestData data, string defaultToolsVersion, Utilities.GetToolset getToolset = null)
+        internal BuildRequestConfiguration(BuildRequestData data, string defaultToolsVersion, Internal.Utilities.GetToolset getToolset = null)
             : this(0, data, defaultToolsVersion, getToolset)
         {
         }
@@ -160,7 +162,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="data">The data containing the configuration information.</param>
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
         /// <param name="getToolset">Callback used to get a Toolset based on a ToolsVersion</param>
-        internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion, Utilities.GetToolset getToolset = null)
+        internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion, Internal.Utilities.GetToolset getToolset = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(data, "data");
             ErrorUtilities.VerifyThrowInternalLength(data.ProjectFullPath, "data.ProjectFullPath");
@@ -931,7 +933,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Determines what the real tools version is.
         /// </summary>
-        private string ResolveToolsVersion(BuildRequestData data, string defaultToolsVersion, Utilities.GetToolset getToolset)
+        private string ResolveToolsVersion(BuildRequestData data, string defaultToolsVersion, Internal.Utilities.GetToolset getToolset)
         {
             if (data.ExplicitToolsVersionSpecified)
             {

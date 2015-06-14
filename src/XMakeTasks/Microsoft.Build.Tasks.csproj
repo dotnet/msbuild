@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+   <!--
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" Condition="!$(Configuration.EndsWith('MONO'))"/>
+  -->
+  <Import Project="..\dir.props"/>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -11,10 +14,14 @@
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-    <!-- Default configurations to help VS understand the configurations -->
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="system.design\system.design.txt">
@@ -396,7 +403,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FindInvalidProjectReferences.cs" />
-    <Compile Include="FormatUrl.cs">
+    <Compile Include="FormatUrl.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FormatVersion.cs">
@@ -405,19 +412,19 @@
     <Compile Include="FxCopExclusions\Microsoft.Build.Tasks.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateApplicationManifest.cs">
+    <Compile Include="GenerateApplicationManifest.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GenerateBootstrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateDeploymentManifest.cs">
+    <Compile Include="GenerateDeploymentManifest.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateManifestBase.cs">
+    <Compile Include="GenerateManifestBase.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateTrustInfo.cs">
+    <Compile Include="GenerateTrustInfo.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GenerateResource.cs">
@@ -491,7 +498,7 @@
     <Compile Include="ManagedCompiler.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ManifestUtil\*.cs">
+    <Compile Include="ManifestUtil\*.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Move.cs" />
@@ -557,10 +564,10 @@
     <Compile Include="ResolveKeySource.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ResolveManifestFiles.cs">
+    <Compile Include="ResolveManifestFiles.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ResolveNativeReference.cs">
+    <Compile Include="ResolveNativeReference.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveProjectBase.cs">
@@ -571,13 +578,13 @@
     </Compile>
     <Compile Include="ResolveSDKReference.cs" />
     <Compile Include="SdkToolsPathUtility.cs" />
-    <Compile Include="RequiresFramework35SP1Assembly.cs">
+    <Compile Include="RequiresFramework35SP1Assembly.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="SGen.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="SignFile.cs">
+    <Compile Include="SignFile.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="StateFileBase.cs">
@@ -624,7 +631,7 @@
     <Compile Include="UnregisterAssembly.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="UpdateManifest.cs">
+    <Compile Include="UpdateManifest.cs" Condition="!$(Configuration.EndsWith('MONO'))">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Vbc.cs">
@@ -743,6 +750,10 @@
       <SubType>Designer</SubType>
       <LogicalName>Microsoft.Build.Tasks.Strings.shared.resources</LogicalName>
     </EmbeddedResource>
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
+      <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
+      <Name>Microsoft.Build.Utilities</Name>
+    </ProjectReference>
     <!-- ==========================================================================================-->
     <!-- Assemblies Files we depend on -->
     <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
@@ -752,24 +763,17 @@
     <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Security" />
-    <Reference Include="System.XML" />
-    <Reference Include="System.XML.Linq" />
-    <Reference Include="System.Configuration" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <!-- Needed by Xaml Task Factory -->
     <Reference Include="System.Xaml" />
     <!-- ==========================================================================================-->
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
-      <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
-      <Name>Microsoft.Build.Utilities</Name>
-    </ProjectReference>
-    
     <!-- If TargetRetailBuildFramework is set to true, reference the public key version. Otherwise reference the project. -->
     <Reference Condition=" '$(TargetRetailBuildFramework)' == 'true' " Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <ProjectReference Condition=" '$(TargetRetailBuildFramework)' != 'true' " Include="..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
-	
     <!-- Other Source Files -->
     <EmbeddedResource Include="ManifestUtil\manifest.xml">
       <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.manifest.xml</LogicalName>
@@ -912,5 +916,8 @@
       <DestFolder>$(XamlRulesOutputDir)</DestFolder>
     </CopyFile>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+   <!--
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
+  -->
+  <Import Project="..\dir.targets"/>
 </Project>

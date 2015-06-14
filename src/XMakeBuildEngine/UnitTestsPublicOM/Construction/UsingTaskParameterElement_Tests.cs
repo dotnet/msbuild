@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="UsingTaskParameterElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -14,8 +16,7 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -23,13 +24,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectUsingParameterElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class UsingTaskParameterElement_Tests
     {
         /// <summary>
         /// Parameter element with all attributes set
         /// </summary>
-        private static string contentAllAttributesSet = @"
+        private static string s_contentAllAttributesSet = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Parameter element with no attributes set
         /// </summary>
-        private static string contentNoAttributesSet = @"
+        private static string s_contentNoAttributesSet = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
@@ -55,10 +56,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read simple task body
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadParameterWithAllAttributes()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
 
             Assert.AreEqual("MyParameter", parameter.Name);
             Assert.AreEqual("System.String", parameter.ParameterType);
@@ -69,10 +70,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read simple task body
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadParameterWithNOAttributes()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentNoAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentNoAttributesSet);
 
             Assert.AreEqual("MyParameter", parameter.Name);
             Assert.AreEqual(typeof(String).FullName, parameter.ParameterType);
@@ -83,7 +84,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read parameter with an invalid attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -104,10 +105,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set type value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetType()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.ParameterType = "newType";
@@ -118,10 +119,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set output value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetOutput()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Output = "output";
@@ -132,10 +133,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set required value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetRequired()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Required = "required";
@@ -146,10 +147,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set type type to empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyType()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.ParameterType = String.Empty;
@@ -160,10 +161,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set type output to empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyOutput()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Output = String.Empty;
@@ -174,10 +175,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set type required to empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyRequired()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Required = String.Empty;
@@ -188,10 +189,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set type type to null
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullType()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.ParameterType = null;
@@ -202,10 +203,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set type output to null
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullOutput()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Output = null;
@@ -216,10 +217,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set type required to null
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNullRequired()
         {
-            ProjectUsingTaskParameterElement parameter = GetParameterXml(contentAllAttributesSet);
+            ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Required = null;

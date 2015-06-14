@@ -8,7 +8,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
@@ -23,13 +23,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectPropertyInstance internal members
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TaskItem_Tests
     {
         /// <summary>
         /// Test serialization
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Serialization()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Ensure an item is equivalent to itself.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEquivalenceIdentity()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Ensure two items with the same item spec and no metadata are equivalent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEquivalence()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Ensure two items with the same custom metadata are equivalent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEquivalenceWithCustomMetadata()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Ensure two items with different custom metadata values are not equivalent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestInequivalenceWithDifferentCustomMetadataValues()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Ensure two items with different custom metadata keys are not equivalent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestInequivalenceWithDifferentCustomMetadataKeys()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Ensure two items with different numbers of custom metadata are not equivalent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestInequivalenceWithDifferentCustomMetadataCount()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Ensure two items with different numbers of custom metadata are not equivalent
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestInequivalenceWithDifferentCustomMetadataCount2()
         {
             TaskItem left = new TaskItem("foo", "bar.proj");
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Ensure when cloning an Item that the clone is equivilant to the parent item and that they are not the same object.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDeepClone()
         {
             TaskItem parent = new TaskItem("foo", "bar.proj");
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task should not mess up special characters on the metadata. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Escaping1()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -214,7 +214,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task run in the task host also should not mess up special characters on the metadata. 
         /// </summary>
-        [TestMethod]
+        [Test]
+        [Ignore("FEATURE: TASKHOST")]
         public void Escaping2()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -267,7 +268,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task run in the task host also should not mess up the escaping of the itemspec either. 
         /// </summary>
-        [TestMethod]
+        [Test]
+        [Ignore("FEATURE: TASKHOST")]
         public void Escaping3()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

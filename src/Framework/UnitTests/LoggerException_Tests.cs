@@ -2,24 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.IO;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class LoggerExceptionTests
     {
         /// <summary>
         /// Verify I implemented ISerializable correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializeDeserialize()
         {
             LoggerException e = new LoggerException("message",
@@ -46,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify I implemented ISerializable correctly, using other ctor
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializeDeserialize2()
         {
             LoggerException e = new LoggerException("message");

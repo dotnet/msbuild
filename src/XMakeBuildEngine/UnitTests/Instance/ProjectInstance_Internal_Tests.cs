@@ -7,7 +7,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using System.Collections;
@@ -22,13 +22,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectInstance internal members
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectInstance_Internal_Tests
     {
         /// <summary>
         /// Read task registrations
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetTaskRegistrations()
         {
             try
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// DefaultTargets are not read from imported projects.
         /// InitialTargets are gathered from imports depth-first.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitialTargetsDefaultTargets()
         {
             try
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// DefaultTargets are not read from imported projects.
         /// InitialTargets are gathered from imports depth-first.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitialTargetsDefaultTargetsEscaped()
         {
             try
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Read property group under target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetPropertyGroupUnderTarget()
         {
             string content = @"
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Read item group under target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetItemGroupUnderTarget()
         {
             string content = @"
@@ -237,7 +237,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Task registry accessor
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetTaskRegistry()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Global properties accessor
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetGlobalProperties()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -260,18 +260,18 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// ToolsVersion accessor
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetToolsVersion()
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+            Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
         }
 
         /// <summary>
         /// Toolset data is cloned properly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneToolsetData()
         {
             var projectCollection = new ProjectCollection();
@@ -286,7 +286,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ProjectInstance's surfacing of the sub-toolset version
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires installed toolset.
         public void GetSubToolsetVersion()
@@ -299,9 +299,17 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, null, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
                 Assert.AreEqual(p.Toolset.DefaultSubToolsetVersion, p.SubToolsetVersion);
-                Assert.AreEqual(p.Toolset.DefaultSubToolsetVersion, p.GetPropertyValue("VisualStudioVersion"));
+
+                if (p.Toolset.DefaultSubToolsetVersion == null)
+                {
+                    Assert.AreEqual(String.Empty, p.GetPropertyValue("VisualStudioVersion"));
+                }
+                else
+                {
+                    Assert.AreEqual(p.Toolset.DefaultSubToolsetVersion, p.GetPropertyValue("VisualStudioVersion"));
+                }
             }
             finally
             {
@@ -313,7 +321,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a value in the 
         /// environment 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -324,7 +332,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, null, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
                 Assert.AreEqual("ABCD", p.SubToolsetVersion);
                 Assert.AreEqual("ABCD", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -337,7 +345,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a global property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetSubToolsetVersion_FromProjectGlobalProperties()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -351,7 +359,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, globalProperties, new ProjectCollection());
 
-                Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
                 Assert.AreEqual("ABCDE", p.SubToolsetVersion);
                 Assert.AreEqual("ABCDE", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -365,7 +373,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for 
         /// getting the sub-toolset version. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetSubToolsetVersion_FromConstructor()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -388,9 +396,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 IDictionary<string, string> projectCollectionGlobalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 projectCollectionGlobalProperties.Add("VisualStudioVersion", "ABCDE");
 
-                ProjectInstance p = new ProjectInstance(xml, globalProperties, "4.0", "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties));
+                ProjectInstance p = new ProjectInstance(xml, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties));
 
-                Assert.AreEqual("4.0", p.Toolset.ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
                 Assert.AreEqual("ABCDEF", p.SubToolsetVersion);
                 Assert.AreEqual("ABCDEF", p.GetPropertyValue("VisualStudioVersion"));
             }
@@ -403,7 +411,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// DefaultTargets accessor
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetDefaultTargets()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -414,7 +422,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// InitialTargets accessor
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetInitialTargets()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -425,7 +433,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project clones targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneTargets()
         {
             var hostServices = new HostServices();
@@ -446,7 +454,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies task registry
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneTaskRegistry()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -459,7 +467,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies global properties
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneGlobalProperties()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -472,7 +480,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies default targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneDefaultTargets()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -484,7 +492,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies initial targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneInitialTargets()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -496,7 +504,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies toolsversion
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneToolsVersion()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -508,7 +516,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests building a simple project and verifying the log looks as expected.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Build()
         {
             string projectFileContent = @"
@@ -564,7 +572,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 globalProperties.Add("g2", "v2");
             }
 
-            Project project = new Project(reader, globalProperties, toolsVersion ?? "4.0", projectCollection ?? ProjectCollection.GlobalProjectCollection);
+            Project project = new Project(reader, globalProperties, toolsVersion ?? ObjectModelHelpers.MSBuildDefaultToolsVersion, projectCollection ?? ProjectCollection.GlobalProjectCollection);
 
             ProjectInstance instance = project.CreateProjectInstance();
 

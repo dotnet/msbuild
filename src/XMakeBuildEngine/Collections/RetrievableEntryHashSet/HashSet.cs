@@ -88,7 +88,9 @@ namespace Microsoft.Build.Collections
     public class HashSet<T> : ICollection<T>, ISet<T>
 #else
     [Serializable()]
+#if !MONO
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
+#endif
     internal class RetrievableEntryHashSet<T> : ICollection<T>, ISerializable, IDeserializationCallback, IDictionary<string, T>
         where T : class, IKeyed
 #endif
@@ -1720,7 +1722,9 @@ namespace Microsoft.Build.Collections
 
 #if !SILVERLIGHT
         [Serializable()]
+#if !MONO
         [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
+#endif
 #endif
         public struct Enumerator : IEnumerator<T>, System.Collections.IEnumerator
         {

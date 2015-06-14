@@ -22,7 +22,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Internal.Constants;
-using Utilities = Microsoft.Build.Internal.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -31,6 +30,8 @@ using System.Globalization;
 
 namespace Microsoft.Build.Evaluation
 {
+    using Utilities = Microsoft.Build.Internal.Utilities;
+
     /// <summary>
     /// Flags for controlling the project load.
     /// </summary>

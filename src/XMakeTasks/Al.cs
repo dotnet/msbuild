@@ -3,15 +3,10 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-
-using System.Collections;
 
 namespace Microsoft.Build.Tasks
 {
@@ -25,7 +20,7 @@ namespace Microsoft.Build.Tasks
         /*
         Microsoft (R) Assembly Linker version 7.10.2175
         for Microsoft (R) .NET Framework version 1.2
-        Copyright (C) Microsoft Corporation 2001-2002. All rights reserved.
+        Copyright (C) Microsoft Corporation 2001-2015. All rights reserved.
         
         Usage: al [options] [sources]
         Options: ('/out' must be specified)
@@ -297,7 +292,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return "AL.exe";
+                return NativeMethodsShared.IsWindows ? "AL.exe" : "al";
             }
         }
 
