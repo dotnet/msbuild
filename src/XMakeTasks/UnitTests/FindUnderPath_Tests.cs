@@ -1,23 +1,21 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
-using System.Reflection;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
+using NUnit.Framework;
+
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class FindUnderPath_Tests
     {
-        [TestMethod]
+        [Test]
         public void BasicFilter()
         {
             FindUnderPath t = new FindUnderPath();
@@ -31,13 +29,18 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(success);
             Assert.AreEqual(1, t.InPath.Length);
             Assert.AreEqual(1, t.OutOfPath.Length);
-            Assert.AreEqual(@"C:\MyProject\File1.txt", t.InPath[0].ItemSpec);
-            Assert.AreEqual(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"C:\MyProject\File1.txt"), t.InPath[0].ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidFile()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Cannot have invliad characters in file name on Unix");
+            }
+
             FindUnderPath t = new FindUnderPath();
             t.BuildEngine = new MockEngine();
 
@@ -51,9 +54,14 @@ namespace Microsoft.Build.UnitTests
             // Don't crash
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidPath()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Cannot have invliad characters in file name on Unix");
+            }
+
             FindUnderPath t = new FindUnderPath();
             t.BuildEngine = new MockEngine();
 
@@ -74,7 +82,8 @@ namespace Microsoft.Build.UnitTests
             testFile = new FileInfo(fileName);
 
             t.Path = new TaskItem(ObjectModelHelpers.TempProjectDir);
-            t.Files = new ITaskItem[] { new TaskItem(EscapingUtilities.Escape(testFile.Name)), new TaskItem(@"C:\SomeoneElsesProject\File2.txt") };
+            t.Files = new ITaskItem[] { new TaskItem(EscapingUtilities.Escape(testFile.Name)),
+                new TaskItem(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt") };
 
             success = false;
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -89,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void VerifyFullPath()
         {
             FindUnderPath t = new FindUnderPath();
@@ -105,10 +114,11 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1, t.InPath.Length);
             Assert.AreEqual(1, t.OutOfPath.Length);
             Assert.AreEqual(testFile.FullName, t.InPath[0].ItemSpec);
-            Assert.AreEqual(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
+                t.OutOfPath[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Test]
         public void VerifyFullPathNegative()
         {
             FindUnderPath t = new FindUnderPath();
@@ -124,7 +134,8 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1, t.InPath.Length);
             Assert.AreEqual(1, t.OutOfPath.Length);
             Assert.AreEqual(testFile.Name, t.InPath[0].ItemSpec);
-            Assert.AreEqual(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
+                t.OutOfPath[0].ItemSpec);
         }
     }
 }

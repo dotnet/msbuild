@@ -6,15 +6,13 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
+
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 using CodeDomProvider = System.CodeDom.Compiler.CodeDomProvider;
 using MSBuildProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
@@ -206,7 +204,7 @@ namespace Microsoft.Build.Tasks
             {
                 get
                 {
-                    return "ResGen.exe";
+                    return "resgen.exe";
                 }
             }
 
@@ -339,11 +337,13 @@ namespace Microsoft.Build.Tasks
                 string pathToResGen = GenerateResGenFullPath();
 
                 // Only do anything if we can actually use response files
-                if (
-                        pathToResGen != null &&
-                        !pathToResGen.Equals(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35), StringComparison.OrdinalIgnoreCase) &&
-                        String.IsNullOrEmpty(StronglyTypedLanguage)
-                    )
+                if (pathToResGen != null
+                    && NativeMethodsShared.IsWindows
+                    && !pathToResGen.Equals(
+                        ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(
+                            "resgen.exe",
+                            TargetDotNetFrameworkVersion.Version35),
+                        StringComparison.OrdinalIgnoreCase) && String.IsNullOrEmpty(StronglyTypedLanguage))
                 {
                     // 4.0 resgen.exe does support response files, so we can return the resgen arguments here!
                     CommandLineBuilderExtension resGenArguments = new CommandLineBuilderExtension();
@@ -378,6 +378,7 @@ namespace Microsoft.Build.Tasks
 
                 if (
                         pathToResGen != null &&
+                        NativeMethodsShared.IsWindows &&
                         !pathToResGen.Equals(NativeMethodsShared.GetLongFilePath(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35)), StringComparison.OrdinalIgnoreCase) &&
                         String.IsNullOrEmpty(StronglyTypedLanguage)
                    )

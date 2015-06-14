@@ -13,7 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -27,13 +27,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Unit tests for ConfigurationMetadata
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ConfigurationMetadata_Tests
     {
         /// <summary>
         /// Prepares to run the test
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tears down after the test.
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
         }
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that a null config throws an ArgumentNullException.
         /// </summary>
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorNullConfiguration()
         {
             BuildRequestConfiguration config = null;
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that a null project thrown an ArgumentNullException
         /// </summary>
         [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Test]
         public void TestConstructorNullProject()
         {
             Project project = null;
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that we get the project path and tools version from the configuration
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestValidConfiguration()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that we get the project path and tools version from the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestValidProject()
         {
             Project project = CreateProject();
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that we get the same hash code from equivalent metadatas even if they come from different sources.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetHashCode()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that the Equals method works correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEquals()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);

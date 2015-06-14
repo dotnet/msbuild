@@ -7,20 +7,20 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the CriticalBuildMessageEventArgs class.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class CriticalBuildMessageEventArgs_Tests
     {
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EventArgsCtors()
         {
             CriticalBuildMessageEventArgs cbmea = new CriticalBuildMessageEventArgs2();

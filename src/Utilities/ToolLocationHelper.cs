@@ -1,11 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.IO;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+
 using Microsoft.Build.Shared;
 using System.Xml;
 using System.Collections;
@@ -726,12 +726,12 @@ namespace Microsoft.Build.Utilities
                 if (String.IsNullOrEmpty(sdkIdentifier))
                 {
                     // Falls back to the old SDK world, e.g. C:\Program Files (x86)\Windows Kits\8.2
-                    sdkRoot = ToolLocationHelper.GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
+                    sdkRoot = GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
                 }
                 else
                 {
                     // Get the root to the new Once Core SDK. For now it's like: C:\Program Files (x86)\Windows SDKs\1.0
-                    sdkRoot = ToolLocationHelper.GetPlatformSDKLocation(sdkIdentifier, sdkVersion, diskRoots, registryRoot);
+                    sdkRoot = GetPlatformSDKLocation(sdkIdentifier, sdkVersion, diskRoots, registryRoot);
                 }
 
                 if (!String.IsNullOrEmpty(sdkRoot))
@@ -916,7 +916,7 @@ namespace Microsoft.Build.Utilities
             try
             {
                 // TODO: Add caching so that we only have to read all this stuff in once. 
-                string sdkRoot = ToolLocationHelper.GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
+                string sdkRoot = GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
                 string winmdLocation = null;
 
                 if (!String.IsNullOrEmpty(sdkRoot))
@@ -1451,7 +1451,7 @@ namespace Microsoft.Build.Utilities
                 // The default
                 SharedDotNetFrameworkArchitecture targetedArchitecture = SharedDotNetFrameworkArchitecture.Current;
 
-                if (platformTarget != null)
+                if (NativeMethodsShared.IsWindows && platformTarget != null)
                 {
                     // If we are a 32 bit operating system the we should always return the 32 bit directory, or we are targeting x86, arm is also 32 bit
                     if (!Environment.Is64BitOperatingSystem || platformTarget.Equals("x86", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm", StringComparison.OrdinalIgnoreCase))
@@ -1473,7 +1473,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // If for some reason the 2.0 framework is not installed in its default location then maybe someone is using the ".net 4.0" reference assembly 
-                // location, if so then we can just use what ever version they passed in becaues it should be MSIL now and not bit specific.
+                // location, if so then we can just use what ever version they passed in because it should be MSIL now and not bit specific.
             }
 
             IList<string> referenceAssemblyDirectories = GetPathToReferenceAssemblies(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile);
@@ -1523,14 +1523,17 @@ namespace Microsoft.Build.Utilities
         /// In additon when the .NETFramework or .NET Framework targetFrameworkIdentifiers are seen and targetFrameworkVersion is 2.0, 3.0, 3.5 or 4.0 we will return the correctly chained reference assembly paths
         /// for the legacy .net frameworks. This chaining will use the existing GetPathToDotNetFrameworkReferenceAssemblies to build up the list of reference assembly paths.
         /// </summary>
-        /// <param name="targetFrameworkMoniker">Moniker being targeted</param>
+        /// <param name="frameworkName">Framework required</param>
         /// <exception cref="ArgumentNullException">When the frameworkName is null</exception>
         /// <returns>Collection of reference assembly locations.</returns>
         public static IList<String> GetPathToReferenceAssemblies(FrameworkNameVersioning frameworkName)
         {
             // Verify the framework class passed in is not null. Other than being null the class will ensure the framework moniker is correct
             ErrorUtilities.VerifyThrowArgumentNull(frameworkName, "frameworkName");
-            IList<String> paths = GetPathToReferenceAssemblies(FrameworkLocationHelper.programFilesReferenceAssemblyLocation, frameworkName);
+            IList<String> paths =
+                GetPathToReferenceAssemblies(
+                    FrameworkLocationHelper.programFilesReferenceAssemblyLocation,
+                    frameworkName);
             return paths;
         }
 
@@ -1780,14 +1783,18 @@ namespace Microsoft.Build.Utilities
             IList<string> dotNetFrameworkReferenceAssemblies = GetPathAndChainReferenceAssemblyLocations(targetFrameworkRootPath, frameworkName, true);
 
             // We have not found any reference assembly locations, if we are the .net framework we can try and fallback to the old legacy tool location helper methods
-            if (String.Equals(frameworkName.Identifier, ".NETFramework", StringComparison.OrdinalIgnoreCase) && dotNetFrameworkReferenceAssemblies.Count == 0)
+            if (String.Equals(frameworkName.Identifier, ".NETFramework", StringComparison.OrdinalIgnoreCase)
+                && dotNetFrameworkReferenceAssemblies.Count == 0)
             {
                 if (String.IsNullOrEmpty(frameworkName.Profile)) // profiles are always in new locations
                 {
                     // If the identifier is ".NET Framework" and the version is a well know legacy version. Manually generate the list of reference assembly paths
                     // based on the known chaining order. Pass null in for the two delegates so we call the static methods rather than require the creation and calling 
                     // of two delegates
-                    dotNetFrameworkReferenceAssemblies = HandleLegacyDotNetFrameworkReferenceAssemblyPaths(null, null, frameworkName);
+                    dotNetFrameworkReferenceAssemblies = HandleLegacyDotNetFrameworkReferenceAssemblyPaths(
+                        null,
+                        null,
+                        frameworkName);
                 }
             }
 
@@ -1798,9 +1805,14 @@ namespace Microsoft.Build.Utilities
 
             for (int i = 0; i < dotNetFrameworkReferenceAssemblies.Count; i++)
             {
-                if (!dotNetFrameworkReferenceAssemblies[i].EndsWith("\\", StringComparison.Ordinal))
+                if (
+                    !dotNetFrameworkReferenceAssemblies[i].EndsWith(
+                        Path.DirectorySeparatorChar.ToString(),
+                        StringComparison.Ordinal))
                 {
-                    dotNetFrameworkReferenceAssemblies[i] = String.Concat(dotNetFrameworkReferenceAssemblies[i], "\\");
+                    dotNetFrameworkReferenceAssemblies[i] = String.Concat(
+                        dotNetFrameworkReferenceAssemblies[i],
+                        Path.DirectorySeparatorChar);
                 }
             }
 
@@ -1817,7 +1829,8 @@ namespace Microsoft.Build.Utilities
             string displayName;
             lock (s_locker)
             {
-                if (s_cachedTargetFrameworkDisplayNames != null && s_cachedTargetFrameworkDisplayNames.TryGetValue(targetFrameworkDirectory, out displayName))
+                if (s_cachedTargetFrameworkDisplayNames != null
+                    && s_cachedTargetFrameworkDisplayNames.TryGetValue(targetFrameworkDirectory, out displayName))
                 {
                     return displayName;
                 }
@@ -1889,6 +1902,15 @@ namespace Microsoft.Build.Utilities
                                 break;
                             }
                             referencePaths.Add(path);
+                            if (NativeMethodsShared.IsMono)
+                            {
+                                // On Mono, some directories contain Facades subdirectory with valid assemblies
+                                var facades = Path.Combine(path, "Facades");
+                                if (Directory.Exists(Path.Combine(path, "Facades")))
+                                {
+                                    referencePaths.Add(facades);
+                                }
+                            }
                         }
                         else if (path == null)
                         {
@@ -2028,7 +2050,7 @@ namespace Microsoft.Build.Utilities
             List<string> sdkDiskRoots = GetTargetPlatformMonikerDiskRoots(diskRoots);
             List<string> extensionSdkDiskRoots = GetExtensionSdkDiskRoots(extensionDiskRoots);
 
-            string registryRoot = GetTargetPlatformMonikerRegistryRoots(registrySearchLocation);
+            string registryRoot = NativeMethodsShared.IsWindows ? GetTargetPlatformMonikerRegistryRoots(registrySearchLocation) : string.Empty;
 
             string cachedTargetPlatformsKey = String.Join("|",
                 String.Join(";", sdkDiskRoots.ToArray()),
@@ -2053,8 +2075,12 @@ namespace Microsoft.Build.Utilities
                 {
                     Dictionary<TargetPlatformSDK, TargetPlatformSDK> monikers = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                     GatherSDKListFromDirectory(sdkDiskRoots, monikers);
-                    GatherSDKListFromRegistry(registryRoot, monikers);
 
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        GatherSDKListFromRegistry(registryRoot, monikers);
+                    }
+					
                     collection = monikers.Keys.ToList();
                     s_cachedTargetPlatforms.Add(cachedTargetPlatformsKey, collection);
                 }
@@ -2197,7 +2223,7 @@ namespace Microsoft.Build.Utilities
                         {
                             // This should make something like c:\Program files\Microsoft SDKs\Windows\v8.0\
                             string platformSDKDirectory = Path.Combine(rootPathWithIdentifier.FullName, version);
-                            string platformSDKManifest = Path.Combine(platformSDKDirectory, "sdkmanifest.xml");
+                            string platformSDKManifest = Path.Combine(platformSDKDirectory, "SDKManifest.xml");
 
                             // If we are gathering the sdk platform manifests then check to see if there is a sdk manifest in the directory if not then skip over it as a platform sdk
                             bool platformSDKManifestExists = File.Exists(platformSDKManifest);
@@ -2314,7 +2340,7 @@ namespace Microsoft.Build.Utilities
 
                             if (platformSDKDirectory != null)
                             {
-                                string platformSDKManifest = Path.Combine(platformSDKDirectory, "sdkmanifest.xml");
+                                string platformSDKManifest = Path.Combine(platformSDKDirectory, "SDKManifest.xml");
                                 // Windows kits is special because they do not have an sdk manifest yet, this is for the windows sdk. We will accept them as they are. For others
                                 // we will require that an sdkmanifest exists.
                                 platformSDKmanifestExists = fileExists(platformSDKManifest) || platformSDKDirectory.IndexOf("Windows Kits", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -2392,7 +2418,7 @@ namespace Microsoft.Build.Utilities
                                             {
                                                 if (FileUtilities.DirectoryExistsNoThrow(directoryName))
                                                 {
-                                                    string sdkManifestFileLocation = Path.Combine(directoryName, "sdkManifest.xml");
+                                                    string sdkManifestFileLocation = Path.Combine(directoryName, "SDKManifest.xml");
                                                     if (fileExists(sdkManifestFileLocation))
                                                     {
                                                         ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", "Adding SDK '{0}'  at '{1}' to the list of found sdks.", sdkKey, directoryName);
@@ -2400,7 +2426,7 @@ namespace Microsoft.Build.Utilities
                                                     }
                                                     else
                                                     {
-                                                        ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", "No sdkManifest.xml file found at '{0}'.", sdkManifestFileLocation);
+                                                        ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", "No SDKManifest.xml file found at '{0}'.", sdkManifestFileLocation);
                                                     }
                                                 }
                                                 else
@@ -2461,21 +2487,30 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private static void GetDefaultSDKDiskRoots(List<string> diskRoots)
         {
-            // The order is important here because we want to look in the users location first before the non privileged location.
-
-            // We need this so that a user can also have an sdk installed in a non privileged location
-            string userLocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (userLocalAppData.Length > 0)
+            if (NativeMethodsShared.IsWindows)
             {
-                string localAppdataFolder = Path.Combine(userLocalAppData, "Microsoft SDKs");
-                if (Directory.Exists(localAppdataFolder))
-                {
-                    diskRoots.Add(localAppdataFolder);
-                }
-            }
+                // The order is important here because we want to look in the users location first before the non privileged location.
 
-            string defaultProgramFilesLocation = Path.Combine(FrameworkLocationHelper.programFiles32, "Microsoft SDKs");
-            diskRoots.Add(defaultProgramFilesLocation);
+                // We need this so that a user can also have an sdk installed in a non privileged location
+                string userLocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (userLocalAppData.Length > 0)
+                {
+                    string localAppdataFolder = Path.Combine(userLocalAppData, "Microsoft SDKs");
+                    if (Directory.Exists(localAppdataFolder))
+                    {
+                        diskRoots.Add(localAppdataFolder);
+                    }
+                }
+
+                string defaultProgramFilesLocation = Path.Combine(
+                    FrameworkLocationHelper.programFiles32,
+                    "Microsoft SDKs");
+                diskRoots.Add(defaultProgramFilesLocation);
+            }
+            else
+            {
+                diskRoots.Add(NativeMethodsShared.FrameworkBasePath);
+            }
         }
 
         /// <summary>
@@ -2685,17 +2720,20 @@ namespace Microsoft.Build.Utilities
             // If the redist list does not exist then the entire chain is incorrect.
             if (!File.Exists(redistFile))
             {
+                // Under MONO a directory may chain to one that has no redist list
+                var chainReference = NativeMethodsShared.IsMono ? string.Empty : null;
                 lock (s_locker)
                 {
-                    s_chainedReferenceAssemblyPath[path] = null;
-                    s_cachedTargetFrameworkDisplayNames[path] = null;
+                    s_chainedReferenceAssemblyPath[path] = chainReference;
+                    s_cachedTargetFrameworkDisplayNames[path] = chainReference;
                 }
 
-                return null;
+                return chainReference;
             }
 
             string includeFramework = null;
             string displayName = null;
+            string redirectPath = null;
 
             try
             {
@@ -2723,6 +2761,13 @@ namespace Microsoft.Build.Utilities
                                     {
                                         displayName = reader.Value;
                                         continue;
+                                    }
+
+                                    // Mono may redirect this to another place
+                                    if (NativeMethodsShared.IsMono && String.Equals(reader.Name, "TargetFrameworkDirectory", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        // The new folder is relative to the place where the FrameworkList.
+                                        redirectPath = Path.GetFullPath(Path.Combine(redistListFolder, FileUtilities.FixFilePath(reader.Value)));
                                     }
                                 }
                                 while (reader.MoveToNextAttribute());
@@ -2776,6 +2821,11 @@ namespace Microsoft.Build.Utilities
                     {
                         pathToReturn = null;
                     }
+                }
+                // We may also have a redirect path
+                else if (!string.IsNullOrEmpty(redirectPath) && Directory.Exists(redirectPath))
+                {
+                    pathToReturn = redirectPath;
                 }
 
                 lock (s_locker)
@@ -2947,6 +2997,12 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         internal static string ConvertDotNetFrameworkArchitectureToProcessorArchitecture(DotNetFrameworkArchitecture architecture)
         {
+            // TODO: Find real architecture on Unix
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                return ProcessorArchitecture.X86;
+            }
+
             switch (architecture)
             {
                 case DotNetFrameworkArchitecture.Bitness32:
@@ -3024,7 +3080,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="fileName">The name of the file being requested.</param>
         /// <param name="version">Target .NET Framework version.</param>
-        /// <param name="vsVersion">Version of Visual Studio associated with the SDK.</param>
+        /// <param name="visualStudioVersion">Version of Visual Studio associated with the SDK.</param>
         /// <param name="architecture">Desired architecture of the resultant file.</param>
         /// <returns>Path to the appropriate Windows SDK file</returns>
         [Obsolete("Consider using GetPlatformSDKLocationFile instead")]
@@ -3046,7 +3102,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="fileName">The name of the file being requested.</param>
         /// <param name="version">Target .NET Framework version.</param>
-        /// <param name="vsVersion">Version of Visual Studio associated with the SDK.</param>
+        /// <param name="visualStudioVersion">Version of Visual Studio associated with the SDK.</param>
         /// <param name="architecture">Desired architecture of the resultant file.</param>
         /// <returns>Path to the appropriate Windows SDK file</returns>
         [Obsolete("Consider using GetPlatformSDKLocationFile instead")]
@@ -3216,7 +3272,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>Will return 'null' if there is no target frameworks on this machine.</returns>
         public static string GetPathToDotNetFrameworkFile(string fileName, TargetDotNetFrameworkVersion version, UtilitiesDotNetFrameworkArchitecture architecture)
         {
-            string pathToFx = ToolLocationHelper.GetPathToDotNetFramework(version, architecture);
+            string pathToFx = GetPathToDotNetFramework(version, architecture);
 
             if (pathToFx == null)
             {
@@ -3234,7 +3290,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>Path string.</returns>
         public static string GetPathToSystemFile(string fileName)
         {
-            string basePath = ToolLocationHelper.PathToSystem;
+            string basePath = PathToSystem;
             string filePath = Path.Combine(basePath, fileName);
             return filePath;
         }
@@ -3242,7 +3298,6 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Gets a IList of supported target framework monikers.
         /// </summary>
-        /// <param name="frameworkReferenceRoot">the base path for the framework reference assemblies</param>
         /// <returns>list of supported target framework monikers</returns>
         public static IList<string> GetSupportedTargetFrameworks()
         {
@@ -3423,7 +3478,7 @@ namespace Microsoft.Build.Utilities
                     // special case for .NETFramework v2.0 - check also in the framework path because v20 does not have reference
                     // assembly folders
 
-                    string dotNetFx20Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
+                    string dotNetFx20Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
                     if (dotNetFx20Path != null)
                     {
                         if (Directory.Exists(dotNetFx20Path))
@@ -3563,14 +3618,14 @@ namespace Microsoft.Build.Utilities
 
             // only return v35 and earlier versions if .NetFx35 is installed
             string dotNetFx35Path = null;
-            dotNetFx35Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35);
+            dotNetFx35Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35);
 
             if (dotNetFx35Path != null)
             {
                 // .NetFx35 is installed  
 
                 // check v20
-                string dotNetFx20Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
+                string dotNetFx20Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
                 if (dotNetFx20Path != null)
                 {
                     versions.Add("v2.0");

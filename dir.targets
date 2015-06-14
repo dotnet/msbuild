@@ -12,7 +12,8 @@
       <Reference Include="System.IO" />
       <Code Type="Fragment" Language="cs">
         <![CDATA[
-            var directory = System.IO.Path.GetDirectoryName(FileName);
+            var filename = FileName.Replace('\\', Path.DirectorySeparatorChar);
+            var directory = System.IO.Path.GetDirectoryName(filename);
             Directory.CreateDirectory(directory);
 
             var tempFile = Path.Combine(directory, Path.GetRandomFileName());
@@ -23,8 +24,8 @@
 
             try
             {
-                if (!File.Exists(FileName))
-                   File.Move(tempFile, FileName);
+                if (!File.Exists(filename))
+                   File.Move(tempFile, filename);
             }
             finally
             {
@@ -40,7 +41,25 @@
     Needed to avoid the InitialTargets from having an Output which ends up getting
     added to the output references when you have a project to project reference.
   -->
-  <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_RestoreBuildTools" />
+  <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_DisplayBuildInfo;_RestoreBuildTools" />
+
+  <Target Name="_DisplayBuildInfo">
+    <Message Importance="High" Text="Build binary target directory: '$(BaseOutputPathWithConfig)'" />
+  </Target>
+
+  <Target Name="_CopyCompilers" AfterTargets="_RestoreBuildTools" Condition="'$(UseRoslynCompilers)' == 'true'">
+    <ItemGroup>
+      <BuildFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\build\*" />
+      <ToolsFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\tools\*" />
+    </ItemGroup>
+    
+    <Copy
+      SourceFiles="@(BuildFiles);@(ToolsFiles)"
+      DestinationFolder="$(OutputPath)tools"
+      SkipUnchangedFiles="true"
+    />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="find '$(OutputPath)tools' -name &quot;*.exe&quot; -exec chmod &quot;+x&quot; '{}' ';'" />
+  </Target>
 
   <Target Name="_CopyCompilers" AfterTargets="_RestoreBuildTools" Condition="'$(UseRoslynCompilers)' == 'true'">
     <ItemGroup>
@@ -60,14 +79,17 @@
           Inputs="$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)dir.props"
           Outputs="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll;$(NugetToolPath)">
 
-    <!-- Download latest nuget.exe -->
     <DownloadFile FileName="$(NuGetToolPath)"
                   Address="http://nuget.org/nuget.exe" 
-                  Condition="!Exists('$(NuGetToolPath)')" />
+                  Condition="!Exists('$(NuGetToolPath)') AND '$(OS)' == 'Windows_NT'" />
+
+    <Exec Command="curl -sSL --create-dirs -s -o $(NuGetToolPath) https://api.nuget.org/downloads/nuget.exe" Condition="!Exists('$(NuGetToolPath)') AND '$(OS)' != 'Windows_NT'" />
 
     <!-- Restore build tools -->
-    <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget\packages.config&quot;" StandardOutputImportance="Low" />
-    
+    <!-- 
+    <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget/packages.config&quot;" StandardOutputImportance="Low" />
+    -->    
+    <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget/packages.config&quot;" />
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
   </Target>

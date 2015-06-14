@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectMetadata_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -13,20 +15,20 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
     /// Tests for ProjectMetadata
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectMetadata_Tests
     {
         /// <summary>
         /// Project getter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectGetter()
         {
             Project project = new Project();
@@ -39,7 +41,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set a new metadata value via the evaluated ProjectMetadata object
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetUnevaluatedValue()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -84,7 +86,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// If the value doesn't change then the project shouldn't dirty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetUnchangedValue()
         {
             Project project = new Project();
@@ -104,7 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Properties should be expanded
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithPropertyExpression()
         {
             Project project = new Project();
@@ -122,7 +124,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Items should be expanded
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithItemExpression()
         {
             Project project = new Project();
@@ -141,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Set a new metadata value with a qualified metadata expression.
         /// Per 3.5, this expands to nothing.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithQualifiedMetadataExpressionOtherItemType()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -169,7 +171,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set a new metadata value with a qualified metadata expression of the same item type
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithQualifiedMetadataExpressionSameItemType()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -195,7 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set a new metadata value with a qualified metadata expression of the same item type
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithQualifiedMetadataExpressionSameMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -220,7 +222,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set a new metadata value with an unqualified metadata expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithUnqualifiedMetadataExpression()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -247,7 +249,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Set a new metadata value with an unqualified metadata expression
         /// Value from an item definition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithUnqualifiedMetadataExpressionFromItemDefinition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -278,7 +280,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Set a new metadata value with a qualified metadata expression
         /// Value from an item definition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithQualifiedMetadataExpressionFromItemDefinition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -310,7 +312,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// of the wrong item type.
         /// Per 3.5, this evaluates to nothing.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueWithQualifiedMetadataExpressionWrongItemType()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -339,7 +341,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set a new metadata value on an item definition with an unqualified metadata expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueOnItemDefinitionWithUnqualifiedMetadataExpression()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -371,7 +373,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set a new metadata value on an item definition with an qualified metadata expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueOnItemDefinitionWithQualifiedMetadataExpression()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -401,7 +403,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// of the wrong item type.
         /// Per 3.5, this evaluates to empty string.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValueOnItemDefinitionWithQualifiedMetadataExpressionWrongItemType()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -432,7 +434,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// IsImported = false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void IsImportedFalse()
         {
             Project project = new Project();
@@ -444,7 +446,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to set metadata on imported item should fail
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetMetadataImported()
         {
@@ -468,7 +470,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Escaping in metadata values
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SpecialCharactersInMetadataValueConstruction()
         {
             string projectString = ObjectModelHelpers.CleanupFileContents(@"<Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -489,11 +491,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Escaping in metadata values
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SpecialCharactersInMetadataValueEvaluation()
         {
             Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project();
-            var metadata = new Dictionary<string, string> 
+            var metadata = new Dictionary<string, string>
             {
                 { "EscapedSemicolon", "%3B" }, // Microsoft.Build.Internal.Utilities.Escape(";")
                 { "EscapedDollarSign", "%24" }, // Microsoft.Build.Internal.Utilities.Escape("$")

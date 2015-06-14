@@ -1,9 +1,12 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="LazyFormattedEventArgs_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 // <summary>Tests for LazyFormattedEventArgs</summary>
 //-----------------------------------------------------------------------
+
 using System;
 using System.Linq;
 using System.Xml;
@@ -13,8 +16,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
@@ -30,13 +32,13 @@ namespace Microsoft.Build.UnitTests.Framework
     /// <summary>
     /// Tests for LazyFormattedEventArgs
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class LazyFormattedEventArgs_Tests
     {
         /// <summary>
         /// Don't crash when task logs with too few format markers
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotCrashOnInvalidFormatExpression()
         {
             string content = @"
@@ -44,7 +46,7 @@ namespace Microsoft.Build.UnitTests.Framework
    <UsingTask
      TaskName=`Crash`
      TaskFactory=`CodeTaskFactory`
-     AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+     AssemblyFile=`$(MSBuildToolsPath)" + Path.DirectorySeparatorChar + @"Microsoft.Build.Tasks.Core.dll` >
      <Task>
        <Code Type=`Fragment` Language=`cs`>
          this.Log.LogError(`Correct: {0}`, `[goodone]`);

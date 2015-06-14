@@ -8,14 +8,16 @@
 using System;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
+
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the TaskFinishedEventArgs class.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TaskFinishedEventArgs_Tests
     {
         /// <summary>
@@ -26,7 +28,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EventArgsCtors()
         {
             TaskFinishedEventArgs targetFinishedEvent = new TaskFinishedEventArgs2();

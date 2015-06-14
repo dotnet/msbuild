@@ -4,16 +4,14 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Resources;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Runtime.InteropServices.ComTypes;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

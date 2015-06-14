@@ -593,6 +593,7 @@ namespace Microsoft.Build.Tasks
 
                         xslct.Load(new XPathDocument(XmlReader.Create(_data)), settings, new XmlUrlResolver());
                         break;
+#if !MONO
                     case XslModes.XsltCompiledDll:
                         // We accept type in format: assembly_name[;type_name]. type_name may be omitted if assembly has just one type defined
                         string dll = _data;
@@ -603,6 +604,7 @@ namespace Microsoft.Build.Tasks
                         Type t = FindType(assemblyPath, typeName);
                         xslct.Load(t);
                         break;
+#endif
                     default:
                         ErrorUtilities.ThrowInternalErrorUnreachable();
                         break;

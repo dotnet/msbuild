@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectUsingTaskElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -15,8 +17,7 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -24,13 +25,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectUsingTaskElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectUsingTaskElement_Tests
     {
         /// <summary>
         /// Read project with no usingtasks
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadNone()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -41,7 +42,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with no task name attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidMissingTaskName()
         {
@@ -57,7 +58,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with empty task name attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidEmptyTaskName()
         {
@@ -73,7 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with unexpected attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -89,7 +90,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with neither AssemblyFile nor AssemblyName attributes
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidMissingAssemblyFileAssemblyName()
         {
@@ -105,7 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with only empty AssemblyFile attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidEmptyAssemblyFile()
         {
@@ -121,7 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with empty AssemblyFile attribute but AssemblyName present
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidEmptyAssemblyFileAndAssemblyNameNotEmpty()
         {
@@ -137,7 +138,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with only empty AssemblyName attribute but AssemblyFile present
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidEmptyAssemblyNameAndAssemblyFileNotEmpty()
         {
@@ -153,7 +154,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with both AssemblyName and AssemblyFile attributes
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidBothAssemblyFileAssemblyName()
         {
@@ -169,7 +170,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with both AssemblyName and AssemblyFile attributes but both are empty
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidBothEmptyAssemblyFileEmptyAssemblyNameBoth()
         {
@@ -185,7 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with assembly file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadBasicUsingTaskAssemblyFile()
         {
             ProjectUsingTaskElement usingTask = GetUsingTaskAssemblyFile();
@@ -199,7 +200,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with assembly name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadBasicUsingTaskAssemblyName()
         {
             ProjectUsingTaskElement usingTask = GetUsingTaskAssemblyName();
@@ -213,7 +214,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read usingtask with task factory, required runtime and required platform
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadBasicUsingTaskFactoryRuntimeAndPlatform()
         {
             ProjectUsingTaskElement usingTask = GetUsingTaskFactoryRuntimeAndPlatform();
@@ -228,7 +229,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Verify that passing in string.empty or null for TaskFactory will remove the element from the xml.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveUsingTaskFactoryRuntimeAndPlatform()
         {
             ProjectUsingTaskElement usingTask = GetUsingTaskFactoryRuntimeAndPlatform();
@@ -244,7 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set assembly file on a usingtask that already has assembly file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetUsingTaskAssemblyFileOnUsingTaskAssemblyFile()
         {
             ProjectUsingTaskElement usingTask = GetUsingTaskAssemblyFile();
@@ -258,7 +259,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set assembly name on a usingtask that already has assembly name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetUsingTaskAssemblyNameOnUsingTaskAssemblyName()
         {
             ProjectUsingTaskElement usingTask = GetUsingTaskAssemblyName();
@@ -272,7 +273,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set assembly file on a usingtask that already has assembly name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetUsingTaskAssemblyFileOnUsingTaskAssemblyName()
         {
@@ -284,7 +285,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set assembly name on a usingtask that already has assembly file
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetUsingTaskAssemblyNameOnUsingTaskAssemblyFile()
         {
@@ -296,7 +297,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set task name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetTaskName()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -311,7 +312,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -326,7 +327,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set task factory
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetTaskFactory()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -341,7 +342,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Make sure there is an exception when there are multiple parameter groups in the using task tag.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void DuplicateParameterGroup()
         {
@@ -360,7 +361,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Make sure there is an exception when there are multiple task groups in the using task tag.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void DuplicateTaskGroup()
         {
@@ -379,7 +380,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Make sure there is an exception when there is an unknown child
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void UnknownChild()
         {
@@ -397,7 +398,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Make sure there is an no exception when there are children in the using task
         /// </summary>
-        [TestMethod]
+        [Test]
         public void WorksWithChildren()
         {
             string content = @"
@@ -422,7 +423,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Make sure there is an exception when a parameter group is added but no task factory attribute is on the using task
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExceptionWhenNoTaskFactoryAndHavePG()
         {
@@ -444,7 +445,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Make sure there is an exception when a parameter group is added but no task factory attribute is on the using task
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ExceptionWhenNoTaskFactoryAndHaveTask()
         {

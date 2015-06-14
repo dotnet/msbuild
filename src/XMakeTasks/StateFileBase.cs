@@ -86,7 +86,7 @@ namespace Microsoft.Build.Tasks
                         if (retVal == null && deserializedObject != null)
                         {
                             // When upgrading to Visual Studio 2008 and running the build for the first time the resource cache files are replaced which causes a cast error due
-                            // to a new version number on the tasks class. "Unable to cast object of type 'Microsoft.Build.Tasks.SystemState' to type 'Microsoft.Build.Tasks.StateFileBase”.
+                            // to a new version number on the tasks class. "Unable to cast object of type 'Microsoft.Build.Tasks.SystemState' to type 'Microsoft.Build.Tasks.StateFileBase".
                             // If there is an invalid cast, a message rather than a warning should be emitted.
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                         }

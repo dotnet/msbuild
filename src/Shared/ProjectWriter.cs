@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
 using System.Xml;
 using System.Text;
@@ -112,9 +111,8 @@ namespace Microsoft.Build.Shared
             }
 
             // don't write an XML declaration unless the project already has one or has non-default encoding
-            _writeXmlDeclaration =
-                ((projectRootElementDeclaration != null) ||
-                ((_documentEncoding != Encoding.UTF8) && (_documentEncoding != null)));
+            _writeXmlDeclaration = (projectRootElementDeclaration != null)
+                                  || (!_documentEncoding.Equals(Encoding.UTF8) && (_documentEncoding != null));
         }
 
         /// <summary>

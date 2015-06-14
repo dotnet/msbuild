@@ -10,11 +10,11 @@ using System.Xml;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ProjectSchemaValidationHandlerTest
     {
         /***********************************************************************
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
          * the project contents are invalid
          * 
          **********************************************************************/
-        [TestMethod]
+        [Test]
         public void VerifyInvalidProjectSchema
             (
             )
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests
         /// Checks that an exception is thrown when the schema being validated
         /// against is itself invalid
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyInvalidSchemaItself1
             (
             )
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
         /// Checks that an exception is thrown when the schema being validated
         /// against is itself invalid
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyInvalidSchemaItself2
             (
             )
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
          * specified in a string, where the project passed is valid
          * 
          **********************************************************************/
-        [TestMethod]
+        [Test]
         public void VerifyValidProjectSchema
             (
             )
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests
         /// We should not validate imported files against the schema in V1, so this
         /// should not be caught by the schema
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyInvalidImportNotCaughtBySchema
             (
             )

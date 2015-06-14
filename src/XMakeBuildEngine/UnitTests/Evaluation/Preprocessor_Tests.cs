@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
@@ -23,13 +23,13 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     /// <summary>
     /// Tests mainly for project preprocessing
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class Preprocessor_Tests
     {
         /// <summary>
         /// Clear out the cache
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Clear out the cache
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void Teardown()
         {
             Setup();
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Single()
         {
             Project project = new Project();
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// InitialTargets are concatenated, outermost to innermost
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitialTargetsOuterAndInner()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" InitialTargets=""i1;i2"">
@@ -98,14 +98,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// InitialTargets are concatenated, outermost to innermost
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitialTargetsInnerOnly()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" InitialTargets=""i2"">
@@ -142,14 +142,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// InitialTargets are concatenated, outermost to innermost
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitialTargetsOuterOnly()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" InitialTargets=""i1"">
@@ -186,14 +186,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic empty project importing another
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoFirstEmpty()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// False import should not be followed
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FalseImport()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -286,7 +286,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another empty one
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoSecondEmpty()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -304,7 +304,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -315,14 +315,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -333,7 +333,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TwoWithContent()
         {
             string one = ObjectModelHelpers.CleanupFileContents(
@@ -374,7 +374,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -398,7 +398,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another one via an ImportGroup
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportGroup()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -417,7 +417,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--</ImportGroup>-->
@@ -451,7 +451,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another one via an ImportGroup with two imports inside it, and a condition on it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportGroupDoubleChildPlusCondition()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -475,7 +475,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -487,7 +487,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -497,14 +497,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   <Import Project=""p3"">
 
-" + Directory.GetCurrentDirectory() + @"\p3
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p3
 ============================================================================================================================================
 -->
   <PropertyGroup>
@@ -514,7 +514,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--</ImportGroup>-->
@@ -526,7 +526,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// First DefaultTargets encountered is used
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultTargetsOuterAndInner()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -548,7 +548,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
      @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" DefaultTargets=""d1"">
@@ -556,28 +556,28 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   <Import Project=""p3"">
 
-" + Directory.GetCurrentDirectory() + @"\p3
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p3
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -588,7 +588,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// First DefaultTargets encountered is used
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DefaultTargetsInnerOnly()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
      @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"" DefaultTargets=""d2"">
@@ -617,28 +617,28 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   <Import Project=""p2"">
 
-" + Directory.GetCurrentDirectory() + @"\p2
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p2
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   <Import Project=""p3"">
 
-" + Directory.GetCurrentDirectory() + @"\p3
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p3
 ============================================================================================================================================
 -->
   <!--
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -649,7 +649,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Basic project importing another one via an ImportGroup, but the ImportGroup condition is false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportGroupFalseCondition()
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
@@ -669,7 +669,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -687,7 +687,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Import has a wildcard expression
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImportWildcard()
         {
             string directory = null;
@@ -699,17 +699,17 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 Directory.CreateDirectory(directory);
 
                 xml0 = ProjectRootElement.Create("p1");
-                xml0.AddImport(directory + "\\*.targets");
+                xml0.AddImport(directory + Path.DirectorySeparatorChar + "*.targets");
 
-                xml1 = ProjectRootElement.Create(directory + "\\1.targets");
+                xml1 = ProjectRootElement.Create(directory + Path.DirectorySeparatorChar + "1.targets");
                 xml1.AddProperty("p", "v1");
                 xml1.Save();
 
-                xml2 = ProjectRootElement.Create(directory + "\\2.targets");
+                xml2 = ProjectRootElement.Create(directory + Path.DirectorySeparatorChar + "2.targets");
                 xml2.AddProperty("p", "v2");
                 xml2.Save();
 
-                xml3 = ProjectRootElement.Create(directory + "\\3.xxxxxx");
+                xml3 = ProjectRootElement.Create(directory + Path.DirectorySeparatorChar + "3.xxxxxx");
                 xml3.AddProperty("p", "v3");
                 xml3.Save();
 
@@ -723,7 +723,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         @"<?xml version=""1.0"" encoding=""utf-16""?>
 <!--
 ============================================================================================================================================
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -756,7 +756,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 ============================================================================================================================================
   </Import>
 
-" + Directory.GetCurrentDirectory() + @"\p1
+" + Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + @"p1
 ============================================================================================================================================
 -->
 </Project>");
@@ -775,7 +775,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// CDATA node type cloned correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CData()
         {
             Project project = new Project();
@@ -798,7 +798,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Metadata named "Project" should not confuse it..
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

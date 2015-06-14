@@ -9,14 +9,15 @@ using System;
 using System.Collections;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the ProjectStartedEventArgs class.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectStartedEventArgs_Tests
     {
         /// <summary>
@@ -27,8 +28,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Setup for text fixture, this is run ONCE for the entire test fixture
         /// </summary>
-        [ClassInitialize]
-        public static void FixtureSetup(TestContext context)
+        [TestFixtureSetUp]
+        public static void FixtureSetup()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(2, 3, 4, 5);
             s_baseProjectStartedEvent = new ProjectStartedEventArgs(1, "Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null, parentBuildEventContext);
@@ -37,7 +38,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EventArgsCtors()
         {
             ProjectStartedEventArgs projectStartedEvent = new ProjectStartedEventArgs2();
@@ -57,7 +58,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify different Items and properties are not taken into account in the equals comparison. They should 
         /// not be considered as part of the equals evaluation
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ItemsAndPropertiesDifferentEquals()
         {
             ArrayList itemsList = new ArrayList();

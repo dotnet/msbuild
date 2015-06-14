@@ -1,17 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-using System.Globalization;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -21,13 +15,13 @@ namespace Microsoft.Build.UnitTests
      * Test the AL task in various ways.
      *
      */
-    [TestClass]
+    [TestFixture]
     sealed public class AlTests
     {
         /// <summary>
         /// Tests the AlgorithmId parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AlgorithmId()
         {
             AL t = new AL();
@@ -37,13 +31,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("whatisthis", t.AlgorithmId, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/algid:whatisthis");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/algid:whatisthis"));
         }
 
         /// <summary>
         /// Tests the BaseAddress parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BaseAddress()
         {
             AL t = new AL();
@@ -53,13 +47,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("12345678", t.BaseAddress, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/baseaddress:12345678");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/baseaddress:12345678"));
         }
 
         /// <summary>
         /// Tests the CompanyName parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CompanyName()
         {
             AL t = new AL();
@@ -69,13 +63,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Google", t.CompanyName, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/company:Google");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/company:Google"));
         }
 
         /// <summary>
         /// Tests the Configuration parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Configuration()
         {
             AL t = new AL();
@@ -85,13 +79,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("debug", t.Configuration, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/configuration:debug");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/configuration:debug"));
         }
 
         /// <summary>
         /// Tests the Copyright parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Copyright()
         {
             AL t = new AL();
@@ -101,13 +95,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("(C) 2005", t.Copyright, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/copyright:(C) 2005");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/copyright:(C) 2005"));
         }
 
         /// <summary>
         /// Tests the Culture parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Culture()
         {
             AL t = new AL();
@@ -117,13 +111,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("aussie", t.Culture, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/culture:aussie");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/culture:aussie"));
         }
 
         /// <summary>
         /// Tests the DelaySign parameter.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DelaySign()
         {
             AL t = new AL();
@@ -133,13 +127,13 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(t.DelaySign, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, "/delaysign+");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/delaysign+"));
         }
 
         /// <summary>
         /// Tests the Description parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Description()
         {
             AL t = new AL();
@@ -149,13 +143,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("whatever", t.Description, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/description:whatever");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/description:whatever"));
         }
 
         /// <summary>
         /// Tests the EmbedResources parameter with an item that has metadata LogicalName and Access=private
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmbedResourcesWithPrivateAccess()
         {
             AL t = new AL();
@@ -172,13 +166,15 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1, t.EmbedResources.Length, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, "/embed:MyResource.bmp,Kenny,Private");
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch("/embed:MyResource.bmp,Kenny,Private"));
         }
 
         /// <summary>
         /// Tests the EvidenceFile parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EvidenceFile()
         {
             AL t = new AL();
@@ -188,13 +184,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("MyEvidenceFile", t.EvidenceFile, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/evidence:MyEvidenceFile");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/evidence:MyEvidenceFile"));
         }
 
         /// <summary>
         /// Tests the FileVersion parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FileVersion()
         {
             AL t = new AL();
@@ -204,13 +200,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("1.2.3.4", t.FileVersion, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/fileversion:1.2.3.4");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/fileversion:1.2.3.4"));
         }
 
         /// <summary>
         /// Tests the Flags parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Flags()
         {
             AL t = new AL();
@@ -220,13 +216,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("0x8421", t.Flags, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/flags:0x8421");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/flags:0x8421"));
         }
 
         /// <summary>
         /// Tests the GenerateFullPaths parameter.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GenerateFullPaths()
         {
             AL t = new AL();
@@ -236,13 +232,13 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(t.GenerateFullPaths, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, "/fullpaths");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/fullpaths"));
         }
 
         /// <summary>
         /// Tests the KeyFile parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyFile()
         {
             AL t = new AL();
@@ -252,13 +248,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("mykey.snk", t.KeyFile, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/keyfile:mykey.snk");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:mykey.snk"));
         }
 
         /// <summary>
         /// Tests the KeyContainer parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyContainer()
         {
             AL t = new AL();
@@ -268,13 +264,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("MyKeyContainer", t.KeyContainer, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/keyname:MyKeyContainer");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/keyname:MyKeyContainer"));
         }
 
         /// <summary>
         /// Tests the LinkResources parameter with an item that has metadata LogicalName, Target, and Access=private
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LinkResourcesWithPrivateAccessAndTargetFile()
         {
             AL t = new AL();
@@ -292,13 +288,15 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1, t.LinkResources.Length, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/link:MyResource.bmp,Kenny,working\MyResource.bmp,Private");
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/link:MyResource.bmp,Kenny,working\MyResource.bmp,Private"));
         }
 
         /// <summary>
         /// Tests the LinkResources parameter with two items with differing metdata.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LinkResourcesWithTwoItems()
         {
             AL t = new AL();
@@ -320,14 +318,18 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(2, t.LinkResources.Length, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/link:MyResource.bmp,Kenny,working\MyResource.bmp,Private");
-            CommandLine.ValidateHasParameter(t, @"/link:MyResource2.bmp,Chef,working\MyResource2.bmp");
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/link:MyResource.bmp,Kenny,working\MyResource.bmp,Private"));
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/link:MyResource2.bmp,Chef,working\MyResource2.bmp"));
         }
 
         /// <summary>
         /// Tests the MainEntryPoint parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MainEntryPoint()
         {
             AL t = new AL();
@@ -337,13 +339,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("Class1.Main", t.MainEntryPoint, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/main:Class1.Main");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/main:Class1.Main"));
         }
 
         /// <summary>
         /// Tests the OutputAssembly parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OutputAssembly()
         {
             AL t = new AL();
@@ -353,13 +355,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("foo.dll", t.OutputAssembly.ItemSpec, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/out:foo.dll");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/out:foo.dll"));
         }
 
         /// <summary>
         /// Tests the Platform parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Platform()
         {
             AL t = new AL();
@@ -369,12 +371,12 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("x86", t.Platform, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
         }
 
         // Tests the "Platform" and "Prefer32Bit" parameter combinations on the AL task,
         // and confirms that it sets the /platform switch on the command-line correctly.
-        [TestMethod]
+        [Test]
         public void PlatformAndPrefer32Bit()
         {
             // Implicit "anycpu"
@@ -385,39 +387,43 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateNoParameterStartsWith(t, @"/platform:");
             t = new AL();
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu32bitpreferred");
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu32bitpreferred"));
 
             // Explicit "anycpu"
             t = new AL();
             t.Platform = "anycpu";
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu"));
             t = new AL();
             t.Platform = "anycpu";
             t.Prefer32Bit = false;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu"));
             t = new AL();
             t.Platform = "anycpu";
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:anycpu32bitpreferred");
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/platform:anycpu32bitpreferred"));
 
             // Explicit "x86"
             t = new AL();
             t.Platform = "x86";
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
             t = new AL();
             t.Platform = "x86";
             t.Prefer32Bit = false;
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
             t = new AL();
             t.Platform = "x86";
             t.Prefer32Bit = true;
-            CommandLine.ValidateHasParameter(t, @"/platform:x86");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/platform:x86"));
         }
 
         /// <summary>
         /// Tests the ProductName parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProductName()
         {
             AL t = new AL();
@@ -427,13 +433,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("VisualStudio", t.ProductName, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/product:VisualStudio");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/product:VisualStudio"));
         }
 
         /// <summary>
         /// Tests the ProductVersion parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProductVersion()
         {
             AL t = new AL();
@@ -443,13 +449,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("8.0", t.ProductVersion, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/productversion:8.0");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/productversion:8.0"));
         }
 
         /// <summary>
         /// Tests the ResponseFiles parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResponseFiles()
         {
             AL t = new AL();
@@ -466,7 +472,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the SourceModules parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SourceModules()
         {
             AL t = new AL();
@@ -491,7 +497,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the TargetType parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetType()
         {
             AL t = new AL();
@@ -501,13 +507,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("winexe", t.TargetType, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/target:winexe");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/target:winexe"));
         }
 
         /// <summary>
         /// Tests the TemplateFile parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TemplateFile()
         {
             AL t = new AL();
@@ -517,13 +523,15 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("mymainassembly.dll", t.TemplateFile, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/template:mymainassembly.dll");
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/template:mymainassembly.dll"));
         }
 
         /// <summary>
         /// Tests the Title parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Title()
         {
             AL t = new AL();
@@ -533,13 +541,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("WarAndPeace", t.Title, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/title:WarAndPeace");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/title:WarAndPeace"));
         }
 
         /// <summary>
         /// Tests the Trademark parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Trademark()
         {
             AL t = new AL();
@@ -549,13 +557,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("MyTrademark", t.Trademark, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/trademark:MyTrademark");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/trademark:MyTrademark"));
         }
 
         /// <summary>
         /// Tests the Version parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Version()
         {
             AL t = new AL();
@@ -565,13 +573,15 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("WowHowManyKindsOfVersionsAreThere", t.Version, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/version:WowHowManyKindsOfVersionsAreThere");
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/version:WowHowManyKindsOfVersionsAreThere"));
         }
 
         /// <summary>
         /// Tests the Win32Icon parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Win32Icon()
         {
             AL t = new AL();
@@ -581,13 +591,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("foo.ico", t.Win32Icon, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/win32icon:foo.ico");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/win32icon:foo.ico"));
         }
 
         /// <summary>
         /// Tests the Win32Resource parameter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Win32Resource()
         {
             AL t = new AL();
@@ -597,7 +607,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("foo.res", t.Win32Resource, "New value");
 
             // Check the parameters.
-            CommandLine.ValidateHasParameter(t, @"/win32res:foo.res");
+            CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch(@"/win32res:foo.res"));
         }
     }
 }

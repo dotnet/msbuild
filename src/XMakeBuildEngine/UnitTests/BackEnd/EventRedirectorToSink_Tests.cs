@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
@@ -16,13 +16,13 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Test the central forwarding logger by initializing a new one and sending events through it.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class EventRedirectorToSink_Tests
     {
         /// <summary>
         /// Tests the basic getting and setting of the logger parameters
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TestConstructorNegativeLoggerId()
         {
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify the correct exception is thrown when the logger is initialized with a null 
         /// event source.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TestConstructorNullSink()
         {
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an valid inputs work and do not produce an exception
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConstructorValidInputs()
         {
             EventSourceSink testSink = new EventSourceSink();
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify when an event is forwarded, the event that was put in is the same event that was received on the event source
         /// also make sure the sinkId has been updated by the event redirector.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestForwardingNotNullEvent()
         {
             EventSourceSink testSink = new EventSourceSink();
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify when a null event is forwarded we get a null argument exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TestForwardingNullEvent()
         {

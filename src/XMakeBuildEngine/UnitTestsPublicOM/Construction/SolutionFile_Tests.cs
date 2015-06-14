@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="SolutionFile_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -10,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
@@ -20,13 +22,13 @@ namespace Microsoft.Build.UnitTests.Construction
     /// <summary>
     /// Tests for the parts of SolutionFile that are surfaced as public API
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class SolutionFile_Tests
     {
         /// <summary>
         /// Test that a project with the C++ project guid and an extension of vcproj is seen as invalid.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ParseSolution_VC()
         {
@@ -61,7 +63,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test that a project with the C++ project guid and an arbitrary extension is seen as valid -- 
         /// we assume that all C++ projects except .vcproj are MSBuild format. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolution_VC2()
         {
             string solutionFileContents =
@@ -97,7 +99,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// A slightly more complicated test where there is some different whitespace.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionWithDifferentSpacing()
         {
             string solutionFileContents =
@@ -134,7 +136,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Solution with an empty project name.  This is somewhat malformed, but we should
         /// still behave reasonably instead of crashing.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolution_EmptyProjectName()
         {
             string solutionFileContents =
@@ -171,7 +173,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test some characters that are valid in a file name but that also could be
         /// considered a delimiter by a parser. Does quoting work for special characters?
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionWhereProjectNameHasSpecialCharacters()
         {
             string solutionFileContents =
@@ -202,14 +204,14 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.AreEqual("MyProject,(=IsGreat)", solution.ProjectsInOrder[0].ProjectName);
             Assert.AreEqual("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
             Assert.AreEqual("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
-        }   
+        }
 
         /// <summary>
         /// Ensure that a bogus version stamp in the .SLN file results in an
         /// InvalidProjectFileException.
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void BadVersionStamp()
         {
             string solutionFileContents =
@@ -225,7 +227,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Expected version numbers less than 7 to cause an invalid project file exception.
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void VersionTooLow()
         {
             string solutionFileContents =
@@ -241,7 +243,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to parse a very basic .sln file to validate that description property in a solution file 
         /// is properly handled.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionFileWithDescriptionInformation()
         {
             string solutionFileContents =
@@ -280,7 +282,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests the parsing of a very basic .SLN file with three independent projects.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicSolution()
         {
             string solutionFileContents =
@@ -321,31 +323,31 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
             Assert.AreEqual(3, solution.ProjectsInOrder.Count);
-            
-            Assert.AreEqual("ConsoleApplication1",                      solution.ProjectsInOrder[0].ProjectName);
+
+            Assert.AreEqual("ConsoleApplication1", solution.ProjectsInOrder[0].ProjectName);
             Assert.AreEqual(@"ConsoleApplication1\ConsoleApplication1.vbproj", solution.ProjectsInOrder[0].RelativePath);
-            Assert.AreEqual("{AB3413A6-D689-486D-B7F0-A095371B3F13}",   solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[0].Dependencies.Count);
-            Assert.AreEqual(null,                                       solution.ProjectsInOrder[0].ParentProjectGuid);
+            Assert.AreEqual("{AB3413A6-D689-486D-B7F0-A095371B3F13}", solution.ProjectsInOrder[0].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[0].Dependencies.Count);
+            Assert.AreEqual(null, solution.ProjectsInOrder[0].ParentProjectGuid);
 
-            Assert.AreEqual("vbClassLibrary",                           solution.ProjectsInOrder[1].ProjectName);
-            Assert.AreEqual(@"vbClassLibrary\vbClassLibrary.vbproj",    solution.ProjectsInOrder[1].RelativePath);
-            Assert.AreEqual("{BA333A76-4511-47B8-8DF4-CA51C303AD0B}",   solution.ProjectsInOrder[1].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[1].Dependencies.Count);
-            Assert.AreEqual(null,                                       solution.ProjectsInOrder[1].ParentProjectGuid);
+            Assert.AreEqual("vbClassLibrary", solution.ProjectsInOrder[1].ProjectName);
+            Assert.AreEqual(@"vbClassLibrary\vbClassLibrary.vbproj", solution.ProjectsInOrder[1].RelativePath);
+            Assert.AreEqual("{BA333A76-4511-47B8-8DF4-CA51C303AD0B}", solution.ProjectsInOrder[1].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[1].Dependencies.Count);
+            Assert.AreEqual(null, solution.ProjectsInOrder[1].ParentProjectGuid);
 
-            Assert.AreEqual("ClassLibrary1",                            solution.ProjectsInOrder[2].ProjectName);
-            Assert.AreEqual(@"ClassLibrary1\ClassLibrary1.csproj",      solution.ProjectsInOrder[2].RelativePath);
-            Assert.AreEqual("{DEBCE986-61B9-435E-8018-44B9EF751655}",   solution.ProjectsInOrder[2].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[2].Dependencies.Count);
-            Assert.AreEqual(null,                                       solution.ProjectsInOrder[2].ParentProjectGuid);
-        }   
+            Assert.AreEqual("ClassLibrary1", solution.ProjectsInOrder[2].ProjectName);
+            Assert.AreEqual(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[2].RelativePath);
+            Assert.AreEqual("{DEBCE986-61B9-435E-8018-44B9EF751655}", solution.ProjectsInOrder[2].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[2].Dependencies.Count);
+            Assert.AreEqual(null, solution.ProjectsInOrder[2].ParentProjectGuid);
+        }
 
         /// <summary>
         /// Exercises solution folders, and makes sure that samely named projects in different
         /// solution folders will get correctly uniquified.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionFolders()
         {
             string solutionFileContents =
@@ -395,36 +397,36 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
             Assert.AreEqual(5, solution.ProjectsInOrder.Count);
-            
-            Assert.AreEqual(@"ClassLibrary1\ClassLibrary1.csproj",      solution.ProjectsInOrder[0].RelativePath);
-            Assert.AreEqual("{34E0D07D-CF8F-459D-9449-C4188D8C5564}",   solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[0].Dependencies.Count);
-            Assert.AreEqual(null,                                       solution.ProjectsInOrder[0].ParentProjectGuid);
 
-            Assert.AreEqual("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}",   solution.ProjectsInOrder[1].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[1].Dependencies.Count);
-            Assert.AreEqual(null,                                       solution.ProjectsInOrder[1].ParentProjectGuid);
+            Assert.AreEqual(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[0].RelativePath);
+            Assert.AreEqual("{34E0D07D-CF8F-459D-9449-C4188D8C5564}", solution.ProjectsInOrder[0].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[0].Dependencies.Count);
+            Assert.AreEqual(null, solution.ProjectsInOrder[0].ParentProjectGuid);
+
+            Assert.AreEqual("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[1].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[1].Dependencies.Count);
+            Assert.AreEqual(null, solution.ProjectsInOrder[1].ParentProjectGuid);
 
             Assert.AreEqual(@"MyPhysicalFolder\ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[2].RelativePath);
-            Assert.AreEqual("{A5EE8128-B08E-4533-86C5-E46714981680}",   solution.ProjectsInOrder[2].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[2].Dependencies.Count);
-            Assert.AreEqual("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}",   solution.ProjectsInOrder[2].ParentProjectGuid);
+            Assert.AreEqual("{A5EE8128-B08E-4533-86C5-E46714981680}", solution.ProjectsInOrder[2].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[2].Dependencies.Count);
+            Assert.AreEqual("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[2].ParentProjectGuid);
 
-            Assert.AreEqual("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}",   solution.ProjectsInOrder[3].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[3].Dependencies.Count);
-            Assert.AreEqual("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}",   solution.ProjectsInOrder[3].ParentProjectGuid);
+            Assert.AreEqual("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", solution.ProjectsInOrder[3].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[3].Dependencies.Count);
+            Assert.AreEqual("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[3].ParentProjectGuid);
 
-            Assert.AreEqual(@"ClassLibrary2\ClassLibrary2.csproj",      solution.ProjectsInOrder[4].RelativePath);
-            Assert.AreEqual("{6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}",   solution.ProjectsInOrder[4].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[4].Dependencies.Count);
-            Assert.AreEqual("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}",   solution.ProjectsInOrder[4].ParentProjectGuid);
+            Assert.AreEqual(@"ClassLibrary2\ClassLibrary2.csproj", solution.ProjectsInOrder[4].RelativePath);
+            Assert.AreEqual("{6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}", solution.ProjectsInOrder[4].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[4].Dependencies.Count);
+            Assert.AreEqual("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", solution.ProjectsInOrder[4].ParentProjectGuid);
         }
 
         /// <summary>
         /// Tests situation where there's a nonexistent project listed in the solution folders.  We should 
         /// error with a useful message. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void MissingNestedProject()
         {
             string solutionFileContents =
@@ -483,7 +485,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Verifies that hand-coded project-to-project dependencies listed in the .SLN file
         /// are correctly recognized by our solution parser.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SolutionDependencies()
         {
             string solutionFileContents =
@@ -531,30 +533,30 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
             Assert.AreEqual(3, solution.ProjectsInOrder.Count);
-            
-            Assert.AreEqual(@"ClassLibrary1\ClassLibrary1.csproj",      solution.ProjectsInOrder[0].RelativePath);
-            Assert.AreEqual("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}",   solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.AreEqual(1,                                          solution.ProjectsInOrder[0].Dependencies.Count);
-            Assert.AreEqual("{FAB4EE06-6E01-495A-8926-5514599E3DD9}",   (string) solution.ProjectsInOrder[0].Dependencies[0]);
-            Assert.AreEqual(null,                                       solution.ProjectsInOrder[0].ParentProjectGuid);
 
-            Assert.AreEqual(@"ClassLibrary2\ClassLibrary2.csproj",      solution.ProjectsInOrder[1].RelativePath);
-            Assert.AreEqual("{7F316407-AE3E-4F26-BE61-2C50D30DA158}",   solution.ProjectsInOrder[1].ProjectGuid);
-            Assert.AreEqual(2,                                          solution.ProjectsInOrder[1].Dependencies.Count);
-            Assert.AreEqual("{FAB4EE06-6E01-495A-8926-5514599E3DD9}",   (string) solution.ProjectsInOrder[1].Dependencies[0]);
-            Assert.AreEqual("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}",   (string) solution.ProjectsInOrder[1].Dependencies[1]);
-            Assert.AreEqual(null,                                       solution.ProjectsInOrder[1].ParentProjectGuid);
+            Assert.AreEqual(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[0].RelativePath);
+            Assert.AreEqual("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}", solution.ProjectsInOrder[0].ProjectGuid);
+            Assert.AreEqual(1, solution.ProjectsInOrder[0].Dependencies.Count);
+            Assert.AreEqual("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", (string)solution.ProjectsInOrder[0].Dependencies[0]);
+            Assert.AreEqual(null, solution.ProjectsInOrder[0].ParentProjectGuid);
 
-            Assert.AreEqual(@"ClassLibrary3\ClassLibrary3.csproj",      solution.ProjectsInOrder[2].RelativePath);
-            Assert.AreEqual("{FAB4EE06-6E01-495A-8926-5514599E3DD9}",   solution.ProjectsInOrder[2].ProjectGuid);
-            Assert.AreEqual(0,                                          solution.ProjectsInOrder[2].Dependencies.Count);
-            Assert.AreEqual(null,                                       solution.ProjectsInOrder[2].ParentProjectGuid);
+            Assert.AreEqual(@"ClassLibrary2\ClassLibrary2.csproj", solution.ProjectsInOrder[1].RelativePath);
+            Assert.AreEqual("{7F316407-AE3E-4F26-BE61-2C50D30DA158}", solution.ProjectsInOrder[1].ProjectGuid);
+            Assert.AreEqual(2, solution.ProjectsInOrder[1].Dependencies.Count);
+            Assert.AreEqual("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", (string)solution.ProjectsInOrder[1].Dependencies[0]);
+            Assert.AreEqual("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}", (string)solution.ProjectsInOrder[1].Dependencies[1]);
+            Assert.AreEqual(null, solution.ProjectsInOrder[1].ParentProjectGuid);
+
+            Assert.AreEqual(@"ClassLibrary3\ClassLibrary3.csproj", solution.ProjectsInOrder[2].RelativePath);
+            Assert.AreEqual("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", solution.ProjectsInOrder[2].ProjectGuid);
+            Assert.AreEqual(0, solution.ProjectsInOrder[2].Dependencies.Count);
+            Assert.AreEqual(null, solution.ProjectsInOrder[2].ParentProjectGuid);
         }
 
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple mixed C#/VC solution
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionConfigurations()
         {
             string solutionFileContents =
@@ -629,7 +631,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple C# application
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseSolutionConfigurationsNoMixedPlatform()
         {
             string solutionFileContents =
@@ -691,7 +693,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// There can be only one '=' character in a sln cfg entry, separating two identical names
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void ParseInvalidSolutionConfigurations1()
         {
             string solutionFileContents =
@@ -716,7 +718,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// There can be only one '=' character in a sln cfg entry, separating two identical names
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void ParseInvalidSolutionConfigurations2()
         {
             string solutionFileContents =
@@ -741,7 +743,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Solution configurations must include the platform part
         /// </summary>
         [ExpectedException(typeof(InvalidProjectFileException))]
-        [TestMethod]
+        [Test]
         public void ParseInvalidSolutionConfigurations3()
         {
             string solutionFileContents =
@@ -765,7 +767,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Make sure the project configurations in solution configurations get parsed correctly 
         /// for a simple mixed C#/VC solution
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseProjectConfigurationsInSolutionConfigurations1()
         {
             string solutionFileContents =
@@ -815,8 +817,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-            ProjectInSolution csharpProject = (ProjectInSolution) solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
-            ProjectInSolution vcProject = (ProjectInSolution) solution.ProjectsByGuid["{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}"];
+            ProjectInSolution csharpProject = (ProjectInSolution)solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
+            ProjectInSolution vcProject = (ProjectInSolution)solution.ProjectsByGuid["{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}"];
 
             Assert.AreEqual(6, csharpProject.ProjectConfigurations.Count);
 
@@ -863,7 +865,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Make sure the project configurations in solution configurations get parsed correctly 
         /// for a more tricky solution
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ParseProjectConfigurationsInSolutionConfigurations2()
         {
             string solutionFileContents =

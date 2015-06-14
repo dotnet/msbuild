@@ -7,23 +7,12 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Xml;
-using System.Diagnostics;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Globalization;
-using System.Xml.Serialization;
-using System.Security;
-using System.Security.Policy;
-using System.Security.Permissions;
-using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
 
@@ -217,9 +206,10 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static Dictionary<string, string> GetEnvironmentVariables()
         {
-            char[] block = GetEnvironmentCharArray();
-
             Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
+
+#if !MONO
+            char[] block = GetEnvironmentCharArray();
 
             // Copy strings out, parsing into pairs and inserting into the table.
             // The first few environment variable entries start with an '='!
@@ -279,7 +269,13 @@ namespace Microsoft.Build.Internal
                 // skip over 0 handled by for loop's i++
                 table[key] = value;
             }
-
+#else
+            var vars = Environment.GetEnvironmentVariables();
+            foreach (var key in vars.Keys)
+            {
+                table[(string)key] = (string)vars[key];
+            }
+#endif
             return table;
         }
 

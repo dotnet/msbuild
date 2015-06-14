@@ -3,25 +3,23 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Globalization;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class CreateCSharpManifestResourceName_Tests
     {
         /// <summary>
         /// Test the basic functionality.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             string result =
@@ -47,7 +45,7 @@ namespace Microsoft.Build.UnitTests
         /// that its running on. This is because 'Ã' is a high ANSI character which is interpretted differently
         /// for different codepages.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress172107()
         {
             // Can't embed the 'Ã' directly because the string is Unicode already and the Unicode<-->ANSI transform
@@ -90,7 +88,7 @@ namespace Microsoft.Build.UnitTests
         /// Test for a namespace that has UTF8 characters but there's no BOM at the start.
         ///
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress249540()
         {
             // Special character is 'Ä' in UTF8: 0xC3 84
@@ -121,7 +119,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test a dependent with a relative path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RelativeDependentUpon()
         {
             string result =
@@ -143,7 +141,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test a dependent with a relative path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AbsoluteDependentUpon()
         {
             string result =
@@ -165,7 +163,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A dependent class plus there is a culture.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DependentWithCulture()
         {
             string result =
@@ -188,7 +186,7 @@ namespace Microsoft.Build.UnitTests
         /// A dependent class plus there is a culture that was expressed in the metadata of the 
         /// item rather than the filename.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DependentWithCultureMetadata()
         {
             string result =
@@ -210,7 +208,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A dependent class plus there is a culture embedded in the .RESX filename.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DependentWithEmbeddedCulture()
         {
             string result =
@@ -233,7 +231,7 @@ namespace Microsoft.Build.UnitTests
         /// No dependent class, but there is a root namespace place.  Also, the .resx
         /// extension contains some upper-case characters.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RootnamespaceWithCulture()
         {
             string result =
@@ -255,7 +253,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If there is a link file name then it is preferred over the main file name.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress222308()
         {
             string result =
@@ -277,7 +275,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A non-resx file in a subfolder, with a root namespace.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BitmapWithRootNamespace()
         {
             string result =
@@ -299,7 +297,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A culture-specific non-resx file in a subfolder, with a root namespace.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CulturedBitmapWithRootNamespace()
         {
             string result =
@@ -315,13 +313,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual(@"fr\RootNamespace.SubFolder.SplashScreen.bmp", result);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"fr\RootNamespace.SubFolder.SplashScreen.bmp"), result);
         }
 
         /// <summary>
         /// A culture-specific non-resx file in a subfolder, with a root namespace, but no culture directory prefix
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CulturedBitmapWithRootNamespaceNoDirectoryPrefix()
         {
             string result =
@@ -344,7 +342,7 @@ namespace Microsoft.Build.UnitTests
         /// If the filename passed in as the "DependentUpon" file doesn't end in .cs then
         /// we want to fall back to the RootNamespace+FileName logic.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress188319()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -383,7 +381,7 @@ namespace Microsoft.Build.UnitTests
         /// Need to convert any spaces in the directory name of embedded resource files to underscores. 
         /// Leave spaces in the file name itself alone. That's how Everett did it.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress309027()
         {
             VerifyExpectedManifestResourceName(
@@ -394,7 +392,7 @@ namespace Microsoft.Build.UnitTests
         /// The folder part of embedded resource names (not the file name though) needs to be a proper identifier, 
         /// since that's how Everett used to do this
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress311473()
         {
             // First char must be a letter or a connector (underscore), others must be a letter/digit/connector or a combining mark
@@ -436,7 +434,7 @@ namespace Microsoft.Build.UnitTests
         /// 
         /// we continue to treat "ro" as the culture.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress419591()
         {
             string result =
@@ -465,7 +463,7 @@ namespace Microsoft.Build.UnitTests
         /// The parent source file doesn't have a class name in it, we just use the culture neutral
         /// filename of the resource file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress419591_EmptySource()
         {
             string result =
@@ -489,7 +487,7 @@ namespace Microsoft.Build.UnitTests
         /// we need to warn because we do not try to resolve the correct manifest name depending
         /// on conditional compilation of code.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress459265()
         {
             MockEngine m = new MockEngine();
@@ -554,7 +552,7 @@ namespace ClassLibrary3
         /// Tests to ensure that the ResourceFilesWithManifestResourceNames contains everything that
         /// the ResourceFiles property on the task contains, but with additional metadata called ManifestResourceName
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResourceFilesWithManifestResourceNamesContainsAdditionalMetadata()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -579,7 +577,7 @@ namespace ClassLibrary3
         /// Ensure that if no LogicalName is specified, that the same ManifestResourceName metadata
         /// gets applied as LogicalName
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddLogicalNameForNonResx()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -604,7 +602,7 @@ namespace ClassLibrary3
         /// <summary>
         /// Ensure that a LogicalName that is already present is preserved during manifest name generation
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PreserveLogicalNameForNonResx()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -630,7 +628,7 @@ namespace ClassLibrary3
         /// <summary>
         /// Resx resources should not get ManifestResourceName metadata copied to the LogicalName value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NoLogicalNameAddedForResx()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -655,7 +653,7 @@ namespace ClassLibrary3
         /// <summary>
         /// A culture-specific resources file in a subfolder, with a root namespace
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CulturedResourcesFileWithRootNamespaceWithinSubfolder()
         {
             string result =
@@ -677,7 +675,7 @@ namespace ClassLibrary3
         /// <summary>
         /// A culture-specific resources file with a root namespace
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CulturedResourcesFileWithRootNamespace()
         {
             string result =
@@ -699,7 +697,7 @@ namespace ClassLibrary3
         /// <summary>
         /// A non-culture-specific resources file with a root namespace
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResourcesFileWithRootNamespace()
         {
             string result =

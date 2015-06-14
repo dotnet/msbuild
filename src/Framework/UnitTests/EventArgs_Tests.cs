@@ -6,21 +6,19 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.IO;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Unit test the base class BuildEventArgs
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class EventArgs_Tests
     {
         #region BaseClass Equals Tests
@@ -32,10 +30,10 @@ namespace Microsoft.Build.UnitTests
         private static GenericBuildEventArgs s_baseGenericEvent = null;
 
         /// <summary>
-        /// Setup the text, this method is run ONCE for the entire text fixture
+        /// Setup the test, this method is run ONCE for the entire test fixture
         /// </summary>
-        [ClassInitialize]
-        public static void Setup(TestContext context)
+        [TestFixtureSetUp]
+        public static void Setup()
         {
             s_baseGenericEvent = new GenericBuildEventArgs("Message", "HelpKeyword", "senderName");
             s_baseGenericEvent.BuildEventContext = new BuildEventContext(9, 8, 7, 6);
@@ -44,7 +42,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise getHashCode.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetHashCode()
         {
             s_baseGenericEvent.GetHashCode();
@@ -53,7 +51,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EventArgsCtors()
         {
             GenericBuildEventArgs genericEventTest = new GenericBuildEventArgs();
@@ -63,8 +61,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify a whidbey project started event can be deserialized, the whidbey event is stored in a serialized base64 string.
         /// </summary>
-        [TestMethod]
-        [Ignore]
+        [Test]
+        [Ignore("FEATURE: LEGACY TASKS")]
         // Ignore: Type in serialized string targets MSBuild retail public key, will not de-serialize
         public void TestDeserialization()
         {
@@ -86,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the BuildEventContext is exercised
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExerciseBuildEventContext()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(0, 0, 0, 0);

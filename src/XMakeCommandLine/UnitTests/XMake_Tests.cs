@@ -15,15 +15,15 @@ using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class XMakeAppTests
     {
-        [TestMethod]
+        [Test]
         public void GatherCommandLineSwitchesTwoProperties()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -38,7 +38,8 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("c=d", parameters[1]);
         }
 
-        [TestMethod]
+#if !MONO
+        [Test]
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -55,7 +56,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(false, switches.HaveErrors());
         }
 
-        [TestMethod]
+        [Test]
         public void GatherCommandLineSwitchesMaxCpuCountWithoutArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -75,7 +76,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         ///  /m: should be an error, unlike /m:1 and /m
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GatherCommandLineSwitchesMaxCpuCountWithoutArgumentButWithColon()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -90,6 +91,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.IsTrue(switches.HaveErrors());
         }
+#endif
 
         /*
          * Quoting Rules:
@@ -118,7 +120,7 @@ namespace Microsoft.Build.UnitTests
          *      abc""cde""xyz       --> nothing is quoted
          */
 
-        [TestMethod]
+        [Test]
         public void SplitUnquotedTest()
         {
             ArrayList sa;
@@ -311,7 +313,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("z", sa[3]);
         }
 
-        [TestMethod]
+        [Test]
         public void UnquoteTest()
         {
             int doubleQuotesRemoved;
@@ -373,7 +375,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(4, doubleQuotesRemoved);
         }
 
-        [TestMethod]
+        [Test]
         public void ExtractSwitchParametersTest()
         {
             string commandLineArg = "\"/p:foo=\"bar";
@@ -420,14 +422,14 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(6, doubleQuotesRemovedFromArg);
         }
 
-        [TestMethod]
+        [Test]
         public void Help()
         {
             Assert.AreEqual(MSBuildApp.ExitType.Success,
                 MSBuildApp.Execute(@"c:\bin\msbuild.exe -? "));
         }
 
-        [TestMethod]
+        [Test]
         public void ErrorCommandLine()
         {
             Assert.AreEqual(MSBuildApp.ExitType.SwitchError,
@@ -440,7 +442,7 @@ namespace Microsoft.Build.UnitTests
                 MSBuildApp.Execute(@"msbuild.exe @bogus.rsp"));
         }
 
-        [TestMethod]
+        [Test]
         public void ValidVerbosities()
         {
             Assert.AreEqual(LoggerVerbosity.Quiet, MSBuildApp.ProcessVerbositySwitch("Q"));
@@ -455,14 +457,14 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(LoggerVerbosity.Diagnostic, MSBuildApp.ProcessVerbositySwitch("DIAGNOSTIC"));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(CommandLineSwitchException))]
         public void InvalidVerbosity()
         {
             MSBuildApp.ProcessVerbositySwitch("loquacious");
         }
 
-        [TestMethod]
+        [Test]
         public void ValidMaxCPUCountSwitch()
         {
             Assert.AreEqual(1, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "1" }));
@@ -476,21 +478,21 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(4, MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "8", "4" }));
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(CommandLineSwitchException))]
         public void InvalidMaxCPUCountSwitch1()
         {
             MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "-1" });
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(CommandLineSwitchException))]
         public void InvalidMaxCPUCountSwitch2()
         {
             MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "0" });
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(CommandLineSwitchException))]
         public void InvalidMaxCPUCountSwitch3()
         {
@@ -498,7 +500,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "foo" });
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(CommandLineSwitchException))]
         public void InvalidMaxCPUCountSwitch4()
         {
@@ -513,7 +515,7 @@ namespace Microsoft.Build.UnitTests
         /// <remarks>
         /// fr-FR, de-DE, and fr-CA are guaranteed to be available on all BVTs, so we must use one of these
         /// </remarks>
-        [TestMethod]
+        [Test]
         public void SetConsoleUICulture()
         {
             Thread thisThread = Thread.CurrentThread;
@@ -534,7 +536,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Invalid configuration file should not dump stack.
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires installed toolset.
         public void ConfigurationInvalid()
@@ -721,7 +723,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that the environment gets passed on to the node during build.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestEnvironment()
         {
             string projectString = ObjectModelHelpers.CleanupFileContents(
@@ -750,7 +752,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires installed toolset.
         public void MSBuildEngineLogger()
@@ -790,7 +792,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetCommandLine()
         {
             string output = RunProcessAndGetOutput(_pathToMSBuildExe, "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag", expectSuccess: false);
@@ -801,7 +803,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Quoted path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetCommandLineQuotedExe()
         {
             string quotedPathToMSBuildExe = "\"" + _pathToMSBuildExe + "\"";
@@ -813,7 +815,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// On path
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetCommandLineQuotedExeOnPath()
         {
             string output = null;
@@ -837,9 +839,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files.
         /// </summary>
-        [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        [Test]
         public void ResponseFileInProjectDirectoryFoundImplicitly()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -876,7 +876,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResponseFileInProjectDirectoryExplicit()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -907,7 +907,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and not any random .rsp
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResponseFileInProjectDirectoryRandomName()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -939,7 +939,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, 
         /// but lower precedence than the actual command line
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResponseFileInProjectDirectoryCommandLineWins()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -971,7 +971,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, 
         /// but lower precedence than the actual command line and higher than the msbuild.rsp next to msbuild.exe
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires installed toolset.
         public void ResponseFileInProjectDirectoryWinsOverMainMSBuildRsp()
@@ -1017,7 +1017,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, 
         /// but not if it's the same as the msbuild.exe directory
         /// </summary>
-        [TestMethod]
+        [Test]
         [Ignore]
         // Ignore: Test requires installed toolset.
         public void ProjectDirectoryIsMSBuildExeDirectory()
@@ -1053,7 +1053,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution with /noautoresponse in, is an error
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResponseFileInProjectDirectoryItselfWithNoAutoResponseSwitch()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1084,7 +1084,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be ignored if cmd line has /noautoresponse
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResponseFileInProjectDirectoryButCommandLineNoAutoResponseSwitch()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1116,7 +1116,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files. Sanity test when there isn't one.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ResponseFileInProjectDirectoryNullCase()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1145,7 +1145,7 @@ namespace Microsoft.Build.UnitTests
         /// Test the case where the extension is a valid extension but is not a project
         /// file extension. In this case no files should be ignored
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProcessProjectSwitchOneProjNotFoundExtension()
         {
             string[] projects = new string[] { "my.proj" };
@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where two identical extensions are asked to be ignored
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTwoIdenticalExtensionsToIgnore()
         {
             string[] projects = new string[] { "my.proj" };
@@ -1168,7 +1168,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass a null and an empty list of project extensions to ignore, this simulates the switch not being set on the commandline
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProcessProjectSwitchNullandEmptyProjectsToIgnore()
         {
             string[] projects = new string[] { "my.proj" };
@@ -1183,7 +1183,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass in one extension and a null value
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchNullInList()
         {
@@ -1196,7 +1196,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass in one extension and an empty string
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchEmptyInList()
         {
@@ -1209,7 +1209,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If only a dot is specified then the extension is invalid
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchExtensionWithoutDot()
         {
@@ -1222,7 +1222,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Put some junk into the extension, in this case there should be an exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchMalformed()
         {
@@ -1235,7 +1235,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test what happens if there are no project or solution files in the directory
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchWildcards()
         {
@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Fail();
         }
 
-        [TestMethod]
+        [Test]
         public void TestProcessProjectSwitch()
         {
             string[] projects = new string[] { "test.nativeproj", "test.vcproj" };
@@ -1306,7 +1306,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ignore .sln and .vcproj files to replicate Building_DF_LKG functionality
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProcessProjectSwitchReplicateBuildingDFLKG()
         {
             string[] projects = new string[] { "test.proj", "test.sln", "Foo.vcproj" };
@@ -1319,7 +1319,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we remove all of the project extensions that exist in the directory
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchRemovedAllprojects()
         {
@@ -1335,7 +1335,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a solution and a project in the same directory but they have different names
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchSlnProjDifferentNames()
         {
@@ -1350,7 +1350,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we have two proj files in the same directory
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchTwoProj()
         {
@@ -1366,7 +1366,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we have two native project files in the same directory
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchTwoNative()
         {
@@ -1382,7 +1382,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test when there are two solutions in the smae directory
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchTwoSolutions()
         {
@@ -1397,7 +1397,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check the case where there are more than two projects in the directory and one is a proj file
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchMoreThenTwoProj()
         {
@@ -1412,7 +1412,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test what happens if there are no project or solution files in the directory
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void TestProcessProjectSwitchNoProjectOrSolution()
         {
@@ -1480,7 +1480,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where no file logger switches are given, should be no file loggers attached
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProcessFileLoggerSwitch1()
         {
             bool distributedFileLogger = false;
@@ -1503,7 +1503,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where a central logger and distributed logger are attached
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProcessFileLoggerSwitch2()
         {
             bool distributedFileLogger = true;
@@ -1526,7 +1526,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where a central file logger is attached but no distributed logger
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProcessFileLoggerSwitch3()
         {
             bool distributedFileLogger = false;
@@ -1580,7 +1580,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where a distributed file logger is attached but no central logger
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProcessFileLoggerSwitch4()
         {
             bool distributedFileLogger = true;
@@ -1702,7 +1702,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when in single proc mode the file logger enables mp logging and does not show eventId
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestProcessFileLoggerSwitch5()
         {
             bool distributedFileLogger = false;
@@ -1724,7 +1724,7 @@ namespace Microsoft.Build.UnitTests
         #endregion
 
         #region ProcessConsoleLoggerSwitches
-        [TestMethod]
+        [Test]
         public void ProcessConsoleLoggerSwitches()
         {
             ArrayList loggers = new ArrayList();

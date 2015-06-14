@@ -2,13 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Text;
-using System.Collections.Generic;
 using System.Configuration;
-using Microsoft.Win32;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
 using System.Threading;
+
+#pragma warning disable 436
 
 namespace Microsoft.Build.UnitTests
 {
@@ -82,7 +80,9 @@ namespace Microsoft.Build.UnitTests
                 throw s_exceptionToThrow;
             }
 
-            return ConfigurationManager.OpenMappedExeConfiguration(s_configFile, ConfigurationUserLevel.None);
+            return s_configFile == null
+                       ? null
+                       : ConfigurationManager.OpenMappedExeConfiguration(s_configFile, ConfigurationUserLevel.None);
         }
     }
 }

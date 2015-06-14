@@ -7,7 +7,7 @@ using System.Xml;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -21,10 +21,10 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
+    [TestFixture]
     public class BatchingEngine_Tests
     {
-        [TestMethod]
+        [Test]
         public void GetBuckets()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// where there are only two items and both of them have a value for Culture, but they
         /// have different values.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValidUnqualifiedMetadataReference()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// It's illegal because not all of the items consumed contain a value for
         /// that metadata.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void InvalidUnqualifiedMetadataReference()
         {
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// It's illegal because not all of the items consumed contain a value for
         /// that metadata.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void NoItemsConsumed()
         {
@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test ensures that two items with duplicate attributes end up in exactly one batching
         /// bucket.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress_Mutation_DuplicateBatchingBucketsAreFoldedTogether()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(1, buckets.Count);
         }
 
-        [TestMethod]
+        [Test]
         public void Simple()
         {
             string content = @"
@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// due to us adding the same item instance to the remove item lists when merging the lookups between the two batches.
         /// The fix was to not add the item to the remove list if it already exists.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Regress72803()
         {
             string content = @"
@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// items for that list even in buckets where there should be none, because
         /// it was batching over metadata that only other list/s had.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BucketsWithEmptyListForBatchedItemList()
         {
             string content = @"
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Bug for Targets instead of Tasks.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BucketsWithEmptyListForTargetBatchedItemList()
         {
             string content = @"
@@ -345,7 +345,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A batching target that has no outputs should still run.
         /// This is how we shipped before, although Jay pointed out it's odd.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BatchOnEmptyOutput()
         {
             string content = @"
@@ -371,7 +371,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// We verify this by using the Warning class. If the same object is being reused,
         /// the second warning would have the code from the first use of the task.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EachBatchGetsASeparateTaskObject()
         {
             string content = @"
@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// order as the items are declared in the project, especially when batching is simply 
         /// being used as a "for loop".
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BatcherPreservesItemOrderWithinASingleItemList()
         {
             string content = @"
@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Undefined and empty metadata values should not be distinguished when bucketing.
         /// This is the same as previously shipped.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UndefinedAndEmptyMetadataValues()
         {
             string content = @"

@@ -5,16 +5,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class CustomEventArgSerialization_Tests
     {
         // Generic build class to test custom serialization of abstract class BuildEventArgs
@@ -39,7 +36,7 @@ namespace Microsoft.Build.UnitTests
 
         private int _eventArgVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _stream = new MemoryStream();
@@ -47,7 +44,7 @@ namespace Microsoft.Build.UnitTests
             _reader = new BinaryReader(_stream);
         }
 
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             // Close will close the writer/reader and the underlying stream
@@ -58,7 +55,7 @@ namespace Microsoft.Build.UnitTests
             _writer = null;
         }
 
-        [TestMethod]
+        [Test]
         public void TestGenericBuildEventArgs()
         {
             // Test using reasonable messages
@@ -127,7 +124,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(genericEvent.Timestamp, newGenericEvent.Timestamp, "Expected TimeStamp to Match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestBuildErrorEventArgs()
         {
             // Test using reasonable messages
@@ -197,7 +194,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestBuildFinishedEventArgs()
         {
             // Test using reasonable messages
@@ -245,7 +242,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(genericEvent.Succeeded == newGenericEvent.Succeeded, "Expected Succeeded to Match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestBuildMessageEventArgs()
         {
             // Test using reasonable messages
@@ -318,7 +315,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(messageEvent.EndColumnNumber, newMessageEvent.EndColumnNumber, "Expected message EndColumnNumber to match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestBuildMessageEventArgsWithFileInfo()
         {
             // Test using reasonable messages
@@ -374,7 +371,7 @@ namespace Microsoft.Build.UnitTests
             VerifyMessageEventArg(messageEvent, newMessageEvent);
         }
 
-        [TestMethod]
+        [Test]
         public void TestCriticalBuildMessageEventArgs()
         {
             // Test using reasonable messages
@@ -430,7 +427,7 @@ namespace Microsoft.Build.UnitTests
             VerifyMessageEventArg(criticalMessageEvent, newCriticalMessageEvent);
         }
 
-        [TestMethod]
+        [Test]
         public void TestBuildWarningEventArgs()
         {
             // Test with reasonable messages
@@ -500,7 +497,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(genericEvent.EndLineNumber, newGenericEvent.EndLineNumber, "Expected EndLineNumber to Match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestProjectFinishedEventArgs()
         {
             // Test with reasonable values
@@ -561,7 +558,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(string.Compare(genericEvent.ProjectFile, newGenericEvent.ProjectFile, StringComparison.OrdinalIgnoreCase) == 0, "Expected ProjectFile to Match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestProjectStartedPropertySerialization()
         {
             // Create a list of test properties which should make it through serialization
@@ -635,7 +632,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestProjectStartedEventArgs()
         {
             // Test with reasonable values
@@ -705,7 +702,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(string.Compare(genericEvent.TargetNames, newGenericEvent.TargetNames, StringComparison.OrdinalIgnoreCase) == 0, "Expected TargetNames to Match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestTargetStartedEventArgs()
         {
             // Test using reasonable values
@@ -773,7 +770,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(string.Compare(genericEvent.ParentTarget, newGenericEvent.ParentTarget, StringComparison.OrdinalIgnoreCase) == 0, "Expected ParentTarget to Match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestTargetFinishedEventArgs()
         {
             // Test using reasonable values
@@ -840,7 +837,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(string.Compare(genericEvent.TargetName, newGenericEvent.TargetName, StringComparison.OrdinalIgnoreCase) == 0, "Expected TargetName to Match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestTaskStartedEventArgs()
         {
             // Test using reasonable values
@@ -908,7 +905,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(string.Compare(genericEvent.TaskName, newGenericEvent.TaskName, StringComparison.OrdinalIgnoreCase) == 0, "Expected TaskName to Match");
         }
 
-        [TestMethod]
+        [Test]
         public void TestTaskFinishedEventArgs()
         {
             // Test using reasonable values

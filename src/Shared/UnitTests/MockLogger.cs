@@ -11,7 +11,7 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
@@ -458,7 +458,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 currentLine = reader.ReadLine();
-                if (!isCaseSensitive)
+                if (!isCaseSensitive && currentLine != null)
                 {
                     currentLine = currentLine.ToUpper();
                 }

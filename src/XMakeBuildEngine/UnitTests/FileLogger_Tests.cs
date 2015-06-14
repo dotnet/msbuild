@@ -1,29 +1,29 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#pragma warning disable 436
+
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 using EventSourceSink = Microsoft.Build.BackEnd.Logging.EventSourceSink;
 using Project = Microsoft.Build.Evaluation.Project;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class FileLogger_Tests
     {
         /// <summary>
         /// Basic test of the file logger.  Writes to a log file in the temp directory.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Basic()
         {
             FileLogger fileLogger = new FileLogger();
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
         /// Basic case of logging a message to a file
         /// Verify it logs and encoding is ANSI
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicNoExistingFile()
         {
             string log = null;
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Invalid file should error nicely
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(LoggerException))]
         public void InvalidFile()
         {
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                SetUpFileLoggerAndLogMessage("logfile=||invalid||", new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
+                SetUpFileLoggerAndLogMessage("logfile=||/invalid||", new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
             }
             finally
             {
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Specific verbosity overrides global verbosity
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SpecificVerbosity()
         {
             string log = null;
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the short hand verbosity settings for the file logger
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValidVerbosities()
         {
             string[] verbositySettings = new string[] { "Q", "quiet", "m", "minimal", "N", "normal", "d", "detailed", "diag", "DIAGNOSTIC" };
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Invalid verbosity setting
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(LoggerException))]
         public void InvalidVerbosity()
         {
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Invalid encoding setting
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(LoggerException))]
         public void InvalidEncoding()
         {
@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Valid encoding setting
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValidEncoding()
         {
             string log = null;
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Valid encoding setting
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ValidEncoding2()
         {
             string log = null;
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logging a message to a file that already exists should overwrite it
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicExistingFileNoAppend()
         {
             string log = null;
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logging to a file that already exists, with "append" set, should append
         /// </summary>
-        [TestMethod]
+        [Test]
         public void BasicExistingFileAppend()
         {
             string log = null;
@@ -371,7 +371,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check the ability of the distributed logger to correctly tell its internal file logger where to log the file
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DistributedFileLoggerParameters()
         {
             DistributedFileLogger fileLogger = new DistributedFileLogger();
@@ -414,7 +414,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(LoggerException))]
         public void DistributedLoggerBadPath()
         {
@@ -423,12 +423,23 @@ namespace Microsoft.Build.UnitTests
             fileLogger.Initialize(new EventSourceSink());
 
             fileLogger.NodeId = 1;
-            fileLogger.Parameters = "logfile=" + Path.Combine(Environment.CurrentDirectory, "\\DONTEXIST\\mylogfile.log");
+            fileLogger.Parameters = "logfile="
+                                    + Path.Combine(
+                                        Environment.CurrentDirectory,
+                                        Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar
+                                        + "mylogfile.log");
             fileLogger.Initialize(new EventSourceSink());
-            Assert.IsTrue(string.Compare(fileLogger.InternalFilelogger.Parameters, ";ShowCommandLine;logfile=" + Path.Combine(Environment.CurrentDirectory, "\\DONTEXIST\\mylogfile2.log"), StringComparison.OrdinalIgnoreCase) == 0);
+            Assert.IsTrue(
+                string.Compare(
+                    fileLogger.InternalFilelogger.Parameters,
+                    ";ShowCommandLine;logfile="
+                    + Path.Combine(
+                        Environment.CurrentDirectory,
+                        Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar + "mylogfile2.log"),
+                    StringComparison.OrdinalIgnoreCase) == 0);
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(LoggerException))]
         public void DistributedLoggerNullEmpty()
         {

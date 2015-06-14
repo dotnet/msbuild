@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectPropertyInstance_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -10,20 +12,20 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for ProjectPropertyInstance public members
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectPropertyInstance_Tests
     {
         /// <summary>
         /// Get name and value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Accessors()
         {
             ProjectPropertyInstance property = GetPropertyInstance();
@@ -35,7 +37,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValue()
         {
             ProjectPropertyInstance property = GetPropertyInstance();
@@ -46,7 +48,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValue_Escaped()
         {
             ProjectPropertyInstance property = GetPropertyInstance();
@@ -57,7 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set empty value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyValue()
         {
             ProjectPropertyInstance property = GetPropertyInstance();
@@ -68,7 +70,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set invalid null value
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullValue()
         {
@@ -79,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Immutable getter
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImmutableGetterFalse()
         {
             ProjectPropertyInstance property = GetPropertyInstance();
@@ -89,7 +91,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Immutable getter true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImmutableGetterTrue()
         {
             var project = new Project();

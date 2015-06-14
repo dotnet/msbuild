@@ -12,7 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -26,14 +26,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for the BuildRequestConfigurationResponse class.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class BuildRequestConfigurationResponse_Tests
     {
         /// <summary>
         /// Validate the constructor takes any combination of arguments.  It is not the purpose of this class to enforce
         /// rules on configuration IDs.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConstructor()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(0, 0, 0);
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test the NodeConfigurationId property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestNodeConfigurationId()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(1, 0, 0);
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test the GlobalConfigurationId property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGlobalConfigurationId()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(0, 1, 0);
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test the ResultsNodeId property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestResultsNodeId()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(0, 1, 2);
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test the Serialize method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslation()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(1, 2, 3);

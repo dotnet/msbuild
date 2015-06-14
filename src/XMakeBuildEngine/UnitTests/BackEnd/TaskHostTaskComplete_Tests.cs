@@ -6,16 +6,14 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+using NUnit.Framework;
 using TaskHostPacketHelpers = Microsoft.Build.UnitTests.BackEnd.TaskHostConfiguration_Tests.TaskHostPacketHelpers;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -23,13 +21,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Unit Tests for TaskHostTaskComplete packet.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TaskHostTaskComplete_Tests
     {
         /// <summary>
         /// Tests various valid ways to construct this packet.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestConstructors()
         {
             TaskHostTaskComplete complete = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success), null);
@@ -52,7 +50,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test invalid constructor permutations. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestInvalidConstructors()
         {
             AssertInvalidConstructorThrows(typeof(InternalErrorException), TaskCompleteType.CrashedDuringExecution, null, "ExceptionlessErrorMessage", null, null, null);
@@ -64,7 +62,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is null
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithNullDictionary()
         {
             TaskHostTaskComplete complete = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success), null);
@@ -82,7 +80,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithEmptyDictionary()
         {
             TaskHostTaskComplete complete = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, new Dictionary<string, object>()), null);
@@ -100,7 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains only value types
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithValueTypesInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -123,7 +121,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithITaskItemInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -144,7 +142,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTranslationWithITaskItemArrayInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -180,7 +178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             catch (Exception e)
             {
                 exceptionCaught = true;
-                Assert.IsInstanceOfType(e, expectedExceptionType, "Wrong exception was thrown!");
+                Assert.That(e, Is.InstanceOf(expectedExceptionType), "Wrong exception was thrown!");
             }
 
             Assert.IsTrue(exceptionCaught, "No exception was caught when one was expected!");

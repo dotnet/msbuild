@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -12,13 +12,13 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class MakeDir_Tests
     {
         /// <summary>
         /// Make sure that attributes set on input items are forwarded to output items.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AttributeForwarding()
         {
             string temp = Path.GetTempPath();
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that if we fail to create a folder, we don't pass
         /// through the input.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SomeInputsFailToCreate()
         {
             string temp = Path.GetTempPath();
@@ -92,9 +92,11 @@ namespace Microsoft.Build.UnitTests
                 bool success = t.Execute();
 
                 Assert.IsTrue(!success);
-                Assert.AreEqual(2, t.DirectoriesCreated.Length);
+                // Since Unix pretty much does not have invalid characters,
+                // the invalid name is not really invalid
+                Assert.AreEqual(NativeMethodsShared.IsWindows ? 2 : 3, t.DirectoriesCreated.Length);
                 Assert.AreEqual(dir, t.DirectoriesCreated[0].ItemSpec);
-                Assert.AreEqual(dir2, t.DirectoriesCreated[1].ItemSpec);
+                Assert.AreEqual(dir2, t.DirectoriesCreated[NativeMethodsShared.IsWindows ? 1 : 2].ItemSpec);
                 Assert.IsTrue
                 (
                     engine.Log.Contains
@@ -114,7 +116,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Creating a directory that already exists should not log anything.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CreateNewDirectory()
         {
             string temp = Path.GetTempPath();
@@ -170,7 +172,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Make sure that nice message is logged if a file already exists with that name.
         */
-        [TestMethod]
+        [Test]
         public void FileAlreadyExists()
         {
             string temp = Path.GetTempPath();

@@ -10,7 +10,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests.OM.Evaluation
@@ -18,14 +18,14 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
     /// <summary>
     /// Tests for ProjectStringCache
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectStringCache_Tests
     {
         /// <summary>
         /// Test that loading two instances of the same xml file uses the same strings
         /// to store read values.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ContentIsSameAcrossInstances()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Test that modifying one instance of a file does not affect the other file.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ContentCanBeModified()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Test that unloading a project file makes its string entries disappear from
         /// the string cache.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemovingFilesRemovesEntries()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Adding a string equivalent to an existing instance and under the same document should
         /// return the existing instance.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddReturnsSameInstanceForSameDocument()
         {
             ProjectStringCache cache = new ProjectStringCache();
@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// Adding a string equivalent to an existing instance but under a different document 
         /// should return the existing instance.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddReturnsSameInstanceForDifferentDocument()
         {
             ProjectStringCache cache = new ProjectStringCache();
@@ -295,7 +295,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// The following method assumes knowledge of the ProjectStringCache internal implementation
         /// details, and may become invalid if those details change.
         /// </remarks>        
-        [TestMethod]
+        [Test]
         public void RemoveLastInstanceDeallocatesEntry()
         {
             ProjectStringCache cache = new ProjectStringCache();
@@ -327,7 +327,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// should still leave a reference in the collection, so that a subsequent add will
         /// return the existing reference.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveOneInstance()
         {
             ProjectStringCache cache = new ProjectStringCache();
@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Different strings should get their own entries.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentStringsSameDocument()
         {
             ProjectStringCache cache = new ProjectStringCache();
@@ -398,7 +398,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Different strings should get their own entries.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DifferentStringsDifferentDocuments()
         {
             ProjectStringCache cache = new ProjectStringCache();

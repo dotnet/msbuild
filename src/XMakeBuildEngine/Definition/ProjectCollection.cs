@@ -10,9 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Xml;
 
@@ -24,18 +22,17 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
 
-using Constants = Microsoft.Build.Internal.Constants;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using Utilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.Evaluation
 {
+    using Utilities = Microsoft.Build.Internal.Utilities;
+
     /// <summary>
     /// Flags for controlling the toolset initialization.
     /// </summary>
@@ -188,7 +185,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         static ProjectCollection()
         {
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
+            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
         }
 
         /// <summary>
@@ -252,9 +249,9 @@ namespace Microsoft.Build.Evaluation
         {
             _loadedProjects = new LoadedProjectCollection();
             _toolsetDefinitionLocations = toolsetDefinitionLocations;
-            this.MaxNodeCount = maxNodeCount;
-            this.ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */);
-            this.OnlyLogCriticalEvents = onlyLogCriticalEvents;
+            MaxNodeCount = maxNodeCount;
+            ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */);
+            OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
             {
@@ -302,7 +299,7 @@ namespace Microsoft.Build.Evaluation
                 throw;
             }
 
-            ProjectRootElementCache.ProjectRootElementAddedHandler += new Evaluation.ProjectRootElementCache.ProjectRootElementCacheAddEntryHandler(ProjectRootElementCache_ProjectRootElementAddedHandler);
+            ProjectRootElementCache.ProjectRootElementAddedHandler += ProjectRootElementCache_ProjectRootElementAddedHandler;
             ProjectRootElementCache.ProjectRootElementDirtied += ProjectRootElementCache_ProjectRootElementDirtiedHandler;
             ProjectRootElementCache.ProjectDirtied += ProjectRootElementCache_ProjectDirtiedHandler;
         }
@@ -384,7 +381,8 @@ namespace Microsoft.Build.Evaluation
                     // Use .CodeBase instead of .Location, because .Location doesn't
                     // work when Microsoft.Build.dll has been shadow-copied, for example
                     // in scenarios where NUnit is loading Microsoft.Build.
-                    s_engineVersion = new Version(FileVersionInfo.GetVersionInfo(FileUtilities.ExecutingAssemblyPath).ProductVersion);
+                    var versionInfo = FileVersionInfo.GetVersionInfo(FileUtilities.ExecutingAssemblyPath);
+                    s_engineVersion = new Version (versionInfo.ProductMajorPart, versionInfo.ProductMinorPart, versionInfo.ProductBuildPart, versionInfo.ProductPrivatePart);
                 }
 
                 return s_engineVersion;
@@ -419,7 +417,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (!_toolsets.ContainsKey(value))
                     {
-                        string toolsVersionList = Microsoft.Build.Internal.Utilities.CreateToolsVersionListString(Toolsets);
+                        string toolsVersionList = Utilities.CreateToolsVersionListString(Toolsets);
                         ErrorUtilities.ThrowInvalidOperation("UnrecognizedToolsVersion", value, toolsVersionList);
                     }
 
@@ -769,7 +767,7 @@ namespace Microsoft.Build.Evaluation
                     // of properties in their build parameters.
                     if (null == _environmentProperties)
                     {
-                        _environmentProperties = Microsoft.Build.Internal.Utilities.GetEnvironmentProperties();
+                        _environmentProperties = Utilities.GetEnvironmentProperties();
                     }
 
                     return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
@@ -1017,7 +1015,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (globalProperties == null)
                 {
-                    globalProperties = this.GlobalProperties;
+                    globalProperties = GlobalProperties;
                 }
                 else
                 {
@@ -1025,7 +1023,7 @@ namespace Microsoft.Build.Evaluation
                     // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
                     // an exception when we go to actually add the newly created project to the ProjectCollection. 
                     // BUT remember that project global properties win -- don't override a property that already exists.
-                    foreach (KeyValuePair<string, string> globalProperty in this.GlobalProperties)
+                    foreach (KeyValuePair<string, string> globalProperty in GlobalProperties)
                     {
                         if (!globalProperties.ContainsKey(globalProperty.Key))
                         {
@@ -1460,7 +1458,7 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(Object.ReferenceEquals(project.ProjectCollection, this), "OM_IncorrectObjectAssociation", "Project", "ProjectCollection");
+                ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(project.ProjectCollection, this), "OM_IncorrectObjectAssociation", "Project", "ProjectCollection");
 
                 if (project.FullPath == null)
                 {
@@ -1557,7 +1555,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="e">The event arguments that indicate ProjectRootElement-specific details.</param>
         private void OnProjectXmlChanged(ProjectXmlChangedEventArgs e)
         {
-            var projectXmlChanged = this.ProjectXmlChanged;
+            var projectXmlChanged = ProjectXmlChanged;
             if (projectXmlChanged != null)
             {
                 projectXmlChanged(this, e);
@@ -1570,7 +1568,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="e">The event arguments that indicate Project-specific details.</param>
         private void OnProjectChanged(ProjectChangedEventArgs e)
         {
-            var projectChanged = this.ProjectChanged;
+            var projectChanged = ProjectChanged;
             if (projectChanged != null)
             {
                 projectChanged(this, e);
@@ -1584,7 +1582,7 @@ namespace Microsoft.Build.Evaluation
         private void OnProjectCollectionChanged(ProjectCollectionChangedEventArgs e)
         {
             Debug.Assert(!Monitor.IsEntered(_locker), "We should never raise events while holding a private lock.");
-            var projectCollectionChanged = this.ProjectCollectionChanged;
+            var projectCollectionChanged = ProjectCollectionChanged;
             if (projectCollectionChanged != null)
             {
                 projectCollectionChanged(this, e);
@@ -1639,7 +1637,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void CreateLoggingService(int maxCPUCount, bool onlyLogCriticalEvents)
         {
-            _loggingService = Microsoft.Build.BackEnd.Logging.LoggingService.CreateLoggingService(LoggerMode.Synchronous, 0 /*Evaluation can be done as if it was on node "0"*/);
+            _loggingService = BackEnd.Logging.LoggingService.CreateLoggingService(LoggerMode.Synchronous, 0 /*Evaluation can be done as if it was on node "0"*/);
             _loggingService.MaxCPUCount = maxCPUCount;
             _loggingService.OnlyLogCriticalEvents = onlyLogCriticalEvents;
         }
@@ -1652,6 +1650,7 @@ namespace Microsoft.Build.Evaluation
         {
             _toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            // We only want our local toolset (as defined in MSBuild.exe.config) when we're operating locally...
             _defaultToolsVersion = ToolsetReader.ReadAllToolsets(_toolsets, EnvironmentProperties, _globalProperties, _toolsetDefinitionLocations);
 
             _toolsetsVersion++;
@@ -2271,7 +2270,7 @@ namespace Microsoft.Build.Evaluation
 
                     _loadedProjects.TryGetValue(fullPath, out candidates);
 
-                    return (candidates == null) ? (IList<Project>)ReadOnlyEmptyList<Project>.Instance : candidates;
+                    return candidates ?? (IList<Project>)ReadOnlyEmptyList<Project>.Instance;
                 }
             }
 

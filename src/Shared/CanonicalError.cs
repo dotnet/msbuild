@@ -73,6 +73,15 @@ namespace Microsoft.Build.Shared
                 + "(?<TEXT>.*)$",
                 RegexOptions.IgnoreCase
              );
+        /*
+        var matches = Regex.Matches(currentLine, "(?<File>.*):(?<Line>\\d+):(?<Character>\\d+):(?<Type> error| warning):(?<Message>.*)");
+
+		*/
+        static private Regex s_originCategoryCodeTextExpression2 = new Regex
+            (
+                @"^\s*(?<ORIGIN>(?<FILENAME>.*):(?<LOCATION>(?<LINE>[0-9]*):(?<COLUMN>[0-9]*))):(?<CATEGORY> error| warning):(?<TEXT>.*)",
+                RegexOptions.IgnoreCase
+            );
 
         // Matches and extracts filename and location from an 'origin' element.
         static private Regex s_filenameLocationFromOrigin = new Regex
@@ -307,15 +316,40 @@ namespace Microsoft.Build.Shared
             //   AssemblyInfo.cpp : fatal error LNK1106: ???????????? ??????????????: 0x6580 ??????????
             //
             Match match = s_originCategoryCodeTextExpression.Match(message);
-
+            string category;
             if (!match.Success)
             {
-                // If no match here, then this message is not an error or warning.
-                return null;
+                // try again with the Clang/GCC matcher
+                match = s_originCategoryCodeTextExpression2.Match(message);
+                if (!match.Success)
+                {
+                    return null;
+                }
+
+                category = match.Groups["CATEGORY"].Value.Trim();
+                if (0 == String.Compare(category, "error", StringComparison.OrdinalIgnoreCase))
+                {
+                    parsedMessage.category = Parts.Category.Error;
+                }
+                else if (0 == String.Compare(category, "warning", StringComparison.OrdinalIgnoreCase))
+                {
+                    parsedMessage.category = Parts.Category.Warning;
+                }
+                else
+                {
+                    // Not an error\warning message.
+                    return null;
+                }
+                parsedMessage.line = ConvertToIntWithDefault(match.Groups["LINE"].Value.Trim());
+                parsedMessage.column = ConvertToIntWithDefault(match.Groups["COLUMN"].Value.Trim());
+                parsedMessage.text = (match.Groups["TEXT"].Value + messageOverflow).Trim();
+                parsedMessage.origin = match.Groups["FILENAME"].Value.Trim();
+                parsedMessage.code = "G" + parsedMessage.text.Split(new char[] { '\'' }, StringSplitOptions.RemoveEmptyEntries)[0].GetHashCode().ToString("X8");
+                return parsedMessage;
             }
 
             string origin = match.Groups["ORIGIN"].Value.Trim();
-            string category = match.Groups["CATEGORY"].Value.Trim();
+            category = match.Groups["CATEGORY"].Value.Trim();
             parsedMessage.code = match.Groups["CODE"].Value.Trim();
             parsedMessage.text = (match.Groups["TEXT"].Value + messageOverflow).Trim();
             parsedMessage.subcategory = match.Groups["SUBCATEGORY"].Value.Trim();

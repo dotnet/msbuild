@@ -2,18 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using Microsoft.Build.Tasks;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Evaluation;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ManagedCompiler_Tests
     {
         #region Test DebugType and EmitDebugInformation settings
@@ -36,7 +35,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the test matrix for DebugSymbols = true
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDebugSymbolsTrue()
         {
             // Verify each of the DebugType settings when EmitDebugInformation is true
@@ -86,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the test matrix for DebugSymbols = false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DebugSymbolsFalse()
         {
             // Verify each of the DebugType settings when EmitDebugInformation is false
@@ -135,7 +134,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the test matrix for DebugSymbols when it is not set
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDebugSymbolsNull()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -184,7 +183,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        [TestMethod]
+        [Test]
         public void DuplicateSources()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -194,7 +193,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)m.BuildEngine).AssertLogContains("MSB3105");
         }
 
-        [TestMethod]
+        [Test]
         public void DuplicateResourcesWithNoLogicalNames()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -206,7 +205,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)m.BuildEngine).AssertLogContains("MSB3105");
         }
 
-        [TestMethod]
+        [Test]
         public void DuplicateResourcesButWithDifferentLogicalNames()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -223,9 +222,14 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)m.BuildEngine).AssertLogDoesntContain("MSB3083");
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultWin32ManifestEmbeddedInConsoleApp()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("No default.win32manifest is not available unless under Windows");
+            }
+
             MyManagedCompiler m = new MyManagedCompiler();
             m.BuildEngine = new MockEngine(true);
             m.Sources = new ITaskItem[] { new TaskItem("bar") };
@@ -238,9 +242,14 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultWin32ManifestEmbeddedInConsoleAppWhenTargetTypeInferred()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("No default.win32manifest is not available unless under Windows");
+            }
+
             MyManagedCompiler m = new MyManagedCompiler();
             m.BuildEngine = new MockEngine(true);
             m.Sources = new ITaskItem[] { new TaskItem("bar") };
@@ -252,7 +261,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultWin32ManifestNotEmbeddedInClassLibrary()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -267,7 +276,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultWin32ManifestNotEmbeddedInNetModule()
         {
             MyManagedCompiler m = new MyManagedCompiler();
@@ -282,7 +291,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Test]
         public void DuplicateResourcesWithSameLogicalNames()
         {
             MyManagedCompiler m = new MyManagedCompiler();

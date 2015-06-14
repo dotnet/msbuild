@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests of the scheduler.
     /// </summary>
-    //[TestClass]
+    //[TestFixture]
     // Ignore: Causing issues with other tests
     public class Scheduler_Tests
     {
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Set up
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tear down
         /// </summary>
-        [TestCleanup]
+        [TearDown]
         public void TearDown()
         {
             if (_buildManager != null)
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when a single request is submitted, we get a request assigned back out.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSimpleRequest()
         {
             CreateConfiguration(1, "foo.proj");
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when we submit a request and we already have results, we get the results back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSimpleRequestWithCachedResultsSuccess()
         {
             CreateConfiguration(1, "foo.proj");
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when we submit a request with failing results, we get the results back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestSimpleRequestWithCachedResultsFail()
         {
             CreateConfiguration(1, "foo.proj");
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when we submit a child request with results cached, we get those results back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestChildRequest()
         {
             CreateConfiguration(1, "foo.proj");
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when multiple requests are submitted, the first one in is the first one out.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestMultipleRequests()
         {
             CreateConfiguration(1, "foo.proj");
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when multiple requests are submitted with results cached, we get the results back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestMultipleRequestsWithSomeResults()
         {
             CreateConfiguration(1, "foo.proj");
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when multiple requests are submitted with results cached, we get the results back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestMultipleRequestsWithAllResults()
         {
             CreateConfiguration(1, "foo.proj");
@@ -279,7 +279,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that if the affinity of one of the requests is out-of-proc, we create an out-of-proc node (but only one)
         /// even if the max node count = 1. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutOfProcNodeCreatedWhenAffinityIsOutOfProc()
         {
             CreateConfiguration(1, "foo.proj");
@@ -301,7 +301,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that if the affinity of our requests is out-of-proc, that many out-of-proc nodes will 
         /// be made (assuming it does not exceed MaxNodeCount)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestOutOfProcNodesCreatedWhenAffinityIsOutOfProc()
         {
             _host.BuildParameters.MaxNodeCount = 4;
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we still won't create any new nodes if they're all for the same configuration -- 
         /// they'd end up all being assigned to the same node. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestNoNewNodesCreatedForMultipleRequestsWithSameConfiguration()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that if the affinity of our requests is "any", we will not create more than 
         /// MaxNodeCount nodes (1 IP node + MaxNodeCount - 1 OOP nodes)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestMaxNodeCountNotExceededWithRequestsOfAffinityAny()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// node will service an Any request instead of an inproc request, leaving only one non-inproc request for the second round 
         /// of node creation.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyRequestOrderingDoesNotAffectNodeCreationCountWithInProcAndAnyRequests()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 
@@ -430,7 +430,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that if the affinity of our requests is out-of-proc, we will create as many as
         /// MaxNodeCount out-of-proc nodes
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestMaxNodeCountOOPNodesCreatedForOOPAffinitizedRequests()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -460,7 +460,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// is less than MaxNodeCount, that we only create MaxNodeCount - 1 OOP nodes (for a total of MaxNodeCount
         /// nodes, when the inproc node is included)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestMaxNodeCountNodesNotExceededWithSomeOOPRequests1()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// is less than MaxNodeCount, that we only create MaxNodeCount - 1 OOP nodes (for a total of MaxNodeCount
         /// nodes, when the inproc node is included)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestMaxNodeCountNodesNotExceededWithSomeOOPRequests2()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -519,7 +519,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure that traversal projects are marked with an affinity of "InProc", which means that 
         /// even if multiple are available, we should still only have the single inproc node.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTraversalAffinityIsInProc()
         {
             _host.BuildParameters.MaxNodeCount = 3;
@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// With something approximating the BuildManager's build loop, make sure that we don't end up 
         /// trying to create more nodes than we can actually support.   
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyNoOverCreationOfNodesWithBuildLoop()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 
@@ -585,7 +585,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that if we get two requests but one of them is a failure, we only get the failure result back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTwoRequestsWithFirstFailure()
         {
             CreateConfiguration(1, "foo.proj");
@@ -604,7 +604,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that if we get two requests but one of them is a failure, we only get the failure result back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestTwoRequestsWithSecondFailure()
         {
             CreateConfiguration(1, "foo.proj");
@@ -623,7 +623,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that if we get three requests but one of them is a failure, we only get the failure result back.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestThreeRequestsWithOneFailure()
         {
             CreateConfiguration(1, "foo.proj");
@@ -643,7 +643,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that providing a result to the only ourstanding request results in build complete.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestResult()
         {
             CreateConfiguration(1, "foo.proj");
@@ -667,7 +667,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that the detailed summary setting causes the summary to be produced.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestDetailedSummary()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"

@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectTaskInstance_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -11,20 +13,20 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for ProjectTaskInstance
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectTaskInstance_Tests
     {
         /// <summary>
         /// Test accessors
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Accessors()
         {
             var task = GetSampleTaskInstance();
@@ -45,7 +47,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// of array type, an empty array is set on the task class.
         /// Therefore empty task parameters should be returned by the parameter list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EmptyParameter()
         {
             var task = GetTaskInstance(@"<t1 a=''/>");

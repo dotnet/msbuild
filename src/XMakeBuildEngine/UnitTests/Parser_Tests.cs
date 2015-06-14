@@ -2,16 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 
+using NUnit.Framework;
+
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ParserTest
     {
         /// <summary>
@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SimpleParseTest()
         {
             Console.WriteLine("SimpleParseTest()");
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ComplexParseTest()
         {
             Console.WriteLine("ComplexParseTest()");
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NotParseTest()
         {
             Console.WriteLine("NegationParseTest()");
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests
         }
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FunctionCallParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
             tree = p.Parse("SimpleFunctionCall( $(property), 1234, abcd, 'abcd efgh' )", ParserOptions.AllowAll, _elementLocation);
         }
 
-        [TestMethod]
+        [Test]
         public void ItemListParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(fExceptionCaught);
         }
 
-        [TestMethod]
+        [Test]
         public void MetadataParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NegativeTests()
         {
             Console.WriteLine("NegativeTests()");
@@ -426,7 +426,7 @@ namespace Microsoft.Build.UnitTests
         /// This test verifies that we trigger warnings for expressions that
         /// could be incorrectly evaluated
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyWarningForOrder()
         {
             // Create a project file that has an expression
@@ -468,7 +468,7 @@ namespace Microsoft.Build.UnitTests
         /// This test verifies that we don't trigger warnings for expressions that
         /// couldn't be incorrectly evaluated
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyNoWarningForOrder()
         {
             // Create a project file that has an expression

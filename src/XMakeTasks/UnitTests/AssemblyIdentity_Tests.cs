@@ -6,7 +6,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -14,14 +14,14 @@ using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AssemblyIdentity_Tests
     {
 
         /// <summary>
         /// Convert an AssemblyIdentity to a string.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConvertToString()
         {
             AssemblyIdentity a = new AssemblyIdentity("MyAssembly", "1.0.0.0");
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Attempt to resolve an assembly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AttemptResolveButFailed()
         {
             AssemblyIdentity a = new AssemblyIdentity("MyAssembly", "1.0.0.0");

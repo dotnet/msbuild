@@ -7,7 +7,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
@@ -19,13 +19,13 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Verify the event source sink functions correctly.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class EventSourceSink_Tests
     {
         /// <summary>
         /// Verify the properties on EventSourceSink properly work
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PropertyTests()
         {
             EventSourceSink sink = new EventSourceSink();
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test out events
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConsumeEventsGoodEvents()
         {
             EventSourceSink sink = new EventSourceSink();
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test out events when no event handlers are registered
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ConsumeEventsGoodEventsNoHandlers()
         {
             EventSourceSink sink = new EventSourceSink();
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify when exceptions are thrown in the event handler, they are properly handled
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LoggerExceptionInEventHandler()
         {
             List<Exception> exceptionList = new List<Exception>();
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify raising a generic event derived from BuildEventArgs rather than CustomBuildEventArgs causes an internalErrorException
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void RaiseGenericBuildEventArgs()
         {
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify that shutdown un registers all of the event handlers
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyShutdown()
         {
             EventSourceSink sink = new EventSourceSink();
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify aggregate exceptions are caught as critical if they contain critical exceptions
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyAggregateExceptionHandling()
         {
             try

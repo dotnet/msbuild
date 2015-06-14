@@ -2,18 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Text;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.Build.Shared;
 
+using NUnit.Framework;
+
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public sealed class NativeMethodsShared_Tests
     {
         #region Data
@@ -28,17 +27,28 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Confirms we can find a file on the system path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FindFileOnPath()
         {
-            string expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
-            string cmdPath = NativeMethodsShared.FindOnPath("cmd.exe");
+            string expectedCmdPath;
+            string shellName;
+            if (NativeMethodsShared.IsWindows)
+            {
+                expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+                shellName = "cmd.exe";
+            }
+            else
+            {
+                expectedCmdPath = "/bin/sh";
+                shellName = "sh";
+            }
 
+            string cmdPath = NativeMethodsShared.FindOnPath(shellName);
             Assert.IsNotNull(cmdPath);
 
             // for the NUnit "Standard Out" tab
-            Console.WriteLine("Expected location of \"cmd.exe\": " + expectedCmdPath);
-            Console.WriteLine("Found \"cmd.exe\" here: " + cmdPath);
+            Console.WriteLine("Expected location of \"" + shellName + "\": " + expectedCmdPath);
+            Console.WriteLine("Found \"" + shellName + "\" here: " + cmdPath);
 
             Assert.AreEqual(0, String.Compare(cmdPath, expectedCmdPath, StringComparison.OrdinalIgnoreCase));
         }
@@ -47,7 +57,7 @@ namespace Microsoft.Build.UnitTests
         /// Confirms we can find a file on the system path even if the path
         /// to the file is very long.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FindFileOnPathAfterResizingBuffer()
         {
             int savedMaxPath = NativeMethodsShared.MAX_PATH;
@@ -68,7 +78,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Confirms we cannot find a bogus file on the system path.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DoNotFindFileOnPath()
         {
             string bogusFile = Path.ChangeExtension(Guid.NewGuid().ToString(), ".txt");
@@ -84,9 +94,14 @@ namespace Microsoft.Build.UnitTests
         /// Verify that getProcAddress works, bug previously was due to a bug in the attributes used to pinvoke the method
         /// when that bug was in play this test would fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestGetProcAddress()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("No Kernel32.dll except on Windows");
+            }
+
             IntPtr kernel32Dll = NativeMethodsShared.LoadLibrary("kernel32.dll");
             try
             {
@@ -123,7 +138,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that when NativeMethodsShared.GetLastWriteFileUtcTime() is called on a
         /// missing time, DateTime.MinValue is returned.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetLastWriteFileUtcTimeReturnsMinValueForMissingFile()
         {
             string nonexistentFile = FileUtilities.GetTemporaryFile();
@@ -138,18 +153,18 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that NativeMethodsShared.SetCurrentDirectory(), when called on a nonexistent
         /// directory, will not set the current directory to that location. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCurrentDirectoryDoesNotSetNonexistentFolder()
         {
             string currentDirectory = Environment.CurrentDirectory;
-            string nonexistentDirectory = currentDirectory + @"foo\bar\baz";
+            string nonexistentDirectory = Path.Combine(currentDirectory, "foo", "bar", "baz");
 
             // Make really sure the nonexistent directory doesn't actually exist
             if (Directory.Exists(nonexistentDirectory))
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    nonexistentDirectory = currentDirectory + @"foo\bar\baz" + Guid.NewGuid();
+                    nonexistentDirectory = Path.Combine(currentDirectory, "foo", "bar", "baz") + Guid.NewGuid();
 
                     if (!Directory.Exists(nonexistentDirectory))
                     {

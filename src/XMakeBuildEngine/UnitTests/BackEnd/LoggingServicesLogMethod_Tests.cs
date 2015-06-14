@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Contain the logging services tests which deal with the logging methods themselves
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class LoggingServicesLogMethod_Tests
     {
         #region Data
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Make sure an InternalErrorExcetpionis thrown when a null event is attempted to be logged
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogBuildEventNullEvent()
         {
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test LogBuildevent by logging a number of events with both OnlyLogCriticalEvents On and Off
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogBuildEvents()
         {
             // This event should only be logged when OnlyLogCriticalEvents is off
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when MessageResourceName  is null.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogErrorNullMessageResource()
         {
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternlErrorException is thrown when an empty MessageResourceName is passed in. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogErrorEmptyMessageResource()
         {
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a message is logged when all of the parameters are filled out correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogErrorGoodParameters()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an exception is thrown when a null buildevent context is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogInvalidProjectFileErrorNullEventContext()
         {
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an exception is thrown when a null Invalid ProjectFile exception is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogInvalidProjectFileErrorNullException()
         {
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// the exception has not been logged yet. Verify with and without OnlyLogCriticalEvents.
         /// In Both cases we expect the event to be logged
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogInvalidProjectFileError()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null build event context is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogFatalErrorNullContext()
         {
@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when fileInfo is null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogFatalErrorNullFileInfo()
         {
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a error message is correctly logged when  the exception is null.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogFatalErrorNullException()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when messageResourceName is null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogFatalErrorNullMessageResourceName()
         {
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when messageResourceName is empty
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogFatalErrorEmptyMessageResourceName()
         {
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogFatalErrorAllGoodInput()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -288,7 +288,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogFatalBuildErrorGoodInput()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when taskName is null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogFatalTaskErrorNullTaskNameName()
         {
@@ -322,7 +322,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a error message is correctly logged when all of the inputs are valid.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogFatalTaskError()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -350,7 +350,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when BuildEventContext is null.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogErrorFromTextNullBuildEventContext()
         {
@@ -361,7 +361,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException when a null FileInfo is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogErrorFromTextNullFileInfo()
         {
@@ -372,7 +372,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogErrorFromTextNullMessage()
         {
@@ -383,7 +383,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test LogErrorFromText with a number of different inputs
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogErrorFromTextTests()
         {
             string warningCode;
@@ -413,7 +413,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure if an imported project has an invalid project file exception say by trying to run a nonexistent task that we properly get
         /// the [projectfile] post fix information.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void VerifyErrorPostfixForInvalidProjectFileException()
         {
             MockLogger mockLogger = new MockLogger();
@@ -478,7 +478,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when taskName is null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogTaskWarningFromExceptionNullTaskName()
         {
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when taskName is empty
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogTaskWarningFromExceptionEmptyTaskName()
         {
@@ -503,7 +503,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify a LogTaskWarningFromException with a null exception and a non null exception 
         /// with all of the other fields properly filled out.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogTaskWarningFromException()
         {
             BuildEventFileInfo fileInfo = new BuildEventFileInfo("foo.cs", 1, 2, 3, 4);
@@ -532,7 +532,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an exception is when a null MessageResourceName is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogWarningNullMessageResource()
         {
@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an exception is when a empty MessageResourceName is passed in. 
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogWarningEmptyMessageResource()
         {
@@ -554,7 +554,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a message is logged when all of the parameters are filled out 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogWarningTests()
         {
             TestLogWarning(null, "SubCategoryForSolutionParsingErrors");
@@ -568,7 +568,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null BuildEventContext is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogWarningFromTextNullBuildEventContext()
         {
@@ -579,7 +579,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null fileInfo is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogWarningFromTextNullFileInfo()
         {
@@ -590,7 +590,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogWarningFromTextNullMessage()
         {
@@ -601,7 +601,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test LogWarningFromText with a number of different inputs
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogWarningFromTextTests()
         {
             string warningCode;
@@ -632,7 +632,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null messageResource name is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogCommentNullMessageResourceName()
         {
@@ -643,7 +643,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a empty messageResource name is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogCommentEmptyMessageResourceName()
         {
@@ -655,7 +655,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify LogComment by testing it with OnlyLogCriticalEvents On and Off when the rest of the fields are 
         /// valid inputs.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogCommentGoodMessage()
         {
             MessageImportance messageImportance = MessageImportance.Normal;
@@ -681,7 +681,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null message is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogCommentFromTextNullMessage()
         {
@@ -692,7 +692,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a message is logged when an empty message is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogCommentFromTextEmptyMessage()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -702,7 +702,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an InternalErrorException is thrown when a null build event context is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void LogCommentFromTextNullBuildEventContextMessage()
         {
@@ -713,7 +713,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Make sure we can log a comment when everything should be working correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogCommentFromTextGoodMessage()
         {
             MessageImportance messageImportance = MessageImportance.Normal;
@@ -740,7 +740,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ProjectStartedNullBuildEventContext()
         {
@@ -752,7 +752,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ProjectStartedNullParentBuildEventContext()
         {
@@ -764,7 +764,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Test the case where ProjectFile is good and TargetNames is null.
         /// Expect an event to be logged
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectStartedEventTests()
         {
             // Good project File and null target names
@@ -793,7 +793,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void ProjectFinishedNullBuildEventContext()
         {
@@ -804,7 +804,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test the project finished event
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProjectFinished()
         {
             TestProjectFinishedEvent(null, true);
@@ -822,7 +822,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure we can log a build started event correctly.
         /// Test both the LogOnlyCriticalEvents true and false
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogBuildStarted()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -841,7 +841,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure we can log a build finished event correctly.
         /// Verify the success cases as well as OnlyLogCriticalEvents
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LogBuildFinished()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -865,7 +865,7 @@ namespace Microsoft.Build.UnitTests.Logging
         ///  Exercise Asynchronous code path, this method should return right away as there are no events to process.
         ///  This will be further tested in the LoggingService_Tests class.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestBuildFinishedWaitForEvents()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Asynchronous, 1);
@@ -882,7 +882,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TaskStartedNullBuildEventContext()
         {
@@ -893,7 +893,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test the case where TaskName 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskStartedEvent()
         {
             TestTaskStartedEvent(null, "ProjectFile", "ProjectFileOfTaskNode");
@@ -915,7 +915,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TaskFinishedNullBuildEventContext()
         {
@@ -926,7 +926,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test the case where TaskName is null. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskFinishedNullTaskName()
         {
             TestTaskFinished(null, "ProjectFile", "ProjectFileOfTaskNode", true);
@@ -953,7 +953,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TargetStartedNullBuildEventContext()
         {
@@ -964,7 +964,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test the target started event with a null target name.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetStartedNullTargetName()
         {
             TestTargetStartedEvent(null, "ProjectFile", "projectFileOfTarget");
@@ -980,7 +980,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test the target started event with different values being null.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetStartedWithParentTarget()
         {
             TestTargetStartedWithParentTargetEvent(null, "ProjectFile", "projectFileOfTarget");
@@ -999,7 +999,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Expect an exception to be thrown if a null build event context is passed in
         /// and OnlyLogCriticalEvents is false
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void TargetFinishedNullBuildEventContext()
         {
@@ -1010,7 +1010,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test the case where TargetName is null. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TargetFinishedNullTargetName()
         {
             TestTargetFinished(null, "ProjectFile", "ProjectFileOfTarget", true);

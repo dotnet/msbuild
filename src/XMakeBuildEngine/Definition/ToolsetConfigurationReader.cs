@@ -5,21 +5,16 @@
 // <summary>A class used to read the Toolset configuration.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
-using System.Text;
-using System.Globalization;
-using System.Reflection;
-using Microsoft.Build.Construction;
+
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -77,11 +72,16 @@ namespace Microsoft.Build.Evaluation
                 {
                     foreach (ToolsetElement toolset in ConfigurationSection.Toolsets)
                     {
-                        ElementLocation location = ElementLocation.Create(toolset.ElementInformation.Source, toolset.ElementInformation.LineNumber, 0);
+                        ElementLocation location = ElementLocation.Create(
+                            toolset.ElementInformation.Source,
+                            toolset.ElementInformation.LineNumber,
+                            0);
 
                         if (toolset.toolsVersion != null && toolset.toolsVersion.Length == 0)
                         {
-                            InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location.LocationString);
+                            InvalidToolsetDefinitionException.Throw(
+                                "InvalidToolsetValueInConfigFileValue",
+                                location.LocationString);
                         }
 
                         yield return new ToolsetPropertyDefinition(toolset.toolsVersion, string.Empty, location);
@@ -217,7 +217,14 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
         {
-            return ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            if (FileUtilities.RunningTests)
+            {
+                return ConfigurationManager.OpenExeConfiguration(FileUtilities.CurrentExecutablePath);
+            }
+            else
+            {
+                return ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            }
         }
     }
 }

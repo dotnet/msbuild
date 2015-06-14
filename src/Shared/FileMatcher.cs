@@ -22,6 +22,7 @@ namespace Microsoft.Build.Shared
     {
         private const string recursiveDirectoryMatch = "**";
         private const string dotdot = "..";
+        private static readonly string s_currentDirectoryPattern = "." + Path.DirectorySeparatorChar;
         private static readonly string s_directorySeparator = new string(Path.DirectorySeparatorChar, 1);
         private static readonly string s_altDirectorySeparator = new string(Path.AltDirectorySeparatorChar, 1);
 
@@ -93,6 +94,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         private static string[] GetAccessibleFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
+            path = FileUtilities.FixFilePath(path);
             string[] files = null;
             switch (entityType)
             {
@@ -166,7 +168,7 @@ namespace Microsoft.Build.Shared
             try
             {
                 // look in current directory if no path specified
-                string dir = ((path.Length == 0) ? ".\\" : path);
+                string dir = ((path.Length == 0) ? s_currentDirectoryPattern : path);
 
                 // get all files in specified directory, unless a file-spec has been provided
                 string[] files = (filespec == null)
@@ -184,7 +186,7 @@ namespace Microsoft.Build.Shared
                 // IDE, which expects just the filename if it is in the current
                 // directory.  But only do this if the original path requested
                 // didn't itself contain a ".\".
-                else if (!path.StartsWith(".\\", StringComparison.Ordinal))
+                else if (!path.StartsWith(s_currentDirectoryPattern, StringComparison.Ordinal))
                 {
                     RemoveInitialDotSlash(files);
                 }
@@ -224,11 +226,11 @@ namespace Microsoft.Build.Shared
 
                 if (pattern == null)
                 {
-                    directories = Directory.GetDirectories((path.Length == 0) ? ".\\" : path);
+                    directories = Directory.GetDirectories((path.Length == 0) ? s_currentDirectoryPattern : path);
                 }
                 else
                 {
-                    directories = Directory.GetDirectories((path.Length == 0) ? ".\\" : path, pattern);
+                    directories = Directory.GetDirectories((path.Length == 0) ? s_currentDirectoryPattern : path, pattern);
                 }
 
                 // Subdirectories in the current directory are coming back with a ".\"
@@ -236,7 +238,7 @@ namespace Microsoft.Build.Shared
                 // IDE, which expects just the filename if it is in the current
                 // directory.  But only do this if the original path requested
                 // didn't itself contain a ".\".
-                if (!path.StartsWith(".\\", StringComparison.Ordinal))
+                if (!path.StartsWith(s_currentDirectoryPattern, StringComparison.Ordinal))
                 {
                     RemoveInitialDotSlash(directories);
                 }
@@ -434,6 +436,7 @@ namespace Microsoft.Build.Shared
             out string filenamePart
         )
         {
+            filespec = FileUtilities.FixFilePath(filespec);
             int indexOfLastDirectorySeparator = filespec.LastIndexOfAny(directorySeparatorCharacters);
             if (-1 == indexOfLastDirectorySeparator)
             {
@@ -524,7 +527,7 @@ namespace Microsoft.Build.Shared
         {
             for (int i = 0; i < paths.Length; i++)
             {
-                if (paths[i].StartsWith(".\\", StringComparison.Ordinal))
+                if (paths[i].StartsWith(s_currentDirectoryPattern, StringComparison.Ordinal))
                 {
                     paths[i] = paths[i].Substring(2);
                 }

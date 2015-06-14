@@ -3,16 +3,17 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class Touch_Tests
     {
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
@@ -21,6 +22,11 @@ namespace Microsoft.Build.UnitTests
         internal static Microsoft.Build.Tasks.SetAttributes fileSetAttributes = new Microsoft.Build.Tasks.SetAttributes(SetAttributes);
         internal static Microsoft.Build.Tasks.SetLastAccessTime setLastAccessTime = new Microsoft.Build.Tasks.SetLastAccessTime(SetLastAccessTime);
         internal static Microsoft.Build.Tasks.SetLastWriteTime setLastWriteTime = new Microsoft.Build.Tasks.SetLastWriteTime(SetLastWriteTime);
+
+        internal static string myexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch\myexisting.txt" : @"/touch/myexisting.txt";
+        internal static string mynonexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch\mynonexisting.txt" : @"/touch/mynonexisting.txt";
+        internal static string nonexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch-nonexisting\file.txt" : @"/touch-nonexisting/file.txt";
+        internal static string myreadonly_txt = NativeMethodsShared.IsWindows ? @"c:\touch\myreadonly.txt" : @"/touch/myreadonly.txt";
 
         private bool Execute(Touch t)
         {
@@ -42,22 +48,22 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         private static bool FileExists(string path)
         {
-            if (path == @"c:\touch\myexisting.txt")
+            if (path == myexisting_txt)
             {
                 return true;
             }
 
-            if (path == @"c:\touch\mynonexisting.txt")
+            if (path == mynonexisting_txt)
             {
                 return false;
             }
 
-            if (path == @"c:\touch-nonexisting\file.txt")
+            if (path == nonexisting_txt)
             {
                 return false;
             }
 
-            if (path == @"c:\touch\myreadonly.txt")
+            if (path == myreadonly_txt)
             {
                 return true;
             }
@@ -72,12 +78,12 @@ namespace Microsoft.Build.UnitTests
         /// <param name="path"></param>
         private static FileStream FileCreate(string path)
         {
-            if (path == @"c:\touch\mynonexisting.txt")
+            if (path == mynonexisting_txt)
             {
                 return null;
             }
 
-            if (path == @"c:\touch-nonexisting\file.txt")
+            if (path == nonexisting_txt)
             {
                 throw new DirectoryNotFoundException();
             }
@@ -94,18 +100,18 @@ namespace Microsoft.Build.UnitTests
         private static FileAttributes GetAttributes(string path)
         {
             FileAttributes a = new FileAttributes();
-            if (path == @"c:\touch\myexisting.txt")
+            if (path == myexisting_txt)
             {
                 return a;
             }
 
-            if (path == @"c:\touch\mynonexisting.txt")
+            if (path == mynonexisting_txt)
             {
                 // Has attributes because Touch created it.
                 return a;
             }
 
-            if (path == @"c:\touch\myreadonly.txt")
+            if (path == myreadonly_txt)
             {
                 a = System.IO.FileAttributes.ReadOnly;
                 return a;
@@ -121,7 +127,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="path"></param>
         private static void SetAttributes(string path, FileAttributes attributes)
         {
-            if (path == @"c:\touch\myreadonly.txt")
+            if (path == myreadonly_txt)
             {
                 return;
             }
@@ -134,17 +140,17 @@ namespace Microsoft.Build.UnitTests
         /// <param name="path"></param>
         private static void SetLastAccessTime(string path, DateTime timestamp)
         {
-            if (path == @"c:\touch\myexisting.txt")
+            if (path == myexisting_txt)
             {
                 return;
             }
 
-            if (path == @"c:\touch\mynonexisting.txt")
+            if (path == mynonexisting_txt)
             {
                 return;
             }
 
-            if (path == @"c:\touch\myreadonly.txt")
+            if (path == myreadonly_txt)
             {
                 // Read-only so throw an exception
                 throw new IOException();
@@ -159,17 +165,17 @@ namespace Microsoft.Build.UnitTests
         /// <param name="path"></param>
         private static void SetLastWriteTime(string path, DateTime timestamp)
         {
-            if (path == @"c:\touch\myexisting.txt")
+            if (path == myexisting_txt)
             {
                 return;
             }
 
-            if (path == @"c:\touch\mynonexisting.txt")
+            if (path == mynonexisting_txt)
             {
                 return;
             }
 
-            if (path == @"c:\touch\myreadonly.txt")
+            if (path == myreadonly_txt)
             {
                 return;
             }
@@ -178,7 +184,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Fail("Unexpected set last write time: " + path);
         }
 
-        [TestMethod]
+        [Test]
         public void TouchExisting()
         {
             Touch t = new Touch();
@@ -187,7 +193,7 @@ namespace Microsoft.Build.UnitTests
 
             t.Files = new ITaskItem[]
             {
-                new TaskItem(@"c:\touch\myexisting.txt")
+                new TaskItem(myexisting_txt)
             };
 
             bool success = Execute(t);
@@ -200,12 +206,12 @@ namespace Microsoft.Build.UnitTests
             (
                 engine.Log.Contains
                 (
-                    String.Format(AssemblyResources.GetString("Touch.Touching"), "c:\\touch\\myexisting.txt")
+                    String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt)
                 )
             );
         }
 
-        [TestMethod]
+        [Test]
         public void TouchNonExisting()
         {
             Touch t = new Touch();
@@ -214,7 +220,7 @@ namespace Microsoft.Build.UnitTests
 
             t.Files = new ITaskItem[]
             {
-                new TaskItem(@"c:\touch\mynonexisting.txt")
+                new TaskItem(mynonexisting_txt)
             };
 
             bool success = Execute(t);
@@ -226,12 +232,12 @@ namespace Microsoft.Build.UnitTests
             (
                 engine.Log.Contains
                 (
-                    String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), "c:\\touch\\mynonexisting.txt")
+                    String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt)
                 )
             );
         }
 
-        [TestMethod]
+        [Test]
         public void TouchNonExistingAlwaysCreate()
         {
             Touch t = new Touch();
@@ -241,7 +247,7 @@ namespace Microsoft.Build.UnitTests
 
             t.Files = new ITaskItem[]
             {
-                new TaskItem(@"c:\touch\mynonexisting.txt")
+                new TaskItem(mynonexisting_txt)
             };
 
             bool success = Execute(t);
@@ -253,12 +259,12 @@ namespace Microsoft.Build.UnitTests
             (
                 engine.Log.Contains
                 (
-                    String.Format(AssemblyResources.GetString("Touch.CreatingFile"), "c:\\touch\\mynonexisting.txt", "AlwaysCreate")
+                    String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate")
                 )
             );
         }
 
-        [TestMethod]
+        [Test]
         public void TouchNonExistingAlwaysCreateAndBadlyFormedTimestamp()
         {
             Touch t = new Touch();
@@ -270,7 +276,7 @@ namespace Microsoft.Build.UnitTests
 
             t.Files = new ITaskItem[]
             {
-                new TaskItem(@"c:\touch\mynonexisting.txt")
+                new TaskItem(mynonexisting_txt)
             };
 
             bool success = Execute(t);
@@ -281,7 +287,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(engine.Log.Contains("MSB3376"));
         }
 
-        [TestMethod]
+        [Test]
         public void TouchReadonly()
         {
             Touch t = new Touch();
@@ -291,7 +297,7 @@ namespace Microsoft.Build.UnitTests
 
             t.Files = new ITaskItem[]
             {
-                new TaskItem(@"c:\touch\myreadonly.txt")
+                new TaskItem(myreadonly_txt)
             };
 
             bool success = Execute(t);
@@ -300,10 +306,10 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(!success);
 
             Assert.IsTrue(engine.Log.Contains("MSB3374"));
-            Assert.IsTrue(engine.Log.Contains(@"c:\touch\myreadonly.txt"));
+            Assert.IsTrue(engine.Log.Contains(myreadonly_txt));
         }
 
-        [TestMethod]
+        [Test]
         public void TouchReadonlyForce()
         {
             Touch t = new Touch();
@@ -314,13 +320,13 @@ namespace Microsoft.Build.UnitTests
 
             t.Files = new ITaskItem[]
             {
-                new TaskItem(@"c:\touch\myreadonly.txt")
+                new TaskItem(myreadonly_txt)
             };
 
             bool success = Execute(t);
         }
 
-        [TestMethod]
+        [Test]
         public void TouchNonExistingDirectoryDoesntExist()
         {
             Touch t = new Touch();
@@ -330,7 +336,7 @@ namespace Microsoft.Build.UnitTests
 
             t.Files = new ITaskItem[]
             {
-                new TaskItem(@"c:\touch-nonexisting\file.txt")
+                new TaskItem(nonexisting_txt)
             };
 
             bool success = Execute(t);
@@ -339,7 +345,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(!success);
 
             Assert.IsTrue(engine.Log.Contains("MSB3371"));
-            Assert.IsTrue(engine.Log.Contains(@"c:\touch-nonexisting\file.txt"));
+            Assert.IsTrue(engine.Log.Contains(nonexisting_txt));
         }
     }
 }

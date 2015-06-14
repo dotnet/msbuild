@@ -11,21 +11,21 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class CommandLineSwitchesTests
     {
-        [ClassInitialize]
-        public static void Setup(TestContext testContext)
+        [TestFixtureSetUp]
+        public static void Setup()
         {
             // Make sure resources are initialized
             MSBuildApp.Initialize();
         }
 
-        [TestMethod]
+        [Test]
         public void BogusSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void HelpSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-        [TestMethod]
+        [Test]
         public void VersionSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-        [TestMethod]
+        [Test]
         public void NoLogoSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-        [TestMethod]
+        [Test]
         public void NoAutoResponseSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-        [TestMethod]
+        [Test]
         public void NoConsoleLoggerSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-        [TestMethod]
+        [Test]
         public void FileLoggerSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-        [TestMethod]
+        [Test]
         public void DistributedFileLoggerSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -245,7 +245,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-        [TestMethod]
+        [Test]
         public void FileLoggerParametersIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -283,8 +283,8 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unquoteParameters);
         }
 
-
-        [TestMethod]
+#if !MONO
+        [Test]
         public void NodeReuseParametersIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -321,8 +321,9 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNotNull(missingParametersErrorMessage);
             Assert.IsTrue(unquoteParameters);
         }
+#endif
 
-        [TestMethod]
+        [Test]
         public void ProjectSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -347,7 +348,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void IgnoreProjectExtensionsSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -392,7 +393,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void TargetSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -437,7 +438,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void PropertySwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -482,7 +483,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void LoggerSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -527,7 +528,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void VerbositySwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -572,7 +573,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void DetailedSummarySwitchIndentificationTests()
         {
             CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
@@ -602,7 +603,8 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-        [TestMethod]
+#if !MONO
+        [Test]
         public void MaxCPUCountSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -639,8 +641,9 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNotNull(missingParametersErrorMessage);
             Assert.IsTrue(unquoteParameters);
         }
+#endif
 
-        [TestMethod]
+        [Test]
         public void ValidateSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -692,7 +695,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void PreprocessSwitchIdentificationTests()
         {
             CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
@@ -716,7 +719,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unquoteParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void SetParameterlessSwitchTests()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -740,7 +743,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(switches[CommandLineSwitches.ParameterlessSwitch.Version]);
         }
 
-        [TestMethod]
+        [Test]
         public void SetParameterizedSwitchTests1()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -772,7 +775,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("minimal", parameters[2]);
         }
 
-        [TestMethod]
+        [Test]
         public void SetParameterizedSwitchTests2()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -815,7 +818,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("B", parameters[1]);
         }
 
-        [TestMethod]
+        [Test]
         public void SetParameterizedSwitchTests3()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -858,7 +861,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("\"p,a;r\"", parameters[3]);
         }
 
-        [TestMethod]
+        [Test]
         public void AppendErrorTests1()
         {
             CommandLineSwitches switchesLeft = new CommandLineSwitches();
@@ -893,7 +896,7 @@ namespace Microsoft.Build.UnitTests
             VerifySwitchError(switchesRight, "/bogus");
         }
 
-        [TestMethod]
+        [Test]
         public void AppendErrorTests2()
         {
             CommandLineSwitches switchesLeft = new CommandLineSwitches();
@@ -917,7 +920,7 @@ namespace Microsoft.Build.UnitTests
             VerifySwitchError(switchesRight, "/nologo:foo");
         }
 
-        [TestMethod]
+        [Test]
         public void AppendParameterlessSwitchesTests()
         {
             CommandLineSwitches switchesLeft = new CommandLineSwitches();
@@ -965,7 +968,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsFalse(switchesLeft.HaveErrors());
         }
 
-        [TestMethod]
+        [Test]
         public void AppendParameterizedSwitchesTests1()
         {
             CommandLineSwitches switchesLeft = new CommandLineSwitches();
@@ -1003,7 +1006,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("build", parameters[0]);
         }
 
-        [TestMethod]
+        [Test]
         public void AppendParameterizedSwitchesTests2()
         {
             CommandLineSwitches switchesLeft = new CommandLineSwitches();
@@ -1032,7 +1035,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("build", parameters[2]);
         }
 
-        [TestMethod]
+        [Test]
         public void AppendParameterizedSwitchesTests3()
         {
             CommandLineSwitches switchesLeft = new CommandLineSwitches();
@@ -1063,7 +1066,7 @@ namespace Microsoft.Build.UnitTests
             VerifySwitchError(switchesLeft, "Rhubarb.proj");
         }
 
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InitializationException))]
         public void InvalidToolsVersionErrors()
         {
@@ -1081,7 +1084,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestHaveAnySwitchesBeenSet()
         {
             // Check if method works with parameterized switch
@@ -1100,7 +1103,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// /nodereuse:false /nodereuse:true should result in "true"
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProcessNodeReuseSwitchTrueLast()
         {
             bool nodeReuse = MSBuildApp.ProcessNodeReuseSwitch(new string[] { "false", "true" });
@@ -1111,7 +1114,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// /nodereuse:true /nodereuse:false should result in "false"
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ProcessNodeReuseSwitchFalseLast()
         {
             bool nodeReuse = MSBuildApp.ProcessNodeReuseSwitch(new string[] { "true", "false" });
@@ -1124,7 +1127,7 @@ namespace Microsoft.Build.UnitTests
         ///     msbuild /clp:v=quiet /clp:v=diag /m:2
         /// gave console logger in quiet verbosity; expected diagnostic
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ExtractAnyLoggerParameterPickLast()
         {
             string result = MSBuildApp.ExtractAnyLoggerParameter("v=diag;v=q", new string[] { "v", "verbosity" });

@@ -2,46 +2,53 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
+
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-using System.Globalization;
 using Microsoft.Runtime.Hosting;
-using Microsoft.Build.Shared;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class AxTlbBaseTask_Tests
     {
         /// <summary>
         /// Tests the /delaysign switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DelaySign()
         {
             AxTlbBaseTask t = new ResolveComReference.AxImp();
 
             Assert.IsFalse(t.DelaySign, "DelaySign should be false by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/delaysign", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/delaysign"),
+                false /* no response file */);
 
             t.DelaySign = true;
             Assert.IsTrue(t.DelaySign, "DelaySign should be true");
-            CommandLine.ValidateHasParameter(t, @"/delaysign", false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/delaysign"),
+                false /* no response file */);
         }
 
         /// <summary>
         /// Tests the /keycontainer: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyContainer()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Key container is not supported, except under Windows");
+            }
+
             var t = new ResolveComReference.TlbImp();
             t.TypeLibName = "FakeTlb.tlb";
             string badParameterValue = "badKeyContainer";
@@ -52,7 +59,10 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 t.ToolPath = Path.GetTempPath();
 
                 Assert.IsNull(t.KeyContainer, "KeyContainer should be null by default");
-                CommandLine.ValidateNoParameterStartsWith(t, @"/keycontainer:", false /* no response file */);
+                CommandLine.ValidateNoParameterStartsWith(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch(@"/keycontainer:"),
+                    false /* no response file */);
 
                 t.KeyContainer = badParameterValue;
                 Assert.AreEqual(badParameterValue, t.KeyContainer, "New KeyContainer value should be set");
@@ -95,24 +105,30 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keycontainer: switch with a space in the name
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyContainerWithSpaces()
         {
             AxTlbBaseTask t = new ResolveComReference.AxImp();
             string testParameterValue = @"my Key Container";
 
             Assert.IsNull(t.KeyContainer, "KeyContainer should be null by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/keycontainer:", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/keycontainer:"),
+                false /* no response file */);
 
             t.KeyContainer = testParameterValue;
             Assert.AreEqual(testParameterValue, t.KeyContainer, "New KeyContainer value should be set");
-            CommandLine.ValidateHasParameter(t, @"/keycontainer:" + testParameterValue, false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/keycontainer:") + testParameterValue,
+                false /* no response file */);
         }
 
         /// <summary>
         /// Tests the /keyfile: switch
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyFile()
         {
             var t = new ResolveComReference.AxImp();
@@ -126,16 +142,25 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 t.ToolPath = Path.GetTempPath();
 
                 Assert.IsNull(t.KeyFile, "KeyFile should be null by default");
-                CommandLine.ValidateNoParameterStartsWith(t, @"/keyfile:", false /* no response file */);
+                CommandLine.ValidateNoParameterStartsWith(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:"),
+                    false /* no response file */);
 
                 t.KeyFile = badParameterValue;
                 Assert.AreEqual(badParameterValue, t.KeyFile, "New KeyFile value should be set");
-                CommandLine.ValidateHasParameter(t, @"/keyfile:" + badParameterValue, false /* no response file */);
+                CommandLine.ValidateHasParameter(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:") + badParameterValue,
+                    false /* no response file */);
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.InvalidKeyFileSpecified", t.KeyFile);
 
                 t.KeyFile = goodParameterValue;
                 Assert.AreEqual(goodParameterValue, t.KeyFile, "New KeyFile value should be set");
-                CommandLine.ValidateHasParameter(t, @"/keyfile:" + goodParameterValue, false /* no response file */);
+                CommandLine.ValidateHasParameter(
+                    t,
+                    CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:") + goodParameterValue,
+                    false /* no response file */);
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile", t.KeyFile);
             }
             finally
@@ -151,24 +176,30 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keyfile: switch with a space in the filename
         /// </summary>
-        [TestMethod]
+        [Test]
         public void KeyFileWithSpaces()
         {
             AxTlbBaseTask t = new ResolveComReference.TlbImp();
             string testParameterValue = @"C:\Program Files\myKeyFile.key";
 
             Assert.IsNull(t.KeyFile, "KeyFile should be null by default");
-            CommandLine.ValidateNoParameterStartsWith(t, @"/keyfile:", false /* no response file */);
+            CommandLine.ValidateNoParameterStartsWith(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:"),
+                false /* no response file */);
 
             t.KeyFile = testParameterValue;
             Assert.AreEqual(testParameterValue, t.KeyFile, "New KeyFile value should be set");
-            CommandLine.ValidateHasParameter(t, @"/keyfile:" + testParameterValue, false /* no response file */);
+            CommandLine.ValidateHasParameter(
+                t,
+                CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:") + testParameterValue,
+                false /* no response file */);
         }
 
         /// <summary>
         /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SdkToolsPath()
         {
             var t = new ResolveComReference.TlbImp();
@@ -202,7 +233,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the ToolPath property:  Should log an error if it's null or a bad path.  
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ToolPath()
         {
             var t = new ResolveComReference.AxImp();
@@ -237,9 +268,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests that strong name sign-related parameters are validated properly, causing the task
         /// to fail if they are incorrectly set up.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TaskFailsWhenImproperlySigned()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Ignore("Key container is not supported, except under Windows");
+            }
+
             var t = new ResolveComReference.TlbImp();
             t.TypeLibName = "Blah.tlb";
             string tempKeyContainer = null;

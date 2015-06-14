@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 // This CallTarget intrinsic task replaces the one on Microsoft.Build.Tasks, which is now deprecated.
 

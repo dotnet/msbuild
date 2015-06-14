@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
@@ -16,13 +16,13 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Test the central forwarding logger by initializing a new one and sending events through it.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class CentralForwardingLogger_Tests
     {
         /// <summary>
         /// Tests the basic getting and setting of the logger parameters
         /// </summary>
-        [TestMethod]
+        [Test]
         public void GetandSetLoggerParameters()
         {
             CentralForwardingLogger centralLogger = new CentralForwardingLogger();
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify the correct exception is thrown when the logger is initialized with a null 
         /// event source.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void InitializeWithNullEventSourceILogger()
         {
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify the correct exception is thrown when the logger is initialized with a null 
         /// event source.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void InitializeWithNullEventSourceINodeLogger()
         {
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify the shutdown method will null out the event redirector
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestShutDown()
         {
             CentralForwardingLogger centralLogger = new CentralForwardingLogger();
@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify that the forwarding logger correctly forwards events when passed to it.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ForwardEvents()
         {
             BuildStartedEventArgs buildStarted = new BuildStartedEventArgs("Message", "Help");
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// event redirector is registered on the logger. This could happen
         /// if no central logger is registered with the system.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RaiseEventWithNoBuildEventRedirector()
         {
             BuildMessageEventArgs normalMessage = new BuildMessageEventArgs("Message2", "help", "sender", MessageImportance.Normal);

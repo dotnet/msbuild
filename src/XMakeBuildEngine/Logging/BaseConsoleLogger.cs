@@ -342,19 +342,20 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void IsRunningWithCharacterFileType()
         {
-            // Get the std out handle
-            IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+            runningWithCharacterFileType = false;
 
-            if (stdHandle != Microsoft.Build.BackEnd.NativeMethods.InvalidHandle)
+            if (NativeMethodsShared.IsWindows)
             {
-                uint fileType = NativeMethodsShared.GetFileType(stdHandle);
+                // Get the std out handle
+                IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
 
-                // The std out is a char type(LPT or Console)
-                runningWithCharacterFileType = (fileType == NativeMethodsShared.FILE_TYPE_CHAR);
-            }
-            else
-            {
-                runningWithCharacterFileType = false;
+                if (stdHandle != Microsoft.Build.BackEnd.NativeMethods.InvalidHandle)
+                {
+                    uint fileType = NativeMethodsShared.GetFileType(stdHandle);
+
+                    // The std out is a char type(LPT or Console)
+                    runningWithCharacterFileType = (fileType == NativeMethodsShared.FILE_TYPE_CHAR);
+                }
             }
         }
 

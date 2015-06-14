@@ -106,25 +106,22 @@ namespace Microsoft.Build.Shared
 
             if (Environment.GetEnvironmentVariable("MSBUILDLAUNCHDEBUGGER") != null)
             {
+#if !MONO
                 Debug.Fail(message, innerMessage);
                 Debugger.Launch();
+#endif
                 return;
             }
 
-#if DEBUG   
-            if (Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null)
+#if DEBUG
+            if (!FileUtilities.RunningTests && Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
+                && Environment.GetEnvironmentVariable("_NTROOT") == null)
             {
-                string processName = Process.GetCurrentProcess().ProcessName.ToUpperInvariant();
-
-                if (!FileUtilities.RunningTests)
-                {
-                    if (Environment.GetEnvironmentVariable("_NTROOT") == null)
-                    {
-                        Debug.Fail(message, innerMessage);
-                        Debugger.Launch();
-                        return;
-                    }
-                }
+#if !MONO
+                Debug.Fail(message, innerMessage);
+                Debugger.Launch();
+#endif
+                return;
             }
 #endif
         }

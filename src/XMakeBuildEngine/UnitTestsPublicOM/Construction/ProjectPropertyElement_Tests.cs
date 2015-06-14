@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ProjectPropertyElement_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -10,8 +12,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -19,13 +20,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectPropertyElement class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ProjectPropertyElement_Tests
     {
         /// <summary>
         /// Read simple property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadProperty()
         {
             ProjectPropertyElement property = GetPropertyXml();
@@ -38,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with children - they are merely part of its value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ReadPropertyWithChildren()
         {
             string content = @"
@@ -60,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with invalid name (but legal xml)
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidName()
         {
@@ -78,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with invalid reserved name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidReservedName()
         {
@@ -96,7 +97,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with invalid built in name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidBuiltInName()
         {
@@ -114,7 +115,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with invalid attribute
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidAttribute()
         {
@@ -132,7 +133,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with child element
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadInvalidChildElement()
         {
@@ -152,7 +153,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set property value
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetValue()
         {
             ProjectPropertyElement property = GetPropertyXml();
@@ -167,7 +168,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Set property value to the same value it was before.
         /// This should not dirty the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetSameValue()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -182,7 +183,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Rename
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetName()
         {
             ProjectPropertyElement property = GetPropertyXml();
@@ -195,7 +196,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Rename to same value should not mark dirty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetNameSame()
         {
             ProjectPropertyElement property = GetPropertyXml();
@@ -209,7 +210,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Rename to illegal name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void SetNameIllegal()
         {
@@ -221,7 +222,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set property value to empty
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetEmptyValue()
         {
             ProjectPropertyElement property = GetPropertyXml();
@@ -235,7 +236,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set property value to null
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void SetInvalidNullValue()
         {
@@ -247,7 +248,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();

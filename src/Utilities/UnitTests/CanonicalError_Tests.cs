@@ -4,30 +4,30 @@
 using System;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Utilities;
 using CanonicalError = Microsoft.Build.Shared.CanonicalError;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class CanonicalErrorTest
     {
-        [TestMethod]
+        [Test]
         public void EmptyOrigin()
         {
             ValidateToolError(@"error CS0006: Metadata file 'C:\WINDOWS\Microsoft.NET\Framework\v1.2.21213\System.dll' could not be found", "", CanonicalError.Parts.Category.Error, "CS0006", @"Metadata file 'C:\WINDOWS\Microsoft.NET\Framework\v1.2.21213\System.dll' could not be found");
         }
 
-        [TestMethod]
+        [Test]
         public void Alink()
         {
             // From AL.EXE
             ValidateToolError(@"ALINK: error AL1017: No target filename was specified", "ALINK", CanonicalError.Parts.Category.Error, "AL1017", @"No target filename was specified");
         }
 
-        [TestMethod]
+        [Test]
         public void CscWithFilename()
         {
             // From CSC.EXE
@@ -35,28 +35,28 @@ namespace Microsoft.Build.UnitTests
             ValidateFileNameLineColumnError(@"Main.cs(17,20): warning CS0168: The variable 'foo' is declared but never used", @"Main.cs", 17, 20, CanonicalError.Parts.Category.Warning, "CS0168", "The variable 'foo' is declared but never used");
         }
 
-        [TestMethod]
+        [Test]
         public void VbcWithFilename()
         {
             // From VBC.EXE
             ValidateFileNameLineError(@"C:\WINDOWS\Microsoft.NET\Framework\v1.2.x86fre\foo.resx(2) : error BC30188: Declaration expected.", @"C:\WINDOWS\Microsoft.NET\Framework\v1.2.x86fre\foo.resx", 2, CanonicalError.Parts.Category.Error, "BC30188", "Declaration expected.");
         }
 
-        [TestMethod]
+        [Test]
         public void ClWithFilename()
         {
             // From CL.EXE
             ValidateFileNameLineError(@"foo.cpp(1) : error C2143: syntax error : missing ';' before '++'", @"foo.cpp", 1, CanonicalError.Parts.Category.Error, "C2143", "syntax error : missing ';' before '++'");
         }
 
-        [TestMethod]
+        [Test]
         public void JscWithFilename()
         {
             // From JSC.EXE
             ValidateFileNameLineColumnError(@"foo.resx(2,1) : error JS1135: Variable 'blech' has not been declared", @"foo.resx", 2, 1, CanonicalError.Parts.Category.Error, "JS1135", "Variable 'blech' has not been declared");
         }
 
-        [TestMethod]
+        [Test]
         public void LinkWithFilename()
         {
             // From Link.exe 
@@ -65,14 +65,14 @@ namespace Microsoft.Build.UnitTests
             ValidateFileNameError(@"foo.cpp : fatal error LNK1106: invalid file or disk full: cannot seek to 0x5361", @"foo.cpp", CanonicalError.Parts.Category.Error, "LNK1106", "invalid file or disk full: cannot seek to 0x5361");
         }
 
-        [TestMethod]
+        [Test]
         public void BscMake()
         {
             // From BSCMAKE.EXE
             ValidateToolError(@"BSCMAKE: error BK1510 : corrupt .SBR file 'foo.cpp'", "BSCMAKE", CanonicalError.Parts.Category.Error, "BK1510", @"corrupt .SBR file 'foo.cpp'");
         }
 
-        [TestMethod]
+        [Test]
         public void CvtRes()
         {
             // From CVTRES.EXE
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
             ValidateToolError(@"CVTRES : fatal error CVT1103: cannot read file", "CVTRES", CanonicalError.Parts.Category.Error, "CVT1103", @"cannot read file");
         }
 
-        [TestMethod]
+        [Test]
         public void DumpBinWithFilename()
         {
             // From DUMPBIN.EXE (notice that an 'LNK' error is returned).
@@ -88,14 +88,14 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [TestMethod]
+        [Test]
         public void LibWithFilename()
         {
             // From LIB.EXE
             ValidateFileNameError(@"foo.cpp : fatal error LNK1106: invalid file or disk full: cannot seek to 0x5361", @"foo.cpp", CanonicalError.Parts.Category.Error, "LNK1106", "invalid file or disk full: cannot seek to 0x5361");
         }
 
-        [TestMethod]
+        [Test]
         public void MlWithFilename()
         {
             // From ML.EXE
@@ -103,14 +103,14 @@ namespace Microsoft.Build.UnitTests
             ValidateFileNameLineError(@"bar.h(2) : error A2088: END directive required at end of file", @"bar.h", 2, CanonicalError.Parts.Category.Error, "A2088", "END directive required at end of file");
         }
 
-        [TestMethod]
+        [Test]
         public void VcDeployWithFilename()
         {
             // From VCDEPLOY.EXE
             ValidateToolError(@"vcdeploy : error VCD0041: IIS must be installed on this machine in order for this program to function correctly.", "vcdeploy", CanonicalError.Parts.Category.Error, "VCD0041", @"IIS must be installed on this machine in order for this program to function correctly.");
         }
 
-        [TestMethod]
+        [Test]
         public void VCBuildError()
         {
             // From VCBUILD.EXE
@@ -118,44 +118,44 @@ namespace Microsoft.Build.UnitTests
             ValidateFileNameLineError(@"1234>c:\temp\testprefast\testprefast\testprefast.cpp(12) : error C4996: 'sprintf' was declared deprecated", @"c:\temp\testprefast\testprefast\testprefast.cpp", 12, CanonicalError.Parts.Category.Error, "C4996", "'sprintf' was declared deprecated");
         }
 
-        [TestMethod]
+        [Test]
         public void FileNameLine()
         {
             ValidateFileNameMultiLineColumnError("foo.cpp(1):error TST0000:Text", "foo.cpp", 1, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.Category.Error, "TST0000", "Text");
         }
 
-        [TestMethod]
+        [Test]
         public void FileNameLineLine()
         {
             ValidateFileNameMultiLineColumnError("foo.cpp(1-5):error TST0000:Text", "foo.cpp", 1, CanonicalError.Parts.numberNotSpecified, 5, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.Category.Error, "TST0000", "Text");
         }
 
-        [TestMethod]
+        [Test]
         public void FileNameLineCol()
         {
             ValidateFileNameMultiLineColumnError("foo.cpp(1,15):error TST0000:Text", "foo.cpp", 1, 15, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.Category.Error, "TST0000", "Text");
         }
 
-        [TestMethod]
+        [Test]
         public void FileNameLineColCol()
         {
             ValidateFileNameMultiLineColumnError("foo.cpp(1,15-25):error TST0000:Text", "foo.cpp", 1, 15, CanonicalError.Parts.numberNotSpecified, 25, CanonicalError.Parts.Category.Error, "TST0000", "Text");
         }
 
-        [TestMethod]
+        [Test]
         public void FileNameLineColLineCol()
         {
             ValidateFileNameMultiLineColumnError("foo.cpp(1,15,2,25):error TST0000:Text", "foo.cpp", 1, 15, 2, 25, CanonicalError.Parts.Category.Error, "TST0000", "Text");
         }
 
-        [TestMethod]
+        [Test]
         public void PathologicalFileNameWithParens()
         {
             // Pathological case, there is actually a file with () at the end (Doesn't work, treats the (1) as a line number anyway).
             ValidateFileNameMultiLineColumnError("PathologicalFile.txt(1):error TST0000:Text", "PathologicalFile.txt", 1, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.numberNotSpecified, CanonicalError.Parts.Category.Error, "TST0000", "Text");
         }
 
-        [TestMethod]
+        [Test]
         public void OverflowTrimmingShouldNotDropChar()
         {
             // A devdiv build produced a huge message like this!
@@ -167,14 +167,14 @@ namespace Microsoft.Build.UnitTests
             Helpers.VerifyAssertLineByLine(message, parts.text);
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateErrorMessageWithFileName()
         {
             ValidateFileNameError("error CS2011: Error opening response file 'e:\foo\test.rsp' -- 'The device is not ready. '",
                 "", CanonicalError.Parts.Category.Error, "CS2011", "Error opening response file 'e:\foo\test.rsp' -- 'The device is not ready. '");
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateErrorMessageWithFileName2()
         {
             ValidateFileNameError(@"BUILDMSG: error: Path 'c:\binaries.x86chk\bin\i386\System.AddIn.Contract.dll' is not under client's root 'c:\vstamq'.",
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
                 "BUILDMSG", CanonicalError.Parts.Category.Error, "", @"Path 'c:\binaries.x86chk\bin\i386\System.AddIn.Contract.dll' is not under client's root 'c:\vstamq'.");
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateErrorMessageWithFileName3()
         {
             ValidateNormalMessage(@"BUILDMSG: errorgarbage: Path 'c:\binaries.x86chk\bin\i386\System.AddIn.Contract.dll' is not under client's root 'c:\vstamq'.");
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
             ValidateNormalMessage(@"BUILDMSG: errorgarbage : Path 'c:\binaries.x86chk\bin\i386\System.AddIn.Contract.dll' is not under client's root 'c:\vstamq'.");
         }
 
-        [TestMethod]
+        [Test]
         public void ValidateErrorMessageVariableNotUsed()
         {
             //      (line)

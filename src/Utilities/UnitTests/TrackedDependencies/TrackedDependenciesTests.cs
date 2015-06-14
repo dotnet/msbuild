@@ -3,25 +3,27 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Xml;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
-using System.Collections;
 using System.Resources;
+using System.Threading;
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
+using NUnit.Framework;
+
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests.TrackedDependencies
 {
-    [TestClass]
+    [TestFixture]
     sealed public class TrackedDependenciesTests
     {
-        private const int sleepTimeMilliseconds = 100;
+        private readonly int sleepTimeMilliseconds = NativeMethodsShared.IsWindows ? 100 : 1000;
 
-        [TestInitialize]
+        [SetUp]
         public void SetupTestEnvironment()
         {
             string tempPath = Path.GetTempPath();
@@ -77,7 +79,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         /// thing as FileTracker.FormatRootingMarker, except with some extra initial normalization to get rid of
         /// pesky PIDs and TIDs in the tlog names. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FormatNormalizedRootingMarkerTests()
         {
             Dictionary<ITaskItem[], string> tests = new Dictionary<ITaskItem[], string>();
@@ -286,7 +288,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(exceptionCaught, "Should have failed to format a rooting marker from a malformed UNC path");
         }
 
-        [TestMethod]
+        [Test]
         public void CreateTrackedDependencies()
         {
             Console.WriteLine("Test: CreateTrackedDependencies");
@@ -305,32 +307,32 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsNotNull(d);
         }
 
-        [TestMethod]
+        [Test]
         public void SingleCanonicalCL()
         {
             Console.WriteLine("Test: SingleCanonicalCL");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\oNe.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -338,28 +340,28 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void NonExistentTlog()
         {
             Console.WriteLine("Test: NonExistentTlog");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
             // Just to be sure, delete the test tlog.
-            File.Delete("TestFiles\\one.tlog");
+            File.Delete(Path.Combine("TestFiles", "one.tlog"));
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -367,27 +369,27 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void EmptyTLog()
         {
             Console.WriteLine("Test: EmptyTLog");
 
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tlog", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tlog"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -395,10 +397,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidReadTLogName()
         {
             Console.WriteLine("Test: InvalidReadTLogName");
@@ -428,26 +430,26 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void ReadTLogWithInitialEmptyLine()
         {
             Console.WriteLine("Test: ReadTLogWithInitialEmptyLine");
 
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] { "", "^FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] { "", "^FOO" });
             MockTask task = DependencyTestHelper.MockTask;
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -456,26 +458,26 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void ReadTLogWithEmptyLineImmediatelyAfterRoot()
         {
             Console.WriteLine("Test: ReadTLogWithEmptyLineImmediatelyAfterRoot");
 
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] { "^FOO", "", "FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] { "^FOO", "", "FOO" });
             MockTask task = DependencyTestHelper.MockTask;
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -484,26 +486,26 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void ReadTLogWithEmptyLineBetweenRoots()
         {
             Console.WriteLine("Test: ReadTLogWithEmptyLineImmediatelyAfterRoot");
 
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] { "^FOO", "FOO", "", "^BAR", "BAR" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] { "^FOO", "FOO", "", "^BAR", "BAR" });
             MockTask task = DependencyTestHelper.MockTask;
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -512,26 +514,26 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void ReadTLogWithEmptyRoot()
         {
             Console.WriteLine("Test: ReadTLogWithEmptyRoot");
 
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] { "^", "FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] { "^", "FOO" });
             MockTask task = DependencyTestHelper.MockTask;
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -540,7 +542,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void ReadTLogWithDuplicateInRoot()
         {
             Console.WriteLine("Test: ReadTLogWithDuplicateInRoot");
@@ -569,7 +571,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreNotEqual(0, d.DependencyTable.Count, "Dependency Table should not be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidWriteTLogName()
         {
             Console.WriteLine("Test: InvalidWriteTLogName");
@@ -586,111 +588,111 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void WriteTLogWithInitialEmptyLine()
         {
             Console.WriteLine("Test: WriteTLogWithInitialEmptyLine");
 
             // Prepare files
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] { "", "^FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] { "", "^FOO" });
             MockTask task = DependencyTestHelper.MockTask;
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog"))
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
             Assert.AreEqual(1, ((task as ITask).BuildEngine as MockEngine).Warnings, "Should have a warning.");
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void WriteTLogWithEmptyLineImmediatelyAfterRoot()
         {
             Console.WriteLine("Test: ReadTLogWithEmptyLineImmediatelyAfterRoot");
 
             // Prepare files
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] { "^FOO", "", "FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] { "^FOO", "", "FOO" });
             MockTask task = DependencyTestHelper.MockTask;
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog"))
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
             Assert.AreEqual(1, ((task as ITask).BuildEngine as MockEngine).Warnings, "Should have a warning.");
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void WriteTLogWithEmptyLineBetweenRoots()
         {
             Console.WriteLine("Test: WriteTLogWithEmptyLineImmediatelyAfterRoot");
 
             // Prepare files
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] { "^FOO", "FOO", "", "^BAR", "BAR" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] { "^FOO", "FOO", "", "^BAR", "BAR" });
             MockTask task = DependencyTestHelper.MockTask;
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog"))
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
             Assert.AreEqual(1, ((task as ITask).BuildEngine as MockEngine).Warnings, "Should have a warning.");
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void WriteTLogWithEmptyRoot()
         {
             Console.WriteLine("Test: WriteTLogWithEmptyRoot");
 
             // Prepare files
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] { "^", "FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] { "^", "FOO" });
             MockTask task = DependencyTestHelper.MockTask;
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog"))
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
             Assert.AreEqual(1, ((task as ITask).BuildEngine as MockEngine).Warnings, "Should have a warning.");
             Assert.AreEqual(0, d.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void PrimarySourceNotInTlog()
         {
             Console.WriteLine("Test: PrimarySourceNotInTlog");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
             // Primary Source; not appearing in this Tlog..
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\foo.cpp"),
-                Path.GetFullPath("TestFiles\\foo.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "foo.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "foo.h")),
             });
 
             // Touch the obj - normally this would mean uptodate, but since there
             // is no tlog entry for the primary source, we want a rebuild of it.
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -698,39 +700,39 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCL()
         {
             Console.WriteLine("Test: MultipleCanonicalCL");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -738,62 +740,62 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLCompactMissingOnSuccess()
         {
             Console.WriteLine("Test: MultipleCanonicalCLCompactMissingOnSuccess");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                Path.GetFullPath("TestFiles\\sometempfile.obj")
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sometempfile.obj"))
             });
 
-            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
-            compactOutputs.RemoveDependenciesFromEntryIfMissing(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")));
+            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
+            compactOutputs.RemoveDependenciesFromEntryIfMissing(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
             compactOutputs.SaveTlog();
 
             // Compact the read tlog
             CanonicalTrackedInputFiles compactInputs = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
                     compactOutputs,
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
 
-            compactInputs.RemoveDependenciesFromEntryIfMissing(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")));
+            compactInputs.RemoveDependenciesFromEntryIfMissing(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
             compactInputs.SaveTlog();
 
             CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
                     outputs,
                     false, /* no minimal rebuild optimization */
@@ -805,346 +807,346 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(outofdate.Length == 0);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLCompactMissingOnSuccessMultiEntry()
         {
             Console.WriteLine("Test: MultipleCanonicalCLCompactMissingOnSuccessMultiEntry");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two1.h"),
-                Path.GetFullPath("TestFiles\\two2.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                Path.GetFullPath("TestFiles\\sometempfile.obj"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\sometempfile2.obj")
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sometempfile.obj")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sometempfile2.obj"))
             });
 
-            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
-            compactOutputs.RemoveDependenciesFromEntryIfMissing(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")));
+            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
+            compactOutputs.RemoveDependenciesFromEntryIfMissing(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
             compactOutputs.SaveTlog();
             // Compact the read tlog
             CanonicalTrackedInputFiles compactInputs = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
                     compactOutputs,
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
 
-            compactInputs.RemoveDependenciesFromEntryIfMissing(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")));
+            compactInputs.RemoveDependenciesFromEntryIfMissing(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
             compactInputs.SaveTlog();
 
             CanonicalTrackedOutputFiles writtenOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
             CanonicalTrackedInputFiles writtenInputs = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
                     writtenOutputs,
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
 
-            Assert.AreEqual(1, writtenOutputs.DependencyTable[Path.GetFullPath("TestFiles\\one.cpp")].Count);
-            Assert.AreEqual(4, writtenInputs.DependencyTable[Path.GetFullPath("TestFiles\\one.cpp")].Count);
+            Assert.AreEqual(1, writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].Count);
+            Assert.AreEqual(4, writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].Count);
             // Everything to do with two.cpp should be left intact
-            Assert.AreEqual(2, writtenOutputs.DependencyTable[Path.GetFullPath("TestFiles\\two.cpp")].Count);
-            Assert.AreEqual(3, writtenInputs.DependencyTable[Path.GetFullPath("TestFiles\\two.cpp")].Count);
+            Assert.AreEqual(2, writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Count);
+            Assert.AreEqual(3, writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Count);
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveDependencyFromEntry()
         {
             Console.WriteLine("Test: RemoveDependencyFromEntry");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tlh", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tli", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tlh"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tli"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                Path.GetFullPath("TestFiles\\one3.obj"),
-                Path.GetFullPath("TestFiles\\one3.tlh"),
-                Path.GetFullPath("TestFiles\\one3.tli"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tlh")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tli")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                Path.GetFullPath("TestFiles\\one3.obj"),
-                Path.GetFullPath("TestFiles\\one3.tlh"),
-                Path.GetFullPath("TestFiles\\one3.tli"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tlh")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tli")),
             });
 
-            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
-            compactOutputs.RemoveDependencyFromEntry(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\one3.obj")));
+            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
+            compactOutputs.RemoveDependencyFromEntry(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
             compactOutputs.SaveTlog();
 
             CanonicalTrackedOutputFiles writtenOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.IsFalse(writtenOutputs.DependencyTable[Path.GetFullPath("TestFiles\\one.cpp")].ContainsKey(Path.GetFullPath("TestFiles\\one3.obj")));
+            Assert.IsFalse(writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
 
             CanonicalTrackedInputFiles compactInputs = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
                     compactOutputs,
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
 
-            compactInputs.RemoveDependencyFromEntry(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\one3.obj")));
+            compactInputs.RemoveDependencyFromEntry(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
             compactInputs.SaveTlog();
 
             CanonicalTrackedInputFiles writtenInputs = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
                     writtenOutputs,
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
 
-            Assert.IsFalse(writtenInputs.DependencyTable[Path.GetFullPath("TestFiles\\one.cpp")].ContainsKey(Path.GetFullPath("TestFiles\\one3.obj")));
+            Assert.IsFalse(writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveDependencyFromEntries()
         {
             Console.WriteLine("Test: RemoveDependencyFromEntry");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tlh", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tli", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tlh"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tli"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
 
-            string rootingMarker = Path.GetFullPath("TestFiles\\one.cpp") + "|" + Path.GetFullPath("TestFiles\\three.cpp") + "|" + Path.GetFullPath("TestFiles\\two.cpp");
+            string rootingMarker = Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"));
 
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
                 "^" + rootingMarker,
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                Path.GetFullPath("TestFiles\\one3.obj"),
-                Path.GetFullPath("TestFiles\\one3.tlh"),
-                Path.GetFullPath("TestFiles\\one3.tli"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tlh")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tli")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
                 "^" + rootingMarker,
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                Path.GetFullPath("TestFiles\\one3.obj"),
-                Path.GetFullPath("TestFiles\\one3.tlh"),
-                Path.GetFullPath("TestFiles\\one3.tli"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tlh")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tli")),
             });
 
-            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
-            compactOutputs.RemoveDependencyFromEntry(new TaskItem[] { new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\three.cpp")) }, new TaskItem(Path.GetFullPath("TestFiles\\one3.obj")));
+            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
+            compactOutputs.RemoveDependencyFromEntry(new TaskItem[] { new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp"))) }, new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
             compactOutputs.SaveTlog();
 
             CanonicalTrackedOutputFiles writtenOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.IsFalse(writtenOutputs.DependencyTable[rootingMarker].ContainsKey(Path.GetFullPath("TestFiles\\one3.obj")));
+            Assert.IsFalse(writtenOutputs.DependencyTable[rootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
 
             CanonicalTrackedInputFiles compactInputs = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    new TaskItem[] { new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\three.cpp")) },
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    new TaskItem[] { new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp"))) },
                     null,
                     compactOutputs,
                     false, /* no minimal rebuild optimization */
                     true /* shred composite rooting markers */
                 );
 
-            compactInputs.RemoveDependencyFromEntry(new TaskItem[] { new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\three.cpp")) }, new TaskItem(Path.GetFullPath("TestFiles\\one3.obj")));
+            compactInputs.RemoveDependencyFromEntry(new TaskItem[] { new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp"))) }, new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
             compactInputs.SaveTlog();
 
             CanonicalTrackedInputFiles writtenInputs = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    new TaskItem[] { new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")), new TaskItem(Path.GetFullPath("TestFiles\\three.cpp")) },
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    new TaskItem[] { new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))), new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp"))) },
                     null,
                     writtenOutputs,
                     false, /* no minimal rebuild optimization */
                     true /* shred composite rooting markers */
                 );
 
-            Assert.IsFalse(writtenInputs.DependencyTable[rootingMarker].ContainsKey(Path.GetFullPath("TestFiles\\one3.obj")));
+            Assert.IsFalse(writtenInputs.DependencyTable[rootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveRootsWithSharedOutputs()
         {
             Console.WriteLine("Test: RemoveRootsWithSharedOutputs");
 
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tlh", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tli", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tlh"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tli"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
 
-            string rootingMarker1 = Path.GetFullPath("TestFiles\\one.cpp") + "|" + Path.GetFullPath("TestFiles\\three.cpp") + "|" + Path.GetFullPath("TestFiles\\two.cpp");
-            string rootingMarker2 = Path.GetFullPath("TestFiles\\one.cpp") + "|" + Path.GetFullPath("TestFiles\\three.cpp");
-            string rootingMarker3 = Path.GetFullPath("TestFiles\\one.cpp");
+            string rootingMarker1 = Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"));
+            string rootingMarker2 = Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp"));
+            string rootingMarker3 = Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"));
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
                 "^" + rootingMarker1.ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
                 "^" + rootingMarker2.ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one3.obj"),
-                Path.GetFullPath("TestFiles\\one3.tlh"),
-                Path.GetFullPath("TestFiles\\one3.tli"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tlh")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tli")),
                 "^" + rootingMarker3.ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.obj")),
             });
 
-            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker1));
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker2));
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker3));
 
-            outputs.RemoveRootsWithSharedOutputs(new ITaskItem[] { new TaskItem("TestFiles\\one.cpp"), new TaskItem("TestFiles\\three.cpp"), new TaskItem("TestFiles\\two.cpp") });
+            outputs.RemoveRootsWithSharedOutputs(new ITaskItem[] { new TaskItem(Path.Combine("TestFiles", "one.cpp")), new TaskItem(Path.Combine("TestFiles", "three.cpp")), new TaskItem(Path.Combine("TestFiles", "two.cpp")) });
 
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker1));
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker2));
             Assert.IsFalse(outputs.DependencyTable.ContainsKey(rootingMarker3));
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveRootsWithSharedOutputs_CurrentRootNotInTable()
         {
             Console.WriteLine("Test: RemoveRootsWithSharedOutputs");
 
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tlh", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tli", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tlh"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.tli"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
 
-            string rootingMarker1 = Path.GetFullPath("TestFiles\\one.cpp") + "|" + Path.GetFullPath("TestFiles\\three.cpp") + "|" + Path.GetFullPath("TestFiles\\two.cpp");
-            string rootingMarker2 = Path.GetFullPath("TestFiles\\one.cpp") + "|" + Path.GetFullPath("TestFiles\\three.cpp");
-            string rootingMarker3 = Path.GetFullPath("TestFiles\\one.cpp");
+            string rootingMarker1 = Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"));
+            string rootingMarker2 = Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp"));
+            string rootingMarker3 = Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"));
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
                 "^" + rootingMarker1.ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
                 "^" + rootingMarker2.ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one3.obj"),
-                Path.GetFullPath("TestFiles\\one3.tlh"),
-                Path.GetFullPath("TestFiles\\one3.tli"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tlh")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.tli")),
                 "^" + rootingMarker3.ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.obj")),
             });
 
-            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker1));
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker2));
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker3));
 
-            outputs.RemoveRootsWithSharedOutputs(new ITaskItem[] { new TaskItem("TestFiles\\four.cpp"), new TaskItem("TestFiles\\one.cpp"), new TaskItem("TestFiles\\three.cpp"), new TaskItem("TestFiles\\two.cpp") });
+            outputs.RemoveRootsWithSharedOutputs(new ITaskItem[] { new TaskItem(Path.Combine("TestFiles", "four.cpp")), new TaskItem(Path.Combine("TestFiles", "one.cpp")), new TaskItem(Path.Combine("TestFiles", "three.cpp")), new TaskItem(Path.Combine("TestFiles", "two.cpp")) });
 
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker1));
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker2));
             Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker3));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLMissingDependency()
         {
             Console.WriteLine("Test: MultipleCanonicalCLMissingDependency");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Delete one of our dependencies
-            string missing = Path.GetFullPath("TestFiles\\one2.h");
+            string missing = Path.GetFullPath(Path.Combine("TestFiles", "one2.h"));
             File.Delete(missing);
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1154,7 +1156,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(outofdate.Length == 1);
 
             // The dependency has been recorded and retrieved correctly
-            Assert.IsTrue(d.DependencyTable[Path.GetFullPath("TestFiles\\one.cpp")].ContainsKey(missing));
+            Assert.IsTrue(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(missing));
 
             // Save out the compacted read log - our missing dependency will be compacted away
             // The tlog will have to entries compacted, since we're not up to date
@@ -1165,10 +1167,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1179,46 +1181,46 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We have a source outstanding for recompilation, it will not appear in
             // the tracking information as it will be written again
-            Assert.IsFalse(d.DependencyTable.ContainsKey(Path.GetFullPath("TestFiles\\one.cpp")));
+            Assert.IsFalse(d.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLMissingOutputDependencyRemoved()
         {
             Console.WriteLine("Test: MultipleCanonicalCLMissingOutputDependencyRemoved");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
 
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\sometempfile2.obj")
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sometempfile2.obj"))
             });
 
-            string missing = Path.GetFullPath("TestFiles\\sometempfile2.obj");
+            string missing = Path.GetFullPath(Path.Combine("TestFiles", "sometempfile2.obj"));
 
-            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+            CanonicalTrackedOutputFiles compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
             // Save out the compacted read log - our missing dependency will be compacted away
             // Use an anonymous method to encapsulate the contains check for the tlogs
             compactOutputs.SaveTlog(delegate (string fullTrackedPath)
@@ -1228,13 +1230,13 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             });
 
             // Read the Tlogs back in..
-            compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+            compactOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
             // Compact the read tlog
             CanonicalTrackedInputFiles compactInputs = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
-                    new TaskItem[] { new TaskItem("TestFiles\\one.cpp"), new TaskItem("TestFiles\\two.cpp") },
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
+                    new TaskItem[] { new TaskItem(Path.Combine("TestFiles", "one.cpp")), new TaskItem(Path.Combine("TestFiles", "two.cpp")) },
                     null,
                     compactOutputs,
                     false, /* no minimal rebuild optimization */
@@ -1248,36 +1250,36 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         }
 
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLMissingInputDependencyRemoved()
         {
             Console.WriteLine("Test: MultipleCanonicalCLMissingInputDependencyRemoved");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Delete one of our dependencies
-            string missing = Path.GetFullPath("TestFiles\\one2.h");
+            string missing = Path.GetFullPath(Path.Combine("TestFiles", "one2.h"));
             File.Delete(missing);
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1287,7 +1289,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(outofdate.Length == 1);
 
             // The dependency has been recorded and retrieved correctly
-            Assert.IsTrue(d.DependencyTable[Path.GetFullPath("TestFiles\\one.cpp")].ContainsKey(missing));
+            Assert.IsTrue(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(missing));
 
             // Save out the compacted read log - our missing dependency will be compacted away
             // Use an anonymous method to encapsulate the contains check for the tlogs
@@ -1301,10 +1303,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1315,54 +1317,54 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         }
 
 
-        [TestMethod]
+        [Test]
         public void MultiplePrimaryCanonicalCL()
         {
             Console.WriteLine("Test: MultiplePrimaryCanonicalCL");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            DependencyTestHelper.WriteAll("TestFiles\\two1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two1.h"),
-                Path.GetFullPath("TestFiles\\two2.h"),
-                Path.GetFullPath("TestFiles\\two3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     new ITaskItem[] {
-                        new TaskItem("TestFiles\\one.cpp"),
-                        new TaskItem("TestFiles\\two.cpp"),
+                        new TaskItem(Path.Combine("TestFiles", "one.cpp")),
+                        new TaskItem(Path.Combine("TestFiles", "two.cpp")),
                         },
                     null,
                     new ITaskItem[] {
-                        new TaskItem("TestFiles\\one.obj"),
-                        new TaskItem("TestFiles\\two.obj"),
+                        new TaskItem(Path.Combine("TestFiles", "one.obj")),
+                        new TaskItem(Path.Combine("TestFiles", "two.obj")),
                         },
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
@@ -1371,11 +1373,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 2);
-            Assert.IsTrue((outofdate[0].ItemSpec == "TestFiles\\one.cpp" && outofdate[1].ItemSpec == "TestFiles\\two.cpp") ||
-                             (outofdate[1].ItemSpec == "TestFiles\\one.cpp" && outofdate[0].ItemSpec == "TestFiles\\two.cpp"));
+            Assert.IsTrue((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
+                             (outofdate[1].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp")));
         }
 
-        [TestMethod]
+        [Test]
         public void MultiplePrimaryCanonicalCLUnderTemp()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -1387,49 +1389,49 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
                 Console.WriteLine("Test: MultiplePrimaryCanonicalCL");
                 // Prepare files
-                DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-                DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-                DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-                DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-                DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-                DependencyTestHelper.WriteAll("TestFiles\\two1.h", "");
-                DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
-                DependencyTestHelper.WriteAll("TestFiles\\two3.h", "");
-                DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-                DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two1.h"), "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two3.h"), "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
 
                 Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-                File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+                File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                     "#Command some-command",
-                    "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                    Path.GetFullPath("TestFiles\\one1.h"),
-                    Path.GetFullPath("TestFiles\\one2.h"),
-                    Path.GetFullPath("TestFiles\\one3.h"),
-                    "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                    Path.GetFullPath("TestFiles\\two1.h"),
-                    Path.GetFullPath("TestFiles\\two2.h"),
-                    Path.GetFullPath("TestFiles\\two3.h"),
+                    "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                    Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                    Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                    Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                    "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                    Path.GetFullPath(Path.Combine("TestFiles", "two1.h")),
+                    Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
+                    Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
                 });
 
                 // Touch one
                 Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-                DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
                 Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-                DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
+                DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
 
                 CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                     (
                         DependencyTestHelper.MockTask,
-                        DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                        DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                         new ITaskItem[] {
-                            new TaskItem("TestFiles\\one.cpp"),
-                            new TaskItem("TestFiles\\two.cpp"),
+                            new TaskItem(Path.Combine("TestFiles", "one.cpp")),
+                            new TaskItem(Path.Combine("TestFiles", "two.cpp")),
                             },
                         null,
                         new ITaskItem[] {
-                            new TaskItem("TestFiles\\one.obj"),
-                            new TaskItem("TestFiles\\two.obj"),
+                            new TaskItem(Path.Combine("TestFiles", "one.obj")),
+                            new TaskItem(Path.Combine("TestFiles", "two.obj")),
                             },
                         false, /* no minimal rebuild optimization */
                         false /* shred composite rooting markers */
@@ -1438,8 +1440,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
                 Assert.IsTrue(outofdate.Length == 2);
-                Assert.IsTrue((outofdate[0].ItemSpec == "TestFiles\\one.cpp" && outofdate[1].ItemSpec == "TestFiles\\two.cpp") ||
-                                 (outofdate[1].ItemSpec == "TestFiles\\one.cpp" && outofdate[0].ItemSpec == "TestFiles\\two.cpp"));
+                Assert.IsTrue((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
+                                 (outofdate[1].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp")));
             }
             finally
             {
@@ -1447,51 +1449,51 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             }
         }
 
-        [TestMethod]
+        [Test]
         public void MultiplePrimaryCanonicalCLSharedDependency()
         {
             Console.WriteLine("Test: MultiplePrimaryCanonicalCL");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            DependencyTestHelper.WriteAll("TestFiles\\two1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"), // the shared dependency
-                Path.GetFullPath("TestFiles\\one3.h"),
-                Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"), // the shared dependency
-                Path.GetFullPath("TestFiles\\two3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")), // the shared dependency
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")), // the shared dependency
+                Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     new ITaskItem[] {
-                        new TaskItem("TestFiles\\one.cpp"),
-                        new TaskItem("TestFiles\\two.cpp"),
+                        new TaskItem(Path.Combine("TestFiles", "one.cpp")),
+                        new TaskItem(Path.Combine("TestFiles", "two.cpp")),
                         },
                     null,
                     new ITaskItem[] {
-                        new TaskItem("TestFiles\\one.obj"),
-                        new TaskItem("TestFiles\\two.obj"),
+                        new TaskItem(Path.Combine("TestFiles", "one.obj")),
+                        new TaskItem(Path.Combine("TestFiles", "two.obj")),
                         },
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
@@ -1500,42 +1502,42 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 2);
-            Assert.IsTrue((outofdate[0].ItemSpec == "TestFiles\\one.cpp" && outofdate[1].ItemSpec == "TestFiles\\two.cpp") ||
-                             (outofdate[1].ItemSpec == "TestFiles\\one.cpp" && outofdate[0].ItemSpec == "TestFiles\\two.cpp"));
+            Assert.IsTrue((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
+                             (outofdate[1].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp")));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLAcrossCommand1()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossCommand1");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
                 "#Command some-command1",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1543,41 +1545,41 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLAcrossCommand2()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossCommand2");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
                 "#Command some-command1",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1585,45 +1587,45 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLAcrossCommandNonDependency()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossCommandNonDependency");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
                 "#Command some-command1",
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"), // this root marker represents the end of the dependencies for one.cpp
-                Path.GetFullPath("TestFiles\\two1.h"),
-                Path.GetFullPath("TestFiles\\two2.h"),
-                Path.GetFullPath("TestFiles\\two3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")), // this root marker represents the end of the dependencies for one.cpp
+                Path.GetFullPath(Path.Combine("TestFiles", "two1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1633,46 +1635,46 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(outofdate.Length == 0);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLAcrossTlogs1()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossTlogs1");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one1.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one1.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one2.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one2.tlog"), new string[] {
                 "#Command some-command1",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one1.tlog"),
-                                    new TaskItem("TestFiles\\one2.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one1.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "one2.tlog"))
                                 };
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1680,49 +1682,49 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleCanonicalCLAcrossTlogs2()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossTlogs2");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one1.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one1.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one2.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one2.tlog"), new string[] {
                 "#Command some-command1",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one1.tlog"),
-                                    new TaskItem("TestFiles\\one2.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one1.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "one2.tlog"))
                                 };
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1730,35 +1732,35 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void SingleRootedCL()
         {
             Console.WriteLine("Test: SingleRootedCL");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1766,49 +1768,49 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleRootedCLAcrossTlogs1()
         {
             Console.WriteLine("Test: MultipleRootedCLAcrossTlogs1");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one1.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one1.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one2.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one2.tlog"), new string[] {
                 "#Command some-command1",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one1.tlog"),
-                                    new TaskItem("TestFiles\\one2.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one1.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "one2.tlog"))
                                 };
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1816,51 +1818,51 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleRootedCL()
         {
             Console.WriteLine("Test: MultipleRootedCL");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one1.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one1.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
                 "#Command some-command1",
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two2.h"),
-                Path.GetFullPath("TestFiles\\two3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one1.tlog"),
-                                    new TaskItem("TestFiles\\one2.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one1.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "one2.tlog"))
                                 };
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\two.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "two.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1868,50 +1870,50 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\two.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleRootedCLNonDependency()
         {
             Console.WriteLine("Test: MultipleRootedCLNonDependency");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one1.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one1.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
                 "#Command some-command1",
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"), // this root marker represents the end of the dependencies for one.cpp
-                Path.GetFullPath("TestFiles\\two2.h"),
-                Path.GetFullPath("TestFiles\\two3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")), // this root marker represents the end of the dependencies for one.cpp
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one1.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one1.tlog"))
                                 };
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1921,46 +1923,46 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(outofdate.Length == 0);
         }
 
-        [TestMethod]
+        [Test]
         public void MultipleRootedCLAcrossTlogs2()
         {
             Console.WriteLine("Test: MultipleRootedCLAcrossTlogs2");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one1.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one1.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one2.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one2.tlog"), new string[] {
                 "#Command some-command1",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one1.tlog"),
-                                    new TaskItem("TestFiles\\one2.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one1.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "one2.tlog"))
                                 };
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -1968,279 +1970,279 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
 
-        [TestMethod]
+        [Test]
         public void OutputSingleCanonicalCL()
         {
             Console.WriteLine("Test: OutputSingleCanonicalCL");
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
             });
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))));
 
-            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")));
+            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
 
             Assert.IsTrue(outputs.Length == 1);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
         }
 
-        [TestMethod]
+        [Test]
         public void OutputSingleCanonicalCLAcrossTlogs()
         {
             Console.WriteLine("Test: OutputSingleCanonicalCLAcrossTlogs");
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
             });
 
-            File.WriteAllLines("TestFiles\\two.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "two.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.pch"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.pch")),
             });
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one.tlog"),
-                                    new TaskItem("TestFiles\\two.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "two.tlog"))
                                 };
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
                     tlogs);
 
-            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")));
+            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
 
             Assert.IsTrue(outputs.Length == 2);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\one.pch"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "one.pch")));
         }
 
-        [TestMethod]
+        [Test]
         public void OutputNonExistentTlog()
         {
             Console.WriteLine("Test: NonExistentTlog");
 
             // Just to be sure, delete the test tlog.
-            File.Delete("TestFiles\\one.tlog");
+            File.Delete(Path.Combine("TestFiles", "one.tlog"));
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))));
 
-            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")));
+            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
 
             Assert.IsTrue(outputs == null);
         }
 
-        [TestMethod]
+        [Test]
         public void OutputMultipleCanonicalCL()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCL");
 
             ITaskItem[] sources = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")))};
 
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))));
 
             ITaskItem[] outputs = d.OutputsForSource(sources);
 
             Assert.IsTrue(outputs.Length == 3);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [TestMethod]
+        [Test]
         public void OutputMultipleCanonicalCLSubrootMatch()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCLSubrootMatch");
 
             // sources is a subset of source2
             ITaskItem[] sources = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")))};
             ITaskItem[] sources2 = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\four.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\five.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "four.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "five.cpp")))};
 
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
                 "^" + FileTracker.FormatRootingMarker(sources2),
-                Path.GetFullPath("TestFiles\\fOUr.obj"),
-                Path.GetFullPath("TestFiles\\fIve.obj"),
-                Path.GetFullPath("TestFiles\\sIx.obj"),
-                Path.GetFullPath("TestFiles\\sEvEn.obj"),
-                Path.GetFullPath("TestFiles\\EIght.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")),
             });
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))));
 
             ITaskItem[] outputs = d.OutputsForSource(sources2, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
             Assert.IsTrue(outputs.Length == 5);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\fOUr.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\fIve.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\sIx.obj"));
-            Assert.IsTrue(outputs[3].ItemSpec == Path.GetFullPath("TestFiles\\sEvEn.obj"));
-            Assert.IsTrue(outputs[4].ItemSpec == Path.GetFullPath("TestFiles\\EIght.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             ITaskItem[] outputs2 = d.OutputsForSource(sources2, /*searchForSubRootsInCompositeRootingMarkers*/ true);
 
             Assert.IsTrue(outputs2.Length == 8);
-            Assert.IsTrue(outputs2[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs2[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs2[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
-            Assert.IsTrue(outputs2[3].ItemSpec == Path.GetFullPath("TestFiles\\fOUr.obj"));
-            Assert.IsTrue(outputs2[4].ItemSpec == Path.GetFullPath("TestFiles\\fIve.obj"));
-            Assert.IsTrue(outputs2[5].ItemSpec == Path.GetFullPath("TestFiles\\sIx.obj"));
-            Assert.IsTrue(outputs2[6].ItemSpec == Path.GetFullPath("TestFiles\\sEvEn.obj"));
-            Assert.IsTrue(outputs2[7].ItemSpec == Path.GetFullPath("TestFiles\\EIght.obj"));
+            Assert.IsTrue(outputs2[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs2[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs2[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs2[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs2[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs2[5].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs2[6].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs2[7].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             // Test if sources can find the superset.
             ITaskItem[] outputs3 = d.OutputsForSource(sources, /*searchForSubRootsInCompositeRootingMarkers*/ true);
 
             Assert.IsTrue(outputs3.Length == 8);
-            Assert.IsTrue(outputs3[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs3[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs3[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
-            Assert.IsTrue(outputs3[3].ItemSpec == Path.GetFullPath("TestFiles\\fOUr.obj"));
-            Assert.IsTrue(outputs3[4].ItemSpec == Path.GetFullPath("TestFiles\\fIve.obj"));
-            Assert.IsTrue(outputs3[5].ItemSpec == Path.GetFullPath("TestFiles\\sIx.obj"));
-            Assert.IsTrue(outputs3[6].ItemSpec == Path.GetFullPath("TestFiles\\sEvEn.obj"));
-            Assert.IsTrue(outputs3[7].ItemSpec == Path.GetFullPath("TestFiles\\EIght.obj"));
+            Assert.IsTrue(outputs3[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs3[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs3[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs3[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs3[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs3[5].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs3[6].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs3[7].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             ITaskItem[] outputs4 = d.OutputsForSource(sources, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
             Assert.IsTrue(outputs4.Length == 3);
-            Assert.IsTrue(outputs4[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs4[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs4[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs4[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs4[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs4[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [TestMethod]
+        [Test]
         public void OutputMultipleCanonicalCLSubrootMisMatch()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCLSubrootMisMatch");
 
             // sources is NOT a subset of source
             ITaskItem[] sources = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")))};
             ITaskItem[] sources2 = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\four.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\five.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "four.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "five.cpp")))};
             ITaskItem[] sources2Match = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\four.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\five.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "four.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "five.cpp")))};
             ITaskItem[] sourcesPlusOne = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\eight.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "eight.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")))};
 
             // Do note sources2Match and source2 is missing three.cpp.  It is to test if the RootContainsAllSubRootComponents can handle the case. 
 
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
                 "^" + FileTracker.FormatRootingMarker(sources2),
-                Path.GetFullPath("TestFiles\\fOUr.obj"),
-                Path.GetFullPath("TestFiles\\fIve.obj"),
-                Path.GetFullPath("TestFiles\\sIx.obj"),
-                Path.GetFullPath("TestFiles\\sEvEn.obj"),
-                Path.GetFullPath("TestFiles\\EIght.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")),
             });
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))));
 
             ITaskItem[] outputs = d.OutputsForSource(sources2Match, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
             Assert.IsTrue(outputs.Length == 5);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\fOUr.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\fIve.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\sIx.obj"));
-            Assert.IsTrue(outputs[3].ItemSpec == Path.GetFullPath("TestFiles\\sEvEn.obj"));
-            Assert.IsTrue(outputs[4].ItemSpec == Path.GetFullPath("TestFiles\\EIght.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             ITaskItem[] outputs2 = d.OutputsForSource(sources2Match, /*searchForSubRootsInCompositeRootingMarkers*/ true);
 
             Assert.IsTrue(outputs2.Length == 5);
-            Assert.IsTrue(outputs2[0].ItemSpec == Path.GetFullPath("TestFiles\\fOUr.obj"));
-            Assert.IsTrue(outputs2[1].ItemSpec == Path.GetFullPath("TestFiles\\fIve.obj"));
-            Assert.IsTrue(outputs2[2].ItemSpec == Path.GetFullPath("TestFiles\\sIx.obj"));
-            Assert.IsTrue(outputs2[3].ItemSpec == Path.GetFullPath("TestFiles\\sEvEn.obj"));
-            Assert.IsTrue(outputs2[4].ItemSpec == Path.GetFullPath("TestFiles\\EIght.obj"));
+            Assert.IsTrue(outputs2[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs2[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs2[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs2[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs2[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             ITaskItem[] outputs3 = d.OutputsForSource(sourcesPlusOne, /*searchForSubRootsInCompositeRootingMarkers*/ true);
 
             Assert.IsTrue(outputs3.Length == 3);
-            Assert.IsTrue(outputs3[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs3[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs3[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs3[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs3[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs3[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
 
             ITaskItem[] outputs4 = d.OutputsForSource(sourcesPlusOne, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
             Assert.IsTrue(outputs4.Length == 0);
         }
 
-        [TestMethod]
+        [Test]
         public void OutputMultipleCanonicalCLLongTempPath()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCLLongTempPath");
 
             ITaskItem[] sources = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")))};
 
             string oldTempPath = Environment.GetEnvironmentVariable("TEMP");
             string oldTmpPath = Environment.GetEnvironmentVariable("TMP");
-            string newTempPath = Path.GetFullPath("TestFiles\\ThisIsAReallyVeryLongTemporaryPlace\\ThatIsLongerThanTheSourcePaths");
+            string newTempPath = Path.GetFullPath(Path.Combine("TestFiles", "ThisIsAReallyVeryLongTemporaryPlace", "ThatIsLongerThanTheSourcePaths"));
 
             Directory.CreateDirectory(newTempPath);
             Environment.SetEnvironmentVariable("TEMP", newTempPath);
@@ -2250,16 +2252,16 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))));
 
             ITaskItem[] outputs = d.OutputsForSource(sources);
 
@@ -2267,39 +2269,39 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Environment.SetEnvironmentVariable("TMP", oldTmpPath);
 
             Assert.IsTrue(outputs.Length == 3);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [TestMethod]
+        [Test]
         public void OutputMultipleCanonicalCLAcrossTLogs()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCLAcrossTLogs");
 
             ITaskItem[] sources = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")))};
 
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
             });
 
-            File.WriteAllLines("TestFiles\\two.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "two.tlog"), new string[] {
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one.tlog"),
-                                    new TaskItem("TestFiles\\two.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "two.tlog"))
                                 };
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
@@ -2308,131 +2310,131 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outputs = d.OutputsForSource(sources);
 
             Assert.IsTrue(outputs.Length == 3);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [TestMethod]
+        [Test]
         public void OutputMultipleSingleSubRootCanonicalCL()
         {
             Console.WriteLine("Test: OutputMultipleSingleSubRootCanonicalCL");
 
             ITaskItem[] sources = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")))};
 
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))));
 
-            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")));
+            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))));
 
             Assert.IsTrue(outputs.Length == 3);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [TestMethod]
+        [Test]
         public void OutputMultipleUnrecognisedRootCanonicalCL()
         {
             Console.WriteLine("Test: OutputMultipleUnrecognisedRootCanonicalCL");
 
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp") + "|" + Path.GetFullPath("TestFiles\\two.cpp") + "|" + Path.GetFullPath("TestFiles\\three.cpp"),
-                Path.GetFullPath("TestFiles\\oNe.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
             CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")));
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))));
 
-            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath("TestFiles\\four.cpp")));
+            ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "four.cpp"))));
 
             Assert.IsTrue(outputs.Length == 0);
         }
 
-        [TestMethod]
+        [Test]
         public void OutputCLMinimalRebuildOptimization()
         {
             Console.WriteLine("Test: OutputCLMinimalRebuildOptimization");
 
             // Prepare read tlog
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\three.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Our source files
             ITaskItem[] sources = {
-                                    new TaskItem("TestFiles\\one.cpp"),
-                                    new TaskItem("TestFiles\\two.cpp"),
-                                    new TaskItem("TestFiles\\three.cpp"),
+                                    new TaskItem(Path.Combine("TestFiles", "one.cpp")),
+                                    new TaskItem(Path.Combine("TestFiles", "two.cpp")),
+                                    new TaskItem(Path.Combine("TestFiles", "three.cpp")),
                                 };
 
             // Prepare write tlog
             // This includes individual output information for each root
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                "^" + Path.GetFullPath("TestFiles\\three.cpp"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
 
             // Represent our tracked and computed outputs
-            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
             // Represent our tracked and provided inputs
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
                     sources,
                     null,
                     outputs,
@@ -2445,7 +2447,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(outofdate.Length == 0);
 
             // Delete one of the outputs in the group
-            File.Delete(Path.GetFullPath("TestFiles\\two.obj"));
+            File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
 
             // With optimization off, all sources in the group will need compilation
             d.SourcesNeedingCompilation = null;
@@ -2456,7 +2458,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             d = new CanonicalTrackedInputFiles
                     (
                         DependencyTestHelper.MockTask,
-                        DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
+                        DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
                         sources,
                         null,
                         outputs,
@@ -2467,72 +2469,72 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             outofdate = d.ComputeSourcesNeedingCompilation();
             Assert.IsTrue(outofdate.Length == 1);
             // And the source is.. two.cpp!
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\two.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void OutputCLMinimalRebuildOptimizationComputed()
         {
             Console.WriteLine("Test: OutputCLMinimalRebuildOptimizationComputed");
 
             // Prepare read tlog
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\three.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Our source files
             ITaskItem[] sources = {
-                                    new TaskItem("TestFiles\\one.cpp"),
-                                    new TaskItem("TestFiles\\two.cpp"),
-                                    new TaskItem("TestFiles\\three.cpp"),
+                                    new TaskItem(Path.Combine("TestFiles", "one.cpp")),
+                                    new TaskItem(Path.Combine("TestFiles", "two.cpp")),
+                                    new TaskItem(Path.Combine("TestFiles", "three.cpp")),
                                 };
 
             // Prepare write tlog
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
                 "^" + FileTracker.FormatRootingMarker(sources),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
 
             // Represent our tracked and computed outputs
-            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
             // "Compute" the additional output information for this compilation, rather than them being tracked
-            outputs.AddComputedOutputForSourceRoot(Path.GetFullPath("TestFiles\\one.cpp"), Path.GetFullPath("TestFiles\\one.obj"));
-            outputs.AddComputedOutputForSourceRoot(Path.GetFullPath("TestFiles\\two.cpp"), Path.GetFullPath("TestFiles\\two.obj"));
-            outputs.AddComputedOutputForSourceRoot(Path.GetFullPath("TestFiles\\three.cpp"), Path.GetFullPath("TestFiles\\three.obj"));
+            outputs.AddComputedOutputForSourceRoot(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")), Path.GetFullPath(Path.Combine("TestFiles", "one.obj")));
+            outputs.AddComputedOutputForSourceRoot(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")), Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            outputs.AddComputedOutputForSourceRoot(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")), Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
 
             // Represent our tracked and provided inputs
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
                     sources,
                     null,
                     outputs,
@@ -2545,7 +2547,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(outofdate.Length == 0);
 
             // Delete one of the outputs in the group
-            File.Delete(Path.GetFullPath("TestFiles\\two.obj"));
+            File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
 
             // With optimization off, all sources in the group will need compilation
             d.SourcesNeedingCompilation = null;
@@ -2556,7 +2558,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
                     sources,
                     null,
                     outputs,
@@ -2567,83 +2569,83 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             outofdate = d.ComputeSourcesNeedingCompilation();
             Assert.IsTrue(outofdate.Length == 1);
             // And the source is.. two.cpp!
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\two.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
         }
 
-        [TestMethod]
+        [Test]
         public void ReplaceOutputForSource()
         {
             Console.WriteLine("Test: ReplaceOutputForSource");
 
-            if (File.Exists(Path.GetFullPath("TestFiles\\three.i")))
+            if (File.Exists(Path.GetFullPath(Path.Combine("TestFiles", "three.i"))))
             {
-                File.Delete(Path.GetFullPath("TestFiles\\three.i"));
+                File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "three.i")));
             }
 
             // Prepare read tlog
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\three.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
             // Our source files
             ITaskItem[] sources = {
-                                    new TaskItem("TestFiles\\one.cpp"),
-                                    new TaskItem("TestFiles\\two.cpp"),
-                                    new TaskItem("TestFiles\\three.cpp"),
+                                    new TaskItem(Path.Combine("TestFiles", "one.cpp")),
+                                    new TaskItem(Path.Combine("TestFiles", "two.cpp")),
+                                    new TaskItem(Path.Combine("TestFiles", "three.cpp")),
                                 };
 
             // Prepare write tlog
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                "^" + Path.GetFullPath("TestFiles\\three.cpp"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
             // Represent our tracked and computed outputs
-            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
             // Change the output (note that this doesn't affect the timestamp)
-            File.Move(Path.GetFullPath("TestFiles\\three.obj"), Path.GetFullPath("TestFiles\\three.i"));
+            File.Move(Path.GetFullPath(Path.Combine("TestFiles", "three.obj")), Path.GetFullPath(Path.Combine("TestFiles", "three.i")));
 
-            string threeRootingMarker = FileTracker.FormatRootingMarker(new TaskItem("TestFiles\\three.cpp"));
+            string threeRootingMarker = FileTracker.FormatRootingMarker(new TaskItem(Path.Combine("TestFiles", "three.cpp")));
             // Remove the fact that three.obj was the tracked output
-            bool removed = outputs.RemoveOutputForSourceRoot(threeRootingMarker, Path.GetFullPath("TestFiles\\three.obj"));
+            bool removed = outputs.RemoveOutputForSourceRoot(threeRootingMarker, Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
             Assert.IsTrue(removed);
             // "Compute" the replacement output information for this compilation, rather than the one originally tracked
-            outputs.AddComputedOutputForSourceRoot(threeRootingMarker, Path.GetFullPath("TestFiles\\three.i"));
+            outputs.AddComputedOutputForSourceRoot(threeRootingMarker, Path.GetFullPath(Path.Combine("TestFiles", "three.i")));
 
             // Represent our tracked and provided inputs
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
                     sources,
                     null,
                     outputs,
@@ -2653,14 +2655,14 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We should have one output for three.cpp
             Assert.AreEqual(1, outputs.DependencyTable[threeRootingMarker].Count);
-            Assert.AreEqual(false, outputs.DependencyTable[threeRootingMarker].ContainsKey(Path.GetFullPath("TestFiles\\three.obj")));
+            Assert.AreEqual(false, outputs.DependencyTable[threeRootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "three.obj"))));
 
             // All things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
             Assert.AreEqual(0, outofdate.Length);
 
             // Delete the new output
-            File.Delete(Path.GetFullPath("TestFiles\\three.i"));
+            File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "three.i")));
 
             // This means a recompile would be required for the roots
             d.SourcesNeedingCompilation = null;
@@ -2668,74 +2670,74 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(outofdate.Length == 1);
         }
 
-        [TestMethod]
+        [Test]
         public void ExcludeSpecificDirectory()
         {
             Console.WriteLine("Test: ExcludeSpecificDirectory");
 
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.cpp"), "");
 
             Thread.Sleep(sleepTimeMilliseconds);
 
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.obj"), "");
 
             Thread.Sleep(sleepTimeMilliseconds);
 
-            Directory.CreateDirectory("TestFiles\\Foo");
-            DependencyTestHelper.WriteAll("TestFiles\\Foo\\one2.h", "");
+            Directory.CreateDirectory(Path.Combine("TestFiles", "Foo"));
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "Foo", "one2.h"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
 
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one1.h").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\Foo\\one2.h").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one3.h").ToUpperInvariant(),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one1.h").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\Foo\\one2.h").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one3.h").ToUpperInvariant(),
-                "^" + Path.GetFullPath("TestFiles\\three.cpp").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one1.h").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\Foo\\one2.h").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one3.h").ToUpperInvariant(),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "Foo", "one2.h")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")).ToUpperInvariant(),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "Foo", "one2.h")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")).ToUpperInvariant(),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "Foo", "one2.h")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")).ToUpperInvariant(),
             });
 
             // Our source files
             ITaskItem[] sources = {
-                                    new TaskItem("TestFiles\\one.cpp"),
-                                    new TaskItem("TestFiles\\two.cpp"),
-                                    new TaskItem("TestFiles\\three.cpp"),
+                                    new TaskItem(Path.Combine("TestFiles", "one.cpp")),
+                                    new TaskItem(Path.Combine("TestFiles", "two.cpp")),
+                                    new TaskItem(Path.Combine("TestFiles", "three.cpp")),
                                 };
 
             // Prepare write tlog
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\one.obj").ToUpperInvariant(),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\two.obj").ToUpperInvariant(),
-                "^" + Path.GetFullPath("TestFiles\\three.cpp").ToUpperInvariant(),
-                Path.GetFullPath("TestFiles\\three.obj").ToUpperInvariant(),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")).ToUpperInvariant(),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")).ToUpperInvariant(),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")).ToUpperInvariant(),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")).ToUpperInvariant(),
             });
 
             // Represent our tracked and computed outputs
-            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")));
+            CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
             // Represent our tracked and provided inputs
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))),
                     sources,
-                    new TaskItem[] { new TaskItem(Path.GetFullPath("TeSTfiles\\Foo")) },
+                    new TaskItem[] { new TaskItem(Path.GetFullPath(Path.Combine("TeSTfiles", "Foo"))) },
                     outputs,
                     true, /* minimal rebuild optimization */
                     false /* shred composite rooting markers */
@@ -2746,60 +2748,60 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, outofdate.Length);
         }
 
-        [TestMethod]
+        [Test]
         public void SaveCompactedReadTlog()
         {
             Console.WriteLine("Test: SaveCompactedReadTlog");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.obj"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one1.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one1.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one2.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one2.tlog"), new string[] {
                 "#Command some-command1",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
-            File.WriteAllLines("TestFiles\\two1.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "two1.tlog"), new string[] {
                 "#Command some-command2",
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two2.h"),
-                Path.GetFullPath("TestFiles\\two3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
             });
 
             // Touch one
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one1.tlog"),
-                                    new TaskItem("TestFiles\\one2.tlog"),
-                                    new TaskItem("TestFiles\\two1.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one1.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "one2.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "two1.tlog"))
                                 };
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -2807,7 +2809,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
 
             d.RemoveEntriesForSource(d.SourcesNeedingCompilation);
             d.SaveTlog();
@@ -2822,9 +2824,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -2832,7 +2834,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             outofdate = d1.ComputeSourcesNeedingCompilation();
 
             Assert.IsTrue(outofdate.Length == 1);
-            Assert.IsTrue(outofdate[0].ItemSpec == "TestFiles\\one.cpp");
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
 
             ITaskItem[] tlogs2 = {
                                     tlogs[0]
@@ -2843,9 +2845,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 (
                     DependencyTestHelper.MockTask,
                     tlogs2,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\two.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "two.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\two.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "two.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -2854,16 +2856,16 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             Assert.IsTrue(outofdate.Length == 0);
             Assert.IsTrue(d2.DependencyTable.Count == 1);
-            Assert.IsFalse(d2.DependencyTable.ContainsKey(Path.GetFullPath("TestFiles\\one.cpp")));
+            Assert.IsFalse(d2.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
 
             // There should be no difference even if we send in all the original tlogs
             CanonicalTrackedInputFiles d3 = new CanonicalTrackedInputFiles
                 (
                     DependencyTestHelper.MockTask,
                     tlogs,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\two.cpp")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "two.cpp"))),
                     null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\two.obj")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "two.obj"))),
                     false, /* no minimal rebuild optimization */
                     false /* shred composite rooting markers */
                 );
@@ -2872,46 +2874,46 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             Assert.IsTrue(outofdate.Length == 0);
             Assert.IsTrue(d3.DependencyTable.Count == 1);
-            Assert.IsFalse(d3.DependencyTable.ContainsKey(Path.GetFullPath("TestFiles\\one.cpp")));
+            Assert.IsFalse(d3.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
         }
 
-        [TestMethod]
+        [Test]
         public void SaveCompactedWriteTlog()
         {
             Console.WriteLine("Test: SaveCompactedWriteTlog");
             TaskItem fooItem = new TaskItem("foo");
 
             ITaskItem[] sources = new TaskItem[] {
-                                    new TaskItem(Path.GetFullPath("TestFiles\\one.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\two.cpp")),
-                                    new TaskItem(Path.GetFullPath("TestFiles\\three.cpp"))};
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))),
+                                    new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")))};
 
             string rootMarker = FileTracker.FormatRootingMarker(sources);
 
             // Prepare files
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
                 "^" + rootMarker,
-                Path.GetFullPath("TestFiles\\oNe.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")),
                 "^" + fooItem.GetMetadata("Fullpath"),
-                Path.GetFullPath("TestFiles\\foo1.bar"),
-                Path.GetFullPath("TestFiles\\bar1.baz"),
+                Path.GetFullPath(Path.Combine("TestFiles", "foo1.bar")),
+                Path.GetFullPath(Path.Combine("TestFiles", "bar1.baz")),
             });
 
-            File.WriteAllLines("TestFiles\\two.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "two.tlog"), new string[] {
                 "#Command some-command",
                 "^" + rootMarker,
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\three.obj"),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
                 "^" + fooItem.GetMetadata("Fullpath"),
-                Path.GetFullPath("TestFiles\\foo2.bar"),
-                Path.GetFullPath("TestFiles\\bar2.baz"),
+                Path.GetFullPath(Path.Combine("TestFiles", "foo2.bar")),
+                Path.GetFullPath(Path.Combine("TestFiles", "bar2.baz")),
             });
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one.tlog"),
-                                    new TaskItem("TestFiles\\two.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "two.tlog"))
                                 };
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
@@ -2921,16 +2923,16 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outputs = d.OutputsForSource(sources);
 
             Assert.IsTrue(outputs.Length == 3);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
 
             outputs = d.OutputsForSource(fooItem);
             Assert.IsTrue(outputs.Length == 4);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\foo1.bar"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\bar1.baz"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\foo2.bar"));
-            Assert.IsTrue(outputs[3].ItemSpec == Path.GetFullPath("TestFiles\\bar2.baz"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "foo1.bar")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "bar1.baz")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "foo2.bar")));
+            Assert.IsTrue(outputs[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "bar2.baz")));
 
             // Compact the tlog removing all entries for "foo" leaving the other entries intact
             d.RemoveEntriesForSource(fooItem);
@@ -2954,9 +2956,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             outputs = d2.OutputsForSource(sources);
             Assert.IsTrue(outputs.Length == 3);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
 
             // There should be no difference even if we send in all the original tlogs
             CanonicalTrackedOutputFiles d3 = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
@@ -2967,9 +2969,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             outputs = d3.OutputsForSource(sources);
             Assert.IsTrue(outputs.Length == 3);
-            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
         /// <summary>
@@ -2977,82 +2979,82 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         /// markers are kept, as in the case where there is a many-to-one relationship between inputs and
         /// outputs (ie. Lib, Link)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SaveCompactedReadTlog_MaintainCompositeRootingMarkers()
         {
             Console.WriteLine("Test: SaveCompactedReadTlog_MaintainCompositeRootingMarkers");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three2.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three2.h"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\three.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "three.cpp"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\twothree.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "twothree.obj"), "");
 
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one1.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one1.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one2.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one2.read.tlog"), new string[] {
                 "#Command some-command1",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
-            File.WriteAllLines("TestFiles\\two1.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "two1.read.tlog"), new string[] {
                 "#Command some-command2",
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two2.h"),
-                Path.GetFullPath("TestFiles\\two3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
             });
 
-            File.WriteAllLines("TestFiles\\three1.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "three1.read.tlog"), new string[] {
                 "#Command some-command2",
-                "^" + Path.GetFullPath("TestFiles\\three.cpp"),
-                Path.GetFullPath("TestFiles\\three1.h")
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three1.h"))
             });
 
-            File.WriteAllLines("TestFiles\\twothree.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "twothree.read.tlog"), new string[] {
                 "#Command some-command2",
-                "^" + Path.GetFullPath("TestFiles\\three.cpp") + "|" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two2.h"),
-                Path.GetFullPath("TestFiles\\two3.h"),
-                Path.GetFullPath("TestFiles\\three1.h"),
-                Path.GetFullPath("TestFiles\\three2.h")
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two3.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "three2.h"))
             });
 
             ITaskItem[] tlogs = {
-                                    new TaskItem("TestFiles\\one1.read.tlog"),
-                                    new TaskItem("TestFiles\\one2.read.tlog"),
-                                    new TaskItem("TestFiles\\two1.read.tlog"),
-                                    new TaskItem("TestFiles\\three1.read.tlog"),
-                                    new TaskItem("TestFiles\\twothree.read.tlog")
+                                    new TaskItem(Path.Combine("TestFiles", "one1.read.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "one2.read.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "two1.read.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "three1.read.tlog")),
+                                    new TaskItem(Path.Combine("TestFiles", "twothree.read.tlog"))
                                 };
 
             ITaskItem[] inputs = {
-                                     new TaskItem("TestFiles\\one.cpp"),
-                                     new TaskItem("TestFiles\\two.cpp"),
-                                     new TaskItem("TestFiles\\three.cpp")
+                                     new TaskItem(Path.Combine("TestFiles", "one.cpp")),
+                                     new TaskItem(Path.Combine("TestFiles", "two.cpp")),
+                                     new TaskItem(Path.Combine("TestFiles", "three.cpp"))
                                  };
 
             ITaskItem[] outputs = {
-                                      new TaskItem("TestFiles\\one.obj"),
-                                      new TaskItem("TestFiles\\twothree.obj")
+                                      new TaskItem(Path.Combine("TestFiles", "one.obj")),
+                                      new TaskItem(Path.Combine("TestFiles", "twothree.obj"))
                                   };
 
             CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles
@@ -3073,7 +3075,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(d.DependencyTable.Count == 4);
 
             // dependencies should include the three .h files written into the .tlogs + the rooting marker
-            Assert.IsTrue(d.DependencyTable[Path.GetFullPath("TestFiles\\three.cpp") + "|" + Path.GetFullPath("TestFiles\\two.cpp")].Values.Count == 4);
+            Assert.IsTrue(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Values.Count == 4);
 
             d.SaveTlog();
 
@@ -3094,10 +3096,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsTrue(d2.DependencyTable.Count == 4);
 
             // dependencies should include the three .h files written into the .tlogs + the two rooting marker files
-            Assert.IsTrue(d2.DependencyTable[Path.GetFullPath("TestFiles\\three.cpp") + "|" + Path.GetFullPath("TestFiles\\two.cpp")].Values.Count == 4);
+            Assert.IsTrue(d2.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Values.Count == 4);
         }
 
-        [TestMethod]
+        [Test]
         public void InvalidFlatTrackingTLogName()
         {
             Console.WriteLine("Test: InvalidFlatTrackingTLogName");
@@ -3120,18 +3122,18 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, data.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingTLogWithInitialEmptyLine()
         {
             Console.WriteLine("Test: FlatTrackingTLogWithInitialEmptyLine");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] { "", "^FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] { "", "^FOO" });
 
             MockTask task = DependencyTestHelper.MockTask;
             FlatTrackingData data = new FlatTrackingData
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     false /* don't skip missing files */
                 );
 
@@ -3139,18 +3141,18 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, data.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingTLogWithEmptyLineImmediatelyAfterRoot()
         {
             Console.WriteLine("Test: FlatTrackingTLogWithEmptyLineImmediatelyAfterRoot");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] { "^FOO", "", "FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] { "^FOO", "", "FOO" });
 
             MockTask task = DependencyTestHelper.MockTask;
             FlatTrackingData data = new FlatTrackingData
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     false /* don't skip missing files */
                 );
 
@@ -3158,18 +3160,18 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, data.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingTLogWithEmptyLineBetweenRoots()
         {
             Console.WriteLine("Test: FlatTrackingTLogWithEmptyLineBetweenRoots");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] { "^FOO", "FOO", "", "^BAR", "BAR" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] { "^FOO", "FOO", "", "^BAR", "BAR" });
 
             MockTask task = DependencyTestHelper.MockTask;
             FlatTrackingData data = new FlatTrackingData
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     false /* don't skip missing files */
                 );
 
@@ -3177,18 +3179,18 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, data.DependencyTable.Count, "DependencyTable should be empty.");
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingTLogWithEmptyRoot()
         {
             Console.WriteLine("Test: FlatTrackingTLogWithEmptyRoot");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] { "^", "FOO" });
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] { "^", "FOO" });
 
             MockTask task = DependencyTestHelper.MockTask;
             FlatTrackingData data = new FlatTrackingData
                 (
                     task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     false /* don't skip missing files */
                 );
 
@@ -3197,78 +3199,78 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.IsNotNull(data.DependencyTable["FOO"], "FOO should be the only entry.");
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataMissingInputsAndOutputs()
         {
             Console.WriteLine("Test: FlatTrackingDataMissingInputsAndOutputs");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two1.h"),
-                Path.GetFullPath("TestFiles\\two2.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                Path.GetFullPath("TestFiles\\sometempfile.obj"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\sometempfile2.obj")
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sometempfile.obj")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sometempfile2.obj"))
             });
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             Assert.AreEqual(2, inputs.MissingFiles.Count);
             Assert.AreEqual(3, outputs.MissingFiles.Count);
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataMissingInputs()
         {
             Console.WriteLine("Test: FlatTrackingDataMissingInputs");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two1.h"),
-                Path.GetFullPath("TestFiles\\two2.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two2.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
             });
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing inputs, we're out of date
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
@@ -3278,37 +3280,37 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(0, outputs.MissingFiles.Count);
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataMissingOutputs()
         {
             Console.WriteLine("Test: FlatTrackingDataMissingOutputs");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
             Thread.Sleep(sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-                Path.GetFullPath("TestFiles\\sometempfile2.obj")
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                Path.GetFullPath(Path.Combine("TestFiles", "sometempfile2.obj"))
             });
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing outputs, we're out of date
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
@@ -3318,16 +3320,16 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(2, outputs.MissingFiles.Count);
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataEmptyInputTLogs()
         {
             Console.WriteLine("Test: FlatTrackingDataEmptyInputTLogs");
             // Prepare files
-            File.WriteAllText("TestFiles\\one.read.tlog", String.Empty);
-            File.WriteAllText("TestFiles\\one.write.tlog", String.Empty);
+            File.WriteAllText(Path.Combine("TestFiles", "one.read.tlog"), String.Empty);
+            File.WriteAllText(Path.Combine("TestFiles", "one.write.tlog"), String.Empty);
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing inputs, we're out of date
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
@@ -3335,28 +3337,28 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataEmptyOutputTLogs()
         {
             Console.WriteLine("Test: FlatTrackingDataEmptyOutputTLogs");
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
             // Prepare files
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
-            File.WriteAllText("TestFiles\\one.write.tlog", String.Empty);
+            File.WriteAllText(Path.Combine("TestFiles", "one.write.tlog"), String.Empty);
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // Inputs newer than outputs - if there are no outputs, then we're out of date
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
@@ -3366,50 +3368,50 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataInputNewerThanTracking()
         {
             Console.WriteLine("Test: FlatTrackingDataInputNewerThanTracking");
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
             });
 
             Thread.Sleep(sleepTimeMilliseconds);
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
             // Compact the read tlog
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
 
             // Touch the tracking logs so that are more recent that any of the inputs
             Thread.Sleep(sleepTimeMilliseconds);
-            File.SetLastWriteTime("TestFiles\\one.read.tlog", DateTime.Now);
-            File.SetLastWriteTime("TestFiles\\one.write.tlog", DateTime.Now);
+            File.SetLastWriteTime(Path.Combine("TestFiles", "one.read.tlog"), DateTime.Now);
+            File.SetLastWriteTime(Path.Combine("TestFiles", "one.write.tlog"), DateTime.Now);
             Thread.Sleep(sleepTimeMilliseconds);
             // Touch the output so that we would be out of date with respect to the inputs, but up to date with respect to the tracking logs
-            File.SetLastWriteTime(Path.GetFullPath("TestFiles\\one.obj"), DateTime.Now - TimeSpan.FromHours(1));
+            File.SetLastWriteTime(Path.GetFullPath(Path.Combine("TestFiles", "one.obj")), DateTime.Now - TimeSpan.FromHours(1));
 
-            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be out of date with respect to the outputs
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
@@ -3417,126 +3419,126 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.AreEqual(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataInputNewerThanTrackingNoOutput()
         {
             Console.WriteLine("Test: FlatTrackingDataInputNewerThanTrackingNoOutput");
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
 
             Thread.Sleep(sleepTimeMilliseconds);
 
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\*-one.write.?.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "*-one.write.?.tlog"))), false);
             // Compact the read tlog
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             inputs.SaveTlog();
             outputs.SaveTlog();
 
-            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\*-one.write.?.tlog")), false);
+            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "*-one.write.?.tlog"))), false);
             // Compact the read tlog
-            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             Assert.AreEqual(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataInputNewerThanOutput()
         {
             Console.WriteLine("Test: FlatTrackingDataInputOrOutputNewerThanTracking");
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
             });
             // Wait so that our tlogs are old
             Thread.Sleep(sleepTimeMilliseconds);
 
             // Prepare the source files (later than tracking logs)
             // Therefore newer
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
 
             // Prepate the output files (later than tracking logs and source files
             // Therefore newer
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
             // Compact the read tlog
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be up to date inputs vs outputs
-            Assert.AreEqual(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.AreEqual(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs), "#1");
 
             // We should be out of date inputs & outputs vs tracking (since we wrote the files after the tracking logs)
-            Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs), "#2");
 
             // Touch the input so that we would be out of date with respect to the outputs, and out of date with respect to the tracking logs
             Thread.Sleep(sleepTimeMilliseconds);
-            File.SetLastWriteTime(Path.GetFullPath("TestFiles\\one.cpp"), DateTime.Now);
+            File.SetLastWriteTime(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")), DateTime.Now);
 
-            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be out of date with respect to the tracking logs
-            Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs), "#3");
 
             // We should be out of date with respect to the outputs
-            Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs), "#4");
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingDataInputOrOutputNewerThanTracking()
         {
             Console.WriteLine("Test: FlatTrackingDataInputOrOutputNewerThanTracking");
-            File.WriteAllLines("TestFiles\\one.read.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.read.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\one2.h"),
-                Path.GetFullPath("TestFiles\\one3.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one2.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one3.h")),
             });
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
             });
 
             Thread.Sleep(sleepTimeMilliseconds);
             // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one1.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one2.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one3.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one1.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one2.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one3.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
             Thread.Sleep(sleepTimeMilliseconds);
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.obj"), "");
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
             // Compact the read tlog
-            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
             // We should be up to date inputs vs outputs
             Assert.AreEqual(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             // We should be out of date inputs & outputs vs tracking (since we wrote the files after the tracking logs)
@@ -3545,58 +3547,58 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // Touch the tracking logs so that are more recent that any of the inputs
             Thread.Sleep(sleepTimeMilliseconds);
-            File.SetLastWriteTime("TestFiles\\one.read.tlog", DateTime.Now);
-            File.SetLastWriteTime("TestFiles\\one.write.tlog", DateTime.Now);
+            File.SetLastWriteTime(Path.Combine("TestFiles", "one.read.tlog"), DateTime.Now);
+            File.SetLastWriteTime(Path.Combine("TestFiles", "one.write.tlog"), DateTime.Now);
             Thread.Sleep(sleepTimeMilliseconds);
 
-            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be up to date with respect to the tracking data
             Assert.AreEqual(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
 
             // Touch the input so that we would be out of date with respect to the outputs, but up to date with respect to the tracking logs
-            File.SetLastWriteTime(Path.GetFullPath("TestFiles\\one.cpp"), DateTime.Now);
+            File.SetLastWriteTime(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")), DateTime.Now);
 
-            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
-            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.read.tlog")), false);
+            outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
+            inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be out of date with respect to the outputs
             Assert.AreEqual(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
         }
 
-        [TestMethod]
+        [Test]
         public void FlatTrackingExcludeDirectories()
         {
             Console.WriteLine("Test: FlatTrackingExcludeDirectories");
 
             // Prepare files 
-            if (!Directory.Exists("TestFiles\\ToBeExcluded"))
+            if (!Directory.Exists(Path.Combine("TestFiles", "ToBeExcluded")))
             {
-                Directory.CreateDirectory("TestFiles\\ToBeExcluded");
+                Directory.CreateDirectory(Path.Combine("TestFiles", "ToBeExcluded"));
             }
 
-            DependencyTestHelper.WriteAll("TestFiles\\ToBeExcluded\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\ToBeExcluded\\two.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "ToBeExcluded", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "ToBeExcluded", "two.h"), "");
 
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.h"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "one.cpp"), "");
 
-            File.WriteAllLines("TestFiles\\one.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.tlog"), new string[] {
                 "#Command some-command",
-                Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one1.h"),
-                Path.GetFullPath("TestFiles\\ToBeExcluded\\two.cpp"),
-                Path.GetFullPath("TestFiles\\ToBeExcluded\\two.h"),
-                Path.GetFullPath("TestFiles\\SubdirectoryExcluded\\three.cpp"),
-                Path.GetFullPath("TestFiles\\SubdirectoryExcluded\\three.h"),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one1.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "ToBeExcluded", "two.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "ToBeExcluded", "two.h")),
+                Path.GetFullPath(Path.Combine("TestFiles", "SubdirectoryExcluded", "three.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "SubdirectoryExcluded", "three.h")),
             });
 
             // Get the newest time w/o any exclude paths
             Dictionary<string, DateTime> sharedLastWriteTimeUtcCache = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
             FlatTrackingData data = new FlatTrackingData
                 (
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     null,
                     DateTime.MinValue,
                     null,
@@ -3606,55 +3608,63 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             DateTime originalNewest = data.NewestFileTimeUtc;
 
             // Force an update to the files we don't care about
-            DependencyTestHelper.WriteAll("TestFiles\\ToBeExcluded\\two.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\ToBeExcluded\\two.h", "");
-            if (!Directory.Exists("TestFiles\\ToBeExcluded\\SubdirectoryExcluded"))
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "ToBeExcluded", "two.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "ToBeExcluded", "two.h"), "");
+            if (!Directory.Exists(Path.Combine("TestFiles", "ToBeExcluded", "SubdirectoryExcluded")))
             {
-                Directory.CreateDirectory("TestFiles\\ToBeExcluded\\SubdirectoryExcluded");
+                Directory.CreateDirectory(Path.Combine("TestFiles", "ToBeExcluded", "SubdirectoryExcluded"));
             }
-            DependencyTestHelper.WriteAll("TestFiles\\ToBeExcluded\\SubdirectoryExcluded\\three.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\ToBeExcluded\\SubdirectoryExcluded\\three.h", "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "ToBeExcluded", "SubdirectoryExcluded", "three.cpp"), "");
+            DependencyTestHelper.WriteAll(Path.Combine("TestFiles", "ToBeExcluded", "SubdirectoryExcluded", "three.h"), "");
 
             // Now do a flat tracker ignoring the exclude directories and make sure the time didn't change
             data = new FlatTrackingData
                 (
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.tlog")),
+                    DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     null,
                     DateTime.MinValue,
-                    new string[] { Path.GetFullPath("TestFiles\\ToBeExcluded") },
+                    new string[] { Path.GetFullPath(Path.Combine("TestFiles", "ToBeExcluded")) },
                     sharedLastWriteTimeUtcCache
                 );
 
             Assert.AreEqual(originalNewest, data.NewestFileTimeUtc, "Timestamp changed when no tracked files changed.");
         }
 
-        [TestMethod]
+        [Test]
         public void TrackingDataCacheResetOnTlogChange()
         {
             Console.WriteLine("Test: FlatTrackingDataCacheResetOnTlogChange");
 
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
+            File.WriteAllLines(Path.Combine("TestFiles", "one.write.tlog"), new string[] {
                 "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\one.cpp"),
-                Path.GetFullPath("TestFiles\\one.obj"),
+                "^" + Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")),
+                Path.GetFullPath(Path.Combine("TestFiles", "one.obj")),
             });
 
-            FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
+            FlatTrackingData outputs = new FlatTrackingData(
+                DependencyTestHelper.MockTask,
+                DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))),
+                false);
             // Sleep once, so that NTFS has enough time to register a file modified time change
             Thread.Sleep(sleepTimeMilliseconds);
-            File.WriteAllLines("TestFiles\\one.write.tlog", new string[] {
-                "#Command some-command",
-                "^" + Path.GetFullPath("TestFiles\\two.cpp"),
-                Path.GetFullPath("TestFiles\\two.obj"),
-            });
+            File.WriteAllLines(
+                Path.Combine("TestFiles", "one.write.tlog"),
+                new string[]
+                    {
+                        "#Command some-command", "^" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp")),
+                        Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
+                    });
 
-            FlatTrackingData outputs2 = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.write.tlog")), false);
+            FlatTrackingData outputs2 = new FlatTrackingData(
+                DependencyTestHelper.MockTask,
+                DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))),
+                false);
 
             // We should not use the cached dependency table, since it has been updated since it was last read from disk
             Assert.IsTrue(outputs.DependencyTable != outputs2.DependencyTable);
         }
 
-        [TestMethod]
+        [Test]
         public void RootContainsSubRoots()
         {
             Console.WriteLine("Test: RootContainsSubRoots");

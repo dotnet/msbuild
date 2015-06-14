@@ -6,10 +6,8 @@ using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Resources;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,8 +16,8 @@ using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

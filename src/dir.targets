@@ -3,17 +3,20 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Restore packages -->
   <PropertyGroup>
-    <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$(MSBuildProjectDirectory)\packages.config</PackagesConfig>
+    <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'packages.config'))</PackagesConfig>
     <RestorePackages Condition="'$(RestorePackages)' == '' and Exists('$(PackagesConfig)')">true</RestorePackages>
     <RestorePackagesSemaphore>$(PackagesDir)$(MSBuildProjectFile).package.restored</RestorePackagesSemaphore>
   </PropertyGroup>
 
   <Target Name="RestorePackages" 
-          BeforeTargets="ResolveNuGetPackages"
           Inputs="$(PackagesConfig)"
           Outputs="$(RestorePackagesSemaphore)"
           Condition="'$(RestorePackages)' == 'true'">
+  <!-- Restore packages -->
+  <!--
     <Exec Command="$(NugetRestoreCommand) &quot;$(PackagesConfig)&quot;" StandardOutputImportance="Low" />
+  -->
+    <Exec Command="$(NugetRestoreCommand) &quot;$(PackagesConfig)&quot;" />
     <Touch Files="$(RestorePackagesSemaphore)" AlwaysCreate="true" />
   </Target>
 </Project>

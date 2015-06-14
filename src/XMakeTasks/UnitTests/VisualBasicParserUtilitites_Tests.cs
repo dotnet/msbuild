@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -13,18 +13,18 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class VisualBasicParserUtilititesTests
     {
         // Try just and empty file
-        [TestMethod]
+        [Test]
         public void EmptyFile()
         {
             AssertParse("", null);
         }
 
         // A simple form
-        [TestMethod]
+        [Test]
         public void SimpleForm()
         {
             AssertParse
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A simple form with a namespace
-        [TestMethod]
+        [Test]
         public void Namespace()
         {
             AssertParse
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A simple form with a namespace
-        [TestMethod]
+        [Test]
         public void NestedNamespace()
         {
             AssertParse
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A namespace the is ended before the class
-        [TestMethod]
+        [Test]
         public void NestedAndEndedNamespace()
         {
             AssertParse
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests
         /// name was something like "BugResources.RemoveStuff.XYZ", because we would
         /// only match the "BugResources" bit.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void NamespaceElementBeginsWithRem()
         {
             AssertParse

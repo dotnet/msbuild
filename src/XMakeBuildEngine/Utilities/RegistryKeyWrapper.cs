@@ -226,7 +226,7 @@ namespace Microsoft.Build.Internal
                         if (ExceptionHandling.NotExpectedRegistryException(ex))
                             throw;
 
-                        throw new RegistryException(ex.Message, Name, ex);
+                        throw new RegistryException(ex.Message, _wrappedKey == null ? string.Empty : Name, ex);
                     }
                     finally
                     {

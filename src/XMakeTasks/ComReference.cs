@@ -2,17 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Globalization;
-using System.IO;
-using System.Resources;
-using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
 using COMException = System.Runtime.InteropServices.COMException;

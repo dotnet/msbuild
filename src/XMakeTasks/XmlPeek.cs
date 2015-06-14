@@ -8,13 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Security;
-using System.Security.Permissions;
-using System.Text;
 using System.Xml;
-using System.Xml.Xsl;
 using System.Xml.XPath;
 
 using Microsoft.Build.Framework;

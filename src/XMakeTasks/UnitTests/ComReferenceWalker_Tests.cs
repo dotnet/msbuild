@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Tasks;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -13,7 +13,7 @@ using COMException = System.Runtime.InteropServices.COMException;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ComReferenceWalker_Tests
     {
         static private int MockReleaseComObject(object o)
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(contains, dependencyExists, message);
         }
 
-        [TestMethod]
+        [Test]
         public void WalkTypeInfosInEmptyLibrary()
         {
             MockTypeLib typeLib = new MockTypeLib();
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A type in the main type library implements an interface from a dependent type library
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ImplementedInterfaces()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [TestMethod]
+        [Test]
         public void DefinedVariableUDT()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [TestMethod]
+        [Test]
         public void DefinedVariableUDTArray()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [TestMethod]
+        [Test]
         public void DefinedVariableUDTPtr()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [TestMethod]
+        [Test]
         public void ThereAndBackAgain()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [TestMethod]
+        [Test]
         public void ComplexComposition()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [TestMethod]
+        [Test]
         public void DefinedFunction()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib1, dependencyTypeLib2, dependencyTypeLib3;
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
             dependencyTypeLib3.AssertAllHandlesReleased();
         }
 
-        [TestMethod]
+        [Test]
         public void IgnoreKnownOleTypes()
         {
             MockTypeLib mainTypeLib = new MockTypeLib();
@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, oleTypeLib, false);
         }
 
-        [TestMethod]
+        [Test]
         public void IgnoreGuidType()
         {
             MockTypeLib mainTypeLib = new MockTypeLib();
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, oleTypeLib, false);
         }
 
-        [TestMethod]
+        [Test]
         public void IgnoreNetExportedTypeLibs()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The main type lib is broken... don't expect any results, but make sure we don't throw.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void FaultInjectionMainLib()
         {
             // The primary test here is that we don't throw, which can't be explicitly expressed in NUnit...
@@ -322,7 +322,7 @@ namespace Microsoft.Build.UnitTests
             dependencyTypeLibBad2.AssertAllHandlesReleased();
         }
 
-        [TestMethod]
+        [Test]
         public void FullDependenciesWithIncrementalAnalysis()
         {
             MockTypeLib mainTypeLib1, mainTypeLib2, mainTypeLib3, dependencyTypeLib1, dependencyTypeLib2, dependencyTypeLib3;

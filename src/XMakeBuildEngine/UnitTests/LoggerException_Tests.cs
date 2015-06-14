@@ -2,28 +2,27 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
-using System.Collections;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
+using System.Runtime.Serialization.Formatters.Binary;
+
 using Microsoft.Build.Exceptions;
-using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class InternalLoggerExceptionTests
     {
         /// <summary>
         /// Verify I implemented ISerializable correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializeDeserialize()
         {
-            InternalLoggerException e = new InternalLoggerException("message",
+            InternalLoggerException e = new InternalLoggerException(
+                "message",
                 new Exception("innerException"),
                 new BuildStartedEventArgs("evMessage", "evHelpKeyword"),
                 "errorCode",
@@ -49,8 +48,4 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-
-
 

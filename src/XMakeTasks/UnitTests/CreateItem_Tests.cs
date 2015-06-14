@@ -1,23 +1,23 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
-using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
+using NUnit.Framework;
+
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class CreateItem_Tests
     {
         /// <summary>
         /// CreateIteming identical lists results in empty list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneFromOneIsZero()
         {
             CreateItem t = new CreateItem();
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// CreateIteming completely different lists results in left list.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneFromOneMismatchIsOne()
         {
             CreateItem t = new CreateItem();
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If 'Exclude' is unspecified, then 'Include' is the result.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UnspecifiedFromOneIsOne()
         {
             CreateItem t = new CreateItem();
@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If 'Include' is unspecified, then empty is the result.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OneFromUnspecifiedIsEmpty()
         {
             CreateItem t = new CreateItem();
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If 'Include' and 'Exclude' are unspecified, then empty is the result.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void UnspecifiedFromUnspecifiedIsEmpty()
         {
             CreateItem t = new CreateItem();
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// CreateItem is case insensitive.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CaseDoesntMatter()
         {
             CreateItem t = new CreateItem();
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
         /// Using the CreateItem task to expand wildcards, and then try accessing the RecursiveDir 
         /// metadata to force batching.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void WildcardsWithRecursiveDir()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -142,18 +142,18 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.txt", "foo");
-            ObjectModelHelpers.CreateFileInTempProjectDirectory(@"Subdir\Bar.txt", "bar");
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("Subdir", "Bar.txt"), "bar");
 
             ObjectModelHelpers.BuildTempProjectFileExpectSuccess("Myapp.proj");
 
-            ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"Destination\Foo.txt");
-            ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"Destination\Subdir\Bar.txt");
+            ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(Path.Combine("Destination", "Foo.txt"));
+            ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(Path.Combine("Destination", "Subdir", "Bar.txt"));
         }
 
         /// <summary>
         /// CreateItem should add additional metadata when instructed
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AdditionalMetaData()
         {
             CreateItem t = new CreateItem();
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// We should be able to preserve the existing metadata on items
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AdditionalMetaDataPreserveExisting()
         {
             CreateItem t = new CreateItem();
@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The default is to overwrite existing metadata on items
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AdditionalMetaDataOverwriteExisting()
         {
             CreateItem t = new CreateItem();

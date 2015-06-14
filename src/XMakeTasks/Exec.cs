@@ -3,17 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -276,54 +272,92 @@ namespace Microsoft.Build.Tasks
         {
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFile(".exec.cmd");
+            bool isUnix = Path.DirectorySeparatorChar == '/';
 
             // UNICODE Batch files are not allowed as of WinXP. We can't use normal ANSI code pages either,
             // since console-related apps use OEM code pages "for historical reasons". Sigh.
             // We need to get the current OEM code page which will be the same language as the current ANSI code page,
             // just the OEM version.
             // See http://www.microsoft.com/globaldev/getWR/steps/wrg_codepage.mspx for a discussion of ANSI vs OEM
-            using (StreamWriter sw = new StreamWriter(_batchFile, false, EncodingUtilities.CurrentSystemOemEncoding)) // HIGHCHAR: Exec task batch files are in OEM code pages (not ANSI!)
-            {
-                // In some wierd setups, users may have set an env var actually called "errorlevel"
-                // this would cause our "exit %errorlevel%" to return false.
-                // This is because the actual errorlevel value is not an environment variable, but some commands,
-                // such as "exit %errorlevel%" will use the environment variable with that name if it exists, instead
-                // of the actual errorlevel value. So we must temporarily reset errorlevel locally first.
-                sw.WriteLine("setlocal");
-                // One more wrinkle.
-                // "set foo=" has odd behavior: it sets errorlevel to 1 if there was no environment variable named
-                // "foo" defined.
-                // This has the effect of making "set errorlevel=" set an errorlevel of 1 if an environment
-                // variable named "errorlevel" didn't already exist!
-                // To avoid this problem, set errorlevel locally to a dummy value first.
-                sw.WriteLine("set errorlevel=dummy");
-                sw.WriteLine("set errorlevel=");
 
-                // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
-                // automatically maps the network path to a drive letter, and then popd disconnects it
-                if (workingDirectoryIsUNC)
+            using (StreamWriter sw = new StreamWriter(_batchFile, false, isUnix ? Encoding.ASCII : EncodingUtilities.CurrentSystemOemEncoding)) // HIGHCHAR: Exec task batch files are in OEM code pages (not ANSI!)
+            {
+                if (!isUnix)
                 {
-                    sw.WriteLine("pushd " + _workingDirectory);
+                    // In some wierd setups, users may have set an env var actually called "errorlevel"
+                    // this would cause our "exit %errorlevel%" to return false.
+                    // This is because the actual errorlevel value is not an environment variable, but some commands,
+                    // such as "exit %errorlevel%" will use the environment variable with that name if it exists, instead
+                    // of the actual errorlevel value. So we must temporarily reset errorlevel locally first.
+                    sw.WriteLine("setlocal");
+                    // One more wrinkle.
+                    // "set foo=" has odd behavior: it sets errorlevel to 1 if there was no environment variable named
+                    // "foo" defined.
+                    // This has the effect of making "set errorlevel=" set an errorlevel of 1 if an environment
+                    // variable named "errorlevel" didn't already exist!
+                    // To avoid this problem, set errorlevel locally to a dummy value first.
+                    sw.WriteLine("set errorlevel=dummy");
+                    sw.WriteLine("set errorlevel=");
+
+                    // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
+                    // automatically maps the network path to a drive letter, and then popd disconnects it
+                    if (workingDirectoryIsUNC)
+                    {
+                        sw.WriteLine("pushd " + _workingDirectory);
+                    }
+                }
+                else
+                {
+                    sw.WriteLine("#!/bin/bash");
+                    if (!string.IsNullOrWhiteSpace(_workingDirectory))
+                    {
+                        sw.WriteLine("cd " + _workingDirectory);
+                    }
                 }
 
+                if (isUnix && NativeMethodsShared.IsMono)
+                {
+                    // Extract the command we are going to run. Note that the command name may
+                    // be preceded by whitespace
+                    var m = Regex.Match(Command, @"^\s*((?:(?:(?<!\\)[^\0 !$`&*()+])|(?:(?<=\\)[^\0]))+)(.*)");
+                    if (m.Success && m.Groups.Count > 1 && m.Groups[1].Captures.Count > 0)
+                    {
+                        string exe = m.Groups[1].Captures[0].ToString();
+                        string commandLine = (m.Groups.Count > 2 && m.Groups[2].Captures.Count > 0) ?
+                            m.Groups[2].Captures[0].Value : "";
+
+
+                        // If we are trying to run a .exe file, prepend mono as the file may
+                        // not be runnable
+                        if (exe.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase)
+                            || exe.EndsWith(".exe\"", StringComparison.InvariantCultureIgnoreCase)
+                            || exe.EndsWith(".exe'", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            Command = "mono " + FileUtilities.FixFilePath(exe) + commandLine;
+                        }
+                    }
+                }
                 sw.WriteLine(Command);
 
-                if (workingDirectoryIsUNC)
+                if (!isUnix)
                 {
-                    sw.WriteLine("popd");
-                }
+                    if (workingDirectoryIsUNC)
+                    {
+                        sw.WriteLine("popd");
+                    }
 
-                // NOTES:
-                // 1) there's a bug in the Process class where the exit code is not returned properly i.e. if the command
-                //    fails with exit code 9009, Process.ExitCode returns 1 -- the statement below forces it to return the
-                //    correct exit code
-                // 2) also because of another (or perhaps the same) bug in the Process class, when we use pushd/popd for a
-                //    UNC path, even if the command fails, the exit code comes back as 0 (seemingly reflecting the success
-                //    of popd) -- the statement below fixes that too
-                // 3) the above described behaviour is most likely bugs in the Process class because batch files in a
-                //    console window do not hide or change the exit code a.k.a. errorlevel, esp. since the popd command is
-                //    a no-fail command, and it never changes the previous errorlevel
-                sw.WriteLine("exit %errorlevel%");
+                    // NOTES:
+                    // 1) there's a bug in the Process class where the exit code is not returned properly i.e. if the command
+                    //    fails with exit code 9009, Process.ExitCode returns 1 -- the statement below forces it to return the
+                    //    correct exit code
+                    // 2) also because of another (or perhaps the same) bug in the Process class, when we use pushd/popd for a
+                    //    UNC path, even if the command fails, the exit code comes back as 0 (seemingly reflecting the success
+                    //    of popd) -- the statement below fixes that too
+                    // 3) the above described behaviour is most likely bugs in the Process class because batch files in a
+                    //    console window do not hide or change the exit code a.k.a. errorlevel, esp. since the popd command is
+                    //    a no-fail command, and it never changes the previous errorlevel
+                    sw.WriteLine("exit %errorlevel%");
+                }
             }
         }
         #endregion
@@ -539,7 +573,14 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool()
         {
             // Get the fully qualified path to cmd.exe
-            return ToolLocationHelper.GetPathToSystemFile("cmd.exe");
+            if (Path.DirectorySeparatorChar == '\\')
+            {
+                return ToolLocationHelper.GetPathToSystemFile("cmd.exe");
+            }
+            else
+            {
+                return "sh";
+            }
         }
 
         /// <summary>
@@ -593,18 +634,21 @@ namespace Microsoft.Build.Tasks
             CreateTemporaryBatchFile();
 
             string batchFileForCommandLine = _batchFile;
-            commandLine.AppendSwitch("/Q");      // echo off
-            commandLine.AppendSwitch("/C");      // run then terminate
 
-            // If for some crazy reason the path has a & character and a space in it
-            // then get the short path of the temp path, which should not have spaces in it
-            // and then escape the &
-            if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+            if (NativeMethodsShared.IsWindows)
             {
-                batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
-            }
+                commandLine.AppendSwitch("/Q");      // echo off
+                commandLine.AppendSwitch("/C");      // run then terminate
 
+                // If for some crazy reason the path has a & character and a space in it
+                // then get the short path of the temp path, which should not have spaces in it
+                // and then escape the &
+                if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                {
+                    batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
+                    batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
+                }
+            }
             commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
         }
 

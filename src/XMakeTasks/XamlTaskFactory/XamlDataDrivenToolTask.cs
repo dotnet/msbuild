@@ -3,19 +3,13 @@
 
 using System;
 using System.Globalization;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Threading;
-using System.IO;
-using System.Runtime.InteropServices;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using System.Collections.Specialized;
 using System.Resources;
+
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks.Xaml
 {

@@ -8,20 +8,21 @@
 using System;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
+#pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the TaskCommandLineEventArgs class.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class TaskCommandLineEventArgs_Tests
     {
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EventArgsCtors()
         {
             TaskCommandLineEventArgs taskCommandLineEvent = new TaskCommandLineEventArgs2();

@@ -7,23 +7,22 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using Microsoft.Build.Collections;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
-using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -254,6 +253,7 @@ namespace Microsoft.Build.Evaluation
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
+            result = FileUtilities.MaybeAdjustFilePath(result);
 
             return result;
         }
@@ -321,6 +321,7 @@ namespace Microsoft.Build.Evaluation
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _usedUninitializedProperties);
+            expression = FileUtilities.MaybeAdjustFilePath(expression);
 
             List<T> result = new List<T>();
 
@@ -1018,7 +1019,7 @@ namespace Microsoft.Build.Evaluation
                 // If we have only a single result, then just return it
                 if (results == null && expression.Length == sourceIndex)
                 {
-                    return lastResult;
+                    return lastResult == null ? null : FileUtilities.MaybeAdjustFilePath(lastResult.ToString());
                 }
                 else
                 {
@@ -1043,14 +1044,14 @@ namespace Microsoft.Build.Evaluation
                             // Create a combined result string from the result components that we've gathered
                             foreach (object component in results)
                             {
-                                result.Append(component.ToString());
+                                result.Append(FileUtilities.MaybeAdjustFilePath(component.ToString()));
                             }
                         }
 
                         // Append the last result we collected (it wasn't added to the list)
                         if (lastResult != null)
                         {
-                            result.Append(lastResult.ToString());
+                            result.Append(FileUtilities.MaybeAdjustFilePath(lastResult.ToString()));
                         }
 
                         // And if we couldn't find anymore property tags in the expression,
@@ -1395,6 +1396,23 @@ namespace Microsoft.Build.Evaluation
 
                     try
                     {
+                        // Unless we are running under Windows, don't bother with anything but the user keys
+                        if (!NativeMethodsShared.IsWindows && !registryKeyName.StartsWith("HKEY_CURRENT_USER", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Fake common requests to HKLM that we can resolve
+
+                            // This is the base path of the framework
+                            if (registryKeyName.StartsWith(
+                                @"HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework",
+                                StringComparison.OrdinalIgnoreCase) &&
+                                valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return NativeMethodsShared.FrameworkBasePath + Path.DirectorySeparatorChar;
+                            }
+
+                            return string.Empty;
+                        }
+
                         object valueFromRegistry = Registry.GetValue(registryKeyName, valueName, null /* default if key or value name is not found */);
 
                         if (null != valueFromRegistry)
@@ -2833,7 +2851,13 @@ namespace Microsoft.Build.Evaluation
                         if (argumentValue != null)
                         {
                             // Unescape the value since we're about to send it out of the engine and into
-                            // the function being called
+                            // the function being called. If a file or a directory function, fix the path
+                            if (_objectType == typeof(System.IO.File) || _objectType == typeof(System.IO.Directory)
+                                || _objectType == typeof(System.IO.Path))
+                            {
+                                argumentValue = FileUtilities.FixFilePath(argumentValue);
+                            }
+
                             args[n] = EscapingUtilities.UnescapeAll(argumentValue);
                         }
                         else

@@ -26,7 +26,7 @@ namespace Microsoft.Build.Shared
 
                 // fall back to default ANSI encoding if we have problems
                 s_currentOemEncoding = Encoding.Default;
-
+#if !MONO
                 try
                 {
                     // get the current OEM code page
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Shared
                 {
                     Debug.Assert(false, "GetEncoding(default OEM encoding) threw a NotSupportedException in EncodingUtilities.CurrentSystemOemEncoding! Please log a bug against MSBuild.", ex.Message);
                 }
-
+#endif
                 return s_currentOemEncoding;
             }
         }

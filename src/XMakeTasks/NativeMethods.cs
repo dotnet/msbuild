@@ -4,11 +4,15 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Collections;
+using System.Globalization;
+using System.Linq;
 using System.Runtime.ExceptionServices;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Tasks
 {
@@ -286,7 +290,6 @@ namespace Microsoft.Build.Tasks
         afRetargetable = 0x0100            // The assembly can be retargeted (at runtime) to an
                                            //  assembly from a different publisher.
     };
-    [StructLayout(LayoutKind.Sequential)]
 
     /*
     From cor.h:
@@ -304,6 +307,7 @@ namespace Microsoft.Build.Tasks
             ULONG       ulOS;                   // [IN/OUT]Size of the OSINFO array/Actual # of entries filled in.
         } ASSEMBLYMETADATA;
     */
+    [StructLayout(LayoutKind.Sequential)]
     internal struct ASSEMBLYMETADATA
     {
         public UInt16 usMajorVersion;
@@ -773,13 +777,60 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         // MoveFileEx
         //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern bool MoveFileEx
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "MoveFileEx")]
+        internal static extern bool MoveFileExWindows
         (
             [In] string existingFileName,
             [In] string newFileName,
             [In] MoveFileFlags flags
         );
+
+        /// <summary>
+        /// Add implementation of this function when not running on windows. The implementation is
+        /// not complete, of course, but should work for most common cases.
+        /// </summary>
+        /// <param name="existingFileName"></param>
+        /// <param name="newFileName"></param>
+        /// <param name="flags"></param>
+        /// <returns></returns>
+        internal static bool MoveFileEx(string existingFileName, string newFileName, MoveFileFlags flags)
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return MoveFileExWindows(existingFileName, newFileName, flags);
+            }
+
+            if (!File.Exists(existingFileName))
+            {
+                return false;
+            }
+
+            var targetExists = File.Exists(newFileName);
+
+            if (targetExists
+                && ((flags & MoveFileFlags.MOVEFILE_REPLACE_EXISTING) != MoveFileFlags.MOVEFILE_REPLACE_EXISTING))
+            {
+                return false;
+            }
+
+            if (targetExists && (File.GetAttributes(newFileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+            {
+                throw new System.IO.IOException("Moving target is read-only");
+            }
+
+            if (string.Equals(existingFileName, newFileName, StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (targetExists)
+            {
+                File.Delete(newFileName);
+            }
+
+            File.Move(existingFileName, newFileName);
+            return true;
+        }
 
         //------------------------------------------------------------------------------
         // RegisterTypeLib
@@ -973,8 +1024,8 @@ typedef enum _tagAssemblyComparisonResult
 
         The AssemblyComparisonResult gives you information about why the identities compared as equal or not equal. The description of the meaning of each ACR_* return value is described in the declaration above.
         ------------------------------------------------------------------------------*/
-        [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        internal static extern int CompareAssemblyIdentity
+        [DllImport("fusion.dll", CharSet = CharSet.Unicode, EntryPoint = "CompareAssemblyIdentity")]
+        internal static extern int CompareAssemblyIdentityWindows
             (
                 string pwzAssemblyIdentity1,
                 [MarshalAs(UnmanagedType.Bool)] bool fUnified1,
@@ -983,6 +1034,63 @@ typedef enum _tagAssemblyComparisonResult
                 [MarshalAs(UnmanagedType.Bool)] out bool pfEquivalent,
                 out AssemblyComparisonResult pResult
             );
+
+        // TODO: Verify correctness of this implementation and
+        // extend to more cases.
+        internal static void CompareAssemblyIdentity(
+            string assemblyIdentity1,
+            bool fUnified1,
+            string assemblyIdentity2,
+            bool fUnified2,
+            out bool pfEquivalent,
+            out AssemblyComparisonResult pResult)
+        {
+            if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
+            {
+                CompareAssemblyIdentityWindows(
+                    assemblyIdentity1,
+                    fUnified1,
+                    assemblyIdentity2,
+                    fUnified2,
+                    out pfEquivalent,
+                    out pResult);
+            }
+
+            AssemblyName an1 = new AssemblyName(assemblyIdentity1);
+            AssemblyName an2 = new AssemblyName(assemblyIdentity2);
+
+            pfEquivalent = AssemblyName.ReferenceMatchesDefinition(an1, an2);
+            if (pfEquivalent)
+            {
+                pResult = AssemblyComparisonResult.ACR_EquivalentFullMatch;
+                return;
+            }
+
+            if (!an1.Name.Equals(an2.Name, StringComparison.InvariantCultureIgnoreCase))
+            {
+                pResult = AssemblyComparisonResult.ACR_NonEquivalent;
+                pfEquivalent = false;
+                return;
+            }
+
+            var versionCompare = an1.Version.CompareTo(an2.Version);
+
+            if ((versionCompare < 0 && fUnified2) || (versionCompare > 0 && fUnified1))
+            {
+                pResult = AssemblyComparisonResult.ACR_NonEquivalentVersion;
+                pfEquivalent = true;
+                return;
+            }
+
+            if (versionCompare == 0)
+            {
+                pResult = AssemblyComparisonResult.ACR_EquivalentFullMatch;
+                pfEquivalent = true;
+                return;
+            }
+
+            pResult = pfEquivalent ? AssemblyComparisonResult.ACR_EquivalentFullMatch : AssemblyComparisonResult.ACR_NonEquivalent;
+        }
 
         internal enum AssemblyComparisonResult
         {
@@ -1163,7 +1271,7 @@ typedef enum _tagAssemblyComparisonResult
         /// This code was taken from the vsproject\ReferenceManager\Providers\NativeMethods.cs
         /// </summary>
         /// <param name="data">Pointer to the beginning of the data block</param>
-        /// <param name="uncompressedData">Length of the uncompressed data block</param>
+        /// <param name="uncompressedDataLength">Length of the uncompressed data block</param>
         internal static unsafe int CorSigUncompressData(IntPtr data, out int uncompressedDataLength)
         {
             // As described in bizapps\server\designers\models\packagemodel\nativemethods.cs:
@@ -1206,9 +1314,31 @@ typedef enum _tagAssemblyComparisonResult
         internal class AssemblyCacheEnum : IEnumerable<AssemblyNameExtension>
         {
             /// <summary>
+            /// Path to the gac
+            /// </summary>
+            private static string s_gacPath = Path.Combine(NativeMethodsShared.FrameworkBasePath, "gac");
+
+            /// <summary>
+            /// Regex for directory version parsing
+            /// </summary>
+            private static Regex s_assemblyVersionRegex = new Regex(
+                @"^([.\d]+)_([^_]*)_([a-fA-F\d]{16})$",
+                RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+            /// <summary>
             /// The IAssemblyEnum interface which allows us to ask for the next assembly from the GAC enumeration.
             /// </summary>
             private IAssemblyEnum _assemblyEnum;
+
+            /// <summary>
+            /// For non-Windows implementation, we need assembly name
+            /// </summary>
+            private AssemblyName _assemblyNameVersion;
+
+            /// <summary>
+            /// For non-Windows implementation, we need assembly name
+            /// </summary>
+            private IEnumerable<string> _gacDirectories;
 
             /// <summary>
             /// Are we done going through the enumeration.
@@ -1227,69 +1357,139 @@ typedef enum _tagAssemblyComparisonResult
             /// <param name="assemblyName"></param>
             private void InitializeEnum(String assemblyName)
             {
-                IAssemblyName fusionName = null;
-
-                int hr = 0;
-
-                if (assemblyName != null)
+                if (NativeMethodsShared.IsWindows)
                 {
-                    hr = CreateAssemblyNameObject(
-                            out fusionName,
-                            assemblyName,
-                            CreateAssemblyNameObjectFlags.CANOF_PARSE_DISPLAY_NAME /* parse components assuming the assemblyName is a fusion name, this does not have to be a full fusion name*/,
-                            IntPtr.Zero);
+                    IAssemblyName fusionName = null;
+
+                    int hr = 0;
+                    try
+                    {
+                        if (assemblyName != null)
+                        {
+                            hr = CreateAssemblyNameObject(
+                                out fusionName,
+                                assemblyName,
+                                CreateAssemblyNameObjectFlags.CANOF_PARSE_DISPLAY_NAME
+                                /* parse components assuming the assemblyName is a fusion name, this does not have to be a full fusion name*/,
+                                IntPtr.Zero);
+                        }
+
+                        if (hr >= 0)
+                        {
+                            hr = CreateAssemblyEnum(
+                                out _assemblyEnum,
+                                IntPtr.Zero,
+                                fusionName,
+                                AssemblyCacheFlags.GAC,
+                                IntPtr.Zero);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        hr = e.HResult;
+                    }
+
+                    if (hr < 0)
+                    {
+                        _assemblyEnum = null;
+                    }
                 }
-
-                if (hr >= 0)
+                else
                 {
-                    hr = CreateAssemblyEnum(
-                            out _assemblyEnum,
-                            IntPtr.Zero,
-                            fusionName,
-                            AssemblyCacheFlags.GAC,
-                            IntPtr.Zero);
-                }
-
-                if (hr < 0)
-                {
-                    _assemblyEnum = null;
+                    if (!string.IsNullOrWhiteSpace(assemblyName))
+                    {
+                        _assemblyNameVersion = new AssemblyName(assemblyName);
+                        _gacDirectories = Directory.EnumerateDirectories(s_gacPath, _assemblyNameVersion.Name);
+                    }
+                    else
+                    {
+                        _gacDirectories = Directory.EnumerateDirectories(s_gacPath);
+                    }
                 }
             }
 
             public IEnumerator<AssemblyNameExtension> GetEnumerator()
             {
-                int hr = 0;
-                IAssemblyName fusionName = null;
-
-                if (_assemblyEnum == null)
+                if (NativeMethodsShared.IsWindows)
                 {
-                    yield break;
-                }
+                    int hr = 0;
+                    IAssemblyName fusionName = null;
 
-                if (_done)
-                {
-                    yield break;
-                }
-
-                while (!_done)
-                {
-                    // Now get next IAssemblyName from m_AssemblyEnum
-                    hr = _assemblyEnum.GetNextAssembly((IntPtr)0, out fusionName, 0);
-
-                    if (hr < 0)
+                    if (_assemblyEnum == null)
                     {
-                        Marshal.ThrowExceptionForHR(hr);
-                    }
-
-                    if (fusionName != null)
-                    {
-                        string assemblyFusionName = GetFullName(fusionName);
-                        yield return new AssemblyNameExtension(assemblyFusionName);
-                    }
-                    else
-                    {
-                        _done = true;
                         yield break;
+                    }
+
+                    if (_done)
+                    {
+                        yield break;
+                    }
+
+                    while (!_done)
+                    {
+                        // Now get next IAssemblyName from m_AssemblyEnum
+                        hr = _assemblyEnum.GetNextAssembly((IntPtr)0, out fusionName, 0);
+
+                        if (hr < 0)
+                        {
+                            Marshal.ThrowExceptionForHR(hr);
+                        }
+
+                        if (fusionName != null)
+                        {
+                            string assemblyFusionName = GetFullName(fusionName);
+                            yield return new AssemblyNameExtension(assemblyFusionName);
+                        }
+                        else
+                        {
+                            _done = true;
+                            yield break;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var dir in _gacDirectories)
+                    {
+                        var assemblyName = Path.GetFileName(dir);
+                        if (!string.IsNullOrWhiteSpace(assemblyName))
+                        {
+                            foreach (var version in Directory.EnumerateDirectories(dir))
+                            {
+                                var versionString = Path.GetFileName(version);
+                                if (!string.IsNullOrWhiteSpace(versionString))
+                                {
+                                    var match = s_assemblyVersionRegex.Match(versionString);
+                                    if (match.Success)
+                                    {
+                                        var name = new AssemblyName
+                                        {
+                                            Name = assemblyName,
+                                            CultureInfo =
+                                                               !string.IsNullOrWhiteSpace(
+                                                                   match.Groups[2].Value)
+                                                                   ? new CultureInfo(
+                                                                         match.Groups[2].Value)
+                                                                   : CultureInfo.InvariantCulture
+                                        };
+                                        if (!string.IsNullOrEmpty(match.Groups[1].Value))
+                                        {
+                                            name.Version = new Version(match.Groups[1].Value);
+                                        }
+                                        if (!string.IsNullOrWhiteSpace(match.Groups[3].Value))
+                                        {
+                                            var value = match.Groups[3].Value;
+                                            name.SetPublicKeyToken(
+                                                Enumerable.Range(0, 16)
+                                                    .Where(x => x % 2 == 0)
+                                                    .Select(x => Convert.ToByte(value.Substring(x, 2), 16)).ToArray());
+                                        }
+
+                                        yield return new AssemblyNameExtension(name);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1310,6 +1510,34 @@ typedef enum _tagAssemblyComparisonResult
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return (IEnumerator)GetEnumerator();
+            }
+
+            public static string AssemblyPathFromStrongName(string strongName)
+            {
+                var assemblyNameVersion = new AssemblyName(strongName);
+                var path = Path.Combine(s_gacPath, assemblyNameVersion.Name);
+
+                // See if we can find the name as a directory in the GAC
+                if (Directory.Exists(path))
+                {
+                    // Since we have a strong name, create the path to the dll
+                    path = Path.Combine(
+                        path,
+                        string.Format(
+                            "{0}_{1}_{2}",
+                            assemblyNameVersion.Version.ToString(4),
+                            assemblyNameVersion.CultureName != "neutral" ? assemblyNameVersion.CultureName : string.Empty,
+                            assemblyNameVersion.GetPublicKeyToken()
+                                .Aggregate(new StringBuilder(), (builder, v) => builder.Append(v.ToString("x2")))),
+                        assemblyNameVersion.Name + ".dll");
+
+                    if (File.Exists(path))
+                    {
+                        return path;
+                    }
+                }
+
+                return null;
             }
         }
 

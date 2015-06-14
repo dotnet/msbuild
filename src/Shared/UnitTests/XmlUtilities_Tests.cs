@@ -2,15 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class XmlUtilities_Tests
     {
         // Various invalid names, with the first invalid character listed for each
@@ -31,7 +30,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get the right invalid char listed in the error string
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InvalidNameErrorLocation()
         {
             for (int i = 0; i <= _invalidNames.GetUpperBound(0); i++)

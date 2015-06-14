@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ConstructionEditing_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -16,8 +18,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -25,13 +26,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for editing through the construction model
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ConstructionEditing_Tests
     {
         /// <summary>
         /// Add a target through the convenience method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddTargetConvenience()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -55,7 +56,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Simple add a target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -77,7 +78,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Append two targets
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendTargetTwice()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -105,7 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add node created from different project with AppendChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAddFromDifferentProject_AppendChild()
         {
@@ -118,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add node created from different project with PrependChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAddFromDifferentProject_PrependChild()
         {
@@ -131,7 +132,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add node created from different project with InsertBeforeChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAddFromDifferentProject_InsertBefore()
         {
@@ -145,7 +146,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add node created from different project with InsertAfterChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAddFromDifferentProject_InsertAfter()
         {
@@ -160,7 +161,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Become direct child of self with AppendChild
         /// (This is prevented anyway because the parent is an invalid type.)
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidBecomeChildOfSelf_AppendChild()
         {
@@ -173,7 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Become grandchild of self with AppendChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidBecomeGrandChildOfSelf_AppendChild()
         {
@@ -188,7 +189,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Become grandchild of self with PrependChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidBecomeGrandChildOfSelf_PrependChild()
         {
@@ -203,7 +204,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Become grandchild of self with InsertBeforeChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidBecomeGrandChildOfSelf_InsertBefore()
         {
@@ -220,7 +221,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Become grandchild of self with InsertAfterChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidBecomeGrandChildOfSelf_InsertAfter()
         {
@@ -237,7 +238,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to reparent with AppendChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAlreadyParented_AppendChild()
         {
@@ -250,7 +251,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to reparent with PrependChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAlreadyParented_PrependChild()
         {
@@ -263,7 +264,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to reparent with InsertBeforeChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAlreadyParented_InsertBefore()
         {
@@ -277,7 +278,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to reparent with InsertAfterChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAlreadyParented_InsertAfter()
         {
@@ -291,7 +292,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add to unparented parent with AppendChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidParentNotParented_AppendChild()
         {
@@ -305,7 +306,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add to unparented parent with PrependChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidParentNotParented_PrependChild()
         {
@@ -319,7 +320,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add to unparented parent with InsertBeforeChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidParentNotParented_InsertBefore()
         {
@@ -334,7 +335,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add to unparented parent with InsertAfterChild
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidParentNotParented_InsertAfter()
         {
@@ -349,7 +350,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting attributes on a target should be reflected in the XML
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendTargetSetAllAttributes()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -373,7 +374,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Clearing attributes on a target should be reflected in the XML
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AppendTargetClearAttributes()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -395,7 +396,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Prepend item group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void PrependItemGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -420,7 +421,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Insert target before
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InsertTargetBefore()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -449,7 +450,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// InsertBeforeChild with a null reference node should be the same as calling AppendChild.
         /// This matches XmlNode behavior.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InsertTargetBeforeNullEquivalentToAppendChild()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -472,7 +473,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// InsertAfterChild with a null reference node should be the same as calling PrependChild.
         /// This matches XmlNode behavior.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InsertTargetAfterNullEquivalentToPrependChild()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -494,7 +495,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Insert target before and after a reference
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InsertTargetBeforeAndTargetAfter()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -526,7 +527,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Insert before when no children
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InsertTargetBeforeNothing()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -547,7 +548,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Insert after when no children
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InsertTargetAfterNothing()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -568,7 +569,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Insert task in target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InsertTaskInTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -591,7 +592,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add a task through the convenience method
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddTaskConvenience()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -613,7 +614,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to insert project in target
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAttemptToAddProjectToTarget()
         {
@@ -626,7 +627,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to insert item in target
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAttemptToAddItemToTarget()
         {
@@ -641,7 +642,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to insert item without include in itemgroup in project
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAttemptToAddItemWithoutIncludeToItemGroupInProject()
         {
@@ -656,7 +657,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to insert item with remove in itemgroup in project
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAttemptToAddItemWithRemoveToItemGroupInProject()
         {
@@ -672,7 +673,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add item without include in itemgroup in target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemWithoutIncludeToItemGroupInTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -699,7 +700,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add item with remove in itemgroup in target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemWithRemoveToItemGroupInTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -727,7 +728,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove a target
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveSingleChildTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -746,7 +747,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to remove a child that is not parented
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void InvalidRemoveUnparentedChild()
         {
@@ -758,7 +759,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to remove a child that is parented by something in another project
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void InvalidRemoveChildFromOtherProject()
         {
@@ -772,7 +773,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to remove a child that is parented by something else in the same project
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidRemoveChildFromOtherParent()
         {
@@ -788,7 +789,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add an Otherwise before a When
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidOtherwiseBeforeWhen()
         {
@@ -805,7 +806,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add an Otherwise after another
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidOtherwiseAfterOtherwise()
         {
@@ -820,7 +821,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add an Otherwise before another
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidOtherwiseBeforeOtherwise()
         {
@@ -835,7 +836,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add a When after an Otherwise
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidWhenAfterOtherwise()
         {
@@ -852,7 +853,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add When before Otherwise
         /// </summary>
-        [TestMethod]
+        [Test]
         public void WhenBeforeOtherwise()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -880,7 +881,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove a target that is last in a list
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveLastInList()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -904,7 +905,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove a target that is first in a list
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveFirstInList()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -928,7 +929,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove all children when there are some
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveAllChildrenSome()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -945,7 +946,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove all children when there aren't any. Shouldn't fail.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveAllChildrenNone()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -959,7 +960,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove and re-insert a node
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveReinsertHasSiblingAppend()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -985,7 +986,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove and re-insert a node
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveReinsertHasSiblingPrepend()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1008,7 +1009,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove and re-insert a node
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveReinsertTwoChildrenAppend()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1030,7 +1031,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove and re-insert a node with no siblings using PrependChild
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveLonelyReinsertPrepend()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1050,7 +1051,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Remove and re-insert a node with no siblings using AppendChild
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RemoveLonelyReinsertAppend()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1072,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// It adds after the last existing property group, if any; otherwise
         /// at the start of the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddPropertyGroup_NoExistingPropertyGroups()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1098,7 +1099,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// It adds after the last existing property group, if any; otherwise
         /// at the start of the project.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddPropertyGroup_ExistingPropertyGroups()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1129,7 +1130,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add an item group to an empty project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemGroup_NoExistingElements()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1146,7 +1147,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add an item group to a project with an existing item group; should add 2nd
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemGroup_OneExistingItemGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1166,7 +1167,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Add an item group to a project with an existing property group; should add 2nd
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemGroup_OneExistingPropertyGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1186,7 +1187,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item group to a project with an existing property group and item group;
         /// should add after the item group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemGroup_ExistingItemGroupAndPropertyGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1209,7 +1210,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item group to a project with an existing target;
         /// should add at the end
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemGroup_ExistingTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1229,7 +1230,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to an empty project
         /// should add to new item group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_EmptyProject()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1249,7 +1250,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project that only has an empty item group,
         /// should reuse that group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_ExistingEmptyItemGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1270,7 +1271,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project that only has an empty item group,
         /// should reuse that group, unless it has a condition
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_ExistingEmptyItemGroupWithCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1293,7 +1294,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project that only has an item group with items of a different type,
         /// and an empty item group, should reuse that group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_ExistingEmptyItemGroupPlusItemGroupOfWrongType()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1319,7 +1320,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project that only has an item group with items of a different type,
         /// and an empty item group above it, should reuse the empty group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_ExistingEmptyItemGroupPlusItemGroupOfWrongTypeBelow()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1346,7 +1347,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project with a single item group with existing items
         /// of a different item type; should add in alpha order of item type
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_ExistingItemGroupWithItemsOfDifferentItemType()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1374,7 +1375,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project with a single item group with existing items of
         /// same item type; should add in alpha order of itemspec
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_ExistingItemGroupWithItemsOfSameItemType()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1398,7 +1399,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item to a project with an existing item group with items of a different
         /// type; should create a new item group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_ExistingItemGroupWithDifferentItemType()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1424,7 +1425,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// then item spec, keeping different item specs in different groups; different
         /// item groups are not mutally sorted
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_ExistingItemGroupWithVariousItems()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1455,7 +1456,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Adding an item that's identical to an existing one should add it again and not skip
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItem_Duplicate()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1476,7 +1477,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Adding items to when and Otherwise
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemToWhereOtherwise()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1516,7 +1517,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Adding items to a specific item group should order them by item type and item spec
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemToItemGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1551,7 +1552,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item definition to an empty project
         /// should add to new item definition group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemDefinition_EmptyProject()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1572,7 +1573,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item definition to a project with a single empty item definition group;
         /// should create another, because it doesn't have any items of the same type
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemDefinition_ExistingItemDefinitionGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1594,7 +1595,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item definition to a project with a single empty item definition group with a condition;
         /// should create a new one after
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemDefinition_ExistingItemDefinitionGroupWithCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1617,7 +1618,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item definition to a project with a single item definitiongroup with existing items of
         /// same item type; should add in same one
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemDefinition_ExistingItemDefinitionGroupWithItemsOfSameItemType()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1642,7 +1643,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add an item definition to a project with an existing item definition group with items of a different
         /// type; should create a new item definition group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddItemDefinition_ExistingItemDefinitionGroupWithDifferentItemType()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1666,7 +1667,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add a property to an empty project
         /// should add to new property group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddProperty_EmptyProject()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1687,7 +1688,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add a property to a project with an existing property group
         /// should add to property group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddProperty_ExistingPropertyGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1708,7 +1709,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add a property to a project with an existing property group with condition
         /// should add to new property group
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddProperty_ExistingPropertyGroupWithCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1732,7 +1733,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add a property to a project with an existing property with the same name
         /// should modify and return existing property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddProperty_ExistingPropertySameName()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1755,7 +1756,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add a property to a project with an existing property with the same name but a condition;
         /// should add new property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddProperty_ExistingPropertySameNameCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1779,7 +1780,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Add a property to a project with an existing property with the same name but a condition;
         /// should add new property
         /// </summary>
-        [TestMethod]
+        [Test]
         public void AddProperty_ExistingPropertySameNameConditionOnGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1804,7 +1805,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add a property with a reserved name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAddPropertyReservedName()
         {
@@ -1815,7 +1816,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add a property with an illegal name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidAddPropertyIllegalName()
         {
@@ -1826,7 +1827,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to add a property with an invalid XML name
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void InvalidAddPropertyInvalidXmlName()
         {
@@ -1837,7 +1838,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Too much nesting should not cause stack overflow.
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void InvalidChooseOverflow()
         {
@@ -1857,7 +1858,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting item condition should dirty project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Dirtying_ItemCondition()
         {
             XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
@@ -1882,7 +1883,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting metadata condition should dirty project
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Dirtying_MetadataCondition()
         {
             XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
@@ -1911,7 +1912,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Delete all the children of a container, then add them
         /// to a new one, and iterate. Should not go into infinite loop :-)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DeleteAllChildren()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -1934,7 +1935,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Same but with Prepend for the 2nd one
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DeleteAllChildren2()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -1957,7 +1958,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Same but with InsertBefore for the 2nd one
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DeleteAllChildren3()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -1980,7 +1981,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Same but with InsertAfter for the 2nd one
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DeleteAllChildren4()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -2003,7 +2004,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Same but with InsertAfter for the 2nd one
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DeleteAllChildren5()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -2026,7 +2027,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Move some children
         /// </summary>
-        [TestMethod]
+        [Test]
         public void DeleteSomeChildren()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -2053,7 +2054,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Attempt to modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_1()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -2065,7 +2066,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_2()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -2077,7 +2078,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_3()
         {
             ProjectRootElement.Create().CreateImportGroupElement().Condition = "c";
@@ -2086,7 +2087,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_4()
         {
             var element = ProjectRootElement.Create().AddItemDefinition("i").AddMetadata("m", "M1");
@@ -2097,7 +2098,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_5()
         {
             var element = ProjectRootElement.Create().AddItem("i", "i1").AddMetadata("m", "M1");
@@ -2108,7 +2109,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_5b()
         {
             var element = ProjectRootElement.Create().AddItem("i", "i1");
@@ -2119,7 +2120,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_6()
         {
             var element = ProjectRootElement.Create().AddItem("i", "i1");
@@ -2130,7 +2131,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_7()
         {
             var element = ProjectRootElement.Create().AddProperty("p", "v1");
@@ -2141,7 +2142,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_8()
         {
             var element = ProjectRootElement.Create().AddProperty("p", "v1");
@@ -2152,7 +2153,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_9()
         {
             var element = ProjectRootElement.Create().AddUsingTask("n", "af", null);
@@ -2163,7 +2164,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_10()
         {
             var element = ProjectRootElement.Create().AddUsingTask("n", "af", null);
@@ -2174,7 +2175,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_11()
         {
             var element = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2185,7 +2186,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_12()
         {
             var element = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2196,7 +2197,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_15()
         {
             var usingTask = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2209,7 +2210,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_16()
         {
             var usingTask = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2222,7 +2223,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_17()
         {
             var usingTask = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2235,7 +2236,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_18()
         {
             var usingTask = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2248,7 +2249,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_19()
         {
             var element = ProjectRootElement.Create().AddTarget("t");
@@ -2259,7 +2260,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_20()
         {
             var element = ProjectRootElement.Create().AddTarget("t");
@@ -2270,7 +2271,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_21()
         {
             var element = ProjectRootElement.Create().AddTarget("t");
@@ -2281,7 +2282,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_22()
         {
             var element = ProjectRootElement.Create().AddTarget("t");
@@ -2292,7 +2293,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_23()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt");
@@ -2303,7 +2304,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_24()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt");
@@ -2314,7 +2315,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_25()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt").AddOutputItem("tp", "i");
@@ -2325,7 +2326,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_26()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt").AddOutputItem("tp", "i");
@@ -2336,7 +2337,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_27()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt").AddOutputProperty("tp", "p");
@@ -2347,7 +2348,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_28()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt").AddOutputProperty("tp", "p");
@@ -2358,7 +2359,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_29()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddItemGroup().AddItem("i", "i1");
@@ -2369,7 +2370,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_30()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddItemGroup().AddItem("i", "i1");
@@ -2380,7 +2381,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_31()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddItemGroup().AddItem("i", "i1").AddMetadata("m", "m1");
@@ -2391,7 +2392,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child that is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedChild_32()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddPropertyGroup().AddProperty("p", "v1");
@@ -2402,7 +2403,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_1()
         {
             var element = ProjectRootElement.Create().AddImportGroup().AddImport("p");
@@ -2413,7 +2414,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_2()
         {
             var element = ProjectRootElement.Create().AddImportGroup().AddImport("p");
@@ -2424,7 +2425,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_3()
         {
             ProjectRootElement.Create().CreateImportGroupElement().Condition = "c";
@@ -2433,7 +2434,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_4()
         {
             var element = ProjectRootElement.Create().AddItemDefinition("i").AddMetadata("m", "M1");
@@ -2444,7 +2445,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_5()
         {
             var element = ProjectRootElement.Create().AddItem("i", "i1").AddMetadata("m", "M1");
@@ -2455,7 +2456,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_5b()
         {
             var element = ProjectRootElement.Create().AddItem("i", "i1");
@@ -2466,7 +2467,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_6()
         {
             var element = ProjectRootElement.Create().AddItem("i", "i1");
@@ -2477,7 +2478,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_7()
         {
             var element = ProjectRootElement.Create().AddProperty("p", "v1");
@@ -2488,7 +2489,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_8()
         {
             var element = ProjectRootElement.Create().AddProperty("p", "v1");
@@ -2499,7 +2500,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_15()
         {
             var usingTask = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2512,7 +2513,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_16()
         {
             var usingTask = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2525,7 +2526,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_17()
         {
             var usingTask = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2538,7 +2539,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_18()
         {
             var usingTask = ProjectRootElement.Create().AddUsingTask("n", null, "an");
@@ -2551,7 +2552,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_23()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt");
@@ -2562,7 +2563,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_24()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt");
@@ -2573,7 +2574,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_25()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt").AddOutputItem("tp", "i");
@@ -2584,7 +2585,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_26()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt").AddOutputItem("tp", "i");
@@ -2595,7 +2596,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_27()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt").AddOutputProperty("tp", "p");
@@ -2606,7 +2607,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_28()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddTask("tt").AddOutputProperty("tp", "p");
@@ -2617,7 +2618,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_29()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddItemGroup().AddItem("i", "i1");
@@ -2628,7 +2629,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_30()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddItemGroup().AddItem("i", "i1");
@@ -2639,7 +2640,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_31()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddItemGroup().AddItem("i", "i1").AddMetadata("m", "m1");
@@ -2650,12 +2651,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ModifyUnparentedParentChild_32()
         {
             var element = ProjectRootElement.Create().AddTarget("t").AddPropertyGroup().AddProperty("p", "v1");
             element.Parent.Parent.RemoveAllChildren();
             element.Value = "v2";
-        }       
+        }
     }
 }

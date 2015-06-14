@@ -9,11 +9,11 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     sealed public class ResolveNonMSBuildProjectOutput_Tests
     {
         private const string attributeProject = "Project";
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestVerifyReferenceAttributes()
         {
             // a correct reference
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestResolve()
         {
             // empty pre-generated string
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestManagedCheck()
         {
             Hashtable unresolvedOutputs = null;
@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that the UnresolvedProjectReferences output parameter is populated correctly.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TestUnresolvedReferences()
         {
             Hashtable unresolvedOutputs = null;
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(unresolvedOutputs["MCDep2.vcproj"] == projectRefs[1]);
         }
 
-        [TestMethod]
+        [Test]
         public void TestVerifyProjectReferenceItem()
         {
             ResolveNonMSBuildProjectOutput rvpo = new ResolveNonMSBuildProjectOutput();

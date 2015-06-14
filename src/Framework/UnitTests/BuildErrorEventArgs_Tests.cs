@@ -8,14 +8,14 @@
 using System;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the BuildErrorEventArg class.
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class BuildErrorEventArgs_Tests
     {
         /// <summary>
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EventArgsCtors()
         {
             BuildErrorEventArgs beea = new BuildErrorEventArgs2();

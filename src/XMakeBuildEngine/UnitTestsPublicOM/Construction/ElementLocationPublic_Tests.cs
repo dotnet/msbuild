@@ -1,4 +1,6 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="ElementLocationPublic_Tests.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -7,7 +9,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -26,7 +28,7 @@ namespace Microsoft.Build.UnitTests.Construction
     /// <summary>
     /// Tests for the ElementLocation class
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class ElementLocationPublic_Tests
     {
         /// <summary>
@@ -35,7 +37,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// loaded from disk, or has been edited since.
         /// This is really a test of our XmlDocumentWithLocation.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShouldHaveFilePathLocationEvenIfNotLoadedNorSavedYet()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -52,7 +54,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Element location should reflect rename.
         /// This is really a test of our XmlXXXXWithLocation.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void XmlLocationReflectsRename()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -73,7 +75,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// We should cache ElementLocation objects for perf.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void XmlLocationsAreCached()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -92,7 +94,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test many of the getters
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LocationStringsMedley()
         {
             string content = @"

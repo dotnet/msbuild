@@ -5,20 +5,20 @@ using System;
 using System.Collections;
 using System.Xml;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class DependentAssembly_Tests
     {
         /// <summary>
         /// Verify that a reference without a public key works correctly
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializeDeserialize()
         {
             DependentAssembly dependentAssembly = new DependentAssembly();

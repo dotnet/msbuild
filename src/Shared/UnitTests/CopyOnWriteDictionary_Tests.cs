@@ -6,31 +6,25 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for the CopyOnWriteDictionary 
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class CopyOnWriteDictionary_Tests
     {
         /// <summary>
         /// Find with the same key inserted using the indexer
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Indexer_ReferenceFound()
         {
             object k1 = new Object();
@@ -49,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Find something not present with the indexer
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(KeyNotFoundException))]
         public void Indexer_NotFound()
         {
@@ -60,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Find with the same key inserted using TryGetValue
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TryGetValue_ReferenceFound()
         {
             object k1 = new Object();
@@ -80,7 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Find something not present with TryGetValue
         /// </summary>
-        [TestMethod]
+        [Test]
         public void TryGetValue_ReferenceNotFound()
         {
             var dictionary = new CopyOnWriteDictionary<object, object>();
@@ -96,7 +90,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Find a key that wasn't inserted but is equal
         /// </summary>
-        [TestMethod]
+        [Test]
         public void EqualityComparer()
         {
             string k1 = String.Concat("ke", "y");
@@ -119,7 +113,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Cloning sees the same values 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneVisibility()
         {
             var dictionary = new CopyOnWriteDictionary<string, string>();
@@ -135,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Clone uses same comparer 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneComparer()
         {
             var dictionary = new CopyOnWriteDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -150,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Writes to original not visible to clone
         /// </summary>
-        [TestMethod]
+        [Test]
         public void OriginalWritesNotVisibleToClones()
         {
             var dictionary = new CopyOnWriteDictionary<string, string>();
@@ -176,7 +170,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Writes to clone not visible to original
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CloneWritesNotVisibleToOriginal()
         {
             var dictionary = new CopyOnWriteDictionary<string, string>();
@@ -204,7 +198,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Serialize basic case
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializeDeserialize()
         {
             CopyOnWriteDictionary<int, string> dictionary = new CopyOnWriteDictionary<int, string>();
@@ -230,7 +224,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Serialize custom comparer
         /// </summary>
-        [TestMethod]
+        [Test]
         public void SerializeDeserialize2()
         {
             CopyOnWriteDictionary<string, string> dictionary = new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);

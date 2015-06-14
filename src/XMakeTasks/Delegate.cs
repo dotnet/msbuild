@@ -3,17 +3,10 @@
 
 using System;
 using System.IO;
-using System.Text;
-using Microsoft.Win32;
-using System.Resources;
-using System.Reflection;
-using System.Collections;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
+
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {

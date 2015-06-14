@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Test the logging service component
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class LoggingService_Tests
     {
         #region Data
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// This method is run before each test case is run.
         /// We instantiate and initialize a new logging service each time
         /// </summary>
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             InitializeLoggingService();
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify the CreateLogger method create a LoggingService in both Synchronous mode
         /// and Asynchronous mode. 
         /// </summary>
-        [TestMethod]
+        [Test]
         public void CreateLogger()
         {
             // Generic host which has some default properties set inside of it
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test the IBuildComponent method InitializeComponent, make sure the component gets the parameters it expects
         /// </summary>
-        [TestMethod]
+        [Test]
         public void InitializeComponent()
         {
             IBuildComponent logServiceComponent = (IBuildComponent)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify the correct exception is thrown when a null Component host is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void InitializeComponentNullHost()
         {
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an exception is thrown if in itialized is called after the service has been shutdown
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void InitializeComponentAfterShutdown()
         {
@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify the correct exceptions are thrown if the loggers crash
         /// when they are shutdown
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShutDownComponentExceptionsInForwardingLogger()
         {
             // Cause a logger exception in the shutdown of the logger
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify the correct exceptions are thrown when ILoggers
         /// throw exceptions during shutdown
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShutDownComponentExceptionsInLogger()
         {
             LoggerThrowException logger = new LoggerThrowException(true, false, new LoggerException("Hello"));
@@ -189,7 +189,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// when events are being logged while shutdown is occuring 
         /// that the shutdown still completes.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ShutdownWaitForEvents()
         {
             // LoggingBuildComponentHost loggingHost = new LoggingBuildComponentHost();
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure an exception is thrown if shutdown is called 
         /// more than once
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void DoubleShutdown()
         {
@@ -228,7 +228,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify we get an exception when a null logger is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void NullLogger()
         {
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify we get an exception when we try and register a logger
         /// and the system has already shutdown
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void RegisterLoggerServiceShutdown()
         {
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify a logger exception when initializing a logger is rethrown 
         /// as a logger exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(LoggerException))]
         public void LoggerExceptionInInitialize()
         {
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify a general exception when initializing a logger is wrapped 
         /// as a InternalLogger exception
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalLoggerException))]
         public void GeneralExceptionInInitialize()
         {
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify a critical exception is not wrapped
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(StackOverflowException))]
         public void ILoggerExceptionInInitialize()
         {
@@ -286,7 +286,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Register an good Logger and verify it was registered.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterILoggerAndINodeLoggerGood()
         {
             ConsoleLogger consoleLogger = new ConsoleLogger();
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Try and register the same logger multiple times
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterDuplicateLogger()
         {
             ConsoleLogger consoleLogger = new ConsoleLogger();
@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify we get an exception when a null logger forwarding logger is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void NullForwardingLogger()
         {
@@ -347,7 +347,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify we get an exception when we try and register a distributed logger
         /// and the system has already shutdown
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void RegisterDistributedLoggerServiceShutdown()
         {
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Register both a good central logger and a good forwarding logger
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterGoodDistributedAndCentralLogger()
         {
             string configurableClassName = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
@@ -391,7 +391,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Have a one forwarding logger which forwards build started and finished and have one which does not and a regular logger. Expect the central loggers to all get 
         /// one build started and one build finished event only.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterGoodDistributedAndCentralLoggerTestBuildStartedFinished()
         {
             string configurableClassNameA = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
@@ -434,7 +434,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Try and register a duplicate central logger
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterDuplicateCentralLogger()
         {
             string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
@@ -458,7 +458,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Try and register a duplicate Forwarding logger
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterDuplicateForwardingLoggerLogger()
         {
             string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
@@ -495,7 +495,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify we get an exception when a null description collection is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void NullDescriptionCollection()
         {
@@ -505,7 +505,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify we get an exception when an empty description collection is passed in
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void EmptyDescriptionCollection()
         {
@@ -515,7 +515,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify we get an exception when we try and register a description and the component has already shutdown
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void NullForwardingLoggerSink()
         {
@@ -530,7 +530,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Register both a good central logger and a good forwarding logger
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterGoodDiscriptions()
         {
             string configurableClassName = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
@@ -592,7 +592,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Try and register a duplicate central logger
         /// </summary>
-        [TestMethod]
+        [Test]
         public void RegisterDuplicateDistributedCentralLogger()
         {
             string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify the getters and setters for the properties work.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void Properties()
         {
             // Test OnlyLogCriticalEvents
@@ -645,7 +645,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify how a null packet is handled. There should be an InternalErrorException thrown
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void NullPacketReceived()
         {
@@ -657,7 +657,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify when a non logging packet is received. 
         /// An invalid operation should be thrown
         /// </summary>
-        [TestMethod]
+        [Test]
         [ExpectedException(typeof(InternalErrorException))]
         public void NonLoggingPacketPacketReceived()
         {
@@ -671,7 +671,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// properly passed to ProcessLoggingEvent
         /// An invalid operation should be thrown
         /// </summary>
-        [TestMethod]
+        [Test]
         public void LoggingPacketReceived()
         {
             LoggingServicesLogMethod_Tests.ProcessBuildEventHelper loggingService = (LoggingServicesLogMethod_Tests.ProcessBuildEventHelper)LoggingServicesLogMethod_Tests.ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);

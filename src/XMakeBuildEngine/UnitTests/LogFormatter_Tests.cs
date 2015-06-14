@@ -2,17 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
-using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using System.Text.RegularExpressions;
 using System.Globalization;
+
+using Microsoft.Build.BackEnd.Logging;
+
+using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class LogFormatterTest
     {
         /*
@@ -21,7 +19,7 @@ namespace Microsoft.Build.UnitTests
         * Tests the mainline: a medium length duration
         * Note the ToString overload used in FormatTimeSpan is culture insensitive.
         */
-        [TestMethod]
+        [Test]
         public void TimeSpanMediumDuration()
         {
             TimeSpan t = new TimeSpan(1254544900);
@@ -36,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         * Format a TimeSpan where the duration is zero.
         * Note the ToString overload used in FormatTimeSpan is culture insensitive.
         */
-        [TestMethod]
+        [Test]
         public void TimeSpanZeroDuration()
         {
             TimeSpan t = new TimeSpan(0);
@@ -44,7 +42,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("00:00:00", result);
         }
 
-        [TestMethod]
+        [Test]
         public void FormatDateTime()
         {
             DateTime testTime = new DateTime(2007 /*Year*/, 08 /*Month*/, 20 /*Day*/, 10 /*Hour*/, 42 /*Minutes*/, 44 /*Seconds*/, 12 /*Milliseconds*/);

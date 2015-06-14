@@ -3,25 +3,14 @@
 
 using System;
 using System.Xml;
-using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
-using System.IO.Pipes;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Globalization;
-using System.Xml.Serialization;
-using System.Security;
-using System.Security.Policy;
-using System.Security.Permissions;
 
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
 
@@ -472,7 +461,9 @@ namespace Microsoft.Build.Internal
             // "MSBuildExtensionsPath32". This points to whatever the value of "Program Files (x86)" environment variable is;
             // but on a 32 bit box this isn't set, and we should use "Program Files" instead.
             string programFiles32 = FrameworkLocationHelper.programFiles32;
-            string extensionsPath32 = Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix);
+            string extensionsPath32 = NativeMethodsShared.IsWindows
+                                          ? Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix)
+                                          : programFiles32;
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
 
             // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a 
@@ -481,7 +472,11 @@ namespace Microsoft.Build.Internal
             {
                 // if ProgramFiles and ProgramFiles(x86) are the same, then this is a 32-bit box, 
                 // so we only want to set MSBuildExtensionsPath64 if they're not
-                string extensionsPath64 = Path.Combine(FrameworkLocationHelper.programFiles64, ReservedPropertyNames.extensionsPathSuffix);
+                string extensionsPath64 = NativeMethodsShared.IsWindows
+                                              ? Path.Combine(
+                                                  FrameworkLocationHelper.programFiles64,
+                                                  ReservedPropertyNames.extensionsPathSuffix)
+                                              : FrameworkLocationHelper.programFiles64;
                 environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
             }
 
