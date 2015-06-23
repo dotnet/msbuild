@@ -275,15 +275,12 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                object name = null;
+                string name = null;
                 if (attr != null)
                 {
-                    name =
-                        attr.NamedArguments.FirstOrDefault(
-                            t =>
-                            t.MemberName.Equals("FrameworkDisplayName", StringComparison.InvariantCultureIgnoreCase));
+                    name = (string)attr.ConstructorArguments[0].Value;
                 }
-                return name == null ? null : name as FrameworkName;
+                return name == null ? null : new FrameworkName(name);
             }
 
             FrameworkName frameworkAttribute = null;
