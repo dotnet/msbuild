@@ -2263,7 +2263,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 resourcesFile = Utilities.WriteTestResX(false, null, null);
 
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
-                t.OutputResources = new ITaskItem[] { new TaskItem("||") };
+                t.OutputResources = new ITaskItem[] { new TaskItem(NativeMethodsShared.IsWindows ? "||" : "\0") };
 
                 bool success = t.Execute();
 
