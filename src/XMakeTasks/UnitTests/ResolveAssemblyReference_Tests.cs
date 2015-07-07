@@ -194,6 +194,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         protected static readonly string s_frameworksPath = Path.Combine(s_rootPathPrefix, "Frameworks");
 
+        protected static readonly string s_myComponentsRootPath = Path.Combine(s_rootPathPrefix, "MyComponents");
+        protected static readonly string s_myComponents10Path = Path.Combine(s_myComponentsRootPath, "1.0");
+        protected static readonly string s_myComponents20Path = Path.Combine(s_myComponentsRootPath, "2.0");
+        protected static readonly string s_myComponentsMiscPath = Path.Combine(s_myComponentsRootPath, "misc");
+
+        protected static readonly string s_myComponentsV05Path = Path.Combine(s_myComponentsRootPath, "v0.5");
+        protected static readonly string s_myComponentsV10Path = Path.Combine(s_myComponentsRootPath, "v1.0");
+        protected static readonly string s_myComponentsV20Path = Path.Combine(s_myComponentsRootPath, "v2.0");
+        protected static readonly string s_myComponentsV30Path = Path.Combine(s_myComponentsRootPath, "v3.0");
+
+        protected static readonly string s_unifyMeDll_V05Path = Path.Combine(s_myComponentsV05Path, "UnifyMe.dll");
+        protected static readonly string s_unifyMeDll_V10Path = Path.Combine(s_myComponentsV10Path, "UnifyMe.dll");
+        protected static readonly string s_unifyMeDll_V20Path = Path.Combine(s_myComponentsV20Path, "UnifyMe.dll");
+        protected static readonly string s_unifyMeDll_V30Path = Path.Combine(s_myComponentsV30Path, "UnifyMe.dll");
+
+        protected static readonly string s_myComponents40ComponentPath = Path.Combine(s_myComponentsRootPath, "4.0Component");
+        protected static readonly string s_40ComponentDependsOnOnlyv4AssembliesDllPath = Path.Combine(s_myComponents40ComponentPath, "DependsOnOnlyv4Assemblies.dll");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -202,9 +220,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             "{RawFileName}",
             "{CandidateAssemblyFiles}",
             s_myProjectPath,
-            @"c:\MyComponents\misc\",
-            @"c:\MyComponents\1.0",
-            @"c:\MyComponents\2.0",
+            s_myComponentsMiscPath,
+            s_myComponents10Path,
+            s_myComponents20Path,
             s_myVersion20Path,
             @"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}",
             "{AssemblyFolders}",
@@ -323,7 +341,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"C:\myassemblies\My.Assembly.dll",
                 Path.Combine(s_myProjectPath, "mscorlib.dll"),                           // This is an mscorlib.dll that has no metadata (i.e. GetAssemblyName returns null)
                 Path.Combine(s_myProjectPath, "System.Data.dll"),                        // This is a System.Data.dll that has the wrong pkt, it shouldn't be matched.
-                @"C:\MyComponents\MyGrid.dll",                                           // A vendor component that we should find in the registry.
+                Path.Combine(s_myComponentsRootPath, "MyGrid.dll"),                      // A vendor component that we should find in the registry.
                 @"C:\MyComponentsA\CustomComponent.dll",                                           // A vendor component that we should find in the registry.
                 @"C:\MyComponentsB\CustomComponent.dll",                                           // A vendor component that we should find in the registry.
                 @"C:\MyWinMDComponents7\MyGridWinMD.winmd",
@@ -341,11 +359,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"C:\MyWinMDComponents\HKLM Components\MyHKLMControlWinMD.winmd",                    // A vendor component that is installed under HKLM but not HKCU.
                 @"C:\MyWinMDComponents\HKCU Components\MyHKLMandHKCUControlWinMD.winmd",             // A vendor component that is installed under HKLM and HKCU.
                 @"C:\MyWinMDComponents\HKLM Components\MyHKLMandHKCUControlWinMD.winmd",             // A vendor component that is installed under HKLM and HKCU.
-                @"C:\MyComponents\v3.0\MyControlWithFutureTargetNDPVersion.dll",         // The future version of a component.
-                @"C:\MyComponents\v2.0\MyControlWithFutureTargetNDPVersion.dll",         // The current version of a component.
-                @"C:\MyComponents\v1.0\MyNDP1Control.dll",                               // A control that only has an NDP 1.0 version
-                @"C:\MyComponents\v2.0\MyControlWithPastTargetNDPVersion.dll",           // The current version of a component.
-                @"C:\MyComponents\v1.0\MyControlWithPastTargetNDPVersion.dll",           // The past version of a component.
+                Path.Combine(s_myComponentsV30Path, "MyControlWithFutureTargetNDPVersion.dll"),         // The future version of a component.
+                Path.Combine(s_myComponentsV20Path, "MyControlWithFutureTargetNDPVersion.dll"),         // The current version of a component.
+                Path.Combine(s_myComponentsV10Path, "MyNDP1Control.dll"),                               // A control that only has an NDP 1.0 version
+                Path.Combine(s_myComponentsV20Path, "MyControlWithPastTargetNDPVersion.dll"),           // The current version of a component.
+                Path.Combine(s_myComponentsV10Path, "MyControlWithPastTargetNDPVersion.dll"),           // The past version of a component.
                 @"C:\MyComponentServicePack\MyControlWithServicePack.dll",               // The service pack 1 version of the control
                 @"C:\MyComponentBase\MyControlWithServicePack.dll",                      // The non-service pack version of the control.
                 @"C:\MyComponentServicePack2\MyControlWithServicePack.dll",              // The service pack 1 version of the control
@@ -421,9 +439,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // ==[Unification Testing]============================================================================================================
             //@"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
-            @"C:\MyComponents\v1.0\UnifyMe.dll",
-                @"C:\MyComponents\v2.0\UnifyMe.dll",
-                @"C:\MyComponents\v3.0\UnifyMe.dll",
+            s_unifyMeDll_V10Path,
+                s_unifyMeDll_V20Path,
+                s_unifyMeDll_V30Path,
             //@"C:\MyComponents\v4.0\UnifyMe.dll",
             @"C:\MyApp\v0.5\DependsOnUnified.dll",
                 @"C:\MyApp\v1.0\DependsOnUnified.dll",
@@ -436,18 +454,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // ==[Unification Testing]============================================================================================================
 
             // ==[Test assemblies reference higher versions than the current target framework=====================================================
-            @"c:\MyComponents\misc\DependsOnOnlyv4Assemblies.dll",  // Only depends on 4.0.0 assemblies
-                @"c:\MyComponents\misc\ReferenceVersion9.dll", //Is in redist list and is a 9.0 assembly
-                @"c:\MyComponents\misc\DependsOn9.dll", //Depends on 9.0 assemblies
-                @"c:\MyComponents\misc\DependsOn9Also.dll", // Depends on 9.0 assemblies
-                @"c:\MyComponents\1.0\DependsOn9.dll", // Depends on 9.0 assemblies
-                @"c:\MyComponents\2.0\DependsOn9.dll", // Depends on 9.0 assemblies
+            Path.Combine(s_myComponentsMiscPath, "DependsOnOnlyv4Assemblies.dll"),  // Only depends on 4.0.0 assemblies
+                Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), //Is in redist list and is a 9.0 assembly
+                Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), //Depends on 9.0 assemblies
+                Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), // Depends on 9.0 assemblies
+                Path.Combine(s_myComponents10Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
+                Path.Combine(s_myComponents20Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
                 @"c:\Regress444809\A.dll",
                 @"c:\Regress444809\v2\A.dll",
                 @"c:\Regress444809\B.dll",
                 @"c:\Regress444809\C.dll",
                 @"c:\Regress444809\D.dll",
-                @"c:\MyComponents\4.0Component\DependsOnOnlyv4Assemblies.dll",
+                s_40ComponentDependsOnOnlyv4AssembliesDllPath,
                 @"C:\Regress714052\MSIL\a.dll",
                 @"C:\Regress714052\X86\a.dll",
                 @"C:\Regress714052\NONE\a.dll",
@@ -459,12 +477,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"C:\Regress714052\Mix\b.dll",
                 @"C:\Regress714052\Mix\b.winmd",
 
-                @"C:\MyComponents\X.dll",
-                @"C:\MyComponents\Y.dll",
-                @"C:\MyComponents\Z.dll",
+                Path.Combine(s_myComponentsRootPath, "X.dll"),
+                Path.Combine(s_myComponentsRootPath, "Y.dll"),
+                Path.Combine(s_myComponentsRootPath, "Z.dll"),
 
-                @"C:\MyComponents\Microsoft.Build.dll",
-                @"C:\MyComponents\DependsOnMSBuild12.dll",
+                Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"),
+                Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"),
 
             // WinMD sample files
             @"C:\WinMD\v4\mscorlib.dll",  // Fake 4.0 mscorlib so we can actually resolve it for one of the tests. With a version of 4
@@ -1184,12 +1202,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
 
-            if (String.Compare(path, @"C:\MyComponents\v0.5\UnifyMe.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_unifyMeDll_V05Path, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 throw new FileNotFoundException();
             }
 
-            if (String.Compare(path, @"C:\MyComponents\v1.0\UnifyMe.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_unifyMeDll_V10Path, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("UnifyMe, Version=1.0.0.0, Culture=nEUtral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
             }
@@ -1240,12 +1258,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("DependsOnUnified, Version=3.0.0.0, Culture=neutral, PublicKEYToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\MyComponents\v2.0\UnifyMe.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_unifyMeDll_V20Path, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyTOKEn=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\MyComponents\v3.0\UnifyMe.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_unifyMeDll_V30Path, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("UnifyMe, Version=3.0.0.0, Culture=neutral, PublICkeyToken=b77a5c561934e089");
             }
@@ -1270,35 +1288,35 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Set up assembly names for testing target framework version checks
             // Is version 4 and will only depends on 4.0 assemblies
-            if (String.Compare(path, @"c:\MyComponents\4.0Component\DependsOnOnlyv4Assemblies.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_40ComponentDependsOnOnlyv4AssembliesDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnOnlyv4Assemblies, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
             // Is version 9 and will not have any dependencies, will be in the redist list
-            if (String.Compare(path, @"c:\MyComponents\misc\ReferenceVersion9.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("ReferenceVersion9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
             // Is a third party assembly which depends on a version 9 assembly
-            if (String.Compare(path, @"c:\MyComponents\misc\DependsOn9.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOn9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
             //A second assembly which depends on version 9 framework assemblies.
-            if (String.Compare(path, @"c:\MyComponents\misc\DependsOn9Also.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOn9Also, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\MyComponents\1.0\DependsOn9.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponents10Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOn9, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\MyComponents\2.0\DependsOn9.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponents20Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOn9, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
@@ -1375,27 +1393,27 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
-            if (String.Compare(path, @"c:\MyComponents\X.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("X, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\MyComponents\Z.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("Z, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\MyComponents\Y.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("Y, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\MyComponents\Microsoft.Build.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             }
 
-            if (String.Compare(path, @"c:\MyComponents\DependsOnMSBuild12.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnMSBuild12, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
@@ -2017,7 +2035,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\MyComponents\MyGrid.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "MyGrid.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2136,7 +2154,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Set up assembly names for testing target framework version checks
             // Is version 4 and will only depends on 4.0 assemblies
-            if (String.Compare(path, @"c:\MyComponents\4.0Component\DependsOnOnlyv4Assemblies.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_40ComponentDependsOnOnlyv4AssembliesDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2145,7 +2163,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             // Is version 9 and will not have any dependencies, will be in the redist list
-            if (String.Compare(path, @"c:\MyComponents\misc\ReferenceVersion9.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2155,7 +2173,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             // Is a third party assembly which depends on a version 9 assembly
-            if (String.Compare(path, @"c:\MyComponents\misc\DependsOn9.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2165,7 +2183,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             //A second assembly which depends on version 9 framework assemblies.
-            if (String.Compare(path, @"c:\MyComponents\misc\DependsOn9Also.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2173,7 +2191,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyComponents\1.0\DependsOn9.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponents10Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2181,7 +2199,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyComponents\2.0\DependsOn9.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponents20Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2214,7 +2232,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyComponents\X.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2222,12 +2240,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyComponents\Z.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[] { };
             }
 
-            if (String.Compare(path, @"c:\MyComponents\Y.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2235,12 +2253,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyComponents\Microsoft.Build.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[] { };
             }
 
-            if (String.Compare(path, @"c:\MyComponents\DependsOnMSBuild12.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2641,7 +2659,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v3.0\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return @"C:\MyComponents\v3.0";
+                    return s_myComponentsV30Path;
                 }
 
                 if
@@ -2651,7 +2669,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase) == 0
                 )
                 {
-                    return @"C:\MyComponents\v2.0";
+                    return s_myComponentsV20Path;
                 }
 
                 if
@@ -2684,7 +2702,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0
                 )
                 {
-                    return @"C:\MyComponents\v1.0";
+                    return s_myComponentsV10Path;
                 }
 
                 if (String.Compare(subKey, @"SOFTWARE\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase) == 0)
@@ -3199,7 +3217,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v1.0\UnifyMe.dll")
+                        new TaskItem(s_unifyMeDll_V10Path)
                     };
 
                 // Construct the app.config.
@@ -3241,7 +3259,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v1.0\UnifyMe.dll")
+                        new TaskItem(s_unifyMeDll_V10Path)
                     };
 
 
@@ -3294,7 +3312,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v1.0\UnifyMe.dll")
+                        new TaskItem(s_unifyMeDll_V10Path)
                     };
 
 
@@ -3439,7 +3457,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v1.0\UnifyMe.dll")
+                        new TaskItem(s_unifyMeDll_V10Path)
                     };
 
                 // Construct the app.config.
@@ -3492,7 +3510,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v1.0\UnifyMe.dll")
+                        new TaskItem(s_unifyMeDll_V10Path)
                     };
 
                 // Construct the app.config.
@@ -3545,7 +3563,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v1.0\UnifyMe.dll")
+                        new TaskItem(s_unifyMeDll_V10Path)
                     };
 
                 // Construct the app.config.
@@ -3596,7 +3614,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v0.5\UnifyMe.dll")
+                        new TaskItem(s_unifyMeDll_V05Path)
                     };
 
                 // Construct the app.config.
@@ -3918,7 +3936,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <value></value>
             new internal string[] DefaultPaths
             {
-                get { return new string[] { @"C:\MyComponents\v0.5", @"C:\MyComponents\v1.0", @"C:\MyComponents\v2.0", @"C:\MyComponents\v3.0" }; }
+                get { return new string[] { s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
             }
 
 
@@ -4204,7 +4222,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <value></value>
             new internal string[] DefaultPaths
             {
-                get { return new string[] { @"C:\MyApp\v0.5", @"C:\MyApp\v1.0", @"C:\MyComponents\v0.5", @"C:\MyComponents\v1.0", @"C:\MyComponents\v2.0", @"C:\MyComponents\v3.0" }; }
+                get { return new string[] { @"C:\MyApp\v0.5", @"C:\MyApp\v1.0", s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
             }
 
 
@@ -4863,7 +4881,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <value></value>
             new internal string[] DefaultPaths
             {
-                get { return new string[] { @"C:\MyApp\v0.5", @"C:\MyApp\v1.0", @"C:\MyApp\v2.0", @"C:\MyApp\v3.0", @"C:\MyComponents\v0.5", @"C:\MyComponents\v1.0", @"C:\MyComponents\v2.0", @"C:\MyComponents\v3.0" }; }
+                get { return new string[] { @"C:\MyApp\v0.5", @"C:\MyApp\v1.0", @"C:\MyApp\v2.0", @"C:\MyApp\v3.0", s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
             }
 
 
@@ -4910,7 +4928,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 Assert.IsTrue(succeeded);
                 AssertNoCase("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
-                AssertNoCase(@"C:\MyComponents\v2.0\UnifyMe.dll", t.ResolvedDependencyFiles[0].ItemSpec);
+                AssertNoCase(s_unifyMeDll_V20Path, t.ResolvedDependencyFiles[0].ItemSpec);
 
                 engine.AssertLogContains
                 (
@@ -4985,7 +5003,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     Assert.IsTrue(t.ResolvedFiles[0].ItemSpec.Contains(@"C:\MyApp\v1.0\DependsOnUnified.dll"), "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
                     Assert.IsTrue(t.ResolvedDependencyFiles.Length == 1, "Expected there to be two resolved dependencies");
                     AssertNoCase("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
-                    AssertNoCase(@"C:\MyComponents\v1.0\UnifyMe.dll", t.ResolvedDependencyFiles[0].ItemSpec);
+                    AssertNoCase(s_unifyMeDll_V10Path, t.ResolvedDependencyFiles[0].ItemSpec);
 
                     engine.AssertLogDoesntContain
                     (
@@ -5224,7 +5242,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"C:\MyApp\v1.0\DependsOnUnified.dll"), "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
                 Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"C:\MyApp\v2.0\DependsOnUnified.dll"), "Expected the ItemSpec of the resolved file to be the item spec of the 2.0.0.0 assembly");
                 AssertNoCase("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
-                AssertNoCase(@"C:\MyComponents\v2.0\UnifyMe.dll", t.ResolvedDependencyFiles[0].ItemSpec);
+                AssertNoCase(s_unifyMeDll_V20Path, t.ResolvedDependencyFiles[0].ItemSpec);
 
                 engine.AssertLogContains
                 (
@@ -5284,7 +5302,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 Assert.IsTrue(succeeded);
                 AssertNoCase("UnifyMe, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
-                AssertNoCase(@"C:\MyComponents\v3.0\UnifyMe.dll", t.ResolvedDependencyFiles[0].ItemSpec);
+                AssertNoCase(s_unifyMeDll_V30Path, t.ResolvedDependencyFiles[0].ItemSpec);
 
                 engine.AssertLogContains
                 (
@@ -5898,7 +5916,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOnOnlyv4Assemblies.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOnOnlyv4Assemblies.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -5944,7 +5962,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.IsTrue(t.ResolvedFiles[0].GetMetadata("OriginalItemSpec").Equals("AnotherOne", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(t.ResolvedFiles[0].ItemSpec.Equals(@"c:\MyComponents\misc\ReferenceVersion9.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(t.ResolvedFiles[0].ItemSpec.Equals(Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -6075,7 +6093,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogDoesntContain("MSB3257");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\ReferenceVersion9.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -6184,7 +6202,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogDoesntContain("MSB3257");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -6217,8 +6235,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", "DependsOn9Also", "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "9.0.0.0", "4.0.0.0"));
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9.dll"), "Expected to not find assembly, but did.");
-            Assert.IsFalse(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9Also.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll")), "Expected to not find assembly, but did.");
+            Assert.IsFalse(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -6251,8 +6269,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogDoesntContain("MSB3258");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(2, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9Also.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll")), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -6309,7 +6327,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             List<string> additionalPaths = new List<string>();
-            additionalPaths.Add(@"c:\MyComponents\4.0Component\");
+            additionalPaths.Add(s_myComponents40ComponentPath);
             additionalPaths.Add(s_myVersion40Path);
             additionalPaths.Add(s_myVersion90Path + Path.DirectorySeparatorChar);
 
@@ -6321,8 +6339,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(2, t.ResolvedFiles.Length);
             Assert.AreEqual(2, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\4.0Component\DependsOnOnlyv4Assemblies.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_40ComponentDependsOnOnlyv4AssembliesDllPath), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -6350,7 +6368,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             List<string> additionalPaths = new List<string>();
-            additionalPaths.Add(@"c:\MyComponents\4.0Component\");
+            additionalPaths.Add(s_myComponents40ComponentPath);
             additionalPaths.Add(s_myVersion40Path);
             additionalPaths.Add(s_myVersion90Path + Path.DirectorySeparatorChar);
 
@@ -6362,8 +6380,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
             Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\4.0Component\DependsOnOnlyv4Assemblies.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsFalse(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_40ComponentDependsOnOnlyv4AssembliesDllPath), "Expected to find assembly, but didn't.");
+            Assert.IsFalse(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll")), "Expected to find assembly, but didn't.");
         }
     }
 
@@ -6402,7 +6420,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll")), "Expected to find assembly, but didn't.");
 
             // Do the resolution without the metadata, expect it to not work since we should not be able to find Dependson9 version 10.0.0.0
             e = new MockEngine();
@@ -6455,7 +6473,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll")), "Expected to find assembly, but didn't.");
 
             // Do the resolution without the metadata, expect it to not work since we should not be able to find Dependson9 version 10.0.0.0
             e = new MockEngine();
@@ -6508,7 +6526,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyComponents\misc\DependsOn9.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll")), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -6521,7 +6539,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             TaskItem item = new TaskItem("DependsOn9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             item.SetMetadata("IgnoreVersionForFrameworkReference", "True");
-            item.SetMetadata("HintPath", @"c:\MyComponents\misc\DependsOn9.dll");
+            item.SetMetadata("HintPath", Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"));
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -7445,7 +7463,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { @"c:\MyComponents" };
+            t.SearchPaths = new string[] { s_myComponentsRootPath };
             t.CopyLocalDependenciesWhenParentReferenceInGac = false;
             bool succeeded = Execute(t);
 
@@ -7476,7 +7494,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { @"c:\MyComponents" };
+            t.SearchPaths = new string[] { s_myComponentsRootPath };
             t.TargetFrameworkMoniker = "I am a random frameworkName";
             bool succeeded = Execute(t);
 
@@ -7514,7 +7532,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { @"c:\MyComponents" };
+            t.SearchPaths = new string[] { s_myComponentsRootPath };
             t.CopyLocalDependenciesWhenParentReferenceInGac = false;
             bool succeeded = Execute(t);
 
@@ -7566,7 +7584,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { @"c:\MyComponents" };
+            t.SearchPaths = new string[] { s_myComponentsRootPath };
             t.CopyLocalDependenciesWhenParentReferenceInGac = true;
             bool succeeded = Execute(t);
 
@@ -7606,7 +7624,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { @"c:\MyComponents" };
+            t.SearchPaths = new string[] { s_myComponentsRootPath };
             t.CopyLocalDependenciesWhenParentReferenceInGac = true;
             bool succeeded = Execute(t);
 
@@ -8993,7 +9011,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"C:\MyComponents\v2.0\MyControlWithFutureTargetNDPVersion.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myComponentsV20Path, "MyControlWithFutureTargetNDPVersion.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -9012,7 +9030,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"C:\MyComponents\v1.0\MyNDP1Control.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myComponentsV10Path, "MyNDP1Control.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -9031,7 +9049,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.AreEqual(@"C:\MyComponents\v2.0\MyControlWithPastTargetNDPVersion.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.AreEqual(Path.Combine(s_myComponentsV20Path, "MyControlWithPastTargetNDPVersion.dll"), t.ResolvedFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -11904,7 +11922,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v1.0\UnifyMe.dll"),
+                        new TaskItem(s_unifyMeDll_V10Path),
                         new TaskItem(Path.GetTempPath())
                     };
 
@@ -12323,7 +12341,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ITaskItem[] assemblyFiles = new TaskItem[]
                     {
-                        new TaskItem(@"C:\MyComponents\v1.0\UnifyMe.dll")
+                        new TaskItem(s_unifyMeDll_V10Path)
                     };
 
             // Construct the app.config.
@@ -15751,7 +15769,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
                 MockEngine e = new MockEngine();
                 t.BuildEngine = e;
-                t.AssemblyFiles = new ITaskItem[] { new TaskItem(@"c:\MyComponents\misc\DependsOn9Also.dll") };
+                t.AssemblyFiles = new ITaskItem[] { new TaskItem(Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll")) };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}", fullFrameworkDirectory };
                 t.TargetFrameworkDirectories = new string[] { targetFrameworkDirectory };
                 t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(profileRedistList) };
@@ -15763,7 +15781,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 bool success = Execute(t, false);
                 Assert.IsTrue(success, "Expected no errors.");
                 Assert.AreEqual(0, t.ResolvedFiles.Length, "Expected no resolved assemblies.");
-                string warningMessage = t.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", @"c:\MyComponents\misc\DependsOn9Also.dll", "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.TargetFrameworkMoniker);
+                string warningMessage = t.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.TargetFrameworkMoniker);
                 e.AssertLogContains(warningMessage);
             }
             finally
@@ -15799,7 +15817,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
                 MockEngine e = new MockEngine();
                 t.BuildEngine = e;
-                TaskItem item = new TaskItem(@"c:\MyComponents\misc\DependsOn9Also.dll");
+                TaskItem item = new TaskItem(Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"));
                 item.SetMetadata("SpecificVersion", "true");
                 t.AssemblyFiles = new ITaskItem[] { item };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}", fullFrameworkDirectory };
@@ -15812,7 +15830,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 bool success = Execute(t);
                 Assert.IsTrue(success, "Expected no errors.");
                 Assert.AreEqual(1, t.ResolvedFiles.Length, "Expected no resolved assemblies.");
-                string warningMessage = t.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", @"c:\MyComponents\misc\DependsOn9Also.dll", "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "Client");
+                string warningMessage = t.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), "System, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "Client");
                 e.AssertLogDoesntContain(warningMessage);
             }
             finally
@@ -15946,7 +15964,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 t.BuildEngine = e;
                 TaskItem item = new TaskItem(@"DependsOnOnlyv4Assemblies, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
                 t.Assemblies = new ITaskItem[] { item };
-                t.SearchPaths = new string[] { @"c:\MyComponents\4.0Component\", "{GAC}" };
+                t.SearchPaths = new string[] { s_myComponents40ComponentPath, "{GAC}" };
                 t.TargetFrameworkDirectories = new string[] { targetFrameworkDirectory };
                 t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(profileRedistList) };
                 t.IgnoreDefaultInstalledAssemblyTables = true;
