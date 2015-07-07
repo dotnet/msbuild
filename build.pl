@@ -259,12 +259,16 @@ sub runtests {
 
     # Build the command to run the test
     my $command = '';
+    my $excludeCategories = '';
+    if ($^O ne 'MSWin32') {
+        $excludeCategories = "WindowsOnly";
+    }
     if ($testName) {
         $command = "\"$nunitConsole\" -run:$testName -xml:$xmlResultFile " . join (' ', @files);
     } elsif ($fixture) {
-        $command = "\"$nunitConsole\" -fixture:$fixture -xml:$xmlResultFile " . join (' ', @files);
+        $command = "\"$nunitConsole\" -fixture:$fixture -exclude:$excludeCategories -xml:$xmlResultFile " . join (' ', @files);
     } else {
-        $command = "\"$nunitConsole\" -xml:$xmlResultFile " . join (' ', @files);
+        $command = "\"$nunitConsole\" -exclude:$excludeCategories -xml:$xmlResultFile " . join (' ', @files);
     }
     print $command . "\n" unless $silent;
 
