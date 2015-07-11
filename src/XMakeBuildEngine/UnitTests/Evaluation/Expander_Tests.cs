@@ -2152,7 +2152,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.IO.Path]::Combine($(Drive), `$(File)`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:\foo\file.txt" : "/foo/file.txt", result);
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:\foo\file.txt" : "/foobar/file.txt", result);
         }
 
         /// <summary>
