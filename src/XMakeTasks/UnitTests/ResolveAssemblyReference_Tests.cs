@@ -226,6 +226,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_myLibraries_V1_E_EDllPath = Path.Combine(s_myLibraries_V1_EPath, "E.dll");
         protected static readonly string s_myLibraries_V2_DDllPath = Path.Combine(s_myLibraries_V2Path, "D.dll");
 
+        protected static readonly string s_regress454863_ADllPath = Path.Combine(s_rootPathPrefix, "Regress454863", "A.dll");
+        protected static readonly string s_regress454863_BDllPath = Path.Combine(s_rootPathPrefix, "Regress454863", "B.dll");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -420,8 +423,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"C:\Regress313747\MS.Internal.Test.Automation.Office.Excel.dll",
                 @"C:\Regress442570\A.dll",
                 @"C:\Regress442570\B.dll",
-                @"C:\Regress454863\A.dll",
-                @"C:\Regress454863\B.dll",
+                s_regress454863_ADllPath,
+                s_regress454863_BDllPath,
                 @"C:\Regress393931\A.metadata_dll",
                 @"c:\Regress387218\A.dll",
                 @"c:\Regress387218\B.dll",
@@ -1767,7 +1770,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress454863\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress454863_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1831,7 +1834,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress454863\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress454863_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -15088,7 +15091,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("A"),
                 new TaskItem("B")
             };
-            t.Assemblies[0].SetMetadata("HintPath", @"C:\Regress454863\A.dll");
+            t.Assemblies[0].SetMetadata("HintPath", s_regress454863_ADllPath);
 
             t.SearchPaths = new string[]
             {
@@ -15097,8 +15100,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"C:\Regress454863\A.dll"), "Expected A.dll to be resolved.");
-            Assert.IsTrue(!ContainsItem(t.ResolvedFiles, @"C:\Regress454863\B.dll"), "Expected B.dll to be *not* be resolved.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_regress454863_ADllPath), "Expected A.dll to be resolved.");
+            Assert.IsTrue(!ContainsItem(t.ResolvedFiles, s_regress454863_BDllPath), "Expected B.dll to be *not* be resolved.");
         }
 
         [Test]
