@@ -238,6 +238,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_regress444809_V2RootPath = Path.Combine(s_regress444809RootPath, "v2");
         protected static readonly string s_regress444809_V2_ADllPath = Path.Combine(s_regress444809_V2RootPath, "A.dll");
 
+        protected static readonly string s_myAppRootPath = Path.Combine(s_rootPathPrefix, "MyApp");
+        protected static readonly string s_myApp_V05Path = Path.Combine(s_myAppRootPath, "v0.5");
+        protected static readonly string s_myApp_V10Path = Path.Combine(s_myAppRootPath, "v1.0");
+        protected static readonly string s_myApp_V20Path = Path.Combine(s_myAppRootPath, "v2.0");
+        protected static readonly string s_myApp_V30Path = Path.Combine(s_myAppRootPath, "v3.0");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -408,7 +414,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyNameMismatch\Foo.dll",
                 @"c:\MyEscapedName\=A=.dll",
                 @"c:\MyEscapedName\__'ASP'dw0024ry.dll",
-                @"c:\MyApp\DependsOnSimpleA.dll",
+                Path.Combine(s_myAppRootPath, "DependsOnSimpleA.dll"),
                 @"C:\Regress312873\a.dll",
                 @"C:\Regress312873\b.dll",
                 @"C:\Regress312873-2\a.dll",
@@ -469,12 +475,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 s_unifyMeDll_V20Path,
                 s_unifyMeDll_V30Path,
             //@"C:\MyComponents\v4.0\UnifyMe.dll",
-            @"C:\MyApp\v0.5\DependsOnUnified.dll",
-                @"C:\MyApp\v1.0\DependsOnUnified.dll",
-                @"C:\MyApp\v2.0\DependsOnUnified.dll",
-                @"C:\MyApp\v3.0\DependsOnUnified.dll",
-                @"C:\MyApp\DependsOnWeaklyNamedUnified.dll",
-                @"C:\MyApp\v1.0\DependsOnEverettSystem.dll",
+            Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"),
+                Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"),
+                Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"),
+                Path.Combine(s_myApp_V30Path, "DependsOnUnified.dll"),
+                Path.Combine(s_myAppRootPath, "DependsOnWeaklyNamedUnified.dll"),
+                Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"),
                 @"C:\Framework\Everett\System.dll",
                 @"C:\Framework\Whidbey\System.dll",
             // ==[Unification Testing]============================================================================================================
@@ -1249,12 +1255,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
 
-            if (String.Compare(path, @"C:\MyApp\v1.0\DependsOnEverettSystem.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnEverettSystem, VersION=1.0.5000.0, Culture=neutral, PublicKeyToken=feedbeadbadcadbe");
             }
 
-            if (String.Compare(path, @"C:\MyApp\v0.5\DependsOnUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnUnified, Version=0.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
             }
@@ -1269,17 +1275,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("C, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\MyApp\v1.0\DependsOnUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnUnified, VERSion=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\MyApp\v2.0\DependsOnUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnUnified, VeRSIon=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\MyApp\v3.0\DependsOnUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V30Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("DependsOnUnified, Version=3.0.0.0, Culture=neutral, PublicKEYToken=b77a5c561934e089");
             }
@@ -2013,7 +2019,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyApp\DependsOnSimpleA.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myAppRootPath, "DependsOnSimpleA.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2125,7 +2131,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\MyApp\v0.5\DependsOnWeaklyNamedUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V05Path, "DependsOnWeaklyNamedUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2133,7 +2139,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\MyApp\v1.0\DependsOnEverettSystem.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2141,7 +2147,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\MyApp\v0.5\DependsOnUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2149,7 +2155,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\MyApp\v1.0\DependsOnUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2157,7 +2163,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\MyApp\v2.0\DependsOnUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2165,7 +2171,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\MyApp\v3.0\DependsOnUnified.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, Path.Combine(s_myApp_V30Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -3045,7 +3051,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <value></value>
             new internal string[] DefaultPaths
             {
-                get { return new string[] { @"C:\MyApp\v1.0", @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
+                get { return new string[] { s_myApp_V10Path, @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
             }
 
             /// <summary>
@@ -3096,7 +3102,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", @"C:\MyApp\v1.0\DependsOnEverettSystem.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"))
                 );
 
                 engine.AssertLogContains
@@ -3137,7 +3143,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;
-                t.SearchPaths = new string[] { @"C:\MyApp\v1.0", @"C:\Framework\Everett" }; ;
+                t.SearchPaths = new string[] { s_myApp_V10Path, @"C:\Framework\Everett" }; ;
 
                 bool succeeded = Execute(t);
 
@@ -3145,7 +3151,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.AreEqual(0, t.ResolvedDependencyFiles.Length);
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", @"C:\MyApp\v1.0\DependsOnEverettSystem.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"))
                 );
             }
 
@@ -3449,7 +3455,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     Assert.AreEqual(0, t.ResolvedDependencyFiles.Length);
                     engine.AssertLogDoesntContain
                     (
-                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                     );
                 }
                 finally
@@ -4248,7 +4254,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <value></value>
             new internal string[] DefaultPaths
             {
-                get { return new string[] { @"C:\MyApp\v0.5", @"C:\MyApp\v1.0", s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
+                get { return new string[] { s_myApp_V05Path, s_myApp_V10Path, s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
             }
 
 
@@ -4299,7 +4305,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssertNoCase("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                 );
 
                 // Cleanup.
@@ -4375,7 +4381,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     Assert.AreEqual(0, t.ResolvedDependencyFiles.Length);
                     engine.AssertLogDoesntContain
                     (
-                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                     );
                 }
                 finally
@@ -4431,6 +4437,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 t.AppConfigFile = appConfigFile;
 
                 bool succeeded = Execute(t);
+                Console.WriteLine (((MockEngine)(t.BuildEngine)).Log);
 
                 Assert.IsTrue(succeeded);
                 Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
@@ -4489,7 +4496,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssertNoCase("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                 );
 
                 // Cleanup.
@@ -4559,7 +4566,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                 );
 
                 engine.AssertLogContains
@@ -4621,7 +4628,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssertNoCase("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "0.5.0.0", appConfigFile, @"C:\MyApp\v0.5\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "0.5.0.0", appConfigFile, Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"))
                 );
 
                 // Cleanup.
@@ -4907,7 +4914,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             /// <value></value>
             new internal string[] DefaultPaths
             {
-                get { return new string[] { @"C:\MyApp\v0.5", @"C:\MyApp\v1.0", @"C:\MyApp\v2.0", @"C:\MyApp\v3.0", s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
+                get { return new string[] { s_myApp_V05Path, s_myApp_V10Path, s_myApp_V20Path, s_myApp_V30Path, s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
             }
 
 
@@ -4963,7 +4970,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                 );
             }
 
@@ -5026,7 +5033,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                     Assert.IsTrue(succeeded);
                     Assert.IsTrue(t.ResolvedFiles.Length == 1, "Expected there to only be one resolved file");
-                    Assert.IsTrue(t.ResolvedFiles[0].ItemSpec.Contains(@"C:\MyApp\v1.0\DependsOnUnified.dll"), "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
+                    Assert.IsTrue(t.ResolvedFiles[0].ItemSpec.Contains(Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")), "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
                     Assert.IsTrue(t.ResolvedDependencyFiles.Length == 1, "Expected there to be two resolved dependencies");
                     AssertNoCase("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
                     AssertNoCase(s_unifyMeDll_V10Path, t.ResolvedDependencyFiles[0].ItemSpec);
@@ -5038,7 +5045,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                     engine.AssertLogDoesntContain
                     (
-                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", @"C:\MyApp\v2.0\DependsOnUnified.dll")
+                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))
                     );
                 }
                 finally
@@ -5120,7 +5127,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     Assert.AreEqual(0, t.ResolvedDependencyFiles.Length);
                     engine.AssertLogDoesntContain
                     (
-                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                        String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                     );
                 }
                 finally
@@ -5192,8 +5199,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     Assert.IsTrue(succeeded);
                     Assert.IsTrue(t.ResolvedFiles.Length == 0, "Expected there to be no resolved files");
 
-                    Assert.IsFalse(ContainsItem(t.ResolvedFiles, @"C:\MyApp\v1.0\DependsOnUnified.dll"), "Expected the ItemSpec of the resolved file to not be the item spec of the 1.0.0.0 assembly");
-                    Assert.IsFalse(ContainsItem(t.ResolvedFiles, @"C:\MyApp\v2.0\DependsOnUnified.dll"), "Expected the ItemSpec of the resolved file to not be the item spec of the 2.0.0.0 assembly");
+                    Assert.IsFalse(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")), "Expected the ItemSpec of the resolved file to not be the item spec of the 1.0.0.0 assembly");
+                    Assert.IsFalse(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll")), "Expected the ItemSpec of the resolved file to not be the item spec of the 2.0.0.0 assembly");
                     string stringList = ResolveAssemblyReference.GenerateSubSetName(null, new ITaskItem[] { new TaskItem(subsetListPath) });
                     engine.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", assemblyNames[0].ItemSpec, "UniFYme, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", stringList));
                     engine.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", assemblyNames[1].ItemSpec, "UniFYme, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "2.0.0.0", "1.0.0.0"));
@@ -5265,8 +5272,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 Assert.IsTrue(succeeded);
                 Assert.IsTrue(t.ResolvedFiles.Length == 2, "Expected to find two resolved assemblies");
-                Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"C:\MyApp\v1.0\DependsOnUnified.dll"), "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
-                Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"C:\MyApp\v2.0\DependsOnUnified.dll"), "Expected the ItemSpec of the resolved file to be the item spec of the 2.0.0.0 assembly");
+                Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")), "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
+                Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll")), "Expected the ItemSpec of the resolved file to be the item spec of the 2.0.0.0 assembly");
                 AssertNoCase("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
                 AssertNoCase(s_unifyMeDll_V20Path, t.ResolvedDependencyFiles[0].ItemSpec);
 
@@ -5277,12 +5284,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                 );
 
                 engine.AssertLogDoesntContain
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "2.0.0.0", @"C:\MyApp\v2.0\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "2.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))
                 );
             }
 
@@ -5337,12 +5344,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", @"C:\MyApp\v1.0\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "1.0.0.0", Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
                 );
 
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "2.0.0.0", @"C:\MyApp\v2.0\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "2.0.0.0", Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))
                 );
             }
 
@@ -5388,7 +5395,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssertNoCase("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", t.ResolvedDependencyFiles[0].GetMetadata("FusionName"));
                 engine.AssertLogContains
                 (
-                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "0.5.0.0", @"C:\MyApp\v0.5\DependsOnUnified.dll")
+                    String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "0.5.0.0", Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"))
                 );
             }
         }
@@ -8410,7 +8417,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("DependsOnSimpleA")
             };
 
-            t.SearchPaths = new string[] { @"c:\MyApp", @"c:\MyStronglyNamed", @"c:\MyWeaklyNamed" };
+            t.SearchPaths = new string[] { s_myAppRootPath, @"c:\MyStronglyNamed", @"c:\MyWeaklyNamed" };
             Execute(t);
             Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
             Assert.AreEqual(@"c:\MyWeaklyNamed\A.dll", t.ResolvedDependencyFiles[0].ItemSpec);
