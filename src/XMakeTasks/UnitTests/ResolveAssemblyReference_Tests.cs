@@ -229,6 +229,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_regress454863_ADllPath = Path.Combine(s_rootPathPrefix, "Regress454863", "A.dll");
         protected static readonly string s_regress454863_BDllPath = Path.Combine(s_rootPathPrefix, "Regress454863", "B.dll");
 
+        protected static readonly string s_regress444809RootPath = Path.Combine(s_rootPathPrefix, "Regress444809");
+        protected static readonly string s_regress444809_ADllPath = Path.Combine(s_regress444809RootPath, "A.dll");
+        protected static readonly string s_regress444809_BDllPath = Path.Combine(s_regress444809RootPath, "B.dll");
+        protected static readonly string s_regress444809_CDllPath = Path.Combine(s_regress444809RootPath, "C.dll");
+        protected static readonly string s_regress444809_DDllPath = Path.Combine(s_regress444809RootPath, "D.dll");
+
+        protected static readonly string s_regress444809_V2RootPath = Path.Combine(s_regress444809RootPath, "v2");
+        protected static readonly string s_regress444809_V2_ADllPath = Path.Combine(s_regress444809_V2RootPath, "A.dll");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -477,11 +486,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), // Depends on 9.0 assemblies
                 Path.Combine(s_myComponents10Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
                 Path.Combine(s_myComponents20Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
-                @"c:\Regress444809\A.dll",
-                @"c:\Regress444809\v2\A.dll",
-                @"c:\Regress444809\B.dll",
-                @"c:\Regress444809\C.dll",
-                @"c:\Regress444809\D.dll",
+                s_regress444809_ADllPath,
+                s_regress444809_V2_ADllPath,
+                s_regress444809_BDllPath,
+                s_regress444809_CDllPath,
+                s_regress444809_DDllPath,
                 s_40ComponentDependsOnOnlyv4AssembliesDllPath,
                 @"C:\Regress714052\MSIL\a.dll",
                 @"C:\Regress714052\X86\a.dll",
@@ -1338,31 +1347,31 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("DependsOn9, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\Regress444809\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress444809_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\Regress444809\v2\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress444809_V2_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\Regress444809\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress444809_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("B, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\Regress444809\C.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress444809_CDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("C, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\Regress444809\D.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress444809_DDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("D, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
@@ -2224,7 +2233,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Regress444809\C.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress444809_CDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2233,7 +2242,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Regress444809\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress444809_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2241,7 +2250,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Regress444809\D.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_regress444809_DDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -10813,7 +10822,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.SearchPaths = new string[] {
-                @"c:\Regress444809", @"c:\Regress444809\v2"
+                s_regress444809RootPath, s_regress444809_V2RootPath
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -10822,11 +10831,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Strings", Assembly.GetExecutingAssembly());
 
             //Unresolved primary reference with itemspec "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null".
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", @"c:\Regress444809\A.dll");
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", @"c:\Regress444809\v2\A.dll");
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", @"c:\Regress444809\C.dll");
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", @"c:\Regress444809\B.dll");
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", @"c:\Regress444809\v2\a.dll");
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_CDllPath);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_V2_ADllPath);
         }
 
         /// <summary>
@@ -10860,7 +10869,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.SearchPaths = new string[] {
-                @"c:\Regress444809", @"c:\Regress444809\v2"
+                s_regress444809RootPath, s_regress444809_V2RootPath
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -10868,10 +10877,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null", String.Empty);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", @"c:\Regress444809\v2\A.dll");
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnResolvedPrimaryItemSpec", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null");
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", @"c:\Regress444809\D.dll");
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", @"c:\Regress444809\B.dll");
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_DDllPath);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
         }
 
         /// <summary>
