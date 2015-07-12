@@ -212,6 +212,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_myComponents40ComponentPath = Path.Combine(s_myComponentsRootPath, "4.0Component");
         protected static readonly string s_40ComponentDependsOnOnlyv4AssembliesDllPath = Path.Combine(s_myComponents40ComponentPath, "DependsOnOnlyv4Assemblies.dll");
 
+        protected static readonly string s_myLibrariesRootPath = Path.Combine(s_rootPathPrefix, "MyLibraries");
+        protected static readonly string s_myLibraries_V1Path = Path.Combine(s_myLibrariesRootPath, "v1");
+        protected static readonly string s_myLibraries_V2Path = Path.Combine(s_myLibrariesRootPath, "v2");
+        protected static readonly string s_myLibraries_V1_EPath = Path.Combine(s_myLibraries_V1Path, "E");
+
+        protected static readonly string s_myLibraries_ADllPath = Path.Combine(s_myLibrariesRootPath, "A.dll");
+        protected static readonly string s_myLibraries_BDllPath = Path.Combine(s_myLibrariesRootPath, "B.dll");
+        protected static readonly string s_myLibraries_CDllPath = Path.Combine(s_myLibrariesRootPath, "C.dll");
+        protected static readonly string s_myLibraries_TDllPath = Path.Combine(s_myLibrariesRootPath, "T.dll");
+
+        protected static readonly string s_myLibraries_V1_DDllPath = Path.Combine(s_myLibraries_V1Path, "D.dll");
+        protected static readonly string s_myLibraries_V1_E_EDllPath = Path.Combine(s_myLibraries_V1_EPath, "E.dll");
+        protected static readonly string s_myLibraries_V2_DDllPath = Path.Combine(s_myLibraries_V2Path, "D.dll");
+
         /// <summary>
         /// Search paths to use.
         /// </summary>
@@ -368,14 +382,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"C:\MyComponentBase\MyControlWithServicePack.dll",                      // The non-service pack version of the control.
                 @"C:\MyComponentServicePack2\MyControlWithServicePack.dll",              // The service pack 1 version of the control
                 Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"),  // A devices mscorlib.
-                @"c:\MyLibraries\A.dll",
+                s_myLibraries_ADllPath,
                 @"c:\MyExecutableLibraries\A.exe",
-                @"c:\MyLibraries\B.dll",
-                @"c:\MyLibraries\C.dll",
-                @"c:\MyLibraries\v1\D.dll",
-                @"c:\MyLibraries\v1\E\E.dll",
+                s_myLibraries_BDllPath,
+                s_myLibraries_CDllPath,
+                s_myLibraries_V1_DDllPath,
+                s_myLibraries_V1_E_EDllPath,
                 @"c:\RogueLibraries\v1\D.dll",
-                @"c:\MyLibraries\v2\D.dll",
+                s_myLibraries_V2_DDllPath,
                 @"c:\MyStronglyNamed\A.dll",
                 @"c:\MyWeaklyNamed\A.dll",
                 @"c:\MyInaccessible\A.dll",
@@ -1184,7 +1198,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension(AssemblyRef.SystemData);
             }
 
-            if (path.EndsWith(@"c:\MyLibraries\v1\D.dll"))
+            if (path.EndsWith(s_myLibraries_V1_DDllPath))
             {
                 // Version 1 of D
                 return new AssemblyNameExtension("D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa");
@@ -1196,7 +1210,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("D, VERsion=1.0.0.0, Culture=neutral, PublicKeyToken=bbbbbbbbbbbbbbbb");
             }
 
-            if (path.EndsWith(@"c:\MyLibraries\v1\E\E.dll"))
+            if (path.EndsWith(s_myLibraries_V1_E_EDllPath))
             {
                 return new AssemblyNameExtension("E, Version=0.0.0.0, Culture=neutral, PUBlicKeyToken=null");
             }
@@ -1268,7 +1282,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("UnifyMe, Version=3.0.0.0, Culture=neutral, PublICkeyToken=b77a5c561934e089");
             }
 
-            if (path.EndsWith(@"c:\MyLibraries\v2\D.dll"))
+            if (path.EndsWith(s_myLibraries_V2_DDllPath))
             {
                 return new AssemblyNameExtension("D, VErsion=2.0.0.0, CulturE=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
             }
@@ -2052,7 +2066,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
 
-            if (String.Compare(path, @"c:\MyLibraries\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_myLibraries_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2060,7 +2074,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyLibraries\t.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_myLibraries_TDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2068,7 +2082,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyLibraries\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_myLibraries_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2076,7 +2090,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyLibraries\v1\d.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_myLibraries_V1_DDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2084,7 +2098,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyLibraries\v2\d.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_myLibraries_V2_DDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2092,7 +2106,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyLibraries\v1\E\E.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(path, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
                 {
@@ -10694,16 +10708,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries",
-                @"c:\MyLibraries\v1",
-                @"c:\MyLibraries\v2"
+                s_myLibrariesRootPath,
+                s_myLibraries_V1Path,
+                s_myLibraries_V2Path
             };
 
             Execute(t);
 
             Assert.AreEqual(2, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\MyLibraries\v2\D.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\MyLibraries\v1\D.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_DDllPath), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath), "Expected to find assembly, but didn't.");
             Assert.AreEqual(1, t.SuggestedRedirects.Length);
             Assert.IsTrue(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"), "Expected to find suggested redirect, but didn't");
             Assert.IsTrue(e.Warnings == 1, "Should only be one warning for suggested redirects.");
@@ -10734,7 +10748,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.SearchPaths = new string[] {
-                @"c:\MyLibraries", @"c:\MyLibraries\v1", @"c:\MyLibraries\v2"
+                s_myLibrariesRootPath, s_myLibraries_V1Path, s_myLibraries_V2Path
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -10757,9 +10771,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         ),
                         "D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa",
                         "1.0.0.0",
-                        "c:\\MyLibraries\\v1\\D.dll",
+                        s_myLibraries_V1_DDllPath,
                         "2.0.0.0",
-                        "c:\\MyLibraries\\v2\\D.dll"
+                        s_myLibraries_V2_DDllPath
                     )
                 )
             );
@@ -10883,7 +10897,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.SearchPaths = new string[] {
-                @"c:\MyLibraries", @"c:\MyLibraries\v1", @"c:\MyLibraries\v2"
+                s_myLibrariesRootPath, s_myLibraries_V1Path, s_myLibraries_V2Path
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -10926,7 +10940,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -10937,7 +10951,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.AreEqual(0, t.SuggestedRedirects.Length);
             Assert.AreEqual(3, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v1\D.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -10964,7 +10978,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -10975,7 +10989,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.AreEqual(0, t.SuggestedRedirects.Length);
             Assert.AreEqual(3, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v1\D.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -11007,7 +11021,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.SearchPaths = new string[] {
-                @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -11016,7 +11030,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.IsTrue(result, @"Expected a success because this conflict is solvable.");
             Assert.AreEqual(3, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v2\D.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V2_DDllPath), "Expected to find assembly, but didn't.");
             Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
         }
 
@@ -11047,7 +11061,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -11056,8 +11070,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.IsTrue(e.Warnings == 2, @"Expected a warning because this is an unresolvable conflict.");
             Assert.AreEqual(2, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v2\D.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v1\D.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V2_DDllPath), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -11084,15 +11098,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.SearchPaths = new string[] {
-                @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
             };
 
             bool result = Execute(t);
 
             Assert.IsTrue(result, @"Expected success because this conflict is solvable.");
             Assert.AreEqual(2, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v2\D.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v1\D.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V2_DDllPath), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -11121,7 +11135,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries", @"c:\MyLibraries\v1", @"c:\RogueLibraries\v1"
+                s_myLibrariesRootPath, s_myLibraries_V1Path, @"c:\RogueLibraries\v1"
             };
 
             bool result = Execute(t);
@@ -11157,13 +11171,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries", @"c:\MyLibraries\v1", @"c:\RogueLibraries\v1"
+                s_myLibrariesRootPath, s_myLibraries_V1Path, @"c:\RogueLibraries\v1"
             };
 
             Execute(t);
 
             Assert.AreEqual(3, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v1\D.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -11290,7 +11304,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries",
+                s_myLibrariesRootPath,
                 @"c:\MyExecutableLibraries"
             };
 
@@ -11330,7 +11344,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[]
             {
                 @"c:\MyExecutableLibraries",
-                @"c:\MyLibraries"
+                s_myLibrariesRootPath
             };
 
             Execute(t);
@@ -11338,7 +11352,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\a.DlL"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_ADllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -11367,7 +11381,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries",
+                s_myLibrariesRootPath,
                 @"c:\MyExecutableLibraries"
             };
 
@@ -11376,7 +11390,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\a.DlL"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_ADllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -11406,7 +11420,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[]
             {
                 @"c:\MyExecutableLibraries",
-                @"c:\MyLibraries"
+                s_myLibrariesRootPath
             };
 
             Execute(t);
@@ -11448,7 +11462,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[]
             {
                 @"c:\MyStronglyNamed",
-                @"c:\MyLibraries"
+                s_myLibrariesRootPath
             };
 
             Execute(t);
@@ -11486,7 +11500,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[]
             {
                 @"c:\MyStronglyNamed",
-                @"c:\MyLibraries"
+                s_myLibrariesRootPath
             };
 
             Execute(t);
@@ -11522,7 +11536,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1"
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
             };
 
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -11530,7 +11544,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\v1\D.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath), "Expected to find assembly, but didn't.");
         }
 
 
@@ -11575,7 +11589,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries", @"c:\MyLibraries\v1", @"c:\MyLibraries\v1\E"
+                s_myLibrariesRootPath, s_myLibraries_V1Path, s_myLibraries_V1_EPath
             };
             t.TargetFrameworkDirectories = new string[] { @"c:\myfx" };
 
@@ -11583,13 +11597,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.AreEqual(2, t.ResolvedFiles.Length);
             Assert.AreEqual(1, t.ResolvedDependencyFiles.Length); // Not 2 because D is treated as a primary reference.
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\MyLibraries\v1\E\E.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_E_EDllPath), "Expected to find assembly, but didn't.");
             Assert.AreEqual(0, engine.Warnings);
             Assert.AreEqual(0, engine.Errors);
 
             foreach (ITaskItem item in t.ResolvedDependencyFiles)
             {
-                if (0 == String.Compare(item.ItemSpec, @"c:\MyLibraries\v1\E\E.dll", StringComparison.OrdinalIgnoreCase))
+                if (0 == String.Compare(item.ItemSpec, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
                 {
                     Assert.AreEqual("false", item.GetMetadata("CopyLocal"));
                 }
@@ -11636,7 +11650,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries", @"c:\MyLibraries\v1", @"c:\MyLibraries\v2", @"c:\MyLibraries\v1\E"
+                s_myLibrariesRootPath, s_myLibraries_V1Path, s_myLibraries_V2Path, s_myLibraries_V1_EPath
             };
             t.TargetFrameworkDirectories = new string[] { @"c:\myfx" };
 
@@ -11644,17 +11658,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.AreEqual(2, t.ResolvedFiles.Length);
             Assert.AreEqual(3, t.ResolvedDependencyFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\MyLibraries\v1\D.dll"), "Expected to find assembly, but didn't.");
-            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\MyLibraries\v1\E\E.dll"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_E_EDllPath), "Expected to find assembly, but didn't.");
 
             foreach (ITaskItem item in t.ResolvedDependencyFiles)
             {
-                if (0 == String.Compare(item.ItemSpec, @"c:\MyLibraries\v1\D.dll", StringComparison.OrdinalIgnoreCase))
+                if (0 == String.Compare(item.ItemSpec, s_myLibraries_V1_DDllPath, StringComparison.OrdinalIgnoreCase))
                 {
                     Assert.AreEqual("false", item.GetMetadata("CopyLocal"));
                 }
 
-                if (0 == String.Compare(item.ItemSpec, @"c:\MyLibraries\v1\E\E.dll", StringComparison.OrdinalIgnoreCase))
+                if (0 == String.Compare(item.ItemSpec, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
                 {
                     Assert.AreEqual("true", item.GetMetadata("CopyLocal"));
                 }
@@ -12288,7 +12302,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries"
+                s_myLibrariesRootPath
             };
 
             Execute(t);
@@ -12296,7 +12310,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\a.DlL"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_ADllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -12315,7 +12329,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("A")
             };
 
-            t.TargetFrameworkDirectories = new string[] { @"c:\boguslocation", @"c:\MyLibraries" };
+            t.TargetFrameworkDirectories = new string[] { @"c:\boguslocation", s_myLibrariesRootPath };
             t.SearchPaths = new string[]
             {
                 @"{TargetFrameworkDirectory}",
@@ -12326,7 +12340,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(e.Warnings == 0, "No warnings expected in this scenario.");
             Assert.IsTrue(e.Errors == 0, "No errors expected in this scenario.");
             Assert.AreEqual(1, t.ResolvedFiles.Length);
-            Assert.IsTrue(ContainsItem(t.ResolvedFiles, @"c:\MyLibraries\a.DlL"), "Expected to find assembly, but didn't.");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_ADllPath), "Expected to find assembly, but didn't.");
         }
 
         /// <summary>
@@ -15388,7 +15402,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.SearchPaths = new string[]
             {
-                @"c:\MyLibraries"
+                s_myLibrariesRootPath
             };
 
             t.Assemblies[1].SetMetadata("RequiredTargetFramework", "3.0");
