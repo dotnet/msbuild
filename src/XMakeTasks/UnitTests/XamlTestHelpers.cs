@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests
                 // Add an assembly reference.
                 cp.ReferencedAssemblies.Add("System.dll");
                 cp.ReferencedAssemblies.Add("System.Data.dll");
-                cp.ReferencedAssemblies.Add("System.XML.dll");
+                cp.ReferencedAssemblies.Add("System.Xml.dll");
                 cp.ReferencedAssemblies.Add(Path.Combine(PathToMSBuildBinaries, "Microsoft.Build.Framework.dll"));
                 cp.ReferencedAssemblies.Add(Path.Combine(PathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"));
                 cp.ReferencedAssemblies.Add(Path.Combine(PathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll"));

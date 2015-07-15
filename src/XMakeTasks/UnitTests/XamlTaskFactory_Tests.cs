@@ -434,10 +434,10 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
                 // Add an assembly reference.
                 cp.ReferencedAssemblies.Add("System.dll");
-                cp.ReferencedAssemblies.Add("System.XML.dll");
-                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "microsoft.build.utilities.core.dll"));
-                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "microsoft.build.tasks.core.dll"));
-                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "microsoft.build.framework.dll"));
+                cp.ReferencedAssemblies.Add("System.Xml.dll");
+                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"));
+                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll"));
+                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Framework.dll"));
                 cp.ReferencedAssemblies.Add("System.Data.dll");
 
                 // Generate an executable instead of 
@@ -490,10 +490,10 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
                 // Add an assembly reference.
                 cp.ReferencedAssemblies.Add("System.dll");
-                cp.ReferencedAssemblies.Add("System.XML.dll");
-                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "microsoft.build.utilities.core.dll"));
-                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "microsoft.build.tasks.core.dll"));
-                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "microsoft.build.framework.dll"));
+                cp.ReferencedAssemblies.Add("System.Xml.dll");
+                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"));
+                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll"));
+                cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Framework.dll"));
                 cp.ReferencedAssemblies.Add("System.Data.dll");
 
                 // Generate an executable instead of 
