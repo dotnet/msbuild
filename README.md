@@ -10,12 +10,12 @@ For more information on MSBuild, see the [MSDN documentation](https://msdn.micro
 * Clone the sources: `git clone https://github.com/Microsoft/msbuild.git`
 
 ### Building
-For the full supported experience, you will need to have Visual Studio 2015 Preview or later. You can open the solution in Visual Studio 2013, but you will encounter issues building with the provided scripts.
+For the full supported experience, you will need to have Visual Studio 2015. You can open the solution in Visual Studio 2013, but you will encounter issues building with the provided scripts.
 
-To get started on **Visual Studio 2015 Preview**:
+To get started on **Visual Studio 2015**:
 
-1. Set up a box with Visual Studio 2015 Preview. Either 
-[install  Visual Studio 2015 Preview](http://www.visualstudio.com/en-us/downloads/visual-studio-2015-downloads-vs), 
+1. Set up a box with Visual Studio 2015. Either 
+[install  Visual Studio 2015](http://www.visualstudio.com/en-us/downloads/visual-studio-2015-downloads-vs), 
 or grab a [prebuilt Azure VM image](http://blogs.msdn.com/b/visualstudioalm/archive/2014/06/04/visual-studio-14-ctp-now-available-in-the-virtual-machine-azure-gallery.aspx).
 2. Clone the source code (see above).
 3. Open src/MSBuild.sln solution in Visual Studio 2015.
