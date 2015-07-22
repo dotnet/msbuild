@@ -319,21 +319,13 @@ namespace Microsoft.Build.Tasks
                     FileUtilities.DeleteNoThrow(destinationFileState.Name);
                 }
 
-                if (NativeMethodsShared.IsWindows)
-                {
-                    hardLinkCreated = NativeMethods.CreateHardLink(destinationFileState.Name, sourceFileState.Name, IntPtr.Zero /* reserved, must be NULL */);
-                }
-                else
-                {
-                    hardLinkCreated = NativeMethods.link(sourceFileState.Name, destinationFileState.Name) == 0;
-                }
+                string errorMessage;
+                hardLinkCreated = NativeMethods.MakeHardLink(destinationFileState.Name, sourceFileState.Name, out errorMessage);
 
                 if (!hardLinkCreated)
                 {
-                    int errorCode = NativeMethodsShared.IsWindows ? Marshal.GetHRForLastWin32Error() : Marshal.GetLastWin32Error();
-                    Exception hardLinkException = NativeMethodsShared.IsWindows ? Marshal.GetExceptionForHR(errorCode) : new Exception("The link() library call failed with the following error code: " + errorCode);
                     // This is only a message since we don't want warnings when copying to network shares etc.
-                    Log.LogMessageFromResources(MessageImportance.Low, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, hardLinkException.Message);
+                    Log.LogMessageFromResources(MessageImportance.Low, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, errorMessage);
                 }
             }
 
