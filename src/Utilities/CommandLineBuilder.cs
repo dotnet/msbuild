@@ -503,13 +503,6 @@ namespace Microsoft.Build.Utilities
 
         #region Appending switches with quoted parameters
 
-        internal static string FixCommandLineSwitch(string switchName)
-        {
-            return !NativeMethodsShared.IsWindows && !string.IsNullOrEmpty(switchName) && switchName.StartsWith("/")
-                       ? "-" + switchName.Substring(1)
-                       : switchName;
-        }
-
         /// <summary>
         /// Appends a command-line switch that has no separate value, without any quoting.
         /// This method appends a space to the command line (if it's not currently empty) before the switch.
