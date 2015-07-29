@@ -54,14 +54,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.False(t.GenerateSource); // "GenerateSource should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/source"),
+                @"/source",
                 false /* no response file */);
 
             t.GenerateSource = true;
             Assert.True(t.GenerateSource); // "GenerateSource should be true"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/source"),
+                @"/source",
                 false /* no response file */);
         }
 
@@ -98,14 +98,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.Null(t.OutputAssembly); // "OutputAssembly should be null by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/out:"),
+                @"/out:",
                 false /* no response file */);
 
             t.OutputAssembly = testParameterValue;
             Assert.Equal(testParameterValue, t.OutputAssembly); // "New OutputAssembly value should be set"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/out:") + testParameterValue,
+                @"/out:" + testParameterValue,
                 false /* no response file */);
         }
 
@@ -121,14 +121,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.Null(t.OutputAssembly); // "OutputAssembly should be null by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/out:"),
+                @"/out:",
                 false /* no response file */);
 
             t.OutputAssembly = testParameterValue;
             Assert.Equal(testParameterValue, t.OutputAssembly); // "New OutputAssembly value should be set"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/out:") + testParameterValue,
+                @"/out:" + testParameterValue,
                 false /* no response file */);
         }
 
@@ -144,14 +144,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.Null(t.RuntimeCallableWrapperAssembly); // "RuntimeCallableWrapper should be null by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/rcw:"),
+                @"/rcw:",
                 false /* no response file */);
 
             t.RuntimeCallableWrapperAssembly = testParameterValue;
             Assert.Equal(testParameterValue, t.RuntimeCallableWrapperAssembly); // "New RuntimeCallableWrapper value should be set"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/rcw:") + testParameterValue,
+                @"/rcw:" + testParameterValue,
                 false /* no response file */);
         }
 
@@ -167,14 +167,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.Null(t.RuntimeCallableWrapperAssembly); // "RuntimeCallableWrapper should be null by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/rcw:"),
+                @"/rcw:",
                 false /* no response file */);
 
             t.RuntimeCallableWrapperAssembly = testParameterValue;
             Assert.Equal(testParameterValue, t.RuntimeCallableWrapperAssembly); // "New RuntimeCallableWrapper value should be set"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/rcw:") + testParameterValue,
+                @"/rcw:" + testParameterValue,
                 false /* no response file */);
         }
 
@@ -189,14 +189,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.False(t.Silent); // "Silent should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/silent"),
+                @"/silent",
                 false /* no response file */);
 
             t.Silent = true;
             Assert.True(t.Silent); // "Silent should be true"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/silent"),
+                @"/silent",
                 false /* no response file */);
         }
 
@@ -211,14 +211,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.False(t.Verbose); // "Verbose should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/verbose"),
+                @"/verbose",
                 false /* no response file */);
 
             t.Verbose = true;
             Assert.True(t.Verbose); // "Verbose should be true"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/verbose"),
+                @"/verbose",
                 false /* no response file */);
         }
 

@@ -523,7 +523,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(switchName, "switchName");
 
             AppendSpaceIfNotEmpty();
-            AppendTextUnquoted(FixCommandLineSwitch(switchName));
+            AppendTextUnquoted(switchName);
         }
 
         /// <summary>
