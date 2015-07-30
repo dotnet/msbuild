@@ -774,6 +774,26 @@ namespace Microsoft.Build.Tasks
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool CreateHardLink(string newFileName, string exitingFileName, IntPtr securityAttributes);
 
+        [DllImport("libc", SetLastError = true)] 
+        internal static extern int link(string oldpath, string newpath);
+
+        internal static bool MakeHardLink(string newFileName, string exitingFileName, out string errorMessage)
+        {
+            bool hardLinkCreated;
+            if (NativeMethodsShared.IsWindows)
+            {
+                hardLinkCreated = CreateHardLink(newFileName, exitingFileName, IntPtr.Zero /* reserved, must be NULL */);
+                errorMessage = hardLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+            }
+            else
+            {
+                hardLinkCreated = link(exitingFileName, newFileName) == 0;
+                errorMessage = hardLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+            }
+
+            return hardLinkCreated;
+        }
+
         //------------------------------------------------------------------------------
         // MoveFileEx
         //------------------------------------------------------------------------------

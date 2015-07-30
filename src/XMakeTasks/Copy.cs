@@ -319,14 +319,13 @@ namespace Microsoft.Build.Tasks
                     FileUtilities.DeleteNoThrow(destinationFileState.Name);
                 }
 
-                hardLinkCreated = NativeMethods.CreateHardLink(destinationFileState.Name, sourceFileState.Name, IntPtr.Zero /* reserved, must be NULL */);
+                string errorMessage;
+                hardLinkCreated = NativeMethods.MakeHardLink(destinationFileState.Name, sourceFileState.Name, out errorMessage);
 
                 if (!hardLinkCreated)
                 {
-                    int errorCode = Marshal.GetHRForLastWin32Error();
-                    Exception hardLinkException = Marshal.GetExceptionForHR(errorCode);
                     // This is only a message since we don't want warnings when copying to network shares etc.
-                    Log.LogMessageFromResources(MessageImportance.Low, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, hardLinkException.Message);
+                    Log.LogMessageFromResources(MessageImportance.Low, "Copy.RetryingAsFileCopy", sourceFileState.Name, destinationFileState.Name, errorMessage);
                 }
             }
 
