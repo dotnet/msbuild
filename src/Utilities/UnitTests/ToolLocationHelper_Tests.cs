@@ -47,6 +47,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
+        [Category("WindowsOnly")]
         public void GetApiContractReferencesFindsWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
