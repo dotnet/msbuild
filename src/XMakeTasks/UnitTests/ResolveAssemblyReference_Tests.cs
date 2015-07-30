@@ -15599,7 +15599,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
 
-                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'");
+                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
                 bool inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsFalse(inRedistList);
             }
@@ -15630,7 +15630,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
 
-                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'");
+                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
                 bool inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsTrue(inRedistList);
             }
@@ -15661,15 +15661,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
 
-                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'");
+                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
                 bool inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsTrue(inRedistList);
 
-                a1 = new AssemblyNameExtension("System, Culture=Neutral, PublicKeyToken='b77a5c561934e089'");
+                a1 = new AssemblyNameExtension("System, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
                 inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsTrue(inRedistList);
 
-                a1 = new AssemblyNameExtension("System, PublicKeyToken='b77a5c561934e089'");
+                a1 = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089");
                 inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsTrue(inRedistList);
 
@@ -15704,7 +15704,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
 
-                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=5.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'");
+                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=5.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
                 bool inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsTrue(inRedistList);
             }
@@ -15737,7 +15737,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
 
-                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=5.0.0.0, Culture=Neutral, PublicKeyToken='b67a5c561934e089'");
+                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=5.0.0.0, Culture=Neutral, PublicKeyToken=b67a5c561934e089");
                 bool inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsFalse(inRedistList);
             }
@@ -15769,7 +15769,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
 
-                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b67a5c561934e089'");
+                AssemblyNameExtension a1 = new AssemblyNameExtension("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken=b67a5c561934e089");
                 bool inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsFalse(inRedistList);
             }
@@ -15801,7 +15801,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
 
-                AssemblyNameExtension a1 = new AssemblyNameExtension("Something, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'");
+                AssemblyNameExtension a1 = new AssemblyNameExtension("Something, Version=10.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
                 bool inRedistList = redist.FrameworkAssemblyEntryInRedist(a1);
                 Assert.IsFalse(inRedistList);
             }
