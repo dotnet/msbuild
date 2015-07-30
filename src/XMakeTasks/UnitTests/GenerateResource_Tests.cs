@@ -2137,7 +2137,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t.Sources = new ITaskItem[] { new TaskItem(txtFile) };
                 t.StronglyTypedLanguage = "CSharp";
                 t.StronglyTypedClassName = "cc";
-                t.StronglyTypedFileName = "||";
+                t.StronglyTypedFileName = NativeMethodsShared.IsWindows ? "||" : "\0";
                 t.OutputResources = new ITaskItem[] { new TaskItem("somefile.resources") };
 
                 bool success = t.Execute();
@@ -2314,7 +2314,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = Utilities.WriteTestResX(false, null, null);
 
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
-                t.OutputResources = new ITaskItem[] { new TaskItem("||") };
+                t.OutputResources = new ITaskItem[] { new TaskItem(NativeMethodsShared.IsWindows ? "||" : "\0") };
 
                 bool success = t.Execute();
 
