@@ -1554,7 +1554,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #region Helper Classes
         /// <summary>
-        /// Create a derrived class which overrides ProcessLoggingEvent so 
+        /// Create a derived class which overrides ProcessLoggingEvent so 
         /// we can test most of the logging methods without relying on the 
         /// exact implementation of process logging events.
         /// </summary>

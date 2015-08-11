@@ -4,6 +4,7 @@
   
   <ItemGroup>
     <Project Include="src\dirs.proj" />
+    <Project Include="Samples\dirs.proj" />
   </ItemGroup>
   
   <Import Project="dir.traversal.targets" />

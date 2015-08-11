@@ -15,13 +15,6 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class FindUnderPath : TaskExtension
     {
-        /// <summary>
-        /// Construct.
-        /// </summary>
-        public FindUnderPath()
-        {
-        }
-
         private bool _updateToAbsolutePaths = false;
         private ITaskItem _path = null;
         private ITaskItem[] _files = new TaskItem[0];

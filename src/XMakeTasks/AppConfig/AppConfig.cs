@@ -14,7 +14,7 @@ namespace Microsoft.Build.Tasks
     internal sealed class AppConfig
     {
         /// <summary>
-        /// Corresponds to the contents of the <runtime> element.
+        /// Corresponds to the contents of the &lt;runtime&gt; element.
         /// </summary>
         private RuntimeSection _runtime = new RuntimeSection();
 

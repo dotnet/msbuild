@@ -43,8 +43,8 @@ namespace Microsoft.Build.Utilities
     ///     A new event source will be created so that the logger passed in can be registered to that event source
     ///     If the build started event has already been logged the MUX logger will create a new BuildStartedEvent and send that to the event source.
     ///     
-    /// UnRegisterLogger:
-    ///     When a build submission is completed the UnregisterLogger method will be called with the submission ID.
+    /// UnregisterLoggers:
+    ///     When a build submission is completed the UnregisterLoggers method will be called with the submission ID.
     ///     At this point we will look up the success state of the project finished event for the submission ID and log a build finished event to the logger.
     ///     The event source will be cleaned up.  This may be interesting because the unregister will come from a thread other than what is doing the logging.
     ///     This may create a Synchronization issue, if unregister is called while events are being logged.
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Utilities
         private Dictionary<int, int> _submissionProjectsInProgress = new Dictionary<int, int>();
 
         /// <summary>
-        /// The maximum node count as specified in the call to Initialze()
+        /// The maximum node count as specified in the call to Initialize()
         /// </summary>
         private int _maxNodeCount = 1;
 

@@ -13,7 +13,7 @@ using System.Windows.Markup;
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
-    /// Serializatrion class for node for the Data driven project schema XAML
+    /// Serialization class for node for the Data driven project schema XAML
     /// </summary>
     [ContentProperty("Nodes")]
     public sealed class ProjectSchemaDefinitions : IProjectSchemaNode

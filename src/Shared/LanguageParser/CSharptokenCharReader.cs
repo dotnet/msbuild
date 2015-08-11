@@ -37,7 +37,7 @@ namespace Microsoft.Build.Shared.LanguageParser
          */
         internal bool SinkLongIntegerSuffix()
         {
-            // Skip the long interger suffix if there is one.        
+            // Skip the long integer suffix if there is one.
             if (CurrentCharacter == 'U' || CurrentCharacter == 'u')
             {
                 Skip();

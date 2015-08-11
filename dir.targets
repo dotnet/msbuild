@@ -38,13 +38,27 @@
   </UsingTask>
 
   <!-- 
-    Needed to avoid the IntialTargets from having an Output which ends up getting
+    Needed to avoid the InitialTargets from having an Output which ends up getting
     added to the output references when you have a project to project reference.
   -->
   <Target Name="_RestoreBuildToolsWrapper" DependsOnTargets="_DisplayBuildInfo;_RestoreBuildTools" />
 
   <Target Name="_DisplayBuildInfo">
     <Message Importance="High" Text="Build binary target directory: '$(BaseOutputPathWithConfig)'" />
+  </Target>
+
+  <Target Name="_CopyCompilers" AfterTargets="_RestoreBuildTools" Condition="'$(UseRoslynCompilers)' == 'true'">
+    <ItemGroup>
+      <BuildFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\build\*" />
+      <ToolsFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\tools\*" />
+    </ItemGroup>
+    
+    <Copy
+      SourceFiles="@(BuildFiles);@(ToolsFiles)"
+      DestinationFolder="$(OutputPath)tools"
+      SkipUnchangedFiles="true"
+    />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="find '$(OutputPath)tools' -name &quot;*.exe&quot; -exec chmod &quot;+x&quot; '{}' ';'" />
   </Target>
 
   <Target Name="_CopyCompilers" AfterTargets="_RestoreBuildTools" Condition="'$(UseRoslynCompilers)' == 'true'">

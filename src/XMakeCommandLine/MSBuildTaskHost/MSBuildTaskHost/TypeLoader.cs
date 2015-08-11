@@ -251,7 +251,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// If we loaded an assembly for this type.
             /// We use this information to set the LoadedType.LoadedAssembly so that this object can be used
-            /// to help created AppDomains to resolve those that it could not load successfuly
+            /// to help created AppDomains to resolve those that it could not load successfully
             /// </summary>
             private Assembly loadedAssembly;
             

@@ -431,7 +431,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Delegate which will get the resource from the correct resoruce manager
+        /// Delegate which will get the resource from the correct resource manager
         /// </summary>
         public delegate string GetStringDelegate(string resourceName);
 

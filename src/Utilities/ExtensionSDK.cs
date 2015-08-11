@@ -153,7 +153,7 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Reference to the manifest object
-        /// Maks sure manifest is instantiated only once
+        /// Makes sure manifest is instantiated only once
         /// </summary>
         private SDKManifest Manifest
         {

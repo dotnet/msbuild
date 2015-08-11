@@ -32,7 +32,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// coresponding content type
+        /// corresponding content type
         /// </summary>
         public string ContentType
         {

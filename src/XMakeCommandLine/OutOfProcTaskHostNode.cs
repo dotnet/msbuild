@@ -728,9 +728,6 @@ namespace Microsoft.Build.CommandLine
 
                 case LinkStatus.Inactive:
                     break;
-
-                default:
-                    break;
             }
         }
 
@@ -893,7 +890,7 @@ namespace Microsoft.Build.CommandLine
                         {
                             if (_updateEnvironmentAndLog)
                             {
-                                LogMessageFromResource(MessageImportance.Low, "ModifyingTaskHostEnvironmentVariable", variable, newValue ?? String.Empty, environmentValue ?? String.Empty);
+                                LogMessageFromResource(MessageImportance.Low, "ModifyingTaskHostEnvironmentVariable", variable, newValue, environmentValue ?? String.Empty);
                             }
 
                             updatedEnvironment[variable] = newValue;

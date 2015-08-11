@@ -54,7 +54,7 @@ namespace Microsoft.Build.Evaluation
                             configuration.SaveAs(tempFileName + ".config");
 
                             // Open the configuration again, the new type for the section handler will do its stuff
-                            // Note that the OpenExeConfiguraion call uses the config filename *without* the .config
+                            // Note that the OpenExeConfiguration call uses the config filename *without* the .config
                             // extension
                             configuration = ConfigurationManager.OpenExeConfiguration(tempFileName);
 

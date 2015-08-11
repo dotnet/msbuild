@@ -600,7 +600,7 @@ namespace Microsoft.Build.Shared
         /// Check the registry key and value to see if the .net Framework is installed on the machine.
         /// </summary>
         /// <param name="registryEntryToCheckInstall">Registry path to look for the value</param>
-        /// <param name="registryValueToCheckInstall">Key to retreive the value from</param>
+        /// <param name="registryValueToCheckInstall">Key to retrieve the value from</param>
         /// <returns>True if the registry key is 1 false if it is not there. This method also return true if the complus enviornment variables are set.</returns>
         private static bool CheckForFrameworkInstallation(string registryEntryToCheckInstall, string registryValueToCheckInstall)
         {
@@ -1510,7 +1510,7 @@ namespace Microsoft.Build.Shared
             {
                 if (this.pathToDotNetFrameworkReferenceAssemblies == null)
                 {
-                    // when a user requests the 40 reference assembly path we dont need to read the redist list because we will not be chaining so we may as well just
+                    // when a user requests the 40 reference assembly path we don't need to read the redist list because we will not be chaining so we may as well just
                     // generate the path and save us some time.
                     string referencePath = GenerateReferenceAssemblyPath(FrameworkLocationHelper.programFilesReferenceAssemblyLocation, this.FrameworkName);
                     if (Directory.Exists(referencePath))
@@ -1639,6 +1639,7 @@ namespace Microsoft.Build.Shared
 
             /// <summary>
             /// Gets the full path of reference assemblies folder, which is the full path of .net framework for v1.1 and v2.0.
+            /// </summary>
             public override string GetPathToDotNetFrameworkReferenceAssemblies()
             {
                 return this.GetPathToDotNetFramework(DotNetFrameworkArchitecture.Current);

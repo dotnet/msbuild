@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------
 // </copyright>
 // <summary>A packet which informs the task host that the task it is 
-// currently executing has been cancelled.</summary>
+// currently executing has been canceled.</summary>
 //-----------------------------------------------------------------------
 
 using System;
@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// TaskHostTaskCancelled informs the task host that the task it is 
-    /// currently executing has been cancelled.
+    /// currently executing has been canceled.
     /// </summary>
     internal class TaskHostTaskCancelled : INodePacket
     {

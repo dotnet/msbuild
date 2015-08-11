@@ -146,7 +146,7 @@ namespace Microsoft.Build.Utilities
         private static object s_locker = new Object();
 
         /// <summary>
-        /// Cache the results of calling the GetPathToRefernceAssemblies so that we do not recaculate it everytime we call the method
+        /// Cache the results of calling the GetPathToReferenceAssemblies so that we do not recalculate it every time we call the method
         /// </summary>
         private static Dictionary<string, IList<string>> s_cachedReferenceAssemblyPaths;
 
@@ -534,7 +534,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Add the set of paths for where sdk files should be found. Where <folderType> is redist, references, designtime
+        /// Add the set of paths for where sdk files should be found. Where &lt;folderType&gt; is redist, references, designtime
         /// </summary>
         private static void AddSDKPaths(string sdkRoot, string folderName, string targetConfiguration, string targetArchitecture, List<string> directories)
         {
@@ -1572,7 +1572,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Generate the list of reference assembly paths for well known .net framework versions
         /// </summary>
-        /// <param name="frameworkName">Target framework moniker class wich contains the targetframeworkVersion</param>
+        /// <param name="frameworkName">Target framework moniker class which contains the targetframeworkVersion</param>
         /// <returns>A collection of strings which list the chained reference assembly paths with the highest version being first</returns>
         internal static IList<string> HandleLegacyDotNetFrameworkReferenceAssemblyPaths(VersionToPath PathToDotNetFramework, VersionToPath PathToReferenceAssemblies, FrameworkNameVersioning frameworkName)
         {
@@ -1589,7 +1589,7 @@ namespace Microsoft.Build.Utilities
                 return HandleLegacy35(PathToDotNetFramework, PathToReferenceAssemblies);
             }
 
-            // Dont know the framework send back an empty list because it does not exist
+            // Don't know the framework send back an empty list because it does not exist
             return new List<string>();
         }
 
@@ -1755,7 +1755,7 @@ namespace Microsoft.Build.Utilities
         /// Returns the paths to the reference assemblies location for the given framework version relative to a given targetFrameworkRoot.
         /// The method will not check to see if the path exists or not.
         /// </summary>
-        /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assembies will be
+        /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
         /// </param>
         /// <param name="frameworkName">A frameworkName class which represents a TargetFrameworkMoniker. This cannot be null.</param>
@@ -2264,7 +2264,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a registy location enumerate the registry and find the installed SDKs.
+        /// Given a registry location enumerate the registry and find the installed SDKs.
         /// </summary>
         internal static void GatherSDKsFromRegistryImpl(Dictionary<TargetPlatformSDK, TargetPlatformSDK> platformMonikers, string registryKeyRoot, RegistryView registryView, RegistryHive registryHive, GetRegistrySubKeyNames getRegistrySubKeyNames, GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue, OpenBaseKey openBaseKey, FileExists fileExists)
         {
@@ -2483,7 +2483,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Get the disk locations to search for sdks under. This can be overidden by an environment variable
+        /// Get the disk locations to search for sdks under. This can be overridden by an environment variable
         /// </summary>
         private static void GetDefaultSDKDiskRoots(List<string> diskRoots)
         {

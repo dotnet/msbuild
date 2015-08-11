@@ -1459,11 +1459,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Verify when a class which derives from ITask is attempted to be registered that we get an InvalidProjectFileException. 
-        /// We only support ITaskItems and not their derrived types as input parameters.
+        /// We only support ITaskItems and not their derived types as input parameters.
         /// </summary>
         [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
-        public void BadScalarInputOnInputParameterDerrivedFromITask()
+        public void BadScalarInputOnInputParameterDerivedFromITask()
         {
             // Note output is false so these are only input parameters
             string output = bool.FalseString;
@@ -1538,7 +1538,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that an arbitrary output type class which is not derrived from ITaskItem is not allowed
+        /// Verify that an arbitrary output type class which is not derived from ITaskItem is not allowed
         /// </summary>
         [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
@@ -2063,7 +2063,7 @@ namespace TestTask
         }
 
         /// <summary>
-        /// Create a custom class derrived from ITaskItem to test input and output parameters work using this item.
+        /// Create a custom class derived from ITaskItem to test input and output parameters work using this item.
         /// </summary>
         internal class DerivedFromITaskItem : ITaskItem
         {

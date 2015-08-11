@@ -188,7 +188,7 @@ namespace Microsoft.Build.Tasks
         private bool _embedInteropTypes = false;
 
         /// <summary>
-        /// This is the key that was passed in to the reference through the <AssemblyFolderKey> metadata.
+        /// This is the key that was passed in to the reference through the &lt;AssemblyFolderKey&gt; metadata.
         /// </summary>
         private string _assemblyFolderKey = String.Empty;
 
@@ -717,9 +717,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// This is the key that was passed in to the reference through the <AssemblyFolderKey> metadata.
+        /// This is the key that was passed in to the reference through the &lt;AssemblyFolderKey&gt; metadata.
         /// </summary>
-        /// <value>The <AssemblyFolderKey> value.</value>
+        /// <value>The &lt;AssemblyFolderKey&gt; value.</value>
         internal string AssemblyFolderKey
         {
             get { return _assemblyFolderKey; }

@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks
                         binaryStream = createFileStream(pathToDependent, FileMode.Open, FileAccess.Read);
                     }
 
-                    // Put the task item into a dictionary so we can access it from a derrived class quickly.
+                    // Put the task item into a dictionary so we can access it from a derived class quickly.
                     itemSpecToTaskitem[resourceFile.ItemSpec] = resourceFile;
 
                     // This "using" statement ensures that the "binaryStream" will be disposed once

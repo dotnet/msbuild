@@ -18,13 +18,6 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class ReadLinesFromFile : TaskExtension
     {
-        /// <summary>
-        /// Construct.
-        /// </summary>
-        public ReadLinesFromFile()
-        {
-        }
-
         private ITaskItem _file = null;
         private ITaskItem[] _lines = new TaskItem[0];
 

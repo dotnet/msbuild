@@ -104,7 +104,7 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Serialization consturctor.
+        /// Serialization constructor.
         /// </summary>
         public HybridDictionary(SerializationInfo info, StreamingContext context)
         {
@@ -674,7 +674,6 @@ namespace Microsoft.Build.Collections
                 }
 
                 list.Add(new KeyValuePair<TKey, TValue>(key, value));
-                return;
             }
             else
             {
@@ -694,7 +693,6 @@ namespace Microsoft.Build.Collections
                 }
 
                 _store = newDictionary;
-                return;
             }
         }
 
