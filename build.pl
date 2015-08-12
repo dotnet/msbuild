@@ -14,7 +14,7 @@ use POSIX;
 use constant DATETIME=>strftime("%Y-%m-%d_%H-%M-%S", localtime);
 
 # The source solution
-my $solutionToBuild = catfile(catfile($RealBin, 'src'), 'MSBuild.sln');
+my $solutionToBuild = catfile($RealBin, 'build.proj');
 
 my $usage = <<"USAGE";
 Usage build.pl [-root=<outputRoot>] [-fullbuild] [-verify] [-tests] [-all] [-quiet] [-silent]
@@ -212,7 +212,8 @@ sub runbuild {
     my $command = "$program ${switch}nologo ${switch}v:q " .
                   "$rebuildSwitch $configSwitch $toolSet $packageProperty" .
                   "${switch}p:BinDir=$binDir ${switch}p:PackagesDir=$packagesDir " .
-                  "${switch}fl \"${switch}flp:LogFile=$logFile;V=diag\" $solutionToBuild";
+                  "${switch}fl \"${switch}flp:LogFile=$logFile;V=diag\" ${switch}p:BuildSamples=false " .
+                  " $solutionToBuild";
     print $command . "\n" unless $silent;
 
     # Run build, parsing it's output to count errors and warnings
