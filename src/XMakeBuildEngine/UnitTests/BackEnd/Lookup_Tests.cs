@@ -593,6 +593,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensure that once keepOnlySpecified is set to true, it remains in effect, and that if a metadata modification is declared as 'keep value' that
         /// the value as lower scopes is retained.
+        /// </summary>
         [Test]
         public void KeepMetadataOnlySpecifiedPropagate4()
         {

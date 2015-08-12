@@ -520,8 +520,6 @@ namespace Microsoft.Build.BackEnd
                         break;
                 }
             }
-
-            return;
         }
 
         /// <summary>

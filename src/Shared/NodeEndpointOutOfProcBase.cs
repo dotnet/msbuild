@@ -389,7 +389,7 @@ namespace Microsoft.Build.BackEnd
                     catch (IOException e)
                     {
                         // We will get here when:
-                        // 1. The host (OOP main node) connects to us, it immediately checks for user priviledges
+                        // 1. The host (OOP main node) connects to us, it immediately checks for user privileges
                         //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
                         // 2. The host is too old sending us bits we automatically reject in the handshake
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);

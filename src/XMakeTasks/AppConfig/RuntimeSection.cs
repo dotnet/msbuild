@@ -8,7 +8,7 @@ using System.Collections;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Wraps the <runtime> section of the .config file.
+    /// Wraps the &lt;runtime&gt; section of the .config file.
     /// </summary>
     internal sealed class RuntimeSection
     {
@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
         private ArrayList _dependentAssemblies = new ArrayList();
 
         /// <summary>
-        /// The reader is positioned on a <runtime> element--read it.
+        /// The reader is positioned on a &lt;runtime&gt; element--read it.
         /// </summary>
         /// <param name="reader"></param>
         internal void Read(XmlTextReader reader)

@@ -1938,6 +1938,10 @@
     <value>MSB3484: Signing target '{0}' could not be found.</value>
     <comment>{StrBegin="MSB3484: "}</comment>
   </data>
+  <data name="SignFile.CertMissingPrivateKey">
+    <value>MSB3487: The signing certificate does not include private key information.</value>
+    <comment>{StrBegin="MSB3487: "}</comment>
+  </data>
   <!--
         The StrongNameUtils message bucket is: MSB3351 - MSB3360
 

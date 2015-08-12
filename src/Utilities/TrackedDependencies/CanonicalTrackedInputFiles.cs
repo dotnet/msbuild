@@ -57,7 +57,7 @@ namespace Microsoft.Build.Utilities
 
         #region Properties
 
-        // This is provided to faciltate unit testing
+        // This is provided to facilitate unit testing
         internal ITaskItem[] SourcesNeedingCompilation
         {
             get { return _sourcesNeedingCompilation; }

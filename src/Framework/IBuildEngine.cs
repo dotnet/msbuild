@@ -55,7 +55,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Retrieves the line number of the task node withing the project file that called it.
+        /// Retrieves the line number of the task node within the project file that called it.
         /// </summary>
         int LineNumberOfTaskNode
         {
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Retrieves the line number of the task node withing the project file that called it.
+        /// Retrieves the line number of the task node within the project file that called it.
         /// </summary>
         int ColumnNumberOfTaskNode
         {

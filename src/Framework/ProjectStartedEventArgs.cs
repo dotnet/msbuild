@@ -313,7 +313,7 @@ namespace Microsoft.Build.Framework
         }
 
         // IEnumerable is not a serializable type. That is okay because
-        // (a) this event will not be thrown by tasks, so it should not generally cross AppFomain boundaries
+        // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
         // (b) this event still makes sense when this field is "null"
         [NonSerialized]
         private IEnumerable _items;
@@ -527,7 +527,7 @@ namespace Microsoft.Build.Framework
         private void SetDefaultsBeforeSerialization(StreamingContext sc)
         {
             _projectId = InvalidProjectId;
-            // Dont want to set the default before deserialization is completed to a new event context because
+            // Don't want to set the default before deserialization is completed to a new event context because
             // that would most likely be a lot of wasted allocations
             _parentProjectBuildEventContext = null;
         }

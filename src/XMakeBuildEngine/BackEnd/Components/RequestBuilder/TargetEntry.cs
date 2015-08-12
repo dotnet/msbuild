@@ -483,7 +483,7 @@ namespace Microsoft.Build.BackEnd
                                 // Now aggregate the result with the existing known results.  There are four rules, assuming the target was not 
                                 // skipped due to being up-to-date:
                                 // 1. If this bucket failed or was cancelled, the aggregate result is failure.
-                                // 2. If this bucket succeded and we have not previously failed, the aggregate result is a success.
+                                // 2. If this bucket Succeeded and we have not previously failed, the aggregate result is a success.
                                 // 3. Otherwise, the bucket was skipped, which has no effect on the aggregate result.
                                 // 4. If the bucket's action code says to stop, then we stop, regardless of the success or failure state.
                                 if (dependencyResult != DependencyAnalysisResult.SkipUpToDate)
@@ -662,7 +662,6 @@ namespace Microsoft.Build.BackEnd
                 DataCollection.CommentMarkProfile(8801, endTargetBuild);
             }
 #endif
-            return;
         }
 
         /// <summary>

@@ -52,7 +52,7 @@ namespace Microsoft.Build.Shared
         /// Convert a task item metadata to bool. Throw an exception if the string is badly formed and can't
         /// be converted.
         /// 
-        /// If the attibute is not found, then return false.
+        /// If the attribute is not found, then return false.
         /// </summary>
         /// <param name="item">The item that contains the metadata.</param>
         /// <param name="itemMetadataName">The name of the metadata.</param>

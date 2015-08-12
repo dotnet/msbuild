@@ -126,7 +126,7 @@ namespace Microsoft.Build.Tasks
             get
             {
                 // If the task instance does not equal null then use its build engine because 
-                // the task instances build engine can be changed for example during tests. This changin of the engine on the same task object is not expected to happen 
+                // the task instances build engine can be changed for example during tests. This changing of the engine on the same task object is not expected to happen
                 // during normal operation.
                 if (_taskInstance != null)
                 {
@@ -1371,7 +1371,7 @@ namespace Microsoft.Build.Tasks
                 ILease lease = (ILease)base.InitializeLifetimeService();
 
                 // Set how long a lease should be initially. Once a lease expires
-                // the remote object will be disconnected and it will be marked as being availiable 
+                // the remote object will be disconnected and it will be marked as being available
                 // for garbage collection
                 int initialLeaseTime = 1;
 
@@ -1428,7 +1428,7 @@ namespace Microsoft.Build.Tasks
             lock (_locker)
             {
                 // Clear out the sponsor (who is responsible for keeping the TaskLoggingHelper remoting lease alive until the task is done)
-                // this will be null if the engineproxy was never sent across an appdomain boundry.
+                // this will be null if the engineproxy was never sent across an appdomain boundary.
                 if (_sponsor != null)
                 {
                     ILease lease = (ILease)RemotingServices.GetLifetimeService(this);

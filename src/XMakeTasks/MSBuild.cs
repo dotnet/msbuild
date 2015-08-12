@@ -411,7 +411,7 @@ namespace Microsoft.Build.Tasks
             bool isRunningMultipleNodes = BuildEngine2.IsRunningMultipleNodes;
             // If we are in single proc mode and stopOnFirstFailure is true, we cannot build in parallel because 
             // building in parallel sends all of the projects to the engine at once preventing us from not sending
-            // any more projects after the first failure. Therefore, to preserve compatibility with whidby if we are in this situation disable buildInParallel.
+            // any more projects after the first failure. Therefore, to preserve compatibility with whidbey if we are in this situation disable buildInParallel.
             if (!isRunningMultipleNodes && _stopOnFirstFailure && _buildInParallel)
             {
                 _buildInParallel = false;
@@ -421,7 +421,7 @@ namespace Microsoft.Build.Tasks
             // When the condition below is met, provide an information message indicating stopOnFirstFailure
             // will have no effect. The reason there will be no effect is, when buildInParallel is true
             // All project files will be submitted to the engine all at once, this mean there is no stopping for failures between projects.
-            // When RunEachTargetSpearately is false, all targets will be submitted to the engine at once, this means there is no way to stop between target failures.
+            // When RunEachTargetSeparately is false, all targets will be submitted to the engine at once, this means there is no way to stop between target failures.
             // therefore the first failure seen will be the only failure seen.
             if (isRunningMultipleNodes && _buildInParallel && _stopOnFirstFailure && !_runEachTargetSeparately)
             {

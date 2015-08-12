@@ -965,7 +965,6 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Makes a temporary dictionary out of an enumerable of keyvaluepairs.
-        /// Throws 
         /// </summary>
         internal static Dictionary<string, V> MakeDictionary<V>(IEnumerable<KeyValuePair<string, V>> enumerable)
         {
@@ -1074,7 +1073,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Compare the expected project XML to actual project XML, after doing a little normalization
-        /// of 
+        /// of quotations/whitespace.
         /// </summary>
         /// <param name="newExpectedProjectContents"></param>
         /// <param name="newActualProjectContents"></param>

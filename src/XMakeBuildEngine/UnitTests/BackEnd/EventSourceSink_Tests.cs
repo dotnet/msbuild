@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Verify raising a generic event derrived from BuildEventArgs rather than CustomBuildEventArgs causes an internalErrorException
+        /// Verify raising a generic event derived from BuildEventArgs rather than CustomBuildEventArgs causes an internalErrorException
         /// </summary>
         [Test]
         [ExpectedException(typeof(InternalErrorException))]

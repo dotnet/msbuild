@@ -220,8 +220,8 @@ namespace Microsoft.Build.Framework
         /// Compare a BuildEventContext with this BuildEventContext. 
         /// A build event context is compared in the following way.
         /// 
-        /// 1. If the obect references are the same the contexts are equivilant
-        /// 2. If the object type is the same and the Id values in the context are the same, the contexts are equivilant
+        /// 1. If the object references are the same the contexts are equivalent
+        /// 2. If the object type is the same and the Id values in the context are the same, the contexts are equivalent
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>

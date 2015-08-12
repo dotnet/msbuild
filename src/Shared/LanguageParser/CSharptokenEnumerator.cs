@@ -168,7 +168,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // Identifier or keyword?
             else if
             (
-                // From 2.4.2 Identifiers: A '@' can be used to prefix an identifier so that a keword can be used as an identifier.
+                // From 2.4.2 Identifiers: A '@' can be used to prefix an identifier so that a keyword can be used as an identifier.
                 _reader.CurrentCharacter == '@' ||
                 _reader.MatchNextIdentifierStart()
             )

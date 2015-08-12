@@ -408,7 +408,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Overriden to give this class infinite lease time. Otherwise we end up with a limited
+        /// Overridden to give this class infinite lease time. Otherwise we end up with a limited
         /// lease (5 minutes I think) and instances can expire if they take long time processing.
         /// </summary>
         [SecurityCritical]

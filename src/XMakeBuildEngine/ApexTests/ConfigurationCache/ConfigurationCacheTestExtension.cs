@@ -48,11 +48,11 @@ namespace Microsoft.Build.ApexTests.Library
         }
 
         /// <summary>
-        /// Retreives the configuration cache from the data provided.
+        /// Retrieves the configuration cache from the data provided.
         /// </summary>
         /// <param name="requestData">Data containing the build request entry.</param>
         /// <param name="toolsVersion">Tools version used to build the request.</param>
-        /// <returns>BuildRequestConfigurationTestExtensuin which contains the configuration retreived from the cache. Can return NULL if the entry for the data is not in the cache.</returns>
+        /// <returns>BuildRequestConfigurationTestExtension which contains the configuration retrieved from the cache. Can return NULL if the entry for the data is not in the cache.</returns>
         public BuildRequestConfigurationTestExtension GetConfigurationFromCache(BuildRequestData requestData, string toolsVersion)
         {
             BuildRequestConfiguration unresolvedConfiguration = new BuildRequestConfiguration(requestData, toolsVersion);

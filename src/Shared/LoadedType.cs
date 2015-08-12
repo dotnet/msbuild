@@ -120,7 +120,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// If we loaded an assembly for this type.
-        /// We use this information to help created AppDomains to resolve types that it could not load successfuly
+        /// We use this information to help created AppDomains to resolve types that it could not load successfully
         /// </summary>
         internal Assembly LoadedAssembly
         {
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Assembly, if any, that we loaded for this type.
-        /// We use this information to help created AppDomains to resolve types that it could not load successfuly
+        /// We use this information to help created AppDomains to resolve types that it could not load successfully
         /// </summary>
         private Assembly _loadedAssembly;
     }

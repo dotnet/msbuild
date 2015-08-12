@@ -19,13 +19,6 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class WriteLinesToFile : TaskExtension
     {
-        /// <summary>
-        /// Construct.
-        /// </summary>
-        public WriteLinesToFile()
-        {
-        }
-
         private ITaskItem _file = null;
         private ITaskItem[] _lines = null;
         private bool _overwrite = false;

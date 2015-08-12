@@ -1022,7 +1022,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Given the list of inputs and outputs, returns the number of resources (starting at the provided initial index)
         /// that can fit onto the commandline without exceeding MaximumCommandLength.
-        /// <summary>
+        /// </summary>
         private int CalculateResourceBatchSize(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess, string resourcelessCommand, int initialResourceIndex)
         {
             CommandLineBuilderExtension currentCommand = new CommandLineBuilderExtension();
@@ -1290,6 +1290,7 @@ namespace Microsoft.Build.Tasks
         /// Determines if the given output file is up to date with respect to the
         /// the given input file by comparing timestamps of the two files as well as
         /// (if the source is a .resx) the linked files inside the .resx file itself
+        /// </summary>
         /// <param name="sourceFilePath"></param>
         /// <param name="outputFilePath"></param>
         /// <returns></returns>

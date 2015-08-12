@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks
     internal static class AssemblyFolder
     {
         /// <summary>
-        /// Key -- Like "hklm\Vendor RegKey" as provided to a reference by the <AssemblyFolderKey> on the reference in the project
+        /// Key -- Like "hklm\Vendor RegKey" as provided to a reference by the &lt;AssemblyFolderKey&gt; on the reference in the project
         /// Value -- Directory
         /// </summary>
         private static Hashtable s_assemblyFolders;
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Returns the list of assembly folders that we're interested in.
         /// </summary>
-        /// <param name="regKeyAlias">Like "hklm\Vendor RegKey" as provided to a reference by the <AssemblyFolderKey> on the reference in the project.</param>
+        /// <param name="regKeyAlias">Like "hklm\Vendor RegKey" as provided to a reference by the &lt;AssemblyFolderKey&gt; on the reference in the project.</param>
         /// <returns>Collection of assembly folders.</returns>
         static internal ICollection GetAssemblyFolders(string regKeyAlias)
         {

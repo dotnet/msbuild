@@ -900,7 +900,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Applies a list of modifications to the appropriate ItemDictionary<ProjectItemInstance> in a main table.
+        /// Applies a list of modifications to the appropriate <see cref="ItemDictionary{ProjectItemInstance}" /> in a main table.
         /// If any modifications conflict, these modifications win.
         /// </summary>
         private void ApplyModificationsToTable(ItemDictionary<ProjectItemInstance> table, string itemType, ItemsMetadataUpdateDictionary modify)
@@ -1085,7 +1085,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public bool HasChanges
             {
-                get { return _modifications.Count > 0 || _keepOnlySpecified == true; }
+                get { return _modifications.Count > 0 || _keepOnlySpecified; }
             }
 
             /// <summary>
