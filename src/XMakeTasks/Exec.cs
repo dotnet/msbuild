@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks
             // Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
             // here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
             // doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
-            // Note: 8/12/15 - Changed encoding to use UTF8 when OS is newer than 6.1 (Windows 7)
+            // Note: 8/12/15 - Changed encoding to use UTF8 when OS version is greater than or equal to 6.1 (Windows 7)
             _standardOutputEncoding = GetEncodingWithOsFallback();
             _standardErrorEncoding = GetEncodingWithOsFallback();
         }
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Tasks
                 if (EncodingUtilities.CurrentSystemOemEncoding.CodePage != sw.Encoding.CodePage)
                 {
                     // Output to nul so we don't change output and logs.
-                    sw.WriteLine($"chcp {sw.Encoding.CodePage}>nul");
+                    sw.WriteLine(string.Format("chcp {0}>nul", sw.Encoding.CodePage));
                 }
 
                 // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
@@ -562,7 +562,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Get encoding based on OS. This will fall back to previous behavior on any OS before Windows 7.
-        /// If the OS is greater than Windows 7, UTF8 encoding will be used for the cmd file.
+        /// If the OS is greater than or equal to Windows 7, UTF8 encoding will be used for the cmd file.
         /// </summary>
         /// <remarks>UTF8 w/o BOM is used because cmd.exe does not like a BOM in a .cmd file.</remarks>
         /// <returns>Encoding to use</returns>
