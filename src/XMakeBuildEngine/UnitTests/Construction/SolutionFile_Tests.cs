@@ -1007,14 +1007,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-            try
-            {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-            }
-            catch (InvalidProjectFileException ex)
-            {
-                Assert.Fail();
-            }
+            ParseSolutionHelper(solutionFileContents);
         }
 
         /// <summary>
