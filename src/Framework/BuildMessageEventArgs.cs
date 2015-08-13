@@ -14,7 +14,9 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// This enumeration provides three levels of importance for messages.
     /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     public enum MessageImportance
     {
         /// <summary>
@@ -44,7 +46,9 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     public class BuildMessageEventArgs : LazyFormattedBuildEventArgs
     {
         /// <summary>
@@ -232,30 +236,47 @@ namespace Microsoft.Build.Framework
 
         private MessageImportance _importance;
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private string _subcategory;
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private string _code;
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private string _file;
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private string _projectFile;
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private int _lineNumber;
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private int _columnNumber;
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private int _endLineNumber;
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private int _endColumnNumber;
 
+#if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
@@ -375,6 +396,7 @@ namespace Microsoft.Build.Framework
             }
         }
         #endregion
+#endif
 
         /// <summary>
         /// Importance of the message

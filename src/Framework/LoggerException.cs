@@ -3,7 +3,9 @@
 
 using System;
 using System.Runtime.Serialization;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions; // for SecurityPermissionAttribute
+#endif
 
 namespace Microsoft.Build.Framework
 {
@@ -17,7 +19,9 @@ namespace Microsoft.Build.Framework
     /// promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     /// without following certain special FX guidelines, can break both forward and backward compatibility
     /// </remarks>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     public class LoggerException : Exception
     {
         /// <summary>
@@ -69,7 +73,7 @@ namespace Microsoft.Build.Framework
             _errorCode = errorCode;
             _helpKeyword = helpKeyword;
         }
-
+#if FEATURE_BINARY_SERIALIZATION
         #region Serialization (update when adding new class members)
 
         /// <summary>
@@ -91,7 +95,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="info">Serialization info</param>
         /// <param name="context">Streaming context</param>
+#if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         override public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -101,6 +107,7 @@ namespace Microsoft.Build.Framework
         }
 
         #endregion
+#endif
 
         #region Properties
 

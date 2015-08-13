@@ -18,7 +18,9 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     public class BuildWarningEventArgs : LazyFormattedBuildEventArgs
     {
         /// <summary>
@@ -142,7 +144,7 @@ namespace Microsoft.Build.Framework
         private int _columnNumber;
         private int _endLineNumber;
         private int _endColumnNumber;
-
+#if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
         /// <summary>
         /// Serializes the Errorevent to a stream through a binary writer
@@ -258,6 +260,8 @@ namespace Microsoft.Build.Framework
             _endColumnNumber = reader.ReadInt32();
         }
         #endregion
+#endif
+
         /// <summary>
         /// The custom sub-type of the event.         
         /// </summary>

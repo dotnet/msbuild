@@ -139,6 +139,12 @@
     <Compile Include="TaskStartedEventArgs.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <None Include="Event args classes.cd" />
+    <None Include="project.json" />
+    <!-- Win32 RC Files -->
+    <RCResourceFile Include="native.rc" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
     <Compile Include="XamlTypes\Argument.cs" />
     <Compile Include="XamlTypes\BaseProperty.cs" />
     <Compile Include="XamlTypes\BoolProperty.cs" />
@@ -161,10 +167,6 @@
     <Compile Include="XamlTypes\StringListProperty.cs" />
     <Compile Include="XamlTypes\StringProperty.cs" />
     <Compile Include="XamlTypes\ValueEditor.cs" />
-    <None Include="Event args classes.cd" />
-    <None Include="project.json" />
-    <!-- Win32 RC Files -->
-    <RCResourceFile Include="native.rc" />
   </ItemGroup>
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
