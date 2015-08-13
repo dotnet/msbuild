@@ -287,6 +287,32 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Tests that Exec still executes properly when there's a non-ansi character in the command
+        /// </summary>
+        [TestMethod]
+        public void ExecTaskUnicodeCharacterInCommand()
+        {
+            string nonAnsiCharacters = "创建";
+            string folder = Path.Combine(Path.GetTempPath(), nonAnsiCharacters);
+            string command = Path.Combine(folder, "test.cmd");
+
+            try
+            {
+                Directory.CreateDirectory(folder);
+                File.WriteAllText(command, "echo [hello]");
+                Exec exec = PrepareExec(command);
+
+                Assert.IsTrue(exec.Execute(), "Task should have succeeded");
+                ((MockEngine)exec.BuildEngine).AssertLogContains("[hello]");
+            }
+            finally
+            {
+                if (Directory.Exists(folder))
+                    Directory.Delete(folder, true);
+            }
+        }
+
         [TestMethod]
         public void InvalidUncDirectorySet()
         {

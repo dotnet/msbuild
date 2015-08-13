@@ -3,14 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
 using System.Text.RegularExpressions;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -33,71 +28,43 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public Exec()
         {
-            // do nothing
+            Command = string.Empty;
+
+            // Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
+            // here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
+            // doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
+            // Note: 8/12/15 - Changed encoding to use UTF8 when OS version is greater than or equal to 6.1 (Windows 7)
+            _standardOutputEncoding = GetEncodingWithOsFallback();
+            _standardErrorEncoding = GetEncodingWithOsFallback();
         }
 
-        #endregion
+    #endregion
 
-        #region Fields
+    #region Fields
 
         // Are the ecodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
-        private string _command = String.Empty;
-        private string _userSpecifiedWorkingDirectory;
         private string _workingDirectory;
-        private bool _ignoreExitCode = false;
-        private bool _consoleToMSBuild = false;
         private ITaskItem[] _outputs;
-        internal bool workingDirectoryIsUNC = false; // internal for unit testing
+        internal bool workingDirectoryIsUNC; // internal for unit testing
         private string _batchFile;
         private string _customErrorRegex;
         private string _customWarningRegex;
         private bool _ignoreStandardErrorWarningFormat = false; // By default, detect standard-format errors
-        private List<ITaskItem> _nonEmptyOutput = new List<ITaskItem>();
+        private readonly List<ITaskItem> _nonEmptyOutput = new List<ITaskItem>();
+        private Encoding _standardErrorEncoding;
+        private Encoding _standardOutputEncoding;
 
         #endregion
 
         #region Properties
 
         [Required]
-        public string Command
-        {
-            get
-            {
-                return _command;
-            }
+        public string Command { get; set; }
 
-            set
-            {
-                _command = value;
-            }
-        }
+        public string WorkingDirectory { get; set; }
 
-        public string WorkingDirectory
-        {
-            get
-            {
-                return _userSpecifiedWorkingDirectory;
-            }
-
-            set
-            {
-                _userSpecifiedWorkingDirectory = value;
-            }
-        }
-
-        public bool IgnoreExitCode
-        {
-            get
-            {
-                return _ignoreExitCode;
-            }
-
-            set
-            {
-                _ignoreExitCode = value;
-            }
-        }
+        public bool IgnoreExitCode { get; set; }
 
         /// <summary>
         /// Enable the pipe of the standard out to an item (StandardOutput).
@@ -105,18 +72,7 @@ namespace Microsoft.Build.Tasks
         /// <Remarks>
         /// Even thought this is called a pipe, it is infact a Tee.  Use StandardOutputImportance to adjust the visibility of the stdout.
         /// </Remarks>
-        public bool ConsoleToMSBuild
-        {
-            get
-            {
-                return _consoleToMSBuild;
-            }
-
-            set
-            {
-                _consoleToMSBuild = value;
-            }
-        }
+        public bool ConsoleToMSBuild { get; set; }
 
         /// <summary>
         /// Users can supply a regular expression that we should
@@ -158,14 +114,7 @@ namespace Microsoft.Build.Tasks
         {
             get { return _standardOutputEncoding; }
         }
-
-        /// <remarks>
-        /// Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
-        /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
-        /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
-        /// </remarks>
-        private Encoding _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-
+        
         /// <summary>
         /// Property specifying the encoding of the captured task standard error stream
         /// </summary>
@@ -173,13 +122,6 @@ namespace Microsoft.Build.Tasks
         {
             get { return _standardErrorEncoding; }
         }
-
-        /// <remarks>
-        /// Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
-        /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
-        /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
-        /// </remarks>
-        private Encoding _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
 
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
@@ -226,22 +168,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] Outputs
         {
-            get
-            {
-                if (_outputs == null)
-                {
-                    return new ITaskItem[0];
-                }
-                else
-                {
-                    return _outputs;
-                }
-            }
-
-            set
-            {
-                _outputs = value;
-            }
+            get { return _outputs ?? new ITaskItem[0]; }
+            set { _outputs = value; }
         }
 
         /// <summary>
@@ -252,18 +180,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ConsoleOutput
         {
-            get
-            {
-                if (!ConsoleToMSBuild)
-                {
-                    return new ITaskItem[0];
-                }
-                else
-                {
-                    return _nonEmptyOutput.ToArray();
-                }
-            }
-            set { }
+            get { return !ConsoleToMSBuild ? new ITaskItem[0] : _nonEmptyOutput.ToArray(); }
         }
 
         #endregion
@@ -282,7 +199,8 @@ namespace Microsoft.Build.Tasks
             // We need to get the current OEM code page which will be the same language as the current ANSI code page,
             // just the OEM version.
             // See http://www.microsoft.com/globaldev/getWR/steps/wrg_codepage.mspx for a discussion of ANSI vs OEM
-            using (StreamWriter sw = new StreamWriter(_batchFile, false, EncodingUtilities.CurrentSystemOemEncoding)) // HIGHCHAR: Exec task batch files are in OEM code pages (not ANSI!)
+            // Note: 8/12/15 - Switched to use UTF8 on OS newer than 6.1 (Windows 7)
+            using (StreamWriter sw = new StreamWriter(_batchFile, false, GetEncodingWithOsFallback()))
             {
                 // In some wierd setups, users may have set an env var actually called "errorlevel"
                 // this would cause our "exit %errorlevel%" to return false.
@@ -298,6 +216,13 @@ namespace Microsoft.Build.Tasks
                 // To avoid this problem, set errorlevel locally to a dummy value first.
                 sw.WriteLine("set errorlevel=dummy");
                 sw.WriteLine("set errorlevel=");
+
+                // We probably have to change the code page to UTF8 (65001) for non-ansi characters to work.
+                if (EncodingUtilities.CurrentSystemOemEncoding.CodePage != sw.Encoding.CodePage)
+                {
+                    // Output to nul so we don't change output and logs.
+                    sw.WriteLine(string.Format("chcp {0}>nul", sw.Encoding.CodePage));
+                }
 
                 // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
                 // automatically maps the network path to a drive letter, and then popd disconnects it
@@ -359,23 +284,21 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         protected override bool HandleTaskExecutionErrors()
         {
-            if (_ignoreExitCode)
+            if (IgnoreExitCode)
             {
                 Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", this.Command, ExitCode);
                 return true;
             }
+
+            if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
+            {
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", this.Command, ExitCode);
+            }
             else
             {
-                if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
-                {
-                    Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", this.Command, ExitCode);
-                }
-                else
-                {
-                    Log.LogErrorWithCodeFromResources("Exec.CommandFailed", this.Command, ExitCode);
-                }
-                return false;
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", this.Command, ExitCode);
             }
+            return false;
         }
 
         /// <summary>
@@ -387,7 +310,6 @@ namespace Microsoft.Build.Tasks
         protected override void LogPathToTool(string toolName, string pathToTool)
         {
             // Do nothing
-            return;
         }
 
         /// <summary>
@@ -397,10 +319,7 @@ namespace Microsoft.Build.Tasks
         /// Overridden to log the batch file command instead of the cmd.exe command.
         /// </remarks>
         /// <param name="message"></param>
-        protected override void LogToolCommand
-        (
-            string message
-        )
+        protected override void LogToolCommand(string message)
         {
             //Dont print the command line if Echo is Off.
             if (!EchoOff)
@@ -416,11 +335,7 @@ namespace Microsoft.Build.Tasks
         /// <remarks>
         /// Overridden to handle any custom regular expressions supplied.
         /// </remarks>
-        protected override void LogEventsFromTextOutput
-        (
-            string singleLine,
-            MessageImportance messageImportance
-        )
+        protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
         {
             if (OutputMatchesRegex(singleLine, ref _customErrorRegex))
             {
@@ -505,8 +420,8 @@ namespace Microsoft.Build.Tasks
 
             // determine what the working directory for the exec command is going to be -- if the user specified a working
             // directory use that, otherwise it's the current directory
-            _workingDirectory = ((_userSpecifiedWorkingDirectory != null) && (_userSpecifiedWorkingDirectory.Length > 0))
-                ? _userSpecifiedWorkingDirectory
+            _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
+                ? WorkingDirectory
                 : Directory.GetCurrentDirectory();
 
             // check if the working directory we're going to use for the exec command is a UNC path
@@ -617,10 +532,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected override string ToolName
         {
-            get
-            {
-                return "cmd.exe";
-            }
+            get { return "cmd.exe"; }
         }
 
         /// <summary>
@@ -645,5 +557,23 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+
+        private static readonly Encoding s_utf8WithoutBom = new UTF8Encoding(false);
+
+        /// <summary>
+        /// Get encoding based on OS. This will fall back to previous behavior on any OS before Windows 7.
+        /// If the OS is greater than or equal to Windows 7, UTF8 encoding will be used for the cmd file.
+        /// </summary>
+        /// <remarks>UTF8 w/o BOM is used because cmd.exe does not like a BOM in a .cmd file.</remarks>
+        /// <returns>Encoding to use</returns>
+        private Encoding GetEncodingWithOsFallback()
+        {
+            // Windows 7 (6.1) or greater
+            var windows7 = new Version(6, 1);
+
+            return Environment.OSVersion.Version >= windows7
+                ? s_utf8WithoutBom
+                : EncodingUtilities.CurrentSystemOemEncoding;
+        }
     }
 }
