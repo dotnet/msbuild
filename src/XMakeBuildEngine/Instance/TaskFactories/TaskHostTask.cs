@@ -266,7 +266,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ProjectFileOfTaskNode,
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
-                        _taskType.Type.Assembly.Location,
+                        _taskType.Type.GetTypeInfo().Assembly.Location,
                         _setParameters
                     );
 
@@ -475,7 +475,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     exceptionMessage = "TaskInstantiationFailureError";
-                    exceptionMessageArgs = new string[] { _taskType.Type.Name, _taskType.Type.Assembly.Location, String.Empty };
+                    exceptionMessageArgs = new string[] { _taskType.Type.Name, _taskType.Type.GetTypeInfo().Assembly.Location, String.Empty };
                 }
 
                 _taskLoggingContext.LogFatalError(new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskException, taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -106,11 +107,11 @@ namespace Microsoft.Build.BackEnd
             {
                 return (string)parameterValue;
             }
-            else if (type.IsValueType)
+            else if (type.GetTypeInfo().IsValueType)
             {
                 return (string)Convert.ChangeType(parameterValue, typeof(string), CultureInfo.CurrentCulture);
             }
-            else if (typeof(ITaskItem).IsAssignableFrom(type))
+            else if (typeof(ITaskItem).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
             {
                 var item = ((ITaskItem)parameterValue);
                 string result = item.ItemSpec;

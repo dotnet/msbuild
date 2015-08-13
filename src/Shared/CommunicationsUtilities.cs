@@ -17,6 +17,7 @@ using System.Security.Principal;
 using System.Threading;
 
 using Microsoft.Build.Shared;
+using System.Reflection;
 
 namespace Microsoft.Build.Internal
 {
@@ -515,7 +516,7 @@ namespace Microsoft.Build.Internal
             // We know that whichever assembly is executing this code -- whether it's MSBuildTaskHost.exe or 
             // Microsoft.Build.dll -- is of the version of the CLR that this process is running.  So grab
             // the version of mscorlib currently in use and call that good enough.  
-            Version mscorlibVersion = typeof(bool).Assembly.GetName().Version;
+            Version mscorlibVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version;
 
             string currentMSBuildArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
             TaskHostContext hostContext = GetTaskHostContext(currentMSBuildArchitecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x64), mscorlibVersion.Major);

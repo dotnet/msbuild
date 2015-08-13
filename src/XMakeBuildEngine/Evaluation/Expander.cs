@@ -3298,7 +3298,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             coercedArguments[n] = args[n].ToString().ToCharArray();
                         }
-                        else if (parameters[n].ParameterType.IsEnum && args[n] is string && ((string)args[n]).Contains("."))
+                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string && ((string)args[n]).Contains("."))
                         {
                             Type enumType = parameters[n].ParameterType;
                             string typeLeafName = enumType.Name + ".";

@@ -6,7 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 #if !SILVERLIGHT
+#if FEATURE_CONSTRAINED_EXECUTION
 using System.Runtime.ConstrainedExecution;
+#endif
 #endif
 using System.Text;
 
@@ -29,7 +31,9 @@ namespace Microsoft.Build.Collections
             1674319, 2009191, 2411033, 2893249, 3471899, 4166287, 4999559, 5999471, 7199369};
 
 #if !SILVERLIGHT
+#if FEATURE_CONSTRAINED_EXECUTION
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+#endif
 #endif
         internal static bool IsPrime(int candidate)
         {
@@ -49,7 +53,9 @@ namespace Microsoft.Build.Collections
         }
 
 #if !SILVERLIGHT
+#if FEATURE_CONSTRAINED_EXECUTION
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+#endif
 #endif
         internal static int GetPrime(int min)
         {

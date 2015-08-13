@@ -124,8 +124,10 @@ namespace Microsoft.Build.Collections
         private bool _readOnly;
 
 #if !SILVERLIGHT
+#if FEATURE_BINARY_SERIALIZATION
         // temporary variable needed during deserialization
         private SerializationInfo _siInfo;
+#endif
 #endif
 
         #region Constructors
@@ -206,6 +208,7 @@ namespace Microsoft.Build.Collections
         }
 
 #if !SILVERLIGHT
+#if FEATURE_BINARY_SERIALIZATION
         protected RetrievableEntryHashSet(SerializationInfo info, StreamingContext context)
         {
             // We can't do anything with the keys and values until the entire graph has been 
@@ -214,6 +217,7 @@ namespace Microsoft.Build.Collections
             // OnDeserialization has been called.
             _siInfo = info;
         }
+#endif
 #endif
 
         #endregion
@@ -501,6 +505,7 @@ namespace Microsoft.Build.Collections
         #region ISerializable methods
 
 #if !SILVERLIGHT
+#if FEATURE_BINARY_SERIALIZATION
         // [SecurityPermissionAttribute(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         [SecurityCritical]
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -522,11 +527,13 @@ namespace Microsoft.Build.Collections
             }
         }
 #endif
+#endif
         #endregion
 
         #region IDeserializationCallback methods
 
 #if !SILVERLIGHT
+#if FEATURE_BINARY_SERIALIZATION
         public virtual void OnDeserialization(Object sender)
         {
             if (_siInfo == null)
@@ -568,6 +575,7 @@ namespace Microsoft.Build.Collections
             _version = _siInfo.GetInt32(VersionName);
             _siInfo = null;
         }
+#endif
 #endif
 
         #endregion

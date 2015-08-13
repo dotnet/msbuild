@@ -23,6 +23,7 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -750,7 +751,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool IsEventSerializable(BuildEventArgs e)
         {
-            if (!e.GetType().IsSerializable)
+            if (!e.GetType().GetTypeInfo().IsSerializable)
             {
                 _taskLoggingContext.LogWarning(new BuildEventFileInfo(string.Empty), null, "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;

@@ -148,6 +148,7 @@ namespace Microsoft.Build.Shared
             return new AssemblyNameExtension(assemblyName);
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Run after the object has been deserialized
         /// </summary>
@@ -156,6 +157,7 @@ namespace Microsoft.Build.Shared
         {
             InitializeRemappedFrom();
         }
+#endif
 
         /// <summary>
         /// Initialize the remapped from structure.

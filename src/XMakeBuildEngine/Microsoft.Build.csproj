@@ -628,6 +628,11 @@
     <Compile Include="FxCopExclusions\Microsoft.Build.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    
+    <Compile Include="..\Shared\Compat\SerializableAttribute.cs" Condition="'$(FeatureBinarySerialization)' != 'true'">
+      <Link>SharedUtilities\Compat\SerializableAttribute.cs</Link>
+    </Compile>
+    
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
     <EmbeddedResource Include="Resources\Strings.resx">

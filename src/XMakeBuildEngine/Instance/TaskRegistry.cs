@@ -579,8 +579,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private static bool IsTaskFactoryClass(Type type, object unused)
         {
-            return (type.IsClass &&
-                !type.IsAbstract &&
+            return (type.GetTypeInfo().IsClass &&
+                !type.GetTypeInfo().IsAbstract &&
                 typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type));
         }
 
@@ -1318,7 +1318,7 @@ namespace Microsoft.Build.Execution
                             {
                                 // We have loaded the type, lets now try and construct it
                                 // Any exceptions from the constructor of the task factory will be caught lower down and turned into an InvalidProjectFileExceptions
-                                factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(loadedType.Type.Assembly.FullName, loadedType.Type.FullName);
+                                factory = (ITaskFactory)AppDomain.CurrentDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
                                 TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext);
 
                                 bool initialized = false;
@@ -1564,7 +1564,7 @@ namespace Microsoft.Build.Execution
                         // The type could not be got directly try and see if the type can be found by appending the FrameworkAssemblyName to it.
                         if (paramType == null)
                         {
-                            paramType = Type.GetType(expandedType + "," + typeof(ITaskItem).Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
+                            paramType = Type.GetType(expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
 
                             ProjectErrorUtilities.VerifyThrowInvalidProject
                             (

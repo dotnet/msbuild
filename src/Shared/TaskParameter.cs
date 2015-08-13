@@ -15,6 +15,7 @@ using System.Security.Permissions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -116,7 +117,7 @@ namespace Microsoft.Build.BackEnd
                     _parameterType = TaskParameterType.StringArray;
                     _wrappedParameter = wrappedParameter;
                 }
-                else if (typeof(ITaskItem[]).IsAssignableFrom(wrappedParameterType))
+                else if (typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(wrappedParameterType.GetTypeInfo()))
                 {
                     _parameterType = TaskParameterType.ITaskItemArray;
                     ITaskItem[] inputAsITaskItemArray = (ITaskItem[])wrappedParameter;
@@ -132,7 +133,7 @@ namespace Microsoft.Build.BackEnd
 
                     _wrappedParameter = taskItemArrayParameter;
                 }
-                else if (wrappedParameterType.GetElementType().IsValueType)
+                else if (wrappedParameterType.GetElementType().GetTypeInfo().IsValueType)
                 {
                     _parameterType = TaskParameterType.ValueTypeArray;
                     _wrappedParameter = wrappedParameter;
@@ -155,7 +156,7 @@ namespace Microsoft.Build.BackEnd
                     _parameterType = TaskParameterType.ITaskItem;
                     _wrappedParameter = CreateNewTaskItemFrom((ITaskItem)wrappedParameter);
                 }
-                else if (wrappedParameterType.IsValueType)
+                else if (wrappedParameterType.GetTypeInfo().IsValueType)
                 {
                     _parameterType = TaskParameterType.ValueType;
                     _wrappedParameter = wrappedParameter;

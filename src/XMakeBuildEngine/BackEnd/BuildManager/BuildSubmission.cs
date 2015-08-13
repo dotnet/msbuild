@@ -266,7 +266,7 @@ namespace Microsoft.Build.Execution
                              _completionCallback(this);
                          });
 
-                        ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(callback, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture);
+                        ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(callback, CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
                     }
                 }
             }

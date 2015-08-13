@@ -123,7 +123,7 @@ namespace Microsoft.Build.Shared
         {
             if (cacheDirectory == null)
             {
-                cacheDirectory = Path.Combine(Path.GetTempPath(), String.Format(Thread.CurrentThread.CurrentUICulture, "MSBuild{0}", Process.GetCurrentProcess().Id));
+                cacheDirectory = Path.Combine(Path.GetTempPath(), String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}", Process.GetCurrentProcess().Id));
             }
 
             return cacheDirectory;

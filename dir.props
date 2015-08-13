@@ -83,13 +83,23 @@
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
+    <FeatureBinarySerialization>true</FeatureBinarySerialization>
     <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>
+    <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
+    
+    
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
     <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
     <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
+
+    <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.
+         If not, then the corresponding properties on Thread (which aren't in .NET Core) need to be used. -->
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
+    
   </PropertyGroup>
 
   <!-- Setup some common paths -->

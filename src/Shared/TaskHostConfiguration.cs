@@ -42,12 +42,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The culture
         /// </summary>
-        private CultureInfo _culture = Thread.CurrentThread.CurrentCulture;
+        private CultureInfo _culture = CultureInfo.CurrentCulture;
 
         /// <summary>
         /// The UI culture.
         /// </summary>
-        private CultureInfo _uiCulture = Thread.CurrentThread.CurrentUICulture;
+        private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
 
         /// <summary>
         /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks. 

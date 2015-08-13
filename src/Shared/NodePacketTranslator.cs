@@ -18,6 +18,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Globalization;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -780,7 +781,7 @@ namespace Microsoft.Build.BackEnd
             public void TranslateEnum<T>(ref T value, int numericValue)
             {
                 Type enumType = value.GetType();
-                ErrorUtilities.VerifyThrow(enumType.IsEnum, "Must pass an enum type.");
+                ErrorUtilities.VerifyThrow(enumType.GetTypeInfo().IsEnum, "Must pass an enum type.");
 
                 _writer.Write(numericValue);
             }
