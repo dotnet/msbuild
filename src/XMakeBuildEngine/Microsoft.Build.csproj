@@ -638,6 +638,8 @@
       <SubType>Designer</SubType>
       <LogicalName>$(AssemblyName).Resources.Strings.shared.resources</LogicalName>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <!-- Assemblies Files we depend on -->
     <!-- Be conservative when adding references... adding System.Xml.Linq can add .47 sec cold start time to our launch time, or 80 ms to warm start time -->
     <Reference Include="System" />
@@ -650,11 +652,8 @@
     <Reference Include="System.Threading.Tasks">
       <HintPath>$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.1\Facades\System.Threading.Tasks.dll</HintPath>
     </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(PackagesDir)Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <!-- If TargetRetailBuildFramework is set to true, reference the public key version. Otherwise reference the project. -->
     <Reference Condition=" '$(TargetRetailBuildFramework)' == 'true' " Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <ProjectReference Condition=" '$(TargetRetailBuildFramework)' != 'true' " Include="..\Framework\Microsoft.Build.Framework.csproj">
@@ -663,7 +662,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
    <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
