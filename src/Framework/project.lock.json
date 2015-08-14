@@ -3,6 +3,7 @@
   "version": 1,
   "targets": {
     ".NETFramework,Version=v4.5.1": {},
+    ".NETFramework,Version=v4.6": {},
     "DNXCore,Version=v5.0": {
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
@@ -1097,6 +1098,7 @@
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x86": {},
+    ".NETFramework,Version=v4.6/win7-x86": {},
     "DNXCore,Version=v5.0/win7-x86": {
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
@@ -4889,6 +4891,7 @@
   "projectFileDependencyGroups": {
     "": [],
     ".NETFramework,Version=v4.5.1": [],
+    ".NETFramework,Version=v4.6": [],
     "DNXCore,Version=v5.0": [
       "Microsoft.NETCore >= 5.0.0",
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.0",

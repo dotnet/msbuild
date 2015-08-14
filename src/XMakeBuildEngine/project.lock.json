@@ -12,6 +12,16 @@
         }
       }
     },
+    ".NETFramework,Version=v4.6": {
+      "Microsoft.Tpl.Dataflow/4.5.24": {
+        "compile": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        }
+      }
+    },
     "DNXCore,Version=v5.0": {
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
@@ -1106,6 +1116,16 @@
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x86": {
+      "Microsoft.Tpl.Dataflow/4.5.24": {
+        "compile": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6/win7-x86": {
       "Microsoft.Tpl.Dataflow/4.5.24": {
         "compile": {
           "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
@@ -4922,6 +4942,9 @@
   "projectFileDependencyGroups": {
     "": [],
     ".NETFramework,Version=v4.5.1": [
+      "Microsoft.Tpl.Dataflow >= 4.5.24"
+    ],
+    ".NETFramework,Version=v4.6": [
       "Microsoft.Tpl.Dataflow >= 4.5.24"
     ],
     "DNXCore,Version=v5.0": [

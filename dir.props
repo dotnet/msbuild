@@ -76,11 +76,30 @@
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
-
+  
+  <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
+        the .NET Core surface area.  This way we can build a binary to run ApiPort on to measure progress. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Port-Progress'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
+    <NetCoreSurface>true</NetCoreSurface>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+  </PropertyGroup>
 
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5.1</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
+    <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
+    <NetCoreSurface>true</NetCoreSurface>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
     <FeatureBinarySerialization>true</FeatureBinarySerialization>
@@ -88,18 +107,12 @@
     <FeatureXamlTypes>true</FeatureXamlTypes>
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
-    
-    
   </PropertyGroup>
-  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
-    <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
+  <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
 
     <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.
          If not, then the corresponding properties on Thread (which aren't in .NET Core) need to be used. -->
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
-    
   </PropertyGroup>
 
   <!-- Setup some common paths -->

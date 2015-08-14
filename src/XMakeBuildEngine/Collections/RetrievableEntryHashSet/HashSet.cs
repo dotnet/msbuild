@@ -91,7 +91,11 @@ namespace Microsoft.Build.Collections
 #if !MONO
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
-    internal class RetrievableEntryHashSet<T> : ICollection<T>, ISerializable, IDeserializationCallback, IDictionary<string, T>
+    internal class RetrievableEntryHashSet<T> : ICollection<T>,
+#if FEATURE_BINARY_SERIALIZATION
+        ISerializable, IDeserializationCallback, 
+#endif
+        IDictionary<string, T>
         where T : class, IKeyed
 #endif
     {
