@@ -19,7 +19,6 @@ using Microsoft.Build.Shared;
 using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Security.Permissions;
 
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 

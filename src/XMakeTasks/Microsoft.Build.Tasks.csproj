@@ -642,6 +642,8 @@
     </Compile>
     <Compile Include="WinMDExp.cs" />
     <Compile Include="WriteCodeFragment.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />
     <Compile Include="XamlTaskFactory\CommandLineToolSwitch.cs" />
     <Compile Include="XamlTaskFactory\RelationsParser.cs">
@@ -656,6 +658,8 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="XmlPeek.cs" />
     <Compile Include="XmlPoke.cs" />
     <Compile Include="XslTransformation.cs" />

@@ -6,7 +6,6 @@ using System.IO;
 using System.Reflection;
 using System.Diagnostics;
 using System.Globalization;
-using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
 
