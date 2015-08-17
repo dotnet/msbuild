@@ -1116,11 +1116,15 @@ namespace Microsoft.Build.BackEnd.Logging
                 // If we have a componenthost then set the culture on the first message we receive
                 if (_componentHost != null)
                 {
-                    originalCultureInfo = Thread.CurrentThread.CurrentCulture;
-                    originalUICultureInfo = Thread.CurrentThread.CurrentUICulture;
-
+                    originalCultureInfo = CultureInfo.CurrentCulture;
+                    originalUICultureInfo = CultureInfo.CurrentUICulture;
+#if FEATURE_CULTUREINFO_SETTERS
+                    CultureInfo.CurrentCulture = _componentHost.BuildParameters.Culture;
+                    CultureInfo.CurrentUICulture = _componentHost.BuildParameters.UICulture;
+#else
                     Thread.CurrentThread.CurrentCulture = _componentHost.BuildParameters.Culture;
                     Thread.CurrentThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
+#endif
                     cultureSet = true;
                 }
 
@@ -1147,8 +1151,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (cultureSet)
                 {
                     // Set the culture back to the original one so that if something else reuses this thread then it will not have a culture which it was not expecting.
+#if FEATURE_CULTUREINFO_SETTERS
+                    CultureInfo.CurrentCulture = originalCultureInfo;
+                    CultureInfo.CurrentUICulture = originalUICultureInfo;
+#else
                     Thread.CurrentThread.CurrentCulture = originalCultureInfo;
                     Thread.CurrentThread.CurrentUICulture = originalUICultureInfo;
+#endif
                 }
             }
         }

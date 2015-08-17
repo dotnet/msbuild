@@ -8,11 +8,16 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
+#if FEATURE_SECURITY_PERMISSIONS
+using System.Security.Permissions;
+#endif
+
+#if FEATURE_SECURITY_PERMISSIONS
 #pragma warning disable 618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, Flags = SecurityPermissionFlag.Execution)]
 #pragma warning restore 618
+#endif
 
 #if (STANDALONEBUILD || MONO)
 [assembly: AssemblyVersion(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion)]

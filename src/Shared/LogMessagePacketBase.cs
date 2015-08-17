@@ -302,7 +302,7 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                string assemblyLocation = _buildEvent.GetType().Assembly.Location;
+                string assemblyLocation = _buildEvent.GetType().GetTypeInfo().Assembly.Location;
                 translator.Translate(ref assemblyLocation);
                 translator.TranslateDotNet(ref _buildEvent);
             }

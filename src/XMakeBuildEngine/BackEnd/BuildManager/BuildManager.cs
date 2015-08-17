@@ -455,8 +455,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void CancelAllSubmissions()
         {
-            CultureInfo parentThreadCulture = _buildParameters != null ? _buildParameters.Culture : Thread.CurrentThread.CurrentCulture;
-            CultureInfo parentThreadUICulture = _buildParameters != null ? _buildParameters.UICulture : Thread.CurrentThread.CurrentUICulture;
+            CultureInfo parentThreadCulture = _buildParameters != null ? _buildParameters.Culture : CultureInfo.CurrentCulture;
+            CultureInfo parentThreadUICulture = _buildParameters != null ? _buildParameters.UICulture : CultureInfo.CurrentUICulture;
 
             WaitCallback callback = new WaitCallback(
             delegate (object state)
@@ -949,19 +949,27 @@ namespace Microsoft.Build.Execution
         {
             try
             {
-                var oldCulture = Thread.CurrentThread.CurrentCulture;
-                var oldUICulture = Thread.CurrentThread.CurrentUICulture;
+                var oldCulture = CultureInfo.CurrentCulture;
+                var oldUICulture = CultureInfo.CurrentUICulture;
 
                 try
                 {
-                    if (Thread.CurrentThread.CurrentCulture != _buildParameters.Culture)
+                    if (CultureInfo.CurrentCulture != _buildParameters.Culture)
                     {
+#if FEATURE_CULTUREINFO_SETTERS
+                        CultureInfo.CurrentCulture = _buildParameters.Culture;
+#else
                         Thread.CurrentThread.CurrentCulture = _buildParameters.Culture;
+#endif
                     }
 
-                    if (Thread.CurrentThread.CurrentUICulture != _buildParameters.UICulture)
+                    if (CultureInfo.CurrentUICulture != _buildParameters.UICulture)
                     {
+#if FEATURE_CULTUREINFO_SETTERS
+                        CultureInfo.CurrentUICulture = _buildParameters.UICulture;
+#else
                         Thread.CurrentThread.CurrentUICulture = _buildParameters.UICulture;
+#endif
                     }
 
                     action();
@@ -975,14 +983,22 @@ namespace Microsoft.Build.Execution
                 finally
                 {
                     // Set the culture back to the original one so that if something else reuses this thread then it will not have a culture which it was not expecting.
-                    if (Thread.CurrentThread.CurrentCulture != oldCulture)
+                    if (CultureInfo.CurrentCulture != oldCulture)
                     {
+#if FEATURE_CULTUREINFO_SETTERS
+                        CultureInfo.CurrentCulture = oldCulture;
+#else
                         Thread.CurrentThread.CurrentCulture = oldCulture;
+#endif
                     }
 
-                    if (Thread.CurrentThread.CurrentUICulture != oldUICulture)
+                    if (CultureInfo.CurrentUICulture != oldUICulture)
                     {
+#if FEATURE_CULTUREINFO_SETTERS
+                        CultureInfo.CurrentUICulture = oldUICulture;
+#else
                         Thread.CurrentThread.CurrentUICulture = oldUICulture;
+#endif
                     }
                 }
             }
@@ -1743,7 +1759,7 @@ namespace Microsoft.Build.Execution
                     Assembly engineAssembly = Assembly.GetAssembly(typeof(ProjectCollection));
                     LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                         loggerClassName: typeof(ConfigurableForwardingLogger).FullName,
-                        loggerAssemblyName: typeof(ConfigurableForwardingLogger).Assembly.GetName().FullName,
+                        loggerAssemblyName: typeof(ConfigurableForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
                         loggerAssemblyFile: null,
                         loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT",
                         verbosity: LoggerVerbosity.Quiet);

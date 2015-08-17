@@ -6,11 +6,16 @@
 //-----------------------------------------------------------------------
 
 using System.Reflection;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+#if FEATURE_XAML_TYPES
 using System.Windows.Markup;
+#endif
 
+#if FEATURE_SECURITY_PERMISSIONS
 // A combination of RequestMinimum and RequestOptional causes the permissions granted to 
 // the assembly to only be the permission requested (like a PermitOnly). More generally
 // the equation for the PermissionSet granted at load time is:
@@ -32,6 +37,7 @@ using System.Windows.Markup;
 #pragma warning disable 618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, Flags = SecurityPermissionFlag.Execution)]
 #pragma warning restore 618
+#endif
 #if STANDALONEBUILD || MONO
 [assembly: AssemblyVersion("14.1.0.0")]
 [assembly: InternalsVisibleTo("Microsoft.Build.Framework.UnitTests")]
@@ -44,7 +50,9 @@ using System.Windows.Markup;
 // tlbexp just pick whatever it wants.
 [assembly: GuidAttribute("D8A9BA71-4724-481d-9CA7-0DA23A1D615C")]
 
+#if FEATURE_XAML_TYPES
 [assembly: XmlnsDefinition("http://schemas.microsoft.com/build/2009/properties", "Microsoft.Build.Framework.XamlTypes")]
+#endif
 #if !MONO
 // This will enable passing the SafeDirectories flag to any P/Invoke calls/implementations within the assembly, 
 // so that we don't run into known security issues with loading libraries from unsafe locations 

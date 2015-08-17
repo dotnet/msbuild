@@ -13,6 +13,7 @@ using BaseLoggingContext = Microsoft.Build.BackEnd.Logging.BaseLoggingContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -331,7 +332,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool IsEventSerializable(BuildEventArgs e)
         {
-            if (!e.GetType().IsSerializable)
+            if (!e.GetType().GetTypeInfo().IsSerializable)
             {
                 _loggingContext.LogWarning(new BuildEventFileInfo(string.Empty), null, "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;

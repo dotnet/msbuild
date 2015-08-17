@@ -633,8 +633,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void SetCommonWorkerThreadParameters()
         {
+#if FEATURE_CULTUREINFO_SETTERS
+            CultureInfo.CurrentCulture = _componentHost.BuildParameters.Culture;
+            CultureInfo.CurrentUICulture = _componentHost.BuildParameters.UICulture;
+#else
             Thread.CurrentThread.CurrentCulture = _componentHost.BuildParameters.Culture;
             Thread.CurrentThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
+#endif
             Thread.CurrentThread.Priority = _componentHost.BuildParameters.BuildThreadPriority;
             Thread.CurrentThread.IsBackground = true;
 
@@ -891,8 +896,13 @@ namespace Microsoft.Build.BackEnd
 
                     handle = await handles.ToTask();
 
+#if FEATURE_CULTUREINFO_SETTERS
+                    CultureInfo.CurrentCulture = savedCulture;
+                    CultureInfo.CurrentUICulture = savedUICulture;
+#else
                     Thread.CurrentThread.CurrentCulture = savedCulture;
                     Thread.CurrentThread.CurrentUICulture = savedUICulture;
+#endif
                 }
                 else
                 {

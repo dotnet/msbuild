@@ -101,6 +101,7 @@ namespace Microsoft.Build.Collections
             _keyComparer = keyComparer;
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serialization constructor, for crossing appdomain boundaries
         /// </summary>
@@ -109,6 +110,7 @@ namespace Microsoft.Build.Collections
         protected CopyOnWriteDictionary(SerializationInfo info, StreamingContext context)
         {
         }
+#endif
 
         /// <summary>
         /// Cloning constructor. Defers the actual clone.
@@ -571,6 +573,7 @@ namespace Microsoft.Build.Collections
                 // Tracing.Record("New COWBD");
             }
 
+#if FEATURE_BINARY_SERIALIZATION
             /// <summary>
             /// Serialization constructor, for crossing appdomain boundaries
             /// </summary>
@@ -578,6 +581,7 @@ namespace Microsoft.Build.Collections
                 : base(info, context)
             {
             }
+#endif
 
             /// <summary>
             /// Empty constructor.
@@ -641,6 +645,7 @@ namespace Microsoft.Build.Collections
                 return ++_refCount;
             }
 
+#if FEATURE_BINARY_SERIALIZATION
             /// <summary>
             /// Deserialization does not call any constructors, not even
             /// the parameterless constructor. Therefore since we do not serialize
@@ -651,6 +656,7 @@ namespace Microsoft.Build.Collections
             {
                 _refCount = 1;
             }
+#endif
         }
     }
 }

@@ -24,7 +24,9 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     public abstract class BuildEventArgs : EventArgs
     {
         /// <summary>
@@ -55,7 +57,9 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Build event context
         /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private BuildEventContext _buildEventContext;
 
         /// <summary>
@@ -177,6 +181,7 @@ namespace Microsoft.Build.Framework
             }
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
@@ -316,8 +321,10 @@ namespace Microsoft.Build.Framework
             #endregion
         }
         #endregion
-        #region SetSerializationDefaults
+#endif
 
+#if FEATURE_BINARY_SERIALIZATION
+        #region SetSerializationDefaults
         /// <summary>
         /// Run before the object has been deserialized
         /// UNDONE (Logging.)  Can this and the next function go away, and instead return a BuildEventContext.Invalid from
@@ -349,5 +356,6 @@ namespace Microsoft.Build.Framework
             }
         }
         #endregion
+#endif
     }
 }

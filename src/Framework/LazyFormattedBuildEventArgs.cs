@@ -15,7 +15,9 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Stores strings for parts of a message delaying the formatting until it needs to be shown
     /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     public class LazyFormattedBuildEventArgs : BuildEventArgs
     {
         /// <summary>
@@ -31,7 +33,9 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Lock object.
         /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
         [NonSerialized]
+#endif
         private Object _locker;
 
         /// <summary>
@@ -102,6 +106,7 @@ namespace Microsoft.Build.Framework
             }
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serializes to a stream through a binary writer.
         /// </summary>
@@ -181,6 +186,7 @@ namespace Microsoft.Build.Framework
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
@@ -281,7 +287,7 @@ namespace Microsoft.Build.Framework
 
             return formatted;
         }
-
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Deserialization does not call any constructors, not even
         /// the parameterless constructor. Therefore since we do not serialize
@@ -292,5 +298,6 @@ namespace Microsoft.Build.Framework
         {
             _locker = new Object();
         }
+#endif
     }
 }

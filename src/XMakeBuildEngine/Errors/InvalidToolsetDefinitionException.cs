@@ -48,6 +48,7 @@ namespace Microsoft.Build.Exceptions
         {
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Basic constructor.
         /// </summary>
@@ -60,6 +61,7 @@ namespace Microsoft.Build.Exceptions
 
             _errorCode = info.GetString("errorCode");
         }
+#endif
 
         /// <summary>
         /// Constructor that takes an MSBuild error code
@@ -84,6 +86,7 @@ namespace Microsoft.Build.Exceptions
             _errorCode = errorCode;
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// ISerializable method which we must override since Exception implements this interface
         /// If we ever add new members to this class, we'll need to update this.
@@ -99,6 +102,7 @@ namespace Microsoft.Build.Exceptions
 
             info.AddValue("errorCode", _errorCode);
         }
+#endif
 
         /// <summary>
         /// The MSBuild error code corresponding with this exception, or

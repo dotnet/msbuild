@@ -86,7 +86,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                ErrorUtilities.ThrowInternalError("Unhandled intrinsic task type {0}", taskInstance.GetType().BaseType);
+                ErrorUtilities.ThrowInternalError("Unhandled intrinsic task type {0}", taskInstance.GetType().GetTypeInfo().BaseType);
                 return null;
             }
         }

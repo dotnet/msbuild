@@ -19,7 +19,9 @@ using Microsoft.Build.Shared;
 using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 
 namespace Microsoft.Build.BackEnd
 {

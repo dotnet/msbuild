@@ -8,7 +8,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Security.Permissions; // for SecurityPermissionAttribute
 using System.Runtime.Serialization;
 
 namespace Microsoft.Build.Shared
@@ -64,6 +63,7 @@ namespace Microsoft.Build.Shared
             ConsiderDebuggerLaunch(message, innerException);
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         #region Serialization (update when adding new class members)
 
         /// <summary>
@@ -78,6 +78,7 @@ namespace Microsoft.Build.Shared
 
         // Base implementation of GetObjectData() is sufficient; we have no fields
         #endregion
+#endif
 
         #region ConsiderDebuggerLaunch
         /// <summary>

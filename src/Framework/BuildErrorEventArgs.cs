@@ -21,7 +21,9 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     public class BuildErrorEventArgs : LazyFormattedBuildEventArgs
     {
         /// <summary>
@@ -270,6 +272,7 @@ namespace Microsoft.Build.Framework
             }
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
@@ -389,6 +392,6 @@ namespace Microsoft.Build.Framework
             _endColumnNumber = reader.ReadInt32();
         }
         #endregion
-
+#endif
     }
 }

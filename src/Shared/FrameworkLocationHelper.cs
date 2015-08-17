@@ -13,6 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Win32;
 
 using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElement;
+using System.Reflection;
 
 namespace Microsoft.Build.Shared
 {
@@ -1367,7 +1368,7 @@ namespace Microsoft.Build.Shared
                 // We're installed and we haven't found this framework path yet -- so find it!
                 string generatedPathToDotNetFramework =
                                 FindDotNetFrameworkPath(
-                                    Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
+                                    Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName),
                                     this.dotNetFrameworkFolderPrefix,
                                     s_directoryExists,
                                     s_getDirectories,

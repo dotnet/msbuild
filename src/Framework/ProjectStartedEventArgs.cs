@@ -21,7 +21,9 @@ namespace Microsoft.Build.Framework
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
     /// </remarks>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     public class ProjectStartedEventArgs : BuildStatusEventArgs
     {
         #region Constants
@@ -189,7 +191,9 @@ namespace Microsoft.Build.Framework
         // This number indicated the instance id of the project and can be
         // used when debugging to determine if two projects with the same name
         // are the same project instance or different instances
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private int _projectId;
 
         public int ProjectId
@@ -200,7 +204,9 @@ namespace Microsoft.Build.Framework
             }
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private BuildEventContext _parentProjectBuildEventContext;
 
         /// <summary>
@@ -249,7 +255,9 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the set of global properties used to evaluate this project.
         /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private IDictionary<string, string> _globalProperties;
 
         /// <summary>
@@ -268,7 +276,9 @@ namespace Microsoft.Build.Framework
             }
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private string _toolsVersion;
 
         /// <summary>
@@ -290,7 +300,9 @@ namespace Microsoft.Build.Framework
         // IEnumerable is not a serializable type. That is okay because
         // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
         // (b) this event still makes sense when this field is "null"
+#if FEATURE_BINARY_SERIALIZATION
         [NonSerialized]
+#endif
         private IEnumerable _properties;
 
         /// <summary>
@@ -315,7 +327,9 @@ namespace Microsoft.Build.Framework
         // IEnumerable is not a serializable type. That is okay because
         // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
         // (b) this event still makes sense when this field is "null"
+#if FEATURE_BINARY_SERIALIZATION
         [NonSerialized]
+#endif
         private IEnumerable _items;
 
         /// <summary>
@@ -336,6 +350,7 @@ namespace Microsoft.Build.Framework
             }
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
 
         /// <summary>
@@ -521,7 +536,9 @@ namespace Microsoft.Build.Framework
             #endregion
         }
         #endregion
+#endif
 
+#if FEATURE_BINARY_SERIALIZATION
         #region SerializationSection
         [OnDeserializing] // Will happen before the object is deserialized
         private void SetDefaultsBeforeSerialization(StreamingContext sc)
@@ -547,5 +564,6 @@ namespace Microsoft.Build.Framework
             }
         }
         #endregion
+#endif
     }
 }

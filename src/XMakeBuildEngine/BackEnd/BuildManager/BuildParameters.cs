@@ -119,7 +119,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The culture
         /// </summary>
-        private CultureInfo _culture = Thread.CurrentThread.CurrentCulture;
+        private CultureInfo _culture = CultureInfo.CurrentCulture;
 
         /// <summary>
         /// The default tools version.
@@ -200,7 +200,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The UI culture.
         /// </summary>
-        private CultureInfo _uiCulture = Thread.CurrentThread.CurrentUICulture;
+        private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
 
         /// <summary>
         /// The toolset provider

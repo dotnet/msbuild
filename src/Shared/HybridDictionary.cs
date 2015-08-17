@@ -103,6 +103,7 @@ namespace Microsoft.Build.Collections
             }
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serialization constructor.
         /// </summary>
@@ -110,6 +111,7 @@ namespace Microsoft.Build.Collections
         {
             throw new NotImplementedException();
         }
+#endif
 
         /// <summary>
         /// Cloning constructor.

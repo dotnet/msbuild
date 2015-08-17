@@ -31,6 +31,7 @@ namespace Microsoft.Build.BackEnd
         {
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
@@ -38,5 +39,6 @@ namespace Microsoft.Build.BackEnd
             : base(info, context)
         {
         }
+#endif
     }
 }

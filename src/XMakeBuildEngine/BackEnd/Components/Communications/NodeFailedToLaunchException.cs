@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.Serialization;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 using Microsoft.Build.Shared;
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
@@ -43,6 +45,7 @@ namespace Microsoft.Build.BackEnd
             ErrorDescription = message;
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
@@ -50,6 +53,7 @@ namespace Microsoft.Build.BackEnd
             : base(info, context)
         {
         }
+#endif
 
         /// <summary>
         /// Gets the error code (if any) associated with the exception message.
@@ -71,11 +75,14 @@ namespace Microsoft.Build.BackEnd
             private set;
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// ISerializable method which we must override since Exception implements this interface
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
+#if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         override public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -83,5 +90,6 @@ namespace Microsoft.Build.BackEnd
             info.AddValue("ErrorCode", ErrorCode);
             info.AddValue("ErrorDescription", ErrorDescription);
         }
+#endif
     }
 }
