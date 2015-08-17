@@ -75,6 +75,7 @@
     <Compile Include="FindAppConfigFile_Tests.cs" />
     <Compile Include="FindInvalidProjectReferences_Tests.cs" />
     <Compile Include="FindUnderPath_Tests.cs" />
+    <Compile Include="GenerateBindingRedirects_Tests.cs" />
     <Compile Include="GenerateResourceOutOfProc_Tests.cs" />
     <Compile Include="GenerateResource_Tests.cs" />
     <Compile Include="GetInstalledSDKLocations_Tests.cs" />
@@ -161,13 +162,13 @@
       <Project>{59A73FE0-D3B7-4299-9063-3A587D429AF4}</Project>
       <Name>Microsoft.Build.Tasks</Name>
     </ProjectReference>
-	    
     <!-- If TargetRetailBuildFramework is set to true, reference the public key version. Otherwise reference the project. -->
     <Reference Condition=" '$(TargetRetailBuildFramework)' == 'true' " Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <ProjectReference Condition=" '$(TargetRetailBuildFramework)' != 'true' " Include="..\..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
