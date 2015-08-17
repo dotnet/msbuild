@@ -103,9 +103,9 @@ namespace Microsoft.Build.Tasks
     internal delegate UInt16 ReadMachineTypeFromPEHeader(string dllPath);
 
     /// <summary>
-    /// Determines if a assembly is in the GAC
+    /// Delegate to get the path to an assembly in the GAC.
     /// </summary>
-    internal delegate bool CheckIfAssemblyInGac(AssemblyNameExtension assemblyName, System.Reflection.ProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists);
+    internal delegate string GetAssemblyPathInGac(AssemblyNameExtension assemblyName, System.Reflection.ProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists, bool fullFusionName, bool specificVersion);
 
     /// <summary>
     /// Determines if a assembly is an winmd file 

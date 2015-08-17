@@ -134,6 +134,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _copyLocalDependenciesWhenParentReferenceInGac;
 
+        private bool _doNotCopyLocalIfInGac;
+
         /// <summary>
         ///  Shoould the framework attribute version mismatch be ignored.
         /// </summary>
@@ -142,7 +144,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Delegate to determine if an assembly name is in the GAC.
         /// </summary>
-        private CheckIfAssemblyInGac _checkIfAssemblyIsInGac;
+        private GetAssemblyPathInGac _getAssemblyPathInGac;
 
         /// <summary>
         /// Build engine 
@@ -164,7 +166,7 @@ namespace Microsoft.Build.Tasks
 
         // Offset to the PE header
         private const int PEOFFSET = 0x3c;
-
+        
         // PEHeader
         private const int PEHEADER = 0x00004550;
 
@@ -218,7 +220,8 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log,
             string[] latestTargetFrameworkDirectories,
             bool copyLocalDependenciesWhenParentReferenceInGac,
-            CheckIfAssemblyInGac checkIfAssemblyIsInGac,
+            bool doNotCopyLocalIfInGac,
+            GetAssemblyPathInGac getAssemblyPathInGac,
             IsWinMDFile isWinMDFile,
             bool ignoreVersionForFrameworkReferences,
             ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader,
@@ -250,7 +253,8 @@ namespace Microsoft.Build.Tasks
             _targetFrameworkMoniker = targetFrameworkMoniker;
             _latestTargetFrameworkDirectories = latestTargetFrameworkDirectories;
             _copyLocalDependenciesWhenParentReferenceInGac = copyLocalDependenciesWhenParentReferenceInGac;
-            _checkIfAssemblyIsInGac = checkIfAssemblyIsInGac;
+            _doNotCopyLocalIfInGac = doNotCopyLocalIfInGac;
+            _getAssemblyPathInGac = getAssemblyPathInGac;
             _isWinMDFile = isWinMDFile;
             _readMachineTypeFromPEHeader = readMachineTypeFromPEHeader;
             _warnOrErrorOnTargetArchitectureMismatch = warnOrErrorOnTargetArchitectureMismatch;
@@ -299,7 +303,8 @@ namespace Microsoft.Build.Tasks
                     openBaseKey,
                     installedAssemblies,
                     getRuntimeVersion,
-                    targetedRuntimeVersion
+                    targetedRuntimeVersion,
+                    getAssemblyPathInGac
                 );
         }
 
@@ -2469,9 +2474,10 @@ namespace Microsoft.Build.Tasks
                         _getRuntimeVersion,
                         _targetedRuntimeVersion,
                         _fileExists,
+                        _getAssemblyPathInGac,
                         _copyLocalDependenciesWhenParentReferenceInGac,
-                        this,
-                        _checkIfAssemblyIsInGac
+                        _doNotCopyLocalIfInGac,
+                        this
                     );
 
                     // If mscorlib was found as a dependency and not a primary reference we will assume that mscorlib on the target machine will be ok to use.
