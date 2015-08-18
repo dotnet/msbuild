@@ -46,14 +46,17 @@ namespace Microsoft.Build.Shared
         /// <returns> True if exception is critical. </returns>
         internal static bool IsCriticalException(Exception e)
         {
-            if (e is StackOverflowException
-             || e is OutOfMemoryException
+            if (e is OutOfMemoryException
+#if FEATURE_CRITICAL_EXCEPTIONS
+             || e is StackOverflowException
              || e is ThreadAbortException
              || e is ThreadInterruptedException
+             || e is AccessViolationException
+#endif
 #if !BUILDINGAPPXTASKS
              || e is InternalErrorException
 #endif
-             || e is AccessViolationException)
+             )
             {
                 // Ideally we would include NullReferenceException, because it should only ever be thrown by CLR (use ArgumentNullException for arguments)
                 // but we should handle it if tasks and loggers throw it.

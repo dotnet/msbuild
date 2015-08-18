@@ -13,6 +13,7 @@ using System.Diagnostics;
 using Microsoft.Build.Shared;
 
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
+using System.Globalization;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -350,13 +351,27 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(null == _terminatePacketPump, "terminatePacketPump != null");
                 ErrorUtilities.VerifyThrow(null == _packetQueue, "packetQueue != null");
 
+#if FEATURE_THREAD_CULTURE
                 _packetPump = new Thread(PacketPumpProc);
+#else
+                //  In .NET Core, we need to set the current culture from inside the new thread
+                CultureInfo culture = _componentHost.BuildParameters.Culture;
+                CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
+                _packetPump = new Thread(() =>
+                {
+                    CultureInfo.CurrentCulture = culture;
+                    CultureInfo.CurrentUICulture = uiCulture;
+                    PacketPumpProc();
+                });
+#endif
                 _packetPump.Name = "InProc Endpoint Packet Pump";
                 _packetAvailable = new AutoResetEvent(false);
                 _terminatePacketPump = new AutoResetEvent(false);
                 _packetQueue = new Queue<INodePacket>();
+#if FEATURE_THREAD_CULTURE
                 _packetPump.CurrentCulture = _componentHost.BuildParameters.Culture;
                 _packetPump.CurrentUICulture = _componentHost.BuildParameters.UICulture;
+#endif
                 _packetPump.Start();
             }
         }
@@ -374,16 +389,18 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue == null");
 
                 _terminatePacketPump.Set();
-                if (!_packetPump.Join(new TimeSpan(0, 0, BuildParameters.EndpointShutdownTimeout)))
+                if (!_packetPump.Join((int) new TimeSpan(0, 0, BuildParameters.EndpointShutdownTimeout).TotalMilliseconds))
                 {
+#if FEATURE_THREAD_ABORT
                     // We timed out.  Kill it.
                     _packetPump.Abort();
+#endif
                 }
 
                 _packetPump = null;
-                _packetAvailable.Close();
+                _packetAvailable.Dispose();
                 _packetAvailable = null;
-                _terminatePacketPump.Close();
+                _terminatePacketPump.Dispose();
                 _terminatePacketPump = null;
                 _packetQueue = null;
             }

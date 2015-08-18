@@ -640,7 +640,9 @@ namespace Microsoft.Build.BackEnd
             Thread.CurrentThread.CurrentCulture = _componentHost.BuildParameters.Culture;
             Thread.CurrentThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
 #endif
+#if FEATURE_THREAD_PRIORITY
             Thread.CurrentThread.Priority = _componentHost.BuildParameters.BuildThreadPriority;
+#endif
             Thread.CurrentThread.IsBackground = true;
 
             // NOTE: This is safe to do because we have specified long-running so we get our own new thread.
@@ -706,12 +708,14 @@ namespace Microsoft.Build.BackEnd
                 }
 #endif
             }
+#if FEATURE_CRITICAL_EXCEPTIONS
             catch (ThreadAbortException)
             {
                 // Do nothing.  This will happen when the thread is forcibly terminated because we are shutting down, for example
                 // when the unit test framework terminates.
                 throw;
             }
+#endif
             catch (Exception e)
             {
                 // Dump all engine exceptions to a temp file

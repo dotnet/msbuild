@@ -108,11 +108,16 @@
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
     <FeatureBinarySerialization>true</FeatureBinarySerialization>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CRITICAL_EXCEPTIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
-
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>
+    <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
+    
 
     
   </PropertyGroup>
