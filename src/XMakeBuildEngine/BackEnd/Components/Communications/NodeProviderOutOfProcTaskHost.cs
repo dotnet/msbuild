@@ -570,7 +570,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation);
+            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? "MSBuild.exe");
 
             // Make it here.
             NodeContext context = GetNode

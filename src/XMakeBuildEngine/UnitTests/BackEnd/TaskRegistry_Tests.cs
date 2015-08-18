@@ -2047,7 +2047,8 @@ namespace TestTask
                     FileUtilities.DeleteNoThrow(outputFile);
                 }
 
-                // now rethrow 
+                // now rethrow
+				throw;
             }
             finally
             {
