@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.Serialization;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Exceptions

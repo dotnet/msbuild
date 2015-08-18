@@ -210,6 +210,7 @@ namespace Microsoft.Build.BackEnd
         public void CleanupTask(ITask task)
         {
             ErrorUtilities.VerifyThrowArgumentNull(task, "task");
+#if FEATURE_APPDOMAIN
             AppDomain appDomain;
             if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
             {
@@ -228,6 +229,7 @@ namespace Microsoft.Build.BackEnd
                     Task.Run(() => AppDomain.Unload(appDomain));
                 }
             }
+#endif
 
             TaskHostTask taskAsTaskHostTask = task as TaskHostTask;
             if (taskAsTaskHostTask != null)

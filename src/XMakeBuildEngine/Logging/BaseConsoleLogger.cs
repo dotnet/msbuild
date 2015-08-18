@@ -164,7 +164,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return String.Compare(
                     (string)(((DictionaryEntry)a).Key),
                     (string)(((DictionaryEntry)b).Key),
-                    true /*case insensitive*/, CultureInfo.CurrentCulture);
+                    StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
@@ -180,7 +180,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return String.Compare(
                     (string)(((ITaskItem)a).ItemSpec),
                     (string)(((ITaskItem)b).ItemSpec),
-                    true /*case insensitive*/, CultureInfo.CurrentCulture);
+                    StringComparison.CurrentCultureIgnoreCase);
             }
         }
 

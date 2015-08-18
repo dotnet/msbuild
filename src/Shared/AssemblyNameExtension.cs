@@ -115,6 +115,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// To be used as a delegate. Gets the AssemblyName of the given file.
         /// </summary>
@@ -147,6 +148,7 @@ namespace Microsoft.Build.Shared
             }
             return new AssemblyNameExtension(assemblyName);
         }
+#endif
 
 #if FEATURE_BINARY_SERIALIZATION
         /// <summary>
@@ -296,7 +298,15 @@ namespace Microsoft.Build.Shared
             {
                 // Is there a string?
                 CreateAssemblyName();
+#if FEATURE_ASSEMBLYNAME_CULTUREINFO
                 return _asAssemblyName.CultureInfo;
+#else
+                if (_asAssemblyName.CultureName == null)
+                {
+                    return null;
+                }
+                return new CultureInfo(_asAssemblyName.CultureName);
+#endif
             }
         }
 
@@ -564,7 +574,11 @@ namespace Microsoft.Build.Shared
 
             if (_asAssemblyName != null)
             {
+#if FEATURE_ASSEMBLYNAME_CLONE
                 newExtension._asAssemblyName = (AssemblyName)_asAssemblyName.Clone();
+#else
+                newExtension._asAssemblyName = new AssemblyName(_asAssemblyName.FullName);
+#endif
             }
 
             newExtension._asString = _asString;
@@ -712,6 +726,7 @@ namespace Microsoft.Build.Shared
         internal bool CompareCulture(AssemblyNameExtension that)
         {
             // Do the Cultures match?
+#if FEATURE_ASSEMBLYNAME_CULTUREINFO
             CultureInfo aCulture = CultureInfo;
             CultureInfo bCulture = that.CultureInfo;
             if (aCulture == null)
@@ -722,12 +737,16 @@ namespace Microsoft.Build.Shared
             {
                 bCulture = CultureInfo.InvariantCulture;
             }
+
             if (aCulture.LCID != bCulture.LCID)
             {
                 return false;
             }
 
             return true;
+#else
+            return CultureInfo?.Name == that.CultureInfo?.Name;
+#endif
         }
 
         /// <summary>

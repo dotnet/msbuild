@@ -643,16 +643,18 @@ namespace Microsoft.Build.BackEnd
             Thread.CurrentThread.Priority = _componentHost.BuildParameters.BuildThreadPriority;
             Thread.CurrentThread.IsBackground = true;
 
+            // NOTE: This is safe to do because we have specified long-running so we get our own new thread.
+            string threadName = "RequestBuilder thread";
+
+#if FEATURE_APARTMENT_STATE
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
             {
                 // NOTE: This is safe to do because the STA scheduler always gives us our own new thread.
                 Thread.CurrentThread.Name = "RequestBuilder STA thread";
             }
-            else
-            {
-                // NOTE: This is safe to do because we have specified long-running so we get our own new thread.
-                Thread.CurrentThread.Name = "RequestBuilder thread";
-            }
+#endif
+
+            Thread.CurrentThread.Name = threadName;
         }
 
         /// <summary>

@@ -417,11 +417,17 @@ namespace Microsoft.Build.BackEnd
                         try
                         {
                             if (
-                                ((requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread) &&
-                                (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
+                                ((requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread)
+#if FEATURE_APARTMENT_STATE
+                                && (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
+#endif
                                 )
                             {
+#if FEATURE_APARTMENT_STATE
                                 taskResult = ExecuteTaskInSTAThread(bucket, taskLoggingContext, taskIdentityParameters, taskHost, howToExecuteTask);
+#else
+                                throw new PlatformNotSupportedException(TaskRequirements.RequireSTAThread.ToString());
+#endif
                             }
                             else
                             {
@@ -517,6 +523,8 @@ namespace Microsoft.Build.BackEnd
             return taskIdentityParameters;
         }
 
+
+#if FEATURE_APARTMENT_STATE
         /// <summary>
         /// Executes the task using an STA thread.
         /// </summary>
@@ -580,6 +588,7 @@ namespace Microsoft.Build.BackEnd
 
             return taskResult;
         }
+#endif
 
         /// <summary>
         /// Logs a task skipped message if necessary.
