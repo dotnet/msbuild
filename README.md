@@ -14,12 +14,13 @@ For the full supported experience, you will need to have Visual Studio 2015. You
 
 To get started on **Visual Studio 2015**:
 
-1. Set up a box with Visual Studio 2015. Either 
-[install  Visual Studio 2015](http://www.visualstudio.com/en-us/downloads/visual-studio-2015-downloads-vs), 
-or grab a [prebuilt Azure VM image](http://blogs.msdn.com/b/visualstudioalm/archive/2014/06/04/visual-studio-14-ctp-now-available-in-the-virtual-machine-azure-gallery.aspx).
+1. [Install Visual Studio 2015](http://www.visualstudio.com/en-us/downloads/visual-studio-2015-downloads-vs).  Select the following optional components:
+  - _Microsoft Web Developer Tools_
+  - _Universal Windows App Development Tools_
+    - _Tools and Windows SDK 10.0.10240_
 2. Clone the source code (see above).
 3. Open src/MSBuild.sln solution in Visual Studio 2015.
- 
+
 ## How to Engage, Contribute and Provide Feedback
 Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we will or won't accept.
 
