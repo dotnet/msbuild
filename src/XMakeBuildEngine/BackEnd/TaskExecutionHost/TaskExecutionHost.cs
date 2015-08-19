@@ -632,7 +632,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (disposing)
             {
-                _taskExecutionIdle.Close();
+                _taskExecutionIdle.Dispose();
                 CleanupCancellationToken();
             }
 

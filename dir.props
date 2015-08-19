@@ -109,6 +109,7 @@
     <FeatureBinarySerialization>true</FeatureBinarySerialization>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CRITICAL_EXCEPTIONS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>

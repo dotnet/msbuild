@@ -667,7 +667,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         finally
                         {
-                            translator.Writer.BaseStream.Close();
+                            translator.Writer.BaseStream.Dispose();
                         }
                     }
                 }
@@ -700,7 +700,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 finally
                 {
-                    translator.Reader.BaseStream.Close();
+                    translator.Reader.BaseStream.Dispose();
                 }
             }
         }

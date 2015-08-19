@@ -1901,12 +1901,17 @@ namespace Microsoft.Build.Evaluation
                                     return null;
                                 }
 
-                                transformFunction = (ItemTransformFunction)Delegate.CreateDelegate(typeof(ItemTransformFunction), itemFunctionInfo, false);
                             }
-                            else
+                            try
                             {
                                 // Create a delegate to the function we're going to call
-                                transformFunction = (ItemTransformFunction)Delegate.CreateDelegate(typeof(ItemTransformFunction), itemFunctionInfo, false);
+                                transformFunction = (ItemTransformFunction)itemFunctionInfo.CreateDelegate(typeof(ItemTransformFunction));
+                            }
+                            catch (ArgumentException)
+                            {
+                                //  Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
+                                //  Since MethodInfo.CreateDelegate doesn't have this option, we catch the ArgumentException to preserve the previous behavior
+                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
                             }
                         }
 

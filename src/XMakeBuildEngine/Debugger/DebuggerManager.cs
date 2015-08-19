@@ -202,7 +202,7 @@ namespace Microsoft.Build.Debugging
             fileName = fileName ?? "MSBuild";
 
             int suffix = 0;
-            while (s_dynamicModule.GetType(fileName) != null)
+            while (s_dynamicModule.GetType(fileName, false, false) != null)
             {
                 fileName += suffix;
                 suffix++;
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Debugging
 
                 string methodName = CreateIsland(type, state);
 
-                state.RecordMethodInfo(type, methodName);
+                state.RecordMethodInfo(type.CreateTypeInfo().AsType(), methodName);
 
                 s_allBakedStates.Add(state.Location, state);
             }
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Debugging
 
             // Although type is going out of scope now, it will
             // subsequently be accessed by its name
-            type.CreateType();
+            type.CreateTypeInfo();
         }
 
         /// <summary>
@@ -378,8 +378,11 @@ namespace Microsoft.Build.Debugging
 
             // Arbitrary but reasonable name
             string name = Process.GetCurrentProcess().ProcessName;
-
+#if FEATURE_REFLECTION_EMIT_DEBUG_INFO
             s_dynamicModule = assembly.DefineDynamicModule(name, true /* track debug information */);
+#else
+            s_dynamicModule = assembly.DefineDynamicModule(name);
+#endif
         }
 
         /// <summary>
@@ -729,8 +732,8 @@ namespace Microsoft.Build.Debugging
 
                 _workerThread.Join();
 
-                _workToDoEvent.Close();
-                _workDoneEvent.Close();
+                _workToDoEvent.Dispose();
+                _workDoneEvent.Dispose();
             }
 
             /// <summary>

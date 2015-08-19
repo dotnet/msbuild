@@ -14,7 +14,10 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// This is a helper class to install an AssemblyResolver event handler in whatever AppDomain this class is created in.
     /// </summary>
-    internal class TaskEngineAssemblyResolver : MarshalByRefObject
+    internal class TaskEngineAssemblyResolver
+#if FEATURE_APPDOMAIN
+        : MarshalByRefObject
+#endif
     {
         /// <summary>
         /// This public default constructor is needed so that instances of this class can be created by NDP.

@@ -306,7 +306,7 @@ namespace Microsoft.Build.BackEnd
                         (_inProcNodeOwningOperatingEnvironment != null))
                     {
                         _inProcNodeOwningOperatingEnvironment.Release();
-                        _inProcNodeOwningOperatingEnvironment.Close();
+                        _inProcNodeOwningOperatingEnvironment.Dispose();
                         _inProcNodeOwningOperatingEnvironment = null;
                     }
 

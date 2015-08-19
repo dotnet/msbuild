@@ -11,8 +11,10 @@ using Microsoft.Build.Shared;
 using System.Diagnostics;
 using BaseLoggingContext = Microsoft.Build.BackEnd.Logging.BaseLoggingContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
+#endif
 using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
@@ -20,7 +22,11 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// The host allows task factories access to method to allow them to log message during the construction of the task factories.
     /// </summary>
-    internal class TaskFactoryLoggingHost : MarshalByRefObject, IBuildEngine
+    internal class TaskFactoryLoggingHost :
+#if FEATURE_APPDOMAIN
+        MarshalByRefObject, 
+#endif
+        IBuildEngine
     {
         /// <summary>
         /// Location of the task node in the original file

@@ -32,12 +32,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// The delegate used to convert values.
         /// </summary>
-        private readonly Converter<V, N> _converter;
+        private readonly Func<V, N> _converter;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        internal ReadOnlyConvertingDictionary(IDictionary<K, V> backing, Converter<V, N> converter)
+        internal ReadOnlyConvertingDictionary(IDictionary<K, V> backing, Func<V, N> converter)
         {
             ErrorUtilities.VerifyThrowArgumentNull(backing, "backing");
             ErrorUtilities.VerifyThrowArgumentNull(converter, "converter");

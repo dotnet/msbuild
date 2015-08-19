@@ -1351,11 +1351,16 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (this)
                 {
-                    StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id), true);
-                    string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
-                    file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);
-                    file.Flush();
-                    file.Close();
+                    const int DefaultFileStreamBufferSize = 4096;
+
+                    using (Stream fileStream = new FileStream(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id),
+                       FileMode.Append, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan))
+                    using (StreamWriter file = new StreamWriter(fileStream))
+                    {                        
+                        string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
+                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);
+                        file.Flush();
+                    }
                 }
             }
         }

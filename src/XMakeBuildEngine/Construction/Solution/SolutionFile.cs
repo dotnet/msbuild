@@ -417,12 +417,12 @@ namespace Microsoft.Build.Construction
             {
                 if (fileStream != null)
                 {
-                    fileStream.Close();
+                    fileStream.Dispose();
                 }
 
                 if (reader != null)
                 {
-                    reader.Close();
+                    reader.Dispose();
                 }
             }
 
@@ -512,12 +512,12 @@ namespace Microsoft.Build.Construction
             {
                 if (fileStream != null)
                 {
-                    fileStream.Close();
+                    fileStream.Dispose();
                 }
 
                 if (_reader != null)
                 {
-                    _reader.Close();
+                    _reader.Dispose();
                 }
             }
         }

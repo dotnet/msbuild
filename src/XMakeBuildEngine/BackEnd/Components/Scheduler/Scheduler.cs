@@ -2197,7 +2197,7 @@ namespace Microsoft.Build.BackEnd
                 file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
                 file.WriteLine(format, stuff);
                 file.Flush();
-                file.Close();
+                file.Dispose();
             }
         }
 

@@ -30,7 +30,10 @@ namespace Microsoft.Build.Tasks
 #else
     public
 #endif
- class TaskLoggingHelper : MarshalByRefObject
+ class TaskLoggingHelper
+#if FEATURE_APPDOMAIN
+        : MarshalByRefObject
+#endif
     {
         #region Constructors
 

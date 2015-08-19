@@ -31,7 +31,11 @@ namespace Microsoft.Build.BackEnd
     /// The task host object which allows tasks to interface with the rest of the build system.
     /// Implementation of IBuildEngineX is thread-safe, so, for example, tasks can log concurrently on multiple threads.
     /// </summary>
-    internal class TaskHost : MarshalByRefObject, IBuildEngine4
+    internal class TaskHost :
+#if FEATURE_APPDOMAIN
+        MarshalByRefObject, 
+#endif
+        IBuildEngine4
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 

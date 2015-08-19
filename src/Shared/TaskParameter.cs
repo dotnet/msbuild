@@ -69,7 +69,11 @@ namespace Microsoft.Build.BackEnd
     /// Wrapper for task parameters, to allow proper serialization even 
     /// in cases where the parameter is not .NET serializable. 
     /// </summary>
-    internal class TaskParameter : MarshalByRefObject, INodePacketTranslatable
+    internal class TaskParameter :
+#if FEATURE_APPDOMAIN
+        MarshalByRefObject, 
+#endif
+        INodePacketTranslatable
     {
         /// <summary>
         /// The TaskParameterType of the wrapped parameter
@@ -490,7 +494,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Super simple ITaskItem derivative that we can use as a container for read items.  
         /// </summary>
-        private class TaskParameterTaskItem : MarshalByRefObject, ITaskItem, ITaskItem2
+        private class TaskParameterTaskItem :
+#if FEATURE_APPDOMAIN
+            MarshalByRefObject, 
+#endif
+            ITaskItem, ITaskItem2
         {
             /// <summary>
             /// The item spec 

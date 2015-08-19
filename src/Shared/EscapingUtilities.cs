@@ -39,6 +39,13 @@ namespace Microsoft.Build.Shared
             return UnescapeAll(escapedString, out throwAwayBool);
         }
 
+        private static bool IsHexDigit(char character)
+        {
+            return ((character >= '0') && (character <= '9'))
+                || ((character >= 'A') && (character <= 'F'))
+                || ((character >= 'a') && (character <= 'f'));
+        }
+
         /// <summary>
         /// Replaces all instances of %XX in the input string with the character represented
         /// by the hexadecimal number XX. 
@@ -81,8 +88,8 @@ namespace Microsoft.Build.Shared
                 // for us to even consider doing anything with this.
                 if (
                         (indexOfPercent <= (escapedString.Length - 3)) &&
-                        Uri.IsHexDigit(escapedString[indexOfPercent + 1]) &&
-                        Uri.IsHexDigit(escapedString[indexOfPercent + 2])
+                        IsHexDigit(escapedString[indexOfPercent + 1]) &&
+                        IsHexDigit(escapedString[indexOfPercent + 2])
                     )
                 {
                     // First copy all the characters up to the current percent sign into

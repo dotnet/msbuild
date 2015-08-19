@@ -582,8 +582,12 @@ namespace Microsoft.Build.Internal
                     }
 
                     fileName += ".txt";
+                    
+                    const int DefaultFileStreamBufferSize = 4096;
 
-                    using (StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), true))
+                    using (Stream fileStream = new FileStream(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId),
+                        FileMode.Append, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan))
+                    using (StreamWriter file = new StreamWriter(fileStream))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, args);
                         long now = DateTime.UtcNow.Ticks;
