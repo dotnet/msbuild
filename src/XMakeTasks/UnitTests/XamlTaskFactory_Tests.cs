@@ -314,6 +314,34 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             Assert.AreEqual("/target:\"[value]\"", properties.First.Value.SwitchName);
         }
 
+        [Test]
+        public void TestLoadAndParseFromAbsoluteFilePath()
+        {
+            string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
+                                     <Rule Name=`CL`>
+                                       <StringProperty Name=`TargetAssembly` Switch=`/target:&quot;[value]&quot;` />
+                                     </Rule>
+                                   </ProjectSchemaDefinitions>";
+            string tmpXamlFile = FileUtilities.GetTemporaryFile();
+            try {
+                File.WriteAllText(tmpXamlFile, xmlContents.Replace("`", "\""));
+                TaskParser tp = new TaskParser();
+                tp.Parse(tmpXamlFile, "CL");
+
+                LinkedList<Property> properties = tp.Properties;
+
+                Assert.AreEqual(1, properties.Count, "Expected one property but there were " + properties.Count);
+                Assert.IsNotNull(properties.First.Value, "TargetAssembly switch should exist");
+                Assert.AreEqual("TargetAssembly", properties.First.Value.Name);
+                Assert.AreEqual(PropertyType.String, properties.First.Value.Type);
+                Assert.AreEqual("/target:\"[value]\"", properties.First.Value.SwitchName);
+            } finally {
+                // This throws because the file is still in use!
+                //if (File.Exists(tmpXamlFile))
+                //    File.Delete(tmpXamlFile);
+            }
+        }
+
         /// <summary>
         /// Tests a simple string array property. 
         /// </summary>

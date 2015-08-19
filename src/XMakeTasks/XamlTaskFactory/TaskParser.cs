@@ -235,36 +235,7 @@ namespace Microsoft.Build.Tasks.Xaml
             ErrorUtilities.VerifyThrowArgumentLength(contentOrFile, "contentOrFile");
             ErrorUtilities.VerifyThrowArgumentLength(desiredRule, "desiredRule");
 
-            string fullPath = null;
-            bool parseSuccessful = false;
-            try
-            {
-                fullPath = Path.GetFullPath(contentOrFile);
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
-                // We will get an exception if the contents are not a path (for instance, they are actual XML.)
-            }
-
-            if (fullPath != null)
-            {
-                if (!File.Exists(fullPath))
-                {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.RuleFileNotFound", fullPath));
-                }
-
-                parseSuccessful = ParseXamlDocument(new StreamReader(fullPath), desiredRule);
-            }
-            else
-            {
-                parseSuccessful = ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
-            }
-
+            bool parseSuccessful = ParseAsContentOrFile(contentOrFile, desiredRule);
             if (!parseSuccessful)
             {
                 StringBuilder parseErrors = new StringBuilder();
@@ -278,6 +249,67 @@ namespace Microsoft.Build.Tasks.Xaml
             }
 
             return parseSuccessful;
+        }
+
+        bool ParseAsContentOrFile(string contentOrFile, string desiredRule)
+        {
+            // On Windows:
+            // - xml string will be an invalid file path, so, Path.GetFullPath will
+            //   return null
+            // - xml string cannot be a rooted path ("C:\\<abc />")
+            //
+            // On Unix:
+            // - xml string is a valid path, this is not a definite check as Path.GetFullPath
+            //   will return !null in most cases
+            // - xml string cannot be a rooted path ("/foo/<abc />")
+
+            bool isRootedPath = false;
+            string maybeFullPath = null;
+            try
+            {
+                isRootedPath = Path.IsPathRooted(contentOrFile);
+                if (!isRootedPath)
+                    maybeFullPath = Path.GetFullPath(contentOrFile);
+            }
+            catch (Exception e)
+            {
+                if (ExceptionHandling.IsCriticalException(e))
+                {
+                    throw;
+                }
+
+                // We will get an exception if the contents are not a path (for instance, they are actual XML.)
+            }
+
+            if (isRootedPath) {
+                // valid *absolute* file path
+
+                if (!File.Exists(contentOrFile))
+                    throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.RuleFileNotFound", contentOrFile));
+
+                return ParseXamlDocument(new StreamReader(contentOrFile), desiredRule);
+            }
+
+            // On Windows, xml content string is not a valid path, so, maybeFullPath == null
+            // On Unix, xml content string would be a valid path, so, maybeFullPath != null
+            if (maybeFullPath == null)
+                // Unable to convert to a path, parse as XML
+                return ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
+
+            if (File.Exists(maybeFullPath))
+                // file found, parse as a file
+                return ParseXamlDocument(new StreamReader(maybeFullPath), desiredRule);
+
+            // @maybeFullPath is either:
+            //  - a non-existent fullpath
+            //  - or xml content with the current dir prepended (like "/foo/bar/<abc .. />"),
+            //    but not on Windows
+            //
+            // On Windows, this means that @contentOrFile is really a non-existant file name
+            if (NativeMethodsShared.IsWindows)
+                throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.RuleFileNotFound", maybeFullPath));
+            else // On !Windows, try parsing as XML
+                return ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
         }
 
         /// <summary>
