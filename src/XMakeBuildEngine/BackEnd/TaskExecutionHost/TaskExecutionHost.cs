@@ -632,10 +632,11 @@ namespace Microsoft.Build.BackEnd
         {
             if (disposing)
             {
-                _taskExecutionIdle.Close();
+                _taskExecutionIdle.Dispose();
                 CleanupCancellationToken();
             }
 
+#if FEATURE_APPDOMAIN
             // if we've been asked to remote these items then
             // we need to disconnect them from .NET Remoting now we're all done with them
             if (_remotedTaskItems != null)
@@ -648,6 +649,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             _remotedTaskItems = null;
+#endif
         }
 
         /// <summary>
@@ -1010,7 +1012,9 @@ namespace Microsoft.Build.BackEnd
                     }
                     finally
                     {
+#if FEATURE_APPDOMAIN
                         loggingHost.MarkAsInactive();
+#endif
                     }
                 }
             }

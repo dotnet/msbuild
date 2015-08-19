@@ -31,7 +31,11 @@ namespace Microsoft.Build.BackEnd
     /// The task host object which allows tasks to interface with the rest of the build system.
     /// Implementation of IBuildEngineX is thread-safe, so, for example, tasks can log concurrently on multiple threads.
     /// </summary>
-    internal class TaskHost : MarshalByRefObject, IBuildEngine4
+    internal class TaskHost :
+#if FEATURE_APPDOMAIN
+        MarshalByRefObject, 
+#endif
+        IBuildEngine4
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
@@ -648,6 +652,7 @@ namespace Microsoft.Build.BackEnd
             return result;
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// InitializeLifetimeService is called when the remote object is activated. 
         /// This method will determine how long the lifetime for the object will be.
@@ -744,6 +749,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Determine if the event is serializable. If we are running with multiple nodes we need to make sure the logging events are serializable. If not

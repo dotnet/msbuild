@@ -339,10 +339,12 @@ namespace Microsoft.Build.BackEnd
             {
                 _taskExecutionHost.CleanupForTask();
 
+#if FEATURE_APPDOMAIN
                 if (taskHost != null)
                 {
                     taskHost.MarkAsInactive();
                 }
+#endif
 
                 // Now all task batches are done, apply all item adds to the outer 
                 // target batch; we do this even if the task wasn't found (in that case,
@@ -417,11 +419,17 @@ namespace Microsoft.Build.BackEnd
                         try
                         {
                             if (
-                                ((requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread) &&
-                                (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
+                                ((requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread)
+#if FEATURE_APARTMENT_STATE
+                                && (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
+#endif
                                 )
                             {
+#if FEATURE_APARTMENT_STATE
                                 taskResult = ExecuteTaskInSTAThread(bucket, taskLoggingContext, taskIdentityParameters, taskHost, howToExecuteTask);
+#else
+                                throw new PlatformNotSupportedException(TaskRequirements.RequireSTAThread.ToString());
+#endif
                             }
                             else
                             {
@@ -517,6 +525,8 @@ namespace Microsoft.Build.BackEnd
             return taskIdentityParameters;
         }
 
+
+#if FEATURE_APARTMENT_STATE
         /// <summary>
         /// Executes the task using an STA thread.
         /// </summary>
@@ -580,6 +590,7 @@ namespace Microsoft.Build.BackEnd
 
             return taskResult;
         }
+#endif
 
         /// <summary>
         /// Logs a task skipped message if necessary.
@@ -812,6 +823,7 @@ namespace Microsoft.Build.BackEnd
                         // Rethrow wrapped in order to avoid losing the callstack
                         throw new InternalLoggerException(taskException.Message, taskException, ex.BuildEventArgs, ex.ErrorCode, ex.HelpKeyword, ex.InitializationException);
                     }
+#if FEATURE_VARIOUS_EXCEPTIONS
                     else if (type == typeof(ThreadAbortException))
                     {
                         Thread.ResetAbort();
@@ -821,6 +833,7 @@ namespace Microsoft.Build.BackEnd
                         // Stack will be lost
                         throw taskException;
                     }
+#endif
                     else if (type == typeof(BuildAbortedException))
                     {
                         _continueOnError = ContinueOnError.ErrorAndStop;

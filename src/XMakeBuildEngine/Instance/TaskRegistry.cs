@@ -1351,7 +1351,9 @@ namespace Microsoft.Build.Execution
                                 }
                                 finally
                                 {
+#if FEATURE_APPDOMAIN
                                     taskFactoryLoggingHost.MarkAsInactive();
+#endif
                                 }
 
                                 if (!initialized)

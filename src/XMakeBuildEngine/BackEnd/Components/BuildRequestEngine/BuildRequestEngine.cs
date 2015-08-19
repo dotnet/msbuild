@@ -1351,11 +1351,12 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (this)
                 {
-                    StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id), true);
-                    string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
-                    file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);
-                    file.Flush();
-                    file.Close();
+                    using (StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id)))
+                    {
+                        string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
+                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);
+                        file.Flush();
+                    }
                 }
             }
         }

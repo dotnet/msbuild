@@ -582,8 +582,8 @@ namespace Microsoft.Build.Internal
                     }
 
                     fileName += ".txt";
-
-                    using (StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), true))
+                    
+                    using (StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId)))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, args);
                         long now = DateTime.UtcNow.Ticks;

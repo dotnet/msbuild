@@ -187,7 +187,9 @@ namespace Microsoft.Build.Shared
                 });
 
                 Thread thread = new Thread(threadStart);
+#if FEATURE_APARTMENT_STATE
                 thread.SetApartmentState(ApartmentState.STA);
+#endif
                 thread.Start(task);
             }
 

@@ -235,7 +235,7 @@ namespace Microsoft.Build.Execution
                     }
                     finally
                     {
-                        translator.Writer.BaseStream.Close();
+                        translator.Writer.BaseStream.Dispose();
                     }
                 }
             }
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Execution
                     }
                     finally
                     {
-                        translator.Reader.BaseStream.Close();
+                        translator.Reader.BaseStream.Dispose();
                     }
                 }
             }

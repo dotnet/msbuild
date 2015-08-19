@@ -69,7 +69,11 @@ namespace Microsoft.Build.BackEnd
     /// Wrapper for task parameters, to allow proper serialization even 
     /// in cases where the parameter is not .NET serializable. 
     /// </summary>
-    internal class TaskParameter : MarshalByRefObject, INodePacketTranslatable
+    internal class TaskParameter :
+#if FEATURE_APPDOMAIN
+        MarshalByRefObject, 
+#endif
+        INodePacketTranslatable
     {
         /// <summary>
         /// The TaskParameterType of the wrapped parameter
@@ -245,6 +249,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Overridden to give this class infinite lease time. Otherwise we end up with a limited
         /// lease (5 minutes I think) and instances can expire if they take long time processing.
@@ -255,6 +260,7 @@ namespace Microsoft.Build.BackEnd
             // null means infinite lease time
             return null;
         }
+#endif
 
         /// <summary>
         /// Factory for deserialization.
@@ -490,7 +496,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Super simple ITaskItem derivative that we can use as a container for read items.  
         /// </summary>
-        private class TaskParameterTaskItem : MarshalByRefObject, ITaskItem, ITaskItem2
+        private class TaskParameterTaskItem :
+#if FEATURE_APPDOMAIN
+            MarshalByRefObject, 
+#endif
+            ITaskItem, ITaskItem2
         {
             /// <summary>
             /// The item spec 
@@ -697,6 +707,7 @@ namespace Microsoft.Build.BackEnd
                 return (IDictionary)clonedMetadata;
             }
 
+#if FEATURE_APPDOMAIN
             /// <summary>
             /// Overridden to give this class infinite lease time. Otherwise we end up with a limited
             /// lease (5 minutes I think) and instances can expire if they take long time processing.
@@ -707,6 +718,7 @@ namespace Microsoft.Build.BackEnd
                 // null means infinite lease time
                 return null;
             }
+#endif
 
             /// <summary>
             /// Returns the escaped value of the requested metadata name.

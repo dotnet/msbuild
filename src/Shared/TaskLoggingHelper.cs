@@ -30,7 +30,10 @@ namespace Microsoft.Build.Tasks
 #else
     public
 #endif
- class TaskLoggingHelper : MarshalByRefObject
+ class TaskLoggingHelper
+#if FEATURE_APPDOMAIN
+        : MarshalByRefObject
+#endif
     {
         #region Constructors
 
@@ -1353,6 +1356,7 @@ namespace Microsoft.Build.Tasks
 
         #endregion
 
+#if FEATURE_APPDOMAIN
         #region AppDomain Code
 
         /// <summary>
@@ -1445,5 +1449,6 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+#endif
     }
 }

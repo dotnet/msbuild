@@ -640,19 +640,23 @@ namespace Microsoft.Build.BackEnd
             Thread.CurrentThread.CurrentCulture = _componentHost.BuildParameters.Culture;
             Thread.CurrentThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
 #endif
+#if FEATURE_THREAD_PRIORITY
             Thread.CurrentThread.Priority = _componentHost.BuildParameters.BuildThreadPriority;
+#endif
             Thread.CurrentThread.IsBackground = true;
 
+            // NOTE: This is safe to do because we have specified long-running so we get our own new thread.
+            string threadName = "RequestBuilder thread";
+
+#if FEATURE_APARTMENT_STATE
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
             {
                 // NOTE: This is safe to do because the STA scheduler always gives us our own new thread.
-                Thread.CurrentThread.Name = "RequestBuilder STA thread";
+                threadName = "RequestBuilder STA thread";
             }
-            else
-            {
-                // NOTE: This is safe to do because we have specified long-running so we get our own new thread.
-                Thread.CurrentThread.Name = "RequestBuilder thread";
-            }
+#endif
+
+            Thread.CurrentThread.Name = threadName;
         }
 
         /// <summary>
@@ -704,12 +708,14 @@ namespace Microsoft.Build.BackEnd
                 }
 #endif
             }
+#if FEATURE_VARIOUS_EXCEPTIONS
             catch (ThreadAbortException)
             {
                 // Do nothing.  This will happen when the thread is forcibly terminated because we are shutting down, for example
                 // when the unit test framework terminates.
                 throw;
             }
+#endif
             catch (Exception e)
             {
                 // Dump all engine exceptions to a temp file

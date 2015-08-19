@@ -27,12 +27,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Converter delegate used on each item in the backing enumerable as it is returned
         /// </summary>
-        private Converter<TFrom, TTo> _converter;
+        private Func<TFrom, TTo> _converter;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        internal ConvertingEnumerable(IEnumerable<TFrom> backingEnumerable, Converter<TFrom, TTo> converter)
+        internal ConvertingEnumerable(IEnumerable<TFrom> backingEnumerable, Func<TFrom, TTo> converter)
         {
             _backingEnumerable = backingEnumerable;
             _converter = converter;
@@ -70,12 +70,12 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// Converter delegate used on each item in the backing enumerator as it is returned
             /// </summary>
-            private Converter<TFrom2, TTo2> _converter;
+            private Func<TFrom2, TTo2> _converter;
 
             /// <summary>
             /// Constructor
             /// </summary>
-            internal ConvertingEnumerator(IEnumerator<TFrom2> backingEnumerator, Converter<TFrom2, TTo2> converter)
+            internal ConvertingEnumerator(IEnumerator<TFrom2> backingEnumerator, Func<TFrom2, TTo2> converter)
             {
                 _backingEnumerator = backingEnumerator;
                 _converter = converter;

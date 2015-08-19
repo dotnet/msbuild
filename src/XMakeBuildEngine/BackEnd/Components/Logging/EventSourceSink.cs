@@ -15,7 +15,11 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// This class raises events on behalf of the build engine to all registered loggers.
     /// </summary>
-    internal sealed class EventSourceSink : MarshalByRefObject, IEventSource, IBuildEventSink
+    internal sealed class EventSourceSink :
+#if FEATURE_APPDOMAIN
+        MarshalByRefObject,
+#endif
+        IEventSource, IBuildEventSink
     {
         #region Events
 

@@ -262,7 +262,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
-            _terminatePacketPump.Close();
+            _terminatePacketPump.Dispose();
             _pipeServer.Close();
             _packetPump = null;
             ChangeLinkStatus(LinkStatus.Inactive);

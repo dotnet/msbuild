@@ -39,7 +39,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// The delegate used to convert values.
         /// </summary>
-        private readonly Converter<V, N> _converter;
+        private readonly Func<V, N> _converter;
 
         /// <summary>
         /// The delegate used to satisfy contains operations, optionally
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Constructor.
         /// </summary>
-        internal ReadOnlyConvertingCollection(ICollection<V> backing, Converter<V, N> converter)
+        internal ReadOnlyConvertingCollection(ICollection<V> backing, Func<V, N> converter)
             : this(backing, converter, null)
         {
         }
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Constructor, optionally taking a delegate to do a "backwards" contains operation.
         /// </summary>
-        internal ReadOnlyConvertingCollection(ICollection<V> backing, Converter<V, N> converter, Contains<N> contains)
+        internal ReadOnlyConvertingCollection(ICollection<V> backing, Func<V, N> converter, Contains<N> contains)
         {
             ErrorUtilities.VerifyThrowArgumentNull(backing, "backing");
             ErrorUtilities.VerifyThrowArgumentNull(converter, "converter");

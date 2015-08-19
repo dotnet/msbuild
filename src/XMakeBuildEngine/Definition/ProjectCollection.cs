@@ -185,7 +185,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         static ProjectCollection()
         {
+#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
+#endif
         }
 
         /// <summary>

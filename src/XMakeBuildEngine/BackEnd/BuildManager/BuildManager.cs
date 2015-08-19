@@ -1756,7 +1756,7 @@ namespace Microsoft.Build.Execution
                 {
                     // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
                     // ensuring we receive project started and finished events.
-                    Assembly engineAssembly = Assembly.GetAssembly(typeof(ProjectCollection));
+                    Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
                     LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                         loggerClassName: typeof(ConfigurableForwardingLogger).FullName,
                         loggerAssemblyName: typeof(ConfigurableForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,

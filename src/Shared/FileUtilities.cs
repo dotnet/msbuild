@@ -1076,5 +1076,12 @@ namespace Microsoft.Build.Shared
                 return s_currentExecutableOverride;
             }
         }
+
+        internal static StreamWriter OpenFileForAppend(string path)
+        {
+            const int DefaultFileStreamBufferSize = 4096;
+            Stream fileStream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
+            return new StreamWriter(fileStream);
+        }
     }
 }
