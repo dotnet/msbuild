@@ -2234,7 +2234,13 @@ namespace Microsoft.Build.Evaluation
                     // using the Include from the source items
                     foreach (Tuple<string, S> item in itemsOfType)
                     {
-                        Function<P> function = new Expander<P, I>.Function<P>(typeof(string), item.Item1, item.Item1, functionName, arguments, BindingFlags.Public | BindingFlags.InvokeMethod, String.Empty, expander.UsedUninitializedProperties);
+                        Function<P> function = new Expander<P, I>.Function<P>(typeof(string), item.Item1, item.Item1, functionName, arguments,
+#if FEATURE_TYPE_INVOKEMEMBER
+                            BindingFlags.Public | BindingFlags.InvokeMethod,
+#else
+                            BindingFlags.Public, InvokeType.InvokeMethod,
+#endif
+                            String.Empty, expander.UsedUninitializedProperties);
 
                         object result = function.Execute(item.Item1, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
 
@@ -2591,6 +2597,14 @@ namespace Microsoft.Build.Evaluation
              *************************************************************************************************************************/
         }
 
+#if !FEATURE_TYPE_INVOKEMEMBER
+        internal enum InvokeType
+        {
+            InvokeMethod,
+            GetPropertyOrField
+        }
+#endif
+
         /// <summary>
         /// This class represents the function as extracted from an expression
         /// It is also responsible for executing the function
@@ -2629,6 +2643,10 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private BindingFlags _bindingFlags;
 
+#if !FEATURE_TYPE_INVOKEMEMBER
+            private InvokeType _invokeType;
+#endif
+
             /// <summary>
             /// The remainder of the body once the function and arguments have been extracted
             /// </summary>
@@ -2642,7 +2660,11 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Construct a function that will be executed during property evaluation
             /// </summary>
-            internal Function(Type objectType, string expression, string expressionRootName, string name, string[] arguments, BindingFlags bindingFlags, string remainder, UsedUninitializedProperties usedUninitializedProperties)
+            internal Function(Type objectType, string expression, string expressionRootName, string name, string[] arguments, BindingFlags bindingFlags,
+#if !FEATURE_TYPE_INVOKEMEMBER
+                InvokeType invokeType,
+#endif
+                string remainder, UsedUninitializedProperties usedUninitializedProperties)
             {
                 _name = name;
                 if (arguments == null)
@@ -2658,6 +2680,9 @@ namespace Microsoft.Build.Evaluation
                 _expression = expression;
                 _objectType = objectType;
                 _bindingFlags = bindingFlags;
+#if !FEATURE_TYPE_INVOKEMEMBER
+                _invokeType = invokeType;
+#endif
                 _remainder = remainder;
                 _usedUninitializedProperties = usedUninitializedProperties;
             }
@@ -2803,6 +2828,85 @@ namespace Microsoft.Build.Evaluation
                 return function;
             }
 
+#if !FEATURE_TYPE_INVOKEMEMBER
+            private MethodInfo BindMethod(object[] args, bool throwOnError = false)
+            {
+                StringComparison nameComparison =
+                    ((_bindingFlags & BindingFlags.IgnoreCase) == BindingFlags.IgnoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+                 var matchingMethods = _objectType.GetMethods(_bindingFlags)
+                                    .Where(method => method.Name.Equals(_name, nameComparison))
+                                    .Where(method =>
+                                    {
+                                        ParameterInfo[] parameters = method.GetParameters();
+                                        if (parameters.Length != args.Length)
+                                        {
+                                            return false;
+                                        }
+
+                                        for (int i = 0; i < parameters.Length; i++)
+                                        {
+                                            if (args[i] == null)
+                                            {
+                                                //  Can't bind null to a value type
+                                                if (parameters[i].ParameterType.GetTypeInfo().IsValueType)
+                                                {
+                                                    return false;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!parameters[i].ParameterType.IsAssignableFrom(args[i].GetType()))
+                                                {
+                                                    return false;
+                                                }
+                                            }
+                                        }
+
+                                        return true;
+                                    }).ToArray();
+
+                if (matchingMethods.Length == 0)
+                {
+                    throw new MissingMethodException(_name);
+                }
+                else if (matchingMethods.Length == 1)
+                {
+                    
+                    return matchingMethods[0];
+                }
+                else
+                {
+                    throw new AmbiguousMatchException(_name);
+                }
+            }
+
+            private MemberInfo BindFieldOrProperty()
+            {
+                StringComparison nameComparison =
+                    ((_bindingFlags & BindingFlags.IgnoreCase) == BindingFlags.IgnoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+                var matchingMembers = _objectType.GetFields(_bindingFlags)
+                    .Cast<MemberInfo>()
+                    .Concat(_objectType.GetProperties(_bindingFlags))
+                    .Where(member => member.Name.Equals(_name, nameComparison))
+                    .ToArray();
+
+                if (matchingMembers.Length == 0)
+                {
+                    throw new MissingMemberException(_name);
+                }
+                else if (matchingMembers.Length == 1)
+                {
+                    return matchingMembers[0];
+                }
+                else
+                {
+                    throw new AmbiguousMatchException(_name);
+                }                
+            }
+#endif
+
             /// <summary>
             /// Execute the function on the given instance
             /// </summary>
@@ -2896,14 +3000,43 @@ namespace Microsoft.Build.Evaluation
                         // otherwise there is the potential of running a function twice!
                         try
                         {
+#if FEATURE_TYPE_INVOKEMEMBER
                             // First use InvokeMember using the standard binder - this will match and coerce as needed
                             functionResult = _objectType.InvokeMember(_name, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+#else
+                            if (_invokeType == InvokeType.InvokeMethod)
+                            {
+                                MethodInfo matchingMethod = BindMethod(args, throwOnError: true);
+
+                                functionResult = matchingMethod.Invoke(objectInstance, args);                                
+                            }
+                            else if (_invokeType == InvokeType.GetPropertyOrField)
+                            {
+                                MemberInfo memberInfo = BindFieldOrProperty();
+                                if (memberInfo is FieldInfo)
+                                {
+                                    functionResult = ((FieldInfo)memberInfo).GetValue(objectInstance);
+                                }
+                                else
+                                {
+                                    functionResult = ((PropertyInfo)memberInfo).GetValue(objectInstance);
+                                }
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException(_invokeType.ToString());
+                            }
+#endif
                         }
                         catch (MissingMethodException ex) // Don't catch and retry on any other exception
                         {
                             // If we're invoking a method, then there are deeper attempts that
                             // can be made to invoke the method
+#if FEATURE_TYPE_INVOKEMEMBER
                             if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
+#else
+                            if (_invokeType == InvokeType.InvokeMethod)
+#endif
                             {
                                 // The standard binder failed, so do our best to coerce types into the arguments for the function
                                 // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true. 
@@ -3114,12 +3247,16 @@ namespace Microsoft.Build.Evaluation
                 Type objectType = null;
 
                 // Try to load the assembly with the computed name
+#if FEATURE_GAC
 #pragma warning disable 618
                 // Unfortunately Assembly.Load is not an alternative to LoadWithPartialName, since
                 // Assembly.Load requires the full assembly name to be passed to it.
                 // Therefore we must ignore the deprecated warning.
                 Assembly candidateAssembly = Assembly.LoadWithPartialName(candidateAssemblyName);
 #pragma warning restore 618
+#else
+                Assembly candidateAssembly = Assembly.Load(new AssemblyName(candidateAssemblyName));
+#endif
 
                 if (candidateAssembly != null)
                 {
@@ -3166,7 +3303,13 @@ namespace Microsoft.Build.Evaluation
 
                 Function<T> indexerFunction;
 
-                indexerFunction = new Function<T>(objectType, expressionFunction, propertyName, functionToInvoke, functionArguments, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.InvokeMethod, remainder, usedUnInitializedProperties);
+                indexerFunction = new Function<T>(objectType, expressionFunction, propertyName, functionToInvoke, functionArguments,
+#if FEATURE_TYPE_INVOKEMEMBER
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.InvokeMethod, 
+#else
+                    BindingFlags.IgnoreCase | BindingFlags.Public, InvokeType.InvokeMethod,
+#endif
+                    remainder, usedUnInitializedProperties);
                 return indexerFunction;
             }
 
@@ -3186,6 +3329,9 @@ namespace Microsoft.Build.Evaluation
 
                 // The binding flags that we will use for this function's execution
                 BindingFlags defaultBindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public;
+#if !FEATURE_TYPE_INVOKEMEMBER
+                InvokeType defaultInvokeType;
+#endif
 
                 // There are arguments that need to be passed to the function
                 if (argumentStartIndex > -1 && !expressionFunction.Substring(methodStartIndex, argumentStartIndex - methodStartIndex).Contains("."))
@@ -3207,7 +3353,11 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // We have been asked for a method invocation
+#if FEATURE_TYPE_INVOKEMEMBER
                     defaultBindingFlags |= BindingFlags.InvokeMethod;
+#else
+                    defaultInvokeType = InvokeType.InvokeMethod;
+#endif
 
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
@@ -3259,7 +3409,11 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.VerifyThrowInvalidProject(netPropertyName.Length > 0, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
                     // We have been asked for a property or a field
+#if FEATURE_TYPE_INVOKEMEMBER
                     defaultBindingFlags |= (BindingFlags.GetProperty | BindingFlags.GetField);
+#else
+                    defaultInvokeType = InvokeType.GetPropertyOrField;
+#endif
 
                     functionToInvoke = netPropertyName;
                 }
@@ -3268,7 +3422,11 @@ namespace Microsoft.Build.Evaluation
                 if (String.IsNullOrEmpty(remainder) || remainder[0] == '.' || remainder[0] == '[')
                 {
                     // Construct a FunctionInfo will all the content that we just gathered
-                    return new Function<T>(objectType, expressionFunction, expressionRootName, functionToInvoke, functionArguments, defaultBindingFlags, remainder, usedUninitializedProperties);
+                    return new Function<T>(objectType, expressionFunction, expressionRootName, functionToInvoke, functionArguments, defaultBindingFlags,
+#if !FEATURE_TYPE_INVOKEMEMBER
+                        defaultInvokeType,
+#endif
+                        remainder, usedUninitializedProperties);
                 }
                 else
                 {
@@ -3380,8 +3538,11 @@ namespace Microsoft.Build.Evaluation
                     {
                         typeName = "MSBuild";
                     }
-
+#if FEATURE_TYPE_INVOKEMEMBER
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
+#else
+                    if (_invokeType == InvokeType.InvokeMethod)
+#endif
                     {
                         return "[" + typeName + "]::" + name + "(" + parameters + ")";
                     }
@@ -3394,7 +3555,11 @@ namespace Microsoft.Build.Evaluation
                 {
                     string propertyValue = "\"" + objectInstance as string + "\"";
 
+#if FEATURE_TYPE_INVOKEMEMBER
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
+#else
+                    if (_invokeType == InvokeType.InvokeMethod)
+#endif
                     {
                         return propertyValue + "." + name + "(" + parameters + ")";
                     }
@@ -3441,6 +3606,21 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
+#if !FEATURE_TYPE_INVOKEMEMBER
+            private static bool ParametersBindToNStringArguments(ParameterInfo[] parameters, int n)
+            {
+                if (parameters.Length != n)
+                {
+                    return false;
+                }
+                if (parameters.Any(p => !p.ParameterType.IsAssignableFrom(typeof(string))))
+                {
+                    return false;
+                }
+                return true;
+            }
+#endif
+
             /// <summary>
             /// Construct and instance of objectType based on the constructor or method arguments provided.
             /// Arguments must never be null.
@@ -3452,19 +3632,35 @@ namespace Microsoft.Build.Evaluation
                 MethodBase memberInfo = null;
 
                 // First let's try for a method where all arguments are strings..
+#if FEATURE_TYPE_INVOKEMEMBER
                 Type[] types = new Type[_arguments.Length];
                 for (int n = 0; n < _arguments.Length; n++)
                 {
                     types[n] = typeof(string);
                 }
+#endif
 
                 if (isConstructor)
                 {
+#if FEATURE_TYPE_INVOKEMEMBER
                     memberInfo = _objectType.GetConstructor(bindingFlags, null, types, null);
+#else
+                    memberInfo = _objectType.GetConstructors(bindingFlags)
+                        .Where(c => ParametersBindToNStringArguments(c.GetParameters(), args.Length))
+                        .FirstOrDefault();
+#endif
                 }
                 else
                 {
+#if FEATURE_TYPE_INVOKEMEMBER
                     memberInfo = _objectType.GetMethod(_name, bindingFlags, null, types, null);
+#else
+                    StringComparison nameComparison =
+                        ((_bindingFlags & BindingFlags.IgnoreCase) == BindingFlags.IgnoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+                    memberInfo = _objectType.GetMethods(bindingFlags)
+                        .Where(method => method.Name.Equals(_name, nameComparison) && ParametersBindToNStringArguments(method.GetParameters(), args.Length))
+                        .FirstOrDefault();
+#endif
                 }
 
                 // If we didn't get a match on all string arguments,
