@@ -319,14 +319,14 @@ namespace Microsoft.Build.Shared
 
                     s_dumpFileName = Path.Combine(tempPath, "MSBuild_" + guid.ToString() + ".failure.txt");
 
-                    using (StreamWriter writer = FileUtilities.OpenFileForAppend(s_dumpFileName))
+                    using (StreamWriter writer = FileUtilities.OpenFile(s_dumpFileName, append: true))
                     {
                         writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", Process.GetCurrentProcess().Id);
                         writer.WriteLine("=====================");
                     }
                 }
 
-                using (StreamWriter writer = FileUtilities.OpenFileForAppend(s_dumpFileName))
+                using (StreamWriter writer = FileUtilities.OpenFile(s_dumpFileName, append: true))
                 {
                     // "G" format is, e.g., 6/15/2008 9:15:07 PM
                     writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));

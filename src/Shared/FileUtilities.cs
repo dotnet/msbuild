@@ -54,20 +54,25 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void GetTestExecutionInfo()
         {
+
+#if FEATURE_GET_COMMANDLINE
             // Get the executable we are running
             var program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
+#else
+            var program = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName);
+#endif
 
             // Check if it matches the pattern
             s_runningTests = program != null
                            && s_testRunners.Any(
-                               s => program.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) == -1);
+                               s => program.IndexOf(s, StringComparison.OrdinalIgnoreCase) == -1);
 
             // Does not look like it's a test, but check the process name
             if (!s_runningTests)
             {
                 program = Process.GetCurrentProcess().ProcessName;
                 s_runningTests =
-                    s_testRunners.Any(s => program.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) == -1);
+                    s_testRunners.Any(s => program.IndexOf(s, StringComparison.OrdinalIgnoreCase) == -1);
             }
 
             // Definitely not a test, leave
@@ -88,7 +93,7 @@ namespace Microsoft.Build.Shared
                 if (dir == null)
                 {
                     // Can't get the assembly path, use current directory
-                    dir = Environment.CurrentDirectory;
+                    dir = Directory.GetCurrentDirectory();
                 }
                 else
                 {
@@ -539,7 +544,7 @@ namespace Microsoft.Build.Shared
             string fileExtension = Path.GetExtension(fileName);
             foreach (string extension in allowedExtensions)
             {
-                if (String.Compare(fileExtension, extension, true /* ignore case */, CultureInfo.CurrentCulture) == 0)
+                if (String.Compare(fileExtension, extension, StringComparison.CurrentCultureIgnoreCase) == 0)
                 {
                     return true;
                 }
@@ -562,17 +567,31 @@ namespace Microsoft.Build.Shared
         {
             get
             {
+#if FEATURE_ASSEMBLY_LOCATION
                 try
                 {
-                    return Path.GetFullPath(new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath);
+                    return Path.GetFullPath(new Uri(typeof(FileUtilities).GetTypeInfo().Assembly.EscapedCodeBase).LocalPath);
                 }
                 catch (InvalidOperationException e)
                 {
                     // Workaround for issue where people are getting relative uri crash here.
                     // Last resort. We may have a problem when the assembly is shadow-copied.
                     ExceptionHandling.DumpExceptionToFile(e);
-                    return System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    return typeof(FileUtilities).GetTypeInfo().Assembly.Location;
                 }
+#else
+                //  If we can't get the path to an assembly (ie on .NET Core), then assume that this assembly has been
+                //  loaded from the same directory as the main application
+                var appPath = Process.GetCurrentProcess().MainModule.FileName;
+                var appDirectory = Path.GetDirectoryName(appPath);
+                var assemblyPath = Path.Combine(appDirectory, typeof(FileUtilities).GetTypeInfo().Assembly.GetName().Name + ".dll");
+                assemblyPath = Path.GetFullPath(assemblyPath);
+                if (!File.Exists(assemblyPath))
+                {
+                    throw new FileNotFoundException(assemblyPath);
+                }
+                return assemblyPath;
+#endif
             }
         }
 
@@ -613,9 +632,12 @@ namespace Microsoft.Build.Shared
                     }
                     else
                     {
-                        s_executablePath = Environment.GetCommandLineArgs()[0] ?? Path.Combine(
-                            Path.GetDirectoryName(ExecutingAssemblyPath) ?? Environment.CurrentDirectory,
-                            "MSBuild.exe");
+
+                        s_executablePath =
+#if FEATURE_GET_COMMANDLINE
+                            Environment.GetCommandLineArgs()[0] ??
+#endif
+                            Path.Combine(Path.GetDirectoryName(ExecutingAssemblyPath) ?? Directory.GetCurrentDirectory(), "MSBuild.exe");
                     }
                 }
 
@@ -1035,7 +1057,7 @@ namespace Microsoft.Build.Shared
         {
             // >= not > because MAX_PATH assumes a trailing null
             if (path.Length >= NativeMethodsShared.MAX_PATH ||
-               (!IsRootedNoThrow(path) && ((Environment.CurrentDirectory.Length + path.Length + 1 /* slash */) >= NativeMethodsShared.MAX_PATH)))
+               (!IsRootedNoThrow(path) && ((Directory.GetCurrentDirectory().Length + path.Length + 1 /* slash */) >= NativeMethodsShared.MAX_PATH)))
             {
                 // Attempt to make it shorter -- perhaps there are some \..\ elements
                 path = GetFullPathNoThrow(path);
@@ -1077,11 +1099,19 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        internal static StreamWriter OpenFileForAppend(string path)
+        internal static StreamWriter OpenFile(string path, bool append, Encoding encoding = null)
         {
             const int DefaultFileStreamBufferSize = 4096;
-            Stream fileStream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
-            return new StreamWriter(fileStream);
+            FileMode mode = append? FileMode.Append: FileMode.Create;
+            Stream fileStream = new FileStream(path, mode, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
+            if (encoding == null)
+            {
+                return new StreamWriter(fileStream);
+            }
+            else
+            {
+                return new StreamWriter(fileStream, encoding);
+            }
         }
     }
 }

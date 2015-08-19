@@ -1235,7 +1235,7 @@ namespace Microsoft.Build.Tasks
 
             // Command-line tools are generally going to emit their output using the current 
             // codepage, so that it displays correctly in the console window.  
-            using (StreamReader fileStream = new StreamReader(fileName, System.Text.Encoding.Default)) // HIGHCHAR: Use ANSI for logging messages.
+            using (StreamReader fileStream = new StreamReader(fileName, System.Text.Encoding.GetEncoding(0))) // HIGHCHAR: Use ANSI for logging messages.
             {
                 errorsFound = LogMessagesFromStream(fileStream, messageImportance);
             }

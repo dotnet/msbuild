@@ -355,7 +355,7 @@ namespace Microsoft.Build.Construction
             {
                 // Open the file
                 fileStream = File.OpenRead(solutionFile);
-                reader = new StreamReader(fileStream, Encoding.Default); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
+                reader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
 
                 // Read first 4 lines of the solution file. 
                 // The header is expected to be in line 1 or 2
@@ -500,7 +500,7 @@ namespace Microsoft.Build.Construction
                 fileStream = File.OpenRead(_solutionFile);
                 // Store the directory of the file as the current directory may change while we are processes the file
                 _solutionFileDirectory = Path.GetDirectoryName(_solutionFile);
-                _reader = new StreamReader(fileStream, Encoding.Default); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
+                _reader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
                 this.ParseSolution();
             }
             catch (Exception e)
