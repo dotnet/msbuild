@@ -1351,12 +1351,8 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (this)
                 {
-                    const int DefaultFileStreamBufferSize = 4096;
-
-                    using (Stream fileStream = new FileStream(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id),
-                       FileMode.Append, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan))
-                    using (StreamWriter file = new StreamWriter(fileStream))
-                    {                        
+                    using (StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id)))
+                    {
                         string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
                         file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);
                         file.Flush();

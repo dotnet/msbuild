@@ -583,11 +583,7 @@ namespace Microsoft.Build.Internal
 
                     fileName += ".txt";
                     
-                    const int DefaultFileStreamBufferSize = 4096;
-
-                    using (Stream fileStream = new FileStream(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId),
-                        FileMode.Append, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan))
-                    using (StreamWriter file = new StreamWriter(fileStream))
+                    using (StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId)))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, args);
                         long now = DateTime.UtcNow.Ticks;

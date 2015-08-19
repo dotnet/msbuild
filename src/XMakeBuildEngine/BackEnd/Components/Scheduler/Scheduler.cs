@@ -2193,7 +2193,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
-                StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id), true);
+                StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id));
                 file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
                 file.WriteLine(format, stuff);
                 file.Flush();
@@ -2210,7 +2210,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    using (StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), true))
+                    using (StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id)))
                     {
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
                         file.WriteLine("------------------------------------------------", _schedulingData.EventTime.Ticks);
@@ -2307,7 +2307,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    using (StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), true))
+                    using (StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id)))
                     {
                         file.WriteLine("Configurations used during this build");
                         file.WriteLine("-------------------------------------");
@@ -2341,7 +2341,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    using (StreamWriter file = new StreamWriter(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), true))
+                    using (StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id)))
                     {
                         file.WriteLine("Requests used during the build:");
                         file.WriteLine("-------------------------------");

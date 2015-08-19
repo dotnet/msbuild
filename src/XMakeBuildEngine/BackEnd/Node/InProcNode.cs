@@ -203,7 +203,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
-#if FEATURE_CRITICAL_EXCEPTIONS
+#if FEATURE_VARIOUS_EXCEPTIONS
             catch (ThreadAbortException)
             {
                 // Do nothing.  This will happen when the thread is forcibly terminated because we are shutting down, for example
