@@ -20,7 +20,6 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.CreateItem"                            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
     <UsingTask TaskName="Microsoft.Build.Tasks.CreateProperty"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
     <UsingTask TaskName="Microsoft.Build.Tasks.CreateVisualBasicManifestResourceName" AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.Csc"                                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Delete"                                AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Error"                                 AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
     <UsingTask TaskName="Microsoft.Build.Tasks.ErrorFromResources"                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
@@ -66,7 +65,6 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.Touch"                                 AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
     <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
     <UsingTask TaskName="Microsoft.Build.Tasks.UpdateManifest"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Vbc"                                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
     <UsingTask TaskName="Microsoft.Build.Tasks.Warning"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
     <UsingTask TaskName="Microsoft.Build.Tasks.WriteCodeFragment"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
     <UsingTask TaskName="Microsoft.Build.Tasks.WriteLinesToFile"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
@@ -74,5 +72,9 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.XmlPoke"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
     <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
     <UsingTask TaskName="Microsoft.Build.Tasks.WinMDExp"                              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    
+    <!-- Roslyn tasks are now in Tasks.Roslyn.dll -->
+    <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Vbc"                       AssemblyFile="Microsoft.Build.Tasks.CodeAnalysis.dll" Condition="'$(MSBuildAssemblyVersion)' != ''" />
 </Project>
 
