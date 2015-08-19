@@ -1149,6 +1149,7 @@ namespace Microsoft.Build.Execution
                 return _includeEscaped;
             }
 
+#if FEATURE_APPDOMAIN
             /// <summary>
             /// Overridden to give this class infinite lease time. Otherwise we end up with a limited
             /// lease (5 minutes I think) and instances can expire if they take long time processing.
@@ -1158,6 +1159,7 @@ namespace Microsoft.Build.Execution
                 // null means infinite lease time
                 return null;
             }
+#endif
 
             #region IItem and ITaskItem2 Members
 

@@ -43,12 +43,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _isRunningWithMultipleNodes;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// A client sponsor is a class
         /// which will respond to a lease renewal request and will
         /// increase the lease time allowing the object to stay in memory
         /// </summary>
         private ClientSponsor _sponsor;
+#endif
 
         /// <summary>
         /// True if the task connected to this proxy is alive
@@ -247,6 +249,7 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// InitializeLifetimeService is called when the remote object is activated. 
         /// This method will determine how long the lifetime for the object will be.
@@ -331,6 +334,7 @@ namespace Microsoft.Build.BackEnd
                 _sponsor = null;
             }
         }
+#endif
 
         /// <summary>
         /// Determine if the event is serializable. If we are running with multiple nodes we need to make sure the logging events are serializable. If not

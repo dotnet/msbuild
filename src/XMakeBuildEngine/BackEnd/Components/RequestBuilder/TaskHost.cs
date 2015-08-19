@@ -652,6 +652,7 @@ namespace Microsoft.Build.BackEnd
             return result;
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// InitializeLifetimeService is called when the remote object is activated. 
         /// This method will determine how long the lifetime for the object will be.
@@ -748,6 +749,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Determine if the event is serializable. If we are running with multiple nodes we need to make sure the logging events are serializable. If not

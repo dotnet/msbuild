@@ -1356,6 +1356,7 @@ namespace Microsoft.Build.Tasks
 
         #endregion
 
+#if FEATURE_APPDOMAIN
         #region AppDomain Code
 
         /// <summary>
@@ -1448,5 +1449,6 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+#endif
     }
 }

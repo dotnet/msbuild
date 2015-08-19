@@ -652,7 +652,7 @@ namespace Microsoft.Build.BackEnd
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
             {
                 // NOTE: This is safe to do because the STA scheduler always gives us our own new thread.
-                Thread.CurrentThread.Name = "RequestBuilder STA thread";
+                threadName = "RequestBuilder STA thread";
             }
 #endif
 

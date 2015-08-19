@@ -114,6 +114,7 @@ namespace Microsoft.Build.BackEnd.Logging
             return null;
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Overridden to give this class infinite lease time. Otherwise we end up with a limited
         /// lease (5 minutes I think) and instances can expire if they take long time processing.
@@ -124,6 +125,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // null means infinite lease time
             return null;
         }
+#endif
 
         // path to the task assembly, but only if it's loaded using LoadFrom. If it's loaded with Load, this is null.
         private string _taskAssemblyFile = null;
