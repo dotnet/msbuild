@@ -18,7 +18,9 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;

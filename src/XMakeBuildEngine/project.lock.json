@@ -375,6 +375,17 @@
           "lib/DNXCore50/System.Console.dll": {}
         }
       },
+      "System.Diagnostics.Contracts/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "[4.0.0, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Diagnostics.Contracts.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Diagnostics.Contracts.dll": {}
+        }
+      },
       "System.Diagnostics.Debug/4.0.10": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -5686,6 +5697,7 @@
       "Microsoft.NETCore >= 5.0.0",
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.0",
       "System.Console >= 4.0.0-beta-23123",
+      "System.Diagnostics.Contracts >= 4.0.0",
       "System.Diagnostics.FileVersionInfo >= 4.0.0-beta-23109",
       "System.Diagnostics.Process >= 4.0.0-beta-23109",
       "System.Diagnostics.TraceSource >= 4.0.0-beta-23019",

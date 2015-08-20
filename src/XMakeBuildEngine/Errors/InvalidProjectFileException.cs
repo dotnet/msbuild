@@ -5,7 +5,9 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Runtime.Serialization;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;

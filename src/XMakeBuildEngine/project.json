@@ -22,6 +22,7 @@
         "Microsoft.NETCore": "5.0.0",
         "Microsoft.NETCore.Portable.Compatibility": "1.0.0",
         "System.Console": "4.0.0-beta-23123",
+        "System.Diagnostics.Contracts": "4.0.0",
         "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23109",
         "System.Diagnostics.Process": "4.0.0-beta-23109",
         "System.Diagnostics.TraceSource": "4.0.0-beta-23019",
