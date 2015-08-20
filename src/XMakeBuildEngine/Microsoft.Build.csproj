@@ -135,7 +135,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="BackEnd\Components\Scheduler\SchedulableRequest.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs" Condition="'$(FeatureFileTracker)' == 'true'"/>
     <Compile Include="BackEnd\Components\Scheduler\SchedulingData.cs" />
     <Compile Include="BackEnd\Components\Scheduler\Scheduler.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulerCircularDependencyException.cs" />
@@ -589,7 +589,7 @@
       <Link>SharedUtilities\NativeMethodsShared.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
+    <Compile Include="..\Shared\InprocTrackingNativeMethods.cs" Condition="'$(FeatureFileTracker)' == 'true'">
       <Link>InprocTrackingNativeMethods.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

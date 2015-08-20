@@ -110,6 +110,8 @@
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
     <FeatureBinarySerialization>true</FeatureBinarySerialization>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
+    <FeatureFileTracker>true</FeatureFileTracker>
     <DefineConstants>$(DefineConstants);FEATURE_GAC</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>

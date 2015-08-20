@@ -775,7 +775,9 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
+#if FEATURE_FILE_TRACKER
                         using (FullTracking.Track(taskLoggingContext.TargetLoggingContext.Target.Name, _taskNode.Name, _buildRequestEntry.ProjectRootDirectory, _buildRequestEntry.RequestConfiguration.Project.PropertiesToBuildWith))
+#endif
                         {
                             taskResult = taskExecutionHost.Execute();
                         }

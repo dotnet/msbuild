@@ -784,7 +784,9 @@ namespace Microsoft.Build.BackEnd
 
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
 
+#if FEATURE_FILE_TRACKER
             using (FullTracking.Suspend())
+#endif
             {
                 bool overallSuccess = true;
 
