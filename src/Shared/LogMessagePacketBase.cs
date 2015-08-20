@@ -105,10 +105,21 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal abstract class LogMessagePacketBase : INodePacket
     {
+#if FEATURE_DOTNETVERSION
         /// <summary>
         /// The packet version, which is based on the CLR version. Cached because querying Environment.Version each time becomes an allocation bottleneck.
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
+#else
+        private static readonly int s_defaultPacketVersion = GetDefaultPacketVersion();
+
+        private static int GetDefaultPacketVersion()
+        {
+            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
+            Version coreAssemblyVersion = coreAssembly.GetName().Version;
+            return 1000 + coreAssemblyVersion.Major * 10 + coreAssemblyVersion.Minor;
+        }
+#endif
 
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.
@@ -271,7 +282,7 @@ namespace Microsoft.Build.Shared
                     if (!s_writeMethodCache.TryGetValue(_eventType, out methodInfo))
                     {
                         Type eventDerivedType = _buildEvent.GetType();
-                        methodInfo = eventDerivedType.GetMethod("WriteToStream", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
+                        methodInfo = eventDerivedType.GetMethod("WriteToStream", BindingFlags.NonPublic | BindingFlags.Instance);
                         s_writeMethodCache.Add(_eventType, methodInfo);
                     }
                 }
@@ -302,8 +313,13 @@ namespace Microsoft.Build.Shared
             }
             else
             {
+#if FEATURE_ASSEMBLY_LOCATION
                 string assemblyLocation = _buildEvent.GetType().GetTypeInfo().Assembly.Location;
                 translator.Translate(ref assemblyLocation);
+#else
+                string assemblyName = _buildEvent.GetType().GetTypeInfo().Assembly.FullName;
+                translator.Translate(ref assemblyName);
+#endif
                 translator.TranslateDotNet(ref _buildEvent);
             }
         }
@@ -333,7 +349,7 @@ namespace Microsoft.Build.Shared
                         if (!s_readMethodCache.TryGetValue(_eventType, out methodInfo))
                         {
                             Type eventDerivedType = _buildEvent.GetType();
-                            methodInfo = eventDerivedType.GetMethod("CreateFromStream", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
+                            methodInfo = eventDerivedType.GetMethod("CreateFromStream", BindingFlags.NonPublic | BindingFlags.Instance);
                             s_readMethodCache.Add(_eventType, methodInfo);
                         }
                     }
@@ -413,7 +429,7 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
-                    delegateMethod = Delegate.CreateDelegate(type, firstArgument, methodInfo);
+                    delegateMethod = methodInfo.CreateDelegate(type, firstArgument);
                 }
                 catch (FileLoadException)
                 {

@@ -25,6 +25,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs" Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
+      <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\Compat\TypeFilter.cs" Condition="'$(FeatureTypeFilter)' != 'true' And $(TargetFrameworkIdentifier) != '.NETFramework'">
       <Link>SharedUtilities\Compat\TypeFilter.cs</Link>
     </Compile>

@@ -43,7 +43,9 @@ namespace Microsoft.Build.Shared
         private const string kernel32Dll = "kernel32.dll";
         private const string mscoreeDLL = "mscoree.dll";
 
+#if FEATURE_HANDLEREF
         internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
+#endif
 
         internal static IntPtr NullIntPtr = new IntPtr(0);
 
@@ -57,6 +59,12 @@ namespace Microsoft.Build.Shared
         internal const uint WAIT_ABANDONED_0 = 0x00000080;
         internal const uint WAIT_OBJECT_0 = 0x00000000;
         internal const uint WAIT_TIMEOUT = 0x00000102;
+
+#if FEATURE_CHARSET_AUTO
+        internal const CharSet AutoOrUnicode = CharSet.Auto;
+#else
+        internal const CharSet AutoOrUnicode = CharSet.Unicode;
+#endif
 
         #endregion
 
@@ -188,7 +196,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Contains information about the current state of both physical and virtual memory, including extended memory
         /// </summary>
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        [StructLayout(LayoutKind.Sequential, CharSet = AutoOrUnicode)]
         internal class MemoryStatus
         {
             /// <summary>
@@ -422,9 +430,16 @@ namespace Microsoft.Build.Shared
             {
                 if (s_frameworkCurrentPath == null)
                 {
+#if FEATURE_ASSEMBLY_LOCATION
                     s_frameworkCurrentPath =
                         Path.GetDirectoryName(typeof(string).GetTypeInfo().Assembly.Location)
                         ?? string.Empty;
+#else
+                    //  There isn't really a concept of a framework path on .NET Core.  Try using the app folder
+                    s_frameworkCurrentPath =
+                        Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
+                        ?? string.Empty;
+#endif
                 }
 
                 return s_frameworkCurrentPath;
@@ -517,13 +532,15 @@ namespace Microsoft.Build.Shared
 
         internal static int SetErrorMode(int newMode)
         {
-            if (Environment.OSVersion.Version >= s_threadErrorModeMinOsVersion)
+#if FEATURE_OSVERSION
+            if (Environment.OSVersion.Version < s_threadErrorModeMinOsVersion)
             {
-                int num;
-                SetErrorMode_Win7AndNewer(newMode, out num);
-                return num;
+                return SetErrorMode_VistaAndOlder(newMode);
             }
-            return SetErrorMode_VistaAndOlder(newMode);
+#endif
+            int num;
+            SetErrorMode_Win7AndNewer(newMode, out num);
+            return num;
         }
 
         [DllImport("kernel32.dll", EntryPoint = "SetThreadErrorMode", SetLastError = true)]
@@ -1054,7 +1071,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern int GetModuleFileName(HandleRef hModule, [Out] StringBuilder buffer, int length);
+        internal static extern int GetModuleFileName(
+#if FEATURE_HANDLEREF
+            HandleRef hModule, 
+#else
+            IntPtr hModule,
+#endif
+            [Out] StringBuilder buffer, int length);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll")]
@@ -1107,7 +1130,7 @@ namespace Microsoft.Build.Shared
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
         private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatus lpBuffer);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
@@ -1119,11 +1142,11 @@ namespace Microsoft.Build.Shared
         internal static extern int GetLongPathName([In] string path, [Out] System.Text.StringBuilder fullpath, [In] int length);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
         internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, SecurityAttributes lpPipeAttributes, int nSize);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]
         internal static extern bool ReadFile(SafeFileHandle hFile, byte[] lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, IntPtr lpOverlapped);
 
         /// <summary>
@@ -1169,7 +1192,12 @@ namespace Microsoft.Build.Shared
             // VS needs this in order to allow the in-proc compilers to properly initialize, since they will make calls from the
             // build thread which the main thread (blocked on BuildSubmission.Execute) must service.
             int waitIndex;
-            int returnValue = CoWaitForMultipleHandles(COWAIT_FLAGS.COWAIT_NONE, timeout, 1, new IntPtr[] { handle.SafeWaitHandle.DangerousGetHandle() }, out waitIndex);
+#if FEATURE_HANDLE_SAFEWAITHANDLE
+            IntPtr handlePtr = handle.SafeWaitHandle.DangerousGetHandle();
+#else
+            IntPtr handlePtr = handle.GetSafeWaitHandle().DangerousGetHandle();
+#endif
+            int returnValue = CoWaitForMultipleHandles(COWAIT_FLAGS.COWAIT_NONE, timeout, 1, new IntPtr[] { handlePtr }, out waitIndex);
             ErrorUtilities.VerifyThrow(returnValue == 0 || ((uint)returnValue == RPC_S_CALLPENDING && timeout != Timeout.Infinite), "Received {0} from CoWaitForMultipleHandles, but expected 0 (S_OK)", returnValue);
             return returnValue == 0;
         }

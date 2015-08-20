@@ -624,7 +624,13 @@ namespace Microsoft.Build.Shared
                     if (NativeMethodsShared.IsWindows)
                     {
                         StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
-                        if (NativeMethodsShared.GetModuleFileName(NativeMethodsShared.NullHandleRef, sb, sb.Capacity) == 0)
+                        if (NativeMethodsShared.GetModuleFileName(
+#if FEATURE_HANDLEREF
+                            NativeMethodsShared.NullHandleRef, 
+#else
+                            IntPtr.Zero,
+#endif
+                            sb, sb.Capacity) == 0)
                         {
                             throw new System.ComponentModel.Win32Exception();
                         }
