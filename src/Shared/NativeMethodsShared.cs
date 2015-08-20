@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
+using System.Reflection;
 
 namespace Microsoft.Build.Shared
 {
@@ -422,7 +423,7 @@ namespace Microsoft.Build.Shared
                 if (s_frameworkCurrentPath == null)
                 {
                     s_frameworkCurrentPath =
-                        Path.GetDirectoryName(System.Reflection.Assembly.GetAssembly(typeof(string)).Location)
+                        Path.GetDirectoryName(typeof(string).GetTypeInfo().Assembly.Location)
                         ?? string.Empty;
                 }
 

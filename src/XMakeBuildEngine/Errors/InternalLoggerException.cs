@@ -240,7 +240,9 @@ namespace Microsoft.Build.Exceptions
         private string _helpKeyword;
 
         // This flag is set to indicate that the exception occured during logger initialization
+#if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
+#endif
         private bool _initializationException;
     }
 }

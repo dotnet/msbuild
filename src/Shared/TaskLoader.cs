@@ -8,6 +8,7 @@
 using System;
 using Microsoft.Build.Framework;
 using System.Reflection;
+using System.Linq;
 
 namespace Microsoft.Build.Shared
 {
@@ -34,7 +35,12 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if specified type is a task</returns>
         internal static bool IsTaskClass(Type type, object unused)
         {
-            return (type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null));
+            return (type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
+#if FEATURE_TYPE_GETINTERFACE
+                type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null));
+#else
+                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask")));
+#endif
         }
 
         /// <summary>

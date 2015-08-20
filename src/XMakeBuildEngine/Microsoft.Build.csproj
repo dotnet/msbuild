@@ -25,7 +25,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(FeatureBinarySerialization)' != 'true'">
+    <Compile Include="..\Shared\Compat\TypeFilter.cs" Condition="'$(FeatureTypeFilter)' != 'true' And $(TargetFrameworkIdentifier) != '.NETFramework'">
+      <Link>SharedUtilities\Compat\TypeFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(FeatureSpecialFolders)' != 'true'">
       <Link>SharedUtilities\FileUtilities.GetFolderPath.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
@@ -135,7 +138,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="BackEnd\Components\Scheduler\SchedulableRequest.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs" Condition="'$(FeatureFileTracker)' == 'true'"/>
+    <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs" Condition="'$(FeatureFileTracker)' == 'true'" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulingData.cs" />
     <Compile Include="BackEnd\Components\Scheduler\Scheduler.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulerCircularDependencyException.cs" />

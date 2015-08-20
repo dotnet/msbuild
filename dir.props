@@ -114,8 +114,10 @@
     <FeatureFileTracker>true</FeatureFileTracker>
     <DefineConstants>$(DefineConstants);FEATURE_GAC</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_MEMORYSTREAM_GETBUFFER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REGISTRYHIVE_DYNDATA</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SPECIAL_FOLDERS</DefineConstants>
@@ -125,6 +127,8 @@
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_INVOKEMEMBER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETINTERFACE</DefineConstants>
+    <FeatureTypeFilter>true</FeatureTypeFilter>
     <DefineConstants>$(DefineConstants);FEATURE_VARIOUS_EXCEPTIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>
