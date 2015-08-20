@@ -320,7 +320,9 @@ namespace Microsoft.Build.Shared
                 string assemblyName = _buildEvent.GetType().GetTypeInfo().Assembly.FullName;
                 translator.Translate(ref assemblyName);
 #endif
+#if FEATURE_BINARY_SERIALIZATION
                 translator.TranslateDotNet(ref _buildEvent);
+#endif
             }
         }
 
@@ -396,7 +398,9 @@ namespace Microsoft.Build.Shared
 
                 try
                 {
+#if FEATURE_BINARY_SERIALIZATION
                     translator.TranslateDotNet(ref _buildEvent);
+#endif
                 }
                 finally
                 {

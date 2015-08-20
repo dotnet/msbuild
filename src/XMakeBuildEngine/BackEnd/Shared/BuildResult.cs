@@ -579,7 +579,9 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _initialTargets);
             translator.Translate(ref _defaultTargets);
             translator.Translate(ref _circularDependency);
+#if FEATURE_BINARY_SERIALIZATION
             translator.TranslateDotNet(ref _requestException);
+#endif
             translator.TranslateDictionary<ConcurrentDictionary<string, TargetResult>, TargetResult>(ref _resultsByTarget, TargetResult.FactoryForDeserialization, CreateTargetResultDictionary);
             translator.Translate(ref _baseOverallResult);
             translator.Translate(ref _projectStateAfterBuild, ProjectInstance.FactoryForDeserialization);

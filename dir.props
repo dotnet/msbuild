@@ -101,6 +101,7 @@
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOADFROM</DefineConstants>
