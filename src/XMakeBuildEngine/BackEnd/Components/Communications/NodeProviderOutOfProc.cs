@@ -76,7 +76,8 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 long baseHandshake = Constants.AssemblyTimestamp;
-                if (Environment.Is64BitProcess)
+                bool is64BitProcess = Marshal.SizeOf<IntPtr>() == 8;
+                if (is64BitProcess)
                 {
                     unchecked
                     {

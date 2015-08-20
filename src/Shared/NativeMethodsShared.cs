@@ -320,8 +320,12 @@ namespace Microsoft.Build.Shared
         {
             get
             {
+#if FEATURE_OSVERSION
                 var env = Environment.OSVersion.Platform;
                 return env == PlatformID.MacOSX || env == PlatformID.Unix;
+#else
+                return IsUnix || IsOSX;
+#endif
             }
         }
 
@@ -332,7 +336,11 @@ namespace Microsoft.Build.Shared
         {
             get
             {
+#if FEATURE_OSVERSION
                 return Environment.OSVersion.Platform == PlatformID.Unix;
+#else
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+#endif
             }
         }
 
@@ -354,7 +362,11 @@ namespace Microsoft.Build.Shared
         {
             get
             {
+#if FEATURE_OSVERSION
                 return !IsUnixLike;
+#else
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
             }
         }
 
@@ -365,7 +377,11 @@ namespace Microsoft.Build.Shared
         {
             get
             {
+#if FEATURE_OSVERSION
                 return Environment.OSVersion.Platform == PlatformID.MacOSX;
+#else
+                return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+#endif
             }
         }
 

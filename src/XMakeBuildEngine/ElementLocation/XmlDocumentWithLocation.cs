@@ -354,7 +354,13 @@ namespace Microsoft.Build.Construction
                             ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
                             string directory = Path.GetDirectoryName(fullPath);
 
-                            if (directory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows), StringComparison.OrdinalIgnoreCase) ||
+#if FEATURE_SPECIAL_FOLDERS
+                            string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+#else
+                            string windowsFolder = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.Windows);
+#endif
+
+                            if (directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase) ||
                                 (directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||
                                 (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles64) && directory.StartsWith(FrameworkLocationHelper.programFiles64, StringComparison.OrdinalIgnoreCase)))
                             {

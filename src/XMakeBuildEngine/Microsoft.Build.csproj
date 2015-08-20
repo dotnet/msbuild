@@ -25,6 +25,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(FeatureBinarySerialization)' != 'true'">
+      <Link>SharedUtilities\FileUtilities.GetFolderPath.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
