@@ -356,8 +356,8 @@
     <Compile Include="Definition\ResolvedImport.cs" />
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
-    <Compile Include="Definition\ToolsetConfigurationReader.cs" />
-    <Compile Include="..\Shared\ToolsetElement.cs">
+    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="$(FeatureSystemConfiguration) == 'true'"/>
+    <Compile Include="..\Shared\ToolsetElement.cs" Condition="$(FeatureSystemConfiguration) == 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />

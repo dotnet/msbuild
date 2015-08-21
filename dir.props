@@ -129,6 +129,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_SPECIAL_FOLDERS</DefineConstants>
     <FeatureSpecialFolders>true</FeatureSpecialFolders>
     <DefineConstants>$(DefineConstants);FEATURE_SYSTEM_CONFIGURATION</DefineConstants>
+    <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
