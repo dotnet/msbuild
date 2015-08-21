@@ -192,6 +192,7 @@ namespace Microsoft.Build.BackEnd
         /// works in all of our current cases, but certainly isn't perfectly generic.</remarks>
         void TranslateEnum<T>(ref T value, int numericValue);
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Translates a value using the .Net binary formatter.
         /// </summary>
@@ -203,6 +204,7 @@ namespace Microsoft.Build.BackEnd
         /// methods.
         /// </remarks>
         void TranslateDotNet<T>(ref T value);
+#endif
 
         /// <summary>
         /// Translates an object implementing INodePacketTranslatable.

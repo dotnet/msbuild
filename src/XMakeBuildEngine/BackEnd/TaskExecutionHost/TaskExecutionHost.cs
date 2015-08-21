@@ -707,7 +707,11 @@ namespace Microsoft.Build.BackEnd
 
             // Let the task finish now.  If cancellation worked, hopefully it finishes sooner than it would have otherwise.
             // If the task builder crashed, this could have already been disposed
+#if FEATURE_HANDLE_SAFEWAITHANDLE
             if (!_taskExecutionIdle.SafeWaitHandle.IsClosed)
+#else
+            if (!_taskExecutionIdle.GetSafeWaitHandle().IsClosed)
+#endif
             {
                 // Kick off a task to log the message so that we don't block the calling thread.
                 Task.Run(async delegate
@@ -966,12 +970,12 @@ namespace Microsoft.Build.BackEnd
                     // Map to an intrinsic task, if necessary.
                     if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                     {
-                        returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(Assembly.GetExecutingAssembly().FullName, null)), _taskName, null);
+                        returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null)), _taskName, null);
                         _intrinsicTasks[_taskName] = returnClass;
                     }
                     else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                     {
-                        returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(Assembly.GetExecutingAssembly().FullName, null)), _taskName, null);
+                        returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null)), _taskName, null);
                         _intrinsicTasks[_taskName] = returnClass;
                     }
                 }

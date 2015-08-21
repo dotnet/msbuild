@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -14,6 +16,7 @@ using Microsoft.Win32;
 
 using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElement;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.Shared
 {
@@ -129,7 +132,11 @@ namespace Microsoft.Build.Shared
         /// By default when a root path is not specified we would like to use the program files directory \ reference assemblies\framework as the root location
         /// to generate the reference assembly paths from.
         /// </summary>
+#if FEATURE_SPECIAL_FOLDERS
         internal static readonly string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+#else
+        internal static readonly string programFiles = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles);
+#endif
         internal static readonly string programFiles32 = GenerateProgramFiles32();
         internal static readonly string programFiles64 = GenerateProgramFiles64();
         internal static readonly string programFilesReferenceAssemblyLocation = GenerateProgramFilesReferenceAssemblyRoot();
@@ -388,7 +395,9 @@ namespace Microsoft.Build.Shared
                                 fallbackDotNetFrameworkSdkRegistryInstallPath,
                                 fallbackDotNetFrameworkSdkInstallKeyValue);
 
-                        if (Environment.Is64BitProcess && s_fallbackDotNetFrameworkSdkInstallPath == null)
+                        bool is64BitProcess = Marshal.SizeOf<IntPtr>() == 8;
+
+                        if (is64BitProcess && s_fallbackDotNetFrameworkSdkInstallPath == null)
                         {
                             // Since we're 64-bit, what we just checked was the 64-bit fallback key -- so now let's 
                             // check the 32-bit one too, just in case. 
@@ -650,7 +659,7 @@ namespace Microsoft.Build.Shared
             if (!NativeMethodsShared.IsWindows)
             {
                 if (!string.IsNullOrEmpty(prefix)
-                    && prefix.Substring(0, 1).Equals("v", StringComparison.InvariantCultureIgnoreCase))
+                    && prefix.Substring(0, 1).Equals("v", StringComparison.OrdinalIgnoreCase))
                 {
                     prefix = prefix.Substring(1);
                 }
@@ -756,7 +765,11 @@ namespace Microsoft.Build.Shared
 
             // On a 64 bit machine we always want to use the program files x86.  If we are running as a 64 bit process then this variable will be set correctly
             // If we are on a 32 bit machine or running as a 32 bit process then this variable will be null and the programFiles variable will be correct.
+#if FEATURE_SPECIAL_FOLDERS
             string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+#else
+            string programFilesX86 = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFilesX86);
+#endif
             if (String.IsNullOrEmpty(programFilesX86))
             {
                 // 32 bit box
@@ -934,6 +947,7 @@ namespace Microsoft.Build.Shared
         {
             string toolPath = null;
 
+#if FEATURE_SYSTEM_CONFIGURATION
             if (ToolsetConfigurationReaderHelpers.ConfigurationFileMayHaveToolsets())
             {
                 try
@@ -980,6 +994,7 @@ namespace Microsoft.Build.Shared
                     // to see if there is any valid data there.  
                 }
             }
+#endif
 
             return toolPath;
         }

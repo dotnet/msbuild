@@ -6,7 +6,9 @@ using System.Globalization;
 
 using Microsoft.Build.Shared;
 using System.Runtime.Serialization;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 
 namespace Microsoft.Build.Exceptions
 {

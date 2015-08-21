@@ -12,7 +12,9 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading;
+#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization.Formatters.Binary;
+#endif
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -323,6 +325,7 @@ namespace Microsoft.Build.BackEnd
                 value = (T)Enum.ToObject(enumType, numericValue);
             }
 
+#if FEATURE_BINARY_SERIALIZATION
             /// <summary>
             /// Translates a value using the .Net binary formatter.
             /// </summary>
@@ -338,6 +341,7 @@ namespace Microsoft.Build.BackEnd
                 BinaryFormatter formatter = new BinaryFormatter();
                 value = (T)formatter.Deserialize(_packetStream);
             }
+#endif
 
             /// <summary>
             /// Translates an object implementing INodePacketTranslatable.
@@ -786,6 +790,7 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(numericValue);
             }
 
+#if FEATURE_BINARY_SERIALIZATION
             /// <summary>
             /// Translates a value using the .Net binary formatter.
             /// </summary>
@@ -801,6 +806,7 @@ namespace Microsoft.Build.BackEnd
                 BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(_packetStream, value);
             }
+#endif
 
             /// <summary>
             /// Translates an object implementing INodePacketTranslatable.

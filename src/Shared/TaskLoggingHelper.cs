@@ -106,7 +106,7 @@ namespace Microsoft.Build.Tasks
                 if (_taskNameUpperCase == null)
                 {
                     // NOTE: use the current thread culture, because this string will be displayed to the user
-                    _taskNameUpperCase = TaskName.ToUpper(CultureInfo.CurrentCulture);
+                    _taskNameUpperCase = TaskName.ToUpper();
                 }
 
                 return _taskNameUpperCase;
@@ -1235,7 +1235,7 @@ namespace Microsoft.Build.Tasks
 
             // Command-line tools are generally going to emit their output using the current 
             // codepage, so that it displays correctly in the console window.  
-            using (StreamReader fileStream = new StreamReader(fileName, System.Text.Encoding.Default)) // HIGHCHAR: Use ANSI for logging messages.
+            using (StreamReader fileStream = FileUtilities.OpenRead(fileName, System.Text.Encoding.GetEncoding(0))) // HIGHCHAR: Use ANSI for logging messages.
             {
                 errorsFound = LogMessagesFromStream(fileStream, messageImportance);
             }

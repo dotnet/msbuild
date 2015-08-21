@@ -13,7 +13,9 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading;
+#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization.Formatters.Binary;
+#endif
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;

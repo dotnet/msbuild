@@ -7,7 +7,9 @@
 
 using System;
 using System.Collections;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 using System.Diagnostics;
 
 using Microsoft.Build.Framework;

@@ -17,7 +17,9 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.AccessControl;
 using System.Security.Principal;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
@@ -76,7 +78,8 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 long baseHandshake = Constants.AssemblyTimestamp;
-                if (Environment.Is64BitProcess)
+                bool is64BitProcess = Marshal.SizeOf<IntPtr>() == 8;
+                if (is64BitProcess)
                 {
                     unchecked
                     {

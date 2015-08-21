@@ -363,11 +363,20 @@ namespace Microsoft.Build.Shared
                 {
                     if (_assemblyLoadInfo.AssemblyName != null)
                     {
+#if FEATURE_ASSEMBLY_LOADFROM
                         _loadedAssembly = Assembly.Load(_assemblyLoadInfo.AssemblyName);
+#else
+                        _loadedAssembly = Assembly.Load(new AssemblyName(_assemblyLoadInfo.AssemblyName));
+#endif
                     }
                     else
                     {
+#if FEATURE_ASSEMBLY_LOADFROM
                         _loadedAssembly = Assembly.UnsafeLoadFrom(_assemblyLoadInfo.AssemblyFile);
+#else
+                        string simpleName = Path.GetFileNameWithoutExtension(_assemblyLoadInfo.AssemblyFile);
+                        _loadedAssembly = Assembly.Load(new AssemblyName(simpleName));
+#endif
                     }
                 }
                 catch (ArgumentException e)

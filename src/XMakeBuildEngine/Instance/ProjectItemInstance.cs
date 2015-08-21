@@ -1460,7 +1460,7 @@ namespace Microsoft.Build.Execution
                 // We need to change this to upper case to ensure that task items whose item specs differ only by 
                 // casing still have the same hash code, since this is used to determine if we have duplicates when 
                 // we do duplicate removal.
-                return ItemSpec.ToUpper(CultureInfo.InvariantCulture).GetHashCode();
+                return ItemSpec.ToUpperInvariant().GetHashCode();
             }
 
             /// <summary>

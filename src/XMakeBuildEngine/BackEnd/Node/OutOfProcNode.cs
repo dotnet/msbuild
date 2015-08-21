@@ -469,8 +469,10 @@ namespace Microsoft.Build.Execution
             // Shutdown any Out Of Proc Nodes Created
             _taskHostNodeManager.ShutdownConnectedNodes(_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse);
 
+#if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
             // Restore the original current directory.
             NativeMethodsShared.SetCurrentDirectory(Environment.SystemDirectory);
+#endif
 
             // Restore the original environment.
             // If the node was never configured, this will be null.
@@ -674,8 +676,10 @@ namespace Microsoft.Build.Execution
             }
             catch (DirectoryNotFoundException)
             {
+#if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
                 // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
                 NativeMethodsShared.SetCurrentDirectory(Environment.SystemDirectory);
+#endif
             }
 
             // Replicate the environment.  First, unset any environment variables set by the previous configuration.

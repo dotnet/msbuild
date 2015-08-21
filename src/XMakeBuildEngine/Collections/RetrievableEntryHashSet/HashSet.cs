@@ -9,7 +9,9 @@ using System.Diagnostics.Contracts;
 #if !SILVERLIGHT
 using System.Runtime.Serialization;
 #endif
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
@@ -88,7 +90,7 @@ namespace Microsoft.Build.Collections
     public class HashSet<T> : ICollection<T>, ISet<T>
 #else
     [Serializable()]
-#if !MONO
+#if !MONO && FEATURE_SECURITY_PERMISSIONS
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
     internal class RetrievableEntryHashSet<T> : ICollection<T>,
@@ -1734,7 +1736,7 @@ namespace Microsoft.Build.Collections
 
 #if !SILVERLIGHT
         [Serializable()]
-#if !MONO
+#if !MONO && FEATURE_SECURITY_PERMISSIONS
         [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
 #endif

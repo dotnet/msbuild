@@ -392,11 +392,11 @@ namespace Microsoft.Build.Evaluation
             int i = keyName.IndexOf('\\');
             if (i != -1)
             {
-                basekeyName = keyName.Substring(0, i).ToUpper(System.Globalization.CultureInfo.InvariantCulture);
+                basekeyName = keyName.Substring(0, i).ToUpperInvariant();
             }
             else
             {
-                basekeyName = keyName.ToUpper(System.Globalization.CultureInfo.InvariantCulture);
+                basekeyName = keyName.ToUpperInvariant();
             }
 
             RegistryKey basekey = null;
@@ -421,9 +421,11 @@ namespace Microsoft.Build.Evaluation
                 case "HKEY_CURRENT_CONFIG":
                     basekey = RegistryKey.OpenBaseKey(RegistryHive.CurrentConfig, view);
                     break;
+#if FEATURE_REGISTRYHIVE_DYNDATA
                 case "HKEY_DYN_DATA":
                     basekey = RegistryKey.OpenBaseKey(RegistryHive.DynData, view);
                     break;
+#endif
                 default:
                     ErrorUtilities.ThrowArgument(keyName);
                     break;

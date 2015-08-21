@@ -160,6 +160,7 @@ namespace Microsoft.Build.Construction
             _reader = null;
         }
 
+#if FEATURE_XML_LOADPATH
         /// <summary>
         /// Grab the path to the file, for use in our location information.
         /// </summary>
@@ -178,6 +179,7 @@ namespace Microsoft.Build.Construction
                 this.Load(xmlReader);
             }
         }
+#endif
 
         /// <summary>
         /// Called during load, to add an element.
@@ -278,6 +280,7 @@ namespace Microsoft.Build.Construction
             base.Save(outStream);
         }
 
+#if FEATURE_XML_LOADPATH
         /// <summary>
         /// Override Save to verify file was not loaded as readonly
         /// </summary>
@@ -286,6 +289,7 @@ namespace Microsoft.Build.Construction
             VerifyThrowNotReadOnly();
             base.Save(filename);
         }
+#endif
 
         /// <summary>
         /// Override Save to verify file was not loaded as readonly
@@ -354,7 +358,13 @@ namespace Microsoft.Build.Construction
                             ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
                             string directory = Path.GetDirectoryName(fullPath);
 
-                            if (directory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows), StringComparison.OrdinalIgnoreCase) ||
+#if FEATURE_SPECIAL_FOLDERS
+                            string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+#else
+                            string windowsFolder = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.Windows);
+#endif
+
+                            if (directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase) ||
                                 (directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||
                                 (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles64) && directory.StartsWith(FrameworkLocationHelper.programFiles64, StringComparison.OrdinalIgnoreCase)))
                             {

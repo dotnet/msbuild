@@ -228,21 +228,25 @@ namespace Microsoft.Build.BackEnd
                     translator.Translate(ref stringArrayParam);
                     _wrappedParameter = stringArrayParam;
                     break;
+#if FEATURE_BINARY_SERIALIZATION
                 case TaskParameterType.ValueType:
                 case TaskParameterType.ValueTypeArray:
                     translator.TranslateDotNet(ref _wrappedParameter);
                     break;
+#endif
                 case TaskParameterType.ITaskItem:
                     TranslateITaskItem(translator);
                     break;
                 case TaskParameterType.ITaskItemArray:
                     TranslateITaskItemArray(translator);
                     break;
+#if FEATURE_BINARY_SERIALIZATION
                 case TaskParameterType.Invalid:
                     Exception exceptionParam = (Exception)_wrappedParameter;
                     translator.TranslateDotNet(ref exceptionParam);
                     _wrappedParameter = exceptionParam;
                     break;
+#endif
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;

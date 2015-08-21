@@ -92,7 +92,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// We use a BindingFlags.Public flag here because the getter is public, so although the setter is internal,
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
-        private static Lazy<PropertyInfo> s_projectStartedEventArgsGlobalProperties = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("GlobalProperties", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty), LazyThreadSafetyMode.PublicationOnly);
+        private static Lazy<PropertyInfo> s_projectStartedEventArgsGlobalProperties = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("GlobalProperties", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         /// <summary>
         /// A cached reflection accessor for an internal member.
@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// We use a BindingFlags.Public flag here because the getter is public, so although the setter is internal,
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
-        private static Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty), LazyThreadSafetyMode.PublicationOnly);
+        private static Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         #region Data
 
@@ -696,7 +696,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (_centralLoggerSinkId == -1)
                 {
                     // Create a forwarding logger which forwards all events to an eventSourceSink
-                    Assembly engineAssembly = Assembly.GetAssembly(typeof(LoggingService));
+                    Assembly engineAssembly = typeof(LoggingService).GetTypeInfo().Assembly;
                     string loggerClassName = "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger";
                     string loggerAssemblyName = engineAssembly.GetName().FullName;
                     LoggerDescription centralLoggerDescrption = new LoggerDescription

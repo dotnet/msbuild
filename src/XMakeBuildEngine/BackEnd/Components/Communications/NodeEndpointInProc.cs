@@ -257,7 +257,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (null != OnLinkStatusChanged)
             {
-                LinkStatusChangedDelegate linkStatusDelegate = (LinkStatusChangedDelegate)OnLinkStatusChanged.Clone();
+                LinkStatusChangedDelegate linkStatusDelegate = OnLinkStatusChanged;
                 linkStatusDelegate(this, newStatus);
             }
         }

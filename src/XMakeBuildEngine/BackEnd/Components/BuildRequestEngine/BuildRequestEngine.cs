@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (this)
                 {
-                    using (StreamWriter file = FileUtilities.OpenFileForAppend(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id)))
+                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
                         file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);

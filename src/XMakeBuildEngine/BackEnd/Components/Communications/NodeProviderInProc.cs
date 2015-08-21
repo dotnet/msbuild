@@ -212,11 +212,15 @@ namespace Microsoft.Build.BackEnd
                 var p = Process.GetCurrentProcess();
                 {
                     // This should be reasonably sufficient to assume MS Expression Blend 4 or earlier
-                    if ((FileUtilities.CurrentExecutableName.Equals("Blend", StringComparison.OrdinalIgnoreCase)) &&
-                        (p.MainModule.FileVersionInfo.OriginalFilename.Equals("Blend.exe", StringComparison.OrdinalIgnoreCase)) &&
-                        (p.MainModule.FileVersionInfo.ProductMajorPart < 5))
+                    if ((FileUtilities.CurrentExecutableName.Equals("Blend", StringComparison.OrdinalIgnoreCase)))
                     {
-                        _exclusiveOperatingEnvironment = false;
+                        FileVersionInfo mainModuleFileVersionInfo = FileVersionInfo.GetVersionInfo(p.MainModule.FileName);
+                        if (mainModuleFileVersionInfo.OriginalFilename.Equals("Blend.exe", StringComparison.OrdinalIgnoreCase) &&
+                            (mainModuleFileVersionInfo.ProductMajorPart < 5))
+                        {
+                            _exclusiveOperatingEnvironment = false;
+                        }
+
                     }
                 }
 

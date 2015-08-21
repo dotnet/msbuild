@@ -69,7 +69,7 @@ namespace Microsoft.Build.Internal
                 s_interval = TimeSpan.FromSeconds(1);
             }
 
-            s_currentAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+            s_currentAssemblyName = typeof(Tracing).GetTypeInfo().Assembly.GetName().Name;
 
             // Trace.WriteLine(new string('/', 100));
             // Trace.WriteLine("interval: " + interval.Seconds);
