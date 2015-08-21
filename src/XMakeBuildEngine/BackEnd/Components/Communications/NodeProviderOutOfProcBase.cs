@@ -145,7 +145,7 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
                     NodeContext nodeContext = new NodeContext(0, nodeProcess.Id, nodeStream, factory, terminateNode);
                     nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
-                    nodeStream.Close();
+                    nodeStream.Dispose();
                 }
             }
         }
@@ -350,7 +350,7 @@ namespace Microsoft.Build.BackEnd
                 // If we don't close any stream, we might hang up the child
                 if (nodeStream != null)
                 {
-                    nodeStream.Close();
+                    nodeStream.Dispose();
                 }
             }
 

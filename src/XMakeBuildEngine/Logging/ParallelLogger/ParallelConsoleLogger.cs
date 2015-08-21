@@ -80,6 +80,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // If forceNoAlign is set there is no point getting the console width as there will be no aligning of the text
             if (!_forceNoAlign)
             {
+#if FEATURE_CONSOLE_BUFFERWIDTH
                 if (runningWithCharacterFileType)
                 {
                     // Get the size of the console buffer so messages can be formatted to the console width
@@ -96,6 +97,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
                 else
+#endif
                 {
                     _alignMessages = false;
                 }

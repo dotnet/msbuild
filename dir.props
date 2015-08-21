@@ -109,7 +109,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CULTUREINFO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
-    <FeatureBinarySerialization>true</FeatureBinarySerialization>
+    <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DOTNETVERSION</DefineConstants>
@@ -133,14 +133,10 @@
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_INVOKEMEMBER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETINTERFACE</DefineConstants>
-    <FeatureTypeFilter>true</FeatureTypeFilter>
     <DefineConstants>$(DefineConstants);FEATURE_VARIOUS_EXCEPTIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>
     <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
-    
-
-    
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
 

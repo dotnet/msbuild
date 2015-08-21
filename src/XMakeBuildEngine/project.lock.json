@@ -1306,6 +1306,26 @@
         "runtime": {
           "lib/dotnet/System.Xml.XDocument.dll": {}
         }
+      },
+      "System.Xml.XmlDocument/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "[4.0.20, )",
+          "System.Xml.ReaderWriter": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Text.Encoding": "[4.0.10, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Xml.XmlDocument.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Xml.XmlDocument.dll": {}
+        }
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x86": {
@@ -2818,6 +2838,26 @@
         },
         "runtime": {
           "lib/dotnet/System.Xml.XDocument.dll": {}
+        }
+      },
+      "System.Xml.XmlDocument/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "[4.0.20, )",
+          "System.Xml.ReaderWriter": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Text.Encoding": "[4.0.10, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Xml.XmlDocument.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Xml.XmlDocument.dll": {}
         }
       }
     }
@@ -5682,6 +5722,38 @@
         "package/services/metadata/core-properties/f5c45d6b065347dfaa1d90d06221623d.psmdcp",
         "[Content_Types].xml"
       ]
+    },
+    "System.Xml.XmlDocument/4.0.0": {
+      "sha512": "H5qTx2+AXgaKE5wehU1ZYeYPFpp/rfFh69/937NvwCrDqbIkvJRmIFyKKpkoMI6gl9hGfuVizfIudVTMyowCXw==",
+      "type": "Package",
+      "files": [
+        "_rels/.rels",
+        "System.Xml.XmlDocument.nuspec",
+        "lib/dotnet/System.Xml.XmlDocument.dll",
+        "lib/net46/System.Xml.XmlDocument.dll",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "ref/dotnet/System.Xml.XmlDocument.dll",
+        "ref/dotnet/System.Xml.XmlDocument.xml",
+        "ref/dotnet/zh-hant/System.Xml.XmlDocument.xml",
+        "ref/dotnet/de/System.Xml.XmlDocument.xml",
+        "ref/dotnet/fr/System.Xml.XmlDocument.xml",
+        "ref/dotnet/it/System.Xml.XmlDocument.xml",
+        "ref/dotnet/ja/System.Xml.XmlDocument.xml",
+        "ref/dotnet/ko/System.Xml.XmlDocument.xml",
+        "ref/dotnet/ru/System.Xml.XmlDocument.xml",
+        "ref/dotnet/zh-hans/System.Xml.XmlDocument.xml",
+        "ref/dotnet/es/System.Xml.XmlDocument.xml",
+        "ref/net46/System.Xml.XmlDocument.dll",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "package/services/metadata/core-properties/89840371bf3f4e0d9ab7b6b34213c74c.psmdcp",
+        "[Content_Types].xml"
+      ]
     }
   },
   "projectFileDependencyGroups": {
@@ -5705,6 +5777,7 @@
       "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213",
       "System.Threading.Thread >= 4.0.0-beta-23123",
       "System.Threading.ThreadPool >= 4.0.10-beta-23123",
+      "System.Xml.XmlDocument >= 4.0.0",
       "Microsoft.NETCore.Runtime >= 1.0.0",
       "Microsoft.NETCore.TestHost-x86 >= 1.0.0-beta-23123"
     ]

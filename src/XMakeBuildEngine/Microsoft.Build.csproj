@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-   <!--
+  <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
-  <Import Project="..\dir.props"/>
+  <Import Project="..\dir.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -24,13 +24,46 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs" Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
+  
+  <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
+       The code here was generally copied from the .NET Framework reference source and
+       modified to compile for .NET Core -->
+  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
+    <Compile Include="..\Shared\Compat\Base64Encoder.cs">
+      <Link>SharedUtilities\Compat\Base64Encoder.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\BinHexEncoder.cs">
+      <Link>SharedUtilities\Compat\BinHexEncoder.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\TypeFilter.cs" Condition="'$(FeatureTypeFilter)' != 'true' And $(TargetFrameworkIdentifier) != '.NETFramework'">
+    <Compile Include="..\Shared\Compat\SecureStringHasher.cs">
+      <Link>SharedUtilities\Compat\SecureStringHasher.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\TypeFilter.cs" >
       <Link>SharedUtilities\Compat\TypeFilter.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\Compat\ValidateNames.cs">
+      <Link>SharedUtilities\Compat\ValidateNames.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\XmlCharType.cs">
+      <Link>SharedUtilities\Compat\XmlCharType.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\XmlReservedNs.cs">
+      <Link>SharedUtilities\Compat\XmlReservedNs.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\XmlTextEncoder.cs">
+      <Link>SharedUtilities\Compat\XmlTextEncoder.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\XmlTextWriter.cs">
+      <Link>SharedUtilities\Compat\XmlTextWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\SerializableAttribute.cs">
+      <Link>SharedUtilities\Compat\SerializableAttribute.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(FeatureSpecialFolders)' != 'true'">
       <Link>SharedUtilities\FileUtilities.GetFolderPath.cs</Link>
     </Compile>
@@ -637,11 +670,6 @@
     <Compile Include="FxCopExclusions\Microsoft.Build.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    
-    <Compile Include="..\Shared\Compat\SerializableAttribute.cs" Condition="'$(FeatureBinarySerialization)' != 'true' And $(TargetFrameworkIdentifier) != '.NETFramework'">
-      <Link>SharedUtilities\Compat\SerializableAttribute.cs</Link>
-    </Compile>
-    
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
     <EmbeddedResource Include="Resources\Strings.resx">
@@ -672,8 +700,8 @@
   <ItemGroup>
     <None Include="project.json" />
   </ItemGroup>
-   <!--
+  <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
-  <Import Project="..\dir.targets"/>
+  <Import Project="..\dir.targets" />
 </Project>
