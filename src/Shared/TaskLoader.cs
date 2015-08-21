@@ -46,15 +46,30 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an ITask instance and returns it.  
         /// </summary>
-        internal static ITask CreateTask(LoadedType loadedType, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError, AppDomainSetup appDomainSetup, bool isOutOfProc, out AppDomain taskAppDomain)
+        internal static ITask CreateTask(LoadedType loadedType, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError
+#if FEATURE_APPDOMAIN
+            , AppDomainSetup appDomainSetup
+#endif
+            , bool isOutOfProc
+#if FEATURE_APPDOMAIN
+            , out AppDomain taskAppDomain
+#endif
+            )
         {
+#if FEATURE_APPDOMAIN
             bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute();
+#else
+            bool separateAppDomain = false;
+#endif
             s_resolverLoadedType = null;
+#if FEATURE_APPDOMAIN
             taskAppDomain = null;
+#endif
             ITask taskInstanceInOtherAppDomain = null;
 
             try
             {
+#if FEATURE_APPDOMAIN
                 if (separateAppDomain)
                 {
                     if (!loadedType.Type.GetTypeInfo().IsMarshalByRef)
@@ -109,12 +124,14 @@ namespace Microsoft.Build.Shared
                     }
                 }
                 else
+#endif
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
                     return (ITask)Activator.CreateInstance(loadedType.Type);
                 }
 
+#if FEATURE_APPDOMAIN
                 if (loadedType.Assembly.AssemblyFile != null)
                 {
                     taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceFromAndUnwrap(loadedType.Assembly.AssemblyFile, loadedType.Type.FullName);
@@ -146,18 +163,22 @@ namespace Microsoft.Build.Shared
                 }
 
                 return taskInstanceInOtherAppDomain;
+#endif
             }
             finally
             {
+#if FEATURE_APPDOMAIN
                 // Don't leave appdomains open
                 if (taskAppDomain != null && taskInstanceInOtherAppDomain == null)
                 {
                     AppDomain.Unload(taskAppDomain);
                     RemoveAssemblyResolver();
                 }
+#endif
             }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// This is a resolver to help created AppDomains when they are unable to load an assembly into their domain we will help
         /// them succeed by providing the already loaded one in the currentdomain so that they can derive AssemblyName info from it
@@ -187,5 +208,6 @@ namespace Microsoft.Build.Shared
                 s_resolverLoadedType = null;
             }
         }
+#endif
     }
 }

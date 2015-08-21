@@ -310,6 +310,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static long GenerateHostHandshakeFromBase(long baseHandshake, long clientHandshake)
         {
+#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
             // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
             WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
 
@@ -328,6 +329,7 @@ namespace Microsoft.Build.Internal
                     baseHandshake = ~baseHandshake;
                 }
             }
+#endif
 
             // Mask out the first byte. That's because old
             // builds used a single, non zero initial byte,

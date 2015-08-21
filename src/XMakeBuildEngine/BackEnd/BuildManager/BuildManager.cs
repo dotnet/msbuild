@@ -1626,8 +1626,10 @@ namespace Microsoft.Build.Execution
                 (
                 -1, /* must be assigned by the NodeManager */
                 _buildParameters,
-                remoteLoggers.ToArray(),
-                AppDomain.CurrentDomain.SetupInformation
+                remoteLoggers.ToArray()
+#if FEATURE_APPDOMAIN
+                , AppDomain.CurrentDomain.SetupInformation
+#endif
                 );
             }
 

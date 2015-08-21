@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+#if FEATURE_DEBUGGER
 using System.Diagnostics.SymbolStore;
+#endif
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -78,10 +80,12 @@ namespace Microsoft.Build.Debugging
         /// </summary>
         private static MethodInfo s_islandCallback;
 
+#if FEATURE_DEBUGGER
         /// <summary>
         /// Cached mapping of file path to symbol store documents
         /// </summary>
         private static Dictionary<string, ISymbolDocumentWriter> s_sources = new Dictionary<string, ISymbolDocumentWriter>(StringComparer.OrdinalIgnoreCase);
+#endif
 
         /// <summary>
         /// The single dynamic module used.
@@ -362,6 +366,7 @@ namespace Microsoft.Build.Debugging
             // of debuggable reflection-emit.
             ErrorUtilities.VerifyThrow(s_dynamicModule == null, "Already emitted");
 
+#if FEATURE_DEBUGGER
             // In a later release, this could be changed to use LightweightCodeGen (DynamicMethod instead of AssemblyBuilder); 
             // currently they don't support sequence points, so they can't be debugged in the normal way
             AssemblyBuilder assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("msbuild"), AssemblyBuilderAccess.Run);
@@ -382,6 +387,7 @@ namespace Microsoft.Build.Debugging
             s_dynamicModule = assembly.DefineDynamicModule(name, true /* track debug information */);
 #else
             s_dynamicModule = assembly.DefineDynamicModule(name);
+#endif
 #endif
         }
 
@@ -436,6 +442,7 @@ namespace Microsoft.Build.Debugging
             // }
             ILGenerator generator = method.GetILGenerator();
 
+#if FEATURE_DEBUGGER
             ISymbolDocumentWriter source;
             if (!s_sources.TryGetValue(state.Location.File, out source))
             {
@@ -453,6 +460,7 @@ namespace Microsoft.Build.Debugging
             generator.EmitCall(OpCodes.Call, s_islandCallback /* method */, null /* no opt params */);
 
             generator.Emit(OpCodes.Ret); // Return from state
+#endif
 
             return method.Name;
         }

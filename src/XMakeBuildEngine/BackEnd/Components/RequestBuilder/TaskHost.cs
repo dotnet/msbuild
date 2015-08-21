@@ -9,8 +9,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
+#endif
 using System.Threading;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -82,12 +84,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private object _callbackMonitor;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// A client sponsor is a class
         /// which will respond to a lease renewal request and will
         /// increase the lease time allowing the object to stay in memory
         /// </summary>
         private ClientSponsor _sponsor;
+#endif
 
         /// <summary>
         /// Legacy continue on error value per batch exposed via IBuildEngine
@@ -214,6 +218,7 @@ namespace Microsoft.Build.BackEnd
             { _taskLoggingContext = value; }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// For configuring child AppDomains.
         /// </summary>
@@ -224,6 +229,7 @@ namespace Microsoft.Build.BackEnd
                 return _host.BuildParameters.AppDomainSetup;
             }
         }
+#endif
 
         /// <summary>
         /// Whether or not this is out of proc.

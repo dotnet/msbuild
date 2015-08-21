@@ -23,7 +23,9 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Logging;
 using System.Globalization;
 using System.Reflection;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+#endif
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -52,10 +54,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _logTaskInputs;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Resolver to assist in resolving types when a new appdomain is created
         /// </summary>
         private TaskEngineAssemblyResolver _resolver;
+#endif
 
         /// <summary>
         /// The interface used to call back into the build engine.
@@ -234,6 +238,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// App domain configuration.
         /// </summary>
@@ -242,6 +247,7 @@ namespace Microsoft.Build.BackEnd
             get;
             set;
         }
+#endif
 
         /// <summary>
         /// Whether or not this is out-of-proc.
@@ -266,7 +272,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific task.
         /// </summary>
-        void ITaskExecutionHost.InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError, AppDomainSetup appDomainSetup, bool isOutOfProc, CancellationToken cancellationToken)
+        void ITaskExecutionHost.InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError,
+#if FEATURE_APPDOMAIN
+            AppDomainSetup appDomainSetup,
+#endif
+            bool isOutOfProc, CancellationToken cancellationToken)
         {
             _buildEngine = buildEngine;
             _projectInstance = projectInstance;
@@ -277,7 +287,9 @@ namespace Microsoft.Build.BackEnd
             _taskHost = taskHost;
             _continueOnError = continueOnError;
             _taskExecutionIdle.Set();
+#if FEATURE_APPDOMAIN
             this.AppDomainSetup = appDomainSetup;
+#endif
             this.IsOutOfProc = isOutOfProc;
         }
 
@@ -332,6 +344,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
+#if FEATURE_APPDOMAIN
             // If the task assembly is loaded into a separate AppDomain using LoadFrom, then we have a problem
             // to solve - when the task class Type is marshalled back into our AppDomain, it's not just transferred
             // here. Instead, NDP will try to Load (not LoadFrom!) the task assembly into our AppDomain, and since
@@ -343,6 +356,7 @@ namespace Microsoft.Build.BackEnd
                 _resolver.Initialize(_taskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyFile);
                 _resolver.InstallHandler();
             }
+#endif
 
             // We instantiate a new task object for each batch
             _taskInstance = InstantiateTask(taskIdentityParameters);
@@ -577,11 +591,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         void ITaskExecutionHost.CleanupForTask()
         {
+#if FEATURE_APPDOMAIN
             if (_resolver != null)
             {
                 _resolver.RemoveHandler();
                 _resolver = null;
             }
+#endif
 
             _taskFactoryWrapper = null;
 
@@ -996,7 +1012,11 @@ namespace Microsoft.Build.BackEnd
                 AssemblyTaskFactory assemblyTaskFactory = _taskFactoryWrapper.TaskFactory as AssemblyTaskFactory;
                 if (assemblyTaskFactory != null)
                 {
-                    task = assemblyTaskFactory.CreateTaskInstance(_taskLocation, _taskLoggingContext, _buildComponentHost, taskIdentityParameters, this.AppDomainSetup, this.IsOutOfProc);
+                    task = assemblyTaskFactory.CreateTaskInstance(_taskLocation, _taskLoggingContext, _buildComponentHost, taskIdentityParameters,
+#if FEATURE_APPDOMAIN
+                        this.AppDomainSetup,
+#endif
+                        this.IsOutOfProc);
                 }
                 else
                 {

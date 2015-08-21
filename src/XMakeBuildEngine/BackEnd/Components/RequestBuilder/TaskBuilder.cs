@@ -303,7 +303,11 @@ namespace Microsoft.Build.BackEnd
                 if (_taskNode != null)
                 {
                     taskHost = new TaskHost(_componentHost, _buildRequestEntry, _targetChildInstance.Location, _targetBuilderCallback);
-                    _taskExecutionHost.InitializeForTask(taskHost, _targetLoggingContext, _buildRequestEntry.RequestConfiguration.Project, _taskNode.Name, _taskNode.Location, _taskHostObject, _continueOnError != ContinueOnError.ErrorAndStop, taskHost.AppDomainSetup, taskHost.IsOutOfProc, _cancellationToken);
+                    _taskExecutionHost.InitializeForTask(taskHost, _targetLoggingContext, _buildRequestEntry.RequestConfiguration.Project, _taskNode.Name, _taskNode.Location, _taskHostObject, _continueOnError != ContinueOnError.ErrorAndStop,
+#if FEATURE_APPDOMAIN
+                        taskHost.AppDomainSetup,
+#endif
+                        taskHost.IsOutOfProc, _cancellationToken);
                 }
 
                 List<string> taskParameterValues = CreateListOfParameterValues();

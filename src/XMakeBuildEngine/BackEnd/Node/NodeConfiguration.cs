@@ -34,10 +34,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BuildParameters _buildParameters;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The app domain information needed for setting up AppDomain-isolated tasks.
         /// </summary>
         private AppDomainSetup _appDomainSetup;
+#endif
 
         /// <summary>
         /// The forwarding loggers to use.
@@ -55,14 +57,18 @@ namespace Microsoft.Build.BackEnd
             (
             int nodeId,
             BuildParameters buildParameters,
-            LoggerDescription[] forwardingLoggers,
-            AppDomainSetup appDomainSetup
+            LoggerDescription[] forwardingLoggers
+#if FEATURE_APPDOMAIN
+            , AppDomainSetup appDomainSetup
+#endif
             )
         {
             _nodeId = nodeId;
             _buildParameters = buildParameters;
             _forwardingLoggers = forwardingLoggers;
+#if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
+#endif
         }
 
         /// <summary>
@@ -106,6 +112,7 @@ namespace Microsoft.Build.BackEnd
             { return _forwardingLoggers; }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Retrieves the app domain setup information.
         /// </summary>
@@ -115,6 +122,7 @@ namespace Microsoft.Build.BackEnd
             get
             { return _appDomainSetup; }
         }
+#endif
 
         #region INodePacket Members
 
@@ -162,7 +170,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal NodeConfiguration Clone()
         {
-            return new NodeConfiguration(_nodeId, _buildParameters, _forwardingLoggers, _appDomainSetup);
+            return new NodeConfiguration(_nodeId, _buildParameters, _forwardingLoggers
+#if FEATURE_APPDOMAIN
+                , _appDomainSetup
+#endif
+                );
         }
     }
 }
