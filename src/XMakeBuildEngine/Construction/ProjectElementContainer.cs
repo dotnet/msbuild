@@ -15,6 +15,7 @@ using Microsoft.Build.Shared;
 using System.Collections.ObjectModel;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
+using System.Reflection;
 
 namespace Microsoft.Build.Construction
 {

@@ -216,8 +216,8 @@ namespace Microsoft.Build.BackEnd
         public void ContinueRequest()
         {
             ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
-            ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0, false), "Request already terminated");
-            ErrorUtilities.VerifyThrow(!_continueEvent.WaitOne(0, false), "Request already continued");
+            ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
+            ErrorUtilities.VerifyThrow(!_continueEvent.WaitOne(0), "Request already continued");
             VerifyEntryInReadyState();
 
             _continueResults = _requestEntry.Continue();
@@ -1132,8 +1132,10 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (DirectoryNotFoundException)
                 {
+#if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
                     // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
                     NativeMethodsShared.SetCurrentDirectory(Environment.SystemDirectory);
+#endif
                 }
             }
 

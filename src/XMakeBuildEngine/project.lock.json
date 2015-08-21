@@ -1326,6 +1326,45 @@
         "runtime": {
           "lib/dotnet/System.Xml.XmlDocument.dll": {}
         }
+      },
+      "System.Xml.XPath/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "[4.0.20, )",
+          "System.IO": "[4.0.10, )",
+          "System.Xml.ReaderWriter": "[4.0.10, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Xml.XPath.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Xml.XPath.dll": {}
+        }
+      },
+      "System.Xml.XPath.XmlDocument/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "[4.0.20, )",
+          "System.Xml.XmlDocument": "[4.0.0, )",
+          "System.Xml.ReaderWriter": "[4.0.10, )",
+          "System.Xml.XPath": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.IO": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Xml.XPath.XmlDocument.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Xml.XPath.XmlDocument.dll": {}
+        }
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x86": {
@@ -2858,6 +2897,45 @@
         },
         "runtime": {
           "lib/dotnet/System.Xml.XmlDocument.dll": {}
+        }
+      },
+      "System.Xml.XPath/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "[4.0.20, )",
+          "System.IO": "[4.0.10, )",
+          "System.Xml.ReaderWriter": "[4.0.10, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Xml.XPath.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Xml.XPath.dll": {}
+        }
+      },
+      "System.Xml.XPath.XmlDocument/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "[4.0.20, )",
+          "System.Xml.XmlDocument": "[4.0.0, )",
+          "System.Xml.ReaderWriter": "[4.0.10, )",
+          "System.Xml.XPath": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.IO": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Xml.XPath.XmlDocument.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Xml.XPath.XmlDocument.dll": {}
         }
       }
     }
@@ -5754,6 +5832,68 @@
         "package/services/metadata/core-properties/89840371bf3f4e0d9ab7b6b34213c74c.psmdcp",
         "[Content_Types].xml"
       ]
+    },
+    "System.Xml.XPath/4.0.0": {
+      "sha512": "jalVwhZSwErcW28NZOE3Dqb6B1XA4DAsL15JvykYIKXtXYQU8PI5GXssjF5G0bLm8/6Gko2e1SOjRs/MoeAKrw==",
+      "type": "Package",
+      "files": [
+        "_rels/.rels",
+        "System.Xml.XPath.nuspec",
+        "lib/dotnet/System.Xml.XPath.dll",
+        "lib/net46/System.Xml.XPath.dll",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "ref/dotnet/System.Xml.XPath.dll",
+        "ref/dotnet/System.Xml.XPath.xml",
+        "ref/dotnet/zh-hant/System.Xml.XPath.xml",
+        "ref/dotnet/de/System.Xml.XPath.xml",
+        "ref/dotnet/fr/System.Xml.XPath.xml",
+        "ref/dotnet/it/System.Xml.XPath.xml",
+        "ref/dotnet/ja/System.Xml.XPath.xml",
+        "ref/dotnet/ko/System.Xml.XPath.xml",
+        "ref/dotnet/ru/System.Xml.XPath.xml",
+        "ref/dotnet/zh-hans/System.Xml.XPath.xml",
+        "ref/dotnet/es/System.Xml.XPath.xml",
+        "ref/net46/System.Xml.XPath.dll",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "package/services/metadata/core-properties/d021107d37ac4c0c92e4a52a049b2db5.psmdcp",
+        "[Content_Types].xml"
+      ]
+    },
+    "System.Xml.XPath.XmlDocument/4.0.0": {
+      "sha512": "toGFsezsdAJ3Fkau0l386iGBg3qfYauQrM4haX1nWPYnUOWb0hXfAEVIi47/Ke4ET3gl9h9ZppKiws8QWeJVyQ==",
+      "type": "Package",
+      "files": [
+        "_rels/.rels",
+        "System.Xml.XPath.XmlDocument.nuspec",
+        "lib/dotnet/System.Xml.XPath.XmlDocument.dll",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "ref/dotnet/System.Xml.XPath.XmlDocument.dll",
+        "ref/dotnet/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/zh-hant/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/de/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/fr/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/it/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/ja/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/ko/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/ru/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/zh-hans/System.Xml.XPath.XmlDocument.xml",
+        "ref/dotnet/es/System.Xml.XPath.XmlDocument.xml",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "package/services/metadata/core-properties/d80c68d7cec54f53bc0a59c937fdbf0b.psmdcp",
+        "[Content_Types].xml"
+      ]
     }
   },
   "projectFileDependencyGroups": {
@@ -5778,6 +5918,7 @@
       "System.Threading.Thread >= 4.0.0-beta-23123",
       "System.Threading.ThreadPool >= 4.0.10-beta-23123",
       "System.Xml.XmlDocument >= 4.0.0",
+      "System.Xml.XPath.XmlDocument >= 4.0.0",
       "Microsoft.NETCore.Runtime >= 1.0.0",
       "Microsoft.NETCore.TestHost-x86 >= 1.0.0-beta-23123"
     ]

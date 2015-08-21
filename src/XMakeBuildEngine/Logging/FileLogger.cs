@@ -80,7 +80,7 @@ namespace Microsoft.Build.Logging
 
             try
             {
-                _fileWriter = FileUtilities.OpenFile(_logFileName, _append, _encoding);
+                _fileWriter = FileUtilities.OpenWrite(_logFileName, _append, _encoding);
 
                 _fileWriter.AutoFlush = _autoFlush;
             }

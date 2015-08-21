@@ -1942,6 +1942,8 @@ namespace Microsoft.Build.Construction
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
+
+#if FEATURE_XMLTEXTREADER
                     using (XmlTextReader xtr = new XmlTextReader(fullPath))
                     {
                         // Start the reader so it has an idea of what the encoding is.
@@ -1950,6 +1952,15 @@ namespace Microsoft.Build.Construction
                         _encoding = xtr.Encoding;
                         document.Load(xtr);
                     }
+#else
+                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                    xmlReaderSettings.DtdProcessing = DtdProcessing.Ignore;
+                    using (XmlReader xr = XmlReader.Create(File.OpenRead(fullPath), xmlReaderSettings))
+                    {
+                        xr.Read();
+                        document.Load(xr);
+                    }
+#endif
 
                     document.FullPath = fullPath;
                     _projectFileLocation = ElementLocation.Create(fullPath);

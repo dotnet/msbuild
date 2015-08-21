@@ -17,6 +17,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
+using System.Reflection;
 
 namespace Microsoft.Build.Construction
 {

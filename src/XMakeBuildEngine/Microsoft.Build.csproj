@@ -24,7 +24,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
-  
   <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
        The code here was generally copied from the .NET Framework reference source and
        modified to compile for .NET Core -->
@@ -41,8 +40,11 @@
     <Compile Include="..\Shared\Compat\SecureStringHasher.cs">
       <Link>SharedUtilities\Compat\SecureStringHasher.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\TypeFilter.cs" >
+    <Compile Include="..\Shared\Compat\TypeFilter.cs">
       <Link>SharedUtilities\Compat\TypeFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Compat\TypeExtensions.cs">
+      <Link>SharedUtilities\Compat\TypeExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Compat\ValidateNames.cs">
       <Link>SharedUtilities\Compat\ValidateNames.cs</Link>

@@ -1105,7 +1105,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        internal static StreamWriter OpenFile(string path, bool append, Encoding encoding = null)
+        internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
         {
             const int DefaultFileStreamBufferSize = 4096;
             FileMode mode = append? FileMode.Append: FileMode.Create;
@@ -1117,6 +1117,20 @@ namespace Microsoft.Build.Shared
             else
             {
                 return new StreamWriter(fileStream, encoding);
+            }
+        }
+
+        internal static StreamReader OpenRead(string path, Encoding encoding = null)
+        {
+            const int DefaultFileStreamBufferSize = 4096;
+            Stream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
+            if (encoding == null)
+            {
+                return new StreamReader(fileStream);
+            }
+            else
+            {
+                return new StreamReader(fileStream, encoding);
             }
         }
     }

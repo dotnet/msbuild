@@ -185,9 +185,10 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                using (XmlTextReader xmlReader = new XmlTextReader(projectFileName))
+                XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                xmlReaderSettings.DtdProcessing = DtdProcessing.Ignore;
+                using (XmlReader xmlReader = XmlReader.Create(projectFileName, xmlReaderSettings))
                 {
-                    xmlReader.DtdProcessing = DtdProcessing.Ignore;
                     while (xmlReader.Read())
                     {
                         if (xmlReader.NodeType == XmlNodeType.Element)

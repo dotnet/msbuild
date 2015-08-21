@@ -50,8 +50,8 @@ namespace Microsoft.Build.Execution
             : base(
             propertyInfo.Name,
             propertyInfo.PropertyType,
-            propertyInfo.GetCustomAttributes(typeof(OutputAttribute), true).Length > 0,
-            propertyInfo.GetCustomAttributes(typeof(RequiredAttribute), true).Length > 0)
+            propertyInfo.GetCustomAttributes(typeof(OutputAttribute), true).Any(),
+            propertyInfo.GetCustomAttributes(typeof(RequiredAttribute), true).Any())
         {
             _propertyInfo = propertyInfo;
         }
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Execution
             {
                 if (_propertyInfo == null)
                 {
-                    _propertyInfo = _taskType.GetProperty(Name, BindingFlags.ExactBinding | BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+                    _propertyInfo = _taskType.GetProperty(Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
                     ErrorUtilities.VerifyThrow(_propertyInfo != null, "Could not find property {0} on type {1} that the task factory indicated should exist.", Name, _taskType.FullName);
                 }
 
