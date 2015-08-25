@@ -194,116 +194,117 @@ namespace Microsoft.Build.Tasks
 
             foreach (var assemblyBinding in assemblyBindingNodes)
             {
-                var dependentAssembly = assemblyBinding.Nodes()
+                // Each assemblyBinding section could have more than one dependentAssembly elements
+                var dependentAssemblies = assemblyBinding.Nodes()
                     .OfType<XElement>()
-                    .FirstOrDefault();
+                    .Where(e => e.Name.LocalName == "dependentAssembly");
 
-                if (dependentAssembly == null)
+                foreach (var dependentAssembly in dependentAssemblies)
                 {
-                    Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MissingNode", "dependentAssembly", "assemblyBinding");
-                    continue;
-                }
+                    var assemblyIdentity = dependentAssembly.Nodes()
+                        .OfType<XElement>()
+                        .Where(e => e.Name.LocalName == "assemblyIdentity")
+                        .FirstOrDefault();
 
-                var assemblyIdentity = dependentAssembly.Nodes()
-                    .OfType<XElement>()
-                    .Where(e => e.Name.LocalName == "assemblyIdentity")
-                    .FirstOrDefault();
-
-                if (assemblyIdentity == null)
-                {
-                    Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MissingNode", "assemblyIdentity", "dependentAssembly");
-                    continue;
-                }
-
-                var bindingRedirect = dependentAssembly.Nodes()
-                    .OfType<XElement>()
-                    .Where(e => e.Name.LocalName == "bindingRedirect")
-                    .FirstOrDefault();
-
-                if (bindingRedirect == null)
-                {
-                    Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MissingNode", "bindingRedirect", "dependentAssembly");
-                    continue;
-                }
-
-                var name = assemblyIdentity.Attribute("name");
-                var nameValue = name.Value;
-                var publicKeyToken = assemblyIdentity.Attribute("publicKeyToken");
-                var publicKeyTokenValue = publicKeyToken.Value;
-                var culture = assemblyIdentity.Attribute("culture");
-                var cultureValue = culture == null ? String.Empty : culture.Value;
-
-                if (name == null || publicKeyToken == null)
-                {
-                    continue;
-                }
-
-                var oldVersionAttribute = bindingRedirect.Attribute("oldVersion");
-                var newVersionAttribute = bindingRedirect.Attribute("newVersion");
-
-                if (oldVersionAttribute == null || newVersionAttribute == null)
-                {
-                    continue;
-                }
-
-                var oldVersionRange = oldVersionAttribute.Value.Split('-');
-                if (oldVersionRange == null || oldVersionRange.Length == 0 || oldVersionRange.Length > 2)
-                {
-                    continue;
-                }
-
-                var oldVerStrLow = oldVersionRange[0];
-                var oldVerStrHigh = oldVersionRange[oldVersionRange.Length == 1 ? 0 : 1];
-
-                Version oldVersionLow, oldVersionHigh;
-                if (!Version.TryParse(oldVerStrLow, out oldVersionLow))
-                {
-                    Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MalformedVersionNumber", oldVerStrLow);
-                    continue;
-                }
-
-                if (!Version.TryParse(oldVerStrHigh, out oldVersionHigh))
-                {
-                    Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MalformedVersionNumber", oldVerStrHigh);
-                    continue;
-                }
-
-                // We cannot do a simply dictionary lookup here because we want to allow relaxed "culture" matching:
-                // we consider it a match if the existing binding redirect doesn't specify culture in the assembly identity.
-                foreach (var entry in redirects)
-                {
-                    if (IsMatch(entry.Key, nameValue, cultureValue, publicKeyTokenValue))
+                    if (assemblyIdentity == null)
                     {
-                        string maxVerStr = entry.Value;
-                        var maxVersion = new Version(maxVerStr);
+                        // Due to MSDN documentation (https://msdn.microsoft.com/en-us/library/0ash1ksb(v=vs.110).aspx)
+                        // assemblyIdentity is required subelement. Emitting a warning if it's not there.
+                        Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MissingNode", "dependentAssembly", "assemblyBinding");
+                        continue;
+                    }
 
-                        if (maxVersion >= oldVersionLow)
+                    var bindingRedirect = dependentAssembly.Nodes()
+                        .OfType<XElement>()
+                        .Where(e => e.Name.LocalName == "bindingRedirect")
+                        .FirstOrDefault();
+
+                    if (bindingRedirect == null)
+                    {
+                        // Due to xsd schema and MSDN documentation bindingRedirect is not required subelement.
+                        // Just skipping it without a warning.
+                        continue;
+                    }
+
+                    var name = assemblyIdentity.Attribute("name");
+                    var nameValue = name.Value;
+                    var publicKeyToken = assemblyIdentity.Attribute("publicKeyToken");
+                    var publicKeyTokenValue = publicKeyToken.Value;
+                    var culture = assemblyIdentity.Attribute("culture");
+                    var cultureValue = culture == null ? String.Empty : culture.Value;
+
+                    if (name == null || publicKeyToken == null)
+                    {
+                        continue;
+                    }
+
+                    var oldVersionAttribute = bindingRedirect.Attribute("oldVersion");
+                    var newVersionAttribute = bindingRedirect.Attribute("newVersion");
+
+                    if (oldVersionAttribute == null || newVersionAttribute == null)
+                    {
+                        continue;
+                    }
+
+                    var oldVersionRange = oldVersionAttribute.Value.Split('-');
+                    if (oldVersionRange == null || oldVersionRange.Length == 0 || oldVersionRange.Length > 2)
+                    {
+                        continue;
+                    }
+
+                    var oldVerStrLow = oldVersionRange[0];
+                    var oldVerStrHigh = oldVersionRange[oldVersionRange.Length == 1 ? 0 : 1];
+
+                    Version oldVersionLow, oldVersionHigh;
+                    if (!Version.TryParse(oldVerStrLow, out oldVersionLow))
+                    {
+                        Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MalformedVersionNumber", oldVerStrLow);
+                        continue;
+                    }
+
+                    if (!Version.TryParse(oldVerStrHigh, out oldVersionHigh))
+                    {
+                        Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MalformedVersionNumber", oldVerStrHigh);
+                        continue;
+                    }
+
+                    // We cannot do a simply dictionary lookup here because we want to allow relaxed "culture" matching:
+                    // we consider it a match if the existing binding redirect doesn't specify culture in the assembly identity.
+                    foreach (var entry in redirects)
+                    {
+                        if (IsMatch(entry.Key, nameValue, cultureValue, publicKeyTokenValue))
                         {
-                            // Update the existing binding redirect to the RAR suggested one.
-                            var newName = entry.Key.Name;
-                            var newCulture = entry.Key.CultureName;
-                            var newPublicKeyToken = entry.Key.GetPublicKeyToken();
-                            var newProcessorArchitecture = entry.Key.ProcessorArchitecture;
+                            string maxVerStr = entry.Value;
+                            var maxVersion = new Version(maxVerStr);
 
-                            var attributes = new List<XAttribute>(4);
-                            attributes.Add(new XAttribute("name", newName));
-                            attributes.Add(new XAttribute("culture", String.IsNullOrEmpty(newCulture) ? "neutral" : newCulture));
-                            attributes.Add(new XAttribute("publicKeyToken", ResolveAssemblyReference.ByteArrayToString(newPublicKeyToken)));
-                            if (newProcessorArchitecture != 0)
+                            if (maxVersion >= oldVersionLow)
                             {
-                                attributes.Add(new XAttribute("processorArchitecture", newProcessorArchitecture.ToString()));
+                                // Update the existing binding redirect to the RAR suggested one.
+                                var newName = entry.Key.Name;
+                                var newCulture = entry.Key.CultureName;
+                                var newPublicKeyToken = entry.Key.GetPublicKeyToken();
+                                var newProcessorArchitecture = entry.Key.ProcessorArchitecture;
+
+                                var attributes = new List<XAttribute>(4);
+                                attributes.Add(new XAttribute("name", newName));
+                                attributes.Add(new XAttribute("culture", String.IsNullOrEmpty(newCulture) ? "neutral" : newCulture));
+                                attributes.Add(new XAttribute("publicKeyToken", ResolveAssemblyReference.ByteArrayToString(newPublicKeyToken)));
+                                if (newProcessorArchitecture != 0)
+                                {
+                                    attributes.Add(new XAttribute("processorArchitecture", newProcessorArchitecture.ToString()));
+                                }
+
+                                assemblyIdentity.ReplaceAttributes(attributes);
+
+                                oldVersionAttribute.Value = "0.0.0.0-" + (maxVersion >= oldVersionHigh ? maxVerStr : oldVerStrHigh);
+                                newVersionAttribute.Value = maxVerStr;
+                                redirects.Remove(entry.Key);
+
+                                Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.OverlappingBindingRedirect", entry.Key.ToString(), bindingRedirect.ToString());
                             }
 
-                            assemblyIdentity.ReplaceAttributes(attributes);
-
-                            oldVersionAttribute.Value = "0.0.0.0-" + (maxVersion >= oldVersionHigh ? maxVerStr : oldVerStrHigh);
-                            newVersionAttribute.Value = maxVerStr;
-                            redirects.Remove(entry.Key);
-
-                            Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.OverlappingBindingRedirect", entry.Key.ToString(), bindingRedirect.ToString());
+                            break;
                         }
-
-                        break;
                     }
                 }
             }

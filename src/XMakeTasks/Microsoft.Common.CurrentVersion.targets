@@ -631,7 +631,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)SpecialFolder.xaml;">
       <Context>File;ProjectSubscriptionService</Context>
     </PropertyPageSchema>
+  </ItemGroup>
 
+  <PropertyGroup>
+    <DefineCommonReferenceSchemas Condition=" '$(DefineCommonReferenceSchemas)' == '' ">$(DefineCommonItemSchemas)</DefineCommonReferenceSchemas>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(DefineCommonReferenceSchemas)' == 'true' ">
     <!-- Assembly references -->
     <PropertyPageSchema Include="$(CommonXamlResourcesDirectory)assemblyreference.xaml">
       <Context>;BrowseObject</Context>
@@ -667,7 +673,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                           AllTargetOutputGroups;
                           VisualStudioWellKnownOutputGroups;
                           SingleFileGenerators;
+                          DeclaredSourceItems;
+                          UserSourceItems;
                            " />
+    <ProjectCapability Condition=" '$(TargetPlatformIdentifier)' == 'Windows' and '$(TargetPlatformVersion)' &lt; 8.0 "
+                       Include="BuildWindowsDesktopTarget" />
   </ItemGroup>
 
   <ItemDefinitionGroup Condition=" '$(DefineExplicitDefaults)' == 'true' ">
@@ -1510,14 +1520,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         The ContinueOnError setting is here so that, during project load, as
         much information as possible will be passed to the compilers.
         -->
-    <PropertyGroup>
-        <_GetTargetPathName>GetTargetPath</_GetTargetPathName>
-        <_GetTargetPathName Condition="'$(IntelliSenseBuild)' == 'true'">GetTargetPathWithTargetPlatformMoniker</_GetTargetPathName>
-    </PropertyGroup>  
 
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="$(_GetTargetPathName)"
+        Targets="GetTargetPath"
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildProjectReferences)' != 'true') and '$(VisualStudioVersion)' != '10.0' and '@(_MSBuildProjectReferenceExistent)' != ''"
@@ -1641,13 +1647,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
-      Returns="$(TargetPath)"/>
+      Returns="@(TargetPathWithTargetPlatformMoniker)">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
+        <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
+        <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
+      </TargetPathWithTargetPlatformMoniker>
+    </ItemGroup>
+  </Target>
 
   <!--
     ============================================================
                                         GetTargetPathWithTargetPlatformMoniker
 
     This stand-alone target returns the name and version of the target platform for this project.
+
+    NOTE: The functionality of this target has been subsumed by GetTargetPath.  This target is
+    provided purely for compat reasons.
     ============================================================
     -->
   <PropertyGroup>
@@ -1657,14 +1673,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GetTargetPathWithTargetPlatformMoniker"
       DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
-      Returns="@(TargetPathWithTargetPlatformMoniker)">
-    <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="$(TargetPath)">
-        <TargetPlatformMoniker>$(TargetPlatformMoniker)</TargetPlatformMoniker>
-        <TargetPlatformIdentifier>$(TargetPlatformIdentifier)</TargetPlatformIdentifier>
-      </TargetPathWithTargetPlatformMoniker>
-    </ItemGroup>
-  </Target>
+      Returns="@(TargetPathWithTargetPlatformMoniker)" />
   
   <!--
     ============================================================
@@ -1792,7 +1801,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <!-- Default in task is true -->
       <_FindDependencies Condition="'$(BuildingProject)' != 'true' and '$(_ResolveReferenceDependencies)' != 'true'">false</_FindDependencies>
-      <_ForceSystemRuntimeDependencyCalculation Condition="'$(IntelliSenseBuild)' == 'true' or '$(CheckForSystemRuntimeDependency)' == 'true'">true</_ForceSystemRuntimeDependencyCalculation>
       <ResolveAssemblyReferencesSilent Condition="'$(ResolveAssemblyReferencesSilent)' == '' and '$(TraceDesignTime)' != 'true' and '$(BuildingProject)' == 'false'">true</ResolveAssemblyReferencesSilent>
       <ResolveAssemblyReferencesSilent Condition="'$(ResolveAssemblyReferencesSilent)' == ''">false</ResolveAssemblyReferencesSilent>
       <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch Condition="'$(ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch)' == ''">Warning</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
@@ -1825,7 +1833,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SupportsBindingRedirectGeneration="$(GenerateBindingRedirectsOutputType)"
         IgnoreVersionForFrameworkReferences="$(IgnoreVersionForFrameworkReferences)"
         FindDependencies="$(_FindDependencies)"
-        ForceSystemRuntimeDependencyCalculation="$(_ForceSystemRuntimeDependencyCalculation)"
         FindSatellites="$(BuildingProject)"
         FindSerializationAssemblies="$(BuildingProject)"
         FindRelatedFiles="$(BuildingProject)"
@@ -1843,6 +1850,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ProfileName="$(TargetFrameworkProfile)"
         LatestTargetFrameworkDirectories="@(LatestTargetFrameworkDirectories)"
         CopyLocalDependenciesWhenParentReferenceInGac="$(CopyLocalDependenciesWhenParentReferenceInGac)"
+        DoNotCopyLocalIfInGac="$(DoNotCopyLocalIfInGac)"
         ResolvedSDKReferences="@(ResolvedSDKReference)"
         WarnOrErrorOnTargetArchitectureMismatch="$(ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch)"
         IgnoreTargetFrameworkAttributeVersionMismatch ="$(ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch)"
@@ -1922,19 +1930,31 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
   </Target>
+
   <!--
-    ============================================================
+    ===========================================================================================
                                         GetInstalledSDKs
 
     Gets the list of SDKs installed in the SDKDirectoryRoot and SDKRegistryRoot locations
 
     These paths are used by the ResolveSDKReference task and the ResolveAssemblyReference task.
-    ============================================================
-    -->
-   <PropertyGroup>
+    ===========================================================================================
+  -->
+  <PropertyGroup>
     <SDKReferenceRegistryRoot Condition="'$(SDKReferenceRegistryRoot)' == ''">Software\Microsoft\Microsoft SDKs</SDKReferenceRegistryRoot>
     <SDKReferenceDirectoryRoot Condition="'$(SDKReferenceDirectoryRoot)' == ''">$(LocalAppData)\Microsoft SDKs;$(MSBuildProgramFiles32)\Microsoft SDKs</SDKReferenceDirectoryRoot>
-    <SDKExtensionDirectoryRoot Condition="'$(SDKTargetReferenceDirectoryRoot)' == '' and '$(SDKIdentifier)' != '' and '$(SDKVersion)' != ''">$(LocalAppData)\$(SDKIdentifier)\$(SDKVersion);$(MSBuildProgramFiles32)\$(SDKIdentifier)\$(SDKVersion)</SDKExtensionDirectoryRoot>
+    <!-- Manifest driven extension SDK locations -->
+    <SDKExtensionDirectoryRoot Condition="'$(SDKExtensionDirectoryRoot)' == '' and '$(SDKIdentifier)' != ''">$(MSBuildProgramFiles32)\Microsoft SDKs\Windows Kits\10;$(MSBuildProgramFiles32)\Windows Kits\10</SDKExtensionDirectoryRoot>
+
+    <!-- UAP projects by default should support Windows 8.1 SDKs -->
+    <SupportWindows81SDKs Condition="'$(SupportWindows81SDKs)' == '' and '$(Support81SDKs)' != 'false' and '$(TargetPlatformIdentifier)' == 'UAP'">true</SupportWindows81SDKs>
+    <TargetPlatformIdentifierWindows81 Condition="'$(TargetPlatformIdentifierWindows81)' == '' and '$(SupportWindows81SDKs)' == 'true'">Windows</TargetPlatformIdentifierWindows81>
+    <TargetPlatformVersionWindows81 Condition="'$(TargetPlatformVersionWindows81)' == '' and '$(SupportWindows81SDKs)' == 'true'">8.1</TargetPlatformVersionWindows81>
+
+    <!-- Desktop and phone SDKs often have the exact same identifiers, don't enable phone by default -->
+    <SupportWindowsPhone81SDKs Condition="'$(SupportWindowsPhone81SDKs)' == '' and '$(Support81SDKs)' != 'false' and '$(TargetPlatformIdentifier)' == 'UAP'">false</SupportWindowsPhone81SDKs>
+    <TargetPlatformIdentifierWindowsPhone81 Condition="'$(TargetPlatformIdentifierWindowsPhone81)' == '' and '$(SupportWindowsPhone81SDKs)' == 'true'">WindowsPhoneApp</TargetPlatformIdentifierWindowsPhone81>
+    <TargetPlatformVersionWindowsPhone81 Condition="'$(TargetPlatformVersionWindowsPhone81)' == '' and '$(SupportWindowsPhone81SDKs)' == 'true'">8.1</TargetPlatformVersionWindowsPhone81>
   </PropertyGroup>
 
   <Target
@@ -1953,7 +1973,30 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            >
       <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
     </GetInstalledSDKLocations>
-  
+
+    <!-- Also lookup 8.1 SDKs if requested -->
+    <GetInstalledSDKLocations
+           SDKDirectoryRoots="$(SDKReferenceDirectoryRoot)"
+           SDKExtensionDirectoryRoots=""
+           SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
+           TargetPlatformVersion="$(TargetPlatformVersionWindows81)"
+           TargetPlatformIdentifier="$(TargetPlatformIdentifierWindows81)"
+           Condition="'@(SDKReference)' != '' and '$(SupportWindows81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindows81)' != '' and '$(TargetPlatformVersionWindows81)' != ''"
+           >
+      <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
+    </GetInstalledSDKLocations>
+
+    <GetInstalledSDKLocations
+           SDKDirectoryRoots="$(SDKReferenceDirectoryRoot)"
+           SDKExtensionDirectoryRoots=""
+           SDKRegistryRoot="$(SDKReferenceRegistryRoot)"
+           TargetPlatformVersion="$(TargetPlatformVersionWindowsPhone81)"
+           TargetPlatformIdentifier="$(TargetPlatformIdentifierWindowsPhone81)"
+           Condition="'@(SDKReference)' != '' and '$(SupportWindowsPhone81SDKs)' == 'true' and '$(TargetPlatformIdentifierWindowsPhone81)' != '' and '$(TargetPlatformVersionWindowsPhone81)' != ''"
+           >
+      <Output TaskParameter="InstalledSDKs" ItemName="InstalledSDKLocations"/>
+    </GetInstalledSDKLocations>
+
   </Target>
 
   <!--
@@ -1972,7 +2015,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         [OUT]
         @(ResolvedSDKReference) - Full path to the root of the SDK
     ============================================================
-    -->
+  -->
   <PropertyGroup>
     <ResolveSDKReferencesDependsOn>
       GetInstalledSDKLocations
@@ -2040,7 +2083,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                                      target GetTargetPlatformMonikers.
 
         [OUT]
-	@(InvalidProjectReferences) - List of invalid project references
+    @(InvalidProjectReferences) - List of invalid project references
 
     ============================================================
     -->
@@ -2793,6 +2836,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
         EnvironmentVariables="$(LCEnvironment)"
         MSBuildArchitecture="$(LCMSBuildArchitecture)"
+        TargetFrameworkVersion="$(TargetFrameworkVersion)"
         >
 
       <Output TaskParameter="OutputLicense" ItemName="CompiledLicenseFile"/>
@@ -3130,7 +3174,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         References="@(ReferencePath)"
         ShouldGenerateSerializer="$(SGenShouldGenerateSerializer)"
         UseProxyTypes="$(SGenUseProxyTypes)"
-	UseKeep="$(SGenUseKeep)"
+        UseKeep="$(SGenUseKeep)"
         KeyContainer="$(KeyContainerName)"
         KeyFile="$(KeyOriginatorFile)"
         DelaySign="$(DelaySign)"
@@ -5419,7 +5463,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.NETFramework.targets" Condition="('$(TargetFrameworkIdentifier)' == ''  or '$(TargetFrameworkIdentifier)' == '.NETFramework') and ('$(TargetRuntime)' == 'Managed')"/>
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Xaml.targets" Condition="('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.Xaml.targets')"/>
+  <PropertyGroup>
+    <ImportXamlTargets Condition="'$(ImportXamlTargets)'=='' and ('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.Xaml.targets')">true</ImportXamlTargets>
+  </PropertyGroup>
+  
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Xaml.targets" Condition="('$(ImportXamlTargets)' == 'true')" />
 
   <!-- imports Microsoft.WorkflowBuildExtensions.targets only if TargetFrameworkVersion is v4.5 or above or TargetFrameworkfVersion specified does not conform to the format of vX.X[.X.X] -->
   <!-- Underlying assumption is that there shouldn't be any other versions between v4.0.* and v4.5 -->
@@ -5458,6 +5506,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
-  <Import Project="$(MSBuildToolsPath)\tools\*.props" />
 
 </Project>

@@ -48,7 +48,12 @@ namespace Microsoft.Build.Tasks
         NoBecauseReferenceItemHadMetadata,
 
         /// <summary>
-        /// The Reference should be CopyLocal='false' because it's found in the GAC.
+        /// The Reference should be CopyLocal='false' because it was resolved from the GAC.
+        /// </summary>
+        NoBecauseReferenceResolvedFromGAC,
+
+        /// <summary>
+        /// Legacy behavior, CopyLocal='false' when the assembly is found in the GAC (even when it was resolved elsewhere).
         /// </summary>
         NoBecauseReferenceFoundInGAC,
 
@@ -95,6 +100,7 @@ namespace Microsoft.Build.Tasks
                 case CopyLocalState.NoBecauseFrameworkFile:
                 case CopyLocalState.NoBecausePrerequisite:
                 case CopyLocalState.NoBecauseReferenceItemHadMetadata:
+                case CopyLocalState.NoBecauseReferenceResolvedFromGAC:
                 case CopyLocalState.NoBecauseReferenceFoundInGAC:
                 case CopyLocalState.NoBecauseEmbedded:
                 case CopyLocalState.NoBecauseParentReferencesFoundInGAC:

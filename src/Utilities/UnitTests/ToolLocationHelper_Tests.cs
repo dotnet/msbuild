@@ -39,6 +39,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [TestMethod]
+        public void GetApiContractReferencesHandlesNullContracts()
+        {
+            string[] returnValue = ToolLocationHelper.GetApiContractReferences(null, String.Empty);
+            Assert.AreEqual(0, returnValue.Length);
+        }
+
+        [TestMethod]
         public void GetApiContractReferencesHandlesNonExistingLocation()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -3879,6 +3886,7 @@ namespace Microsoft.Build.UnitTests
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetOneCoreSDKPropsLocation");
             string platformDirectory = Path.Combine(testDirectoryRoot, "OneCoreSDK\\1.0\\");
             string propsDirectory = Path.Combine(platformDirectory, "DesignTime\\CommonConfiguration\\Neutral\\MyPlatform\\0.8.0.0");
+            string platformDirectory2 = Path.Combine(platformDirectory, "Platforms", "MyPlatform", "0.8.0.0");
 
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
              <Project DefaultTargets=""ExpandSDKReferenceAssemblies"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -3910,8 +3918,10 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(testDirectoryRoot);
                 Directory.CreateDirectory(propsDirectory);
+                Directory.CreateDirectory(platformDirectory2);
 
                 File.WriteAllText(Path.Combine(platformDirectory, "sdkManifest.xml"), "Test");
+                File.WriteAllText(Path.Combine(platformDirectory2, "Platform.xml"), "Test");
 
                 Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents, null);
 

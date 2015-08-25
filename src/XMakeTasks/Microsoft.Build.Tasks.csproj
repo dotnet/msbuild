@@ -11,8 +11,8 @@
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-    <!-- Default configurations to help VS understand the configurations -->
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
@@ -340,9 +340,6 @@
     <Compile Include="CreateVisualBasicManifestResourceName.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Csc.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="CSharpParserUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -488,9 +485,6 @@
     <Compile Include="MakeDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ManagedCompiler.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="ManifestUtil\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -627,9 +621,6 @@
     <Compile Include="UpdateManifest.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Vbc.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="VisualBasicParserUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -747,6 +738,9 @@
     <!-- Assemblies Files we depend on -->
     <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
     <!-- ==========================================================================================-->
+    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis">
+      <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
@@ -762,14 +756,10 @@
       <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
       <Name>Microsoft.Build.Utilities</Name>
     </ProjectReference>
-    
-    <!-- If TargetRetailBuildFramework is set to true, reference the public key version. Otherwise reference the project. -->
-    <Reference Condition=" '$(TargetRetailBuildFramework)' == 'true' " Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <ProjectReference Condition=" '$(TargetRetailBuildFramework)' != 'true' " Include="..\Framework\Microsoft.Build.Framework.csproj">
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
-	
     <!-- Other Source Files -->
     <EmbeddedResource Include="ManifestUtil\manifest.xml">
       <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.manifest.xml</LogicalName>

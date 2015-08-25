@@ -25,6 +25,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
+using Microsoft.CodeAnalysis.BuildTasks;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -2047,7 +2048,8 @@ namespace TestTask
                     FileUtilities.DeleteNoThrow(outputFile);
                 }
 
-                // now rethrow 
+                // now rethrow
+				throw;
             }
             finally
             {

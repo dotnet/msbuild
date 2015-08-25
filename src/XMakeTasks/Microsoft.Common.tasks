@@ -6,73 +6,74 @@
                is encountered, it will cause the task to be rediscovered next time the task is used. -->
     <!-- NOTE: Using the fully qualified class name in a <UsingTask> tag is faster than using a partially qualified name. -->
  
-    <UsingTask TaskName="Microsoft.Build.Tasks.AL"                                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.AspNetCompiler"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.AssignCulture"                         AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.AssignLinkMetadata"                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.AssignProjectConfiguration"            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.AssignTargetPath"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.CallTarget"                            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.CombinePath"                           AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.ConvertToAbsolutePath"                 AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Copy"                                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.CreateCSharpManifestResourceName"      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.CreateItem"                            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.CreateProperty"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.CreateVisualBasicManifestResourceName" AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.Csc"                                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Delete"                                AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Error"                                 AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ErrorFromResources"                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Exec"                                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.FindAppConfigFile"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.FindInList"                            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.FindInvalidProjectReferences"          AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.FindUnderPath"                         AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.FormatUrl"                             AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.FormatVersion"                         AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateApplicationManifest"           AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateBindingRedirects"              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateBootstrapper"                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateDeploymentManifest"            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateTrustInfo"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GetAssemblyIdentity"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkPath"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkSdkPath"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GetReferenceAssemblyPaths"             AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.LC"                                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.MakeDir"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Message"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Move"                                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.MSBuild"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ReadLinesFromFile"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.RemoveDir"                             AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.RemoveDuplicates"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.RequiresFramework35SP1Assembly"        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveAssemblyReference"              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveCodeAnalysisRuleSet"            AssemblyFile="Microsoft.Build.Tasks.Core.dll" />    
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveSDKReference"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GetInstalledSDKLocations"              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GetSDKReferenceFiles"                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveComReference"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveKeySource"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveManifestFiles"                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNativeReference"                AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNonMSBuildProjectOutput"        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.SGen"                                  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.SignFile"                              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Touch"                                 AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.UpdateManifest"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Vbc"                                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.Warning"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.WriteCodeFragment"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
-    <UsingTask TaskName="Microsoft.Build.Tasks.WriteLinesToFile"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
-    <UsingTask TaskName="Microsoft.Build.Tasks.XmlPeek"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.XmlPoke"                               AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />        
-    <UsingTask TaskName="Microsoft.Build.Tasks.WinMDExp"                              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AL"                                    AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AspNetCompiler"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AssignCulture"                         AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AssignLinkMetadata"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AssignProjectConfiguration"            AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.AssignTargetPath"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.CallTarget"                            AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.CombinePath"                           AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.ConvertToAbsolutePath"                 AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Copy"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.CreateCSharpManifestResourceName"      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.CreateItem"                            AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.CreateProperty"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.CreateVisualBasicManifestResourceName" AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.Delete"                                AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Error"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ErrorFromResources"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Exec"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FindAppConfigFile"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FindInList"                            AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FindInvalidProjectReferences"          AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FindUnderPath"                         AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FormatUrl"                             AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.FormatVersion"                         AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateApplicationManifest"           AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateBindingRedirects"              AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateBootstrapper"                  AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateDeploymentManifest"            AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateTrustInfo"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetAssemblyIdentity"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkPath"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkSdkPath"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetReferenceAssemblyPaths"             AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.LC"                                    AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.MakeDir"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Message"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Move"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.MSBuild"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ReadLinesFromFile"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RemoveDir"                             AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RemoveDuplicates"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RequiresFramework35SP1Assembly"        AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveAssemblyReference"              AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveCodeAnalysisRuleSet"            AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />    
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveSDKReference"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetInstalledSDKLocations"              AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GetSDKReferenceFiles"                  AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveComReference"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveKeySource"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveManifestFiles"                  AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNativeReference"                AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNonMSBuildProjectOutput"        AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.SGen"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.SignFile"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Touch"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.UpdateManifest"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.Warning"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.WriteCodeFragment"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />        
+    <UsingTask TaskName="Microsoft.Build.Tasks.WriteLinesToFile"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />        
+    <UsingTask TaskName="Microsoft.Build.Tasks.XmlPeek"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.XmlPoke"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />        
+    <UsingTask TaskName="Microsoft.Build.Tasks.WinMDExp"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    
+    <!-- Roslyn tasks are now in Tasks.Roslyn.dll -->
+    <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="Microsoft.Build.Tasks.CodeAnalysis.dll" />
+    <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Vbc"                       AssemblyFile="Microsoft.Build.Tasks.CodeAnalysis.dll" />
 </Project>
-
