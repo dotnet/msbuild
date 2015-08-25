@@ -21,6 +21,7 @@ using System.Linq;
 
 using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using ObjectModelHelpers = Microsoft.Build.UnitTests.ObjectModelHelpers;
+using Microsoft.CodeAnalysis.BuildTasks;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
 

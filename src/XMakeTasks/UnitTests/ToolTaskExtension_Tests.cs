@@ -2,15 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Resources;
 using System.Reflection;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -25,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void TestResourceAccess()
         {
-            Csc t = new Csc();
+            MyToolTaskExtension t = new MyToolTaskExtension();
             MockEngine engine = new MockEngine();
 
             t.BuildEngine = engine;
@@ -59,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         [ExpectedException(typeof(ArgumentException))]
         public void ResourceAccessSanityCheck()
         {
-            Csc t = new Csc();
+            MyToolTaskExtension t = new MyToolTaskExtension();
             MockEngine engine = new MockEngine();
 
             t.BuildEngine = engine;
@@ -72,7 +67,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void GetNonExistentBoolWithDefault()
         {
-            Csc t = new Csc();
+            MyToolTaskExtension t = new MyToolTaskExtension();
             Assert.AreEqual(5, t.GetIntParameterWithDefault("Key", 5));
         }
 
@@ -83,7 +78,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void GetBoolWithDefault()
         {
-            Csc t = new Csc();
+            MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = true;
 
             Assert.AreEqual(true, t.GetBoolParameterWithDefault("Key", false));
@@ -96,10 +91,23 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void GetIntWithDefault()
         {
-            Csc t = new Csc();
+            MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = 5;
 
             Assert.AreEqual(5, t.GetIntParameterWithDefault("Key", 9));
+        }
+
+        private class MyToolTaskExtension : ToolTaskExtension
+        {
+            protected override string ToolName
+            {
+                get { return "toolname"; }
+            }
+
+            protected override string GenerateFullPathToTool()
+            {
+                return "fullpath";
+            }
         }
     }
 }
