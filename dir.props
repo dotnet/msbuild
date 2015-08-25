@@ -1,7 +1,10 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-   <PropertyGroup>
-     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
-   </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <!-- This is to workaround an issue with a dependent assembly (Microsoft.Build.Tasks.CodeAnalysis.dll)
+         copying it's dependencies (which are in the GAC).	-->
+    <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
+  </PropertyGroup>
 
    <!-- Compiler config -->
    <PropertyGroup>
@@ -11,24 +14,38 @@
    
    <!-- Common repo directories -->
   <PropertyGroup>
-    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <BuildToolsVersion>1.0.25-prerelease-00080</BuildToolsVersion>
+	<CompilerToolsVersion>1.0.0</CompilerToolsVersion>
+    
+	<ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <SourceDir>$(ProjectDir)src\</SourceDir>
     <BinDir>$(ProjectDir)bin\</BinDir>
     <TestWorkingDir>$(BinDir)tests\</TestWorkingDir>
     <PackagesDir>$(ProjectDir)packages\</PackagesDir>
     <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
+	<CompilerToolsDir>$(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion)\tools</CompilerToolsDir>
   </PropertyGroup>
 
+  <!-- list of nuget package sources passed to nuget.exe -->
+  <ItemGroup>
+    <NuGetSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-buildtools" />
+    <NuGetSourceList Include="https:%2F%2Fwww.nuget.org/api/v2" />
+  </ItemGroup>
+  
   <!-- Common nuget properties -->
   <PropertyGroup>
     <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
     <NuGetConfigFile>$(SourceDir).nuget\NuGet.Config</NuGetConfigFile>
-    <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
+    <NuGetPackageSource>@(NuGetSourceList -> '-source %(Identity)', ' ')</NuGetPackageSource>
+    <NuGetConfigCommandLine>$(NuGetPackageSource) -ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
-    <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('\'))"</NugetRestoreCommand>
+    <!-- NuGet.exe doesn't like trailing slashes in the output directory argument -->
+    <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
+    <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
+    <NugetRestoreCommand Condition="'$(OsEnvironment)'=='Unix'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
   </PropertyGroup>
   
   <!-- Set default Configuration and Platform -->
