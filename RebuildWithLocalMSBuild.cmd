@@ -16,8 +16,7 @@ if not defined VS140COMNTOOLS (
 )
 
 :: Build and copy output to bin\MSBuild
-:: Set TargetRetailBuildFramework to false so that we can target our own version of Microsoft.Build.Framework
-call "%~dp0BuildAndCopy.cmd" "%MSBuildTempPath%" false
+call "%~dp0BuildAndCopy.cmd" "%MSBuildTempPath%"
 
 :: Rebuild
 set MSBUILDCUSTOMPATH=%MSBuildTempPath%\MSBuild.exe

@@ -12,6 +12,9 @@
           Retries="5"
           SkipUnchangedFiles="true" />
   </Target>
+  
+  <!-- OSS sign assemblies after compile runs. -->
+  <Import Project="$(ToolsDir)\sign.targets" />
     
   <!-- Restore packages -->
   <PropertyGroup>
