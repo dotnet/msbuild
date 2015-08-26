@@ -15,7 +15,9 @@ using System.Xml;
  * 
  * 
  ******************************************************************************/
+#if FEATURE_MSBUILD_DEBUGGER
 using Microsoft.Build.Debugging;
+#endif
 using Microsoft.Build.Evaluation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
@@ -413,6 +415,7 @@ namespace Microsoft.Build.Shared
 
             Exception exceptionToThrow = new InvalidProjectFileException(elementLocation.File, elementLocation.Line, elementLocation.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
 
+#if FEATURE_MSBUILD_DEBUGGER
             if (!DebuggerManager.DebuggingEnabled)
             {
                 throw exceptionToThrow;
@@ -434,6 +437,9 @@ namespace Microsoft.Build.Shared
                 Debugger.Break();
                 throw;
             }
+#else
+            throw exceptionToThrow;
+#endif
         }
     }
 }

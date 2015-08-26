@@ -201,7 +201,7 @@ namespace Microsoft.Build.Framework
             // NOTE: String.Format() does not allow a null arguments array
             if ((args != null) && (args.Length > 0))
             {
-#if DEBUG && !BUILDING_DF_LKG
+#if DEBUG
 
 #if VALIDATERESOURCESTRINGS
                 // The code below reveals many places in our codebase where
