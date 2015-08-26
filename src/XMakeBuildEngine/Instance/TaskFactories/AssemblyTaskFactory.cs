@@ -44,10 +44,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LoadedType _loadedType;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// A cache of tasks and the AppDomains they are loaded in.
         /// </summary>
         private Dictionary<ITask, AppDomain> _tasksAndAppDomains = new Dictionary<ITask, AppDomain>();
+#endif
 
         /// <summary>
         ///  the set of parameters owned by this particular task host
@@ -238,8 +240,10 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
+#if FEATURE_APPDOMAIN
                 // It's really not necessary to do it for TaskHostTasks
                 TaskLoader.RemoveAssemblyResolver();
+#endif
             }
         }
 
@@ -320,7 +324,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Create an instance of the wrapped ITask for a batch run of the task.
         /// </summary>
-        internal ITask CreateTaskInstance(ElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskIdentityParameters, AppDomainSetup appDomainSetup, bool isOutOfProc)
+        internal ITask CreateTaskInstance(ElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskIdentityParameters,
+#if FEATURE_APPDOMAIN
+            AppDomainSetup appDomainSetup, 
+#endif
+            bool isOutOfProc)
         {
             bool useTaskFactory = false;
             IDictionary<string, string> mergedParameters = null;
@@ -366,19 +374,35 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
 
-                TaskHostTask task = new TaskHostTask(taskLocation, taskLoggingContext, buildComponentHost, mergedParameters, _loadedType, appDomainSetup);
+                TaskHostTask task = new TaskHostTask(taskLocation, taskLoggingContext, buildComponentHost, mergedParameters, _loadedType
+#if FEATURE_APPDOMAIN
+                    , appDomainSetup
+#endif
+                    );
                 return task;
             }
             else
             {
+#if FEATURE_APPDOMAIN
                 AppDomain taskAppDomain = null;
+#endif
 
-                ITask taskInstance = TaskLoader.CreateTask(_loadedType, _taskName, taskLocation.File, taskLocation.Line, taskLocation.Column, new TaskLoader.LogError(ErrorLoggingDelegate), appDomainSetup, isOutOfProc, out taskAppDomain);
+                ITask taskInstance = TaskLoader.CreateTask(_loadedType, _taskName, taskLocation.File, taskLocation.Line, taskLocation.Column, new TaskLoader.LogError(ErrorLoggingDelegate)
+#if FEATURE_APPDOMAIN
+                    , appDomainSetup
+#endif
+                    , isOutOfProc
+#if FEATURE_APPDOMAIN
+                    , out taskAppDomain
+#endif
+                    );
 
+#if FEATURE_APPDOMAIN
                 if (taskAppDomain != null)
                 {
                     _tasksAndAppDomains[taskInstance] = taskAppDomain;
                 }
+#endif
 
                 return taskInstance;
             }

@@ -14,7 +14,9 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Evaluation;
 using Microsoft.Win32;
 
+#if FEATURE_SYSTEM_CONFIGURATION
 using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElement;
+#endif
 using System.Reflection;
 using System.Runtime.InteropServices;
 

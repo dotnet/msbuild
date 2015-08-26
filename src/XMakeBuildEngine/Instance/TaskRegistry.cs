@@ -20,7 +20,9 @@ using Microsoft.Build.BackEnd;
 
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+#if FEATURE_APPDOMAIN
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
+#endif
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using System.Collections.ObjectModel;
@@ -1233,10 +1235,13 @@ namespace Microsoft.Build.Execution
                     ITaskFactory factory = null;
                     LoadedType loadedType = null;
 
+
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
 
+#if FEATURE_APPDOMAIN
                     if (isAssemblyTaskFactory || isTaskHostFactory)
+#endif
                     {
                         bool explicitlyLaunchTaskHost =
                             isTaskHostFactory ||
@@ -1251,6 +1256,7 @@ namespace Microsoft.Build.Execution
                         loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
                         factory = taskFactory;
                     }
+#if FEATURE_APPDOMAIN
                     else
                     {
                         // We are not one of the default factories. 
@@ -1351,9 +1357,7 @@ namespace Microsoft.Build.Execution
                                 }
                                 finally
                                 {
-#if FEATURE_APPDOMAIN
                                     taskFactoryLoggingHost.MarkAsInactive();
-#endif
                                 }
 
                                 if (!initialized)
@@ -1408,6 +1412,7 @@ namespace Microsoft.Build.Execution
                             }
                         }
                     }
+#endif
 
                     _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
                 }

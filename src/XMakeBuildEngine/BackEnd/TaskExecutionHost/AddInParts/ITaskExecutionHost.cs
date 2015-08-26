@@ -67,7 +67,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize the host with the objects required to communicate with the host process.
         /// </summary>
-        void InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError, AppDomainSetup appDomainSetup, bool isOutOfProc, CancellationToken cancellationToken);
+        void InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError,
+#if FEATURE_APPDOMAIN
+            AppDomainSetup appDomainSetup,
+#endif
+            bool isOutOfProc, CancellationToken cancellationToken);
 
         /// <summary>
         /// Ask the task host to find its task in the registry and get it ready for initializing the batch

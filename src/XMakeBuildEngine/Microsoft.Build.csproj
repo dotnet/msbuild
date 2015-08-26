@@ -116,7 +116,7 @@
     <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
+    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
@@ -139,7 +139,7 @@
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
+    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" Condition="$(FeatureAppDomain) == 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ReuseableStringBuilder.cs" />
@@ -206,7 +206,7 @@
     <Compile Include="Construction\Solution\SolutionProjectGenerator.cs" />
     <Compile Include="Evaluation\IToolsetProvider.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheResponse.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodeEndpointOutOfProc.cs" />
+    <Compile Include="BackEnd\Components\Communications\NodeEndpointOutOfProc.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="BackEnd\Components\Communications\NodeManager.cs" />
     <Compile Include="BackEnd\Components\Communications\TaskHostNodeManager.cs" />
     <Compile Include="BackEnd\Components\Communications\LogMessagePacket.cs" />
@@ -221,9 +221,9 @@
     <Compile Include="BackEnd\Components\Caching\IPropertyCache.cs" />
     <Compile Include="BackEnd\Components\Caching\IResultsCache.cs" />
     <Compile Include="BackEnd\Components\Communications\NodePacketTranslatorExtensions.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" />
+    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="BackEnd\Components\RequestBuilder\BatchingEngine.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -235,7 +235,7 @@
     <Compile Include="BackEnd\Components\RequestBuilder\TargetSpecification.cs" />
     <Compile Include="BackEnd\Node\InProcNode.cs" />
     <Compile Include="BackEnd\Node\NodeConfiguration.cs" />
-    <Compile Include="BackEnd\Node\OutOfProcNode.cs" />
+    <Compile Include="BackEnd\Node\OutOfProcNode.cs" Condition="$(FeatureAppDomain) == 'true'" />
     <Compile Include="BackEnd\Node\NativeMethods.cs" />
     <Compile Include="BackEnd\Shared\BuildAbortedException.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IRequestBuilder.cs" />
@@ -356,8 +356,8 @@
     <Compile Include="Definition\ResolvedImport.cs" />
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
-    <Compile Include="Definition\ToolsetConfigurationReader.cs" />
-    <Compile Include="..\Shared\ToolsetElement.cs">
+    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="$(FeatureSystemConfiguration) == 'true'"/>
+    <Compile Include="..\Shared\ToolsetElement.cs" Condition="$(FeatureSystemConfiguration) == 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />

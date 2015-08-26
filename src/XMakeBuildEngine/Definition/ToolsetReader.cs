@@ -88,7 +88,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static string ReadAllToolsets(Dictionary<string, Toolset> toolsets, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations locations)
         {
-            return ReadAllToolsets(toolsets, null, null, environmentProperties, globalProperties, locations);
+            return ReadAllToolsets(toolsets, null,
+#if FEATURE_SYSTEM_CONFIGURATION
+                null, 
+#endif
+                environmentProperties, globalProperties, locations);
         }
 
         /// <summary>
@@ -99,7 +103,9 @@ namespace Microsoft.Build.Evaluation
             (
             Dictionary<string, Toolset> toolsets,
             ToolsetRegistryReader registryReader,
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReader configurationReader,
+#endif
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
             ToolsetDefinitionLocations locations
@@ -116,6 +122,7 @@ namespace Microsoft.Build.Evaluation
             string overrideTasksPathFromConfiguration = null;
             string defaultOverrideToolsVersionFromConfiguration = null;
 
+#if FEATURE_SYSTEM_CONFIGURATION
             if ((locations & ToolsetDefinitionLocations.ConfigurationFile)
                 == ToolsetDefinitionLocations.ConfigurationFile)
             {
@@ -139,6 +146,7 @@ namespace Microsoft.Build.Evaluation
                         out defaultOverrideToolsVersionFromConfiguration);
                 }
             }
+#endif
 
             string defaultToolsVersionFromRegistry = null;
             string overrideTasksPathFromRegistry = null;

@@ -81,11 +81,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LoadedType _taskType;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomainSetup we'll want to apply to the AppDomain that we may 
         /// want to load the OOP task into. 
         /// </summary>
         private AppDomainSetup _appDomainSetup;
+#endif
 
         /// <summary>
         /// The task host context of the task host we're launching -- used to 
@@ -98,10 +100,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _connectedToTaskHost = false;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The provider for task host nodes. 
         /// </summary>
         private NodeProviderOutOfProcTaskHost _taskHostProvider;
+#endif
 
         /// <summary>
         /// Lock object to serialize access to the task host. 
@@ -127,7 +131,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskHostTask(IElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskHostParameters, LoadedType taskType, AppDomainSetup appDomainSetup)
+        public TaskHostTask(IElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskHostParameters, LoadedType taskType
+#if FEATURE_APPDOMAIN
+                , AppDomainSetup appDomainSetup
+#endif
+            )
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType, "taskType");
 
@@ -135,7 +143,9 @@ namespace Microsoft.Build.BackEnd
             _taskLoggingContext = taskLoggingContext;
             _buildComponentHost = buildComponentHost;
             _taskType = taskType;
+#if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
+#endif
             _taskHostParameters = taskHostParameters;
 
             _packetFactory = new NodePacketFactory();
@@ -223,6 +233,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_taskCancelled)
             {
+#if FEATURE_APPDOMAIN
                 lock (_taskHostLock)
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
@@ -230,6 +241,7 @@ namespace Microsoft.Build.BackEnd
                         _taskHostProvider.SendData(_requiredContext, new TaskHostTaskCancelled());
                     }
                 }
+#endif
 
                 _taskCancelled = true;
             }
@@ -248,8 +260,10 @@ namespace Microsoft.Build.BackEnd
             // set up the node
             lock (_taskHostLock)
             {
+#if FEATURE_APPDOMAIN
                 _taskHostProvider = (NodeProviderOutOfProcTaskHost)_buildComponentHost.GetComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
                 ErrorUtilities.VerifyThrowInternalNull(_taskHostProvider, "taskHostProvider");
+#endif
             }
 
             TaskHostConfiguration hostConfiguration =
@@ -260,13 +274,19 @@ namespace Microsoft.Build.BackEnd
                         CommunicationsUtilities.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
+#if FEATURE_APPDOMAIN
                         _appDomainSetup,
+#endif
                         BuildEngine.LineNumberOfTaskNode,
                         BuildEngine.ColumnNumberOfTaskNode,
                         BuildEngine.ProjectFileOfTaskNode,
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
+#if FEATURE_ASSEMBLY_LOADFROM
                         _taskType.Type.GetTypeInfo().Assembly.Location,
+#else
+                        _taskType.Type.GetTypeInfo().Assembly.GetName(),
+#endif
                         _setParameters
                     );
 
@@ -275,7 +295,9 @@ namespace Microsoft.Build.BackEnd
                 lock (_taskHostLock)
                 {
                     _requiredContext = CommunicationsUtilities.GetTaskHostContext(_taskHostParameters);
+#if FEATURE_APPDOMAIN
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
+#endif
                 }
 
                 if (_connectedToTaskHost)
@@ -318,7 +340,9 @@ namespace Microsoft.Build.BackEnd
                     {
                         lock (_taskHostLock)
                         {
+#if FEATURE_APPDOMAIN
                             _taskHostProvider.DisconnectFromHost(_requiredContext);
+#endif
                             _connectedToTaskHost = false;
                         }
                     }
@@ -475,7 +499,13 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     exceptionMessage = "TaskInstantiationFailureError";
-                    exceptionMessageArgs = new string[] { _taskType.Type.Name, _taskType.Type.GetTypeInfo().Assembly.Location, String.Empty };
+                    exceptionMessageArgs = new string[] { _taskType.Type.Name,
+#if FEATURE_ASSEMBLY_LOADFROM
+                        _taskType.Type.GetTypeInfo().Assembly.Location,
+#else
+                        _taskType.Type.GetTypeInfo().Assembly.FullName,
+#endif
+                        String.Empty };
                 }
 
                 _taskLoggingContext.LogFatalError(new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskException, taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);
@@ -559,7 +589,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(TaskHostContext requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
         {
+#if FEATURE_APPDOMAIN
             string msbuildLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(requiredContext);
+#else
+            string msbuildLocation = null;
+#endif
 
             if (msbuildLocation == null)
             {

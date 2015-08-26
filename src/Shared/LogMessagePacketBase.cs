@@ -14,7 +14,9 @@ using System.Reflection;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
+#if FEATURE_APPDOMAIN
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -136,10 +138,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static HashSet<string> s_customEventsLoaded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The resolver used to load custom event types.
         /// </summary>
         private static TaskEngineAssemblyResolver s_resolver;
+#endif
 
         /// <summary>
         /// The object used to synchronize access to shared data.
@@ -389,12 +393,14 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
+#if FEATURE_APPDOMAIN
                 if (resolveAssembly)
                 {
                     s_resolver = new TaskEngineAssemblyResolver();
                     s_resolver.InstallHandler();
                     s_resolver.Initialize(fileLocation);
                 }
+#endif
 
                 try
                 {
@@ -404,11 +410,13 @@ namespace Microsoft.Build.Shared
                 }
                 finally
                 {
+#if FEATURE_APPDOMAIN
                     if (resolveAssembly)
                     {
                         s_resolver.RemoveHandler();
                         s_resolver = null;
                     }
+#endif
                 }
             }
 

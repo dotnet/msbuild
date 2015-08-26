@@ -7,8 +7,10 @@ using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Text;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
+#endif
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -64,12 +66,14 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// A client sponsor is a class
         /// which will respond to a lease renewal request and will
         /// increase the lease time allowing the object to stay in memory
         /// </summary>
         private ClientSponsor _sponsor;
+#endif
 
         // We have to pass an instance of ITask to BuildEngine, and since we call into the engine from this class we
         // need to store the actual task instance.

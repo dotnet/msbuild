@@ -513,8 +513,10 @@ namespace Microsoft.Build.BackEnd
             _componentHost.BuildParameters.NodeId = configuration.NodeId;
             _shutdownException = null;
 
+#if FEATURE_APPDOMAIN
             // And the AppDomainSetup
             _componentHost.BuildParameters.AppDomainSetup = configuration.AppDomainSetup;
+#endif
 
             // Declare in-proc
             _componentHost.BuildParameters.IsOutOfProc = false;

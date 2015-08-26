@@ -15,6 +15,7 @@ using System.Threading;
 using System.Text;
 
 using Microsoft.Build.Shared;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -49,10 +50,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks. 
         /// </summary>
         private AppDomainSetup _appDomainSetup;
+#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined. 
@@ -79,10 +82,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _taskName;
 
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Location of the assembly containing the task to be executed. 
         /// </summary>
         private string _taskLocation;
+#else
+        private AssemblyName _taskAssemblyName;
+#endif
 
         /// <summary>
         /// The set of parameters to apply to the task prior to execution.  
@@ -112,18 +119,26 @@ namespace Microsoft.Build.BackEnd
                 IDictionary<string, string> buildProcessEnvironment,
                 CultureInfo culture,
                 CultureInfo uiCulture,
+#if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
+#endif
                 int lineNumberOfTask,
                 int columnNumberOfTask,
                 string projectFileOfTask,
                 bool continueOnError,
                 string taskName,
+#if FEATURE_ASSEMBLY_LOADFROM
                 string taskLocation,
+#else
+                AssemblyName taskAssemblyName,
+#endif
                 IDictionary<string, object> taskParameters
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
+#if FEATURE_ASSEMBLY_LOADFROM
             ErrorUtilities.VerifyThrowInternalLength(taskLocation, "taskLocation");
+#endif
 
             _nodeId = nodeId;
             _startupDirectory = startupDirectory;
@@ -140,13 +155,19 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
+#if FEATURE_ASSEMBLY_LOADFROM
             _appDomainSetup = appDomainSetup;
+#endif
             _lineNumberOfTask = lineNumberOfTask;
             _columnNumberOfTask = columnNumberOfTask;
             _projectFileOfTask = projectFileOfTask;
             _continueOnError = continueOnError;
             _taskName = taskName;
+#if FEATURE_ASSEMBLY_LOADFROM
             _taskLocation = taskLocation;
+#else
+            _taskAssemblyName = taskAssemblyName;
+#endif
 
             if (taskParameters != null)
             {
@@ -216,6 +237,7 @@ namespace Microsoft.Build.BackEnd
             { return _uiCulture; }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomain configuration bytes that we may want to use to initialize
         /// AppDomainIsolated tasks. 
@@ -226,6 +248,7 @@ namespace Microsoft.Build.BackEnd
             get
             { return _appDomainSetup; }
         }
+#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined. 
@@ -277,6 +300,7 @@ namespace Microsoft.Build.BackEnd
             { return _taskName; }
         }
 
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Path to the assembly to load the task from. 
         /// </summary>
@@ -286,6 +310,7 @@ namespace Microsoft.Build.BackEnd
             get
             { return _taskLocation; }
         }
+#endif
 
         /// <summary>
         /// Parameters to set on the instantiated task prior to execution. 
@@ -325,7 +350,9 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _columnNumberOfTask);
             translator.Translate(ref _projectFileOfTask);
             translator.Translate(ref _taskName);
+#if FEATURE_ASSEMBLY_LOADFROM
             translator.Translate(ref _taskLocation);
+#endif
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
         }

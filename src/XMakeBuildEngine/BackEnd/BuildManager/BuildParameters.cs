@@ -29,6 +29,7 @@ using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
 namespace Microsoft.Build.Execution
 {
+    using System.Diagnostics;
     using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
@@ -811,6 +812,7 @@ namespace Microsoft.Build.Execution
             set;
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Information for configuring child AppDomains.
         /// </summary>
@@ -819,6 +821,7 @@ namespace Microsoft.Build.Execution
             get;
             set;
         }
+#endif
 
         /// <summary>
         ///  (for diagnostic use) Whether or not this is out of proc
@@ -1002,7 +1005,11 @@ namespace Microsoft.Build.Execution
             }
 
             // Use the default location of the directory from which the engine was loaded.
+#if FEATURE_APPDOMAIN
             path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MSBuild.exe");
+#else
+            path = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+#endif
             if (path != null && CheckMSBuildExeExistsAt(path))
             {
                 _nodeExeLocation = path;
@@ -1025,6 +1032,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+#if FEATURE_APPDOMAIN
             // Search in the location of any assemblies we have loaded.
             foreach (System.Reflection.Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -1056,6 +1064,7 @@ namespace Microsoft.Build.Execution
                     }
                 }
             }
+#endif
 
             // Search in the framework directory.  Checks the COMPLUS_INSTALL_ROOT among other things.
             path = FrameworkLocationHelper.PathToDotNetFrameworkV40;
