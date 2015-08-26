@@ -39,6 +39,18 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Generates a unique temporary file name with a given extension in the temporary folder.
+        /// File is guaranteed to be unique.
+        /// Extension may have an initial period.
+        /// File will NOT be created.
+        /// May throw IOException.
+        /// </summary>
+        internal static string GetTemporaryFileName(string extension)
+        {
+            return GetTemporaryFile(null, extension, false);
+        }
+
+        /// <summary>
+        /// Generates a unique temporary file name with a given extension in the temporary folder.
         /// If no extension is provided, uses ".tmp".
         /// File is guaranteed to be unique.
         /// Caller must delete it when finished.
@@ -59,7 +71,7 @@ namespace Microsoft.Build.Shared
         {
             return GetTemporaryFile(null, extension);
         }
-
+        
         /// <summary>
         /// Creates a file with unique temporary file name with a given extension in the specified folder.
         /// File is guaranteed to be unique.
@@ -68,7 +80,7 @@ namespace Microsoft.Build.Shared
         /// Caller must delete it when finished.
         /// May throw IOException.
         /// </summary>
-        internal static string GetTemporaryFile(string directory, string extension)
+        internal static string GetTemporaryFile(string directory, string extension, bool createFile = true)
         {
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(directory, "directory");
             ErrorUtilities.VerifyThrowArgumentLength(extension, "extension");
@@ -78,22 +90,22 @@ namespace Microsoft.Build.Shared
                 extension = '.' + extension;
             }
 
-            string file = null;
-
             try
             {
                 directory = directory ?? Path.GetTempPath();
 
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
+                Directory.CreateDirectory(directory);
 
-                file = Path.Combine(directory, "tmp" + Guid.NewGuid().ToString("N") + extension);
+                string file = Path.Combine(directory, string.Format("tmp{0}{1}", Guid.NewGuid().ToString("N"), extension));
 
                 ErrorUtilities.VerifyThrow(!File.Exists(file), "Guid should be unique");
 
-                File.WriteAllText(file, String.Empty);
+                if (createFile)
+                {
+                    File.WriteAllText(file, String.Empty);
+                }
+
+                return file;
             }
             catch (Exception ex)
             {
@@ -104,8 +116,6 @@ namespace Microsoft.Build.Shared
 
                 throw new IOException(ResourceUtilities.FormatResourceString("Shared.FailedCreatingTempFile", ex.Message), ex);
             }
-
-            return file;
         }
     }
 }

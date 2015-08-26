@@ -48,6 +48,7 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             // Need to make sure the environment is cleared up for later tests
             Environment.SetEnvironmentVariable("VisualStudioVersion", _originalVisualStudioVersion);
+            ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
         /// <summary>
@@ -1516,8 +1517,6 @@ EndGlobal
         [TestMethod]
         public void SolutionGeneratorEscapingProjectFilePaths()
         {
-            string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
-
             string solutionFileContents =
                 @"
                 Microsoft Visual Studio Solution File, Format Version 9.00
