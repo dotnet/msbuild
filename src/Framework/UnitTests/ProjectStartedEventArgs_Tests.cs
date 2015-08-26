@@ -26,8 +26,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Setup for text fixture, this is run ONCE for the entire test fixture
         /// </summary>
-        [ClassInitialize]
-        public static void FixtureSetup(TestContext context)
+        public ProjectStartedEventArgs_Tests()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(2, 3, 4, 5);
             s_baseProjectStartedEvent = new ProjectStartedEventArgs(1, "Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null, parentBuildEventContext);

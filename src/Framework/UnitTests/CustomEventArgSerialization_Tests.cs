@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    public class CustomEventArgSerialization_Tests
+    public class CustomEventArgSerialization_Tests : IDisposable
     {
         // Generic build class to test custom serialization of abstract class BuildEventArgs
         internal class GenericBuildEventArg : BuildEventArgs
@@ -38,16 +38,14 @@ namespace Microsoft.Build.UnitTests
 
         private int _eventArgVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
-        [TestInitialize]
-        public void SetUp()
+        public CustomEventArgSerialization_Tests()
         {
             _stream = new MemoryStream();
             _writer = new BinaryWriter(_stream);
             _reader = new BinaryReader(_stream);
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             // Close will close the writer/reader and the underlying stream
             _writer.Close();

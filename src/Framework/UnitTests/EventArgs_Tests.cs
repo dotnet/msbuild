@@ -33,8 +33,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Setup the text, this method is run ONCE for the entire text fixture
         /// </summary>
-        [ClassInitialize]
-        public static void Setup(TestContext context)
+        public EventArgs_Tests()
         {
             s_baseGenericEvent = new GenericBuildEventArgs("Message", "HelpKeyword", "senderName");
             s_baseGenericEvent.BuildEventContext = new BuildEventContext(9, 8, 7, 6);
