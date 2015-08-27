@@ -361,8 +361,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// a task with parameters. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheTaskDoesNotExist_ExactMatch()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -403,8 +401,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// a task with parameters. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheTaskDoesNotExist_FuzzyMatch()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -445,8 +441,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// a task with parameters. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheMatchingTaskDoesNotExist_FuzzyMatch()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -489,8 +483,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// a task with parameters. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheMatchingTaskDoesNotExistOnFirstCallButDoesOnSecond()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -533,8 +525,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// a task with parameters. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheMatchingExactParameters()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -612,8 +602,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// parameters other than those two. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheMatchingExactParameters_AdditionalParameters()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -661,8 +649,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// fuzzy matches.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -746,8 +732,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// fuzzy matches.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_RecoverFromFailure()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -806,8 +790,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// sets. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_MultipleUsingTasks()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -938,8 +920,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// record that's in the cache, even if it wasn't the original first record. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_MultipleUsingTasks_PreferCache()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -992,8 +972,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// fuzzy matches.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_ExactMatches()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");
@@ -1064,8 +1042,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// parameters other than those two. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void RetrieveFromCacheFuzzyMatchingParameters_AdditionalParameters()
         {
             Assert.IsNotNull(s_testTaskLocation, "Need a test task to run this test");

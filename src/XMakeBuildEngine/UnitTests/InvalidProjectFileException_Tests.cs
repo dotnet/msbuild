@@ -57,8 +57,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that nesting an IPFE copies the error code
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ErrorCodeShouldAppearForCircularDependency()
         {
             string file = Path.GetTempPath() + Guid.NewGuid().ToString("N");

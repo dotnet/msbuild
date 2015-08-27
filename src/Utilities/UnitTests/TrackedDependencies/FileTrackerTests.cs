@@ -39,9 +39,9 @@ namespace Microsoft.Build.UnitTests.FileTracking
         [ClassInitialize]
         public static void ClassSetup(TestContext testContext)
         {
-            s_defaultFileTrackerPathUnquoted = null;//FileTracker.GetFileTrackerPath(ExecutableType.SameAsCurrentProcess);
-            s_defaultFileTrackerPath = null; //"\"" + defaultFileTrackerPathUnquoted + "\"";
-            s_defaultTrackerPath = null;//FileTracker.GetTrackerPath(ExecutableType.SameAsCurrentProcess);
+            s_defaultFileTrackerPathUnquoted = FileTracker.GetFileTrackerPath(ExecutableType.SameAsCurrentProcess);
+            s_defaultFileTrackerPath = "\"" + s_defaultFileTrackerPathUnquoted + "\"";
+            s_defaultTrackerPath = FileTracker.GetTrackerPath(ExecutableType.SameAsCurrentProcess);
         }
 
         [TestInitialize]
@@ -72,8 +72,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerHelp()
         {
             Console.WriteLine("Test: FileTracker");
@@ -83,8 +81,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerBadArg()
         {
             Console.WriteLine("Test: FileTrackerBadArg");
@@ -97,8 +93,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerNoUIDll()
         {
             Console.WriteLine("Test: FileTrackerNoUIDll");
@@ -136,8 +130,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerNonexistentRspFile()
         {
             Console.WriteLine("Test: FileTrackerNonexistentRspFile");
@@ -159,8 +151,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerWithDll()
         {
             Console.WriteLine("Test: FileTrackerWithDll");
@@ -171,8 +161,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerReadOnlyTlog()
         {
             Console.WriteLine("Test: FileTrackerTlogWriteFailure");
@@ -205,8 +193,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrIn()
         {
             Console.WriteLine("Test: FileTrackerFindStrIn");
@@ -221,8 +207,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInOperations()
         {
             Console.WriteLine("Test: FileTrackerFindStrInOperations");
@@ -241,8 +225,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInOperationsExtended()
         {
             Console.WriteLine("Test: FileTrackerFindStrInOperationsExtended");
@@ -266,8 +248,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInOperationsExtended_AttributesOnly()
         {
             Console.WriteLine("Test: FileTrackerFindStrInOperationsExtended_AttributesOnly");
@@ -290,8 +270,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerExtendedDirectoryTracking()
         {
             Console.WriteLine("Test: FileTrackerExtendedDirectoryTracking");
@@ -414,8 +392,6 @@ namespace ConsoleApplication4
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInIncludeDuplicates()
         {
             Console.WriteLine("Test: FileTrackerFindStrInIncludeDuplicates");
@@ -457,8 +433,6 @@ namespace ConsoleApplication4
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerDoNotRecordWriteAsRead()
         {
             Console.WriteLine("Test: FileTrackerDoNotRecordWriteAsRead");
@@ -533,8 +507,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInCommandLine()
         {
             Console.WriteLine("Test: FileTrackerFindStrInCommandLine");
@@ -550,8 +522,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInArgumentSpaces()
         {
             Console.WriteLine("Test: FileTrackerFindStrIn");
@@ -566,8 +536,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindUnicode()
         {
             Console.WriteLine("Test: FileTrackerFindUnicode");
@@ -583,8 +551,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerStartProcessFindStrIn()
         {
             Console.WriteLine("Test: FileTrackerStartProcessFindStrIn");
@@ -601,8 +567,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerResponseFile()
         {
             Console.WriteLine("Test: FileTrackerResponseFile");
@@ -623,8 +587,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInRootFiles()
         {
             Console.WriteLine("Test: FileTrackerFindStrInRootFiles");
@@ -642,8 +604,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInRootFilesCommand()
         {
             Console.WriteLine("Test: FileTrackerFindStrInRootFilesCommand");
@@ -664,8 +624,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInRootFilesSpaces()
         {
             Console.WriteLine("Test: FileTrackerFindStrInRootFilesSpaces");
@@ -683,8 +641,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerHelperCommandLine()
         {
             Console.WriteLine("Test: FileTrackerHelperCommandLine");
@@ -702,8 +658,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerSortOut()
         {
             Console.WriteLine("Test: FileTrackerSortOut");
@@ -730,8 +684,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerSortOutIntermediate()
         {
             Console.WriteLine("Test: FileTrackerSortOutIntermediate");
@@ -760,8 +712,6 @@ class X
 
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerIntermediateDirMissing()
         {
             Console.WriteLine("Test: FileTrackerIntermediateDirMissing");
@@ -792,8 +742,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInChain()
         {
             Console.WriteLine("Test: FileTrackerFindStrInChain");
@@ -808,8 +756,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFindStrInChainRepeatCommand()
         {
             Console.WriteLine("Test: FileTrackerFindStrInChainRepeatCommand");
@@ -829,8 +775,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFileIsUnderPath()
         {
             Console.WriteLine("Test: FileTrackerFileIsUnderPath");
@@ -877,8 +821,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void FileTrackerFileIsExcludedFromDependencies()
         {
             Console.WriteLine("Test: FileTrackerFileIsExcludedFromDependencies");
@@ -927,8 +869,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingTest1()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -952,8 +892,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingTest2()
         {
             // Do test 1 twice in a row to make sure there is no leakage
@@ -962,8 +900,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingTestSuspendResume()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -1002,8 +938,6 @@ class X
 
         [TestMethod]
         [ExpectedException(typeof(COMException))]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingTestStopBeforeWrite()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -1095,8 +1029,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingTestIteration()
         {
             for (int iter = 0; iter < 50; iter++)
@@ -1106,8 +1038,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingNonStopTestIteration()
         {
             for (int iter = 0; iter < 50; iter++)
@@ -1118,8 +1048,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingTwoContexts()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -1161,8 +1089,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingTwoContextsWithRoot()
         {
             string sourceFile = "inlinetrackingtest.txt";
@@ -1214,8 +1140,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingSpawnsOutOfProcTool()
         {
             string intermediateDir = Path.GetTempPath() + @"InProcTrackingSpawnsOutOfProcTool\";
@@ -1264,8 +1188,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingSpawnsOutOfProcTool_OverrideEnvironment()
         {
             string intermediateDir = Path.GetTempPath() + @"InProcTrackingSpawnsOutOfProcTool_OverrideEnvironment\";
@@ -1316,8 +1238,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingSpawnsToolWithTrackerResponseFile()
         {
             Console.WriteLine("Test: InProcTrackingSpawnsToolWithTrackerResponseFile");
@@ -1326,8 +1246,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingSpawnsToolWithTrackerNoResponseFile()
         {
             Console.WriteLine("Test: InProcTrackingSpawnsToolWithTrackerNoResponseFile");
@@ -1336,8 +1254,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         [ExpectedException(typeof(COMException))]
         public void InProcTrackingTwoContextsTwoEnds()
         {
@@ -1378,8 +1294,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingStartProcessFindStrIn()
         {
             Console.WriteLine("Test: InProcTrackingStartProcessFindStrIn");
@@ -1408,8 +1322,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingStartProcessFindStrNullCommandLine()
         {
             Console.WriteLine("Test: InProcTrackingStartProcessFindStrNullCommandLine");
@@ -1457,8 +1369,6 @@ class X
 
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingStartProcessFindStrInDefaultTaskName()
         {
             Console.WriteLine("Test: InProcTrackingStartProcessFindStrInDefaultTaskName");
@@ -1488,8 +1398,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingChildThreadTrackedAuto()
         {
             FileTracker.SetThreadCount(1);
@@ -1531,8 +1439,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingChildThreadTrackedManual()
         {
             FileTracker.SetThreadCount(1);
@@ -1572,8 +1478,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingChildThreadNotTracked()
         {
             FileTracker.SetThreadCount(1);
@@ -1610,8 +1514,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingChildThreadNotTrackedLocallyTracked()
         {
             FileTracker.SetThreadCount(1);
@@ -1674,8 +1576,6 @@ class X
 
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void InProcTrackingChildCustomEnvironment()
         {
             string sourceFile = "allenvironment.txt";
@@ -1742,8 +1642,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void CreateFileDoesntRecordWriteIfNotWrittenTo()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "CreateFileDoesntRecordWriteIfNotWrittenTo");
@@ -1787,8 +1685,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void CopyAlwaysRecordsWrites()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "CopyAlwaysRecordsWrites");
@@ -1859,7 +1755,7 @@ class X
 
         [TestMethod]
         [Ignore]
-        // Ignore: Test requires installed toolset.
+        // Ignore: Needs investigation
         public void MoveAlwaysRecordsWrites()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "MoveAlwaysRecordsWrites");
@@ -1933,8 +1829,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void LaunchMultipleOfSameTool_SameCommand()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_SameCommand");
@@ -1967,8 +1861,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void LaunchMultipleOfSameTool_DifferentCommands1()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands1");
@@ -2002,8 +1894,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void LaunchMultipleOfSameTool_DifferentCommands2()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands2");
@@ -2054,8 +1944,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void LaunchMultipleOfSameTool_DifferentCommands3()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands3");
@@ -2111,8 +1999,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void LaunchMultipleOfSameTool_DifferentCommands4()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands4");
@@ -2167,8 +2053,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void LaunchMultipleDifferentTools()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleDifferentTools");
@@ -2218,8 +2102,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void LaunchMultipleOfSameTool_DifferentContexts()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentContexts");
@@ -2255,7 +2137,7 @@ class X
 
         [TestMethod]
         [Ignore]
-        // Ignore: Test requires installed toolset.
+        // Ignore: Needs investigation
         public void LaunchMultipleOfSameTool_ToolLaunchesOthers()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_ToolLaunchesOthers");

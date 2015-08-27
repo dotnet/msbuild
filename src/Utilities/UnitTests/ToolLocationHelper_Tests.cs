@@ -974,8 +974,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
         {
             string projectContents = @"
@@ -1017,8 +1015,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs10()
         {
             string projectContents = @"
@@ -1062,8 +1058,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs11()
         {
             string projectContents = @"
@@ -3260,8 +3254,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the GetPlatformExtensionSDKLocation method can be correctly called during evaluation time as a msbuild function.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void VerifyGetInstalledSDKLocations()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations");
@@ -3331,8 +3323,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the GetPlatformExtensionSDKLocation method can be correctly called during evaluation time as a msbuild function.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void VerifyGetInstalledSDKLocations2()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations2");
@@ -3403,8 +3393,6 @@ namespace Microsoft.Build.UnitTests
         /// Setup some fake entries in the registry and verify we get the correct sdk from there.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void VerifyGetInstalledSDKLocations3()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations3");
@@ -3806,8 +3794,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for pre-OneCore SDKs during evaluation time as a msbuild function.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void VerifyGetPreOneCoreSDKPropsLocation()
         {
             // This is the mockup layout for SDKs before One Core SDK.
@@ -3878,8 +3864,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for OneCore SDK during evaluation time as a msbuild function.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void VerifyGetOneCoreSDKPropsLocation()
         {
             // This is the mockup layout for One Core SDK. 

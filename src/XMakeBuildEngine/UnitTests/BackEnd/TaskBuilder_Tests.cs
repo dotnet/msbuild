@@ -589,8 +589,6 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NullMetadataOnOutputItems()
         {
             string customTaskPath = CustomTaskHelper.GetAssemblyForTask(s_nullMetadataTaskContents);
@@ -615,8 +613,6 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void NullMetadataOnLegacyOutputItems()
         {
             string referenceAssembliesPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.VersionLatest);
@@ -651,8 +647,6 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NullMetadataOnOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -694,7 +688,7 @@ namespace ItemCreationTask
         /// </summary>
         [TestMethod]
         [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        // Ignore: Needs investigation, doesn't like Task.v4.0.dll
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -748,8 +742,6 @@ namespace ItemCreationTask
         /// which didn't support the defining project metadata.  
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ValidateDefiningProjectMetadataOnTaskOutputs_LegacyItems()
         {
             string referenceAssembliesPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.VersionLatest);
@@ -805,8 +797,6 @@ namespace ItemCreationTask
         /// Tests an MTA task with an exception.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestSTAThreadNotRequiredWithException()
         {
             TestSTATask(false, false, true);
@@ -816,8 +806,6 @@ namespace ItemCreationTask
         /// Tests an MTA task with failure.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestSTAThreadNotRequiredWithFailure()
         {
             TestSTATask(false, true, false);

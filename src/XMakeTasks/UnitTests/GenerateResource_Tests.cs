@@ -2333,8 +2333,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
     public class References
     {
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2508,8 +2506,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// Assembly.LoadFrom instead.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

@@ -3193,8 +3193,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// still receive the original value of the global property. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void VerifyGlobalPropertyPassedToP2P()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3257,8 +3255,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// global property.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void VerifyLocalPropertyPropagatesIfExplicitlyPassedToP2P()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"

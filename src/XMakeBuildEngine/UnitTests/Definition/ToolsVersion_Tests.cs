@@ -413,8 +413,6 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Validate that a custom defined toolset is honored
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void CustomToolsVersionIsHonored()
         {
             Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", String.Empty);

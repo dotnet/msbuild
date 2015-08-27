@@ -751,8 +751,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void MSBuildEngineLogger()
         {
             string projectString =
@@ -838,8 +836,6 @@ namespace Microsoft.Build.UnitTests
         /// take priority over any other response files.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ResponseFileInProjectDirectoryFoundImplicitly()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
