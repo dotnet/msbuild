@@ -24,7 +24,6 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\build\Debug</OutputPath>
-    <DefineConstants>TRACE;DEBUG;VS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -39,7 +38,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\..\build\Debug-MONO\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;VS;MONO</DefineConstants>
+    <DefineConstants>$(DefineConstants);VS;MONO</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>

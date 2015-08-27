@@ -58,20 +58,11 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// <summary>
         /// Default constructor
         /// </summary>
-#if WHIDBEY_VISIBILITY
-        internal
-#else
-        protected
-#endif
-        DataDrivenToolTask(ResourceManager taskResources)
+        protected DataDrivenToolTask(ResourceManager taskResources)
             : base(taskResources)
         {
             logPrivate = new TaskLoggingHelper(this);
-#if WHIDBEY_BUILD
-            logPrivate.TaskResources = AssemblyResources.DataDrivenToolTaskResources;
-#else
             logPrivate.TaskResources = AssemblyResources.PrimaryResources;
-#endif
             logPrivate.HelpKeywordPrefix = "MSBuild.";
         }
 
@@ -80,12 +71,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// <summary>
         /// The list of all the switches that have been set
         /// </summary>
-#if WHIDBEY_VISIBILITY
-        internal
-#else
-        protected
-#endif
-        Dictionary<string, ToolSwitch> ActiveToolSwitches
+        protected Dictionary<string, ToolSwitch> ActiveToolSwitches
         {
             get
             {
@@ -199,12 +185,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// Returns the generated command line
         /// </summary>
         /// <returns></returns>
-#if WHIDBEY_VISIBILITY
-        internal virtual 
-#else
-        internal
-#endif
-        string GetCommandLine_ForUnitTestsOnly() 
+        internal string GetCommandLine_ForUnitTestsOnly() 
         {
             return GenerateResponseFileCommands();
         }

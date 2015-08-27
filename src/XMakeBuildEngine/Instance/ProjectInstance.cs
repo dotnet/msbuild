@@ -24,7 +24,9 @@ using Utilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
+#if MSBUILD_DEBUGGER
 using Microsoft.Build.Debugging;
+#endif
 using System.Xml;
 using System.IO;
 using System.Collections;

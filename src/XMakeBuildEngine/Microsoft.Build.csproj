@@ -13,10 +13,10 @@
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;STANDALONEBUILD;BUILD_ENGINE</DefineConstants>
+    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;STANDALONEBUILD;BUILD_ENGINE</DefineConstants>
+    <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">

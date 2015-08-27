@@ -59,13 +59,20 @@
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+    <MsbuildDebugger>true</MsbuildDebugger>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <MsbuildDebugger>true</MsbuildDebugger>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Change define constants as needed -->
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
   </PropertyGroup>
 
   <!-- Setup some common paths -->

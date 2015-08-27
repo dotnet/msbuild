@@ -5,6 +5,8 @@
 // <summary>Provides debugging support for state machines.</summary>
 //-----------------------------------------------------------------------
 
+#if FEATURE_MSBUILD_DEBUGGER
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -906,3 +908,4 @@ namespace Microsoft.Build.Debugging
         }
     }
 }
+#endif
