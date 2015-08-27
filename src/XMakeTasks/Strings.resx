@@ -671,7 +671,7 @@
     <comment>{StrBegin="MSB3150: "}</comment>
   </data>
   <data name="GenerateBootstrapper.PackageFileNotFound">
-    <value>MSB3152: To enable 'Download prerequisites from the same location as my application' in the Prerequisites dialog box, you must download file '{0}' for item '{1}' to your local machine. For more information, see http://go.microsoft.com/fwlink/?LinkId=239883.</value>
+    <value>MSB3152: To enable 'Download prerequisites from the same location as my application' in the Prerequisites dialog box, you must download file '{0}' for item '{1}' to your local machine. For more information, see http://go.microsoft.com/fwlink/?LinkId=616018.</value>
     <comment>{StrBegin="MSB3152: "}</comment>
   </data>
   <data name="GenerateBootstrapper.PackageResourceFileNotFound">

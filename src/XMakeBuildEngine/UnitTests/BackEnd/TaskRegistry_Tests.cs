@@ -23,6 +23,8 @@ using Microsoft.Build.Utilities;
 using NUnit.Framework;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.UnitTests;
+using Microsoft.CodeAnalysis.BuildTasks;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -2045,7 +2047,8 @@ namespace TestTask
                     FileUtilities.DeleteNoThrow(outputFile);
                 }
 
-                // now rethrow 
+                // now rethrow
+				throw;
             }
             finally
             {

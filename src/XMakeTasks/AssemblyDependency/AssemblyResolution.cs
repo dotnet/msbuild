@@ -132,7 +132,8 @@ namespace Microsoft.Build.Tasks
             OpenBaseKey openBaseKey,
             InstalledAssemblies installedAssemblies,
             GetAssemblyRuntimeVersion getRuntimeVersion,
-            Version targetedRuntimeVersion
+            Version targetedRuntimeVersion,
+            GetAssemblyPathInGac getAssemblyPathInGac
         )
         {
             Resolver[] resolvers = new Resolver[searchPaths.Length];
@@ -161,7 +162,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (0 == String.Compare(basePath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new GacResolver(targetProcessorArchitecture, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, buildEngine);
+                    resolvers[p] = new GacResolver(targetProcessorArchitecture, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, getAssemblyPathInGac);
                 }
                 else if (0 == String.Compare(basePath, AssemblyResolutionConstants.assemblyFoldersSentinel, StringComparison.OrdinalIgnoreCase))
                 {

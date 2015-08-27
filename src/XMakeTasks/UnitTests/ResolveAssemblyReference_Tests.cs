@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal static Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue = new Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
         internal static Microsoft.Build.Tasks.GetLastWriteTime getLastWriteTime = new Microsoft.Build.Tasks.GetLastWriteTime(GetLastWriteTime);
         internal static Microsoft.Build.Tasks.GetAssemblyRuntimeVersion getRuntimeVersion = new Microsoft.Build.Tasks.GetAssemblyRuntimeVersion(GetRuntimeVersion);
-        internal static Microsoft.Build.Tasks.CheckIfAssemblyInGac checkIfAssemblyIsInGac = new Microsoft.Build.Tasks.CheckIfAssemblyInGac(CheckForAssemblyInGac);
+        internal static Microsoft.Build.Tasks.GetAssemblyPathInGac checkIfAssemblyIsInGac = new Microsoft.Build.Tasks.GetAssemblyPathInGac(GetPathForAssemblyInGac);
         internal static Microsoft.Build.Shared.OpenBaseKey openBaseKey = new Microsoft.Build.Shared.OpenBaseKey(GetBaseKey);
         internal Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
         internal static Microsoft.Build.Tasks.IsWinMDFile isWinMDFile = new Microsoft.Build.Tasks.IsWinMDFile(IsWinMDFile);
@@ -194,6 +194,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         protected static readonly string s_frameworksPath = Path.Combine(s_rootPathPrefix, "Frameworks");
 
+        protected static readonly string s_myComponents2RootPath = Path.Combine(s_rootPathPrefix, "MyComponents2");
         protected static readonly string s_myComponentsRootPath = Path.Combine(s_rootPathPrefix, "MyComponents");
         protected static readonly string s_myComponents10Path = Path.Combine(s_myComponentsRootPath, "1.0");
         protected static readonly string s_myComponents20Path = Path.Combine(s_myComponentsRootPath, "2.0");
@@ -460,22 +461,22 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"c:\MyRedist\MyRedistRootAssembly.dll",
                 @"c:\MyRedist\MyOtherAssembly.dll",
                 @"c:\MyRedist\MyThirdAssembly.dll",
-            // ==[Related File Extensions Testing]================================================================================================
-            @"C:\AssemblyFolder\SomeAssembly.dll",
+                // ==[Related File Extensions Testing]================================================================================================
+                @"C:\AssemblyFolder\SomeAssembly.dll",
                 @"C:\AssemblyFolder\SomeAssembly.pdb",
                 @"C:\AssemblyFolder\SomeAssembly.xml",
                 @"C:\AssemblyFolder\SomeAssembly.pri",
                 @"C:\AssemblyFolder\SomeAssembly.licenses",
                 @"C:\AssemblyFolder\SomeAssembly.config",
-            // ==[Related File Extensions Testing]================================================================================================
+                // ==[Related File Extensions Testing]================================================================================================
 
-            // ==[Unification Testing]============================================================================================================
-            //@"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
-            s_unifyMeDll_V10Path,
+                // ==[Unification Testing]============================================================================================================
+                //@"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
+                s_unifyMeDll_V10Path,
                 s_unifyMeDll_V20Path,
                 s_unifyMeDll_V30Path,
-            //@"C:\MyComponents\v4.0\UnifyMe.dll",
-            Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"),
+                //@"C:\MyComponents\v4.0\UnifyMe.dll",
+                Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"),
                 Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"),
                 Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"),
                 Path.Combine(s_myApp_V30Path, "DependsOnUnified.dll"),
@@ -483,10 +484,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"),
                 @"C:\Framework\Everett\System.dll",
                 @"C:\Framework\Whidbey\System.dll",
-            // ==[Unification Testing]============================================================================================================
+                // ==[Unification Testing]============================================================================================================
 
-            // ==[Test assemblies reference higher versions than the current target framework=====================================================
-            Path.Combine(s_myComponentsMiscPath, "DependsOnOnlyv4Assemblies.dll"),  // Only depends on 4.0.0 assemblies
+                // ==[Test assemblies reference higher versions than the current target framework=====================================================
+                Path.Combine(s_myComponentsMiscPath, "DependsOnOnlyv4Assemblies.dll"),  // Only depends on 4.0.0 assemblies
                 Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), //Is in redist list and is a 9.0 assembly
                 Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), //Depends on 9.0 assemblies
                 Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), // Depends on 9.0 assemblies
@@ -509,6 +510,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 @"C:\Regress714052\Mix\b.dll",
                 @"C:\Regress714052\Mix\b.winmd",
 
+                Path.Combine(s_myComponentsRootPath, "V.dll"),
+                Path.Combine(s_myComponents2RootPath, "W.dll"),
                 Path.Combine(s_myComponentsRootPath, "X.dll"),
                 Path.Combine(s_myComponentsRootPath, "Y.dll"),
                 Path.Combine(s_myComponentsRootPath, "Z.dll"),
@@ -516,8 +519,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"),
                 Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"),
 
-            // WinMD sample files
-            @"C:\WinMD\v4\mscorlib.dll",  // Fake 4.0 mscorlib so we can actually resolve it for one of the tests. With a version of 4
+                // WinMD sample files
+                @"C:\WinMD\v4\mscorlib.dll",  // Fake 4.0 mscorlib so we can actually resolve it for one of the tests. With a version of 4
                 @"C:\WinMD\v255\mscorlib.dll",  // Fake 4.0 mscorlib so we can actually resolve it for one of the tests. With a version of 255
                 @"C:\WinMD\DotNetAssemblyDependsOnWinMD.dll",
                 @"C:\WinMD\DotNetAssemblyDependsOn255WinMD.dll",
@@ -729,28 +732,36 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         ///  Checks to see if the assemblyName passed in is in the GAC.
         /// </summary>
-        private static bool CheckForAssemblyInGac(AssemblyNameExtension assemblyName, SystemProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists)
+        private static string GetPathForAssemblyInGac(AssemblyNameExtension assemblyName, SystemProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists, bool fullFusionName, bool specificVersion)
         {
-            if (assemblyName.Equals(new AssemblyNameExtension("Z, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null")))
+            if (assemblyName.Equals(new AssemblyNameExtension("V, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null")))
             {
-                return false;
+                return null;
+            }
+            else if (assemblyName.Equals(new AssemblyNameExtension("W, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null")))
+            {
+                return @"C:\MyComponents2\W.dll";
+            }
+            else if (assemblyName.Equals(new AssemblyNameExtension("Z, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null")))
+            {
+                return null;
             }
             else if (assemblyName.Equals(new AssemblyNameExtension("X, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null")))
             {
-                return true;
+                return @"C:\MyComponents\X.dll";
             }
             else if (assemblyName.Equals(new AssemblyNameExtension("Y, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null")))
             {
-                return false;
+                return null;
             }
             else
             {
                 string gacLocation = null;
                 if (assemblyName.Version != null)
                 {
-                    gacLocation = GlobalAssemblyCache.GetLocation(assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, true, fileExists, null, null, false /* this value does not matter if we are passing a full fusion name*/);
+                    gacLocation = GlobalAssemblyCache.GetLocation(assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, null, null, specificVersion /* this value does not matter if we are passing a full fusion name*/);
                 }
-                return gacLocation != null;
+                return gacLocation;
             }
         }
 
@@ -1424,6 +1435,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (String.Compare(path, @"C:\Regress714052\None\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
+            }
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "V.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("V, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
+            }
+            if (String.Compare(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension("W, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
             if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -2264,6 +2283,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
+            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "V.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension[]
+                {
+                    new AssemblyNameExtension("W, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null")
+                };
+            }
+
+            if (String.Compare(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return new AssemblyNameExtension[] { };
+            }
+            
             if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
@@ -7497,7 +7529,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { s_myComponentsRootPath };
+
+            if (NativeMethodsShared.IsWindows)
+            {
+                t.SearchPaths = new string[] { "{gac}", s_myComponentsRootPath };
+            }
+            else {
+                t.SearchPaths = new string[] { s_myComponentsRootPath };
+            }
+            
             t.CopyLocalDependenciesWhenParentReferenceInGac = false;
             bool succeeded = Execute(t);
 
@@ -7566,7 +7606,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { s_myComponentsRootPath };
+            
+            if (NativeMethodsShared.IsWindows)
+            {
+                t.SearchPaths = new string[] { "{gac}", s_myComponentsRootPath };
+            }
+            else {
+                t.SearchPaths = new string[] { s_myComponentsRootPath };
+            }
+
             t.CopyLocalDependenciesWhenParentReferenceInGac = false;
             bool succeeded = Execute(t);
 
@@ -7618,7 +7666,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { s_myComponentsRootPath };
+
+            if (NativeMethodsShared.IsWindows)
+            {
+                t.SearchPaths = new string[] { "{gac}", s_myComponentsRootPath };
+            }
+            else {
+                t.SearchPaths = new string[] { s_myComponentsRootPath };
+            }
+
             t.CopyLocalDependenciesWhenParentReferenceInGac = true;
             bool succeeded = Execute(t);
 
@@ -7658,7 +7714,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = new string[] { s_myComponentsRootPath };
+
+            if (NativeMethodsShared.IsWindows)
+            {
+                t.SearchPaths = new string[] { "{gac}", s_myComponentsRootPath };
+            }
+            else {
+                t.SearchPaths = new string[] { s_myComponentsRootPath };
+            }
+
             t.CopyLocalDependenciesWhenParentReferenceInGac = true;
             bool succeeded = Execute(t);
 
@@ -7670,6 +7734,76 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             AssertNoCase("false", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
             AssertNoCase("true", t.ResolvedFiles[1].GetMetadata("CopyLocal"));
             AssertNoCase("true", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
+        }
+
+        [Test]
+        public void CopyLocalDependenciesWhenParentReferenceNotInGac()
+        {
+            // Create the engine.
+            MockEngine engine = new MockEngine();
+
+            ITaskItem[] assemblyNames = new TaskItem[]
+                    {
+                        // V not in GAC, depends on W (in GAC)
+                        // V - CopyLocal should be true (resolved locally)
+                        // W - CopyLocal should be false (resolved {gac})
+                        new TaskItem("V, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null"),
+                    };
+
+            // Now, pass feed resolved primary references into ResolveAssemblyReference.
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = engine;
+            t.Assemblies = assemblyNames;
+            t.SearchPaths = new string[] { "{gac}", @"c:\MyComponents" };
+            bool succeeded = Execute(t);
+
+            Assert.IsTrue(succeeded);
+            Assert.AreEqual(1, t.ResolvedFiles.Length);
+            Assert.AreEqual(1, t.CopyLocalFiles.Length);
+            Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
+            Assert.AreEqual(0, engine.Errors);
+            Assert.AreEqual(0, engine.Warnings);
+            AssertNoCase("true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
+            AssertNoCase("false", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
+        }
+
+        /// <summary>
+        /// Test the legacy behavior for copy local (set to false when an assembly exists in the gac no matter
+        /// where it was actually resolved). Sets DoNotCopyLocalIfInGac = true
+        /// </summary>
+        [Test]
+        public void CopyLocalLegacyBehavior()
+        {
+            // Create the engine.
+            MockEngine engine = new MockEngine();
+
+            ITaskItem[] assemblyNames = new TaskItem[]
+                    {
+                        // V not in GAC, depends on W (in GAC)
+                        // V - CopyLocal should be true (resolved locally)
+                        // W - CopyLocal should be false (resolved from "c:\MyComponents" BUT exists in GAC, so false)
+                        // (changed the order of the search paths to emulate this)
+                        new TaskItem("V, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null"),
+                    };
+
+            // Now, pass feed resolved primary references into ResolveAssemblyReference.
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = engine;
+            t.Assemblies = assemblyNames;
+            t.DoNotCopyLocalIfInGac = true;
+            t.SearchPaths = new string[] { @"c:\MyComponents", "{gac}",  };
+            bool succeeded = Execute(t);
+
+            Assert.IsTrue(succeeded);
+            Assert.AreEqual(1, t.ResolvedFiles.Length);
+            Assert.AreEqual(1, t.CopyLocalFiles.Length);
+            Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
+            Assert.AreEqual(0, engine.Errors);
+            Assert.AreEqual(0, engine.Warnings);
+            AssertNoCase("true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
+            AssertNoCase("false", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
         }
 
         /// <summary>
@@ -9222,9 +9356,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v1.0", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 2);
+            Assert.AreEqual(3, returnedVersions.Count);
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));            
         }
 
         [Test]
@@ -9233,10 +9368,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v2.0", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 3);
+            Assert.AreEqual(4, returnedVersions.Count);
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -9245,14 +9381,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v3.0", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 6);
+            Assert.AreEqual(7, returnedVersions.Count);
 
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v3.0SP1", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v3.0 BAZ", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v3.0SP1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v3.0 BAZ", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -9261,27 +9398,27 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 27);
+            Assert.AreEqual(27, returnedVersions.Count);
 
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v5.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v4.0001.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v4.1", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v4.0.255.87", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v4.0.255", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v4.0.0000", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v4.0.9999", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v4.0.2116.87", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v4.0.2116", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v4.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v3.5", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[13].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[14].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[15].RegistryKey).Equals("v3.0SP1", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[16].RegistryKey).Equals("v3.0 BAZ", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[17].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[18].RegistryKey).Equals("v5", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v5", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v4.0001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v4.1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v4.0.255.87", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v4.0.255", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v4.0.0000", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v4.0.9999", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v4.0.2116.87", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v4.0.2116", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v4.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v3.5", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[13].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[14].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[15].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[16].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[17].RegistryKey).Equals("v3.0SP1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[18].RegistryKey).Equals("v3.0 BAZ", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[19].RegistryKey).Equals("v3.5.0.x86chk", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[20].RegistryKey).Equals("v3.5.1.x86chk", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[21].RegistryKey).Equals("v3.5.256.x86chk", StringComparison.OrdinalIgnoreCase));
@@ -9298,16 +9435,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v3.5", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 9);
+            Assert.AreEqual(10, returnedVersions.Count);
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v3.5", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v3.5.0.x86chk", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v3.5.1.x86chk", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v3.5.256.x86chk", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("V3.5.0.0.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v3.5.0.x86chk", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v3.5.1.x86chk", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v3.5.256.x86chk", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("V3.5.0.0.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -9316,7 +9454,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 9);
+            Assert.AreEqual(10, returnedVersions.Count);
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v4.0.9999", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v4.0.2116.87", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v4.0.2116", StringComparison.OrdinalIgnoreCase));
@@ -9325,7 +9463,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -9334,7 +9473,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0.0", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 10);
+            Assert.AreEqual(11, returnedVersions.Count);
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v4.0.0000", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v4.0.9999", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v4.0.2116.87", StringComparison.OrdinalIgnoreCase));
@@ -9344,7 +9483,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -9353,7 +9493,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.1", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 13);
+            Assert.AreEqual(14, returnedVersions.Count);
 
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v4.1", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v4.0.255.87", StringComparison.OrdinalIgnoreCase));
@@ -9367,7 +9507,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[13].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -9376,7 +9517,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.1.0", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 14);
+            Assert.AreEqual(15, returnedVersions.Count);
 
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v4.0001.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v4.1", StringComparison.OrdinalIgnoreCase));
@@ -9391,7 +9532,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[13].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[13].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[14].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
 
@@ -9401,7 +9543,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0.255", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 12);
+            Assert.AreEqual(13, returnedVersions.Count);
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v4.0.255.87", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v4.0.255", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v4.0.0000", StringComparison.OrdinalIgnoreCase));
@@ -9413,7 +9555,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -9422,23 +9565,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v5.0", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 15);
+            Assert.AreEqual(17, returnedVersions.Count);
 
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v5.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v4.0001.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v4.1", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v4.0.255.87", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v4.0.255", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v4.0.0000", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v4.0.9999", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v4.0.2116.87", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v4.0.2116", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v4.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v3.5", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[13].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[14].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v5", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v4.0001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v4.1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v4.0.255.87", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v4.0.255", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v4.0.0000", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v4.0.9999", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v4.0.2116.87", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v4.0.2116", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v4.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v3.5", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[13].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[14].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[15].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[16].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -9447,10 +9592,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v5", s_assemblyFolderExTestVersions);
 
             Assert.IsNotNull(returnedVersions);
-            Assert.IsTrue(returnedVersions.Count == 2);
+            Assert.AreEqual(17, returnedVersions.Count);
 
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v5.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v5", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v4.0001.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[3].RegistryKey).Equals("v4.1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[4].RegistryKey).Equals("v4.0.255.87", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[5].RegistryKey).Equals("v4.0.255", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[6].RegistryKey).Equals("v4.0.0000", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[7].RegistryKey).Equals("v4.0.9999", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[8].RegistryKey).Equals("v4.0.2116.87", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[9].RegistryKey).Equals("v4.0.2116", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[10].RegistryKey).Equals("v4.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[11].RegistryKey).Equals("v3.5", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[12].RegistryKey).Equals("v3.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[13].RegistryKey).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[14].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[15].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
+            Assert.IsTrue(((string)returnedVersions[16].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]
@@ -10492,7 +10652,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns></returns>
         private ReferenceTable GenerateTableWithAssemblyFromTheGlobalLocation(string location)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null, null, null, null, null, null, new Version("4.0"), null, null, null, true, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false);
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null, null, null, null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false);
 
             AssemblyNameExtension assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
             TaskItem taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
@@ -14128,7 +14288,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Test]
         public void ReferenceTableDependentItemsInBlackList4()
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null, null, null, null, null, null, new Version("4.0"), null, null, null, true, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false);
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null, null, null, null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false);
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
             Hashtable blackList;
@@ -14304,7 +14464,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static ReferenceTable MakeEmptyReferenceTable(TaskLoggingHelper log)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null, null, null, null, null, null, new Version("4.0"), null, log, null, true, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false);
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null, null, null, null, null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false);
             return referenceTable;
         }
 
@@ -16402,8 +16562,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // build mode
             t.FindDependencies = true;
-            t.ForceSystemRuntimeDependencyCalculation = false;
-
             Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
 
             Assert.IsTrue(string.Equals(t.DependsOnSystemRuntime, "false", StringComparison.OrdinalIgnoreCase),
@@ -16411,20 +16569,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // intelli build mode
             t.FindDependencies = false;
-            t.ForceSystemRuntimeDependencyCalculation = true;
             Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
 
             Assert.IsTrue(string.Equals(t.DependsOnSystemRuntime, "false", StringComparison.OrdinalIgnoreCase),
                 "Expected no System.Runtime dependency found during intellibuild.");
-
-            // rar mode
-            // intelli build mode
-            t.FindDependencies = false;
-            t.ForceSystemRuntimeDependencyCalculation = false;
-            Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
-
-            Assert.IsTrue(string.Equals(t.DependsOnSystemRuntime, "false", StringComparison.OrdinalIgnoreCase),
-                "Expected no System.Runtime dependency found for standalone RAR.");
         }
 
 
@@ -16447,7 +16595,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // build mode
             t.FindDependencies = true;
-            t.ForceSystemRuntimeDependencyCalculation = false;
 
             Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
 
@@ -16456,20 +16603,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // intelli build mode
             t.FindDependencies = false;
-            t.ForceSystemRuntimeDependencyCalculation = true;
             Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
 
             Assert.IsTrue(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase),
                 "Expected System.Runtime dependency found during intellibuild.");
-
-            // rar mode
-            // intelli build mode
-            t.FindDependencies = false;
-            t.ForceSystemRuntimeDependencyCalculation = false;
-            Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
-
-            Assert.IsTrue(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase),
-                "Expected System.Runtime dependency found for standalone RAR.");
         }
 
         // Indirect dependency
@@ -16491,7 +16628,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // build mode
             t.FindDependencies = true;
-            t.ForceSystemRuntimeDependencyCalculation = false;
 
             Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
 
@@ -16500,20 +16636,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // intelli build mode
             t.FindDependencies = false;
-            t.ForceSystemRuntimeDependencyCalculation = true;
             Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
 
             Assert.IsTrue(string.Equals(t.DependsOnSystemRuntime, "true", StringComparison.OrdinalIgnoreCase),
                 "Expected System.Runtime dependency found during intellibuild.");
-
-            // rar mode
-            // intelli build mode
-            t.FindDependencies = false;
-            t.ForceSystemRuntimeDependencyCalculation = false;
-            Assert.IsTrue(t.Execute(fileExists, directoryExists, getDirectories, getAssemblyName, getAssemblyMetadata, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getLastWriteTime, getRuntimeVersion, openBaseKey, checkIfAssemblyIsInGac, isWinMDFile, readMachineTypeFromPEHeader));
-
-            Assert.IsTrue(string.Equals(t.DependsOnSystemRuntime, "false", StringComparison.OrdinalIgnoreCase),
-                "Expected no System.Runtime dependency found for standalone RAR.");
         }
 
         #region HelperDelegates

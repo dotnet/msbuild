@@ -11,6 +11,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ImportByWildcardBeforeMicrosoftCommonProps Condition="'$(ImportByWildcardBeforeMicrosoftCommonProps)' == ''">true</ImportByWildcardBeforeMicrosoftCommonProps>
+        <ImportByWildcardAfterMicrosoftCommonProps Condition="'$(ImportByWildcardAfterMicrosoftCommonProps)' == ''">true</ImportByWildcardAfterMicrosoftCommonProps>
+        <ImportUserLocationsByWildcardBeforeMicrosoftCommonProps Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == ''">true</ImportUserLocationsByWildcardBeforeMicrosoftCommonProps>
+        <ImportUserLocationsByWildcardAfterMicrosoftCommonProps Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftCommonProps>
+    </PropertyGroup>
+
+    <!-- 
+        Import wildcard "ImportBefore" props files if we're actually in a 12.0+ project (rather than a project being
+        treated as 4.0)
+    -->
+    <ImportGroup Condition="'$(MSBuildAssemblyVersion)' != ''">
+        <!-- 
+            Wildcard imports come from $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props.d folder.
+            This is very similar to the same extension point used in Microsoft.Common.targets, which is located in
+            the $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ directory. Unfortunately, there
+            is already a file named "Microsoft.Common.props" in this directory so we have to have a slightly different
+            directory name to hold extensions.
+        -->
+        <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore')"/>
+        <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftCommonProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore')"/>
+    </ImportGroup>
+
    <!-- 
         In VS 2010 SP1 and VS 2012, both supported for asset compatibility, the MSBuild installed 
         as part of them did not enforce using the local ToolsVersion (4.0) in all cases, but instead 
@@ -89,4 +112,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          so there's no need to import them twice.
      -->
     <Import Project="$(CustomAfterMicrosoftCommonProps)" Condition="'$(CustomAfterMicrosoftCommonProps)' != '' and Exists('$(CustomAfterMicrosoftCommonProps)') and ('$(MSBuildAssemblyVersion)' != '' or !Exists('$(MSBuildExtensionsPath)\4.0\Microsoft.Common.props'))" />
+
+    <!-- 
+        Import wildcard "ImportAfter" props files if we're actually in a 12.0+ project (rather than a project being
+        treated as 4.0)
+    -->
+    <ImportGroup Condition="'$(MSBuildAssemblyVersion)' != ''">
+        <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
+        <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
+    </ImportGroup>
 </Project>

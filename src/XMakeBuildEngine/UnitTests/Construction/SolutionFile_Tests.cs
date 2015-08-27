@@ -648,10 +648,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         /// <param name="solutionFileContents"></param>
         /// <returns></returns>
-        static internal SolutionFile ParseSolutionHelper
-            (
-            string solutionFileContents
-            )
+        static internal SolutionFile ParseSolutionHelper(string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
             StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);
@@ -659,13 +656,9 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile sp = new SolutionFile();
             sp.SolutionFileDirectory = Path.GetTempPath();
             sp.SolutionReader = sr;
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            sp.FullPath = tmpFileName + ".sln";
-            // This file is not expected to exist at this point, so make sure it doesn't
-            File.Delete(sp.FullPath);
+            sp.FullPath = FileUtilities.GetTemporaryFileName(".sln");
             sp.ParseSolution();
             // Clean up the temporary file that got created with this call
-            File.Delete(tmpFileName);
             return sp;
         }
 

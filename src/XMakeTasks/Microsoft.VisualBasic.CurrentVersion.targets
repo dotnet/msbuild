@@ -41,6 +41,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetRuntime>Managed</TargetRuntime>
         <AlwaysUseNumericalSuffixInItemNames>true</AlwaysUseNumericalSuffixInItemNames>
         <DefineCommonItemSchemas Condition=" '$(DefineCommonItemSchemas)' == '' ">true</DefineCommonItemSchemas>
+        <DefineCommonReferenceSchemas Condition=" '$(DefineCommonReferenceSchemas)' == '' ">true</DefineCommonReferenceSchemas>
         <DefineCommonCapabilities Condition=" '$(DefineCommonCapabilities)' == '' ">true</DefineCommonCapabilities>
         <SynthesizeLinkMetadata Condition=" '$(SynthesizeLinkMetadata)' == '' and '$(HasSharedItems)' == 'true' ">true</SynthesizeLinkMetadata>
     </PropertyGroup>
@@ -170,16 +171,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <!--
       The XamlPreCompile target must remain identical to
-      the CoreCompile target in this same file.
-      Any updates to one must be made to the other
+      the CoreCompile target in Microsoft.VisualBasic.Core.targets.
+      Any updates to one must be made to the other.
 -->
     <Target
         Name="XamlPreCompile"
         Inputs="$(MSBuildAllProjects);
-                @(Compile);                             
+                @(Compile);
                 @(_CoreCompileResourceInputs);
                 $(ApplicationIcon);
-                $(AssemblyOriginatorKeyFile);              
+                $(AssemblyOriginatorKeyFile);
                 @(ReferencePath);
                 @(CompiledLicenseFile);
                 @(LinkResource);
@@ -205,9 +206,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         </PropertyGroup> 
         
         <PropertyGroup>
-            <!-- If we are building in visual studio setting the VbcToolPath will prevent the inproc compiler from being used during compile-->
-            <VbcToolPath Condition="'$(VbcToolPath)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">$(MsBuildToolsPath)</VbcToolPath>
-          
           <!-- If we are targeting winmdobj we want to specifically set the pdbFile property so that it does not collide with the output of winmdexp which we will run subsequently -->
           <PdbFile Condition="'$(PdbFile)' == '' and '$(OutputType)' == 'winmdobj' and '$(DebugSymbols)' == 'true'">$(IntermediateOutputPath)$(TargetName).compile.pdb</PdbFile>
         </PropertyGroup>
@@ -228,12 +226,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           <AdditionalFiles Include="@(%(AdditionalFileItems.Identity))" />
         </ItemGroup>
       
+        <!-- Don't run analyzers for Vbc task on XamlPrecompile pass, we only want to run them on core compile. -->
+        <!-- Analyzers="@(Analyzer)" -->
+
+        <PropertyGroup Condition="'$(UseSharedCompilation)' == ''">
+          <UseSharedCompilation>true</UseSharedCompilation>
+        </PropertyGroup>
+
         <!-- Condition is to filter out the _CoreCompileResourceInputs so that it doesn't pass in culture resources to the compiler -->
         <Vbc  Condition=" '%(_CoreCompileResourceInputs.WithCulture)' != 'true' "
               AdditionalLibPaths="$(AdditionalLibPaths)"
               AddModules="@(AddModules)"
               AdditionalFiles="@(AdditionalFiles)"
-              Analyzers="@(Analyzer)"
               BaseAddress="$(BaseAddress)"
               CodeAnalysisRuleSet="$(ResolvedCodeAnalysisRuleSet)"
               CodePage="$(CodePage)"
@@ -243,7 +247,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               DisabledWarnings="$(NoWarn)"
               DocumentationFile="@(DocFileItem)"
               EmitDebugInformation="$(DebugSymbols)"
-              EnvironmentVariables="$(VbcEnvironment)"              
+              EnvironmentVariables="$(VbcEnvironment)"
+              ErrorLog="$(ErrorLog)"
               ErrorReport="$(ErrorReport)"
               FileAlignment="$(FileAlignment)"
               GenerateDocumentation="$(GenerateDocumentation)"
@@ -272,6 +277,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               PreferredUILang="$(PreferredUILang)"
               References="@(ReferencePath)"
               RemoveIntegerChecks="$(RemoveIntegerChecks)"
+              ReportAnalyzer="$(ReportAnalyzer)"
               Resources="@(_CoreCompileResourceInputs);@(CompiledLicenseFile)"
               ResponseFiles="$(CompilerResponseFile)"
               RootNamespace="$(RootNamespace)"
@@ -285,6 +291,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               ToolPath="$(VbcToolPath)"
               TreatWarningsAsErrors="$(TreatWarningsAsErrors)"
               UseHostCompilerIfAvailable="$(UseHostCompilerIfAvailable)"
+              UseSharedCompilation="$(UseSharedCompilation)"
               Utf8Output="$(Utf8Output)"
               VBRuntimePath="$(VBRuntimePath)"
               Verbosity="$(VbcVerbosity)"
@@ -292,7 +299,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               WarningsAsErrors="$(WarningsAsErrors)"
               WarningsNotAsErrors="$(WarningsNotAsErrors)"
               Win32Icon="$(ApplicationIcon)"
-              Win32Manifest="$(Win32Manifest)"              
+              Win32Manifest="$(Win32Manifest)"
               Win32Resource="$(Win32Resource)"
               VBRuntime="$(VBRuntime)"
               />
@@ -307,140 +314,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <OnError Condition="'$(OnXamlPreCompileErrorTarget)' != ''" ExecuteTargets="$(OnXamlPreCompileErrorTarget)" />    
     </Target>
 
-<!--
-      The CoreCompile target must remain identical to
-      the XamlPreCompile target in this same file.
-      Any updates to one must be made to the other
--->
-    <Target
-        Name="CoreCompile"
-        Inputs="$(MSBuildAllProjects);
-                @(Compile);                             
-                @(_CoreCompileResourceInputs);
-                $(ApplicationIcon);
-                $(AssemblyOriginatorKeyFile);              
-                @(ReferencePath);
-                @(CompiledLicenseFile);
-                @(LinkResource);
-                @(EmbeddedDocumentation);
-                $(Win32Resource);
-                $(Win32Manifest);
-                @(CustomAdditionalCompileInputs);
-                $(ResolvedCodeAnalysisRuleSet)"
-        Outputs="@(DocFileItem);
-                 @(IntermediateAssembly);
-                 @(_DebugSymbolsIntermediatePath);
-                 $(NonExistentFile);
-                 @(CustomAdditionalCompileOutputs)"
-        Returns=""
-        DependsOnTargets="$(CoreCompileDependsOn)"
-    >
-        <PropertyGroup>
-            <_NoWarnings Condition=" '$(WarningLevel)' == '0' ">true</_NoWarnings>
-            <_NoWarnings Condition=" '$(WarningLevel)' == '1' ">false</_NoWarnings>
-        </PropertyGroup>
+    <PropertyGroup>
+        <VisualBasicCoreTargetsPath Condition="'$(VisualBasicCoreTargetsPath)' == ''">Microsoft.VisualBasic.Core.targets</VisualBasicCoreTargetsPath>
+    </PropertyGroup>
 
-      <PropertyGroup>
-        <!-- If we are building in visual studio setting the VbcToolPath will prevent the inproc compiler from being used during compile-->
-        <VbcToolPath Condition="'$(VbcToolPath)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">$(MsBuildToolsPath)</VbcToolPath>
-
-        <!-- If we are targeting winmdobj we want to specifically the pdbFile property since we do not want it to collide with the output of winmdexp-->
-        <PdbFile Condition="'$(PdbFile)' == '' and '$(OutputType)' == 'winmdobj' and '$(DebugSymbols)' == 'true'">$(IntermediateOutputPath)$(TargetName).compile.pdb</PdbFile>
-      </PropertyGroup>
-
-        <ItemGroup Condition="'$(TargetingClr2Framework)'=='true'">
-            <ReferencePath>
-                <EmbedInteropTypes/>
-            </ReferencePath>
-        </ItemGroup>
-
-        <!-- Prefer32Bit was introduced in .NET 4.5. Set it to false if we are targeting 4.0 -->
-        <PropertyGroup Condition="('$(TargetFrameworkVersion)' == 'v4.0')">
-            <Prefer32Bit>false</Prefer32Bit>
-        </PropertyGroup>
-
-        <ItemGroup Condition="('$(AdditionalFileItemNames)' != '')">
-          <AdditionalFileItems Include="$(AdditionalFileItemNames)" />
-          <AdditionalFiles Include="@(%(AdditionalFileItems.Identity))" />
-        </ItemGroup>
-      
-        <!-- Condition is to filter out the _CoreCompileResourceInputs so that it doesn't pass in culture resources to the compiler -->
-        <Vbc  Condition=" '%(_CoreCompileResourceInputs.WithCulture)' != 'true' "
-              AdditionalLibPaths="$(AdditionalLibPaths)"
-              AddModules="@(AddModules)"
-              AdditionalFiles="@(AdditionalFiles)"
-              Analyzers="@(Analyzer)"
-              BaseAddress="$(BaseAddress)"
-              CodeAnalysisRuleSet="$(ResolvedCodeAnalysisRuleSet)"
-              CodePage="$(CodePage)"
-              DebugType="$(DebugType)"
-              DefineConstants="$(FinalDefineConstants)"
-              DelaySign="$(DelaySign)"
-              DisabledWarnings="$(NoWarn)"
-              DocumentationFile="@(DocFileItem)"
-              EmitDebugInformation="$(DebugSymbols)"
-              EnvironmentVariables="$(VbcEnvironment)"              
-              ErrorReport="$(ErrorReport)"
-              FileAlignment="$(FileAlignment)"
-              GenerateDocumentation="$(GenerateDocumentation)"
-              HighEntropyVA="$(HighEntropyVA)"
-              Imports="@(Import)"
-              KeyContainer="$(KeyContainerName)"
-              KeyFile="$(KeyOriginatorFile)"
-              LangVersion="$(LangVersion)"
-              LinkResources="@(LinkResource)"
-              MainEntryPoint="$(StartupObject)"
-              ModuleAssemblyName="$(ModuleAssemblyName)"
-              NoConfig="true"
-              NoStandardLib="$(NoCompilerStandardLib)"
-              NoVBRuntimeReference="$(NoVBRuntimeReference)"
-              NoWarnings="$(_NoWarnings)"
-              NoWin32Manifest="$(NoWin32Manifest)"
-              Optimize="$(Optimize)"
-              OptionCompare="$(OptionCompare)"
-              OptionExplicit="$(OptionExplicit)"
-              OptionInfer="$(OptionInfer)"
-              OptionStrict="$(OptionStrict)"
-              OptionStrictType="$(OptionStrictType)" 
-              OutputAssembly="@(IntermediateAssembly)"
-              PdbFile="$(PdbFile)"
-              Platform="$(PlatformTarget)"
-              Prefer32Bit="$(Prefer32Bit)"
-              PreferredUILang="$(PreferredUILang)"
-              References="@(ReferencePath)"
-              RemoveIntegerChecks="$(RemoveIntegerChecks)"
-              Resources="@(_CoreCompileResourceInputs);@(CompiledLicenseFile)"
-              ResponseFiles="$(CompilerResponseFile)"
-              RootNamespace="$(RootNamespace)"
-              SdkPath="$(FrameworkPathOverride)"
-              Sources="@(Compile)"
-              SubsystemVersion="$(SubsystemVersion)"
-              TargetCompactFramework="$(TargetCompactFramework)"
-              TargetType="$(OutputType)"
-              ToolExe="$(VbcToolExe)"
-              ToolPath="$(VbcToolPath)"
-              TreatWarningsAsErrors="$(TreatWarningsAsErrors)"
-              UseHostCompilerIfAvailable="$(UseHostCompilerIfAvailable)"
-              Utf8Output="$(Utf8Output)"
-              VBRuntimePath="$(VBRuntimePath)"
-              Verbosity="$(VbcVerbosity)"
-              VsSessionGuid="$(VsSessionGuid)"
-              WarningsAsErrors="$(WarningsAsErrors)"
-              WarningsNotAsErrors="$(WarningsNotAsErrors)"
-              Win32Icon="$(ApplicationIcon)"
-              Win32Manifest="$(Win32Manifest)"              
-              Win32Resource="$(Win32Resource)"
-              VBRuntime="$(VBRuntime)"
-              />
-
-              <ItemGroup>
-                  <_CoreCompileResourceInputs Remove="@(_CoreCompileResourceInputs)" />                  
-              </ItemGroup>    
-              
-              <CallTarget Targets="$(TargetsTriggeredByCompilation)" Condition="'$(TargetsTriggeredByCompilation)' != ''"/>         
-              
-    </Target>
-
+    <Import Project="$(VisualBasicCoreTargetsPath)" />
 
     <Import Project="Microsoft.Common.targets" />
     <Import Project="$(MSBuildToolsPath)\Microsoft.ServiceModel.targets" Condition="('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.ServiceModel.targets')"/>

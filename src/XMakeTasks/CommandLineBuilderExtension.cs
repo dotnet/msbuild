@@ -14,12 +14,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// CommandLineBuilder derived class for specialized logic specific to MSBuild tasks
     /// </summary>
-#if WHIDBEY_VISIBILITY
-    internal
-#else
-    public /* because its used by VJ# Vjc task. */
-#endif
-    class CommandLineBuilderExtension : CommandLineBuilder
+    public class CommandLineBuilderExtension : CommandLineBuilder
     {
         /// <summary>
         /// Set a boolean switch iff its value exists and its value is 'true'.

@@ -2,21 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Text;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml;
 
 using Microsoft.Build.Shared;
-using System.Xml;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Win32;
 
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
-using Microsoft.Win32;
-using System.Collections.ObjectModel;
 
 namespace Microsoft.Build.Utilities
 {
@@ -198,6 +196,9 @@ namespace Microsoft.Build.Utilities
         private const string referencesFolderName = "References";
         private const string designTimeFolderName = "DesignTime";
         private const string platformsFolderName = "Platforms";
+        private const string uapDirectoryName = "Windows Kits";
+        private const string uapRegistryName = "Windows";
+        private const int uapVersion = 10;
         private static readonly char[] s_diskRootSplitChars = new char[] { ';' };
 
         /// <summary>
@@ -362,7 +363,9 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier, "targetPlatformIdentifier");
             ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, "targetPlatformVersion");
 
-            ErrorUtilities.DebugTraceMessage("GetPlatformExtensionSDKLocations", "Calling with TargetPlatformIdentifier:'{0}' and TargetPlatformVersion: '{1}'", targetPlatformIdentifier, targetPlatformVersion.ToString());
+            string targetPlatformVersionString = targetPlatformVersion.ToString();
+
+            ErrorUtilities.DebugTraceMessage("GetPlatformExtensionSDKLocations", "Calling with TargetPlatformIdentifier:'{0}' and TargetPlatformVersion: '{1}'", targetPlatformIdentifier, targetPlatformVersionString);
             IEnumerable<TargetPlatformSDK> targetPlatformSDKs = RetrieveTargetPlatformList(diskRoots, extensionDiskRoots, registryRoot);
 
             return targetPlatformSDKs
@@ -372,7 +375,7 @@ namespace Microsoft.Build.Utilities
                     (
                         platformSDK.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
                         && platformSDK.TargetPlatformVersion <= targetPlatformVersion
-                    ))
+                    ) || platformSDK.ContainsPlatform(targetPlatformIdentifier, targetPlatformVersionString))
                 .OrderBy<TargetPlatformSDK, Version>(platform => platform.TargetPlatformVersion);
         }
 
@@ -403,16 +406,42 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string registryRoot)
         {
+            return GetPlatformExtensionSDKLocation(sdkMoniker, targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
+        }
+
+        /// <summary>
+        /// Given an SDKName, targetPlatformIdentifier and TargetPlatformVersion search the default sdk locations for the passed in sdk name.
+        /// The format of the sdk moniker is  SDKName, Version=X.X
+        /// </summary>
+        /// <param name="sdkMoniker">Name of the SDK to determine the installation location for.</param>
+        /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
+        /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
+        /// <param name="diskRoots">List of disk roots to search for sdks within</param>
+        /// <param name="extensionDiskRoots">List of disk roots to look for manifest driven extension sdks</param>
+        /// <param name="registryRoot">Registry root to look for sdks within</param>
+        /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
+        public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string[] extensionDiskRoots, string registryRoot)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier, "targetPlatformIdentifier");
             ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, "targetPlatformVersion");
             ErrorUtilities.VerifyThrowArgumentLength(sdkMoniker, "sdkMoniker");
 
-            IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, null, registryRoot);
-            var targetPlatformMoniker = targetPlatforms.Where<TargetPlatformSDK>(platform => platform.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
-                                                                                                 && platform.TargetPlatformVersion <= targetPlatformVersion
-                                                                                                 && platform.ExtensionSDKs.ContainsKey(sdkMoniker)
-                                                                                    ).OrderByDescending<TargetPlatformSDK, Version>(platform => platform.TargetPlatformVersion)
-                                                                                    .DefaultIfEmpty(null).FirstOrDefault<TargetPlatformSDK>();
+            IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, extensionDiskRoots, registryRoot);
+            var targetPlatformMoniker = targetPlatforms.Where<TargetPlatformSDK>(
+                platform =>
+                    (
+                        String.IsNullOrEmpty(platform.TargetPlatformIdentifier)
+                        ||
+                        (
+                            platform.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
+                            && platform.TargetPlatformVersion <= targetPlatformVersion
+                        )
+                    )
+                    && platform.ExtensionSDKs.ContainsKey(sdkMoniker))
+                .OrderByDescending<TargetPlatformSDK, Version>(platform => platform.TargetPlatformVersion)
+                .DefaultIfEmpty(null).FirstOrDefault<TargetPlatformSDK>();
+
             if (targetPlatformMoniker != null)
             {
                 return targetPlatformMoniker.ExtensionSDKs[sdkMoniker];
@@ -449,6 +478,23 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string registryRoot)
         {
+            return GetPlatformExtensionSDKLocation(sdkMoniker, targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
+        }
+
+        /// <summary>
+        /// Given an SDKName, targetPlatformIdentifier and TargetPlatformVersion search the default sdk locations for the passed in sdk name.
+        /// The format of the sdk moniker is  SDKName, Version=X.X
+        /// </summary>
+        /// <param name="sdkMoniker">Name of the SDK to determine the installation location for.</param>
+        /// <param name="targetPlatformIdentifier">Targeted platform to find SDKs for</param>
+        /// <param name="targetPlatformVersion">Targeted platform version to find SDKs for</param>
+        /// <param name="diskRoots">List of disk roots to search for sdks within</param>
+        /// <param name="extensionDiskRoots">List of disk roots to look for manifest driven extension sdks</param>
+        /// <param name="registryRoot">Registry root to look for sdks within</param>
+        /// <returns>Location of the SDK if it is found, empty string if it could not be found</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
+        public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string extensionDiskRoots, string registryRoot)
+        {
             ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, "targetPlatformVersion");
 
             string[] sdkDiskRoots = null;
@@ -457,12 +503,18 @@ namespace Microsoft.Build.Utilities
                 sdkDiskRoots = diskRoots.Split(s_diskRootSplitChars, StringSplitOptions.RemoveEmptyEntries);
             }
 
+            string[] extensionSdkDiskRoots = null;
+            if (!String.IsNullOrEmpty(extensionDiskRoots))
+            {
+                extensionSdkDiskRoots = extensionDiskRoots.Split(s_diskRootSplitChars, StringSplitOptions.RemoveEmptyEntries);
+            }
+
             Version platformVersion = null;
             string sdkLocation = String.Empty;
 
             if (Version.TryParse(targetPlatformVersion, out platformVersion))
             {
-                sdkLocation = GetPlatformExtensionSDKLocation(sdkMoniker, targetPlatformIdentifier, platformVersion, sdkDiskRoots, registryRoot);
+                sdkLocation = GetPlatformExtensionSDKLocation(sdkMoniker, targetPlatformIdentifier, platformVersion, sdkDiskRoots, extensionSdkDiskRoots, registryRoot);
             }
 
             return sdkLocation;
@@ -721,23 +773,13 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                string sdkRoot = null;
-
-                if (String.IsNullOrEmpty(sdkIdentifier))
-                {
-                    // Falls back to the old SDK world, e.g. C:\Program Files (x86)\Windows Kits\8.2
-                    sdkRoot = GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
-                }
-                else
-                {
-                    // Get the root to the new Once Core SDK. For now it's like: C:\Program Files (x86)\Windows SDKs\1.0
-                    sdkRoot = GetPlatformSDKLocation(sdkIdentifier, sdkVersion, diskRoots, registryRoot);
-                }
+                // e.g. C:\Program Files (x86)\Windows Kits\8.2
+                string sdkRoot = ToolLocationHelper.GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
 
                 if (!String.IsNullOrEmpty(sdkRoot))
                 {
                     // In the old SDK world, it is e.g. C:\Program Files (x86)\Windows Kits\8.2\DesignTime\CommonConfiguration\Neutral
-                    // In OneCore SDK world, it is e.g. C:\Program Files (x86)\Windows SDKs\1.0\DesignTime\CommonConfiguration\Neutral\UAP\0.8.0.0
+                    // In OneCore SDK world, it is e.g. C:\Program Files (x86)\Windows Kits\10.0\DesignTime\CommonConfiguration\Neutral\UAP\0.8.0.0
 
                     if (String.IsNullOrEmpty(sdkIdentifier))
                     {
@@ -983,7 +1025,7 @@ namespace Microsoft.Build.Utilities
             try
             {
                 // TODO: Add caching so that we only have to read all this stuff in once. 
-                TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(sdkIdentifier, sdkVersion, diskRoots, null, registryRoot);
+                TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
                 string platformManifestLocation = null;
 
                 if (matchingSdk != null)
@@ -1031,6 +1073,11 @@ namespace Microsoft.Build.Utilities
         /// <returns>List of matching WinMDs</returns>
         internal static string[] GetApiContractReferences(IEnumerable<ApiContract> apiContracts, string targetPlatformSdkRoot)
         {
+            if (apiContracts == null)
+            {
+                return new string[] { };
+            }
+
             List<string> contractWinMDs = new List<string>();
 
             string referencesRoot = Path.Combine(targetPlatformSdkRoot, referencesFolderName);
@@ -1202,6 +1249,72 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Given an SDK Identifier and SDK version, return the latest installed platform.
+        /// </summary>
+        /// <param name="sdkIdentifier">SDK for which to find the latest installed platform</param>
+        /// <param name="sdkVersion">SDK version for which to find the latest installed platform</param>
+        /// <returns>The latest installed version for the given SDK</returns>
+        public static string GetLatestSDKTargetPlatformVersion(string sdkIdentifier, string sdkVersion)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(sdkIdentifier, "sdkIdentifier");
+            ErrorUtilities.VerifyThrowArgumentNull(sdkVersion, "sdkVersion");
+
+            List<Version> availablePlatformVersions = new List<Version>();
+            IEnumerable<string> platformMonikerList = GetPlatformsForSDK(sdkIdentifier, new Version(sdkVersion), null, null);
+
+            Version platformVersion;
+            foreach (string platformMoniker in platformMonikerList)
+            {
+                if (TryParsePlatformVersion(platformMoniker, out platformVersion))
+                {
+                    availablePlatformVersions.Add(platformVersion);
+                }
+            }
+
+            if (availablePlatformVersions != null && availablePlatformVersions.Count > 0)
+            {
+                return availablePlatformVersions.OrderByDescending(x => x).FirstOrDefault().ToString();
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Tries to parse the "version" out of a platformMoniker. 
+        /// </summary>
+        /// <param name="platformMoniker">PlatformMoniker, in the form "PlatformName, Version=version"</param>
+        /// <param name="platformVersion">The version of the platform, if the parse was successful - Else set to null</param>
+        /// <returns>True if parse was successful, false otherwise </returns>
+        internal static bool TryParsePlatformVersion(string platformMoniker, out Version platformVersion)
+        {
+            platformVersion = null;
+            FrameworkNameVersioning framework = null;
+            try
+            {
+                framework = new FrameworkNameVersioning(platformMoniker);
+            }
+            catch (Exception e)
+            {
+                if (!(e is ArgumentException || e is ArgumentNullException))
+                {
+                    throw;
+                }
+                ErrorUtilities.DebugTraceMessage("TryParsePlatformVersion", "Cannot create FrameworkName object, Exception:{0}", e.Message);
+            }
+            if (framework != null)
+            {
+                platformVersion = framework.Version;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Given a target platform identifier and version and locations in which to search, find the TargetPlatformSDK 
         /// object that matches.  
         /// </summary>
@@ -1246,8 +1359,7 @@ namespace Microsoft.Build.Utilities
             // For UAP platforms match against registered platforms...
             // Logic is same as used for managed UAP projects
             // vsproject\flavors\ProjectFlavoring\Microsoft.VisualStudio.ProjectFlavoring\Microsoft\VisualStudio\ProjectFlavoring\Retargeting\Management\VsMultiTargetingPlatformProvider.cs:FindPlatformSdk
-            if (matchingSdk == null &&
-                string.Equals(targetPlatformIdentifier, "UAP", StringComparison.OrdinalIgnoreCase))
+            if (matchingSdk == null)
             {
                 string versionString = targetPlatformVersion.ToString();
                 matchingSdk = targetPlatforms.FirstOrDefault<TargetPlatformSDK>(platform => platform.ContainsPlatform(targetPlatformIdentifier, versionString));
@@ -2118,10 +2230,17 @@ namespace Microsoft.Build.Utilities
                     continue;
                 }
 
+                // Leave this entry as partners have already started to develop against this path, we will eventually remove this
                 DirectoryInfo extensionSdksDirectory = rootInfo.GetDirectories("Extension SDKs", SearchOption.TopDirectoryOnly).FirstOrDefault();
                 if (extensionSdksDirectory != null)
                 {
                     GatherExtensionSDKs(extensionSdksDirectory, extensionSdk);
+                }
+
+                DirectoryInfo extensionSdksDirectory2 = rootInfo.GetDirectories("ExtensionSDKs", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                if (extensionSdksDirectory2 != null)
+                {
+                    GatherExtensionSDKs(extensionSdksDirectory2, extensionSdk);
                 }
             }
         }
@@ -2215,7 +2334,15 @@ namespace Microsoft.Build.Utilities
                     // Go through each of the targetplatform versions under the targetplatform identifier.
                     foreach (KeyValuePair<Version, List<string>> directoryUnderRoot in versionsInRoot)
                     {
-                        TargetPlatformSDK platformSDKKey = new TargetPlatformSDK(rootPathWithIdentifier.Name, directoryUnderRoot.Key, null);
+                        TargetPlatformSDK platformSDKKey;
+                        if (rootPathWithIdentifier.Name.Equals(uapDirectoryName, StringComparison.OrdinalIgnoreCase) && directoryUnderRoot.Key.Major == uapVersion)
+                        {
+                            platformSDKKey = new TargetPlatformSDK(uapRegistryName, directoryUnderRoot.Key, null);
+                        }
+                        else
+                        {
+                            platformSDKKey = new TargetPlatformSDK(rootPathWithIdentifier.Name, directoryUnderRoot.Key, null);
+                        }
                         TargetPlatformSDK targetPlatformSDK = null;
 
                         // DirectoryUnderRoot.Value will be a list of the raw directory strings under the targetplatform identifier directory that map to the versions specified in directoryUnderRoot.Key.
@@ -3346,7 +3473,7 @@ namespace Microsoft.Build.Utilities
             {
                 if (s_cachedHighestFrameworkNameForTargetFrameworkIdentifier == null)
                 {
-                    s_cachedHighestFrameworkNameForTargetFrameworkIdentifier = new Dictionary<string, System.Runtime.Versioning.FrameworkName>(StringComparer.OrdinalIgnoreCase);
+                    s_cachedHighestFrameworkNameForTargetFrameworkIdentifier = new Dictionary<string, FrameworkNameVersioning>(StringComparer.OrdinalIgnoreCase);
                 }
                 else
                 {

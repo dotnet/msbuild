@@ -27,11 +27,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-#if WHIDBEY_BUILD
-    sealed internal class MockEngine : IBuildEngine
-#else
     sealed internal class MockEngine : IBuildEngine2
-#endif
     {
         private bool _isRunningMultipleNodes;
         private int _messages = 0;
