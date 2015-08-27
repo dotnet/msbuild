@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [TestMethod]
         [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        // Ignore: This scenario is broken in Roslyn
         public void TestDefaultSubToolsetFor40()
         {
             Toolset t = ProjectCollection.GlobalProjectCollection.GetToolset("4.0");

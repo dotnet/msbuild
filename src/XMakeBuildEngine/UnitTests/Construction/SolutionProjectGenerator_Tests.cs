@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         [TestMethod]
         [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        // Ignore: Needs investigation
         public void DefaultSubToolsetIfSolutionVersionSubToolsetDoesntExist()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         [TestMethod]
         [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        // Ignore: Needs investigation
         public void SolutionPassesSubToolsetToChildProjects2()
         {
             string classLibraryContentsToolsV4 = ObjectModelHelpers.CleanupFileContents(
@@ -433,7 +433,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         [TestMethod]
         [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        // Ignore: Needs investigation
         public void SolutionDoesntPassSubToolsetToChildProjects()
         {
             try
@@ -1406,8 +1406,6 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestTargetFrameworkPaths1()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)

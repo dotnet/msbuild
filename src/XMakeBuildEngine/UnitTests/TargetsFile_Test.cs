@@ -31,8 +31,6 @@ namespace Microsoft.Build.UnitTests
         /// Check that the ARM flag is passed to the compiler when targeting ARM.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TargetARM()
         {
             string file = null;
@@ -85,8 +83,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -137,8 +133,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void ExplicitAnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -190,8 +184,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -248,8 +240,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ExplicitAnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -307,8 +297,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -359,8 +347,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ExplicitAnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -462,8 +448,6 @@ namespace Microsoft.Build.UnitTests
         /// targeting .NET 4.0 do not get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ExplicitAnyCPU40ExeProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -515,8 +499,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -573,8 +555,6 @@ namespace Microsoft.Build.UnitTests
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void ExplicitAnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -632,8 +612,6 @@ namespace Microsoft.Build.UnitTests
         /// not supported for library projects, if Prefer32Bit is explicitly set, we should still respect that. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void AnyCPULibraryProjectIs32BitPreferredIfPrefer32BitSet()
         {
             string file = null;
@@ -686,8 +664,6 @@ namespace Microsoft.Build.UnitTests
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -738,8 +714,6 @@ namespace Microsoft.Build.UnitTests
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void AnyCPUJupiterProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -792,8 +766,6 @@ namespace Microsoft.Build.UnitTests
         /// Validate that the GetFrameworkPaths target 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void TestGetFrameworkPaths()
         {
             MockLogger logger = new MockLogger();
@@ -829,8 +801,6 @@ namespace Microsoft.Build.UnitTests
         /// Validate that the GetFrameworkPaths target 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TestTargetFrameworkPaths()
         {
             string[] targetFrameworkVersions = { "v2.0", "v3.0", "v3.5", "v4.0", "v4.5", "" };
@@ -896,8 +866,6 @@ namespace Microsoft.Build.UnitTests
         /// Doesn't synthesize Link metadata if the items are defined in the project  
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NoLinkMetadataSynthesisWhenDefinedInProject()
         {
             string[] files = null;
@@ -960,8 +928,6 @@ namespace Microsoft.Build.UnitTests
         /// Synthesizes Link metadata if the items are defined in an import and are on the whitelist
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SynthesizeLinkMetadataForItemsOnWhitelist()
         {
             string[] files = null;
@@ -1041,8 +1007,6 @@ namespace Microsoft.Build.UnitTests
         /// Don't synthesize link metadata if the SynthesizeLinkMetadata property is false
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void DontSynthesizeLinkMetadataIfPropertyNotSet()
         {
             string[] files = null;

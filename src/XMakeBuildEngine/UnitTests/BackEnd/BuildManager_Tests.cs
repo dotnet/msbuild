@@ -146,8 +146,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// so that on the next call we get access to them
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void VerifyEnvironmentSavedBetweenCalls()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -340,8 +338,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// get all of the initial properties.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void InProcForwardPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -393,8 +389,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// get all of the initial properties.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void InProcMsBuildForwardAllPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1161,8 +1155,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A sequential build.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void OverlappingBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1562,8 +1554,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that overlapping builds of the same project are allowed.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void OverlappingBuildsOfTheSameProjectSameTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1755,8 +1745,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Retrieving a ProjectInstance after another build without resetting the cache keeps the existing instance
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void GhostProjectRootElementCache()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -1911,8 +1899,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that using a second BuildManager doesn't cause the system to crash.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void Regress251333()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2179,8 +2165,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure()
         {
             string projA = null;
@@ -2246,8 +2230,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// AfterTargets, only one of which fails. 
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints()
         {
             string projA = null;
@@ -2329,8 +2311,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// entrypoint target.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void FailedNestedAfterTargetInP2PShouldCauseOverallBuildFailure()
         {
             string projA = null;

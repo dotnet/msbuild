@@ -512,8 +512,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// they only get unescaped when fed into a subsequent task.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void InferEscapedOutputsFromTask()
         {
             string inputFile = null;
@@ -556,8 +554,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// as an escaped percent sign.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ItemTransformContainingSemicolon()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -583,8 +579,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// as an escaped percent sign.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -646,8 +640,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// won't be unescaped.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void GlobalPropertyWithEscapedCharacters()
         {
             MockLogger logger = new MockLogger();
@@ -672,8 +664,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// literally, not as a wildcard
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void EscapedWildcardsShouldNotBeExpanded()
         {
             MockLogger logger = new MockLogger();
@@ -708,8 +698,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// literally, not as a wildcard
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
             MockLogger logger = new MockLogger();
@@ -775,8 +763,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// same name.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void TargetNamesAlwaysUnescaped_Override()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -908,8 +894,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInConfiguration()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -968,8 +952,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInConfiguration_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
@@ -1038,8 +1020,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInAssemblyName()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1092,8 +1072,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInAssemblyName_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
@@ -1156,8 +1134,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DollarSignInAssemblyName()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1210,8 +1186,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DollarSignInAssemblyName_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
@@ -1274,8 +1248,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInSourceCodeFilename()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1328,8 +1300,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInSourceCodeFilename_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
@@ -1395,7 +1365,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// </summary>
         [TestMethod]
         [Ignore]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
+        // Ignore: This scenario is broken in Roslyn
         public void SolutionWithLotsaCrazyCharacters()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1592,7 +1562,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// </summary>
         [TestMethod]
         [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        // Ignore: This scenario is broken in Roslyn
         public void SolutionWithLotsaCrazyCharacters_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
