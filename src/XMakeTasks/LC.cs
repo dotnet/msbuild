@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -92,6 +93,15 @@ namespace Microsoft.Build.Tasks
             set { Bag["SdkToolsPath"] = value; }
             get { return (string)Bag["SdkToolsPath"]; }
         }
+
+        /// <summary>
+        /// Targeted version of the framework (i.e. 4.5 or 2.0, etc.)
+        /// </summary>
+        [Required]
+        public string TargetFrameworkVersion
+        {
+            get; set;
+        }
         #endregion
 
         #region Class properties
@@ -132,10 +142,10 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Generates response file with arguments for lc.exe
+        /// Generates arguments to be passed to lc.exe
         /// </summary>
-        /// <param name="commandLine">command line builder class to add arguments to the response file</param>
-        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
+        /// <param name="commandLine">command line builder class to add arguments to</param>
+        private void AddCommands(CommandLineBuilderExtension commandLine)
         {
             commandLine.AppendSwitchIfNotNull("/target:", LicenseTarget.ItemSpec);
 
@@ -163,6 +173,43 @@ namespace Microsoft.Build.Tasks
                 outputPath = Path.Combine(OutputDirectory, outputPath);
 
             OutputLicense = new TaskItem(outputPath);
+        }
+
+
+        /// <summary>
+        /// Generates response file with arguments for lc.exe
+        /// Used when targeting framework version is 4.0 or later
+        /// </summary>
+        /// <param name="commandLine">command line builder class to add arguments to the response file</param>
+        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
+        {
+            Version targetFramework = Util.GetTargetFrameworkVersion(TargetFrameworkVersion);
+            // Don't generate response file on versions of the framework < 4.0
+            // They will use the 2.x SDK lc.exe which does not understand response files
+            if (targetFramework.CompareTo(new Version("4.0")) < 0)
+            {
+                return;
+            }
+
+            AddCommands(commandLine);
+        }
+
+        /// <summary>
+        /// Generates command line arguments for lc.exe
+        /// Used when targeting framework version is less than 4.0
+        /// </summary>
+        /// <param name="commandLine">command line builder class to add arguments to the command line</param>
+        protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
+        {
+            Version targetFramework = Util.GetTargetFrameworkVersion(TargetFrameworkVersion);
+            // If the target framework version is < 4.0, we will be using lc.exe from an older SDK
+            // In this case, we want to use command line parameters instead of a response file
+            if (targetFramework.CompareTo(new Version("4.0")) >= 0)
+            {
+                return;
+            }
+
+            AddCommands(commandLine);
         }
 
         #endregion

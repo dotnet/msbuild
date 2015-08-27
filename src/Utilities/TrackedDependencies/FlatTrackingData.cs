@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Resources;
+using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -68,12 +69,7 @@ namespace Microsoft.Build.Utilities
         #region Properties
 
         // Provide external access to the dependencyTable
-#if WHIDBEY_VISIBILITY
-        internal
-#else
-        public
-#endif
-        IDictionary<string, DateTime> DependencyTable
+        internal IDictionary<string, DateTime> DependencyTable
         {
             get { return _dependencyTable; }
         }
@@ -675,11 +671,11 @@ namespace Microsoft.Build.Utilities
                 // empty all tlogs
                 foreach (ITaskItem tlogFile in _tlogFiles)
                 {
-                    File.WriteAllText(tlogFile.ItemSpec, "", System.Text.Encoding.Unicode);
+                    File.WriteAllText(tlogFile.ItemSpec, "", Encoding.Unicode);
                 }
 
                 // Write out the dependency information as a new tlog
-                using (StreamWriter newTlog = new StreamWriter(firstTlog, false, System.Text.Encoding.Unicode))
+                using (StreamWriter newTlog = new StreamWriter(firstTlog, false, Encoding.Unicode))
                 {
                     foreach (string fileEntry in _dependencyTable.Keys)
                     {
@@ -748,7 +744,7 @@ namespace Microsoft.Build.Utilities
             FlatTrackingData outputs = new FlatTrackingData(hostTask, writeTLogNames, DateTime.MinValue);
 
             // Find out if we are up to date
-            isUpToDate = FlatTrackingData.IsUpToDate(hostTask.Log, upToDateCheckType, inputs, outputs);
+            isUpToDate = IsUpToDate(hostTask.Log, upToDateCheckType, inputs, outputs);
 
             // We're going to execute, so clear out the tlogs so
             // the new execution will correctly populate the tlogs a-new
@@ -959,12 +955,7 @@ namespace Microsoft.Build.Utilities
     /// <summary>
     /// The possible types of up to date check that we can support
     /// </summary>
-#if WHIDBEY_VISIBILITY
-    internal
-#else
-    public
-#endif
-    enum UpToDateCheckType
+    public enum UpToDateCheckType
     {
         InputNewerThanOutput,
         InputOrOutputNewerThanTracking,

@@ -41,6 +41,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetRuntime>Managed</TargetRuntime>
         <AlwaysUseNumericalSuffixInItemNames>true</AlwaysUseNumericalSuffixInItemNames>
         <DefineCommonItemSchemas Condition=" '$(DefineCommonItemSchemas)' == '' ">true</DefineCommonItemSchemas>
+        <DefineCommonReferenceSchemas Condition=" '$(DefineCommonReferenceSchemas)' == '' ">true</DefineCommonReferenceSchemas>
         <DefineCommonCapabilities Condition=" '$(DefineCommonCapabilities)' == '' ">true</DefineCommonCapabilities>
         <SynthesizeLinkMetadata Condition=" '$(SynthesizeLinkMetadata)' == '' and '$(HasSharedItems)' == 'true' ">true</SynthesizeLinkMetadata>
     </PropertyGroup>
@@ -167,8 +168,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  
 <!--
       The XamlPreCompile target must remain identical to
-      the CoreCompile target in this same file.
-      Any updates to one must be made to the other
+      the CoreCompile target in Microsoft.CSharp.Core.targets.
+      Any updates to one must be made to the other.
 -->
      <Target
         Name="XamlPreCompile"
@@ -209,11 +210,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <NoWarn Condition=" '$(BuildingInsideVisualStudio)' == 'true' and '$(VisualStudioVersion)' != '' and '$(VisualStudioVersion)' > '10.0' ">$(NoWarn);2008</NoWarn>
         </PropertyGroup>
 
-        <PropertyGroup>
-            <!-- If we are building in visual studio setting the CscToolPath will prevent the inproc compiler from being used during compile-->
-            <CscToolPath Condition="'$(CscToolPath)' == '' and '$(BuildingOutOfProcess)' != 'false'" >$(MsBuildToolsPath)</CscToolPath>
-        </PropertyGroup>
-
         <ItemGroup Condition="'$(TargetingClr2Framework)'=='true'">
             <ReferencePath>
                 <EmbedInteropTypes/>
@@ -239,13 +235,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           <AdditionalFiles Include="@(%(AdditionalFileItems.Identity))" />
         </ItemGroup>
         
-        <!-- Condition is to filter out the _CoreCompileResourceInputs so that it doesn't pass in culture resources to the compiler -->
+       <!-- Don't run analyzers for Csc task on XamlPrecompile pass, we only want to run them on core compile. -->
+       <!-- Analyzers="@(Analyzer)" -->
+
+       <PropertyGroup Condition="'$(UseSharedCompilation)' == ''">
+         <UseSharedCompilation>true</UseSharedCompilation>
+       </PropertyGroup>
+
+       <!-- Condition is to filter out the _CoreCompileResourceInputs so that it doesn't pass in culture resources to the compiler -->
         <Csc  Condition=" '%(_CoreCompileResourceInputs.WithCulture)' != 'true' "
               AdditionalLibPaths="$(AdditionalLibPaths)"
               AddModules="@(AddModules)"
               AdditionalFiles="@(AdditionalFiles)"
               AllowUnsafeBlocks="$(AllowUnsafeBlocks)"
-              Analyzers="@(Analyzer)"
               ApplicationConfiguration="$(AppConfigForCompiler)"
               BaseAddress="$(BaseAddress)"
               CheckForOverflowUnderflow="$(CheckForOverflowUnderflow)"
@@ -259,6 +261,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               EmitDebugInformation="$(DebugSymbols)"
               EnvironmentVariables="$(CscEnvironment)"              
               ErrorEndLocation="$(ErrorEndLocation)"
+              ErrorLog="$(ErrorLog)"
               ErrorReport="$(ErrorReport)"
               FileAlignment="$(FileAlignment)"
               GenerateFullPaths="$(GenerateFullPaths)"
@@ -280,6 +283,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               Prefer32Bit="$(Prefer32Bit)"
               PreferredUILang="$(PreferredUILang)"
               References="@(ReferencePath)"
+              ReportAnalyzer="$(ReportAnalyzer)"
               Resources="@(_CoreCompileResourceInputs);@(CompiledLicenseFile)"
               ResponseFiles="$(CompilerResponseFile)"
               Sources="@(Compile)"
@@ -289,6 +293,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               ToolPath="$(CscToolPath)"
               TreatWarningsAsErrors="$(TreatWarningsAsErrors)"
               UseHostCompilerIfAvailable="$(UseHostCompilerIfAvailable)"
+              UseSharedCompilation="$(UseSharedCompilation)"
               Utf8Output="$(Utf8Output)"
               VsSessionGuid="$(VsSessionGuid)"
               WarningLevel="$(WarningLevel)"
@@ -308,145 +313,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
         <OnError Condition="'$(OnXamlPreCompileErrorTarget)' != ''" ExecuteTargets="$(OnXamlPreCompileErrorTarget)" />
     </Target>
- 
-<!--
-      The CoreCompile target must remain identical to
-      the XamlPreCompile target in this same file.
-      Any updates to one must be made to the other
--->
-    <Target
-        Name="CoreCompile"
-        Inputs="$(MSBuildAllProjects);
-                @(Compile);                               
-                @(_CoreCompileResourceInputs);
-                $(ApplicationIcon);
-                $(AssemblyOriginatorKeyFile);
-                @(ReferencePath);
-                @(CompiledLicenseFile);
-                @(LinkResource);
-                @(EmbeddedDocumentation); 
-                $(Win32Resource);
-                $(Win32Manifest);
-                @(CustomAdditionalCompileInputs);
-                $(ResolvedCodeAnalysisRuleSet)"
-        Outputs="@(DocFileItem);
-                 @(IntermediateAssembly);
-                 @(_DebugSymbolsIntermediatePath);                 
-                 $(NonExistentFile);
-                 @(CustomAdditionalCompileOutputs)"
-        Returns=""
-        DependsOnTargets="$(CoreCompileDependsOn)"
-    >
-        <!-- These two compiler warnings are raised when a reference is bound to a different version
-             than specified in the assembly reference version number.  MSBuild raises the same warning in this case,
-             so the compiler warning would be redundant. -->
-        <PropertyGroup Condition="('$(TargetFrameworkVersion)' != 'v1.0') and ('$(TargetFrameworkVersion)' != 'v1.1')">
-            <NoWarn>$(NoWarn);1701;1702</NoWarn>
-        </PropertyGroup>
 
-        <PropertyGroup>
-            <!-- To match historical behavior, when inside VS11+ disable the warning from csc.exe indicating that no sources were passed in-->
-            <NoWarn Condition=" '$(BuildingInsideVisualStudio)' == 'true' and '$(VisualStudioVersion)' != '' and '$(VisualStudioVersion)' > '10.0' ">$(NoWarn);2008</NoWarn>
-        </PropertyGroup>
+    <PropertyGroup>
+        <CSharpCoreTargetsPath Condition="'$(CSharpCoreTargetsPath)' == ''">Microsoft.CSharp.Core.targets</CSharpCoreTargetsPath>
+    </PropertyGroup>
 
-        <PropertyGroup>
-            <!-- If we are building in visual studio setting the CscToolPath will prevent the inproc compiler from being used during compile-->
-            <CscToolPath Condition="'$(CscToolPath)' == '' and '$(BuildingOutOfProcess)' != 'false'" >$(MsBuildToolsPath)</CscToolPath>
-        </PropertyGroup>
+    <Import Project="$(CSharpCoreTargetsPath)" />
 
-        <ItemGroup Condition="'$(TargetingClr2Framework)'=='true'">
-            <ReferencePath>
-                <EmbedInteropTypes/>
-            </ReferencePath>
-        </ItemGroup>
-        
-        <PropertyGroup>
-            <!-- If the user has specified AppConfigForCompiler, we'll use it. If they have not, but they set UseAppConfigForCompiler,
-                 then we'll use AppConfig -->
-            <AppConfigForCompiler Condition="'$(AppConfigForCompiler)' == '' and '$(UseAppConfigForCompiler)' == 'true'">$(AppConfig)</AppConfigForCompiler>
-  
-            <!-- If we are targeting winmdobj we want to specifically the pdbFile property since we do not want it to collide with the output of winmdexp--> 
-            <PdbFile Condition="'$(PdbFile)' == '' and '$(OutputType)' == 'winmdobj' and '$(_DebugSymbolsProduced)' == 'true'">$(IntermediateOutputPath)$(TargetName).compile.pdb</PdbFile>
-        </PropertyGroup>
-        
-        <!-- Prefer32Bit was introduced in .NET 4.5. Set it to false if we are targeting 4.0 -->
-        <PropertyGroup Condition="('$(TargetFrameworkVersion)' == 'v4.0')">
-            <Prefer32Bit>false</Prefer32Bit>
-        </PropertyGroup>
-       
-        <ItemGroup Condition="('$(AdditionalFileItemNames)' != '')">
-          <AdditionalFileItems Include="$(AdditionalFileItemNames)" />
-          <AdditionalFiles Include="@(%(AdditionalFileItems.Identity))" />
-        </ItemGroup>
-      
-        <!-- Condition is to filter out the _CoreCompileResourceInputs so that it doesn't pass in culture resources to the compiler -->
-        <Csc  Condition=" '%(_CoreCompileResourceInputs.WithCulture)' != 'true' "
-              AdditionalLibPaths="$(AdditionalLibPaths)"
-              AddModules="@(AddModules)"
-              AdditionalFiles="@(AdditionalFiles)"
-              AllowUnsafeBlocks="$(AllowUnsafeBlocks)"
-              Analyzers="@(Analyzer)"
-              ApplicationConfiguration="$(AppConfigForCompiler)"
-              BaseAddress="$(BaseAddress)"
-              CheckForOverflowUnderflow="$(CheckForOverflowUnderflow)"
-              CodeAnalysisRuleSet="$(ResolvedCodeAnalysisRuleSet)"
-              CodePage="$(CodePage)"
-              DebugType="$(DebugType)"
-              DefineConstants="$(DefineConstants)"
-              DelaySign="$(DelaySign)"
-              DisabledWarnings="$(NoWarn)"
-              DocumentationFile="@(DocFileItem)"
-              EmitDebugInformation="$(DebugSymbols)"
-              EnvironmentVariables="$(CscEnvironment)"              
-              ErrorEndLocation="$(ErrorEndLocation)"
-              ErrorReport="$(ErrorReport)"
-              FileAlignment="$(FileAlignment)"
-              GenerateFullPaths="$(GenerateFullPaths)"
-              HighEntropyVA="$(HighEntropyVA)"
-              KeyContainer="$(KeyContainerName)"
-              KeyFile="$(KeyOriginatorFile)"
-              LangVersion="$(LangVersion)"
-              LinkResources="@(LinkResource)"
-              MainEntryPoint="$(StartupObject)"
-              ModuleAssemblyName="$(ModuleAssemblyName)"
-              NoConfig="true"
-              NoLogo="$(NoLogo)"
-              NoStandardLib="$(NoCompilerStandardLib)"
-              NoWin32Manifest="$(NoWin32Manifest)"
-              Optimize="$(Optimize)"
-              OutputAssembly="@(IntermediateAssembly)"
-              PdbFile="$(PdbFile)" 
-              Platform="$(PlatformTarget)"
-              Prefer32Bit="$(Prefer32Bit)"
-              PreferredUILang="$(PreferredUILang)"
-              References="@(ReferencePath)"
-              Resources="@(_CoreCompileResourceInputs);@(CompiledLicenseFile)"
-              ResponseFiles="$(CompilerResponseFile)"
-              Sources="@(Compile)"
-              SubsystemVersion="$(SubsystemVersion)"
-              TargetType="$(OutputType)"
-              ToolExe="$(CscToolExe)"
-              ToolPath="$(CscToolPath)"
-              TreatWarningsAsErrors="$(TreatWarningsAsErrors)"
-              UseHostCompilerIfAvailable="$(UseHostCompilerIfAvailable)"
-              Utf8Output="$(Utf8Output)"
-              VsSessionGuid="$(VsSessionGuid)"
-              WarningLevel="$(WarningLevel)"
-              WarningsAsErrors="$(WarningsAsErrors)"
-              WarningsNotAsErrors="$(WarningsNotAsErrors)"
-              Win32Icon="$(ApplicationIcon)"
-              Win32Manifest="$(Win32Manifest)"
-              Win32Resource="$(Win32Resource)"
-              />            
-                
-              <ItemGroup>
-                  <_CoreCompileResourceInputs Remove="@(_CoreCompileResourceInputs)" />                  
-              </ItemGroup>
-             
-              <CallTarget Targets="$(TargetsTriggeredByCompilation)" Condition="'$(TargetsTriggeredByCompilation)' != ''"/>
-              
-    </Target>
-    
     <Import Project="Microsoft.Common.targets" />
     <Import Project="$(MSBuildToolsPath)\Microsoft.ServiceModel.targets" Condition="('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.ServiceModel.targets')"/>
 

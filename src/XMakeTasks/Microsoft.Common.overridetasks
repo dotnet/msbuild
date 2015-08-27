@@ -8,17 +8,17 @@
                is encountered, it will cause the task to be rediscovered next time the task is used. -->
     <!-- NOTE: Using the fully qualified class name in a <UsingTask> tag is faster than using a partially qualified name. -->
 
-    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveComReference"  AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"     AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="ResolveComReference"                        AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="GenerateResource"                           AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="RegisterAssembly"                           AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="UnregisterAssembly"                         AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="ReadLinesFromFile"                          AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="FindUnderPath"                              AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="ConvertToAbsolutePath"                      AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="MSBuild"                                    AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
-    <UsingTask TaskName="ResolveAssemblyReference"                   AssemblyFile="Microsoft.Build.Tasks.Core.dll" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.ResolveComReference"  AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"     AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"     AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"   AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="ResolveComReference"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="GenerateResource"                           AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="RegisterAssembly"                           AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="UnregisterAssembly"                         AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="ReadLinesFromFile"                          AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="FindUnderPath"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="ConvertToAbsolutePath"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="MSBuild"                                    AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="ResolveAssemblyReference"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
 </Project>

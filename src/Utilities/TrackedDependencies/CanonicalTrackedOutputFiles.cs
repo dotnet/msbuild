@@ -33,12 +33,7 @@ namespace Microsoft.Build.Utilities
         #region Properties
 
         // Provide external access to the dependencyTable
-#if WHIDBEY_VISIBILITY
-        internal
-#else
-        public
-#endif
-        Dictionary<string, Dictionary<string, DateTime>> DependencyTable
+        internal Dictionary<string, Dictionary<string, DateTime>> DependencyTable
         {
             get { return _dependencyTable; }
         }

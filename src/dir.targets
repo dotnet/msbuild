@@ -7,6 +7,20 @@
     <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
   </PropertyGroup>
   
+  <!-- Copy Roslyn Compiler tools to the output path (so we have csc.exe, etc) -->
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <CompilerToolsFiles Include="$(CompilerToolsDir)\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CompilerToolsFiles)"
+          DestinationFolder="$(OutputPath)"
+          Retries="5"
+          SkipUnchangedFiles="true" />
+  </Target>
+  
+  <!-- OSS sign assemblies after compile runs. -->
+  <Import Project="$(ToolsDir)\sign.targets" />
+
   <!-- Restore packages -->
   <PropertyGroup>
     <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'packages.config'))</PackagesConfig>

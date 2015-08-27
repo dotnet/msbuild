@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Helper logging class for tasks, used for dealing with two resource streams.
     /// </summary>
-#if WHIDBEY_VISIBILITY || BUILD_ENGINE
+#if BUILD_ENGINE
     internal
 #else
     public
