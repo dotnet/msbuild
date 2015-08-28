@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectRootElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Test the ProjectRootElement class.</summary>
 //-----------------------------------------------------------------------
@@ -312,7 +312,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.IsTrue(exceptionThrown, "ERROR: An invalid project file exception should have been thrown.");
         }
-        
+
         /// <summary>
         /// Valid Xml, invalid syntax thrown by child element parsing
         /// </summary>
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidProjectFileException))]
-        public void ValidXmlInvalidSyntaxOpenFromDiskTwice() 
+        public void ValidXmlInvalidSyntaxOpenFromDiskTwice()
         {
             string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
@@ -835,23 +835,23 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 ProjectRootElement p = ProjectRootElement.Open(solutionFile);
             }
-        catch (PrivilegeNotHeldException)
-        {
-        throw new InvalidProjectFileException("Running unelevated so skipping this scenario.");
-        }
+            catch (PrivilegeNotHeldException)
+            {
+                throw new InvalidProjectFileException("Running unelevated so skipping this scenario.");
+            }
             finally
             {
-        if (security != null)
-        {
+                if (security != null)
+                {
                     security.RemoveAccessRule(rule);
-        }
+                }
 
                 File.Delete(solutionFile);
                 File.Delete(tempFileSentinel);
                 Assert.AreEqual(false, File.Exists(solutionFile));
             }
         }
-        
+
         /// <summary>
         /// Build a project file that can't be accessed
         /// </summary>
@@ -880,8 +880,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             catch (PrivilegeNotHeldException)
             {
-           throw new InvalidProjectFileException("Running unelevated so skipping the scenario."); 
-        }
+                throw new InvalidProjectFileException("Running unelevated so skipping the scenario.");
+            }
             finally
             {
                 if (security != null)

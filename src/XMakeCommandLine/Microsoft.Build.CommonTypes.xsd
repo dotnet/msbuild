@@ -950,6 +950,7 @@ elementFormDefault="qualified">
     
     <xs:element name="VisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="MinimumVisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AdditionalFileItemNames" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AllowUnsafeBlocks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AppConfigForCompiler" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ApplicationIcon" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1284,6 +1285,7 @@ elementFormDefault="qualified">
     <xs:element name="EnableSQLServerDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EnableSecurityDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EnableUnmanagedDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="ErrorLog" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ErrorReport" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EmbedManifest" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ErrorReportUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1427,6 +1429,7 @@ elementFormDefault="qualified">
     <xs:element name="RemoteDebugEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RemoteDebugMachine" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RemoveIntegerChecks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="ReportAnalyzer" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ResponseFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RootNamespace" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SccProjectName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -3983,9 +3986,7 @@ elementFormDefault="qualified">
     <xs:element name="PrepareLayoutDependsOn" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
     <xs:element name="ProduceAppxBundle" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
     <xs:element name="RebuildPackageAction" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
-    <xs:element name="RegisterAppxLayoutDependsOn" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
     <xs:element name="ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
-    <xs:element name="UnRegisterAppxLayoutDependsOn" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
     <xs:element name="ValidatePresenceOfAppxManifestItemsDependsOn" type="msb:StringPropertyType" substitutionGroup="msb:Property" />
 
     <!-- TODO: Remove once Windows Phone SDK starts shipping StoreManifest.xsd -->
@@ -4469,22 +4470,6 @@ elementFormDefault="qualified">
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="CreateAppxLayout" substitutionGroup="msb:Task">
-        <xs:complexType>
-            <xs:complexContent>
-                <xs:extension base="msb:TaskType">
-                    <xs:attribute name="AppxRecipe" use="required" />
-                    <xs:attribute name="LayoutDir" />
-                    <xs:attribute name="Incremental" type="msb:boolean" />
-                    <xs:attribute name="IgnoreLocalNetworkLoopback" type="msb:boolean" />
-                    <xs:attribute name="AllowLocalNetworkLoopback" type="msb:boolean" />
-                    <xs:attribute name="PackageFullName" />
-                    <xs:attribute name="FirstAppUserModelId" />
-                </xs:extension>
-            </xs:complexContent>
-        </xs:complexType>
-    </xs:element>
-
     <xs:complexType name="CreatePriConfigXmlTaskType">
         <xs:complexContent>
             <xs:extension base="msb:TaskType">
@@ -4939,17 +4924,6 @@ elementFormDefault="qualified">
                     <xs:attribute name="PdbCopyToolPath" use="required" />
                     <xs:attribute name="InputPdb" use="required" />
                     <xs:attribute name="StrippedPdb" use="required" />
-                </xs:extension>
-            </xs:complexContent>
-        </xs:complexType>
-    </xs:element>
-    
-    <xs:element name="UnregisterAppx" substitutionGroup="msb:Task">
-        <xs:complexType>
-            <xs:complexContent>
-                <xs:extension base="msb:TaskType">
-                    <xs:attribute name="FullPackageName" />
-                    <xs:attribute name="LayoutDir" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>

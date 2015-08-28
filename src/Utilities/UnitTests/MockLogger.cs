@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -23,16 +26,16 @@ namespace Microsoft.VisualStudio.Build.UnitTest
      */
     internal sealed class MockLogger : ILogger
     {
-#region Properties
-        private int errorCount = 0;
-        private int warningCount = 0;
-        private StringBuilder fullLog = new StringBuilder();
-        private List<BuildErrorEventArgs> errors = new List<BuildErrorEventArgs>();
-        private List<BuildFinishedEventArgs> buildFinishedEvents = new List<BuildFinishedEventArgs>();
-        private List<BuildWarningEventArgs> warnings = new List<BuildWarningEventArgs>();
-        private List<ExternalProjectStartedEventArgs> externalProjectStartedEvents = new List<ExternalProjectStartedEventArgs>();
-        private List<ExternalProjectFinishedEventArgs> externalProjectFinishedEvents = new List<ExternalProjectFinishedEventArgs>();
-        private bool logBuildFinishedEvent = true;
+        #region Properties
+        private int _errorCount = 0;
+        private int _warningCount = 0;
+        private StringBuilder _fullLog = new StringBuilder();
+        private List<BuildErrorEventArgs> _errors = new List<BuildErrorEventArgs>();
+        private List<BuildFinishedEventArgs> _buildFinishedEvents = new List<BuildFinishedEventArgs>();
+        private List<BuildWarningEventArgs> _warnings = new List<BuildWarningEventArgs>();
+        private List<ExternalProjectStartedEventArgs> _externalProjectStartedEvents = new List<ExternalProjectStartedEventArgs>();
+        private List<ExternalProjectFinishedEventArgs> _externalProjectFinishedEvents = new List<ExternalProjectFinishedEventArgs>();
+        private bool _logBuildFinishedEvent = true;
 
         /// <summary>
         /// Should the build finished event be logged in the log file. This is to work around the fact we have different
@@ -42,11 +45,11 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         {
             get
             {
-                return logBuildFinishedEvent;
+                return _logBuildFinishedEvent;
             }
             set
             {
-                logBuildFinishedEvent = value;
+                _logBuildFinishedEvent = value;
             }
         }
 
@@ -58,9 +61,9 @@ namespace Microsoft.VisualStudio.Build.UnitTest
          */
         internal int ErrorCount
         {
-            get { return this.errorCount; }
-        }          
-        
+            get { return _errorCount; }
+        }
+
         /*
          * Method:  WarningCount
          *
@@ -69,7 +72,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
          */
         internal int WarningCount
         {
-            get { return this.warningCount; }
+            get { return _warningCount; }
         }
 
         /// <summary>
@@ -79,7 +82,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         {
             get
             {
-                return buildFinishedEvents;
+                return _buildFinishedEvents;
             }
         }
 
@@ -90,7 +93,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         {
             get
             {
-                return this.errors;
+                return _errors;
             }
         }
 
@@ -101,7 +104,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         {
             get
             {
-                return this.warnings;
+                return _warnings;
             }
         }
 
@@ -110,7 +113,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// </summary>
         internal List<ExternalProjectStartedEventArgs> ExternalProjectStartedEvents
         {
-            get { return this.externalProjectStartedEvents; }
+            get { return _externalProjectStartedEvents; }
         }
 
         /// <summary>
@@ -118,7 +121,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// </summary>
         internal List<ExternalProjectFinishedEventArgs> ExternalProjectFinishedEvents
         {
-            get { return this.externalProjectFinishedEvents; }
+            get { return _externalProjectFinishedEvents; }
         }
 
         /*
@@ -129,11 +132,11 @@ namespace Microsoft.VisualStudio.Build.UnitTest
          */
         internal string FullLog
         {
-            get { return this.fullLog.ToString(); }
-        }      
-#endregion                    
-        
-#region Minimal ILogger implementation
+            get { return _fullLog.ToString(); }
+        }
+        #endregion
+
+        #region Minimal ILogger implementation
 
         /*
          * Property:    Verbosity
@@ -143,10 +146,10 @@ namespace Microsoft.VisualStudio.Build.UnitTest
          */
         public LoggerVerbosity Verbosity
         {
-            get  {return LoggerVerbosity.Normal;}
-            set  {/* do nothing */}
-        }  
-        
+            get { return LoggerVerbosity.Normal; }
+            set {/* do nothing */}
+        }
+
         /*
          * Property:    Parameters
          * 
@@ -165,7 +168,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
                 // do nothing
             }
         }
-        
+
         /*
          * Method:  Initialize
          *
@@ -183,7 +186,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// </summary>
         public void ClearLog()
         {
-            this.fullLog = new StringBuilder();
+            _fullLog = new StringBuilder();
         }
 
         /*
@@ -196,7 +199,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         {
             // do nothing
         }
-#endregion
+        #endregion
 
         /*
          * Method:  LoggerEventHandler
@@ -214,41 +217,41 @@ namespace Microsoft.VisualStudio.Build.UnitTest
                 // need the second condition to pass on ploc builds
                 if (w.Code != "MSB4056" && !w.Message.Contains("MSB4056"))
                 {
-                    fullLog.AppendFormat("{0}({1},{2}): {3} warning {4}: {5}\r\n",
-                        w.File, 
+                    _fullLog.AppendFormat("{0}({1},{2}): {3} warning {4}: {5}\r\n",
+                        w.File,
                         w.LineNumber,
                         w.ColumnNumber,
                         w.Subcategory,
                         w.Code,
                         w.Message);
 
-                    ++warningCount;
-                    this.warnings.Add(w);
+                    ++_warningCount;
+                    _warnings.Add(w);
                 }
             }
             else if (eventArgs is BuildErrorEventArgs)
             {
-                BuildErrorEventArgs e = (BuildErrorEventArgs) eventArgs;
+                BuildErrorEventArgs e = (BuildErrorEventArgs)eventArgs;
 
-                fullLog.AppendFormat("{0}({1},{2}): {3} error {4}: {5}\r\n",
-                    e.File, 
+                _fullLog.AppendFormat("{0}({1},{2}): {3} error {4}: {5}\r\n",
+                    e.File,
                     e.LineNumber,
                     e.ColumnNumber,
                     e.Subcategory,
                     e.Code,
                     e.Message);
 
-                ++errorCount;
-                this.errors.Add(e);
+                ++_errorCount;
+                _errors.Add(e);
             }
             else
             {
                 // Log the message unless we are a build finished event and logBuildFinished is set to false.
-                bool logMessage = !(eventArgs is BuildFinishedEventArgs) || (eventArgs is BuildFinishedEventArgs && logBuildFinishedEvent);
+                bool logMessage = !(eventArgs is BuildFinishedEventArgs) || (eventArgs is BuildFinishedEventArgs && _logBuildFinishedEvent);
                 if (logMessage)
                 {
-                    fullLog.Append(eventArgs.Message);
-                    fullLog.Append("\r\n");
+                    _fullLog.Append(eventArgs.Message);
+                    _fullLog.Append("\r\n");
                 }
             }
 
@@ -263,7 +266,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             if (eventArgs is BuildFinishedEventArgs)
             {
-                buildFinishedEvents.Add((BuildFinishedEventArgs)eventArgs);
+                _buildFinishedEvents.Add((BuildFinishedEventArgs)eventArgs);
                 // We should not have any task crashes. Sometimes a test will validate that their expected error
                 // code appeared, but not realize it then crashed.
                 AssertLogDoesntContain("MSB4018");
@@ -283,16 +286,16 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         {
             get
             {
-                if (engineResourceManager == null)
+                if (s_engineResourceManager == null)
                 {
-                    engineResourceManager = new ResourceManager("Microsoft.Build.Resources.Strings", typeof(ProjectCollection).Assembly);
+                    s_engineResourceManager = new ResourceManager("Microsoft.Build.Resources.Strings", typeof(ProjectCollection).Assembly);
                 }
 
-                return engineResourceManager;
+                return s_engineResourceManager;
             }
         }
 
-        static private ResourceManager engineResourceManager = null;
+        static private ResourceManager s_engineResourceManager = null;
 
         // Gets the resource string given the resource ID
         static public string GetString(string stringId)
@@ -309,7 +312,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             StringReader reader = new StringReader(FullLog);
             int index = 0;
             string currentLine = reader.ReadLine();
-            while(currentLine != null)
+            while (currentLine != null)
             {
                 if (currentLine.Contains(contains[index]))
                 {
@@ -338,7 +341,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// </summary>
         internal void AssertNoErrors()
         {
-            Assert.AreEqual(0, errorCount);
+            Assert.AreEqual(0, _errorCount);
         }
 
         /// <summary>
@@ -346,8 +349,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// </summary>
         internal void AssertNoWarnings()
         {
-            Assert.AreEqual(0, warningCount);
+            Assert.AreEqual(0, _warningCount);
         }
-
     }
 }

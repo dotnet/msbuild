@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="EditingElementsReferencedByOrReferences_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for editing elements that are related to other XML elements</summary>
 //-----------------------------------------------------------------------
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     <I Include=""Z"" />
   </ItemGroup>
 </Project>";
-            
+
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
         }
 
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.AreEqual("A;D", item2.GetMetadataValue("M"), "Invalid metadata at start");
 
             item1.RemoveMetadata("M");
-            
+
             string expected =
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <ItemDefinitionGroup>
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item1 = project.GetItems("I").Where(i => i.EvaluatedInclude == "X").First();
             item1.RemoveMetadata("M");
-            
+
             string expected =
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <ItemDefinitionGroup>
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItem item2 = project.GetItems("I").Where(i => i.EvaluatedInclude == "Y").First();
             Assert.AreEqual("A;D", item2.GetMetadataValue("M"), "Invalid metadata after first removal");
         }
-    
+
         /// <summary>
         /// Removes metadata but still keep inherited one from item definition.
         /// </summary>
@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.AreEqual("m", item.GetMetadataValue("N"), "Wrong metadata value at startup");
 
             item.RemoveMetadata("M");
-            
+
             string expected =
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
   <ItemGroup>
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.AreEqual("%(I.M)", metadata.UnevaluatedValue, "Unevaluated value is wrong");
             Assert.AreEqual(String.Empty, metadata.EvaluatedValue, "Evaluated value is wrong");
         }
-        
+
         /// <summary>
         /// Removes duplicated property.
         /// </summary>

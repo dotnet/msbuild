@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="DefinitionEditing_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for editing through the definition model.</summary>
 //-----------------------------------------------------------------------
@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             IList<ProjectItem> items = project.AddItem("i", @"c:\" + Guid.NewGuid().ToString() + @"\**\i1");
 
-            Assert.AreEqual(0, items.Count);            
+            Assert.AreEqual(0, items.Count);
         }
 
         /// <summary>
@@ -552,7 +552,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Helpers.GetFirst(project.GetItems("i")).SetMetadataValue("n", "n1");
 
-                string expected = String.Format( 
+                string expected = String.Format(
                     ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
@@ -954,7 +954,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Helpers.VerifyAssertProjectContent(expected, project.Xml);
 
             Assert.AreEqual("$(p)", (Helpers.MakeList(project.Items))[1].EvaluatedInclude);
-        }        
+        }
 
         /// <summary>
         /// An item originates from a wildcard, and we rename it to something
@@ -1432,7 +1432,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             var property = project.SetProperty("p", "v1");
             property.Xml.Parent.RemoveAllChildren();
-            property.UnevaluatedValue = "v2";            
+            property.UnevaluatedValue = "v2";
         }
 
         /// <summary>
@@ -2029,7 +2029,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             IList<ProjectItem> items = project.AddItemFast("i", @"c:\" + Guid.NewGuid().ToString() + @"\**\i1");
 
-            Assert.AreEqual(0, items.Count);            
+            Assert.AreEqual(0, items.Count);
         }
 
         /// <summary>

@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -24,47 +27,47 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Initial targets a project should have
         /// </summary>
-        private string initialTargets;
-        
+        private string _initialTargets;
+
         /// <summary>
         /// Default targets a project should have
         /// </summary>
-        private string defaultTargets;
+        private string _defaultTargets;
 
         /// <summary>
         /// Tools version specified in the project file
         /// </summary>
-        private string toolsVersion;
+        private string _toolsVersion;
 
         /// <summary>
         /// Project file name
         /// </summary>
-        private string filename;
+        private string _filename;
 
         /// <summary>
         /// If a real instance of MSBuild project should be created
         /// </summary>
-        private bool createMSBuildProject;
+        private bool _createMSBuildProject;
 
         /// <summary>
         /// XMLDocument representation of the project file
         /// </summary>
-        private XmlDocumentWithLocation projectXmlDocument;
+        private XmlDocumentWithLocation _projectXmlDocument;
 
         /// <summary>
         /// Project XML
         /// </summary>
-        private XmlElement projectRootElement;
+        private XmlElement _projectRootElement;
 
         /// <summary>
         /// List of targets that have been added to this definition
         /// </summary>
-        private Dictionary<string, TargetDefinition> targets;
+        private Dictionary<string, TargetDefinition> _targets;
 
         /// <summary>
         /// Project definition to use which is specified by the test
         /// </summary>
-        private ProjectInstance msbuildProjectInstance;
+        private ProjectInstance _msbuildProjectInstance;
 
         #endregion
 
@@ -93,14 +96,14 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public ProjectDefinition(string filename, string initialTargets, string defaultTargets, string toolsVersion, bool createMSBuildProject)
         {
-            this.initialTargets = initialTargets;
-            this.defaultTargets = defaultTargets;
-            this.toolsVersion = toolsVersion;
-            this.filename = filename;
-            this.createMSBuildProject = createMSBuildProject;
-            this.projectXmlDocument = new XmlDocumentWithLocation();
-            this.targets = new Dictionary<string, TargetDefinition>();
-            this.projectRootElement = this.projectXmlDocument.CreateElement("Project", @"http://schemas.microsoft.com/developer/msbuild/2003");
+            _initialTargets = initialTargets;
+            _defaultTargets = defaultTargets;
+            _toolsVersion = toolsVersion;
+            _filename = filename;
+            _createMSBuildProject = createMSBuildProject;
+            _projectXmlDocument = new XmlDocumentWithLocation();
+            _targets = new Dictionary<string, TargetDefinition>();
+            _projectRootElement = _projectXmlDocument.CreateElement("Project", @"http://schemas.microsoft.com/developer/msbuild/2003");
             GenerateProjectRootElement();
         }
 
@@ -109,8 +112,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void AddTarget(TargetDefinition target)
         {
-            this.projectRootElement.AppendChild(target.FinalTargetXmlElement);
-            this.targets.Add(target.Name, target);
+            _projectRootElement.AppendChild(target.FinalTargetXmlElement);
+            _targets.Add(target.Name, target);
         }
 
         /// <summary>
@@ -118,18 +121,18 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public ProjectInstance GetMSBuildProjectInstance()
         {
-            if (!this.createMSBuildProject)
+            if (!_createMSBuildProject)
             {
                 return null;
             }
 
-            if (this.msbuildProjectInstance != null)
+            if (_msbuildProjectInstance != null)
             {
-                return this.msbuildProjectInstance;
+                return _msbuildProjectInstance;
             }
 
             CreateDefaultTarget();
-            ProjectRootElement pXml = ProjectRootElement.Open(this.projectXmlDocument);
+            ProjectRootElement pXml = ProjectRootElement.Open(_projectXmlDocument);
             Microsoft.Build.Evaluation.Project pDef = new Microsoft.Build.Evaluation.Project(pXml);
             return pDef.CreateProjectInstance();
         }
@@ -145,7 +148,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             set
             {
-                this.msbuildProjectInstance = value;
+                _msbuildProjectInstance = value;
             }
         }
 
@@ -156,7 +159,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.projectXmlDocument;
+                return _projectXmlDocument;
             }
         }
 
@@ -167,7 +170,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.filename;
+                return _filename;
             }
         }
 
@@ -178,7 +181,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.targets;
+                return _targets;
             }
         }
 
@@ -189,11 +192,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.defaultTargets;
+                return _defaultTargets;
             }
             set
             {
-                this.defaultTargets = value;
+                _defaultTargets = value;
             }
         }
 
@@ -204,11 +207,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.initialTargets;
+                return _initialTargets;
             }
             set
             {
-                this.initialTargets = value;
+                _initialTargets = value;
             }
         }
 
@@ -219,11 +222,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.createMSBuildProject;
+                return _createMSBuildProject;
             }
             set
             {
-                this.createMSBuildProject = value;
+                _createMSBuildProject = value;
             }
         }
 
@@ -236,7 +239,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void CreateDefaultTarget()
         {
-            if (this.projectRootElement.GetElementsByTagName("Target") == null || this.projectRootElement.GetElementsByTagName("Target").Count == 0)
+            if (_projectRootElement.GetElementsByTagName("Target") == null || _projectRootElement.GetElementsByTagName("Target").Count == 0)
             {
                 CreateDefaultFirstTarget();
             }
@@ -247,30 +250,29 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void GenerateProjectRootElement()
         {
-            
-            this.projectRootElement.SetAttribute("xmlns", @"http://schemas.microsoft.com/developer/msbuild/2003");
+            _projectRootElement.SetAttribute("xmlns", @"http://schemas.microsoft.com/developer/msbuild/2003");
 
-            if (this.defaultTargets != null)
+            if (_defaultTargets != null)
             {
-                this.projectRootElement.SetAttribute("DefaultTargets", this.defaultTargets);
+                _projectRootElement.SetAttribute("DefaultTargets", _defaultTargets);
             }
 
-            if (this.initialTargets != null)
+            if (_initialTargets != null)
             {
-                this.projectRootElement.SetAttribute("InitialTargets", this.initialTargets);
+                _projectRootElement.SetAttribute("InitialTargets", _initialTargets);
             }
 
-            if (this.toolsVersion != null)
+            if (_toolsVersion != null)
             {
-                this.projectRootElement.SetAttribute("ToolsVersion", this.toolsVersion);
+                _projectRootElement.SetAttribute("ToolsVersion", _toolsVersion);
             }
 
-            XmlElement propertyGroupElement = this.projectXmlDocument.CreateElement("PropertyGroup", @"http://schemas.microsoft.com/developer/msbuild/2003");
-            XmlNode propertyGroup = this.projectRootElement.AppendChild(propertyGroupElement as XmlNode);
-            XmlElement propertyElement = this.projectXmlDocument.CreateElement("GlobalConfigurationName", @"http://schemas.microsoft.com/developer/msbuild/2003");
-            propertyElement.InnerXml = this.filename + ":$(ConfigurationId)";
+            XmlElement propertyGroupElement = _projectXmlDocument.CreateElement("PropertyGroup", @"http://schemas.microsoft.com/developer/msbuild/2003");
+            XmlNode propertyGroup = _projectRootElement.AppendChild(propertyGroupElement as XmlNode);
+            XmlElement propertyElement = _projectXmlDocument.CreateElement("GlobalConfigurationName", @"http://schemas.microsoft.com/developer/msbuild/2003");
+            propertyElement.InnerXml = _filename + ":$(ConfigurationId)";
             propertyGroup.AppendChild(propertyElement as XmlNode);
-            this.projectXmlDocument.AppendChild(this.projectRootElement as XmlNode);
+            _projectXmlDocument.AppendChild(_projectRootElement as XmlNode);
         }
 
         /// <summary>
@@ -278,9 +280,9 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void CreateDefaultFirstTarget()
         {
-            TargetDefinition target = new TargetDefinition(RequestDefinition.defaultTargetName, this.projectXmlDocument);
+            TargetDefinition target = new TargetDefinition(RequestDefinition.defaultTargetName, _projectXmlDocument);
             this.AddTarget(target);
-            this.projectRootElement.AppendChild(target.FinalTargetXmlElement);
+            _projectRootElement.AppendChild(target.FinalTargetXmlElement);
         }
 
         #endregion
@@ -292,7 +294,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void Dispose()
         {
-            this.targets.Clear();
+            _targets.Clear();
         }
 
         #endregion

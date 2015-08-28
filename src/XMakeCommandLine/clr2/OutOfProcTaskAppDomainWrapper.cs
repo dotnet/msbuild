@@ -1,9 +1,11 @@
-﻿//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // <copyright file="OutOfProcTaskAppDomainWrapper.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 // <summary>Class implementing an out-of-proc node for executing tasks inside an AppDomain.</summary>
 //-----------------------------------------------------------------------
+
 using System;
 using Microsoft.Build.Shared;
 

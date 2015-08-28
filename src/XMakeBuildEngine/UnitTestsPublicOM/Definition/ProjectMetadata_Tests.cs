@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectMetadata_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectMetadata</summary>
 //-----------------------------------------------------------------------
@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void SpecialCharactersInMetadataValueEvaluation()
         {
             Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project();
-            var metadata = new Dictionary<string, string> 
+            var metadata = new Dictionary<string, string>
             {
                 { "EscapedSemicolon", "%3B" }, // Microsoft.Build.Internal.Utilities.Escape(";")
                 { "EscapedDollarSign", "%24" }, // Microsoft.Build.Internal.Utilities.Escape("$")

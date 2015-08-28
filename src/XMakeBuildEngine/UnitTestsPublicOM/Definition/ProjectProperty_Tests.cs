@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectProperty_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectProperty</summary>
 //-----------------------------------------------------------------------
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.ReevaluateIfNecessary();
 
             property.UnevaluatedValue = "v2";
-            
+
             Assert.AreEqual("v2", property.EvaluatedValue);
             Assert.AreEqual("v2", property.UnevaluatedValue);
             Assert.AreEqual(true, project.IsDirty);

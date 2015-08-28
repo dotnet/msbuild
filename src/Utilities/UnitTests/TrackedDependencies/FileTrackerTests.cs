@@ -958,9 +958,6 @@ class X
         }
 
         [TestMethod]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
-
         public void InProcTrackingTestNotStop()
         {
             InProcTrackingTesterNoStop(1);

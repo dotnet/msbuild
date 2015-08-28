@@ -286,7 +286,6 @@ namespace Microsoft.Build.Tasks
         afRetargetable = 0x0100            // The assembly can be retargeted (at runtime) to an
                                            //  assembly from a different publisher.
     };
-    [StructLayout(LayoutKind.Sequential)]
 
     /*
     From cor.h:
@@ -304,6 +303,7 @@ namespace Microsoft.Build.Tasks
             ULONG       ulOS;                   // [IN/OUT]Size of the OSINFO array/Actual # of entries filled in.
         } ASSEMBLYMETADATA;
     */
+    [StructLayout(LayoutKind.Sequential)]
     internal struct ASSEMBLYMETADATA
     {
         public UInt16 usMajorVersion;

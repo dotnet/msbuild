@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ConstructionEditing_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for editing through the construction model.</summary>
 //-----------------------------------------------------------------------
@@ -2656,6 +2656,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             var element = ProjectRootElement.Create().AddTarget("t").AddPropertyGroup().AddProperty("p", "v1");
             element.Parent.Parent.RemoveAllChildren();
             element.Value = "v2";
-        }       
+        }
     }
 }

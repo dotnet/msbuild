@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -255,7 +258,7 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Directory in which the PlatformManifest wrapped by this class lives
             /// </summary>
-            private string manifestDirectory = null;
+            private string _manifestDirectory = null;
 
             /// <summary>
             /// Accessor for the PlatformManifest wrapped by this class
@@ -271,10 +274,10 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             public TemporaryPlatformManifest(string contents)
             {
-                manifestDirectory = FileUtilities.GetTemporaryDirectory();
-                File.WriteAllText(Path.Combine(manifestDirectory, "Platform.xml"), ObjectModelHelpers.CleanupFileContents(contents));
+                _manifestDirectory = FileUtilities.GetTemporaryDirectory();
+                File.WriteAllText(Path.Combine(_manifestDirectory, "Platform.xml"), ObjectModelHelpers.CleanupFileContents(contents));
 
-                Manifest = new PlatformManifest(manifestDirectory);
+                Manifest = new PlatformManifest(_manifestDirectory);
             }
 
             #region IDisposable Support
@@ -286,9 +289,9 @@ namespace Microsoft.Build.UnitTests
             {
                 if (disposing)
                 {
-                    if (FileUtilities.DirectoryExistsNoThrow(manifestDirectory))
+                    if (FileUtilities.DirectoryExistsNoThrow(_manifestDirectory))
                     {
-                        FileUtilities.DeleteDirectoryNoThrow(manifestDirectory, recursive: true);
+                        FileUtilities.DeleteDirectoryNoThrow(_manifestDirectory, recursive: true);
                     }
                 }
             }

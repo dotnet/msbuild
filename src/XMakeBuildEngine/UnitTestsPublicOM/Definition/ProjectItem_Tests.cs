@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectItem_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectItem</summary>
 //-----------------------------------------------------------------------
@@ -614,7 +614,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.AreEqual("m2", project.ItemDefinitions["i"].GetMetadataValue("m")); // Should not have been affected
         }
-        
+
         /// <summary>
         /// Repeated copying of items with item definitions should cause the following order of precedence:
         /// 1) direct metadata on the item
