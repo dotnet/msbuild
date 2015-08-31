@@ -745,35 +745,6 @@
       <SubType>Designer</SubType>
       <LogicalName>Microsoft.Build.Tasks.Strings.shared.resources</LogicalName>
     </EmbeddedResource>
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
-      <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
-      <Name>Microsoft.Build.Utilities</Name>
-    </ProjectReference>
-    <!-- ==========================================================================================-->
-    <!-- Assemblies Files we depend on -->
-    <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
-    <!-- ==========================================================================================-->
-    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis">
-      <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <!-- Needed by Xaml Task Factory -->
-    <Reference Include="System.Xaml" />
-    <!-- ==========================================================================================-->
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
-      <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
-      <Name>Microsoft.Build.Utilities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
     <!-- Other Source Files -->
     <EmbeddedResource Include="ManifestUtil\manifest.xml">
       <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.manifest.xml</LogicalName>
@@ -916,7 +887,36 @@
       <DestFolder>$(XamlRulesOutputDir)</DestFolder>
     </CopyFile>
   </ItemGroup>
-   <!--
+  <!-- ==========================================================================================-->
+  <!-- Assemblies Files we depend on -->
+  <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
+  <!-- ==========================================================================================-->
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <Reference Include="Microsoft.Build.Tasks.CodeAnalysis">
+      <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <!-- Needed by Xaml Task Factory -->
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+  <!-- ==========================================================================================-->
+  <ItemGroup>
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
+      <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
+      <Name>Microsoft.Build.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
+      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
+      <Name>Microsoft.Build.Framework</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
   -->
   <Import Project="..\dir.targets"/>

@@ -15,13 +15,13 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Security;
 using System.Threading;
 using System.Xml;
+#if FEATURE_VARIOUS_EXCEPTIONS
 using System.Xml.Schema;
-
+using System.Runtime.Serialization;
+#endif
 
 namespace Microsoft.Build.Shared
 #endif

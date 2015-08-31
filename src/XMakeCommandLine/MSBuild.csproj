@@ -14,6 +14,10 @@
     <AssemblyName>MSBuild</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
@@ -188,12 +192,14 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <!-- File for Assemblies we depend on -->
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\XMakeBuildEngine\Microsoft.Build.csproj">
       <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
       <Name>Microsoft.Build</Name>
@@ -208,6 +214,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="MSBuild.exe.manifest" />
+    <None Include="project.json" />
   </ItemGroup>
    <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>

@@ -955,9 +955,11 @@ namespace Microsoft.Build.Execution
             internal const string XamlTaskFactory = "XamlTaskFactory";
 
             /// <summary>
+#if FEATURE_APPDOMAIN
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
             private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
+#endif
 
 #if DEBUG
             /// <summary>
@@ -976,10 +978,12 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private readonly RegisteredTaskIdentity _taskIdentity;
 
+#if FEATURE_APPDOMAIN
             /// <summary>
             /// Typeloader for taskFactories
             /// </summary>
             private static TypeLoader s_taskFactoryTypeLoader;
+#endif
 
             /// <summary>
             /// The task name this record was registered with from the using task element

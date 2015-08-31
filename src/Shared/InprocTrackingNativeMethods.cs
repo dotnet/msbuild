@@ -6,20 +6,18 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
 #if FEATURE_CONSTRAINED_EXECUTION
 using System.Runtime.ConstrainedExecution;
 #endif
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.IO;
-using System.Linq;
 using System.Security;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
-using System.Text;
-using System.Threading.Tasks;
+#if FEATURE_RESOURCE_EXPOSURE
+using System.Runtime.Versioning;
+#endif
 
 namespace Microsoft.Build.Shared
 {

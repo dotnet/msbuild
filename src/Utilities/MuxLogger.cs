@@ -321,7 +321,11 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// This class holds everything the logger needs to know about a particular submission, including the event source.
         /// </summary>
-        private class SubmissionRecord : MarshalByRefObject, IEventSource
+        private class SubmissionRecord :
+#if FEATURE_APPDOMAIN
+            MarshalByRefObject,
+#endif
+            IEventSource
         {
             #region Fields
             /// <summary>

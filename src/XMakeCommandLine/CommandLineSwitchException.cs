@@ -4,7 +4,9 @@
 using System;
 using System.Globalization;
 using System.Runtime.Serialization;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 
 using Microsoft.Build.Shared;
 
@@ -13,7 +15,9 @@ namespace Microsoft.Build.CommandLine
     /// <summary>
     /// This exception is used to flag (syntax) errors in command line switches passed to the application.
     /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     internal sealed class CommandLineSwitchException : Exception
     {
         /// <summary>
@@ -96,7 +100,9 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Serialize the contents of the class.
         /// </summary>
+#if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

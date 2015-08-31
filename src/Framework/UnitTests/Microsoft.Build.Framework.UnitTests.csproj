@@ -50,18 +50,20 @@
       <HintPath>$(PackagesDir)NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System" />
     <ProjectReference Include="..\Microsoft.Build.Framework.csproj">
       <Project>{571f09db-a81a-4444-945c-6f7b530054cd}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
