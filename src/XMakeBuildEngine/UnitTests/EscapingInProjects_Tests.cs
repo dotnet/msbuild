@@ -1364,8 +1364,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: This scenario is broken in Roslyn
+        [Ignore] // Ignore: See https://github.com/dotnet/roslyn/pull/2772
+        // This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.
         public void SolutionWithLotsaCrazyCharacters()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1561,8 +1561,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: This scenario is broken in Roslyn
+        [Ignore] // Ignore: See https://github.com/dotnet/roslyn/pull/2772
+        // This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.
         public void SolutionWithLotsaCrazyCharacters_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");

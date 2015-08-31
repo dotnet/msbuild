@@ -1193,9 +1193,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Predecessors and imports
         /// </summary>
         [TestMethod]
-        [Ignore]
-        // Ignore: In-line Utilities function not found.
-
         public void PropertyPredecessorsAndImports()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

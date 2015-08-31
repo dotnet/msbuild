@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="TypeLoader.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Determines if a type is in a given assembly and loads that type. 
 // This version is CLR 3.5-compatible.</summary>
@@ -24,37 +24,37 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Lock for initializing the dictionary
         /// </summary>
-        private static readonly Object cacheOfLoadedTypesByFilterLock = new Object();
+        private static readonly Object s_cacheOfLoadedTypesByFilterLock = new Object();
 
         /// <summary>
         /// Lock for initializing the dictionary
         /// </summary>
-        private static readonly Object cacheOfReflectionOnlyLoadedTypesByFilterLock = new Object();
+        private static readonly Object s_cacheOfReflectionOnlyLoadedTypesByFilterLock = new Object();
 
         /// <summary>
         /// Lock for initializing the dictionary
         /// </summary>
-        private static readonly Object loadInfoToTypeLock = new Object();
+        private static readonly Object s_loadInfoToTypeLock = new Object();
 
         /// <summary>
         /// Lock for initializing the dictionary
         /// </summary>
-        private static readonly Object reflectionOnlyloadInfoToTypeLock = new Object();
+        private static readonly Object s_reflectionOnlyloadInfoToTypeLock = new Object();
 
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given typeFilter.
         /// </summary>
-        private static IDictionary<TypeFilter, IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cacheOfLoadedTypesByFilter = new Dictionary<TypeFilter, IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
-        
+        private static IDictionary<TypeFilter, IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfLoadedTypesByFilter = new Dictionary<TypeFilter, IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
+
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given typeFilter for assemblies which are to be loaded for reflectionOnlyLoads.
         /// </summary>
-        private static IDictionary<TypeFilter, IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cacheOfReflectionOnlyLoadedTypesByFilter = new Dictionary<TypeFilter, IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
-       
+        private static IDictionary<TypeFilter, IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new Dictionary<TypeFilter, IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
+
         /// <summary>
         /// Typefilter for this typeloader
         /// </summary>
-        private TypeFilter isDesiredType;
+        private TypeFilter _isDesiredType;
 
         /// <summary>
         /// Constructor.
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Shared
         {
             ErrorUtilities.VerifyThrow(isDesiredType != null, "need a type filter");
 
-            this.isDesiredType = isDesiredType;
+            _isDesiredType = isDesiredType;
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Shared
             AssemblyLoadInfo assembly
         )
         {
-            return GetLoadedType(cacheOfLoadedTypesByFilterLock, loadInfoToTypeLock, cacheOfLoadedTypesByFilter, typeName, assembly);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilterLock, s_loadInfoToTypeLock, s_cacheOfLoadedTypesByFilter, typeName, assembly);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Shared
             AssemblyLoadInfo assembly
         )
         {
-            return GetLoadedType(cacheOfReflectionOnlyLoadedTypesByFilterLock, reflectionOnlyloadInfoToTypeLock, cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly);
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilterLock, s_reflectionOnlyloadInfoToTypeLock, s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly);
         }
 
         /// <summary>
@@ -188,10 +188,10 @@ namespace Microsoft.Build.Shared
             IDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> loadInfoToType = null;
             lock (cacheLock)
             {
-                if (!cache.TryGetValue(isDesiredType, out loadInfoToType))
+                if (!cache.TryGetValue(_isDesiredType, out loadInfoToType))
                 {
                     loadInfoToType = new Dictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>();
-                    cache.Add(isDesiredType, loadInfoToType);
+                    cache.Add(_isDesiredType, loadInfoToType);
                 }
             }
 
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Shared
             {
                 if (!loadInfoToType.TryGetValue(assembly, out typeNameToType))
                 {
-                    typeNameToType = new AssemblyInfoToLoadedTypes(isDesiredType, assembly);
+                    typeNameToType = new AssemblyInfoToLoadedTypes(_isDesiredType, assembly);
                     loadInfoToType.Add(assembly, typeNameToType);
                 }
             }
@@ -221,40 +221,40 @@ namespace Microsoft.Build.Shared
             /// Lock to prevent two threads from using this object at the same time.
             /// Since we fill up internal structures with what is in the assembly 
             /// </summary>
-            private readonly Object lockObject = new Object();
+            private readonly Object _lockObject = new Object();
 
             /// <summary>
             /// Type filter to pick the correct types out of an assembly
             /// </summary>
-            private TypeFilter isDesiredType;
+            private TypeFilter _isDesiredType;
 
             /// <summary>
             /// Assembly load information so we can load an assembly
             /// </summary>
-            private AssemblyLoadInfo assemblyLoadInfo;
+            private AssemblyLoadInfo _assemblyLoadInfo;
 
             /// <summary>
             /// What is the type for the given type name, this may be null if the typeName does not map to a type.
             /// </summary>
-            private Dictionary<string, Type> typeNameToType;
+            private Dictionary<string, Type> _typeNameToType;
 
             /// <summary>
             /// List of public types in the assembly which match the typefilter and their corresponding types
             /// </summary>
-            private Dictionary<string, Type> publicTypeNameToType;
+            private Dictionary<string, Type> _publicTypeNameToType;
 
             /// <summary>
             /// Have we scanned the public types for this assembly yet.
             /// </summary>
-            private bool haveScannedPublicTypes;
+            private bool _haveScannedPublicTypes;
 
             /// <summary>
             /// If we loaded an assembly for this type.
             /// We use this information to set the LoadedType.LoadedAssembly so that this object can be used
-            /// to help created AppDomains to resolve those that it could not load successfully
+            /// to help created AppDomains to resolve those that it could not load successfuly
             /// </summary>
-            private Assembly loadedAssembly;
-            
+            private Assembly _loadedAssembly;
+
             /// <summary>
             /// Given a type filter, and an assembly to load the type information from determine if a given type name is in the assembly or not.
             /// </summary>
@@ -263,10 +263,10 @@ namespace Microsoft.Build.Shared
                 ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
                 ErrorUtilities.VerifyThrowArgumentNull(loadInfo, "loadInfo");
 
-                this.isDesiredType = typeFilter;
-                this.assemblyLoadInfo = loadInfo;
-                this.typeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-                this.publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+                _isDesiredType = typeFilter;
+                _assemblyLoadInfo = loadInfo;
+                _typeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+                _publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
             }
 
             /// <summary>
@@ -277,22 +277,22 @@ namespace Microsoft.Build.Shared
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, "typeName");
 
                 // Only one thread should be doing operations on this instance of the object at a time.
-                lock (lockObject)
+                lock (_lockObject)
                 {
                     Type type = null;
 
                     // Maybe we've already cracked open this assembly before. Check to see if the typeName is in the list we dont look for partial matches here
                     // this is an optimization.
-                    bool foundType = typeNameToType.TryGetValue(typeName, out type);
+                    bool foundType = _typeNameToType.TryGetValue(typeName, out type);
                     if (!foundType)
                     {
                         // We could still not find the type, lets try and resolve it by doing a get type.
-                        if ((assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
+                        if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
                         {
                             try
                             {
                                 // try to load the type using its assembly qualified name
-                                type = Type.GetType(typeName + "," + assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
+                                type = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
                             }
                             catch (ArgumentException)
                             {
@@ -306,36 +306,36 @@ namespace Microsoft.Build.Shared
                             {
                                 // if it's not the right type, bail out -- there's no point searching further since we already matched on the
                                 // fully qualified name
-                                if (!isDesiredType(type, null))
+                                if (!_isDesiredType(type, null))
                                 {
-                                    typeNameToType.Add(typeName, null);
+                                    _typeNameToType.Add(typeName, null);
                                     return null;
                                 }
                                 else
                                 {
-                                    typeNameToType.Add(typeName, type);
+                                    _typeNameToType.Add(typeName, type);
                                 }
                             }
                         }
 
                         // We could not find the type based on the passed in type name, we now need to see if there is a type which 
                         // will match based on partially matching the typename. To do this partial matching we need to get the public types in the assembly
-                        if (type == null && !haveScannedPublicTypes)
+                        if (type == null && !_haveScannedPublicTypes)
                         {
                             ScanAssemblyForPublicTypes();
-                            haveScannedPublicTypes = true;
+                            _haveScannedPublicTypes = true;
                         }
 
                         // Could not find the type we need to look through the types in the assembly or in our cache.
                         if (type == null)
                         {
-                            foreach (KeyValuePair<string, Type> desiredTypeInAssembly in publicTypeNameToType)
+                            foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
                             {
                                 // if type matches partially on its name
                                 if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
                                 {
                                     type = desiredTypeInAssembly.Value;
-                                    typeNameToType.Add(typeName, type);
+                                    _typeNameToType.Add(typeName, type);
                                     break;
                                 }
                             }
@@ -344,13 +344,13 @@ namespace Microsoft.Build.Shared
 
                     if (type != null)
                     {
-                        return new LoadedType(type, assemblyLoadInfo, loadedAssembly);
+                        return new LoadedType(type, _assemblyLoadInfo, _loadedAssembly);
                     }
 
                     return null;
                 }
             }
- 
+
             /// <summary>
             /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on 
             /// to find tasks, loggers, and task factories.
@@ -360,13 +360,13 @@ namespace Microsoft.Build.Shared
                 // we need to search the assembly for the type...
                 try
                 {
-                    if (assemblyLoadInfo.AssemblyName != null)
+                    if (_assemblyLoadInfo.AssemblyName != null)
                     {
-                        loadedAssembly = Assembly.Load(assemblyLoadInfo.AssemblyName);
+                        _loadedAssembly = Assembly.Load(_assemblyLoadInfo.AssemblyName);
                     }
                     else
                     {
-                        loadedAssembly = Assembly.LoadFrom(assemblyLoadInfo.AssemblyFile);
+                        _loadedAssembly = Assembly.LoadFrom(_assemblyLoadInfo.AssemblyFile);
                     }
                 }
                 catch (ArgumentException e)
@@ -374,16 +374,16 @@ namespace Microsoft.Build.Shared
                     // Assembly.Load() and Assembly.LoadFrom() will throw an ArgumentException if the assembly name is invalid
                     // convert to a FileNotFoundException because it's more meaningful
                     // NOTE: don't use ErrorUtilities.VerifyThrowFileExists() here because that will hit the disk again
-                    throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation, e);
+                    throw new FileNotFoundException(null, _assemblyLoadInfo.AssemblyLocation, e);
                 }
 
                 // only look at public types
-                Type[] allPublicTypesInAssembly = loadedAssembly.GetExportedTypes();
+                Type[] allPublicTypesInAssembly = _loadedAssembly.GetExportedTypes();
                 foreach (Type publicType in allPublicTypesInAssembly)
                 {
-                    if (isDesiredType(publicType, null))
+                    if (_isDesiredType(publicType, null))
                     {
-                        publicTypeNameToType.Add(publicType.FullName, publicType);
+                        _publicTypeNameToType.Add(publicType.FullName, publicType);
                     }
                 }
             }

@@ -1,10 +1,14 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
+
 namespace Microsoft.Build.UnitTests.QA
 {
     /// <summary>
@@ -16,11 +20,11 @@ namespace Microsoft.Build.UnitTests.QA
     {
         #region Private Data
 
-        private IBuildComponentHost host;
-        private IResultsCache resultCache;
-        private int clearedCount;
-        private int addCount;
-        private int getCount;
+        private IBuildComponentHost _host;
+        private IResultsCache _resultCache;
+        private int _clearedCount;
+        private int _addCount;
+        private int _getCount;
 
         #endregion
 
@@ -29,10 +33,10 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public QAResultsCache()
         {
-            this.resultCache = new ResultsCache();
-            this.addCount = 0;
-            this.getCount = 0;
-            this.clearedCount = 0;
+            _resultCache = new ResultsCache();
+            _addCount = 0;
+            _getCount = 0;
+            _clearedCount = 0;
         }
 
         #region IResultsCache Members
@@ -43,8 +47,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="result">The result to add.</param>
         public void AddResult(BuildResult result)
         {
-            addCount++;
-            this.resultCache.AddResult(result);
+            _addCount++;
+            _resultCache.AddResult(result);
         }
 
         /// <summary>
@@ -52,8 +56,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ClearResults()
         {
-            clearedCount++;
-            this.resultCache.ClearResults();
+            _clearedCount++;
+            _resultCache.ClearResults();
         }
 
         /// <summary>
@@ -63,8 +67,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// <returns>The build results for the specified request.</returns>
         public BuildResult GetResultForRequest(BuildRequest request)
         {
-            getCount++;
-            return this.resultCache.GetResultForRequest(request);
+            _getCount++;
+            return _resultCache.GetResultForRequest(request);
         }
 
         /// <summary>
@@ -74,8 +78,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// <returns>The build results for the specified configuration.</returns>
         public BuildResult GetResultsForConfiguration(int configurationId)
         {
-            getCount++;
-            return this.resultCache.GetResultsForConfiguration(configurationId);
+            _getCount++;
+            return _resultCache.GetResultsForConfiguration(configurationId);
         }
 
         /// <summary>
@@ -83,7 +87,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, List<string> additionalTargetsToCheckForOverallResult, bool skippedResultsAreOK)
         {
-            return this.resultCache.SatisfyRequest(request, configInitialTargets, configDefaultTargets, additionalTargetsToCheckForOverallResult, skippedResultsAreOK);
+            return _resultCache.SatisfyRequest(request, configInitialTargets, configDefaultTargets, additionalTargetsToCheckForOverallResult, skippedResultsAreOK);
         }
 
         /// <summary>
@@ -92,7 +96,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="configurationId">The configuration id.</param>
         public void ClearResultsForConfiguration(int configurationId)
         {
-            this.resultCache.ClearResultsForConfiguration(configurationId);
+            _resultCache.ClearResultsForConfiguration(configurationId);
         }
 
         /// <summary>
@@ -112,7 +116,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            this.host = host;
+            _host = host;
         }
 
         /// <summary>
@@ -120,8 +124,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ShutdownComponent()
         {
-            host = null;
-            ((IBuildComponent)this.resultCache).ShutdownComponent();
+            _host = null;
+            ((IBuildComponent)_resultCache).ShutdownComponent();
         }
 
         #endregion
@@ -135,7 +139,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return ((ResultsCache)this.resultCache).ResultsDictionary.Count;
+                return ((ResultsCache)_resultCache).ResultsDictionary.Count;
             }
         }
 
@@ -146,7 +150,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.getCount;
+                return _getCount;
             }
         }
 
@@ -157,7 +161,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.clearedCount;
+                return _clearedCount;
             }
         }
 
@@ -168,7 +172,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.addCount;
+                return _addCount;
             }
         }
 

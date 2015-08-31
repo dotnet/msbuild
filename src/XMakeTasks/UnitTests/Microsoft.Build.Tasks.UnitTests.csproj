@@ -83,12 +83,10 @@
     <Compile Include="LC_Tests.cs" />
     <Compile Include="MakeDir_Tests.cs" />
     <Compile Include="ManifestWriter_Tests.cs" />
-    <Compile Include="MockCscHostObject.cs" />
     <Compile Include="MockFaultInjectionHelper.cs" />
     <Compile Include="MockTypeInfo.cs" />
     <Compile Include="MockTypeLib.cs" />
     <Compile Include="MockUnmanagedMemoryHelper.cs" />
-    <Compile Include="MockVbcHostObject.cs" />
     <Compile Include="Move_Tests.cs" />
     <Compile Include="MSBuild_Tests.cs" />
     <Compile Include="PropertyParser_Tests.cs" />

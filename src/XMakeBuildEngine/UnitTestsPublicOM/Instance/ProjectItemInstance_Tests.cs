@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectItemInstance_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectItemInstance public members</summary>
 //-----------------------------------------------------------------------
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.AreEqual("i", item.ItemType);
             Assert.AreEqual("i1", item.EvaluatedInclude);
             Assert.AreEqual(false, item.Metadata.GetEnumerator().MoveNext());
-        } 
+        }
 
         /// <summary>
         /// Basic ProjectItemInstance with metadata
@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         [TestMethod]
         public void InstanceItemToUtilItemIDG()
         {
-                       string content = @"
+            string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemDefinitionGroup>
                             <i>

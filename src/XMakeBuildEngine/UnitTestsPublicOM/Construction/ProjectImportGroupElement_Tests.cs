@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectImportGroupElement_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectImportGroupElement class.</summary>
 //-----------------------------------------------------------------------
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-        
+
             project.AddImport("b.proj");
 
             string expectedContent = @"
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         <Import Project='b.proj' />
                     </Project>
                 ";
-                
+
             Helpers.CompareProjectXml(expectedContent, project.RawXml);
         }
 
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
             project.AddImport("e.proj");
-            
+
             string expectedContent = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Import Project='a.proj' />
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
             project.AddImport("d.proj");
-            
+
             string expectedContent = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Import Project='a.proj' />
@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Helpers.CompareProjectXml(expectedContent, project.RawXml);
         }
-    
+
         /// <summary>
         /// Read project with no imports
         /// </summary>
@@ -298,12 +298,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
             List<ProjectImportGroupElement> importGroups = Helpers.MakeList(project.ImportGroups);
-            
+
             Assert.AreEqual(2, importGroups.Count);
             Assert.AreEqual(2, importGroups[0].Count);
             Assert.AreEqual(1, importGroups[1].Count);
             Assert.AreEqual("second", importGroups[1].Label);
-            
+
             Assert.AreEqual(3, imports.Count);
             Assert.AreEqual("i1.proj", imports[0].Project);
             Assert.AreEqual("i2.proj", imports[1].Project);

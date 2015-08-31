@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectInstance_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectInstance public members</summary>
 //-----------------------------------------------------------------------
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 File.WriteAllText(file3, String.Empty);
 
                 string path = Path.Combine(directory, "*.exe");
-                         
+
                 string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'>
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance second = first.DeepCopy();
 
             Assert.IsTrue(!Object.ReferenceEquals(Helpers.MakeList(first.GetItems("i"))[0], Helpers.MakeList(second.GetItems("i"))[0]));
-            
+
             first.AddItem("i", "i3");
             Assert.AreEqual(4, Helpers.MakeList(first.GetItems("i")).Count);
             Assert.AreEqual(3, Helpers.MakeList(second.GetItems("i")).Count);
@@ -445,7 +445,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var pc = new ProjectCollection();
             var projA = ProjectRootElement.Create(pc);
             var projB = ProjectRootElement.Create(pc);
-            
+
             string tempDir = Path.GetTempFileName();
             File.Delete(tempDir);
             Directory.CreateDirectory(tempDir);
@@ -456,7 +456,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             projB.AddImport("a.proj");
             projA.AddItem("Compile", "*.cs");
             projB.AddItem("CompileB", "@(Compile)");
-            
+
             var projBEval = new Project(projB, null, null, pc);
             var projBInstance = projBEval.CreateProjectInstance();
             var projAInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "aItem.cs").Single();
@@ -715,7 +715,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { ((ITaskItem2)Helpers.GetFirst(instance.Items)).SetMetadataValueLiteral("a", "b"); });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { ((ITaskItem2)Helpers.GetFirst(instance.Items)).SetMetadataValueLiteral("a", "b"); });
         }
 
         /// <summary>
@@ -759,7 +759,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
         }
 
         /// <summary>
@@ -770,7 +770,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("p1").EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("p1").EvaluatedValue = "v2"; });
         }
 
         /// <summary>
@@ -781,7 +781,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.SetProperty("newproperty", "v2"); });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.SetProperty("newproperty", "v2"); });
         }
 
         /// <summary>
@@ -793,7 +793,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.SetProperty("g", "gv2"); });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.SetProperty("g", "gv2"); });
         }
 
         /// <summary>
@@ -805,7 +805,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.SetProperty("username", "someone_else_here"); });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.SetProperty("username", "someone_else_here"); });
         }
 
         /// <summary>
@@ -818,7 +818,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var instance = protoInstance.DeepCopy(false /* mutable */);
 
             // These should not throw
-            instance.SetProperty("p", "pnew");  
+            instance.SetProperty("p", "pnew");
             instance.AddItem("i", "ii");
             Helpers.GetFirst(instance.Items).EvaluatedInclude = "new";
             instance.SetProperty("g", "gnew");
@@ -834,10 +834,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var protoInstance = GetSampleProjectInstance(false /* mutable */);
             var instance = protoInstance.DeepCopy(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("g").EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("username").EvaluatedValue = "someone_else_here"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("g").EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("username").EvaluatedValue = "someone_else_here"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
         }
 
         /// <summary>
@@ -852,10 +852,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             // Should not have bothered cloning
             Assert.IsTrue(Object.ReferenceEquals(protoInstance, instance));
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("g").EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("username").EvaluatedValue = "someone_else_here"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("g").EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("username").EvaluatedValue = "someone_else_here"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
         }
 
         /// <summary>
@@ -867,10 +867,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var protoInstance = GetSampleProjectInstance(true /* immutable */);
             var instance = protoInstance.DeepCopy(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("g").EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("username").EvaluatedValue = "someone_else_here"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("g").EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("username").EvaluatedValue = "someone_else_here"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
         }
 
         /// <summary>
@@ -910,7 +910,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Create a ProjectInstance with some items and properties and targets
         /// </summary>
-        private static ProjectInstance GetSampleProjectInstance(bool isImmutable = false)            
+        private static ProjectInstance GetSampleProjectInstance(bool isImmutable = false)
         {
             string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >

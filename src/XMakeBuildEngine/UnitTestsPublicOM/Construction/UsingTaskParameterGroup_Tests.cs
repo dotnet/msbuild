@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="UsingTaskParameterGroup_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for the UsingTaskParameterGroupElement_Tests class.</summary>
 //-----------------------------------------------------------------------
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// ParameterGroup with no parameters inside
         /// </summary>
-        private static string contentEmptyParameterGroup = @"
+        private static string s_contentEmptyParameterGroup = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup/>
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// ParameterGroup with duplicate child parameters
         /// </summary>
-        private static string contentDuplicateParameters = @"
+        private static string s_contentDuplicateParameters = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// ParameterGroup with multiple parameters
         /// </summary>
-        private static string contentMultipleParameters = @"
+        private static string s_contentMultipleParameters = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [TestMethod]
         public void ReadEmptyParameterGroup()
         {
-            UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(contentEmptyParameterGroup);
+            UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentEmptyParameterGroup);
             Assert.IsNotNull(parameterGroup);
             Assert.AreEqual(0, parameterGroup.Count);
             Assert.IsNull(parameterGroup.Parameters.GetEnumerator().Current);
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [TestMethod]
         public void ReadMutipleParameters()
         {
-            UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(contentMultipleParameters);
+            UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentMultipleParameters);
             Assert.IsNotNull(parameterGroup);
             Assert.AreEqual(2, parameterGroup.Count);
             Assert.IsNotNull(parameterGroup.Parameters);
@@ -114,10 +114,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [ExpectedException(typeof(InvalidProjectFileException))]
         public void ReadDuplicateChildParameters()
         {
-            UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(contentDuplicateParameters);
+            UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentDuplicateParameters);
             Assert.Fail();
         }
-  
+
         /// <summary>
         /// Read parameterGroup with a attribute
         /// </summary>

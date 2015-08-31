@@ -1,6 +1,6 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ProjectItemDefinition_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Tests for ProjectItemDefinition</summary>
 //-----------------------------------------------------------------------
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </i>
   </ItemDefinitionGroup>
   <Import Project=""{0}"" />
-</Project>"), 
+</Project>"),
                    file
                    );
 
