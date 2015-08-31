@@ -14,6 +14,7 @@ using Microsoft.Win32;
 using NUnit.Framework;
 
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>

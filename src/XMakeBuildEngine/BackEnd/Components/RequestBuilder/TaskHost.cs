@@ -35,7 +35,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskHost :
 #if FEATURE_APPDOMAIN
-        MarshalByRefObject, 
+        MarshalByRefObject,
 #endif
         IBuildEngine4
     {

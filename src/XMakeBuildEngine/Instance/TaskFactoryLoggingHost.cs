@@ -24,7 +24,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskFactoryLoggingHost :
 #if FEATURE_APPDOMAIN
-        MarshalByRefObject, 
+        MarshalByRefObject,
 #endif
         IBuildEngine
     {

@@ -123,7 +123,7 @@ namespace Microsoft.Build
                         }
 #endif
                     }
-                    
+
                     if (rawBuffer == null)
                     {
                         rawBuffer = _buffer.ByteBuffer;

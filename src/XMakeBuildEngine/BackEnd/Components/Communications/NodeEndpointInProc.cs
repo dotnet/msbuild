@@ -389,7 +389,7 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue == null");
 
                 _terminatePacketPump.Set();
-                if (!_packetPump.Join((int) new TimeSpan(0, 0, BuildParameters.EndpointShutdownTimeout).TotalMilliseconds))
+                if (!_packetPump.Join((int)new TimeSpan(0, 0, BuildParameters.EndpointShutdownTimeout).TotalMilliseconds))
                 {
 #if FEATURE_THREAD_ABORT
                     // We timed out.  Kill it.

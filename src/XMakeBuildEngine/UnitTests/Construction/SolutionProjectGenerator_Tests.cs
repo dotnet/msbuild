@@ -723,11 +723,11 @@ EndGlobal
             #endregion
             // arrange
             var logger = new MockLogger();
-            var loggers = new List<ILogger>(1) {logger};
+            var loggers = new List<ILogger>(1) { logger };
             var solutionFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("MSBuildIssue.sln", solutionFileContents);
             ObjectModelHelpers.CreateFileInTempProjectDirectory("B.csproj", projectBravoFileContents);
             ObjectModelHelpers.CreateFileInTempProjectDirectory("C.csproj", projectCharlieFileContents);
-            var solution = new SolutionFile {FullPath = solutionFile};
+            var solution = new SolutionFile { FullPath = solutionFile };
             solution.ParseSolutionFile();
 
             // act

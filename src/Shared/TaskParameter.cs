@@ -71,7 +71,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskParameter :
 #if FEATURE_APPDOMAIN
-        MarshalByRefObject, 
+        MarshalByRefObject,
 #endif
         INodePacketTranslatable
     {
@@ -502,7 +502,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private class TaskParameterTaskItem :
 #if FEATURE_APPDOMAIN
-            MarshalByRefObject, 
+            MarshalByRefObject,
 #endif
             ITaskItem, ITaskItem2
         {

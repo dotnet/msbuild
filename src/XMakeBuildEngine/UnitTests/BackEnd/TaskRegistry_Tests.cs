@@ -2048,7 +2048,7 @@ namespace TestTask
                 }
 
                 // now rethrow
-				throw;
+                throw;
             }
             finally
             {

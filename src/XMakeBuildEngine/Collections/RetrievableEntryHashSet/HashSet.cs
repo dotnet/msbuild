@@ -95,7 +95,7 @@ namespace Microsoft.Build.Collections
 #endif
     internal class RetrievableEntryHashSet<T> : ICollection<T>,
 #if FEATURE_BINARY_SERIALIZATION
-        ISerializable, IDeserializationCallback, 
+        ISerializable, IDeserializationCallback,
 #endif
         IDictionary<string, T>
         where T : class, IKeyed

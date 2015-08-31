@@ -220,7 +220,6 @@ namespace Microsoft.Build.BackEnd
                         {
                             _exclusiveOperatingEnvironment = false;
                         }
-
                     }
                 }
 

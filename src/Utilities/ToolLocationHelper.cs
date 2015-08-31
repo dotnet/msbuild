@@ -2192,7 +2192,7 @@ namespace Microsoft.Build.Utilities
                     {
                         GatherSDKListFromRegistry(registryRoot, monikers);
                     }
-					
+
                     collection = monikers.Keys.ToList();
                     s_cachedTargetPlatforms.Add(cachedTargetPlatformsKey, collection);
                 }

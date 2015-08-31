@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #region Using directives
+
 using Microsoft.Build.Shared;
 
 using NUnit.Framework;
 #endregion
+
 namespace Microsoft.Build.UnitTests
 {
     [TestFixture]

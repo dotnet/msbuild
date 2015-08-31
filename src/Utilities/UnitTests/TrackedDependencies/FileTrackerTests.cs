@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             {
                 Assert.Ignore("FileTracker is not supported under Unix");
             }
-			
+
             s_defaultFileTrackerPathUnquoted = null;//FileTracker.GetFileTrackerPath(ExecutableType.SameAsCurrentProcess);
             s_defaultFileTrackerPath = null; //"\"" + defaultFileTrackerPathUnquoted + "\"";
             s_defaultTrackerPath = null;//FileTracker.GetTrackerPath(ExecutableType.SameAsCurrentProcess);
@@ -586,10 +586,10 @@ class X
             Console.WriteLine("Test: FileTrackerFindUnicode");
 
             File.Delete("find.read.1.tlog");
-            FileTrackerTestHelper.WriteAll("tẼst.in", "foo");
+            FileTrackerTestHelper.WriteAll("t\u1EBCst.in", "foo");
 
             // FINDSTR.EXE doesn't support unicode, so we'll use FIND.EXE which does
-            int exit = FileTrackerTestHelper.RunCommandNoStdOut(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /i . /c find /I \"\\\"foo\"\\\" tẼst.in");
+            int exit = FileTrackerTestHelper.RunCommandNoStdOut(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /i . /c find /I \"\\\"foo\"\\\" t\u1EBCst.in");
             Console.WriteLine("");
             Assert.AreEqual(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("t\u1EBCst.in").ToUpperInvariant(), "find.read.1.tlog");

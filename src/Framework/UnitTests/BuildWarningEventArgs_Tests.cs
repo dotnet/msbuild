@@ -9,6 +9,7 @@ using System;
 
 using Microsoft.Build.Framework;
 using NUnit.Framework;
+
 #pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests

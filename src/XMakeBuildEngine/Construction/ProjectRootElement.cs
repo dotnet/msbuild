@@ -50,7 +50,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Constant for default (empty) project file.
         /// </summary>
-        private static string EmptyProjectFileContent = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Project ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
+        private static string s_emptyProjectFileContent = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Project ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
 
         /// <summary>
         /// The singleton delegate that loads projects into the ProjectRootElement
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Construction
             XmlReaderSettings xrs = new XmlReaderSettings();
             xrs.DtdProcessing = DtdProcessing.Ignore;
 
-            using (XmlReader xr = XmlReader.Create(new StringReader(ProjectRootElement.EmptyProjectFileContent), xrs))
+            using (XmlReader xr = XmlReader.Create(new StringReader(ProjectRootElement.s_emptyProjectFileContent), xrs))
             {
                 document.Load(xr);
             }

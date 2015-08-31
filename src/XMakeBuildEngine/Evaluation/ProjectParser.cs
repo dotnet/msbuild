@@ -126,10 +126,10 @@ namespace Microsoft.Build.Construction
 #if (!STANDALONEBUILD)
                 using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectConstructBegin, CodeMarkerEvent.perfMSBuildProjectConstructEnd))
 #endif
-	            {
-	                ProjectParser parser = new ProjectParser(document, projectRootElement);
-	                parser.Parse();
-	            }
+            {
+                ProjectParser parser = new ProjectParser(document, projectRootElement);
+                parser.Parse();
+            }
 #if MSBUILDENABLEVSPROFILING 
             }
             finally

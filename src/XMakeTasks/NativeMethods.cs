@@ -774,7 +774,7 @@ namespace Microsoft.Build.Tasks
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool CreateHardLink(string newFileName, string exitingFileName, IntPtr securityAttributes);
 
-        [DllImport("libc", SetLastError = true)] 
+        [DllImport("libc", SetLastError = true)]
         internal static extern int link(string oldpath, string newpath);
 
         internal static bool MakeHardLink(string newFileName, string exitingFileName, out string errorMessage)

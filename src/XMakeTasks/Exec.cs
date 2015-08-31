@@ -327,16 +327,16 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-                if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
-                {
-                    Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", this.Command, ExitCode);
-                }
-                else
-                {
-                    Log.LogErrorWithCodeFromResources("Exec.CommandFailed", this.Command, ExitCode);
-                }
-                return false;
+            if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
+            {
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", this.Command, ExitCode);
             }
+            else
+            {
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", this.Command, ExitCode);
+            }
+            return false;
+        }
 
         /// <summary>
         /// Logs the tool name and the path from where it is being run.
@@ -493,8 +493,8 @@ namespace Microsoft.Build.Tasks
             // Get the fully qualified path to cmd.exe
             if (Path.DirectorySeparatorChar == '\\')
             {
-            return ToolLocationHelper.GetPathToSystemFile("cmd.exe");
-        }
+                return ToolLocationHelper.GetPathToSystemFile("cmd.exe");
+            }
             else
             {
                 return "sh";
@@ -555,17 +555,17 @@ namespace Microsoft.Build.Tasks
 
             if (NativeMethodsShared.IsWindows)
             {
-            commandLine.AppendSwitch("/Q");      // echo off
-            commandLine.AppendSwitch("/C");      // run then terminate
+                commandLine.AppendSwitch("/Q");      // echo off
+                commandLine.AppendSwitch("/C");      // run then terminate
 
-            // If for some crazy reason the path has a & character and a space in it
-            // then get the short path of the temp path, which should not have spaces in it
-            // and then escape the &
-            if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
-            {
-                batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
-            }
+                // If for some crazy reason the path has a & character and a space in it
+                // then get the short path of the temp path, which should not have spaces in it
+                // and then escape the &
+                if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                {
+                    batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
+                    batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
+                }
             }
             commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
         }
@@ -620,7 +620,7 @@ namespace Microsoft.Build.Tasks
             {
                 return Encoding.ASCII;
             }
-            
+
             // Windows 7 (6.1) or greater
             var windows7 = new Version(6, 1);
 

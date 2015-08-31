@@ -11,6 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
 using NUnit.Framework;
+
 #pragma warning disable 0219
 
 namespace Microsoft.Build.UnitTests
