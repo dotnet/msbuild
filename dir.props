@@ -22,8 +22,8 @@
     <BinDir>$(ProjectDir)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
     <PackagesDir>$(ProjectDir)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
-	<ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion),"lib"))$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
-	<CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+    <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion),"lib"))$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
+    <CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
   </PropertyGroup>
 
   <!-- list of nuget package sources passed to nuget.exe -->
@@ -46,7 +46,7 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) -OutputDirectory "$(PackagesDir.TrimEnd('/\'.ToCharArray()))"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
-    <ResolveNugetPackages>false</ResolveNugetPackages>
+    <ProjectPackagesConfigFile>$(NuGetConfigFile)</ProjectPackagesConfigFile>
   </PropertyGroup>
   
   <!-- Set default Configuration and Platform -->
@@ -114,12 +114,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <PlatformTarget>x86</PlatformTarget>
     <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
     <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
     <NetCoreSurface>true</NetCoreSurface>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
+    <ResolveNugetPackages>false</ResolveNugetPackages>
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
@@ -134,6 +136,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DOTNETVERSION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
     <FeatureFileTracker>true</FeatureFileTracker>
@@ -164,6 +167,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XML_LOADPATH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XMLTEXTREADER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
 
@@ -173,7 +177,7 @@
   </PropertyGroup>
 
   <!-- Change define constants as needed -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(MsbuildDebugger)' == 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
   </PropertyGroup>
 

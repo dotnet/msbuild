@@ -6,17 +6,12 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
 
-using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-using BuildParameters = Microsoft.Build.Execution.BuildParameters;
-
+using Microsoft.Build.Execution;
+using Microsoft.Build.Logging;
+#if FEATURE_APPDOMAIN
+#endif
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
