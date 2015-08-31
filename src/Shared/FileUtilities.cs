@@ -54,7 +54,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void GetTestExecutionInfo()
         {
-
 #if FEATURE_GET_COMMANDLINE
             // Get the executable we are running
             var program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
@@ -438,7 +437,7 @@ namespace Microsoft.Build.Shared
             // have no slashes.
             if (NativeMethodsShared.IsWindows || string.IsNullOrWhiteSpace(value) ||
                 value.StartsWith("$(") || value.StartsWith("@(") || value.StartsWith("\\\\") ||
-                value.IndexOfAny(new [] {'/', '\\'}) == -1)
+                value.IndexOfAny(new[] { '/', '\\' }) == -1)
             {
                 return value;
             }
@@ -626,7 +625,7 @@ namespace Microsoft.Build.Shared
                         StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
                         if (NativeMethodsShared.GetModuleFileName(
 #if FEATURE_HANDLEREF
-                            NativeMethodsShared.NullHandleRef, 
+                            NativeMethodsShared.NullHandleRef,
 #else
                             IntPtr.Zero,
 #endif
@@ -638,7 +637,6 @@ namespace Microsoft.Build.Shared
                     }
                     else
                     {
-
                         s_executablePath =
 #if FEATURE_GET_COMMANDLINE
                             Environment.GetCommandLineArgs()[0] ??
@@ -1108,7 +1106,7 @@ namespace Microsoft.Build.Shared
         internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
         {
             const int DefaultFileStreamBufferSize = 4096;
-            FileMode mode = append? FileMode.Append: FileMode.Create;
+            FileMode mode = append ? FileMode.Append : FileMode.Create;
             Stream fileStream = new FileStream(path, mode, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
             if (encoding == null)
             {
