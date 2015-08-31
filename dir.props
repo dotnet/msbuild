@@ -135,6 +135,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_CONSOLE_FALLBACK</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DOTNETVERSION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
@@ -147,6 +148,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_MEMORYSTREAM_GETBUFFER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_PARALLEL_BUILD</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PERFORMANCE_COUNTERS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REGISTRYHIVE_DYNDATA</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
@@ -166,6 +168,7 @@
     <FeatureXamlTypes>true</FeatureXamlTypes>
     <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XML_LOADPATH</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XMLTEXTREADER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
   </PropertyGroup>

@@ -109,7 +109,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
+    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
@@ -137,7 +137,7 @@
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
+    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" Condition="$(FeatureAppDomain) == 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
@@ -168,14 +168,14 @@
     <Compile Include="InitializationException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
+    <Compile Include="NodeEndpointOutOfProcTaskHost.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="LogMessagePacket.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="OutOfProcTaskHostNode.cs" />
-    <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
-    <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
+    <Compile Include="OutOfProcTaskHostNode.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="OutOfProcTaskAppDomainWrapper.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="XMake.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
