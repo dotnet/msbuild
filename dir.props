@@ -118,6 +118,9 @@
     <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
     <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
     <NetCoreSurface>true</NetCoreSurface>
+    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
+    <TestHost Condition="'$(OS)' == 'Windows_NT'">CoreRun.exe</TestHost>
+    <TestHost Condition="'$(OS)' != 'Windows_NT'">corerun</TestHost>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">

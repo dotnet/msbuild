@@ -16,6 +16,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <PlatformTarget>x86</PlatformTarget>
+    <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
+    <StartProgram Condition="'$(StartProgram)'==''">$(OutputPath)\$(TestHost)</StartProgram>
+    <StartArguments>msbuild.exe</StartArguments>
   </PropertyGroup>
 
   <!-- Default configurations to help VS understand the configurations -->
