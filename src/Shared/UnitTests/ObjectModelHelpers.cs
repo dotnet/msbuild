@@ -18,6 +18,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 using NUnit.Framework;
+
 namespace Microsoft.Build.UnitTests
 {
     /*
@@ -29,9 +30,9 @@ namespace Microsoft.Build.UnitTests
     internal static class ObjectModelHelpers
     {
         private const string msbuildNamespace = "http://schemas.microsoft.com/developer/msbuild/2003";
-        private static string msbuildDefaultToolsVersion = MSBuildConstants.CurrentToolsVersion;
-        private static string msbuildAssemblyVersion = MSBuildConstants.CurrentAssemblyVersion;
-        private static string currentVisualStudioVersion = MSBuildConstants.CurrentVisualStudioVersion;
+        private static string s_msbuildDefaultToolsVersion = MSBuildConstants.CurrentToolsVersion;
+        private static string s_msbuildAssemblyVersion = MSBuildConstants.CurrentAssemblyVersion;
+        private static string s_currentVisualStudioVersion = MSBuildConstants.CurrentVisualStudioVersion;
 
         /// <summary>
         /// Return the the current Visual Studio version
@@ -40,7 +41,7 @@ namespace Microsoft.Build.UnitTests
         {
             get
             {
-                return currentVisualStudioVersion;
+                return s_currentVisualStudioVersion;
             }
         }
 
@@ -51,7 +52,7 @@ namespace Microsoft.Build.UnitTests
         {
             get
             {
-                return msbuildDefaultToolsVersion;
+                return s_msbuildDefaultToolsVersion;
             }
         }
 
@@ -62,7 +63,7 @@ namespace Microsoft.Build.UnitTests
         {
             get
             {
-                return msbuildAssemblyVersion;
+                return s_msbuildAssemblyVersion;
             }
         }
 
@@ -414,8 +415,8 @@ namespace Microsoft.Build.UnitTests
 
             // Place the correct MSBuild namespace into the <Project> tag.
             projectFileContents = projectFileContents.Replace("msbuildnamespace", msbuildNamespace);
-            projectFileContents = projectFileContents.Replace("msbuilddefaulttoolsversion", msbuildDefaultToolsVersion);
-            projectFileContents = projectFileContents.Replace("msbuildassemblyversion", msbuildAssemblyVersion);
+            projectFileContents = projectFileContents.Replace("msbuilddefaulttoolsversion", s_msbuildDefaultToolsVersion);
+            projectFileContents = projectFileContents.Replace("msbuildassemblyversion", s_msbuildAssemblyVersion);
 
             return projectFileContents;
         }

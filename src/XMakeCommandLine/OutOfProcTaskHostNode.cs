@@ -728,6 +728,9 @@ namespace Microsoft.Build.CommandLine
 
                 case LinkStatus.Inactive:
                     break;
+
+                default:
+                    break;
             }
         }
 

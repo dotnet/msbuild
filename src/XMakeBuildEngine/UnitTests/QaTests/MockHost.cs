@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -37,61 +40,61 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// The logging service
         /// </summary>
-        private ILoggingService loggingService = null;
+        private ILoggingService _loggingService = null;
 
         /// <summary>
         /// The request engine
         /// </summary>
-        private IBuildRequestEngine requestEngine = null;
+        private IBuildRequestEngine _requestEngine = null;
 
         /// <summary>
         /// The test data provider
         /// </summary>
-        private ITestDataProvider testDataProvider = null;
+        private ITestDataProvider _testDataProvider = null;
         /// <summary>
         /// Number of miliseconds of engine idle time to cause a shutdown
         /// </summary>
-        private int engineShutdownTimeout = 30000;
+        private int _engineShutdownTimeout = 30000;
 
         /// <summary>
         /// Number of initial node count
         /// </summary>
-        private int initialNodeCount = 1;
+        private int _initialNodeCount = 1;
 
         /// <summary>
         /// Default node id
         /// </summary>
-        private int nodeId = 1;
+        private int _nodeId = 1;
 
         /// <summary>
         /// Only log critical events by default
         /// </summary>
-        private bool logOnlyCriticalEvents = true;
+        private bool _logOnlyCriticalEvents = true;
 
         /// <summary>
         /// The last status of the engine reported
         /// </summary>
-        private BuildRequestEngineStatus lastEngineStatus;
+        private BuildRequestEngineStatus _lastEngineStatus;
 
         /// <summary>
         /// Internal Event that is fired when the engine status changes
         /// </summary>
-        private AutoResetEvent engineStatusChangedEvent;
+        private AutoResetEvent _engineStatusChangedEvent;
 
         /// <summary>
         /// Delegate which handles initilizing the components requested for
         /// </summary>
-        private GetComponentDelegate getComponentCallback;
+        private GetComponentDelegate _getComponentCallback;
 
         /// <summary>
         /// All the build components returned by the host
         /// </summary>
-        private Queue<IBuildComponent> buildComponents;
+        private Queue<IBuildComponent> _buildComponents;
 
         /// <summary>
         /// The build parameters.
         /// </summary>
-        private BuildParameters buildParameters;
+        private BuildParameters _buildParameters;
 
         /// <summary>
         /// Global timeout is 30 seconds
@@ -101,22 +104,22 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Retrieves the LegacyThreadingData associated with a particular component host
         /// </summary>
-        private LegacyThreadingData legacyThreadingData;
+        private LegacyThreadingData _legacyThreadingData;
 
         /// <summary>
         /// Constructor 
         /// </summary>
         internal QAMockHost(GetComponentDelegate getComponentCallback)
         {
-            this.buildParameters = new BuildParameters();
-            this.getComponentCallback = getComponentCallback;
-            this.engineStatusChangedEvent = new AutoResetEvent(false);
-            this.lastEngineStatus = BuildRequestEngineStatus.Shutdown;
-            this.loggingService = this;
-            this.requestEngine = null;
-            this.testDataProvider = null;
-            this.buildComponents = new Queue<IBuildComponent>();
-            this.legacyThreadingData = new LegacyThreadingData();
+            _buildParameters = new BuildParameters();
+            _getComponentCallback = getComponentCallback;
+            _engineStatusChangedEvent = new AutoResetEvent(false);
+            _lastEngineStatus = BuildRequestEngineStatus.Shutdown;
+            _loggingService = this;
+            _requestEngine = null;
+            _testDataProvider = null;
+            _buildComponents = new Queue<IBuildComponent>();
+            _legacyThreadingData = new LegacyThreadingData();
         }
 
         /// <summary>
@@ -128,7 +131,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.loggingService;
+                return _loggingService;
             }
         }
 
@@ -139,7 +142,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return legacyThreadingData;
+                return _legacyThreadingData;
             }
         }
 
@@ -161,7 +164,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return buildParameters;
+                return _buildParameters;
             }
         }
 
@@ -172,48 +175,48 @@ namespace Microsoft.Build.UnitTests.QA
         {
             IBuildComponent returnComponent = null;
 
-            switch(type)
+            switch (type)
             {
                 case BuildComponentType.LoggingService: // Singleton
-                    return (IBuildComponent)this.loggingService;
+                    return (IBuildComponent)_loggingService;
 
                 case BuildComponentType.TestDataProvider: // Singleton
-                    if (this.testDataProvider != null)
+                    if (_testDataProvider != null)
                     {
-                        return (IBuildComponent)this.testDataProvider;
+                        return (IBuildComponent)_testDataProvider;
                     }
 
-                    returnComponent = this.getComponentCallback(type);
+                    returnComponent = _getComponentCallback(type);
                     if (returnComponent != null)
                     {
                         returnComponent.InitializeComponent(this);
-                        this.testDataProvider = (ITestDataProvider)returnComponent;
+                        _testDataProvider = (ITestDataProvider)returnComponent;
                     }
 
                     break;
 
                 case BuildComponentType.RequestEngine: // Singleton
-                    if (this.requestEngine != null)
+                    if (_requestEngine != null)
                     {
-                        return (IBuildComponent)this.requestEngine;
+                        return (IBuildComponent)_requestEngine;
                     }
 
-                    returnComponent = this.getComponentCallback(type);
+                    returnComponent = _getComponentCallback(type);
                     if (returnComponent != null)
                     {
                         returnComponent.InitializeComponent(this);
-                        this.requestEngine = (IBuildRequestEngine)returnComponent;
-                        this.requestEngine.OnEngineException += new EngineExceptionDelegate(RequestEngine_OnEngineException);
-                        this.requestEngine.OnNewConfigurationRequest += new NewConfigurationRequestDelegate(RequestEngine_OnNewConfigurationRequest);
-                        this.requestEngine.OnRequestBlocked += new RequestBlockedDelegate(RequestEngine_OnNewRequest);
-                        this.requestEngine.OnRequestComplete += new RequestCompleteDelegate(RequestEngine_OnRequestComplete);
-                        this.requestEngine.OnStatusChanged += new EngineStatusChangedDelegate(RequestEngine_OnStatusChanged);
+                        _requestEngine = (IBuildRequestEngine)returnComponent;
+                        _requestEngine.OnEngineException += new EngineExceptionDelegate(RequestEngine_OnEngineException);
+                        _requestEngine.OnNewConfigurationRequest += new NewConfigurationRequestDelegate(RequestEngine_OnNewConfigurationRequest);
+                        _requestEngine.OnRequestBlocked += new RequestBlockedDelegate(RequestEngine_OnNewRequest);
+                        _requestEngine.OnRequestComplete += new RequestCompleteDelegate(RequestEngine_OnRequestComplete);
+                        _requestEngine.OnStatusChanged += new EngineStatusChangedDelegate(RequestEngine_OnStatusChanged);
                     }
 
                     break;
 
                 default:
-                    returnComponent = this.getComponentCallback(type);
+                    returnComponent = _getComponentCallback(type);
                     if (returnComponent != null)
                     {
                         returnComponent.InitializeComponent(this);
@@ -223,9 +226,9 @@ namespace Microsoft.Build.UnitTests.QA
 
             if (returnComponent != null)
             {
-                lock (this.buildComponents)
+                lock (_buildComponents)
                 {
-                    this.buildComponents.Enqueue(returnComponent);
+                    _buildComponents.Enqueue(returnComponent);
                 }
             }
 
@@ -250,11 +253,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.nodeId;
+                return _nodeId;
             }
             set
             {
-                this.nodeId = value;
+                _nodeId = value;
             }
         }
 
@@ -265,11 +268,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.logOnlyCriticalEvents;
+                return _logOnlyCriticalEvents;
             }
             set
             {
-                this.logOnlyCriticalEvents = value;
+                _logOnlyCriticalEvents = value;
             }
         }
 
@@ -280,11 +283,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.engineShutdownTimeout;
+                return _engineShutdownTimeout;
             }
             set
             {
-                this.engineShutdownTimeout = value;
+                _engineShutdownTimeout = value;
             }
         }
 
@@ -295,11 +298,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.initialNodeCount;
+                return _initialNodeCount;
             }
             set
             {
-                this.initialNodeCount = value;
+                _initialNodeCount = value;
             }
         }
 
@@ -324,14 +327,14 @@ namespace Microsoft.Build.UnitTests.QA
         public void ShutdownComponent()
         {
             ShutDownRequestEngine();
-            if (this.testDataProvider != null)
+            if (_testDataProvider != null)
             {
-                ((IBuildComponent)this.testDataProvider).ShutdownComponent();
+                ((IBuildComponent)_testDataProvider).ShutdownComponent();
             }
 
-            this.buildComponents.Clear();
-            this.loggingService = null;
-            this.requestEngine = null;
+            _buildComponents.Clear();
+            _loggingService = null;
+            _requestEngine = null;
         }
 
         /// <summary>
@@ -339,7 +342,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void AbortBuild()
         {
-            this.requestEngine.CleanupForBuild();
+            _requestEngine.CleanupForBuild();
         }
 
         /// <summary>
@@ -349,8 +352,8 @@ namespace Microsoft.Build.UnitTests.QA
         {
             if (this.LastEngineStatus != BuildRequestEngineStatus.Shutdown)
             {
-                this.requestEngine.CleanupForBuild();
-                ((IBuildComponent)this.requestEngine).ShutdownComponent();
+                _requestEngine.CleanupForBuild();
+                ((IBuildComponent)_requestEngine).ShutdownComponent();
                 WaitForEngineStatus(BuildRequestEngineStatus.Shutdown);
             }
         }
@@ -362,7 +365,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             while (this.LastEngineStatus != status)
             {
-                if (this.engineStatusChangedEvent.WaitOne(QAMockHost.globalTimeOut, false) == false)
+                if (_engineStatusChangedEvent.WaitOne(QAMockHost.globalTimeOut, false) == false)
                 {
                     Assert.Fail("Requested engine status was not received within - " + QAMockHost.globalTimeOut.ToString() + " seconds.");
                 }
@@ -380,7 +383,7 @@ namespace Microsoft.Build.UnitTests.QA
         private void RequestEngine_OnStatusChanged(BuildRequestEngineStatus newStatus)
         {
             this.LastEngineStatus = newStatus;
-            this.engineStatusChangedEvent.Set();
+            _engineStatusChangedEvent.Set();
         }
 
         /// <summary>
@@ -388,9 +391,9 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void RequestEngine_OnRequestComplete(BuildRequest request, BuildResult result)
         {
-            if (this.testDataProvider != null)
+            if (_testDataProvider != null)
             {
-                this.testDataProvider.NewResult = new ResultFromEngine(request, result);
+                _testDataProvider.NewResult = new ResultFromEngine(request, result);
             }
         }
 
@@ -400,11 +403,11 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="request"></param>
         private void RequestEngine_OnNewRequest(BuildRequestBlocker blocker)
         {
-            if (this.testDataProvider != null)
+            if (_testDataProvider != null)
             {
                 foreach (BuildRequest request in blocker.BuildRequests)
                 {
-                    this.testDataProvider.NewRequest = request;
+                    _testDataProvider.NewRequest = request;
                 }
             }
         }
@@ -415,9 +418,9 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="config"></param>
         private void RequestEngine_OnNewConfigurationRequest(BuildRequestConfiguration config)
         {
-            if (this.testDataProvider != null)
+            if (_testDataProvider != null)
             {
-                this.testDataProvider.NewConfiguration = config;
+                _testDataProvider.NewConfiguration = config;
             }
         }
 
@@ -427,9 +430,9 @@ namespace Microsoft.Build.UnitTests.QA
         /// <param name="e"></param>
         private void RequestEngine_OnEngineException(Exception e)
         {
-            if (this.testDataProvider != null)
+            if (_testDataProvider != null)
             {
-                this.testDataProvider.EngineException = e;
+                _testDataProvider.EngineException = e;
             }
         }
 
@@ -437,11 +440,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.lastEngineStatus;
+                return _lastEngineStatus;
             }
             set
             {
-               this.lastEngineStatus = value;
+                _lastEngineStatus = value;
             }
         }
 

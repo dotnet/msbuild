@@ -90,7 +90,7 @@ namespace Microsoft.Build.Evaluation
         {
             return ReadAllToolsets(toolsets, null,
 #if FEATURE_SYSTEM_CONFIGURATION
-                null, 
+                null,
 #endif
                 environmentProperties, globalProperties, locations);
         }

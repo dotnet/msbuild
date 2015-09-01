@@ -507,7 +507,8 @@ namespace Microsoft.Build.Shared
             // We matched. We only care about the 2nd and 3rd captures, which tells us
             // us the version number.
             int majorVersion;
-            if (!int.TryParse(m.Groups[1].Value, out majorVersion)) {
+            if (!int.TryParse(m.Groups[1].Value, out majorVersion))
+            {
                 return null;
             }
 
@@ -1074,7 +1075,7 @@ namespace Microsoft.Build.Shared
         [DllImport(kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern int GetModuleFileName(
 #if FEATURE_HANDLEREF
-            HandleRef hModule, 
+            HandleRef hModule,
 #else
             IntPtr hModule,
 #endif

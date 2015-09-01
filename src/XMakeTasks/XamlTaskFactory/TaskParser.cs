@@ -251,7 +251,7 @@ namespace Microsoft.Build.Tasks.Xaml
             return parseSuccessful;
         }
 
-        bool ParseAsContentOrFile(string contentOrFile, string desiredRule)
+        private bool ParseAsContentOrFile(string contentOrFile, string desiredRule)
         {
             // On Windows:
             // - xml string will be an invalid file path, so, Path.GetFullPath will
@@ -281,7 +281,8 @@ namespace Microsoft.Build.Tasks.Xaml
                 // We will get an exception if the contents are not a path (for instance, they are actual XML.)
             }
 
-            if (isRootedPath) {
+            if (isRootedPath)
+            {
                 // valid *absolute* file path
 
                 if (!File.Exists(contentOrFile))

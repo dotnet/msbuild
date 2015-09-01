@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -26,87 +29,87 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Build result generated of this definition
         /// </summary>
-        private BuildResult buildResult;
+        private BuildResult _buildResult;
 
         /// <summary>
         /// BuildRequest generated for this definition
         /// </summary>
-        private BuildRequest buildRequest;
+        private BuildRequest _buildRequest;
 
         /// <summary>
         /// List of child definitions which needs to be built before this definition
         /// </summary>
-        private List<RequestDefinition> childDefinitions;
+        private List<RequestDefinition> _childDefinitions;
 
         /// <summary>
         /// Time in miliseconds this build needs to execute for
         /// </summary>
-        private int executionTime;
+        private int _executionTime;
 
         /// <summary>
         /// Targets to build
         /// </summary>
-        private string[] targetsToBuild;
+        private string[] _targetsToBuild;
 
         /// <summary>
         /// Exception recorded during a build process
         /// </summary>
-        private Exception buildException;
+        private Exception _buildException;
 
         /// <summary>
         /// The test data provider
         /// </summary>
-        private ITestDataProvider testDataProvider;
+        private ITestDataProvider _testDataProvider;
 
         /// <summary>
         /// The BuildRequsetEngine
         /// </summary>
-        private IBuildRequestEngine requestEngine;
+        private IBuildRequestEngine _requestEngine;
 
         /// <summary>
         /// The BuildRequsetEngine
         /// </summary>
-        private IResultsCache resultsCache;
+        private IResultsCache _resultsCache;
 
         /// <summary>
         /// File name associated to this definition
         /// </summary>
-        private string fileName;
+        private string _fileName;
 
         /// <summary>
         /// Tools version associated to this definition
         /// </summary>
-        private string toolsVersion;
+        private string _toolsVersion;
 
         /// <summary>
         /// Global properties associated to this definition
         /// </summary>
-        private PropertyDictionary<ProjectPropertyInstance> globalProperties;
+        private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
         /// <summary>
         /// BuildRequestConfiguration associated with this definition
         /// </summary>
-        private BuildRequestConfiguration configuration;
+        private BuildRequestConfiguration _configuration;
 
         /// <summary>
         /// Event that gets fired when the request has been completed
         /// </summary>
-        private AutoResetEvent testProjectCompletedEvent;
+        private AutoResetEvent _testProjectCompletedEvent;
 
         /// <summary>
         /// Elements defining the actual project
         /// </summary>
-        private ProjectDefinition projectDefinition;
+        private ProjectDefinition _projectDefinition;
 
         /// <summary>
         /// This request is used for testing cancels
         /// </summary>
-        private bool waitForCancel;
+        private bool _waitForCancel;
 
         /// <summary>
         /// Global request id starts at 2. 1 is reserved for the root
         /// </summary>
-        private static int globalRequestId = 2;
+        private static int s_globalRequestId = 2;
 
         /// <summary>
         /// Default tools version name
@@ -178,38 +181,37 @@ namespace Microsoft.Build.UnitTests.QA
         {
             if (noTargetsToBuild || targets == null)
             {
-                this.targetsToBuild = new string[] { };
+                _targetsToBuild = new string[] { };
             }
             else
             {
-                this.targetsToBuild = targets;
+                _targetsToBuild = targets;
             }
 
-            this.globalProperties = ((properties == null) ? new PropertyDictionary<ProjectPropertyInstance>() : properties);
-            this.toolsVersion = ((toolsVersion == null) ? RequestDefinition.defaultToolsVersion : toolsVersion);
-            this.fileName = fileName;
+            _globalProperties = ((properties == null) ? new PropertyDictionary<ProjectPropertyInstance>() : properties);
+            _toolsVersion = ((toolsVersion == null) ? RequestDefinition.defaultToolsVersion : toolsVersion);
+            _fileName = fileName;
             if (childDefinitions != null)
             {
-                this.childDefinitions = new List<RequestDefinition>(childDefinitions);
+                _childDefinitions = new List<RequestDefinition>(childDefinitions);
                 foreach (RequestDefinition bd in childDefinitions)
                 {
-                    this.childDefinitions.Add(bd);
+                    _childDefinitions.Add(bd);
                 }
             }
             else
             {
-                this.childDefinitions = new List<RequestDefinition>();
+                _childDefinitions = new List<RequestDefinition>();
             }
 
-            this.testProjectCompletedEvent = new AutoResetEvent(false);
-            this.executionTime = executionTime;
-            this.requestEngine = (IBuildRequestEngine)host.GetComponent(BuildComponentType.RequestEngine);
-            this.testDataProvider = (ITestDataProvider)host.GetComponent(BuildComponentType.TestDataProvider);
-            this.resultsCache = (IResultsCache)host.GetComponent(BuildComponentType.ResultsCache);
-            this.testDataProvider.AddDefinition(this);
-            this.projectDefinition = new ProjectDefinition(this.fileName);
-            this.waitForCancel = false;
-            
+            _testProjectCompletedEvent = new AutoResetEvent(false);
+            _executionTime = executionTime;
+            _requestEngine = (IBuildRequestEngine)host.GetComponent(BuildComponentType.RequestEngine);
+            _testDataProvider = (ITestDataProvider)host.GetComponent(BuildComponentType.TestDataProvider);
+            _resultsCache = (IResultsCache)host.GetComponent(BuildComponentType.ResultsCache);
+            _testDataProvider.AddDefinition(this);
+            _projectDefinition = new ProjectDefinition(_fileName);
+            _waitForCancel = false;
         }
 
         #endregion
@@ -222,14 +224,14 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void RaiseOnNewConfigurationRequest(BuildRequestConfiguration config)
         {
-            if (this.configuration != null)
+            if (_configuration != null)
             {
-                string message = String.Format("Configuration for request {0}:{1} has already been created", this.configuration.ConfigurationId, this.configuration.ProjectFullPath);
+                string message = String.Format("Configuration for request {0}:{1} has already been created", _configuration.ConfigurationId, _configuration.ProjectFullPath);
                 throw new InvalidOperationException(message);
             }
 
-            this.configuration = this.testDataProvider.CreateConfiguration(this);
-            this.requestEngine.ReportConfigurationResponse(new BuildRequestConfigurationResponse(config.ConfigurationId, this.configuration.ConfigurationId, this.configuration.ResultsNodeId));
+            _configuration = _testDataProvider.CreateConfiguration(this);
+            _requestEngine.ReportConfigurationResponse(new BuildRequestConfigurationResponse(config.ConfigurationId, _configuration.ConfigurationId, _configuration.ResultsNodeId));
         }
 
         /// <summary>
@@ -248,11 +250,11 @@ namespace Microsoft.Build.UnitTests.QA
             if (!result.ResultBelongsToRootRequest)
             {
                 // Don't report root requests to the request engine, as it doesn't wait on them.
-                this.requestEngine.UnblockBuildRequest(new BuildRequestUnblocker(result));
+                _requestEngine.UnblockBuildRequest(new BuildRequestUnblocker(result));
             }
-            
-            this.buildResult = result;
-            this.testProjectCompletedEvent.Set();
+
+            _buildResult = result;
+            _testProjectCompletedEvent.Set();
         }
 
         /// <summary>
@@ -260,8 +262,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void RaiseEngineException(Exception e)
         {
-            this.buildException = e;
-            this.testProjectCompletedEvent.Set();
+            _buildException = e;
+            _testProjectCompletedEvent.Set();
         }
 
         #endregion
@@ -273,8 +275,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void Dispose()
         {
-            this.testProjectCompletedEvent.Close();
-            this.childDefinitions.Clear();
+            _testProjectCompletedEvent.Close();
+            _childDefinitions.Clear();
             GC.SuppressFinalize(this);
         }
 
@@ -289,7 +291,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return new BuildRequestConfiguration(new BuildRequestData(this.fileName, this.globalProperties.ToDictionary(), this.toolsVersion, new string[0], null), "2.0");
+                return new BuildRequestConfiguration(new BuildRequestData(_fileName, _globalProperties.ToDictionary(), _toolsVersion, new string[0], null), "2.0");
             }
         }
 
@@ -300,7 +302,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.configuration;
+                return _configuration;
             }
         }
 
@@ -312,7 +314,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.targetsToBuild;
+                return _targetsToBuild;
             }
         }
 
@@ -323,7 +325,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.executionTime;
+                return _executionTime;
             }
         }
 
@@ -336,7 +338,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.buildException;
+                return _buildException;
             }
         }
 
@@ -348,7 +350,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.childDefinitions;
+                return _childDefinitions;
             }
         }
 
@@ -360,7 +362,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.buildResult;
+                return _buildResult;
             }
         }
 
@@ -371,7 +373,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.fileName;
+                return _fileName;
             }
         }
 
@@ -382,7 +384,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.toolsVersion;
+                return _toolsVersion;
             }
         }
 
@@ -393,7 +395,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.globalProperties;
+                return _globalProperties;
             }
         }
 
@@ -404,11 +406,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.projectDefinition;
+                return _projectDefinition;
             }
             set
             {
-                this.projectDefinition = value;
+                _projectDefinition = value;
             }
         }
 
@@ -419,11 +421,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.projectDefinition.CreateMSBuildProject;
+                return _projectDefinition.CreateMSBuildProject;
             }
             set
             {
-                this.projectDefinition.CreateMSBuildProject = value;
+                _projectDefinition.CreateMSBuildProject = value;
             }
         }
 
@@ -434,11 +436,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.waitForCancel;
+                return _waitForCancel;
             }
             set
             {
-                this.waitForCancel = true;
+                _waitForCancel = true;
             }
         }
 
@@ -451,7 +453,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void AddChildDefinition(RequestDefinition project)
         {
-            this.childDefinitions.Add(project);
+            _childDefinitions.Add(project);
         }
 
         /// <summary>
@@ -466,22 +468,22 @@ namespace Microsoft.Build.UnitTests.QA
 
             // No specific target was specified to build. Since validateBuildResult is only called for tests where the
             // request builder and there on is mocked - just testing request engine - the end result will be a default target
-            if (this.targetsToBuild.Length == 0)
+            if (_targetsToBuild.Length == 0)
             {
-                Assert.IsTrue(this.buildResult.HasResultsForTarget(RequestDefinition.defaultTargetName), "Should have results for target:" + RequestDefinition.defaultTargetName);
+                Assert.IsTrue(_buildResult.HasResultsForTarget(RequestDefinition.defaultTargetName), "Should have results for target:" + RequestDefinition.defaultTargetName);
             }
             else
             {
-                foreach (string target in this.targetsToBuild)
+                foreach (string target in _targetsToBuild)
                 {
                     targetCount++;
-                    Assert.IsTrue(this.buildResult.HasResultsForTarget(target), "Should have results for target:" + target);
+                    Assert.IsTrue(_buildResult.HasResultsForTarget(target), "Should have results for target:" + target);
                 }
 
-                Assert.AreEqual(targetCount, this.targetsToBuild.Length, "Total target count and returned target count does not match");
+                Assert.AreEqual(targetCount, _targetsToBuild.Length, "Total target count and returned target count does not match");
             }
 
-            Assert.IsTrue(this.buildResult.OverallResult == BuildResultCode.Success, "Overall results should be a success");
+            Assert.IsTrue(_buildResult.OverallResult == BuildResultCode.Success, "Overall results should be a success");
         }
 
         /// <summary>
@@ -538,31 +540,31 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void WaitForResultsInternal(bool throwOnException, bool dontFail)
         {
-            bool signaled = this.testProjectCompletedEvent.WaitOne(QAMockHost.globalTimeOut, false);
+            bool signaled = _testProjectCompletedEvent.WaitOne(QAMockHost.globalTimeOut, false);
 
             if (!signaled)
             {
-                Assert.Fail("Timeout after- " + QAMockHost.globalTimeOut.ToString() + " seconds waiting for project:" + this.fileName + " to complete");
+                Assert.Fail("Timeout after- " + QAMockHost.globalTimeOut.ToString() + " seconds waiting for project:" + _fileName + " to complete");
             }
             else
             {
-                if (this.buildException != null)
+                if (_buildException != null)
                 {
-                    Assert.Fail("Received engine exception: " + this.buildException + " when building project:" + this.fileName);
+                    Assert.Fail("Received engine exception: " + _buildException + " when building project:" + _fileName);
                 }
                 else
                 {
-                    Assert.IsTrue(this.buildResult.ConfigurationId == this.configuration.ConfigurationId);
-                    if (this.buildResult.Exception != null)
+                    Assert.IsTrue(_buildResult.ConfigurationId == _configuration.ConfigurationId);
+                    if (_buildResult.Exception != null)
                     {
                         if (throwOnException)
                         {
-                            throw this.buildResult.Exception;
+                            throw _buildResult.Exception;
                         }
-                        
-                        if(!dontFail)
+
+                        if (!dontFail)
                         {
-                            Assert.Fail(this.buildResult.Exception.Message);
+                            Assert.Fail(_buildResult.Exception.Message);
                         }
                     }
                 }
@@ -574,7 +576,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ValidateTargetBuilt(string targetName)
         {
-            Assert.IsTrue(this.buildResult.HasResultsForTarget(targetName), "Should have results for target:" + targetName);
+            Assert.IsTrue(_buildResult.HasResultsForTarget(targetName), "Should have results for target:" + targetName);
         }
 
         /// <summary>
@@ -582,8 +584,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ValidateTargetDidNotBuild(string targetName)
         {
-            Assert.IsFalse(this.buildResult.HasResultsForTarget(targetName), "Should have not have results for target:" + targetName);
-            
+            Assert.IsFalse(_buildResult.HasResultsForTarget(targetName), "Should have not have results for target:" + targetName);
         }
 
         /// <summary>
@@ -592,7 +593,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ValidateNonPrimaryTargetEndResult(string targetName, TargetResultCode expectedResultCode, string[] items)
         {
-            BuildResult result = this.resultsCache.GetResultForRequest(this.buildRequest);
+            BuildResult result = _resultsCache.GetResultForRequest(_buildRequest);
             TargetResult targetResult = (TargetResult)result[targetName];
             InternalValidateTargetEndResult(targetResult, expectedResultCode, items);
         }
@@ -603,7 +604,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ValidateTargetEndResult(string targetName, TargetResultCode expectedResultCode, string[] items)
         {
-            TargetResult targetResult = (TargetResult)this.buildResult[targetName];
+            TargetResult targetResult = (TargetResult)_buildResult[targetName];
             InternalValidateTargetEndResult(targetResult, expectedResultCode, items);
         }
 
@@ -644,10 +645,10 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public bool IsResultAvailable()
         {
-            bool signaled = this.testProjectCompletedEvent.WaitOne(1, false);
+            bool signaled = _testProjectCompletedEvent.WaitOne(1, false);
             if (signaled)
             {
-                this.testProjectCompletedEvent.Set();
+                _testProjectCompletedEvent.Set();
             }
 
             return signaled;
@@ -663,27 +664,27 @@ namespace Microsoft.Build.UnitTests.QA
         {
             if (request == null)
             {
-                this.configuration = testDataProvider.CreateConfiguration(this);
-                this.buildRequest = new BuildRequest(1 /* submissionId */, 1, this.configuration.ConfigurationId, this.targetsToBuild, null, BuildEventContext.Invalid, null);
-                this.buildRequest.GlobalRequestId = RequestDefinition.globalRequestId++;
+                _configuration = _testDataProvider.CreateConfiguration(this);
+                _buildRequest = new BuildRequest(1 /* submissionId */, 1, _configuration.ConfigurationId, _targetsToBuild, null, BuildEventContext.Invalid, null);
+                _buildRequest.GlobalRequestId = RequestDefinition.s_globalRequestId++;
             }
             else
             {
-                this.buildRequest = request;
+                _buildRequest = request;
                 // Assign a new Global Request id if one is not already there
                 bool assignNewId = false;
-                if (this.buildRequest.GlobalRequestId == BuildRequest.InvalidGlobalRequestId)
+                if (_buildRequest.GlobalRequestId == BuildRequest.InvalidGlobalRequestId)
                 {
-                    foreach (KeyValuePair<int, RequestDefinition> idRequestPair in this.testDataProvider.RequestDefinitions)
+                    foreach (KeyValuePair<int, RequestDefinition> idRequestPair in _testDataProvider.RequestDefinitions)
                     {
                         if (
-                            idRequestPair.Value.buildRequest != null &&
-                            idRequestPair.Value.buildRequest.ConfigurationId == this.buildRequest.ConfigurationId &&
-                            idRequestPair.Value.buildRequest.Targets.Count == this.buildRequest.Targets.Count
+                            idRequestPair.Value._buildRequest != null &&
+                            idRequestPair.Value._buildRequest.ConfigurationId == _buildRequest.ConfigurationId &&
+                            idRequestPair.Value._buildRequest.Targets.Count == _buildRequest.Targets.Count
                             )
                         {
-                            List<string> leftTargets = new List<string>(idRequestPair.Value.buildRequest.Targets);
-                            List<string> rightTargets = new List<string>(this.buildRequest.Targets);
+                            List<string> leftTargets = new List<string>(idRequestPair.Value._buildRequest.Targets);
+                            List<string> rightTargets = new List<string>(_buildRequest.Targets);
                             leftTargets.Sort(StringComparer.OrdinalIgnoreCase);
                             rightTargets.Sort(StringComparer.OrdinalIgnoreCase);
                             for (int i = 0; i < leftTargets.Count; i++)
@@ -697,7 +698,7 @@ namespace Microsoft.Build.UnitTests.QA
 
                             if (!assignNewId)
                             {
-                                this.buildRequest.GlobalRequestId = idRequestPair.Value.buildRequest.GlobalRequestId;
+                                _buildRequest.GlobalRequestId = idRequestPair.Value._buildRequest.GlobalRequestId;
                                 break;
                             }
                         }
@@ -706,11 +707,11 @@ namespace Microsoft.Build.UnitTests.QA
 
                 if (assignNewId)
                 {
-                    this.buildRequest.GlobalRequestId = RequestDefinition.globalRequestId++;
+                    _buildRequest.GlobalRequestId = RequestDefinition.s_globalRequestId++;
                 }
             }
 
-            this.requestEngine.SubmitBuildRequest(this.buildRequest);
+            _requestEngine.SubmitBuildRequest(_buildRequest);
         }
 
         /// <summary>
@@ -728,11 +729,11 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public bool AreSameDefinitions(BuildRequestConfiguration config)
         {
-            if (this.globalProperties.Count == 0 && ((PropertyDictionary<ProjectPropertyInstance>)(config.Properties)).Count == 0)
+            if (_globalProperties.Count == 0 && ((PropertyDictionary<ProjectPropertyInstance>)(config.Properties)).Count == 0)
             {
                 if (
-                    String.Compare(this.fileName, config.ProjectFullPath, StringComparison.OrdinalIgnoreCase) == 0 &&
-                    String.Compare(this.toolsVersion, config.ToolsVersion, StringComparison.OrdinalIgnoreCase) == 0
+                    String.Compare(_fileName, config.ProjectFullPath, StringComparison.OrdinalIgnoreCase) == 0 &&
+                    String.Compare(_toolsVersion, config.ToolsVersion, StringComparison.OrdinalIgnoreCase) == 0
                     )
                 {
                     return true;
@@ -741,9 +742,9 @@ namespace Microsoft.Build.UnitTests.QA
             else
             {
                 if (
-                    String.Compare(this.fileName, config.ProjectFullPath, StringComparison.OrdinalIgnoreCase) == 0 &&
-                    String.Compare(this.toolsVersion, config.ToolsVersion, StringComparison.OrdinalIgnoreCase) == 0 &&
-                    this.globalProperties.Equals((PropertyDictionary<ProjectPropertyInstance>)(config.Properties))
+                    String.Compare(_fileName, config.ProjectFullPath, StringComparison.OrdinalIgnoreCase) == 0 &&
+                    String.Compare(_toolsVersion, config.ToolsVersion, StringComparison.OrdinalIgnoreCase) == 0 &&
+                    _globalProperties.Equals((PropertyDictionary<ProjectPropertyInstance>)(config.Properties))
                    )
                 {
                     return true;

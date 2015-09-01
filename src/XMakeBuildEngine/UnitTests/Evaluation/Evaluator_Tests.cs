@@ -2395,8 +2395,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // Setup a project collection which asks for 4 nodes
             ProjectCollection collection =
                 new ProjectCollection(
-                    ProjectCollection.GlobalProjectCollection.GlobalProperties,
-                    ProjectCollection.GlobalProjectCollection.Loggers,
+                                   ProjectCollection.GlobalProjectCollection.GlobalProperties,
+                                   ProjectCollection.GlobalProjectCollection.Loggers,
                                    null,
                                    ProjectCollection.GlobalProjectCollection.ToolsetLocations,
                                    4,

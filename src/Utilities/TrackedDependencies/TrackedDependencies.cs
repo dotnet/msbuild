@@ -15,7 +15,7 @@ namespace Microsoft.Build.Utilities
     /// <summary>
     /// This class contains utility functions to assist with tracking dependencies
     /// </summary>
-    internal static class TrackedDependencies
+    public static class TrackedDependencies
     {
         #region Methods
         /// <summary>

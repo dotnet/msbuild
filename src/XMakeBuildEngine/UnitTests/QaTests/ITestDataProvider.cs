@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -19,7 +22,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Indexer to get the Nth request definition from the provider
         /// </summary>
-        RequestDefinition this[ int index ]{ get; }
+        RequestDefinition this[int index] { get; }
 
         /// <summary>
         /// Adds a new definition to the cache. Returns the key associated with this definition so that it can be
@@ -53,7 +56,7 @@ namespace Microsoft.Build.UnitTests.QA
         Exception EngineException { set; }
 
         /// <summary>
-        /// Dictonary of request definitions where the key is the configuration id and the value is the request defination for that configuration
+        /// Dictionary of request definitions where the key is the configuration id and the value is the request definition for that configuration
         /// </summary>
         Dictionary<int, RequestDefinition> RequestDefinitions { get; }
     }

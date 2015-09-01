@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
-// <copyright file="EditingElementsReferencedByOrReferences_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 // <summary>Tests for editing elements that are related to other XML elements</summary>
 //-----------------------------------------------------------------------

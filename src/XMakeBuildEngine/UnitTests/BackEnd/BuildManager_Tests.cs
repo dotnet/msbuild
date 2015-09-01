@@ -67,11 +67,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _logger = new MockLogger();
             _parameters = new BuildParameters
-                              {
-                                  ShutdownInProcNodeOnBuildFinish = true,
-                                  Loggers = new ILogger[] { _logger },
-                                  EnableNodeReuse = false
-                              };
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
             _buildManager = new BuildManager();
             _projectCollection = new ProjectCollection();
             Environment.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");

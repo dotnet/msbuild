@@ -1,8 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
-// <copyright file="ProjectInstance_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 // <summary>Tests for ProjectInstance public members</summary>
 //-----------------------------------------------------------------------
@@ -718,7 +716,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { ((ITaskItem2)Helpers.GetFirst(instance.Items)).SetMetadataValueLiteral("a", "b"); });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { ((ITaskItem2)Helpers.GetFirst(instance.Items)).SetMetadataValueLiteral("a", "b"); });
         }
 
         /// <summary>
@@ -762,7 +760,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
         }
 
         /// <summary>
@@ -773,7 +771,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("p1").EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("p1").EvaluatedValue = "v2"; });
         }
 
         /// <summary>
@@ -784,7 +782,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.SetProperty("newproperty", "v2"); });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.SetProperty("newproperty", "v2"); });
         }
 
         /// <summary>
@@ -796,7 +794,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.SetProperty("g", "gv2"); });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.SetProperty("g", "gv2"); });
         }
 
         /// <summary>
@@ -808,7 +806,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.SetProperty("username", "someone_else_here"); });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.SetProperty("username", "someone_else_here"); });
         }
 
         /// <summary>
@@ -837,15 +835,15 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var protoInstance = GetSampleProjectInstance(false /* mutable */);
             var instance = protoInstance.DeepCopy(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("g").EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("g").EvaluatedValue = "v2"; });
             Helpers.VerifyAssertThrowsInvalidOperation(
                 delegate
-                    {
-                        instance.GetProperty(NativeMethodsShared.IsWindows ? "username" : "USER").EvaluatedValue =
-                            "someone_else_here";
-                    });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
+                {
+                    instance.GetProperty(NativeMethodsShared.IsWindows ? "username" : "USER").EvaluatedValue =
+                        "someone_else_here";
+                });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
         }
 
         /// <summary>
@@ -860,15 +858,15 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             // Should not have bothered cloning
             Assert.IsTrue(Object.ReferenceEquals(protoInstance, instance));
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("g").EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("g").EvaluatedValue = "v2"; });
             Helpers.VerifyAssertThrowsInvalidOperation(
                 delegate
-                    {
-                        instance.GetProperty(NativeMethodsShared.IsWindows ? "username" : "USER").EvaluatedValue =
-                            "someone_else_here";
-                    });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
+                {
+                    instance.GetProperty(NativeMethodsShared.IsWindows ? "username" : "USER").EvaluatedValue =
+                        "someone_else_here";
+                });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
         }
 
         /// <summary>
@@ -880,15 +878,15 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var protoInstance = GetSampleProjectInstance(true /* immutable */);
             var instance = protoInstance.DeepCopy(true /* immutable */);
 
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { instance.GetProperty("g").EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("g").EvaluatedValue = "v2"; });
             Helpers.VerifyAssertThrowsInvalidOperation(
                 delegate
-                    {
-                        instance.GetProperty(NativeMethodsShared.IsWindows ? "username" : "USER").EvaluatedValue =
-                            "someone_else_here";
-                    });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
-            Helpers.VerifyAssertThrowsInvalidOperation(delegate() { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
+                {
+                    instance.GetProperty(NativeMethodsShared.IsWindows ? "username" : "USER").EvaluatedValue =
+                        "someone_else_here";
+                });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Properties).EvaluatedValue = "v2"; });
+            Helpers.VerifyAssertThrowsInvalidOperation(delegate () { Helpers.GetFirst(instance.Items).EvaluatedInclude = "new"; });
         }
 
         /// <summary>

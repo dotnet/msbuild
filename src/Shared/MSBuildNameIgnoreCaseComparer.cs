@@ -136,7 +136,7 @@ namespace Microsoft.Build.Collections
             }
 
 #if RETAIL
-            if ((runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64) && (runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM))
+            if ((s_runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64) && (s_runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM))
             {
                 // The use of unsafe here is quite a bit faster than the regular
                 // mechanism in the BCL. This is because we can make assumptions
@@ -355,7 +355,7 @@ namespace Microsoft.Build.Collections
                 }
             }
 #if RETAIL
-            if ((runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64) && (runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM))
+            if ((s_runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64) && (s_runningProcessorArchitecture != NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM))
             {
                 unsafe
                 {

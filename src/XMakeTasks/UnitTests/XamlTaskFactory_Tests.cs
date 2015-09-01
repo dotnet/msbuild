@@ -323,7 +323,8 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                      </Rule>
                                    </ProjectSchemaDefinitions>";
             string tmpXamlFile = FileUtilities.GetTemporaryFile();
-            try {
+            try
+            {
                 File.WriteAllText(tmpXamlFile, xmlContents.Replace("`", "\""));
                 TaskParser tp = new TaskParser();
                 tp.Parse(tmpXamlFile, "CL");
@@ -335,7 +336,9 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 Assert.AreEqual("TargetAssembly", properties.First.Value.Name);
                 Assert.AreEqual(PropertyType.String, properties.First.Value.Type);
                 Assert.AreEqual("/target:\"[value]\"", properties.First.Value.SwitchName);
-            } finally {
+            }
+            finally
+            {
                 // This throws because the file is still in use!
                 //if (File.Exists(tmpXamlFile))
                 //    File.Delete(tmpXamlFile);

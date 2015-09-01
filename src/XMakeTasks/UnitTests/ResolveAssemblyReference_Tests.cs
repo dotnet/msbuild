@@ -2295,7 +2295,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return new AssemblyNameExtension[] { };
             }
-            
+
             if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return new AssemblyNameExtension[]
@@ -4469,7 +4469,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 t.AppConfigFile = appConfigFile;
 
                 bool succeeded = Execute(t);
-                Console.WriteLine (((MockEngine)(t.BuildEngine)).Log);
+                Console.WriteLine(((MockEngine)(t.BuildEngine)).Log);
 
                 Assert.IsTrue(succeeded);
                 Assert.AreEqual(1, t.ResolvedDependencyFiles.Length);
@@ -7534,10 +7534,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 t.SearchPaths = new string[] { "{gac}", s_myComponentsRootPath };
             }
-            else {
+            else
+            {
                 t.SearchPaths = new string[] { s_myComponentsRootPath };
             }
-            
+
             t.CopyLocalDependenciesWhenParentReferenceInGac = false;
             bool succeeded = Execute(t);
 
@@ -7606,12 +7607,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            
+
             if (NativeMethodsShared.IsWindows)
             {
                 t.SearchPaths = new string[] { "{gac}", s_myComponentsRootPath };
             }
-            else {
+            else
+            {
                 t.SearchPaths = new string[] { s_myComponentsRootPath };
             }
 
@@ -7671,7 +7673,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 t.SearchPaths = new string[] { "{gac}", s_myComponentsRootPath };
             }
-            else {
+            else
+            {
                 t.SearchPaths = new string[] { s_myComponentsRootPath };
             }
 
@@ -7719,7 +7722,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 t.SearchPaths = new string[] { "{gac}", s_myComponentsRootPath };
             }
-            else {
+            else
+            {
                 t.SearchPaths = new string[] { s_myComponentsRootPath };
             }
 
@@ -7793,7 +7797,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
             t.DoNotCopyLocalIfInGac = true;
-            t.SearchPaths = new string[] { @"c:\MyComponents", "{gac}",  };
+            t.SearchPaths = new string[] { @"c:\MyComponents", "{gac}", };
             bool succeeded = Execute(t);
 
             Assert.IsTrue(succeeded);
@@ -9359,7 +9363,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.AreEqual(3, returnedVersions.Count);
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));            
+            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [Test]

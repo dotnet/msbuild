@@ -199,7 +199,7 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                ThreadStart taskRunnerDelegate = delegate()
+                ThreadStart taskRunnerDelegate = delegate ()
                 {
                     try
                     {

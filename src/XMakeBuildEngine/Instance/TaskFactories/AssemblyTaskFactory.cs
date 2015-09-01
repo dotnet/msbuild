@@ -326,7 +326,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal ITask CreateTaskInstance(ElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskIdentityParameters,
 #if FEATURE_APPDOMAIN
-            AppDomainSetup appDomainSetup, 
+            AppDomainSetup appDomainSetup,
 #endif
             bool isOutOfProc)
         {

@@ -584,7 +584,7 @@ namespace Microsoft.Build.Internal
                     }
 
                     fileName += ".txt";
-                    
+
                     using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), append: true))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, args);

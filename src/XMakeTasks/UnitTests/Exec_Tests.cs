@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void ExecTaskUnicodeCharacterInCommand()
         {
-            string nonAnsiCharacters = "创建";
+            string nonAnsiCharacters = "\u521B\u5EFA";
             string folder = Path.Combine(Path.GetTempPath(), nonAnsiCharacters);
             string command = Path.Combine(folder, "test.cmd");
 

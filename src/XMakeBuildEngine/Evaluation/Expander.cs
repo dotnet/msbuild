@@ -1900,7 +1900,6 @@ namespace Microsoft.Build.Evaluation
                                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
                                     return null;
                                 }
-
                             }
                             try
                             {
@@ -3305,7 +3304,7 @@ namespace Microsoft.Build.Evaluation
 
                 indexerFunction = new Function<T>(objectType, expressionFunction, propertyName, functionToInvoke, functionArguments,
 #if FEATURE_TYPE_INVOKEMEMBER
-                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.InvokeMethod, 
+                    BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.InvokeMethod,
 #else
                     BindingFlags.IgnoreCase | BindingFlags.Public, InvokeType.InvokeMethod,
 #endif

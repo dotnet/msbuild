@@ -439,8 +439,6 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Validate that a custom defined toolset is honored
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void CustomToolsVersionIsHonored()
         {
             Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", String.Empty);
@@ -958,7 +956,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\directory1\\directory2\\a.tasks"
                                          : "/directory1/directory2/a.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='a1' AssemblyName='a' />
                             <UsingTask TaskName='a2' AssemblyName='a' />
                             <UsingTask TaskName='a3' AssemblyName='a' />
@@ -967,37 +965,37 @@ namespace Microsoft.Build.UnitTests.Definition
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\directory1\\directory2\\b.tasks"
                                          : "/directory1/directory2/b.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='b1' AssemblyName='b' />
                        </Project>"),
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\directory1\\directory2\\c.tasksfile"
                                          : "/directory1/directory2/c.taskfile",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='c1' AssemblyName='c' />
                        </Project>"),
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\directory1\\directory2\\directory3\\d.tasks"
                                          : "/directory1/directory2/directory3/d.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='d1' AssemblyName='d' />
                        </Project>"),
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\directory1\\directory2\\e.tasks"
                                          : "/directory1/directory2/e.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='e1' AssemblyName='e' />
                        </Project>"),
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "d:\\directory1\\directory2\\f.tasks"
                                          : "/d/directory1/directory2/f.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='f1' AssemblyName='f' />
                        </Project>"),
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\directory1\\directory2\\g.custom.tasks"
                                          : "/directory1/directory2/g.custom.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='g1' AssemblyName='g' />
                             <UsingTask TaskName='g2' AssemblyName='g' />
                             <UsingTask TaskName='g3' AssemblyName='g' />
@@ -1005,7 +1003,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\somepath\\1.tasks"
                                          : "/somepath/1.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='11' AssemblyName='1' />
                             <UsingTask TaskName='12' AssemblyName='1' />
                             <UsingTask TaskName='13' AssemblyName='1' />
@@ -1013,13 +1011,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\somepath\\2.tasks"
                                          : "/somepath/2.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='21' AssemblyName='2' />
                        </Project>"),
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\inline\\inlinetasks.tasks"
                                          : "/inline/inlinetasks.tasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='t2' AssemblyName='an' Condition='true' TaskFactory='AssemblyFactory' Runtime='CLR2' Architecture='x86' RequiredRuntime='2.0' RequiredPlatform='x86'>
                                 <ParameterGroup>
                                    <MyParameter ParameterType='System.String' Output='true' Required='false'/>
@@ -1032,7 +1030,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\msbuildoverridetasks\\1.overridetasks"
                                          : "/msbuildoverridetasks/1.overridetasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='a1' AssemblyName='o' />
                             <UsingTask TaskName='oa1' AssemblyName='o' />
                             <UsingTask TaskName='oa2' AssemblyName='o' />
@@ -1041,10 +1039,10 @@ namespace Microsoft.Build.UnitTests.Definition
                 new DefaultTasksFile(NativeMethodsShared.IsWindows
                                          ? "c:\\msbuildoverridetasks\\2.overridetasks"
                                          : "/msbuildoverridetasks/2.overridetasks",
-                    @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                      @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='ooo' AssemblyName='o' />
                         </Project>")
-            };
+};
 
         public struct DefaultTasksFile
         {

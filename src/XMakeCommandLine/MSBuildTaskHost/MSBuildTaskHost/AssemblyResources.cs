@@ -1,9 +1,10 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="AssemblyResources.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
 // </copyright>
 // <summary>Resource manager class for MSBuildTaskHost.exe.</summary>
 //-----------------------------------------------------------------------
+
 using System.Resources;
 using System.Reflection;
 using System.Globalization;
@@ -18,7 +19,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Actual source of the resource string we'll be reading.
         /// </summary>
-        private static readonly ResourceManager resources = new ResourceManager("MSBuildTaskHost.Strings.Shared", Assembly.GetExecutingAssembly());
+        private static readonly ResourceManager s_resources = new ResourceManager("MSBuildTaskHost.Strings.Shared", Assembly.GetExecutingAssembly());
 
         /// <summary>
         /// Loads the specified resource string, either from the assembly's primary resources, or its shared resources.
@@ -28,7 +29,7 @@ namespace Microsoft.Build.Shared
         internal static string GetString(string name)
         {
             // NOTE: the ResourceManager.GetString() method is thread-safe
-            string resource = resources.GetString(name, CultureInfo.CurrentUICulture);
+            string resource = s_resources.GetString(name, CultureInfo.CurrentUICulture);
 
             ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
 

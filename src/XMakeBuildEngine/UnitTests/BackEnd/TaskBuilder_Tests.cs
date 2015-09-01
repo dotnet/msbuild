@@ -613,8 +613,6 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [Test]
-        [Ignore("FEATURE: LEGACY TASKS")]
-        // Ignore: Test requires installed toolset.
         public void NullMetadataOnLegacyOutputItems()
         {
             string referenceAssembliesPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.VersionLatest);
@@ -689,8 +687,6 @@ namespace ItemCreationTask
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
         [Test]
-        [Ignore("FEATURE: LEGACY TASKS")]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -744,8 +740,6 @@ namespace ItemCreationTask
         /// which didn't support the defining project metadata.  
         /// </summary>
         [Test]
-        [Ignore("FEATURE: LEGACY TASKS")]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void ValidateDefiningProjectMetadataOnTaskOutputs_LegacyItems()
         {
             string referenceAssembliesPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.VersionLatest);

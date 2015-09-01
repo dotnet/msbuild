@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -23,47 +26,47 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Task name
         /// </summary>
-        private string name;
+        private string _name;
 
         /// <summary>
         /// Condition on the task
         /// </summary>
-        private string condition;
+        private string _condition;
 
         /// <summary>
         /// Target should continue if task failed
         /// </summary>
-        private bool continueOnError;
+        private bool _continueOnError;
 
         /// <summary>
         /// Task Xml representation
         /// </summary>
-        private XmlElement taskElement;
+        private XmlElement _taskElement;
 
         /// <summary>
         /// XMLDocument to use when creating elements
         /// </summary>
-        private XmlDocument parentXmlDocument;
+        private XmlDocument _parentXmlDocument;
 
         /// <summary>
         /// Event which notifies if the task has completed execution
         /// </summary>
-        private AutoResetEvent taskExecuted;
+        private AutoResetEvent _taskExecuted;
 
         /// <summary>
         /// Event which notifies if the task has started execution
         /// </summary>
-        private AutoResetEvent taskStarted;
+        private AutoResetEvent _taskStarted;
 
         /// <summary>
         /// Final task parameter
         /// </summary>
-        private Dictionary<string, string> finalTaskParameters;
+        private Dictionary<string, string> _finalTaskParameters;
 
         /// <summary>
         /// Expected result of the task
         /// </summary>
-        private WorkUnitResult expectedResult;
+        private WorkUnitResult _expectedResult;
 
         #endregion
 
@@ -90,15 +93,15 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public TaskDefinition(string name, string condition, bool continueOnError, XmlDocument projectXmlDocument, WorkUnitResult expectedResult)
         {
-            this.name = name;
-            this.condition = condition;
-            this.continueOnError = continueOnError;
-            this.taskElement = projectXmlDocument.CreateElement(this.name, @"http://schemas.microsoft.com/developer/msbuild/2003");
-            this.parentXmlDocument = projectXmlDocument;
-            this.expectedResult = expectedResult;
-            this.finalTaskParameters = new Dictionary<string, string>();
-            this.taskExecuted = new AutoResetEvent(false);
-            this.taskStarted = new AutoResetEvent(false);
+            _name = name;
+            _condition = condition;
+            _continueOnError = continueOnError;
+            _taskElement = projectXmlDocument.CreateElement(_name, @"http://schemas.microsoft.com/developer/msbuild/2003");
+            _parentXmlDocument = projectXmlDocument;
+            _expectedResult = expectedResult;
+            _finalTaskParameters = new Dictionary<string, string>();
+            _taskExecuted = new AutoResetEvent(false);
+            _taskStarted = new AutoResetEvent(false);
             GenerateTaskElement();
         }
 
@@ -111,7 +114,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void AddTaskInput(string inputName, string inputValue)
         {
-            this.taskElement.SetAttribute(inputName, inputValue);
+            _taskElement.SetAttribute(inputName, inputValue);
         }
 
         /// <summary>
@@ -119,7 +122,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void AddTaskOutput(string outputParameterName, string outputAssignmentName, bool assignmentAsProperty)
         {
-            XmlElement output = this.parentXmlDocument.CreateElement("Output", @"http://schemas.microsoft.com/developer/msbuild/2003");
+            XmlElement output = _parentXmlDocument.CreateElement("Output", @"http://schemas.microsoft.com/developer/msbuild/2003");
 
             output.SetAttribute("TaskParameter", outputParameterName);
             if (assignmentAsProperty)
@@ -131,7 +134,7 @@ namespace Microsoft.Build.UnitTests.QA
                 output.SetAttribute("ItemName", outputAssignmentName);
             }
 
-            this.taskElement.AppendChild(output as XmlNode);
+            _taskElement.AppendChild(output as XmlNode);
         }
 
         /// <summary>
@@ -139,12 +142,12 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void ValidateTaskParameter(string parameterName, string parameterValue)
         {
-            if (!this.finalTaskParameters.ContainsKey(parameterName))
+            if (!_finalTaskParameters.ContainsKey(parameterName))
             {
                 Assert.Fail("Final task parameter list does not contain the parameter");
             }
 
-            Assert.AreEqual(this.finalTaskParameters[parameterName], parameterValue, "Value is not the same as expected");
+            Assert.AreEqual(_finalTaskParameters[parameterName], parameterValue, "Value is not the same as expected");
         }
 
         /// <summary>
@@ -152,7 +155,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void WaitForTaskToComplete()
         {
-            this.taskExecuted.WaitOne();
+            _taskExecuted.WaitOne();
         }
 
         /// <summary>
@@ -160,7 +163,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void WaitForTaskToStart()
         {
-            this.taskStarted.WaitOne();
+            _taskStarted.WaitOne();
         }
 
         /// <summary>
@@ -168,7 +171,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void SignalTaskCompleted()
         {
-            this.taskExecuted.Set();
+            _taskExecuted.Set();
         }
 
         /// <summary>
@@ -176,7 +179,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public void SignalTaskStarted()
         {
-            this.taskStarted.Set();
+            _taskStarted.Set();
         }
 
         #endregion
@@ -190,7 +193,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.taskElement;
+                return _taskElement;
             }
         }
 
@@ -201,7 +204,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.expectedResult;
+                return _expectedResult;
             }
         }
 
@@ -212,7 +215,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.name;
+                return _name;
             }
         }
 
@@ -228,7 +231,7 @@ namespace Microsoft.Build.UnitTests.QA
             }
             set
             {
-                this.finalTaskParameters = value;
+                _finalTaskParameters = value;
             }
         }
 
@@ -241,14 +244,14 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void GenerateTaskElement()
         {
-            if (this.condition != null)
+            if (_condition != null)
             {
-                this.taskElement.SetAttribute("Condition", this.condition);
+                _taskElement.SetAttribute("Condition", _condition);
             }
 
-            if (this.continueOnError)
+            if (_continueOnError)
             {
-                this.taskElement.SetAttribute("ContinueOnError", "true");
+                _taskElement.SetAttribute("ContinueOnError", "true");
             }
         }
 
@@ -270,8 +273,8 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         private void InternalDispose()
         {
-            this.taskStarted.Close();
-            this.taskExecuted.Close();
+            _taskStarted.Close();
+            _taskExecuted.Close();
         }
 
         /// <summary>

@@ -607,9 +607,9 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Managed implementation of a reader for getting the runtime version of an assembly
     /// </summary>
-    static class ManagedRuntimeVersionReader
+    internal static class ManagedRuntimeVersionReader
     {
-        class HeaderInfo
+        private class HeaderInfo
         {
             public uint VirtualAddress;
             public uint Size;
@@ -648,7 +648,7 @@ namespace Microsoft.Build.Tasks
 
                     if (sr.BaseStream.Length < PEHeaderPointerOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize)
                         return string.Empty;
-                    
+
                     // The PE format starts with an MS-DOS stub of 128 bytes.
                     // At offset 0x3c in the DOS header is a 4-byte unsigned integer offset to the PE
                     // signature (shall be “PE\0\0”), immediately followed by the PE file header
@@ -724,7 +724,7 @@ namespace Microsoft.Build.Tasks
                     // Read all section headers, we need them to make RVA to
                     // offset conversions.
 
-                    var sections = new HeaderInfo [numberOfSections];
+                    var sections = new HeaderInfo[numberOfSections];
                     for (int n = 0; n < numberOfSections; n++)
                     {
                         // At offset 8 of the section is the section size
@@ -734,7 +734,8 @@ namespace Microsoft.Build.Tasks
                         var sectionRva = sr.ReadUInt32();
                         sr.BaseStream.Position = sectionOffset + 20;
                         var sectionDataOffset = sr.ReadUInt32();
-                        sections[n] = new HeaderInfo {
+                        sections[n] = new HeaderInfo
+                        {
                             VirtualAddress = sectionRva,
                             Size = sectionSize,
                             FileOffset = sectionDataOffset
@@ -793,7 +794,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        static bool ReadBytes(BinaryReader r, params byte[] bytes)
+        private static bool ReadBytes(BinaryReader r, params byte[] bytes)
         {
             for (int n = 0; n < bytes.Length; n++)
             {
@@ -803,7 +804,7 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
-        static uint RvaToOffset(HeaderInfo[] sections, uint rva)
+        private static uint RvaToOffset(HeaderInfo[] sections, uint rva)
         {
             foreach (var s in sections)
             {
