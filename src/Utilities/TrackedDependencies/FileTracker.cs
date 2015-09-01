@@ -14,6 +14,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 
+#if FEATURE_FILE_TRACKER
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -68,14 +70,26 @@ namespace Microsoft.Build.Utilities
         private static string s_tempLongPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetLongFilePath(s_tempPath).ToUpperInvariant());
 
         // The path to ApplicationData (is equal to %USERPROFILE%\Application Data folder in Windows XP and %USERPROFILE%\AppData\Roaming in Vista and later)
+#if FEATURE_SPECIAL_FOLDERS
         private static string s_applicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).ToUpperInvariant());
+#else
+        private static string s_applicationDataPath = FileUtilities.EnsureTrailingSlash(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData).ToUpperInvariant());
+#endif
 
         // The path to LocalApplicationData (is equal to %USERPROFILE%\Local Settings\Application Data folder in Windows XP and %USERPROFILE%\AppData\Local in Vista and later).
+#if FEATURE_SPECIAL_FOLDERS
         private static string s_localApplicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).ToUpperInvariant());
+#else
+            private static string s_localApplicationDataPath = FileUtilities.EnsureTrailingSlash(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData).ToUpperInvariant());
+#endif
 
         // The path to the LocalLow folder. In Vista and later, user application data is organized across %USERPROFILE%\AppData\LocalLow,  %USERPROFILE%\AppData\Local (%LOCALAPPDATA%) 
         // and %USERPROFILE%\AppData\Roaming (%APPDATA%). The LocalLow folder is not present in XP.
+#if FEATURE_SPECIAL_FOLDERS
         private static string s_localLowApplicationDataPath = FileUtilities.EnsureTrailingSlash(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData\\LocalLow").ToUpperInvariant());
+#else
+        private static string s_localLowApplicationDataPath = FileUtilities.EnsureTrailingSlash(Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.UserProfile), "AppData\\LocalLow").ToUpperInvariant());
+#endif
 
         // The path to the common Application Data, which is also used by some programs (e.g. antivirus) that we wish to ignore.
         // Is equal to C:\Documents and Settings\All Users\Application Data on XP, and C:\ProgramData on Vista+.
@@ -96,7 +110,11 @@ namespace Microsoft.Build.Utilities
         {
             s_commonApplicationDataPaths = new List<string>();
 
+#if FEATURE_SPECIAL_FOLDERS
             string defaultCommonApplicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).ToUpperInvariant());
+#else
+            string defaultCommonApplicationDataPath = FileUtilities.EnsureTrailingSlash(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.CommonApplicationData).ToUpperInvariant());
+#endif
             s_commonApplicationDataPaths.Add(defaultCommonApplicationDataPath);
 
             string defaultRootDirectory = Path.GetPathRoot(defaultCommonApplicationDataPath);
@@ -929,3 +947,5 @@ namespace Microsoft.Build.Utilities
     /// <returns>If the file should actually be written to the TLog (true) or not (false)</returns>
     public delegate bool DependencyFilter(string fullPath);
 }
+
+#endif

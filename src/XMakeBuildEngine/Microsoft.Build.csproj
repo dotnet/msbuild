@@ -68,6 +68,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\EnvironmentUtilities.cs">
+      <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(FeatureSpecialFolders)' != 'true'">
       <Link>SharedUtilities\FileUtilities.GetFolderPath.cs</Link>
     </Compile>
@@ -118,7 +121,7 @@
     <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" Condition="$(FeatureAppDomain) == 'true'" />
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
@@ -178,7 +181,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="BackEnd\Components\Scheduler\SchedulableRequest.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs" Condition="'$(FeatureFileTracker)' == 'true'" />
+    <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs"/>
     <Compile Include="BackEnd\Components\Scheduler\SchedulingData.cs" />
     <Compile Include="BackEnd\Components\Scheduler\Scheduler.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulerCircularDependencyException.cs" />
@@ -208,9 +211,9 @@
     <Compile Include="Construction\Solution\SolutionProjectGenerator.cs" />
     <Compile Include="Evaluation\IToolsetProvider.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheResponse.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodeEndpointOutOfProc.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="BackEnd\Components\Communications\NodeEndpointOutOfProc.cs" Condition="$(FeatureAppDomain) == 'true'" />
     <Compile Include="BackEnd\Components\Communications\NodeManager.cs" />
-    <Compile Include="BackEnd\Components\Communications\TaskHostNodeManager.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="BackEnd\Components\Communications\TaskHostNodeManager.cs" Condition="$(FeatureAppDomain) == 'true'" />
     <Compile Include="BackEnd\Components\Communications\LogMessagePacket.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeFailedToLaunchException.cs" />
     <Compile Include="BackEnd\Components\BuildRequestEngine\BuildRequestConfigurationResponse.cs" />
@@ -223,9 +226,9 @@
     <Compile Include="BackEnd\Components\Caching\IPropertyCache.cs" />
     <Compile Include="BackEnd\Components\Caching\IResultsCache.cs" />
     <Compile Include="BackEnd\Components\Communications\NodePacketTranslatorExtensions.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" Condition="$(FeatureAppDomain) == 'true'"/>
-    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" Condition="$(FeatureAppDomain) == 'true'"/>
-    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" Condition="$(FeatureAppDomain) == 'true'" />
+    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" Condition="$(FeatureAppDomain) == 'true'" />
+    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" Condition="$(FeatureAppDomain) == 'true'" />
     <Compile Include="BackEnd\Components\RequestBuilder\BatchingEngine.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -358,7 +361,7 @@
     <Compile Include="Definition\ResolvedImport.cs" />
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
-    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="$(FeatureSystemConfiguration) == 'true'"/>
+    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="$(FeatureSystemConfiguration) == 'true'" />
     <Compile Include="..\Shared\ToolsetElement.cs" Condition="$(FeatureSystemConfiguration) == 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -632,7 +635,7 @@
       <Link>SharedUtilities\NativeMethodsShared.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\InprocTrackingNativeMethods.cs" Condition="'$(FeatureFileTracker)' == 'true'">
+    <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

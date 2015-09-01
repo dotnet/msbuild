@@ -46,6 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="..\Shared\EnvironmentUtilities.cs">
+      <Link>EnvironmentUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

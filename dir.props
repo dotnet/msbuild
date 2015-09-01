@@ -143,7 +143,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
-    <FeatureFileTracker>true</FeatureFileTracker>
     <DefineConstants>$(DefineConstants);FEATURE_GAC</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HANDLE_SAFEWAITHANDLE</DefineConstants>
@@ -180,6 +179,8 @@
     <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.
          If not, then the corresponding properties on Thread (which aren't in .NET Core) need to be used. -->
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
+
+    <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
   </PropertyGroup>
 
   <!-- Change define constants as needed -->

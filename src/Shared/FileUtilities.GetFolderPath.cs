@@ -14,6 +14,8 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading;
 
+#if !FEATURE_SPECIAL_FOLDERS
+
 namespace Microsoft.Build.Shared
 {
     internal static partial class FileUtilities
@@ -103,6 +105,7 @@ namespace Microsoft.Build.Shared
             internal const int CSIDL_MYMUSIC = 0x000d;
             internal const int CSIDL_MYPICTURES = 0x0027;
 
+            internal const int CSIDL_PROFILE                    = 0x0028; // %USERPROFILE% (%SystemDrive%\Users\%USERNAME%)
             internal const int CSIDL_PROGRAM_FILESX86           = 0x002a; // x86 C:\Program Files on RISC
 
             internal const int CSIDL_WINDOWS                    = 0x0024; // GetWindowsDirectory()
@@ -209,6 +212,10 @@ namespace Microsoft.Build.Shared
             //     Represents the program files folder. 
             //  
             ProgramFiles = Win32Native.CSIDL_PROGRAM_FILES,
+            //
+            //      USERPROFILE
+            //
+            UserProfile            = Win32Native.CSIDL_PROFILE,
             //  
             //     Represents the folder for components that are shared across applications. 
             //  
@@ -233,3 +240,4 @@ namespace Microsoft.Build.Shared
         }
     }
 }
+#endif

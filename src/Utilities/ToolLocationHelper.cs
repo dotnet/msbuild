@@ -1385,7 +1385,11 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
+#if FEATURE_SPECIAL_FOLDERS
                 return Environment.GetFolderPath(Environment.SpecialFolder.System);
+#else
+                return FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System);
+#endif
             }
         }
 
@@ -1566,7 +1570,7 @@ namespace Microsoft.Build.Utilities
                 if (NativeMethodsShared.IsWindows && platformTarget != null)
                 {
                     // If we are a 32 bit operating system the we should always return the 32 bit directory, or we are targeting x86, arm is also 32 bit
-                    if (!Environment.Is64BitOperatingSystem || platformTarget.Equals("x86", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm", StringComparison.OrdinalIgnoreCase))
+                    if (!EnvironmentUtilities.Is64BitOperatingSystem || platformTarget.Equals("x86", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm", StringComparison.OrdinalIgnoreCase))
                     {
                         targetedArchitecture = SharedDotNetFrameworkArchitecture.Bitness32;
                     }
@@ -2203,7 +2207,7 @@ namespace Microsoft.Build.Utilities
                     if (!s_cachedExtensionSdks.TryGetValue(cachedExtensionSdksKey, out extensionSdk))
                     {
                         // These extension SDKs can target multiple platforms under the same Target SDK, stash in a null platform key for later filtering
-                        extensionSdk = new TargetPlatformSDK(String.Empty, new Version(), null);
+                        extensionSdk = new TargetPlatformSDK(String.Empty, new Version(0, 0), null);
 
                         GatherExtensionSDKListFromDirectory(extensionSdkDiskRoots, extensionSdk);
                         s_cachedExtensionSdks.Add(cachedExtensionSdksKey, extensionSdk);
@@ -2591,7 +2595,7 @@ namespace Microsoft.Build.Utilities
             OpenBaseKey openBaseKey = new OpenBaseKey(RegistryHelper.OpenBaseKey);
             FileExists fileExists = new FileExists(File.Exists);
 
-            bool is64bitOS = Environment.Is64BitOperatingSystem;
+            bool is64bitOS = EnvironmentUtilities.Is64BitOperatingSystem;
 
             // Under WOW64 the HKEY_CURRENT_USER\SOFTWARE key is shared. This means the values are the same in the 64 bit and 32 bit views. This means we only need to get one view of this key.
             GatherSDKsFromRegistryImpl(platformMonikers, registryRoot, RegistryView.Default, RegistryHive.CurrentUser, getSubkeyNames, getRegistrySubKeyDefaultValue, openBaseKey, fileExists);
@@ -2619,7 +2623,11 @@ namespace Microsoft.Build.Utilities
                 // The order is important here because we want to look in the users location first before the non privileged location.
 
                 // We need this so that a user can also have an sdk installed in a non privileged location
+#if FEATURE_SPECIAL_FOLDERS
                 string userLocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+#else
+                string userLocalAppData = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData);
+#endif
                 if (userLocalAppData.Length > 0)
                 {
                     string localAppdataFolder = Path.Combine(userLocalAppData, "Microsoft SDKs");
@@ -2865,10 +2873,11 @@ namespace Microsoft.Build.Utilities
             try
             {
                 // Read in the xml file looking for the includeFramework inorder to chain.
-                using (XmlTextReader reader = new XmlTextReader(redistFile))
-                {
-                    reader.DtdProcessing = DtdProcessing.Ignore;
+                XmlReaderSettings readerSettings = new XmlReaderSettings();
+                readerSettings.DtdProcessing = DtdProcessing.Ignore;
 
+                using (XmlReader reader = XmlReader.Create(redistFile, readerSettings))
+                {
                     while (reader.Read())
                     {
                         if (reader.NodeType == XmlNodeType.Element)

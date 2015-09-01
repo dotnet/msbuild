@@ -695,7 +695,7 @@ namespace Microsoft.Build.Utilities
                 responseFile = FileUtilities.GetTemporaryFile(".rsp");
 
                 // Use the encoding specified by the overridable ResponseFileEncoding property
-                using (StreamWriter responseFileStream = new StreamWriter(responseFile, false, this.ResponseFileEncoding))
+                using (StreamWriter responseFileStream = FileUtilities.OpenWrite(responseFile, false, this.ResponseFileEncoding))
                 {
                     responseFileStream.Write(ResponseFileEscape(responseFileCommands));
                 }
@@ -769,7 +769,12 @@ namespace Microsoft.Build.Utilities
             {
                 foreach (KeyValuePair<string, string> entry in envOverrides)
                 {
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+                    startInfo.Environment[entry.Key] = entry.Value;
+#else
                     startInfo.EnvironmentVariables[entry.Key] = entry.Value;
+#endif
+
                 }
 #pragma warning restore 0618
             }
@@ -779,7 +784,11 @@ namespace Microsoft.Build.Utilities
             {
                 foreach (KeyValuePair<object, object> variable in _environmentVariablePairs)
                 {
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+                    startInfo.Environment[(string)variable.Key] = (string)variable.Value;
+#else
                     startInfo.EnvironmentVariables[(string)variable.Key] = (string)variable.Value;
+#endif
                 }
             }
 
@@ -848,7 +857,7 @@ namespace Microsoft.Build.Utilities
 
                 // Close the input stream. This is done to prevent commands from
                 // blocking the build waiting for input from the user.
-                proc.StandardInput.Close();
+                proc.StandardInput.Dispose();
 
                 // sign up for stderr callbacks
                 proc.BeginErrorReadLine();
@@ -856,8 +865,7 @@ namespace Microsoft.Build.Utilities
                 proc.BeginOutputReadLine();
 
                 // start the time-out timer
-                _toolTimer = new Timer(new TimerCallback(ReceiveTimeoutNotification));
-                _toolTimer.Change(Timeout, System.Threading.Timeout.Infinite /* no periodic timeouts */);
+                _toolTimer = new Timer(new TimerCallback(ReceiveTimeoutNotification), null, Timeout, System.Threading.Timeout.Infinite /* no periodic timeouts */);
 
                 // deal with the various notifications
                 HandleToolNotifications(proc);
@@ -883,7 +891,7 @@ namespace Microsoft.Build.Utilities
                         // Leave the exit code at -1.
                     }
 
-                    proc.Close();
+                    proc.Dispose();
                     proc = null;
                 }
 
@@ -899,11 +907,11 @@ namespace Microsoft.Build.Utilities
                 lock (_eventCloseLock)
                 {
                     _eventsDisposed = true;
-                    _standardErrorDataAvailable.Close();
-                    _standardOutputDataAvailable.Close();
+                    _standardErrorDataAvailable.Dispose();
+                    _standardOutputDataAvailable.Dispose();
 
-                    _toolExited.Close();
-                    _toolTimeoutExpired.Close();
+                    _toolExited.Dispose();
+                    _toolTimeoutExpired.Dispose();
 
                     if (_toolTimer != null)
                     {

@@ -13,6 +13,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 
+#if FEATURE_FILE_TRACKER
+
 namespace Microsoft.Build.Utilities
 {
     public class FlatTrackingData
@@ -675,7 +677,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // Write out the dependency information as a new tlog
-                using (StreamWriter newTlog = new StreamWriter(firstTlog, false, Encoding.Unicode))
+                using (StreamWriter newTlog = FileUtilities.OpenWrite(firstTlog, false, Encoding.Unicode))
                 {
                     foreach (string fileEntry in _dependencyTable.Keys)
                     {
@@ -962,3 +964,5 @@ namespace Microsoft.Build.Utilities
         InputNewerThanTracking
     }
 }
+
+#endif

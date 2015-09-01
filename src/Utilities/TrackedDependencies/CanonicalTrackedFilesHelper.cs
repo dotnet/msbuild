@@ -6,6 +6,8 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 
+#if FEATURE_FILE_TRACKER
+
 namespace Microsoft.Build.Utilities
 {
     internal static class CanonicalTrackedFilesHelper
@@ -115,3 +117,5 @@ namespace Microsoft.Build.Utilities
         }
     }
 }
+
+#endif

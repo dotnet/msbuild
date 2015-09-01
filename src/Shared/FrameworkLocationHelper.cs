@@ -397,9 +397,7 @@ namespace Microsoft.Build.Shared
                                 fallbackDotNetFrameworkSdkRegistryInstallPath,
                                 fallbackDotNetFrameworkSdkInstallKeyValue);
 
-                        bool is64BitProcess = Marshal.SizeOf<IntPtr>() == 8;
-
-                        if (is64BitProcess && s_fallbackDotNetFrameworkSdkInstallPath == null)
+                        if (EnvironmentUtilities.Is64BitProcess && s_fallbackDotNetFrameworkSdkInstallPath == null)
                         {
                             // Since we're 64-bit, what we just checked was the 64-bit fallback key -- so now let's 
                             // check the 32-bit one too, just in case. 

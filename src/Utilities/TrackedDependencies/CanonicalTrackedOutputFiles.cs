@@ -11,6 +11,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 
+#if FEATURE_FILE_TRACKER
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -675,7 +677,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // Write out the dependency information as a new tlog
-                using (StreamWriter outputs = new StreamWriter(firstTlog, false, System.Text.Encoding.Unicode))
+                using (StreamWriter outputs = FileUtilities.OpenWrite(firstTlog, false, System.Text.Encoding.Unicode))
                 {
                     foreach (string rootingMarker in _dependencyTable.Keys)
                     {
@@ -883,3 +885,5 @@ namespace Microsoft.Build.Utilities
         #endregion
     }
 }
+
+#endif
