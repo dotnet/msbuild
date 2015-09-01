@@ -6,9 +6,10 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.Build.Framework;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
@@ -17,11 +18,13 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class TaskLoader
     {
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// For saving the assembly that was loaded by the TypeLoader
         /// We only use this when the assembly failed to load properly into the appdomain
         /// </summary>
         private static LoadedType s_resolverLoadedType;
+#endif
 
         /// <summary>
         /// Delegate for logging task loading errors. 
@@ -58,14 +61,10 @@ namespace Microsoft.Build.Shared
         {
 #if FEATURE_APPDOMAIN
             bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute();
-#else
-            bool separateAppDomain = false;
-#endif
             s_resolverLoadedType = null;
-#if FEATURE_APPDOMAIN
             taskAppDomain = null;
-#endif
             ITask taskInstanceInOtherAppDomain = null;
+#endif
 
             try
             {

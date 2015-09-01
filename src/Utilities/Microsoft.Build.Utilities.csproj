@@ -223,15 +223,22 @@
       <SubType>Designer</SubType>
       <LogicalName>Microsoft.Build.Utilities.Strings.shared.resources</LogicalName>
     </EmbeddedResource>
+  </ItemGroup>
     <!-- Assemblies Files we depend on -->
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
   </ItemGroup>
    <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>

@@ -21,7 +21,9 @@ namespace Microsoft.Build.Collections
     /// 2) It uses "unsafe" pointers to maximize performance of those operations
     /// 3) It takes advantage of limitations on MSBuild Property/Item names to cheaply do case insensitive comparison.
     /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
     [Serializable]
+#endif
     internal class MSBuildNameIgnoreCaseComparer : EqualityComparer<string>, IEqualityComparer<IKeyed>
     {
         /// <summary>

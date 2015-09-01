@@ -221,7 +221,7 @@ namespace Microsoft.Build.Utilities
         /// in addition to (or selectively overriding) the regular environment block.
         /// </summary>
         /// <remarks>
-        /// Using this instead of EnvironmentOverride as that takes a StringDictionary,
+        /// Using this instead of EnvironmentOverride as that takes a Dictionary,
         /// which cannot be set from an MSBuild project.
         /// </remarks>
         public string[] EnvironmentVariables
@@ -293,7 +293,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <returns>The new value for the Environment for the task.</returns>
         [Obsolete("Use EnvironmentVariables property")]
-        virtual protected StringDictionary EnvironmentOverride
+        virtual protected Dictionary<string, string> EnvironmentOverride
         {
             get { return null; }
         }
@@ -764,12 +764,12 @@ namespace Microsoft.Build.Utilities
 
             // Old style environment overrides
 #pragma warning disable 0618 // obsolete
-            StringDictionary envOverrides = EnvironmentOverride;
+            Dictionary<string, string> envOverrides = EnvironmentOverride;
             if (null != envOverrides)
             {
-                foreach (DictionaryEntry entry in envOverrides)
+                foreach (KeyValuePair<string, string> entry in envOverrides)
                 {
-                    startInfo.EnvironmentVariables[(string)entry.Key] = (string)entry.Value;
+                    startInfo.EnvironmentVariables[entry.Key] = entry.Value;
                 }
 #pragma warning restore 0618
             }
@@ -1559,12 +1559,12 @@ namespace Microsoft.Build.Utilities
 
                 // Old style environment overrides
 #pragma warning disable 0618 // obsolete
-                StringDictionary envOverrides = EnvironmentOverride;
+                Dictionary<string, string> envOverrides = EnvironmentOverride;
                 if (null != envOverrides)
                 {
-                    foreach (DictionaryEntry entry in envOverrides)
+                    foreach (KeyValuePair<string, string> entry in envOverrides)
                     {
-                        alreadyLoggedEnvironmentHeader = LogEnvironmentVariable(alreadyLoggedEnvironmentHeader, (string)entry.Key, (string)entry.Value);
+                        alreadyLoggedEnvironmentHeader = LogEnvironmentVariable(alreadyLoggedEnvironmentHeader, entry.Key, entry.Value);
                     }
 #pragma warning restore 0618
                 }

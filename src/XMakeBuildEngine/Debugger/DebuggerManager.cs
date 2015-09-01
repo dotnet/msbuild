@@ -11,16 +11,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-#if FEATURE_DEBUGGER
-using System.Diagnostics.SymbolStore;
-#endif
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+#if FEATURE_DEBUGGER
+using System.Diagnostics.SymbolStore;
+#endif
 
 namespace Microsoft.Build.Debugging
 {

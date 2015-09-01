@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.IO;
 using System.Text;
 using System.Globalization;
@@ -13,6 +15,8 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
+#if FEATURE_SYSTEM_CONFIGURATION
+
     /// <summary>
     /// Helper class for reading toolsets out of the configuration file.
     /// </summary>
@@ -562,4 +566,5 @@ namespace Microsoft.Build.Evaluation
             }
         }
     }
+#endif
 }

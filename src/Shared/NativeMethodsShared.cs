@@ -11,8 +11,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.Win32.SafeHandles;
+#if FEATURE_ASSEMBLY_LOCATION
 using System.Reflection;
+#endif
+using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Build.Shared
 {
@@ -167,7 +169,6 @@ namespace Microsoft.Build.Shared
             internal ushort wProcessorLevel;
             internal ushort wProcessorRevision;
         }
-
 
         /// <summary>
         /// Wrap the intptr returned by OpenProcess in a safe handle.
@@ -625,7 +626,7 @@ namespace Microsoft.Build.Shared
 
                 if (length > 0)
                 {
-                    System.Text.StringBuilder fullPathBuffer = new System.Text.StringBuilder(length);
+                    StringBuilder fullPathBuffer = new StringBuilder(length);
                     length = GetShortPathName(path, fullPathBuffer, length);
                     errorCode = Marshal.GetLastWin32Error();
 
@@ -664,7 +665,7 @@ namespace Microsoft.Build.Shared
 
                 if (length > 0)
                 {
-                    System.Text.StringBuilder fullPathBuffer = new System.Text.StringBuilder(length);
+                    StringBuilder fullPathBuffer = new StringBuilder(length);
                     length = GetLongPathName(path, fullPathBuffer, length);
                     errorCode = Marshal.GetLastWin32Error();
 
@@ -1136,11 +1137,11 @@ namespace Microsoft.Build.Shared
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal static extern int GetShortPathName(string path, [Out] System.Text.StringBuilder fullpath, [In] int length);
+        internal static extern int GetShortPathName(string path, [Out] StringBuilder fullpath, [In] int length);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal static extern int GetLongPathName([In] string path, [Out] System.Text.StringBuilder fullpath, [In] int length);
+        internal static extern int GetLongPathName([In] string path, [Out] StringBuilder fullpath, [In] int length);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", CharSet = AutoOrUnicode, SetLastError = true)]

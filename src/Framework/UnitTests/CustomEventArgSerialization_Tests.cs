@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if FEATURE_BINARY_SERIALIZATION
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +35,18 @@ namespace Microsoft.Build.UnitTests
         private BinaryWriter _writer;
         private BinaryReader _reader;
 
+#if FEATURE_DOTNETVERSION
         private int _eventArgVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
+#else
+        private static readonly int s_defaultPacketVersion = GetDefaultPacketVersion();
+
+        private static int GetDefaultPacketVersion()
+        {
+            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
+            Version coreAssemblyVersion = coreAssembly.GetName().Version;
+            return 1000 + coreAssemblyVersion.Major * 10 + coreAssemblyVersion.Minor;
+        }
+#endif
 
         [SetUp]
         public void SetUp()
@@ -976,3 +988,4 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
+#endif

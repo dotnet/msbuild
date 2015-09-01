@@ -8,7 +8,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
+#endif
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -27,7 +29,11 @@ namespace Microsoft.Build.Utilities
     /// <comment>
     /// Surprisingly few of these Utilities TaskItems are created: typically several orders of magnitude fewer than the number of engine TaskItems.
     /// </comment>
-    public sealed class TaskItem : MarshalByRefObject, ITaskItem, ITaskItem2
+    public sealed class TaskItem :
+#if FEATURE_APPDOMAIN
+        MarshalByRefObject,
+#endif
+        ITaskItem, ITaskItem2
     {
         #region Member Data
 
@@ -402,11 +408,16 @@ namespace Microsoft.Build.Utilities
         /// Gets the item-spec.
         /// </summary>
         /// <returns>The item-spec string.</returns>
+#if FEATURE_APPDOMAIN
         public override string ToString()
+#else
+        public string ToString()
+#endif
         {
             return _itemSpec;
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Overridden to give this class infinite lease time. Otherwise we end up with a limited
         /// lease (5 minutes I think) and instances can expire if they take long time processing.
@@ -417,6 +428,7 @@ namespace Microsoft.Build.Utilities
             // null means infinite lease time
             return null;
         }
+#endif
 
         #endregion
 

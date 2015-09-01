@@ -71,9 +71,11 @@ namespace Microsoft.Build.CommandLine
             Logger,
             DistributedLogger,
             Verbosity,
+#if FEATURE_XML_SCHEMA_VALIDATION
             Validate,
+#endif
             ConsoleLoggerParameters,
-#if !MONO
+#if !MONO && FEATURE_APPDOMAIN
             NodeMode,
             MaxCPUCount,
 #endif
@@ -236,9 +238,11 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "logger", "l" },                       ParameterizedSwitch.Logger,                     null,                           false,          "MissingLoggerError",                  false   ),
             new ParameterizedSwitchInfo(  new string[] { "distributedlogger", "dl" },           ParameterizedSwitch.DistributedLogger,          null,                           false,          "MissingLoggerError",                  false   ),
             new ParameterizedSwitchInfo(  new string[] { "verbosity", "v" },                    ParameterizedSwitch.Verbosity,                  null,                           false,          "MissingVerbosityError",               true    ),
+#if FEATURE_XML_SCHEMA_VALIDATION
             new ParameterizedSwitchInfo(  new string[] { "validate", "val" },                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true    ),
+#endif
             new ParameterizedSwitchInfo(  new string[] { "consoleloggerparameters", "clp" },    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true    ),
-#if !MONO
+#if !MONO && FEATURE_APPDOMAIN
             new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false   ),
             new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true    ),
 #endif
@@ -861,21 +865,26 @@ namespace Microsoft.Build.CommandLine
                 object value = Registry.GetValue(key, valueName, null);
                 if (value != null)
                 {
-                    switch (System.Type.GetTypeCode(value.GetType()))
+                    if (value is int)
                     {
-                        case TypeCode.Int32:
-                            return ((int)value) != 0;
-                        case TypeCode.String:
-                            bool result;
-                            if (bool.TryParse((string)value, out result))
-                            {
-                                return result;
-                            }
-                            return null;
-                        default:
-                            // Recover by assuming the flag is not set.
-                            Debug.Assert(false, "Could not read debugger enabled flag. Key was found but it had type {0}" + value.GetType().ToString());
-                            return null;
+
+                        return ((int)value) != 0;
+                    }
+                    else if (value is string)
+                    {
+
+                        bool result;
+                        if (bool.TryParse((string)value, out result))
+                        {
+                            return result;
+                        }
+                        return null;
+                    }
+                    else
+                    {
+                        // Recover by assuming the flag is not set.
+                        Debug.Assert(false, "Could not read debugger enabled flag. Key was found but it had type {0}" + value.GetType().ToString());
+                        return null;
                     }
                 }
                 return null;

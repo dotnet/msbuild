@@ -218,15 +218,15 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Microsoft.Win32.Registry/4.0.0-beta-23109": {
+      "Microsoft.Win32.Registry/4.0.0-beta-23127": {
         "dependencies": {
-          "System.Runtime": "[4.0.20-beta-23109, )",
-          "System.Runtime.InteropServices": "[4.0.20-beta-23109, )",
-          "System.Resources.ResourceManager": "[4.0.0-beta-23109, )",
-          "System.Runtime.Handles": "[4.0.0-beta-23109, )",
-          "System.Runtime.Extensions": "[4.0.10-beta-23109, )",
-          "System.Collections": "[4.0.10-beta-23109, )",
-          "System.Globalization": "[4.0.10-beta-23109, )"
+          "System.Runtime": "[4.0.20-beta-23127, )",
+          "System.Runtime.InteropServices": "[4.0.20-beta-23127, )",
+          "System.Resources.ResourceManager": "[4.0.0-beta-23127, )",
+          "System.Runtime.Handles": "[4.0.0-beta-23127, )",
+          "System.Runtime.Extensions": "[4.0.10-beta-23127, )",
+          "System.Collections": "[4.0.10-beta-23127, )",
+          "System.Globalization": "[4.0.10-beta-23127, )"
         },
         "compile": {
           "ref/dotnet/Microsoft.Win32.Registry.dll": {}
@@ -1756,15 +1756,15 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Microsoft.Win32.Registry/4.0.0-beta-23123": {
+      "Microsoft.Win32.Registry/4.0.0-beta-23127": {
         "dependencies": {
-          "System.Runtime": "[4.0.20, )",
-          "System.Runtime.InteropServices": "[4.0.20, )",
-          "System.Resources.ResourceManager": "[4.0.0, )",
-          "System.Runtime.Handles": "[4.0.0, )",
-          "System.Runtime.Extensions": "[4.0.10, )",
-          "System.Collections": "[4.0.10, )",
-          "System.Globalization": "[4.0.10, )"
+          "System.Runtime": "[4.0.20-beta-23127, )",
+          "System.Runtime.InteropServices": "[4.0.20-beta-23127, )",
+          "System.Resources.ResourceManager": "[4.0.0-beta-23127, )",
+          "System.Runtime.Handles": "[4.0.0-beta-23127, )",
+          "System.Runtime.Extensions": "[4.0.10-beta-23127, )",
+          "System.Collections": "[4.0.10-beta-23127, )",
+          "System.Globalization": "[4.0.10-beta-23127, )"
         },
         "compile": {
           "ref/dotnet/Microsoft.Win32.Registry.dll": {}
@@ -3393,8 +3393,8 @@
         "[Content_Types].xml"
       ]
     },
-    "Microsoft.Win32.Registry/4.0.0-beta-23109": {
-      "sha512": "EGFd1xAy5TyB6zsOmyfWXcNUnPSX4+x1mNo923Y9Aerz5g8cm5ddv3730RWhbgHSNYQkakhA1M6pDtLJKkdkaw==",
+    "Microsoft.Win32.Registry/4.0.0-beta-23127": {
+      "sha512": "OLlm5CChfeoBvo2hkE9hYtXFm2bn61npTtBmTjc+hrYKltIy3W/yIpwBPNGmKR7/OG4C/senZrrVS5PgPIU5Lw==",
       "type": "Package",
       "files": [
         "_rels/.rels",
@@ -3413,31 +3413,7 @@
         "ref/dotnet/zh-hans/Microsoft.Win32.Registry.xml",
         "ref/dotnet/es/Microsoft.Win32.Registry.xml",
         "ref/net46/Microsoft.Win32.Registry.dll",
-        "package/services/metadata/core-properties/2691709a5d23494cb575274499bcec66.psmdcp",
-        "[Content_Types].xml"
-      ]
-    },
-    "Microsoft.Win32.Registry/4.0.0-beta-23123": {
-      "sha512": "uDHpWnfXuynO2QyCsQbUjK3u6WZGXiiMOfHtFJ83Mkt/M3EtMeA6z3N/eHMnR9qBdfTAFon9yelVmwRBXXU1nQ==",
-      "type": "Package",
-      "files": [
-        "_rels/.rels",
-        "Microsoft.Win32.Registry.nuspec",
-        "lib/DNXCore50/Microsoft.Win32.Registry.dll",
-        "lib/net46/Microsoft.Win32.Registry.dll",
-        "ref/dotnet/Microsoft.Win32.Registry.dll",
-        "ref/dotnet/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/zh-hant/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/de/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/fr/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/it/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/ja/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/ko/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/ru/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/zh-hans/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/es/Microsoft.Win32.Registry.xml",
-        "ref/net46/Microsoft.Win32.Registry.dll",
-        "package/services/metadata/core-properties/a3c99102d20347a1b22da1fd42a907b4.psmdcp",
+        "package/services/metadata/core-properties/ab5e15917647479181745bf7b998cc45.psmdcp",
         "[Content_Types].xml"
       ]
     },
@@ -5898,30 +5874,21 @@
   },
   "projectFileDependencyGroups": {
     "": [],
-    ".NETFramework,Version=v4.5.1": [
-      "Microsoft.Tpl.Dataflow >= 4.5.24"
-    ],
-    ".NETFramework,Version=v4.6": [
-      "Microsoft.Tpl.Dataflow >= 4.5.24",
-      "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213"
-    ],
+    ".NETFramework,Version=v4.5.1": [],
+    ".NETFramework,Version=v4.6": [],
     "DNXCore,Version=v5.0": [
       "Microsoft.NETCore >= 5.0.0",
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.0",
       "System.Console >= 4.0.0-beta-23123",
       "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213",
-      "System.Diagnostics.Contracts >= 4.0.0",
-      "System.Diagnostics.FileVersionInfo >= 4.0.0-beta-23109",
-      "System.Diagnostics.Process >= 4.0.0-beta-23109",
-      "System.Diagnostics.TraceSource >= 4.0.0-beta-23019",
       "System.IO.Pipes >= 4.0.0-beta-23123",
       "System.Threading.Thread >= 4.0.0-beta-23123",
-      "System.Threading.ThreadPool >= 4.0.10-beta-23123",
       "System.Xml.XmlDocument >= 4.0.0",
       "System.Xml.XPath.XmlDocument >= 4.0.0",
       "System.Xml.ReaderWriter >= 4.0.10",
       "Microsoft.NETCore.Runtime >= 1.0.0",
-      "Microsoft.NETCore.TestHost-x86 >= 1.0.0-beta-23123"
+      "Microsoft.NETCore.TestHost-x86 >= 1.0.0-beta-23123",
+      "Microsoft.Win32.Registry >= 4.0.0-beta-23127"
     ]
   }
 }

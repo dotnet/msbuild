@@ -14,6 +14,13 @@
     <AssemblyName>MSBuild</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
+    <PlatformTarget>x86</PlatformTarget>
+    <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
+    <StartProgram Condition="'$(StartProgram)'==''">$(OutputPath)\$(TestHost)</StartProgram>
+    <StartArguments>msbuild.exe</StartArguments>
+  </PropertyGroup>
+
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
@@ -105,7 +112,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
+    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
@@ -133,7 +140,7 @@
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
+    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" Condition="$(FeatureAppDomain) == 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
@@ -164,14 +171,14 @@
     <Compile Include="InitializationException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
+    <Compile Include="NodeEndpointOutOfProcTaskHost.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="LogMessagePacket.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="OutOfProcTaskHostNode.cs" />
-    <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
-    <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
+    <Compile Include="OutOfProcTaskHostNode.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" Condition="$(FeatureAppDomain) == 'true'"/>
+    <Compile Include="OutOfProcTaskAppDomainWrapper.cs" Condition="$(FeatureAppDomain) == 'true'"/>
     <Compile Include="XMake.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -188,12 +195,14 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <!-- File for Assemblies we depend on -->
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\XMakeBuildEngine\Microsoft.Build.csproj">
       <Project>{16CD7635-7CF4-4C62-A77B-CF87D0F09A58}</Project>
       <Name>Microsoft.Build</Name>
@@ -208,6 +217,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="MSBuild.exe.manifest" />
+    <None Include="project.json" />
   </ItemGroup>
    <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" Condition="!$(Configuration.EndsWith('MONO'))"/>
