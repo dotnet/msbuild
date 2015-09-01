@@ -48,6 +48,8 @@ namespace Microsoft.Build.CommandLine
             _commandLineArg = commandLineArg;
         }
 
+
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serialization constructor
         /// </summary>
@@ -63,6 +65,7 @@ namespace Microsoft.Build.CommandLine
 
             _commandLineArg = info.GetString("commandLineArg");
         }
+#endif
 
         /// <summary>
         /// Gets the error message and the invalid switch, or only the error message if no invalid switch is set.
@@ -97,6 +100,7 @@ namespace Microsoft.Build.CommandLine
         // the invalid switch causing this exception
         private string _commandLineArg;
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serialize the contents of the class.
         /// </summary>
@@ -109,6 +113,7 @@ namespace Microsoft.Build.CommandLine
 
             info.AddValue("commandLineArg", _commandLineArg, typeof(string));
         }
+#endif
 
         /// <summary>
         /// Throws the exception if the specified condition is not met.

@@ -100,6 +100,7 @@ namespace Microsoft.Build.CommandLine
         // the invalid switch causing this exception (can be null)
         private string _invalidSwitch;
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serialize the contents of the class.
         /// </summary>
@@ -112,6 +113,7 @@ namespace Microsoft.Build.CommandLine
 
             info.AddValue("invalidSwitch", _invalidSwitch, typeof(string));
         }
+#endif
 
         /// <summary>
         /// Throws the exception if the specified condition is not met.

@@ -584,7 +584,14 @@ namespace Microsoft.Build.Shared
                 //  loaded from the same directory as the main application
                 var appPath = Process.GetCurrentProcess().MainModule.FileName;
                 var appDirectory = Path.GetDirectoryName(appPath);
-                var assemblyPath = Path.Combine(appDirectory, typeof(FileUtilities).GetTypeInfo().Assembly.GetName().Name + ".dll");
+
+                string extension = ".dll";
+                string assemblySimpleName = typeof(FileUtilities).GetTypeInfo().Assembly.GetName().Name;
+                if (assemblySimpleName.Equals("msbuild", StringComparison.OrdinalIgnoreCase))
+                {
+                    extension = ".exe";
+                }
+                var assemblyPath = Path.Combine(appDirectory, assemblySimpleName + extension);
                 assemblyPath = Path.GetFullPath(assemblyPath);
                 if (!File.Exists(assemblyPath))
                 {

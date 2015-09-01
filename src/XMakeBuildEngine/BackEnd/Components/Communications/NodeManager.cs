@@ -34,10 +34,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private INodeProvider _inProcNodeProvider;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The node provider for out-of-proc nodes.
         /// </summary> 
         private INodeProvider _outOfProcNodeProvider;
+#endif
 
         /// <summary>
         /// The build component host.
@@ -111,10 +113,12 @@ namespace Microsoft.Build.BackEnd
                 nodeId = AttemptCreateNode(_inProcNodeProvider, configuration);
             }
 
+#if FEATURE_APPDOMAIN
             if (nodeId == InvalidNodeId && (nodeAffinity == NodeAffinity.Any || nodeAffinity == NodeAffinity.OutOfProc))
             {
                 nodeId = AttemptCreateNode(_outOfProcNodeProvider, configuration);
             }
+#endif
 
             if (nodeId == InvalidNodeId)
             {
@@ -165,10 +169,12 @@ namespace Microsoft.Build.BackEnd
                 _inProcNodeProvider.ShutdownConnectedNodes(enableReuse);
             }
 
+#if FEATURE_APPDOMAIN
             if (null != _outOfProcNodeProvider)
             {
                 _outOfProcNodeProvider.ShutdownConnectedNodes(enableReuse);
             }
+#endif
         }
 
         /// <summary>
@@ -176,11 +182,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
+#if FEATURE_APPDOMAIN
             // don't worry about inProc
             if (null != _outOfProcNodeProvider)
             {
                 _outOfProcNodeProvider.ShutdownAllNodes();
             }
+#endif
         }
 
         #endregion
@@ -198,7 +206,9 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
 
             _inProcNodeProvider = _componentHost.GetComponent(BuildComponentType.InProcNodeProvider) as INodeProvider;
+#if FEATURE_APPDOMAIN
             _outOfProcNodeProvider = _componentHost.GetComponent(BuildComponentType.OutOfProcNodeProvider) as INodeProvider;
+#endif
 
             _componentShutdown = false;
 
@@ -215,13 +225,17 @@ namespace Microsoft.Build.BackEnd
                 ((IDisposable)_inProcNodeProvider).Dispose();
             }
 
+#if FEATURE_APPDOMAIN
             if (_outOfProcNodeProvider != null && _outOfProcNodeProvider is IDisposable)
             {
                 ((IDisposable)_outOfProcNodeProvider).Dispose();
             }
+#endif
 
             _inProcNodeProvider = null;
+#if FEATURE_APPDOMAIN
             _outOfProcNodeProvider = null;
+#endif
             _componentHost = null;
             _componentShutdown = true;
 

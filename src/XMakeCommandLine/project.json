@@ -17,7 +17,8 @@
         "System.Xml.XPath.XmlDocument": "4.0.0",
         "System.Xml.ReaderWriter": "4.0.10",
         "Microsoft.NETCore.Runtime": "1.0.0",
-        "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123"
+        "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
+        "Microsoft.Win32.Registry": "4.0.0-beta-23127"
       }
     }
   }
