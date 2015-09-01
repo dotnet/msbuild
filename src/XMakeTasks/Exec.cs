@@ -38,9 +38,9 @@ namespace Microsoft.Build.Tasks
             _standardErrorEncoding = GetEncodingWithOsFallback();
         }
 
-    #endregion
+        #endregion
 
-    #region Fields
+        #region Fields
 
         // Are the ecodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
@@ -114,7 +114,7 @@ namespace Microsoft.Build.Tasks
         {
             get { return _standardOutputEncoding; }
         }
-        
+
         /// <summary>
         /// Property specifying the encoding of the captured task standard error stream
         /// </summary>

@@ -1290,12 +1290,12 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                    if (!primaryReference.ResolvedFromGac)
-                    {
-                        foundSourceItemNotInGac = true;
-                        break;
+                        if (!primaryReference.ResolvedFromGac)
+                        {
+                            foundSourceItemNotInGac = true;
+                            break;
+                        }
                     }
-                }
                 }
 
                 // All parent source items were found in the GAC.

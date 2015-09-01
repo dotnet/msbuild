@@ -166,7 +166,7 @@ namespace Microsoft.Build.Tasks
 
         // Offset to the PE header
         private const int PEOFFSET = 0x3c;
-        
+
         // PEHeader
         private const int PEHEADER = 0x00004550;
 

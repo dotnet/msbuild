@@ -2,12 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #region Using directives
+
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Shared;
 
 
 #endregion
+
 namespace Microsoft.Build.UnitTests
 {
     [TestClass]

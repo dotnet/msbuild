@@ -71,7 +71,7 @@ namespace Microsoft.Build.Shared
         {
             return GetTemporaryFile(null, extension);
         }
-        
+
         /// <summary>
         /// Creates a file with unique temporary file name with a given extension in the specified folder.
         /// File is guaranteed to be unique.

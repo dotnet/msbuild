@@ -7692,7 +7692,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
             t.DoNotCopyLocalIfInGac = true;
-            t.SearchPaths = new string[] { @"c:\MyComponents", "{gac}",  };
+            t.SearchPaths = new string[] { @"c:\MyComponents", "{gac}", };
             bool succeeded = Execute(t);
 
             Assert.IsTrue(succeeded);
@@ -9228,7 +9228,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.AreEqual(3, returnedVersions.Count);
             Assert.IsTrue(((string)returnedVersions[0].RegistryKey).Equals("v1.0", StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(((string)returnedVersions[1].RegistryKey).Equals("v1", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));            
+            Assert.IsTrue(((string)returnedVersions[2].RegistryKey).Equals("v00001.0", StringComparison.OrdinalIgnoreCase));
         }
 
         [TestMethod]
