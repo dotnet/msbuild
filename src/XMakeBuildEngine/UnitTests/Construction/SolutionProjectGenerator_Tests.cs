@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         [Test]
         [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        // Ignore: Needs investigation
         public void SolutionPassesSubToolsetToChildProjects2()
         {
             string classLibraryContentsToolsV4 = ObjectModelHelpers.CleanupFileContents(
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         [Test]
         [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
+        // Ignore: Needs investigation
         public void SolutionDoesntPassSubToolsetToChildProjects()
         {
             try

@@ -1,7 +1,10 @@
-﻿// FxCop Suppression file
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// FxCop Suppression file
 // To Use:
 // Add module level suppressions to this file to have them suppressed in the assembly
 //
+
 using System.Diagnostics.CodeAnalysis;
 #if CODE_ANALYSIS
 [module: SuppressMessage("Microsoft.Performance","CA1811:AvoidUncalledPrivateCode", Scope="member", Target="Microsoft.Build.BackEnd.TaskHostConfiguration.#.ctor(System.Int32,System.String,System.Collections.Generic.IDictionary`2<System.String,System.String>,System.Globalization.CultureInfo,System.Globalization.CultureInfo,System.AppDomainSetup,System.Int32,System.Int32,System.String,System.Boolean,System.String,System.String,System.Collections.Generic.IDictionary`2<System.String,System.Object>)", Justification="This is shared code between MSBuild and MSBuildTaskHost")]

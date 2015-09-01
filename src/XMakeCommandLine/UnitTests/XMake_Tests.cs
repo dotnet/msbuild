@@ -753,8 +753,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void MSBuildEngineLogger()
         {
             string projectString =

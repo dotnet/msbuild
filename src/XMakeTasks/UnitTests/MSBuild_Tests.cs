@@ -330,7 +330,6 @@ namespace Microsoft.Build.UnitTests
         /// property value and so he can't escape it himself.
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();

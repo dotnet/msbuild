@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -29,10 +32,10 @@ namespace Microsoft.Build.UnitTests.QA
     {
         #region Data members
 
-        private Common_Tests commonTests;
-        private ResultsCache resultsCache;
-        private string assemblyPath;
-        private string tempPath;
+        private Common_Tests _commonTests;
+        private ResultsCache _resultsCache;
+        private string _assemblyPath;
+        private string _tempPath;
 
         #endregion
 
@@ -43,12 +46,12 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public Integration_Tests()
         {
-            this.commonTests = new Common_Tests(this.GetComponent, true);
-            this.resultsCache = null;
-            this.tempPath = System.IO.Path.GetTempPath();
-            this.assemblyPath = Path.GetDirectoryName(
+            _commonTests = new Common_Tests(this.GetComponent, true);
+            _resultsCache = null;
+            _tempPath = System.IO.Path.GetTempPath();
+            _assemblyPath = Path.GetDirectoryName(
                 new Uri(System.Reflection.Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath);
-            this.assemblyPath = Path.Combine(this.assemblyPath, "Microsoft.Build.Unittest.dll");
+            _assemblyPath = Path.Combine(_assemblyPath, "Microsoft.Build.Unittest.dll");
         }
 
         #endregion
@@ -61,8 +64,8 @@ namespace Microsoft.Build.UnitTests.QA
         [TestInitialize]
         public void Setup()
         {
-            this.resultsCache = new ResultsCache();
-            this.commonTests.Setup();
+            _resultsCache = new ResultsCache();
+            _commonTests.Setup();
         }
 
         /// <summary>
@@ -71,8 +74,8 @@ namespace Microsoft.Build.UnitTests.QA
         [TestCleanup]
         public void TearDown()
         {
-            this.commonTests.TearDown();
-            this.resultsCache = null;
+            _commonTests.TearDown();
+            _resultsCache = null;
         }
 
         #endregion
@@ -99,7 +102,7 @@ namespace Microsoft.Build.UnitTests.QA
                     return (IBuildComponent)targetBuilder;
 
                 case BuildComponentType.ResultsCache:
-                    return (IBuildComponent)this.resultsCache;
+                    return (IBuildComponent)_resultsCache;
 
                 default:
                     throw new ArgumentException("Unexpected type requested. Type = " + type.ToString());
@@ -127,7 +130,7 @@ namespace Microsoft.Build.UnitTests.QA
                                 </QAMockTaskForIntegrationTests>
                             </Target>
                         </Project>"),
-                        this.assemblyPath);
+                        _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t", out projectInstance);
@@ -159,7 +162,7 @@ namespace Microsoft.Build.UnitTests.QA
                                 </QAMockTaskForIntegrationTests>
                             </Target>
                         </Project>"),
-                        this.assemblyPath);
+                        _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t", out projectInstance);
@@ -195,7 +198,7 @@ namespace Microsoft.Build.UnitTests.QA
                                 </QAMockTaskForIntegrationTests>
                             </Target>
                         </Project>"),
-                        this.assemblyPath);
+                        _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t", out projectInstance);
@@ -232,7 +235,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-            this.assemblyPath);
+            _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -267,7 +270,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-            this.assemblyPath);
+            _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -302,7 +305,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t0", out projectInstance);
@@ -340,7 +343,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -374,7 +377,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -407,7 +410,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-            this.assemblyPath);
+            _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -444,7 +447,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -480,7 +483,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -513,7 +516,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1;t2", out projectInstance);
@@ -546,7 +549,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", null, out projectInstance);
@@ -579,7 +582,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", null, out projectInstance);
@@ -622,7 +625,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -667,7 +670,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -675,7 +678,7 @@ namespace Microsoft.Build.UnitTests.QA
             r1.SubmitBuildRequest();
 
             r1.WaitForResults();
-
+            
             r1.ValidateTargetEndResult("t1", TargetResultCode.Failure, null);
             r1.ValidateNonPrimaryTargetEndResult("t2", TargetResultCode.Success, null);
             r1.ValidateNonPrimaryTargetEndResult("t3", TargetResultCode.Failure, null);
@@ -709,7 +712,7 @@ namespace Microsoft.Build.UnitTests.QA
                             <Target Name='t4' />
 
                         </Project>"),
-            this.assemblyPath);
+            _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -747,7 +750,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -784,7 +787,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -821,7 +824,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -858,7 +861,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -895,7 +898,7 @@ namespace Microsoft.Build.UnitTests.QA
                             </Target>
 
                         </Project>"),
-                this.assemblyPath);
+                _assemblyPath);
 
             ProjectInstance projectInstance = null;
             RequestDefinition r1 = GetRequestUsingProject(projectFileContents, "1.proj", "t1", out projectInstance);
@@ -932,13 +935,13 @@ namespace Microsoft.Build.UnitTests.QA
                 targetNames = targetName.Split(';');
             }
 
-            projectName = System.IO.Path.Combine(this.tempPath, projectName);
-            RequestDefinition r1 = new RequestDefinition(projectName, "2.0", targetNames, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            projectName = System.IO.Path.Combine(_tempPath, projectName);
+            RequestDefinition r1 = new RequestDefinition(projectName, "2.0", targetNames, null, 0, null, (IBuildComponentHost)_commonTests.Host);
             r1.ProjectDefinition = p1;
 
             return r1;
         }
-   
+
         #endregion
     }
 
@@ -952,27 +955,27 @@ namespace Microsoft.Build.UnitTests.QA
         /// <summary>
         /// Task host
         /// </summary>
-        private Microsoft.Build.Framework.ITaskHost taskHost;
+        private Microsoft.Build.Framework.ITaskHost _taskHost;
 
         /// <summary>
         /// Build engine
         /// </summary>
-        private Microsoft.Build.Framework.IBuildEngine buildEngine;
+        private Microsoft.Build.Framework.IBuildEngine _buildEngine;
 
         /// <summary>
         /// Expected output
         /// </summary>
-        private string expectedOutput;
+        private string _expectedOutput;
 
         /// <summary>
         /// Task should show an exception
         /// </summary>
-        private bool taskShouldThrow;
+        private bool _taskShouldThrow;
 
         /// <summary>
         /// Task should return false from Execute indicating error
         /// </summary>
-        private bool taskShouldError;
+        private bool _taskShouldError;
 
         #endregion
 
@@ -981,9 +984,9 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public QAMockTaskForIntegrationTests()
         {
-            this.taskShouldError = false;
-            this.taskShouldThrow = false;
-            this.expectedOutput = String.Empty;
+            _taskShouldError = false;
+            _taskShouldThrow = false;
+            _expectedOutput = String.Empty;
         }
 
 
@@ -996,11 +999,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.buildEngine;
+                return _buildEngine;
             }
             set
             {
-                this.buildEngine = value;
+                _buildEngine = value;
             }
         }
 
@@ -1011,11 +1014,11 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.taskHost;
+                return _taskHost;
             }
             set
             {
-                this.taskHost = value;
+                _taskHost = value;
             }
         }
 
@@ -1026,7 +1029,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             set
             {
-                this.expectedOutput = value;
+                _expectedOutput = value;
             }
         }
 
@@ -1037,7 +1040,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             set
             {
-                this.taskShouldError = value;
+                _taskShouldError = value;
             }
         }
 
@@ -1048,7 +1051,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             set
             {
-                this.taskShouldThrow = value;
+                _taskShouldThrow = value;
             }
         }
 
@@ -1060,7 +1063,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             get
             {
-                return this.expectedOutput;
+                return _expectedOutput;
             }
         }
 
@@ -1069,12 +1072,12 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public bool Execute()
         {
-            if (this.taskShouldThrow)
+            if (_taskShouldThrow)
             {
                 throw new QAMockTaskForIntegrationTestsException();
             }
 
-            if (this.taskShouldError)
+            if (_taskShouldError)
             {
                 return false;
             }

@@ -268,8 +268,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Test requires installed toolset.
         public void CommandLineErrorsReportFullCommandlineAmpersandTemp()
         {
             string projectFile = @"
@@ -323,8 +321,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void CommandLineErrorsReportFullCommandline()
         {
             string projectFile = @"
@@ -361,8 +357,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
         /// </summary>
         [Test]
-        [Ignore]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SquareBracketEscaping()
         {
             string projectFile = @"

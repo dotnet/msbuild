@@ -894,8 +894,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInConfiguration()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -954,8 +952,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInConfiguration_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
@@ -1024,8 +1020,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInAssemblyName()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1078,8 +1072,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInAssemblyName_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
@@ -1142,8 +1134,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DollarSignInAssemblyName()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1196,8 +1186,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void DollarSignInAssemblyName_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
@@ -1260,8 +1248,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SemicolonInSourceCodeFilename()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1314,8 +1300,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SemicolonInSourceCodeFilename_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
@@ -1380,8 +1364,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Test requires dependent components (e.g. csc2.exe).
         public void SolutionWithLotsaCrazyCharacters()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1577,8 +1559,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Test]
-        [Ignore("TEST: INSTALLED BUILD PROCESS")]
-        // Ignore: Changes to the current directory interfere with the toolset reader.
         public void SolutionWithLotsaCrazyCharacters_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");

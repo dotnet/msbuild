@@ -106,58 +106,6 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         }
 
         /// <summary>
-        /// Tests that only a limited number of strong references are held
-        /// </summary>
-        [Test]
-        [Ignore("This test seems to be flaky depending on when garbage collection happens")]
-        public void AddManyEntriesNotAllStrongReferences()
-        {
-            List<string> paths = new List<string>(55);
-            for (int i = 0; i < 55; i++)
-            {
-                paths.Add(Path.Combine("c:\\", i.ToString()));
-            }
-
-            for (int i = 0; i < paths.Count; i++)
-            {
-                ProjectRootElement.Create(paths[i]);
-            }
-
-            GC.Collect();
-
-            // Boost one
-            ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get(paths[2], (p, c) => null, true);
-
-            GC.Collect();
-
-            // Should have only indexes 6 through 54 remaining, except #2 which got boosted
-            for (int i = 0; i < 6; i++)
-            {
-                if (i != 2)
-                {
-                    Assert.IsNull(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(paths[i]), "expected " + i + " to not be in cache");
-                }
-            }
-
-            for (int i = 2; i < 55; i++)
-            {
-                if (i > 5 || i == 2)
-                {
-                    Assert.IsNotNull(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(paths[i]));
-                }
-            }
-
-            ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.DiscardStrongReferences();
-
-            GC.Collect();
-
-            for (int i = 0; i < 55; i++)
-            {
-                Assert.IsNull(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.TryGet(paths[i]));
-            }
-        }
-
-        /// <summary>
         /// Cache should not return a ProjectRootElement if the file it was loaded from has since changed -
         /// if the cache was configured to auto-reload.
         /// </summary>

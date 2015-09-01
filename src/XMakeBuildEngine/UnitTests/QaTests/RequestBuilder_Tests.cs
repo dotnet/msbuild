@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -26,9 +29,9 @@ namespace Microsoft.Build.UnitTests.QA
     {
         #region Data members
 
-        private Common_Tests commonTests;
-        private ResultsCache resultsCache;
-        private string tempPath;
+        private Common_Tests _commonTests;
+        private ResultsCache _resultsCache;
+        private string _tempPath;
 
         #endregion
 
@@ -39,9 +42,9 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public RequestBuilder_Tests()
         {
-            this.commonTests = new Common_Tests(this.GetComponent, true);
-            this.resultsCache = null;
-            this.tempPath = System.IO.Path.GetTempPath();
+            _commonTests = new Common_Tests(this.GetComponent, true);
+            _resultsCache = null;
+            _tempPath = System.IO.Path.GetTempPath();
         }
 
         #endregion
@@ -54,8 +57,8 @@ namespace Microsoft.Build.UnitTests.QA
         [TestInitialize]
         public void Setup()
         {
-            this.resultsCache = new ResultsCache();
-            this.commonTests.Setup();
+            _resultsCache = new ResultsCache();
+            _commonTests.Setup();
         }
 
         /// <summary>
@@ -64,9 +67,8 @@ namespace Microsoft.Build.UnitTests.QA
         [TestCleanup]
         public void TearDown()
         {
-            this.commonTests.TearDown();
-            this.resultsCache = null;
-
+            _commonTests.TearDown();
+            _resultsCache = null;
         }
 
         #endregion
@@ -93,7 +95,7 @@ namespace Microsoft.Build.UnitTests.QA
                     return (IBuildComponent)targetBuilder;
 
                 case BuildComponentType.ResultsCache:
-                    return (IBuildComponent)this.resultsCache;
+                    return (IBuildComponent)_resultsCache;
 
                 default:
                     throw new ArgumentException("Unexpected type requested. Type = " + type.ToString());
@@ -186,7 +188,7 @@ namespace Microsoft.Build.UnitTests.QA
             p1.WaitForCancel = true;
             p1.SubmitBuildRequest();
 
-            this.commonTests.Host.AbortBuild();
+            _commonTests.Host.AbortBuild();
 
             p1.ValidateBuildAbortedResult();
         }
@@ -201,7 +203,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildOneProject()
         {
-            this.commonTests.BuildOneProject();
+            _commonTests.BuildOneProject();
         }
 
         /// <summary>
@@ -210,7 +212,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build4Projects()
         {
-            this.commonTests.Build4DifferentProjects();
+            _commonTests.Build4DifferentProjects();
         }
 
         /// <summary>
@@ -219,7 +221,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildingTheSameProjectTwiceWithDifferentToolsVersion()
         {
-            this.commonTests.BuildingTheSameProjectTwiceWithDifferentToolsVersion();
+            _commonTests.BuildingTheSameProjectTwiceWithDifferentToolsVersion();
         }
 
         /// <summary>
@@ -228,7 +230,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildingTheSameProjectTwiceWithDifferentToolsGlobalProperties()
         {
-            this.commonTests.BuildingTheSameProjectTwiceWithDifferentGlobalProperties();
+            _commonTests.BuildingTheSameProjectTwiceWithDifferentGlobalProperties();
         }
 
         /// <summary>
@@ -237,7 +239,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void ReferenceAProjectAlreadyBuiltInTheNode()
         {
-            this.commonTests.ReferenceAProjectAlreadyBuiltInTheNode();
+            _commonTests.ReferenceAProjectAlreadyBuiltInTheNode();
         }
 
         /// <summary>
@@ -246,7 +248,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void ReferenceAProjectAlreadyBuiltInTheNodeButWithDifferentToolsVersion()
         {
-            this.commonTests.ReferenceAProjectAlreadyBuiltInTheNodeButWithDifferentToolsVersion();
+            _commonTests.ReferenceAProjectAlreadyBuiltInTheNodeButWithDifferentToolsVersion();
         }
 
         /// <summary>
@@ -255,7 +257,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void ReferenceAProjectAlreadyBuiltInTheNodeButWithDifferentGlobalProperties()
         {
-            this.commonTests.ReferenceAProjectAlreadyBuiltInTheNodeButWithDifferentGlobalProperties();
+            _commonTests.ReferenceAProjectAlreadyBuiltInTheNodeButWithDifferentGlobalProperties();
         }
 
         /// <summary>
@@ -264,7 +266,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildOneProjectWith1Reference()
         {
-            this.commonTests.BuildOneProjectWith1Reference();
+            _commonTests.BuildOneProjectWith1Reference();
         }
 
         /// <summary>
@@ -273,7 +275,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildOneProjectWith3Reference()
         {
-            this.commonTests.BuildOneProjectWith3Reference();
+            _commonTests.BuildOneProjectWith3Reference();
         }
 
         /// <summary>
@@ -282,7 +284,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildOneProjectWith3ReferenceWhere2AreTheSame()
         {
-            this.commonTests.BuildOneProjectWith3ReferenceWhere2AreTheSame();
+            _commonTests.BuildOneProjectWith3ReferenceWhere2AreTheSame();
         }
 
         /// <summary>
@@ -291,7 +293,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildMultipleProjectsWithMiddleProjectHavingReferenceToANewProject()
         {
-            this.commonTests.BuildMultipleProjectsWithMiddleProjectHavingReferenceToANewProject();
+            _commonTests.BuildMultipleProjectsWithMiddleProjectHavingReferenceToANewProject();
         }
 
         /// <summary>
@@ -300,7 +302,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildMultipleProjectsWithTheFirstProjectHavingReferenceToANewProject()
         {
-            this.commonTests.BuildMultipleProjectsWithTheFirstProjectHavingReferenceToANewProject();
+            _commonTests.BuildMultipleProjectsWithTheFirstProjectHavingReferenceToANewProject();
         }
 
         /// <summary>
@@ -309,7 +311,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildMultipleProjectsWithTheLastProjectHavingReferenceToANewProject()
         {
-            this.commonTests.BuildMultipleProjectsWithTheLastProjectHavingReferenceToANewProject();
+            _commonTests.BuildMultipleProjectsWithTheLastProjectHavingReferenceToANewProject();
         }
 
         /// <summary>
@@ -318,7 +320,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildMultipleProjectsWithEachReferencingANewProject()
         {
-            this.commonTests.BuildMultipleProjectsWithEachReferencingANewProject();
+            _commonTests.BuildMultipleProjectsWithEachReferencingANewProject();
         }
 
         /// <summary>
@@ -327,7 +329,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildMultipleProjectsWhereFirstReferencesMultipleNewProjects()
         {
-            this.commonTests.BuildMultipleProjectsWhereFirstReferencesMultipleNewProjects();
+            _commonTests.BuildMultipleProjectsWhereFirstReferencesMultipleNewProjects();
         }
 
         /// <summary>
@@ -336,7 +338,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildMultipleProjectsWhereFirstAndLastReferencesMultipleNewProjects()
         {
-            this.commonTests.BuildMultipleProjectsWhereFirstAndLastReferencesMultipleNewProjects();
+            _commonTests.BuildMultipleProjectsWhereFirstAndLastReferencesMultipleNewProjects();
         }
 
         /// <summary>
@@ -345,13 +347,13 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildMultipleProjectsWithReferencesWhereSomeReferencesAreAlreadyBuilt()
         {
-            this.commonTests.BuildMultipleProjectsWithReferencesWhereSomeReferencesAreAlreadyBuilt();
+            _commonTests.BuildMultipleProjectsWithReferencesWhereSomeReferencesAreAlreadyBuilt();
         }
 
         [TestMethod]
         public void BuildMultipleProjectsWithReferencesAndDifferentGlobalProperties()
         {
-            this.commonTests.BuildMultipleProjectsWithReferencesAndDifferentGlobalProperties();
+            _commonTests.BuildMultipleProjectsWithReferencesAndDifferentGlobalProperties();
         }
 
         /// <summary>
@@ -360,7 +362,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void BuildMultipleProjectsWithReferencesAndDifferentToolsVersion()
         {
-            this.commonTests.BuildMultipleProjectsWithReferencesAndDifferentToolsVersion();
+            _commonTests.BuildMultipleProjectsWithReferencesAndDifferentToolsVersion();
         }
 
         /// <summary>
@@ -369,7 +371,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build3ProjectsWhere1HasAReferenceTo3()
         {
-            this.commonTests.Build3ProjectsWhere1HasAReferenceTo3();
+            _commonTests.Build3ProjectsWhere1HasAReferenceTo3();
         }
 
         /// <summary>
@@ -378,7 +380,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build3ProjectsWhere2HasAReferenceTo3()
         {
-            this.commonTests.Build3ProjectsWhere2HasAReferenceTo3();
+            _commonTests.Build3ProjectsWhere2HasAReferenceTo3();
         }
 
         /// <summary>
@@ -387,7 +389,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build3ProjectsWhere3HasAReferenceTo1()
         {
-            this.commonTests.Build3ProjectsWhere3HasAReferenceTo1();
+            _commonTests.Build3ProjectsWhere3HasAReferenceTo1();
         }
 
         #endregion
@@ -411,8 +413,8 @@ namespace Microsoft.Build.UnitTests.QA
                 toolsVersion = "2.0";
             }
 
-            filename = System.IO.Path.Combine(tempPath, filename);
-            RequestDefinition request = new RequestDefinition(filename, toolsVersion, targets, null, executionTime, null, (IBuildComponentHost)this.commonTests.Host);
+            filename = System.IO.Path.Combine(_tempPath, filename);
+            RequestDefinition request = new RequestDefinition(filename, toolsVersion, targets, null, executionTime, null, (IBuildComponentHost)_commonTests.Host);
             request.CreateMSBuildProject = true;
 
             return request;

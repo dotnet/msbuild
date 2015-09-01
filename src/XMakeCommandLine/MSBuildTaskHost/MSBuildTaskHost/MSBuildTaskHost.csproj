@@ -30,7 +30,7 @@
     <ProjectGuid>{53733ECF-0D81-43DA-B602-2AE9417F614F}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
-    <StyleCopEnabled>true</StyleCopEnabled>
+    <StyleCopEnabled>false</StyleCopEnabled>
   </PropertyGroup>
   <PropertyGroup>
     <UserIncludes>

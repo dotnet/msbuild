@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Xml;
 using System.Text;
 using System.Collections;
@@ -27,9 +30,9 @@ namespace Microsoft.Build.UnitTests.QA
     {
         #region Data members
 
-        private Common_Tests commonTests;
-        private ResultsCache resultsCache;
-        private string tempPath;
+        private Common_Tests _commonTests;
+        private ResultsCache _resultsCache;
+        private string _tempPath;
 
         #endregion
 
@@ -40,9 +43,9 @@ namespace Microsoft.Build.UnitTests.QA
         /// </summary>
         public TargetBuilder_Tests()
         {
-            this.commonTests = new Common_Tests(this.GetComponent, true);
-            this.tempPath = System.IO.Path.GetTempPath();
-            this.resultsCache = null;
+            _commonTests = new Common_Tests(this.GetComponent, true);
+            _tempPath = System.IO.Path.GetTempPath();
+            _resultsCache = null;
         }
 
         #endregion
@@ -55,8 +58,8 @@ namespace Microsoft.Build.UnitTests.QA
         [TestInitialize]
         public void Setup()
         {
-            this.resultsCache = new ResultsCache();
-            this.commonTests.Setup();
+            _resultsCache = new ResultsCache();
+            _commonTests.Setup();
         }
 
         /// <summary>
@@ -65,8 +68,8 @@ namespace Microsoft.Build.UnitTests.QA
         [TestCleanup]
         public void TearDown()
         {
-            this.commonTests.TearDown();
-            this.resultsCache = null;
+            _commonTests.TearDown();
+            _resultsCache = null;
         }
 
         #endregion
@@ -93,7 +96,7 @@ namespace Microsoft.Build.UnitTests.QA
                     return (IBuildComponent)targetBuilder;
 
                 case BuildComponentType.ResultsCache:
-                    return (IBuildComponent)this.resultsCache;
+                    return (IBuildComponent)_resultsCache;
 
                 default:
                     throw new ArgumentException("Unexpected type requested. Type = " + type.ToString());
@@ -110,7 +113,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build1ProjectWith1TargetAnd1Task()
         {
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition project1 = test1.ProjectDefinition;
             TargetDefinition target1 = new TargetDefinition(RequestDefinition.defaultTargetName, project1.ProjectXmlDocument);
             TaskDefinition task1 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
@@ -130,7 +133,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build1ProjectWith1TargetAnd2Task()
         {
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition project1 = test1.ProjectDefinition;
             TargetDefinition target1 = new TargetDefinition(RequestDefinition.defaultTargetName, project1.ProjectXmlDocument);
             TaskDefinition task1 = new TaskDefinition("task1", null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
@@ -154,7 +157,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build1ProjectWith2TargetAnd1TaskEach()
         {
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[2] { "Target1", "Target2" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[2] { "Target1", "Target2" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition project1 = test1.ProjectDefinition;
             TargetDefinition target1 = new TargetDefinition("Target1", project1.ProjectXmlDocument);
             TargetDefinition target2 = new TargetDefinition("Target2", project1.ProjectXmlDocument);
@@ -195,7 +198,7 @@ namespace Microsoft.Build.UnitTests.QA
             target2.AddTask(task2);
             project1.AddTarget(target1);
             project1.AddTarget(target2);
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             test1.ProjectDefinition = project1;
 
             test1.SubmitBuildRequest();
@@ -223,7 +226,7 @@ namespace Microsoft.Build.UnitTests.QA
             target2.AddTask(task2);
             project1.AddTarget(target1);
             project1.AddTarget(target2);
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             test1.ProjectDefinition = project1;
 
             test1.SubmitBuildRequest();
@@ -251,7 +254,7 @@ namespace Microsoft.Build.UnitTests.QA
             target2.AddTask(task2);
             project1.AddTarget(target1);
             project1.AddTarget(target2);
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             test1.ProjectDefinition = project1;
 
             test1.SubmitBuildRequest();
@@ -278,7 +281,7 @@ namespace Microsoft.Build.UnitTests.QA
             TaskDefinition task2 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
             TaskDefinition task3 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
             TaskDefinition task4 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             target1.AddTask(task1);
             target2.AddTask(task2);
             target3.AddTask(task3);
@@ -288,7 +291,7 @@ namespace Microsoft.Build.UnitTests.QA
             project1.AddTarget(target3);
             project1.AddTarget(target4);
             test1.ProjectDefinition = project1;
-            
+
             test1.SubmitBuildRequest();
 
             task4.WaitForTaskToComplete();
@@ -318,7 +321,7 @@ namespace Microsoft.Build.UnitTests.QA
             TaskDefinition task2 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
             TaskDefinition task3 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
             TaskDefinition task4 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             target1.AddTask(task1);
             target2.AddTask(task2);
             target3.AddTask(task3);
@@ -357,7 +360,7 @@ namespace Microsoft.Build.UnitTests.QA
             ProjectDefinition project = new ProjectDefinition(FullProjectPath("1.proj"));
             TargetDefinition target1 = new TargetDefinition("target1", null, "target2", project.ProjectXmlDocument);
             TargetDefinition target2 = new TargetDefinition("target2", null, "target1", project.ProjectXmlDocument);
-            RequestDefinition test = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "target1" }, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "target1" }, null, 0, null, (IBuildComponentHost)_commonTests.Host);
             project.AddTarget(target1);
             project.AddTarget(target2);
             test.ProjectDefinition = project;
@@ -382,7 +385,7 @@ namespace Microsoft.Build.UnitTests.QA
             project.AddTarget(target1);
             project.AddTarget(target2);
 
-            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "target1" }, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "target1" }, null, 0, null, (IBuildComponentHost)_commonTests.Host);
             request.ProjectDefinition = project;
 
             request.SubmitBuildRequest();
@@ -404,7 +407,7 @@ namespace Microsoft.Build.UnitTests.QA
             project.AddTarget(target1);
             project.AddTarget(target2);
 
-            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "target1" }, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "target1" }, null, 0, null, (IBuildComponentHost)_commonTests.Host);
             request.ProjectDefinition = project;
 
             request.SubmitBuildRequest();
@@ -424,7 +427,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             string[] targetsToBuild = new string[3] { "target1", "target2", "target1" };
 
-            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", targetsToBuild, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", targetsToBuild, null, 0, null, (IBuildComponentHost)_commonTests.Host);
 
             TargetDefinition target1 = new TargetDefinition("target1", request.ProjectDefinition.ProjectXmlDocument);
             TargetDefinition target2 = new TargetDefinition("target2", request.ProjectDefinition.ProjectXmlDocument);
@@ -448,13 +451,13 @@ namespace Microsoft.Build.UnitTests.QA
         {
             string[] targetsToBuild = new string[1] { "target1" };
 
-            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", targetsToBuild, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", targetsToBuild, null, 0, null, (IBuildComponentHost)_commonTests.Host);
 
             TargetDefinition target1 = new TargetDefinition("target1", null, "target2;target3", request.ProjectDefinition.ProjectXmlDocument);
             TargetDefinition target2 = new TargetDefinition("target2", null, "target4", request.ProjectDefinition.ProjectXmlDocument);
             TargetDefinition target3 = new TargetDefinition("target3", null, "target4", request.ProjectDefinition.ProjectXmlDocument);
             TargetDefinition target4 = new TargetDefinition("target4", request.ProjectDefinition.ProjectXmlDocument);
-            
+
             request.ProjectDefinition.AddTarget(target1);
             request.ProjectDefinition.AddTarget(target2);
             request.ProjectDefinition.AddTarget(target3);
@@ -478,7 +481,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             string[] targetsToBuild = new string[1] { "target1" };
 
-            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", targetsToBuild, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", targetsToBuild, null, 0, null, (IBuildComponentHost)_commonTests.Host);
 
             TargetDefinition target1 = new TargetDefinition("target1", null, "target2;target3", request.ProjectDefinition.ProjectXmlDocument);
             TargetDefinition target2 = new TargetDefinition("target2", null, "target4", request.ProjectDefinition.ProjectXmlDocument);
@@ -511,7 +514,7 @@ namespace Microsoft.Build.UnitTests.QA
         {
             string[] targetsToBuild = new string[1] { "target1" };
 
-            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", targetsToBuild, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition request = new RequestDefinition(FullProjectPath("1.proj"), "2.0", targetsToBuild, null, 0, null, (IBuildComponentHost)_commonTests.Host);
 
             TargetDefinition target1 = new TargetDefinition("target1", null, "target2;target3", request.ProjectDefinition.ProjectXmlDocument);
             TargetDefinition target2 = new TargetDefinition("target2", null, "target4", request.ProjectDefinition.ProjectXmlDocument);
@@ -546,7 +549,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build1ProjectWith1TargetWhereConditionIsTrue()
         {
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition project1 = test1.ProjectDefinition;
             TargetDefinition target1 = new TargetDefinition(RequestDefinition.defaultTargetName, @"'1' == '1'", project1.ProjectXmlDocument);
             TaskDefinition task1 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
@@ -566,7 +569,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build1ProjectWith1TargetWhereConditionIsFasle()
         {
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition project1 = test1.ProjectDefinition;
             TargetDefinition target1 = new TargetDefinition(RequestDefinition.defaultTargetName, @"'1' == '2'", project1.ProjectXmlDocument);
             TaskDefinition task1 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
@@ -589,7 +592,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void OnErrorTargetIsBuilt()
         {
-            RequestDefinition r1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "tar1" }, null, 0, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition r1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "tar1" }, null, 0, null, (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition p1 = r1.ProjectDefinition;
 
             TargetDefinition tar1 = new TargetDefinition("tar1", p1.ProjectXmlDocument);
@@ -619,7 +622,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build1ProjectWith1TargetWhereTheTaskFailButContinuesOnError()
         {
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition project1 = test1.ProjectDefinition;
             TargetDefinition target1 = new TargetDefinition(RequestDefinition.defaultTargetName, null, project1.ProjectXmlDocument);
             TaskDefinition task1 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetContinueWithErrorResult());
@@ -648,7 +651,7 @@ namespace Microsoft.Build.UnitTests.QA
             target2.AddTask(task2);
             project1.AddTarget(target1);
             project1.AddTarget(target2);
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             test1.ProjectDefinition = project1;
 
             test1.SubmitBuildRequest();
@@ -679,7 +682,7 @@ namespace Microsoft.Build.UnitTests.QA
 
             project1.AddTarget(target1);
             project1.AddTarget(target2);
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             test1.ProjectDefinition = project1;
 
             test1.SubmitBuildRequest();
@@ -711,7 +714,7 @@ namespace Microsoft.Build.UnitTests.QA
             target2.AddTask(task2);
             project1.AddTarget(target1);
             project1.AddTarget(target2);
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), "2.0", new string[1] { "Target1" }, null, 100, null, (IBuildComponentHost)_commonTests.Host);
             test1.ProjectDefinition = project1;
 
             test1.SubmitBuildRequest();
@@ -721,7 +724,6 @@ namespace Microsoft.Build.UnitTests.QA
 
             test1.ValidateNonPrimaryTargetEndResult("Target2", TargetResultCode.Failure, null);
             test1.ValidateTargetEndResult("Target1", TargetResultCode.Failure, null);
-            
         }
 
         /// <summary>
@@ -730,7 +732,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void Build1ProjectWith1TargetWhereTheTaskFail()
         {
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition project1 = test1.ProjectDefinition;
             TargetDefinition target1 = new TargetDefinition(RequestDefinition.defaultTargetName, null, project1.ProjectXmlDocument);
             TaskDefinition task1 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, project1.ProjectXmlDocument, TestUtilities.GetStopWithErrorResult());
@@ -754,7 +756,7 @@ namespace Microsoft.Build.UnitTests.QA
         [TestMethod]
         public void ValidateTargetOutput()
         {
-            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition test1 = new RequestDefinition(FullProjectPath("1.proj"), (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition project1 = test1.ProjectDefinition;
             TargetDefinition target1 = new TargetDefinition("Target1", null, "Foo", null, project1.ProjectXmlDocument);
 
@@ -763,7 +765,7 @@ namespace Microsoft.Build.UnitTests.QA
             test1.SubmitBuildRequest();
 
             test1.WaitForResults();
-            test1.ValidateTargetEndResult("Target1", TargetResultCode.Success, new string[1] {"Foo"});
+            test1.ValidateTargetEndResult("Target1", TargetResultCode.Success, new string[1] { "Foo" });
         }
 
         #endregion
@@ -780,7 +782,7 @@ namespace Microsoft.Build.UnitTests.QA
         [ExpectedException(typeof(BuildAbortedException))]
         public void TaskStatusOnCancellation()
         {
-            RequestDefinition r1 = new RequestDefinition(FullProjectPath("1.proj"), "4.0", null, null, 5000, null, (IBuildComponentHost)this.commonTests.Host);
+            RequestDefinition r1 = new RequestDefinition(FullProjectPath("1.proj"), "4.0", null, null, 5000, null, (IBuildComponentHost)_commonTests.Host);
             ProjectDefinition p1 = r1.ProjectDefinition;
             TargetDefinition t1 = new TargetDefinition(RequestDefinition.defaultTargetName, p1.ProjectXmlDocument);
             TaskDefinition ta1 = new TaskDefinition(RequestDefinition.defaultTaskName, null, false, p1.ProjectXmlDocument, TestUtilities.GetSuccessResult());
@@ -790,7 +792,7 @@ namespace Microsoft.Build.UnitTests.QA
 
             r1.SubmitBuildRequest();
             ta1.WaitForTaskToStart();
-            this.commonTests.Host.ShutDownRequestEngine();
+            _commonTests.Host.ShutDownRequestEngine();
 
             r1.WaitForResultsThrowException();
         }
@@ -807,7 +809,7 @@ namespace Microsoft.Build.UnitTests.QA
         /// <returns>Full path to the file name</returns>
         private string FullProjectPath(string filename)
         {
-            filename = System.IO.Path.Combine(this.tempPath, filename);
+            filename = System.IO.Path.Combine(_tempPath, filename);
             return filename;
         }
 
