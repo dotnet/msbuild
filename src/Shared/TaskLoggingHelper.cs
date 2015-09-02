@@ -18,7 +18,7 @@ using Microsoft.Build.Shared;
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd
 #else
-namespace Microsoft.Build.Tasks
+namespace Microsoft.Build.Utilities
 #endif
 {
     /// <summary>

@@ -8,6 +8,10 @@ using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#if !BUILD_ENGINE
+using Microsoft.Build.Utilities;
+#endif
+
 //This is in the Tasks namespace because that's where it was before and it is public.
 
 #if BUILD_ENGINE

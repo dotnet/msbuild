@@ -3,7 +3,7 @@
     using System;
     using System.Runtime.InteropServices;
 
-    public abstract class SafeHandleZeroOrMinusOneIsInvalid : SafeHandle
+    internal abstract class SafeHandleZeroOrMinusOneIsInvalid : SafeHandle
     {
         protected SafeHandleZeroOrMinusOneIsInvalid(bool ownsHandle) : base(IntPtr.Zero, ownsHandle)
         {

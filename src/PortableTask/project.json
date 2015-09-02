@@ -1,0 +1,15 @@
+﻿{
+  "runtimes": {
+    "win7-x86": { }
+  },
+  "frameworks": {
+    "net451": { },
+    "net46": { },
+    "dnxcore50": {
+      "dependencies": {
+        "Microsoft.NETCore": "5.0.0",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.0"
+      }
+    }
+  }
+}

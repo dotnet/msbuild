@@ -4,7 +4,6 @@
 using System;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
 
 #if FEATURE_FILE_TRACKER
 

@@ -4,7 +4,6 @@
 using System.Resources;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.Utilities
 {

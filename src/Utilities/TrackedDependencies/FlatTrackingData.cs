@@ -11,7 +11,6 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Tasks;
 
 #if FEATURE_FILE_TRACKER
 
