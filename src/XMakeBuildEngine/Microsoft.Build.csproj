@@ -181,7 +181,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="BackEnd\Components\Scheduler\SchedulableRequest.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs"/>
+    <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulingData.cs" />
     <Compile Include="BackEnd\Components\Scheduler\Scheduler.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulerCircularDependencyException.cs" />
@@ -204,6 +204,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
+    <Compile Include="Definition\ToolsetLocalReader.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
     <Compile Include="Evaluation\ProjectChangedEventArgs.cs" />

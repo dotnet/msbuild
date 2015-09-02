@@ -263,21 +263,39 @@ namespace Microsoft.Build.Evaluation
                 toolsets.Add("2.0", synthetic20Toolset);
             }
 
+            string defaultToolsVersionFromLocal = null;
+            string overrideTasksPathFromLocal = null;
+            string defaultOverrideToolsVersionFromLocal = null;
+
+            if ((locations & ToolsetDefinitionLocations.Local) == ToolsetDefinitionLocations.Local)
+            {
+                var localReader = new ToolsetLocalReader(environmentProperties, globalProperties);
+
+                defaultToolsVersionFromLocal = localReader.ReadToolsets(
+                        toolsets,
+                        globalProperties,
+                        initialProperties,
+                        false /* accumulate properties */,
+                        out overrideTasksPathFromLocal,
+                        out defaultOverrideToolsVersionFromLocal);
+            }
+
             // We'll use the path from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
             // nor the registry specify a override in which case we'll just return null.
-            string overrideTasksPath = overrideTasksPathFromConfiguration ?? overrideTasksPathFromRegistry;
+            string overrideTasksPath = overrideTasksPathFromConfiguration ?? overrideTasksPathFromRegistry ?? overrideTasksPathFromLocal;
 
             // We'll use the path from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
             // nor the registry specify a override in which case we'll just return null.
             string defaultOverrideToolsVersion = defaultOverrideToolsVersionFromConfiguration
-                                                 ?? defaultOverrideToolsVersionFromRegistry;
+                                                 ?? defaultOverrideToolsVersionFromRegistry
+                                                 ?? defaultOverrideToolsVersionFromLocal;
 
             // We'll use the default from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
             // nor the registry specify a default, in which case we'll just return null.
-            string defaultToolsVersion = defaultToolsVersionFromConfiguration ?? defaultToolsVersionFromRegistry;
+            string defaultToolsVersion = defaultToolsVersionFromConfiguration ?? defaultToolsVersionFromRegistry ?? defaultToolsVersionFromLocal;
 
             // If we got a default version from the registry or config file, and it
             // actually exists, fine.

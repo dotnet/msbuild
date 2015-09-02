@@ -52,7 +52,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Read toolset information from the registry (HKLM\Software\Microsoft\MSBuild\ToolsVersions).
         /// </summary>
-        Registry = 2
+        Registry = 2,
+
+        /// <summary>
+        /// Read toolset information from the current exe path
+        /// </summary>
+        Local = 4
     }
 
     /// <summary>
