@@ -1,0 +1,2 @@
+# This API is marked obsolete and has been removed from the reference assembly
+MembersMustExist : Member 'Microsoft.Build.Utilities.ToolTask.EnvironmentOverride.get()' does not exist in the implementation but it does exist in the contract.
