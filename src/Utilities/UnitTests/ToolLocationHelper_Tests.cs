@@ -675,6 +675,7 @@ namespace Microsoft.Build.UnitTests
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK80A = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.0A\WinSDK-NetFx40Tools-x86";
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK81A = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v8.1A\WinSDK-NetFx40Tools-x86";
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK46 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.6\WinSDK-NetFx40Tools-x86";
+            string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK461 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.6.1\WinSDK-NetFx40Tools-x86";
 
             // v4.0
             Assert.AreEqual(ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100), fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK70A);
@@ -699,6 +700,13 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version110); });
             ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version120); });
             Assert.AreEqual(ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version140), fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK46);
+
+
+            // v4.6.1
+            ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version100); });
+            ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version110); });
+            ObjectModelHelpers.AssertThrows(typeof(ArgumentException), delegate { ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version120); });
+            Assert.AreEqual(ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version140), fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK461);
         }
 
         [TestMethod]
