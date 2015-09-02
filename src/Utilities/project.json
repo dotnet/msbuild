@@ -12,12 +12,14 @@
         "Microsoft.NETCore.Runtime.CoreCLR-x86": "1.0.0",
         "System.Console": "4.0.0-beta-23123",
         "System.Diagnostics.Process": "4.0.0-beta-23109",
+        "System.Diagnostics.TraceSource": "4.0.0-beta-23019",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
         "System.Threading.Thread": "4.0.0-beta-23123",
         "System.Threading.ThreadPool": "4.0.10-beta-23123",
         "Microsoft.NETCore.Runtime": "1.0.0",
         "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
         "System.Xml.XmlDocument": "4.0.0",
-        "System.Xml.XPath.XmlDocument": "4.0.0",
+        "System.Xml.XPath.XmlDocument": "4.0.0"
       }
     }
   }

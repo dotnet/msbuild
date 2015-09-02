@@ -956,12 +956,23 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
 
+                ToolsetDefinitionLocations toolsetDefinitionLocations = ToolsetDefinitionLocations.None;
+#if FEATURE_SYSTEM_CONFIGURATION
+                toolsetDefinitionLocations |= ToolsetDefinitionLocations.ConfigurationFile;
+#endif
+#if FEATURE_REGISTRY_TOOLSETS
+                toolsetDefinitionLocations |= ToolsetDefinitionLocations.Registry;
+#endif
+#if !FEATURE_SYSTEM_CONFIGURATION && !FEATURE_REGISTRY_TOOLSETS
+                toolsetDefinitionLocations |= ToolsetDefinitionLocations.Local;
+#endif
+
                 projectCollection = new ProjectCollection
                         (
                         globalProperties,
                         loggers,
                         null,
-                        Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry,
+                        toolsetDefinitionLocations,
                         cpuCount,
                         onlyLogCriticalEvents
                         );

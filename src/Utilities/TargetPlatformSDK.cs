@@ -184,7 +184,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public override int GetHashCode()
         {
-            return TargetPlatformIdentifier.ToLower(CultureInfo.InvariantCulture).GetHashCode() ^ TargetPlatformVersion.GetHashCode();
+            return TargetPlatformIdentifier.ToLowerInvariant().GetHashCode() ^ TargetPlatformVersion.GetHashCode();
         }
 
         /// <summary>

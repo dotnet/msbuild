@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         static internal bool IsLetter(char c)
         {
-            UnicodeCategory cat = Char.GetUnicodeCategory(c);
+            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // letter-character:
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         static internal bool IsDecimalDigit(char c)
         {
-            UnicodeCategory cat = Char.GetUnicodeCategory(c);
+            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // decimal-digit-character:
@@ -83,7 +83,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         static internal bool IsConnecting(char c)
         {
-            UnicodeCategory cat = Char.GetUnicodeCategory(c);
+            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // connecting-character:
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         static internal bool IsCombining(char c)
         {
-            UnicodeCategory cat = Char.GetUnicodeCategory(c);
+            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // combining-character:
@@ -125,7 +125,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         static internal bool IsFormatting(char c)
         {
-            UnicodeCategory cat = Char.GetUnicodeCategory(c);
+            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // formatting-character:

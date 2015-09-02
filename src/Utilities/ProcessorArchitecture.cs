@@ -66,77 +66,34 @@ namespace Microsoft.Build.Utilities
         {
             string architecture = null;
 
-            IntPtr kernel32Dll = NativeMethodsShared.LoadLibrary("kernel32.dll");
-            try
+            NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
+
+            NativeMethodsShared.GetSystemInfo(ref systemInfo);
+
+            switch (systemInfo.wProcessorArchitecture)
             {
-                if (kernel32Dll != NativeMethodsShared.NullIntPtr)
-                {
-                    // This method gets the current architecture from the currently running msbuild.
-                    // If the entry point is missing, we're running on Kernel older than WinXP
-                    // http://msdn.microsoft.com/en-us/library/ms684139.aspx
-                    IntPtr isWow64ProcessHandle = NativeMethodsShared.GetProcAddress(kernel32Dll, "IsWow64Process");
+                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_INTEL:
+                    architecture = ProcessorArchitecture.X86;
+                    break;
 
-                    if (isWow64ProcessHandle == NativeMethodsShared.NullIntPtr)
-                    {
-                        architecture = ProcessorArchitecture.X86;
-                    }
-                    else
-                    {
-                        // entry point present, check if running in WOW
-                        IsWow64ProcessDelegate isWow64Process = (IsWow64ProcessDelegate)Marshal.GetDelegateForFunctionPointer(isWow64ProcessHandle, typeof(IsWow64ProcessDelegate));
-                        bool isWow64 = false;
-                        bool success = isWow64Process(Process.GetCurrentProcess().Handle, out isWow64);
+                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_AMD64:
+                    architecture = ProcessorArchitecture.AMD64;
+                    break;
 
-                        if (success)
-                        {
-                            // if it's running on WOW, must be an x86 process
-                            if (isWow64)
-                            {
-                                architecture = ProcessorArchitecture.X86;
-                            }
-                            else
-                            {
-                                // it's a native process. Check the system architecture to determine the process architecture.
-                                NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
+                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64:
+                    architecture = ProcessorArchitecture.IA64;
+                    break;
 
-                                NativeMethodsShared.GetSystemInfo(ref systemInfo);
+                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM:
+                    architecture = ProcessorArchitecture.ARM;
+                    break;
 
-                                switch (systemInfo.wProcessorArchitecture)
-                                {
-                                    case NativeMethodsShared.PROCESSOR_ARCHITECTURE_INTEL:
-                                        architecture = ProcessorArchitecture.X86;
-                                        break;
-
-                                    case NativeMethodsShared.PROCESSOR_ARCHITECTURE_AMD64:
-                                        architecture = ProcessorArchitecture.AMD64;
-                                        break;
-
-                                    case NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64:
-                                        architecture = ProcessorArchitecture.IA64;
-                                        break;
-
-                                    case NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM:
-                                        architecture = ProcessorArchitecture.ARM;
-                                        break;
-
-                                    // unknown architecture? return null
-                                    default:
-                                        architecture = null;
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                }
+                // unknown architecture? return null
+                default:
+                    architecture = null;
+                    break;
             }
-            finally
-            {
-                if (kernel32Dll != NativeMethodsShared.NullIntPtr)
-                {
-                    NativeMethodsShared.FreeLibrary(kernel32Dll);
-                }
-            }
-
+            
             return architecture;
         }
     }

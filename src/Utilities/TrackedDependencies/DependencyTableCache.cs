@@ -10,6 +10,8 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#if FEATURE_FILE_TRACKER
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -305,3 +307,5 @@ namespace Microsoft.Build.Utilities
         #endregion
     }
 }
+
+#endif

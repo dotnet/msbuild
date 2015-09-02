@@ -5,6 +5,8 @@
 // <summary>Interop methods for the FileTracker.dll interop APIs.</summary>
 //-----------------------------------------------------------------------
 
+#if FEATURE_FILE_TRACKER
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -309,3 +311,4 @@ namespace Microsoft.Build.Shared
         }
     }
 }
+#endif

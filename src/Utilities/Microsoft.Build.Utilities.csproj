@@ -23,8 +23,19 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
+  <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
+    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+      <Link>Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="..\Shared\EnvironmentUtilities.cs">
+      <Link>EnvironmentUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs">
+      <Link>FileUtilities.GetFolderPath.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

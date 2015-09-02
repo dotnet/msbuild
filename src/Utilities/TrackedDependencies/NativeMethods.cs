@@ -24,7 +24,11 @@ namespace Microsoft.Build.Utilities
         {
             DateTime fileModifiedTime = DateTime.MinValue;
 
+#if FEATURE_OSVERSION
             if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
+#else
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+#endif
             {
                 WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
                 bool success = false;

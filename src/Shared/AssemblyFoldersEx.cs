@@ -75,7 +75,7 @@ namespace Microsoft.Build.Shared
                 return;
             }
 
-            bool is64bitOS = Environment.Is64BitOperatingSystem;
+            bool is64bitOS = EnvironmentUtilities.Is64BitOperatingSystem;
             bool targeting64bit = targetProcessorArchitecture == ProcessorArchitecture.Amd64 || targetProcessorArchitecture == ProcessorArchitecture.IA64;
 
             // The registry lookup should be as follows:

@@ -13,6 +13,8 @@ using Microsoft.Build.Shared;
 
 using Microsoft.Build.Tasks;
 
+#if FEATURE_FILE_TRACKER
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -945,7 +947,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // Write out the remaining dependency information as a new tlog
-                using (StreamWriter inputs = new StreamWriter(firstTlog, false, System.Text.Encoding.Unicode))
+                using (StreamWriter inputs = FileUtilities.OpenWrite(firstTlog, false, System.Text.Encoding.Unicode))
                 {
                     if (!_maintainCompositeRootingMarkers)
                     {
@@ -1167,3 +1169,5 @@ namespace Microsoft.Build.Utilities
         #endregion
     }
 }
+
+#endif
