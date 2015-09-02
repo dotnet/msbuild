@@ -9,6 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Build.Framework.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.Framework.UnitTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
