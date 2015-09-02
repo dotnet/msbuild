@@ -8,6 +8,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 
+#if FEATURE_STRONG_NAMES
+
 namespace Microsoft.Runtime.Hosting
 {
     /// <summary>
@@ -719,3 +721,4 @@ namespace Microsoft.Runtime.Hosting
             [MarshalAs(UnmanagedType.U4)] out int pcbStrongNameToken);
     }
 }
+#endif
