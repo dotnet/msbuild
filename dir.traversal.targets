@@ -49,4 +49,6 @@
 
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
 
+  <Target Name="RebuildAndTest" DependsOnTargets="Rebuild;Test" />
+
 </Project>
