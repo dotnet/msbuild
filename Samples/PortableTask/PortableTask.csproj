@@ -9,6 +9,7 @@
     <RootNamespace>PortableTask</RootNamespace>
     <AssemblyName>PortableTask</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
+    <UseProductOutputPath>true</UseProductOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
@@ -20,6 +21,7 @@
   <ItemGroup>
     <None Include="portableTaskTest.proj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="project.json" />
     <!-- A reference to the entire .NET Framework is automatically included -->
@@ -29,21 +31,17 @@
     <Compile Include="ShowItems.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
+    <ProjectReference Include="..\..\src\Framework\Microsoft.Build.Framework.csproj">
       <Project>{571f09db-a81a-4444-945c-6f7b530054cd}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
+    <ProjectReference Include="..\..\src\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
       <Name>Microsoft.Build.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\dir.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  
+  <!-- OSS sign assembly after compile runs. -->
+  <Import Project="$(ToolsDir)\sign.targets" />
 </Project>
