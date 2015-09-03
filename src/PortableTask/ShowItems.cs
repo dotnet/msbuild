@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +16,18 @@ namespace PortableTask
 
         public override bool Execute()
         {
+            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
+
+            var coreAssemblyFileVersion = coreAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+            if (coreAssemblyFileVersion == null)
+            {
+                Log.LogError("No AssemblyFileVersionAttribute found on core assembly");
+            }
+            else
+            {
+                Log.LogMessage($"Core assembly file version: {coreAssemblyFileVersion.Version}");
+            }
+
             if (Items == null)
             {
                 Log.LogError("Items was null");
@@ -30,8 +43,6 @@ namespace PortableTask
                     Log.LogMessage(item.ItemSpec);
                 }
             }
-
-
             
             return true;
         }
