@@ -57,6 +57,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Version dotNetFrameworkVersion45 = new Version(4, 5);
         internal static readonly Version dotNetFrameworkVersion451 = new Version(4, 5, 1);
         internal static readonly Version dotNetFrameworkVersion46 = new Version(4, 6);
+        internal static readonly Version dotNetFrameworkVersion461 = new Version(4, 6, 1);
 
         // visual studio versions.
         internal static readonly Version visualStudioVersion100 = new Version(10, 0);
@@ -194,6 +195,9 @@ namespace Microsoft.Build.Shared
 
             // v4.6
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion46, visualStudioVersion140),
+
+            // v4.6.1
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion461, visualStudioVersion140),
         };
 
         /// <summary>
@@ -235,7 +239,7 @@ namespace Microsoft.Build.Shared
             }),
 
             // VS14
-            new VisualStudioSpec(visualStudioVersion140, "NETFXSDK\\4.6", "v8.1", "InstallationFolder", new []
+            new VisualStudioSpec(visualStudioVersion140, "NETFXSDK\\{0}", "v8.1", "InstallationFolder", new []
             {
                 dotNetFrameworkVersion11,
                 dotNetFrameworkVersion20,
@@ -244,6 +248,7 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
                 dotNetFrameworkVersion46,
+                dotNetFrameworkVersion461
             }),
         };
 
@@ -264,6 +269,7 @@ namespace Microsoft.Build.Shared
             // VS14
             { Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion45, visualStudioVersion140) },
             { Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion451, visualStudioVersion140) },
+            { Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion140), Tuple.Create(dotNetFrameworkVersion46, visualStudioVersion140) },
         };
 
         private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict;
@@ -1095,15 +1101,6 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// The key in registry to indicate the corresponding .net framework in this visual studio.
-            /// i.e. 'v8.0A' for VS11.
-            /// </summary>
-            public string DotNetFrameworkSdkRegistryKey
-            {
-                get { return _dotNetFrameworkSdkRegistryKey; }
-            }
-
-            /// <summary>
             /// The list of supported .net framework versions in this visual studio.
             /// </summary>
             public Version[] SupportedDotNetFrameworkVersions
@@ -1125,6 +1122,27 @@ namespace Microsoft.Build.Shared
             public string WindowsSdkRegistryInstallationFolderName
             {
                 get { return _windowsSdkRegistryInstallationFolderName; }
+            }
+
+            /// <summary>
+            /// The key in the registry to indicate the corresponding .net framework in this visual studio.
+            /// i.e. 'v8.0A' for VS11.
+            /// </summary>
+            public string GetDotNetFrameworkSdkRegistryKey(Version dotNetSdkVersion)
+            {
+                string sdkVersionFolder = "4.6"; // Default for back-compat
+
+                // Framework 4.6.1 
+                if (dotNetSdkVersion == dotNetFrameworkVersion461)
+                {
+                    sdkVersionFolder = "4.6.1";
+                }
+
+                // If the path is formatted to include a version number if we need to include that.
+                // (e.g. NETFXSDK\{0} should be NETFXSDK\4.6 or NETFXSDK\4.6.1)
+                // Note: before VS2015 this key was the same per instance of VS and didn't need to change.
+                // In that case the string will not contain a format item and will not be modified.
+                return string.Format(_dotNetFrameworkSdkRegistryKey, sdkVersionFolder);
             }
         }
 
@@ -1250,7 +1268,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetDotNetFrameworkSdkRootRegistryKey(VisualStudioSpec visualStudioSpec)
             {
-                return string.Join(@"\", HKLM, MicrosoftSDKsRegistryKey, visualStudioSpec.DotNetFrameworkSdkRegistryKey, this.dotNetFrameworkSdkRegistryToolsKey);
+                return string.Join(@"\", HKLM, MicrosoftSDKsRegistryKey, visualStudioSpec.GetDotNetFrameworkSdkRegistryKey(Version), dotNetFrameworkSdkRegistryToolsKey);
             }
 
             /// <summary>
@@ -1308,7 +1326,7 @@ namespace Microsoft.Build.Shared
                     return cachedPath;
                 }
 
-                string registryPath = string.Join(@"\", MicrosoftSDKsRegistryKey, visualStudioSpec.DotNetFrameworkSdkRegistryKey, this.dotNetFrameworkSdkRegistryToolsKey);
+                string registryPath = string.Join(@"\", MicrosoftSDKsRegistryKey, visualStudioSpec.GetDotNetFrameworkSdkRegistryKey(Version), this.dotNetFrameworkSdkRegistryToolsKey);
 
                 // For the Dev10 SDK, we check the registry that corresponds to the current process' bitness, rather than
                 // always the 32-bit one the way we do for Dev11 and onward, since that's what we did in Dev10 as well.
