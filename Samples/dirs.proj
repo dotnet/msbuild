@@ -4,6 +4,7 @@
   <ItemGroup>
     <Project Include="TaskUsageLogger\TaskUsageLogger.csproj" />
     <Project Include="XmlFileLogger\XmlFileLogger.csproj" />
+    <Project Include="PortableTask\PortableTask.csproj" />
   </ItemGroup>
 
   <Import Project="..\dir.traversal.targets" />

@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-using Microsoft.Build.Tasks;
-
 #if FEATURE_FILE_TRACKER
 
 namespace Microsoft.Build.Utilities

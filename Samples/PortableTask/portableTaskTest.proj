@@ -1,0 +1,10 @@
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="ShowItems" AssemblyFile="PortableTask.dll"/>
+  <ItemGroup>
+    <TestItems Include="**\Microsoft.Build.*.dll"/>
+  </ItemGroup>
+  <Target Name="Build">
+    <Message Text="Hello World!"/>
+    <ShowItems Items="@(TestItems)"/>
+  </Target>
+</Project>

@@ -218,3 +218,5 @@ _Pvt_Extensions
 # Project-specific
 ApiPort/
 *.xlsx
+ref/
+Differences.txt

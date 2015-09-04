@@ -7,7 +7,6 @@ using System.Resources;
 using System.Security;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.Utilities
 {
