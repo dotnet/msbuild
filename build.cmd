@@ -18,9 +18,9 @@ set NUGETEXEPATH="%~dp0packages\NuGet.exe"
 if not exist "%~dp0packages" mkdir "%~dp0packages"
 if not exist "%NUGETEXEPATH%" (
     :: This will need to be fixed for non-windows
-    echo ** Downloading NuGet.exe from https://nuget.org/NuGet.exe...
-    echo PS^> Invoke-WebRequest -OutFile %NUGETEXEPATH% "https://nuget.org/NuGet.exe"
-    powershell -Command "Invoke-WebRequest -OutFile %NUGETEXEPATH% "https://nuget.org/NuGet.exe""
+    echo ** Downloading NuGet.exe from https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe...
+    echo PS^> Invoke-WebRequest -OutFile %NUGETEXEPATH% "https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe"
+    powershell -Command "Invoke-WebRequest -OutFile %NUGETEXEPATH% "https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe""
 )
 
 echo Restoring NuGet packages
