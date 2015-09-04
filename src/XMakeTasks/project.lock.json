@@ -646,6 +646,22 @@
           "lib/DNXCore50/System.IO.FileSystem.dll": {}
         }
       },
+      "System.IO.FileSystem.DriveInfo/4.0.0-beta-23302": {
+        "dependencies": {
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices": "[4.0.20, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.IO.FileSystem": "[4.0.0, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.IO.FileSystem.DriveInfo.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.IO.FileSystem.DriveInfo.dll": {}
+        }
+      },
       "System.IO.FileSystem.Primitives/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.20, )"
@@ -2163,6 +2179,22 @@
         },
         "runtime": {
           "lib/DNXCore50/System.IO.FileSystem.dll": {}
+        }
+      },
+      "System.IO.FileSystem.DriveInfo/4.0.0-beta-23302": {
+        "dependencies": {
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices": "[4.0.20, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.IO.FileSystem": "[4.0.0, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.IO.FileSystem.DriveInfo.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.IO.FileSystem.DriveInfo.dll": {}
         }
       },
       "System.IO.FileSystem.Primitives/4.0.0": {
@@ -4191,6 +4223,28 @@
         "[Content_Types].xml"
       ]
     },
+    "System.IO.FileSystem.DriveInfo/4.0.0-beta-23302": {
+      "sha512": "pbZYqNnchljr2Epj7yP/HJrthPSGlOabfpD3iqVCNFEzNSATcTiTTV9KH8gZcf+AjjhVZfCL8Dv58ve7KKjBCg==",
+      "type": "Package",
+      "files": [
+        "_rels/.rels",
+        "System.IO.FileSystem.DriveInfo.nuspec",
+        "lib/DNXCore50/System.IO.FileSystem.DriveInfo.dll",
+        "lib/net46/System.IO.FileSystem.DriveInfo.dll",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "ref/dotnet/System.IO.FileSystem.DriveInfo.dll",
+        "ref/net46/System.IO.FileSystem.DriveInfo.dll",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "package/services/metadata/core-properties/c1d5c5ba76824b0cbbcc85f2eb7dd723.psmdcp",
+        "[Content_Types].xml"
+      ]
+    },
     "System.IO.FileSystem.Primitives/4.0.0": {
       "sha512": "7pJUvYi/Yq3A5nagqCCiOw3+aJp3xXc/Cjr8dnJDnER3/6kX3LEencfqmXUcPl9+7OvRNyPMNhqsLAcMK6K/KA==",
       "type": "Package",
@@ -5780,6 +5834,7 @@
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.0",
       "System.Console >= 4.0.0-beta-23123",
       "System.Diagnostics.TraceSource >= 4.0.0-beta-23019",
+      "System.IO.FileSystem.DriveInfo >= 4.0.0-beta-23302",
       "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213",
       "System.Xml.XmlDocument >= 4.0.0",
       "System.Xml.ReaderWriter >= 4.0.10",

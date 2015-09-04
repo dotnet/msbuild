@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Tasks
 {
+#if FEATURE_COM_INTEROP
     /// <summary>
     /// The original ITypeInfo interface in the CLR has incorrect definitions for GetRefTypeOfImplType and GetRefTypeInfo.
     /// It uses ints for marshalling handles which will result in a crash on 64 bit systems. This is a temporary interface
@@ -466,6 +467,8 @@ namespace Microsoft.Build.Tasks
                                     | PROCESSORARCHITECTURE
                                     | RETARGETABLE
     }
+
+#endif
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct STARTUPINFO
@@ -964,6 +967,7 @@ namespace Microsoft.Build.Tasks
         [DllImport("dbghelp.dll", SetLastError = true)]
         internal static extern IntPtr ImageRvaToVa(IntPtr ntHeaders, IntPtr imageBase, uint Rva, out IntPtr LastRvaSection);
 
+#if FEATURE_COM_INTEROP
         //------------------------------------------------------------------------------
         // CreateAssemblyCache
         //------------------------------------------------------------------------------
@@ -1128,6 +1132,7 @@ typedef enum _tagAssemblyComparisonResult
             ACR_EquivalentPartialFXUnified,
             ACR_NonEquivalentPartialVersion
         }
+#endif
 
         //------------------------------------------------------------------------------
         // PFXImportCertStore
@@ -1203,7 +1208,7 @@ typedef enum _tagAssemblyComparisonResult
         #endregion
 
         #region Methods
-
+#if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
         /// <summary>
         /// Given a pointer to a metadata blob, read the string parameter from it.  Returns true if 
         /// a valid string was constructed and false otherwise.  
@@ -1281,7 +1286,7 @@ typedef enum _tagAssemblyComparisonResult
 
             return (strValue != null);
         }
-
+#endif
         /// <summary>
         /// Returns the number of bytes that compressed data -- the length of the uncompressed 
         /// data -- takes up, and has an out value of the length of the string.  
@@ -1326,7 +1331,7 @@ typedef enum _tagAssemblyComparisonResult
         }
         #endregion
         #region InternalClass
-
+#if FEATURE_COM_INTEROP
         /// <summary>
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
@@ -1560,7 +1565,7 @@ typedef enum _tagAssemblyComparisonResult
                 return null;
             }
         }
-
+#endif
         #endregion
     }
 }
