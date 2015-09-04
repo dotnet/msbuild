@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 return -1;
             }
 
-            if (x.CloneCustomMetadata().Count != x.CloneCustomMetadata().Count)
+            if (x.CloneCustomMetadata().Count != y.CloneCustomMetadata().Count)
             {
                 return -1;
             }
