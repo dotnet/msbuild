@@ -116,7 +116,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem OutputEntryPoint
         {
             get { return _outputEntryPoint; }
-            set { OutputEntryPoint = value; }
+            set { _outputEntryPoint = value; }
         }
 
         [Output]
