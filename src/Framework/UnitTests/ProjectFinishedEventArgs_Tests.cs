@@ -8,14 +8,13 @@
 using System;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Verify the functioning of the ProjectFinishedEventArgs class.
     /// </summary>
-    [TestClass]
     public class ProjectFinishedEventArgs_Tests
     {
         /// <summary>
@@ -26,7 +25,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EventArgsCtors()
         {
             ProjectFinishedEventArgs projectFinishedEvent = new ProjectFinishedEventArgs2();

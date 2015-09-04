@@ -2134,7 +2134,7 @@ namespace Microsoft.Build.Tasks
                         (
                             // Use any app.config specified binding redirects so that later when we output suggested redirects
                             // for the GenerateBindingRedirects target, we don't suggest ones that the user already wrote
-                            appConfigRemappedAssemblies, 
+                            appConfigRemappedAssemblies,
                             _assemblyFiles,
                             _assemblyNames,
                             generalResolutionExceptions

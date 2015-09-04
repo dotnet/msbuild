@@ -20,4 +20,4 @@ call "%~dp0BuildAndCopy.cmd" "%MSBuildTempPath%"
 
 :: Rebuild
 set MSBUILDCUSTOMPATH=%MSBuildTempPath%\MSBuild.exe
-"%~dp0build.cmd" /t:Rebuild
+"%~dp0build.cmd" /t:RebuildAndTest
