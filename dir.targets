@@ -94,11 +94,4 @@
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
   </Target>
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="'$(NetCoreBuild)' != 'true'"/>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" Condition="'$(NetCoreBuild)' == 'true'"/>
-
-  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
-    <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
-  </PropertyGroup>
-
 </Project>

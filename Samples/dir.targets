@@ -5,4 +5,11 @@
   </PropertyGroup>
   
   <Import Project="..\dir.targets" />
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="'$(NetCoreBuild)' != 'true'"/>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" Condition="'$(NetCoreBuild)' == 'true'"/>
+
+  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
+    <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
+  </PropertyGroup>
 </Project>
