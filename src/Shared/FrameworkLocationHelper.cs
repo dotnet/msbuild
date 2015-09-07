@@ -848,6 +848,12 @@ namespace Microsoft.Build.Shared
                 // Or if it's not defined there, look it up in the registry
                 toolsPath = GetPathToBuildToolsFromRegistry(toolsVersion, architecture);
             }
+#if !FEATURE_SYSTEM_CONFIGURATION && !FEATURE_REGISTRY_TOOLSETS
+            if (string.IsNullOrEmpty(toolsPath))
+            {
+                toolsPath = FileUtilities.CurrentExecutableDirectory;
+            }
+#endif
 
             return toolsPath;
         }
