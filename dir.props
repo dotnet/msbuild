@@ -16,7 +16,6 @@
   <PropertyGroup>
     <BuildToolsVersion>1.0.25-prerelease-00080</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
-
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <SourceDir>$(ProjectDir)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
     <BinDir>$(ProjectDir)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
@@ -26,19 +25,12 @@
     <CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
   </PropertyGroup>
 
-  <!-- list of nuget package sources passed to nuget.exe -->
-  <ItemGroup>
-    <NuGetSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-buildtools" />
-    <NuGetSourceList Include="https:%2F%2Fwww.nuget.org/api/v2" />
-  </ItemGroup>
-  
   <!-- Common nuget properties -->
   <PropertyGroup>
     <NuGetDir>$(PackagesDir)</NuGetDir>
     <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
     <NuGetConfigFile>$([System.IO.Path]::Combine($(SourceDir),".nuget","NuGet.Config"))</NuGetConfigFile>
-    <NuGetPackageSource>@(NuGetSourceList -> '-source %(Identity)', ' ')</NuGetPackageSource>
-    <NuGetConfigCommandLine>$(NuGetPackageSource) -ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
+    <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
