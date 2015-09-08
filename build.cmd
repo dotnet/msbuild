@@ -24,7 +24,10 @@ if not exist "%NUGETEXEPATH%" (
 )
 
 echo Restoring NuGet packages
-"%NUGETEXEPATH%" install "%~dp0src\.nuget\packages.config" -o "%~dp0packages"
+:: Global packages (targets files needed to load projects, things needed everywhere)
+"%NUGETEXEPATH%" restore "%~dp0src\.nuget\packages.config" -o "%~dp0packages"
+:: Packages referenced by individual projects
+"%NUGETEXEPATH%" restore "%~dp0src\MSBuild.sln" -o "%~dp0packages"
 
 echo ** MSBuild Path: %MSBUILDCUSTOMPATH%
 echo ** Building all sources
