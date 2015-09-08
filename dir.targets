@@ -79,7 +79,8 @@
           DependsOnTargets="Build"
           Condition="'$(IsTestProject)' == 'true'">
     <xunit Assemblies="@(MainAssembly)"
-           ShadowCopy="false" />
+           ShadowCopy="false"
+           Xml="@(MainAssembly->'%(FullPath)_TestResults.xml')"/>
   </Target>
 
   <Target Name="BuildAndTest"
