@@ -96,6 +96,12 @@
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+    <DebugType/>
+    <DebugSymbols>false</DebugSymbols>
+    <TargetPlatformIdentifier>$(OS)</TargetPlatformIdentifier>
+  </PropertyGroup>
   
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
         the .NET Core surface area.  This way we can build a binary to run ApiPort on to measure progress. -->

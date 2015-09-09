@@ -16,6 +16,8 @@ using NUnit.Framework;
 
 #pragma warning disable 0219
 
+#if FEATURE_FILE_TRACKER
+
 namespace Microsoft.Build.UnitTests.TrackedDependencies
 {
     [TestFixture]
@@ -3737,3 +3739,4 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
     }
 }
 
+#endif

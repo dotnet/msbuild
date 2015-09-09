@@ -603,7 +603,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(duplicateSwitchErrorMessage);
         }
 
-#if !MONO
+#if !MONO && FEATURE_APPDOMAIN
         [Test]
         public void MaxCPUCountSwitchIdentificationTests()
         {
@@ -643,6 +643,7 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
+#if FEATURE_XML_SCHEMA_VALIDATION
         [Test]
         public void ValidateSwitchIdentificationTests()
         {
@@ -694,6 +695,7 @@ namespace Microsoft.Build.UnitTests
             Assert.IsNull(missingParametersErrorMessage);
             Assert.IsTrue(unquoteParameters);
         }
+#endif
 
         [Test]
         public void PreprocessSwitchIdentificationTests()

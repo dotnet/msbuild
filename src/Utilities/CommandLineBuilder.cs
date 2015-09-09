@@ -503,7 +503,7 @@ namespace Microsoft.Build.Utilities
 
         #region Appending switches with quoted parameters
 
-        internal static string FixCommandLineSwitch(string switchName)
+        public static string FixCommandLineSwitch(string switchName)
         {
             return !NativeMethodsShared.IsWindows && !string.IsNullOrEmpty(switchName) && switchName.StartsWith("/")
                        ? "-" + switchName.Substring(1)

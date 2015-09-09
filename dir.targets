@@ -49,8 +49,8 @@
 
   <Target Name="_CopyCompilers" AfterTargets="_RestoreBuildTools" Condition="'$(UseRoslynCompilers)' == 'true'">
     <ItemGroup>
-      <BuildFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\build\*" />
-      <ToolsFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\tools\*" />
+      <BuildFiles Include="$(PackagesDir)Microsoft.Net.Compilers*\build\*" />
+      <ToolsFiles Include="$(PackagesDir)Microsoft.Net.Compilers*\tools\*" />
     </ItemGroup>
     
     <Copy
@@ -101,4 +101,5 @@
     <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
   </PropertyGroup>
 
+  <Import Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props" /> 
 </Project>

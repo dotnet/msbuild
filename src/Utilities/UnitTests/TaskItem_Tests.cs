@@ -436,7 +436,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Miniature class to be remoted to another appdomain that just creates some TaskItems and makes them available for returning. 
         /// </summary>
-        private sealed class TaskItemCreator : MarshalByRefObject
+        private sealed class TaskItemCreator
+#if FEATURE_APPDOMAIN
+                : MarshalByRefObject
+#endif
         {
             /// <summary>
             /// Task items that will be consumed by the other appdomain
