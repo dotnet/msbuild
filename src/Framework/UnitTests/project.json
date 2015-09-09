@@ -1,9 +1,9 @@
-{
+﻿{
   "dependencies": {
-     "xunit": "2.1.0-beta4-build3109"
+    "xunit": "2.1.0-rc1-build3168"
   },
   "frameworks": {
-    "net451": { },
-    "net46": { }
+    "net451": {},
+    "net46": {}
   }
 }

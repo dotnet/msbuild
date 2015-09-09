@@ -73,15 +73,15 @@
   </Target>
 
   <!-- Get access to the xunit task from the globally-installed location -->
-  <Import Project="$(PackagesDir)\xunit.runner.msbuild.2.1.0-beta4-build3109\build\portable-net45+netcore45+wp8+wpa81\xunit.runner.msbuild.props" Condition="Exists('packages\xunit.runner.msbuild.2.1.0-beta4-build3109\build\portable-net45+netcore45+wp8+wpa81\xunit.runner.msbuild.props')" />
+  <Import Project="$(PackagesDir)\xunit.runner.msbuild.$(XunitVersion)\build\portable-net45+win8+wp8+wpa81\xunit.runner.msbuild.props" />
 
   <Target Name="Test"
           DependsOnTargets="Build"
           Condition="'$(IsTestProject)' == 'true'">
     <ItemGroup>
       <AssembliesToCopyLocal Include="$(PackagesDir)xunit.abstractions\2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.abstractions.dll" />
-      <AssembliesToCopyLocal Include="$(PackagesDir)xunit.extensibility.core\$(XunitVersion)\lib\portable-net45+netcore45+wp8+wpa81\xunit.core.dll" />
-      <AssembliesToCopyLocal Include="$(PackagesDir)xunit.assert\$(XunitVersion)\lib\portable-net45+netcore45+wp8+wpa81\xunit.assert.dll" />
+      <AssembliesToCopyLocal Include="$(PackagesDir)xunit.extensibility.core\$(XunitVersion)\lib\portable-net45+win8+wp8+wpa81\xunit.core.dll" />
+      <AssembliesToCopyLocal Include="$(PackagesDir)xunit.assert\$(XunitVersion)\lib\portable-net45+win8+wp8+wpa81\xunit.assert.dll" />
       <AssembliesToCopyLocal Include="$(PackagesDir)xunit.core\$(XunitVersion)\build\_Desktop\xunit.execution.desktop.dll" />
     </ItemGroup>
     <!-- Copy xunit stuff to output directory -->
