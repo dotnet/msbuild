@@ -782,7 +782,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private string _pathToMSBuildExe = Path.Combine(Environment.CurrentDirectory, "MSBuild.exe");
+        private string _pathToMSBuildExe = Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.exe");
         private string _pathToArbitraryBogusFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
 
         /// <summary>
@@ -815,17 +815,17 @@ namespace Microsoft.Build.UnitTests
         public void GetCommandLineQuotedExeOnPath()
         {
             string output = null;
-            string current = Environment.CurrentDirectory;
+            string current = Directory.GetCurrentDirectory();
 
             try
             {
-                Environment.CurrentDirectory = Path.GetDirectoryName(_pathToMSBuildExe);
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(_pathToMSBuildExe));
 
                 output = RunProcessAndGetOutput("msbuild.exe", "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag", expectSuccess: false);
             }
             finally
             {
-                Environment.CurrentDirectory = current;
+                Directory.SetCurrentDirectory(current);
             }
 
             Assert.IsTrue(output.IndexOf(_pathToMSBuildExe + " /v:diag " + _pathToArbitraryBogusFile, StringComparison.OrdinalIgnoreCase) >= 0);
@@ -842,7 +842,7 @@ namespace Microsoft.Build.UnitTests
             string projectPath = Path.Combine(directory, "my.proj");
             string rspPath = Path.Combine(directory, "msbuild.rsp");
 
-            string currentDirectory = Environment.CurrentDirectory;
+            string currentDirectory = Directory.GetCurrentDirectory();
 
             try
             {
@@ -1594,7 +1594,7 @@ namespace Microsoft.Build.UnitTests
                        );
             Assert.IsTrue(loggers.Count == 0, "Expected no central loggers to be attached");
             Assert.IsTrue(distributedLoggerRecords.Count == 1, "Expected a distributed logger to be attached");
-            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "logFile=" + Path.Combine(Environment.CurrentDirectory, "MSBuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
+            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
 
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1611,7 +1611,7 @@ namespace Microsoft.Build.UnitTests
                        );
             Assert.IsTrue(loggers.Count == 0, "Expected no central loggers to be attached");
             Assert.IsTrue(distributedLoggerRecords.Count == 1, "Expected a distributed logger to be attached");
-            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, fileLoggerParameters[0] + ";logFile=" + Path.Combine(Environment.CurrentDirectory, "MSBuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
+            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, fileLoggerParameters[0] + ";logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
 
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1628,7 +1628,7 @@ namespace Microsoft.Build.UnitTests
                        );
             Assert.IsTrue(loggers.Count == 0, "Expected no central loggers to be attached");
             Assert.IsTrue(distributedLoggerRecords.Count == 1, "Expected a distributed logger to be attached");
-            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, fileLoggerParameters[0] + ";logFile=" + Path.Combine(Environment.CurrentDirectory, "MSBuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
+            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, fileLoggerParameters[0] + ";logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
 
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1645,7 +1645,7 @@ namespace Microsoft.Build.UnitTests
                        );
             Assert.IsTrue(loggers.Count == 0, "Expected no central loggers to be attached");
             Assert.IsTrue(distributedLoggerRecords.Count == 1, "Expected a distributed logger to be attached");
-            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, ";Parameter1;logFile=" + Path.Combine(Environment.CurrentDirectory, "MSBuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
+            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, ";Parameter1;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
 
 
             // Not add a set of parameters and make sure the logger has those parameters
@@ -1678,7 +1678,7 @@ namespace Microsoft.Build.UnitTests
                        );
             Assert.IsTrue(loggers.Count == 0, "Expected no central loggers to be attached");
             Assert.IsTrue(distributedLoggerRecords.Count == 1, "Expected a distributed logger to be attached");
-            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;verbosity=Normal;logFile=" + Path.Combine(Environment.CurrentDirectory, "..\\cat.log;Parameter1"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
+            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;verbosity=Normal;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "..\\cat.log;Parameter1"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
 
             loggers = new ArrayList();
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1692,7 +1692,7 @@ namespace Microsoft.Build.UnitTests
                            2
                        );
             Console.WriteLine(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters);
-            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;Parameter;;;Parameter;Parameter;logFile=" + Path.Combine(Environment.CurrentDirectory, "msbuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
+            Assert.IsTrue(string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;Parameter;;;Parameter;Parameter;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "msbuild.log"), StringComparison.OrdinalIgnoreCase) == 0, "Expected parameter in logger to match parameter passed in");
         }
 
         /// <summary>

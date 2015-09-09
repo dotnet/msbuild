@@ -353,7 +353,7 @@ namespace Microsoft.Build.Tasks
 
                         AnalyzeElement(typeInfo, elemDesc);
 
-                        offset += Marshal.SizeOf(typeof(ELEMDESC));
+                        offset += Marshal.SizeOf<ELEMDESC>();
                     }
 
                     // Analyze the return value type

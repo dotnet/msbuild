@@ -2589,13 +2589,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             // Set the current working directory to the location of ClassLibrary20.csproj.
             // This is what allows us to pass in a relative path to the referenced assembly.
-            string originalCurrentDirectory = Environment.CurrentDirectory;
-            Environment.CurrentDirectory = ObjectModelHelpers.TempProjectDir;
+            string originalCurrentDirectory = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
 
             bool success = t.Execute();
 
             // Restore the current working directory to what it was before the test.
-            Environment.CurrentDirectory = originalCurrentDirectory;
+            Directory.SetCurrentDirectory(originalCurrentDirectory);
 
             // Make sure the resource was built.
             Assert.IsTrue(success, "GenerateResource failed");

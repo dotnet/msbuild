@@ -91,7 +91,7 @@ namespace Microsoft.Build.Shared
                 if (dir == null)
                 {
                     // Can't get the assembly path, use current directory
-                    dir = Environment.CurrentDirectory;
+                    dir = Directory.GetCurrentDirectory();
                 }
                 else
                 {
@@ -889,7 +889,7 @@ namespace Microsoft.Build.Shared
         {
             // >= not > because MAX_PATH assumes a trailing null
             if (path.Length >= NativeMethodsShared.MAX_PATH ||
-               (!IsRootedNoThrow(path) && ((Environment.CurrentDirectory.Length + path.Length + 1 /* slash */) >= NativeMethodsShared.MAX_PATH)))
+               (!IsRootedNoThrow(path) && ((Directory.GetCurrentDirectory().Length + path.Length + 1 /* slash */) >= NativeMethodsShared.MAX_PATH)))
             {
                 // Attempt to make it shorter -- perhaps there are some \..\ elements
                 path = GetFullPathNoThrow(path);

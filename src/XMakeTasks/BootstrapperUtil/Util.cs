@@ -90,7 +90,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     if (!String.IsNullOrEmpty(s_defaultPath))
                         return s_defaultPath;
 
-                    s_defaultPath = Environment.CurrentDirectory;
+                    s_defaultPath = Directory.GetCurrentDirectory();
                 }
 
                 return s_defaultPath;
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (!String.IsNullOrEmpty(defaultPath))
                 return defaultPath;
 
-            return Environment.CurrentDirectory;
+            return Directory.GetCurrentDirectory();
         }
 
 

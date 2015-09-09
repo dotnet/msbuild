@@ -254,7 +254,7 @@ namespace Microsoft.Build.Tasks
         private static uint GetCor20HeaderRva(IntPtr ntHeadersPtr)
         {
             // read the first ushort in the optional header - we have an uint and IMAGE_FILE_HEADER preceding it
-            ushort optionalHeaderMagic = (ushort)Marshal.ReadInt16(ntHeadersPtr, Marshal.SizeOf(typeof(uint)) + Marshal.SizeOf(typeof(NativeMethods.IMAGE_FILE_HEADER)));
+            ushort optionalHeaderMagic = (ushort)Marshal.ReadInt16(ntHeadersPtr, Marshal.SizeOf<uint>() + Marshal.SizeOf<NativeMethods.IMAGE_FILE_HEADER>());
 
             // this should really be a structure, but NDP can't marshal fixed size struct arrays in a struct... ugh.
             // this ulong corresponds to a IMAGE_DATA_DIRECTORY structure

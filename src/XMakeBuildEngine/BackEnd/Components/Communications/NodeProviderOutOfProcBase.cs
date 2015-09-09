@@ -373,7 +373,7 @@ namespace Microsoft.Build.BackEnd
             commandLineArgs = msbuildLocation + " " + commandLineArgs;
 
             BackendNativeMethods.STARTUP_INFO startInfo = new BackendNativeMethods.STARTUP_INFO();
-            startInfo.cb = Marshal.SizeOf(startInfo);
+            startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
 
             // Null out the process handles so that the parent process does not wait for the child process
             // to exit before it can exit.
@@ -394,8 +394,8 @@ namespace Microsoft.Build.BackEnd
 
             BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
             BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
-            processSecurityAttributes.nLength = Marshal.SizeOf(processSecurityAttributes);
-            threadSecurityAttributes.nLength = Marshal.SizeOf(threadSecurityAttributes);
+            processSecurityAttributes.nLength = Marshal.SizeOf< BackendNativeMethods.SECURITY_ATTRIBUTES>();
+            threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
             BackendNativeMethods.PROCESS_INFORMATION processInfo = new BackendNativeMethods.PROCESS_INFORMATION();
 

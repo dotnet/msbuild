@@ -2560,7 +2560,7 @@ namespace Microsoft.Build.CommandLine
                     // If the string is empty then send it through as the distributed file logger WILL deal with EMPTY logfile paths
                     if (!String.IsNullOrEmpty(logFileName) && !Path.IsPathRooted(logFileName))
                     {
-                        fileParameters = fileParameters.Replace(logFileParameter, "logFile=" + Path.Combine(Environment.CurrentDirectory, logFileName));
+                        fileParameters = fileParameters.Replace(logFileParameter, "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), logFileName));
                     }
                 }
                 catch (Exception e)
@@ -2582,7 +2582,7 @@ namespace Microsoft.Build.CommandLine
                         fileParameters += ";";
                     }
 
-                    fileParameters += "logFile=" + Path.Combine(Environment.CurrentDirectory, msbuildLogFileName);
+                    fileParameters += "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), msbuildLogFileName);
                 }
 
                 //Gets the currently loaded assembly in which the specified class is defined

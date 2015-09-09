@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests
             // and doesn't return the handle or clean it up itself there's not much we can do to avoid the leak.
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeLib_GetLibAttr);
 
-            ppTLibAttr = _memoryHelper.AllocateHandle(Marshal.SizeOf(typeof(TYPELIBATTR)));
+            ppTLibAttr = _memoryHelper.AllocateHandle(Marshal.SizeOf<TYPELIBATTR>());
             Marshal.StructureToPtr(this.Attributes, ppTLibAttr, false);
         }
 

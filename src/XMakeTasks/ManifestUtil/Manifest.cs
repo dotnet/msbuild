@@ -211,7 +211,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (!String.IsNullOrEmpty(_sourcePath))
                 defaultDir = Path.GetDirectoryName(_sourcePath);
             if (!Path.IsPathRooted(defaultDir))
-                defaultDir = Path.Combine(Environment.CurrentDirectory, defaultDir);
+                defaultDir = Path.Combine(Directory.GetCurrentDirectory(), defaultDir);
             string[] searchPaths = { defaultDir };
             ResolveFiles(searchPaths);
         }

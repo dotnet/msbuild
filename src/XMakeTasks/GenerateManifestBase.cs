@@ -475,7 +475,7 @@ namespace Microsoft.Build.Tasks
         {
             int t1 = Environment.TickCount;
 
-            string[] searchPaths = { Environment.CurrentDirectory };
+            string[] searchPaths = { Directory.GetCurrentDirectory() };
             _manifest.ResolveFiles(searchPaths);
             _manifest.UpdateFileInfo(this.TargetFrameworkVersion);
             if (_manifest.OutputMessages.ErrorCount > 0)

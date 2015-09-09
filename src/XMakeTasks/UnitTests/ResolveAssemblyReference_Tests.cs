@@ -10184,10 +10184,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.BuildEngine = new MockEngine();
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
-            string previousCurrentDirectory = Environment.CurrentDirectory;
+            string previousCurrentDirectory = Directory.GetCurrentDirectory();
 
             Directory.CreateDirectory(testPath);
-            Environment.CurrentDirectory = testPath;
+            Directory.SetCurrentDirectory(testPath);
             try
             {
                 t.Assemblies = new ITaskItem[] { new TaskItem(@"..\RawFileNameRelative\System.Xml.dll") };
@@ -10199,7 +10199,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                Environment.CurrentDirectory = previousCurrentDirectory;
+                Directory.SetCurrentDirectory(previousCurrentDirectory);
 
                 if (Directory.Exists(testPath))
                 {
@@ -10221,10 +10221,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.BuildEngine = new MockEngine();
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
-            string previousCurrentDirectory = Environment.CurrentDirectory;
+            string previousCurrentDirectory = Directory.GetCurrentDirectory();
 
             Directory.CreateDirectory(testPath);
-            Environment.CurrentDirectory = testPath;
+            Directory.SetCurrentDirectory(testPath);
             try
             {
                 t.Assemblies = new ITaskItem[] { new TaskItem(@"System.Xml.dll") };
@@ -10236,7 +10236,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                Environment.CurrentDirectory = previousCurrentDirectory;
+                Directory.SetCurrentDirectory(previousCurrentDirectory);
 
                 if (Directory.Exists(testPath))
                 {
@@ -10256,10 +10256,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.BuildEngine = new MockEngine();
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
-            string previousCurrentDirectory = Environment.CurrentDirectory;
+            string previousCurrentDirectory = Directory.GetCurrentDirectory();
 
             Directory.CreateDirectory(testPath);
-            Environment.CurrentDirectory = testPath;
+            Directory.SetCurrentDirectory(testPath);
             try
             {
                 TaskItem taskItem = new TaskItem(AssemblyRef.SystemXml);
@@ -10274,7 +10274,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                Environment.CurrentDirectory = previousCurrentDirectory;
+                Directory.SetCurrentDirectory(previousCurrentDirectory);
 
                 if (Directory.Exists(testPath))
                 {
@@ -12047,10 +12047,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void RelativeAssemblyFiles()
         {
             string testPath = Path.Combine(Path.GetTempPath(), @"RelativeAssemblyFiles");
-            string previousCurrentDirectory = Environment.CurrentDirectory;
+            string previousCurrentDirectory = Directory.GetCurrentDirectory();
 
             Directory.CreateDirectory(testPath);
-            Environment.CurrentDirectory = testPath;
+            Directory.SetCurrentDirectory(testPath);
             try
             {
                 // Create the engine.
@@ -12076,7 +12076,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                Environment.CurrentDirectory = previousCurrentDirectory;
+                Directory.SetCurrentDirectory(previousCurrentDirectory);
 
                 if (Directory.Exists(testPath))
                 {
