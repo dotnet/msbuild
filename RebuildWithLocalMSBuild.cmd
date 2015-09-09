@@ -15,9 +15,9 @@ if not defined VS140COMNTOOLS (
     exit /b 1
 )
 
-:: Build and copy output to bin\MSBuild
-call "%~dp0BuildAndCopy.cmd" "%MSBuildTempPath%"
+:: Build and copy output to bin\bootstrap
+call "%~dp0BuildAndCopy.cmd"
 
-:: Rebuild
-set MSBUILDCUSTOMPATH=%MSBuildTempPath%\MSBuild.exe
-"%~dp0build.cmd" /t:RebuildAndTest
+:: Rebuild with bootstrapped msbuild
+set MSBUILDCUSTOMPATH="%~dp0\bin\Bootstrap\14.1\Bin\MSBuild.exe"
+"%~dp0build.cmd" /t:RebuildAndTest /p:BootstrappedMSBuild=true

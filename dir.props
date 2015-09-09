@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <!-- This is to workaround an issue with a dependent assembly (Microsoft.Build.Tasks.CodeAnalysis.dll)
-         copying it's dependencies (which are in the GAC).	-->
+         copying its dependencies (which are in the GAC). -->
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
   </PropertyGroup>
 
@@ -11,19 +11,26 @@
      <UseRoslynCompilers>true</UseRoslynCompilers>
      <DebugSymbols Condition="'$(UseRoslynCompilers)' == 'true'">false</DebugSymbols>
   </PropertyGroup>
-   
+
    <!-- Common repo directories -->
   <PropertyGroup>
     <BuildToolsVersion>1.0.25-prerelease-00080</BuildToolsVersion>
-	<CompilerToolsVersion>1.0.0</CompilerToolsVersion>
-    
-	<ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
+
+    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <SourceDir>$(ProjectDir)src\</SourceDir>
     <BinDir>$(ProjectDir)bin\</BinDir>
     <TestWorkingDir>$(BinDir)tests\</TestWorkingDir>
     <PackagesDir>$(ProjectDir)packages\</PackagesDir>
     <ToolsDir>$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)\lib\</ToolsDir>
-	<CompilerToolsDir>$(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion)\tools</CompilerToolsDir>
+    <CompilerToolsDir>$(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion)\tools</CompilerToolsDir>
+
+    <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
+  </PropertyGroup>
+
+  <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
+  <PropertyGroup Condition="'$(BootstrappedMSBuild)' == 'true'">
+    <MSBuildExtensionsPath>$(BootstrapDestination)</MSBuildExtensionsPath>
   </PropertyGroup>
 
   <!-- list of nuget package sources passed to nuget.exe -->
@@ -31,7 +38,7 @@
     <NuGetSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-buildtools" />
     <NuGetSourceList Include="https:%2F%2Fwww.nuget.org/api/v2" />
   </ItemGroup>
-  
+
   <!-- Common nuget properties -->
   <PropertyGroup>
     <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
@@ -47,13 +54,13 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
     <NugetRestoreCommand Condition="'$(OsEnvironment)'=='Unix'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
   </PropertyGroup>
-  
+
   <!-- Set default Configuration and Platform -->
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' ==''">Debug</Configuration>
     <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
   </PropertyGroup>
-  
+
   <!-- Setup Default symbol and optimization for Configuration -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -91,7 +98,7 @@
     <BaseIntermediateOutputPath>$(BaseOutputPath)obj\</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(MSBuildProjectName)\$(OS)\$(Configuration)\</IntermediateOutputPath>
     <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$(BaseIntermediateOutputPath)$(MSBuildProjectName)\$(Platform)\$(OS)\$(Configuration)\</IntermediateOutputPath>
-    
+
     <TestPath>$(TestWorkingDir)$(MSBuildProjectName)\$(OS)\$(Configuration)\</TestPath>
     <TestPath Condition="'$(Platform)' != 'AnyCPU'">$(TestWorkingDir)$(MSBuildProjectName)\$(Platform)\$(OS)\$(Configuration)\</TestPath>
   </PropertyGroup>
