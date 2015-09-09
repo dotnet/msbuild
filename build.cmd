@@ -25,7 +25,7 @@ if not exist "%NUGETEXEPATH%" (
 
 echo Restoring NuGet packages
 :: Global packages (targets files needed to load projects, things needed everywhere)
-"%NUGETEXEPATH%" restore "%~dp0src\.nuget\packages.config" -o "%~dp0packages"
+"%NUGETEXEPATH%" restore -ConfigFile "%~dp0src\.nuget\NuGet.config" "%~dp0src\.nuget\packages.config" -o "%~dp0packages"
 :: Packages referenced by individual projects
 "%NUGETEXEPATH%" restore "%~dp0src\MSBuild.sln" -o "%~dp0packages"
 

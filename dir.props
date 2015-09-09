@@ -54,6 +54,11 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) $(NuGetConfigCommandLine)</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
     <NugetRestoreCommand Condition="'$(OsEnvironment)'=='Unix'">mono $(NuGetRestoreCommand)</NugetRestoreCommand>
+
+    <!-- Nuget's resolve-assemblies-from-packages code looks at this
+         variable, but we can't just rename PackagesDir because parts
+         of the BuildTools package depend on that variable name. -->
+    <NugetPackagesDirectory>$(PackagesDir)</NugetPackagesDirectory>
   </PropertyGroup>
 
   <!-- Set default Configuration and Platform -->
