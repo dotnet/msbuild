@@ -199,7 +199,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public MemoryStatus()
             {
-                _length = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.MemoryStatus));
+                _length = (uint)Marshal.SizeOf<NativeMethodsShared.MemoryStatus>();
             }
 
             /// <summary>
@@ -294,7 +294,7 @@ namespace Microsoft.Build.Shared
         {
             public SecurityAttributes()
             {
-                _nLength = (uint)Marshal.SizeOf(typeof(NativeMethodsShared.SecurityAttributes));
+                _nLength = (uint)Marshal.SizeOf<NativeMethodsShared.SecurityAttributes>();
             }
 
             private uint _nLength;

@@ -436,7 +436,7 @@ namespace Microsoft.Build.UnitTests
                                 expander,
                                 ExpanderOptions.ExpandAll,
                                 null,
-                                Environment.CurrentDirectory,
+                                Directory.GetCurrentDirectory(),
                                 ElementLocation.EmptyLocation
                             );
 
@@ -453,7 +453,7 @@ namespace Microsoft.Build.UnitTests
                                 expander,
                                 ExpanderOptions.ExpandAll,
                                 null,
-                                Environment.CurrentDirectory,
+                                Directory.GetCurrentDirectory(),
                                 ElementLocation.EmptyLocation
                             );
 
@@ -479,7 +479,7 @@ namespace Microsoft.Build.UnitTests
                                     expander,
                                     ExpanderOptions.ExpandAll,
                                     null,
-                                    Environment.CurrentDirectory,
+                                    Directory.GetCurrentDirectory(),
                                     ElementLocation.EmptyLocation
                                 );
 
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests
                                     expander,
                                     ExpanderOptions.ExpandAll,
                                     null,
-                                    Environment.CurrentDirectory,
+                                    Directory.GetCurrentDirectory(),
                                     ElementLocation.EmptyLocation
                                 );
 
@@ -806,7 +806,7 @@ namespace Microsoft.Build.UnitTests
                                        expander,
                                        ExpanderOptions.ExpandAll,
                                        conditionedProperties,
-                                       Environment.CurrentDirectory,
+                                       Directory.GetCurrentDirectory(),
                                        ElementLocation.EmptyLocation
                                    );
 
@@ -919,7 +919,7 @@ namespace Microsoft.Build.UnitTests
                         expander,
                         ExpanderOptions.ExpandAll,
                         null,
-                        Environment.CurrentDirectory,
+                        Directory.GetCurrentDirectory(),
                         ElementLocation.EmptyLocation
                     );
             }
@@ -956,7 +956,7 @@ namespace Microsoft.Build.UnitTests
                             expander,
                             ExpanderOptions.ExpandAll,
                             null,
-                            Environment.CurrentDirectory,
+                            Directory.GetCurrentDirectory(),
                             ElementLocation.EmptyLocation
                         );
                 }

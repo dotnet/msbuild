@@ -769,7 +769,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (toolPath == null)
                 toolPath = Path.Combine(ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100), "bin", ToolName);
             if (toolPath == null)
-                toolPath = Path.Combine(Environment.CurrentDirectory, ToolName);
+                toolPath = Path.Combine(Directory.GetCurrentDirectory(), ToolName);
             if (!File.Exists(toolPath))
                 toolPath = null;
             return toolPath;

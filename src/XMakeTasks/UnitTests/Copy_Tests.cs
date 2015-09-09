@@ -1036,7 +1036,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void CopyFileOnItself2()
         {
-            string currdir = Environment.CurrentDirectory;
+            string currdir = Directory.GetCurrentDirectory();
             string filename = "2A333ED756AF4dc392E728D0F864A396";
             string file = Path.Combine(currdir, filename);
 

@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void SetCurrentDirectoryDoesNotSetNonexistentFolder()
         {
-            string currentDirectory = Environment.CurrentDirectory;
+            string currentDirectory = Directory.GetCurrentDirectory();
             string nonexistentDirectory = currentDirectory + @"foo\bar\baz";
 
             // Make really sure the nonexistent directory doesn't actually exist
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     // verify that the current directory did not change
                     Assert.IsFalse(exceptionCaught, "SetCurrentDirectory should not throw!");
-                    Assert.AreEqual(currentDirectory, Environment.CurrentDirectory);
+                    Assert.AreEqual(currentDirectory, Directory.GetCurrentDirectory());
                 }
             }
         }
