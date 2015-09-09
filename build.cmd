@@ -18,13 +18,16 @@ set NUGETEXEPATH="%~dp0packages\NuGet.exe"
 if not exist "%~dp0packages" mkdir "%~dp0packages"
 if not exist "%NUGETEXEPATH%" (
     :: This will need to be fixed for non-windows
-    echo ** Downloading NuGet.exe from https://nuget.org/NuGet.exe...
-    echo PS^> Invoke-WebRequest -OutFile %NUGETEXEPATH% "https://nuget.org/NuGet.exe"
-    powershell -Command "Invoke-WebRequest -OutFile %NUGETEXEPATH% "https://nuget.org/NuGet.exe""
+    echo ** Downloading NuGet.exe from https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe...
+    echo PS^> Invoke-WebRequest -OutFile %NUGETEXEPATH% "https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe"
+    powershell -Command "Invoke-WebRequest -OutFile %NUGETEXEPATH% "https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe""
 )
 
 echo Restoring NuGet packages
-"%NUGETEXEPATH%" install "%~dp0src\.nuget\packages.config" -o "%~dp0packages"
+:: Global packages (targets files needed to load projects, things needed everywhere)
+"%NUGETEXEPATH%" restore "%~dp0src\.nuget\packages.config" -o "%~dp0packages"
+:: Packages referenced by individual projects
+"%NUGETEXEPATH%" restore "%~dp0src\MSBuild.sln" -o "%~dp0packages"
 
 echo ** MSBuild Path: %MSBUILDCUSTOMPATH%
 echo ** Building all sources
