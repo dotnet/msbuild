@@ -24,8 +24,7 @@ namespace Microsoft.Build.UnitTests
 {
     sealed public class ToolLocationHelper_Tests
     {
-        [TestInitialize]
-        public void SetUpTest()
+        public ToolLocationHelper_Tests()
         {
             ToolLocationHelper.ClearStaticCaches();
         }
@@ -2639,33 +2638,28 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Verify the toolLocation helper method that enumerates the disk and registry to get the list of installed SDKs.
     /// </summary>
-    public class GetPlatformExtensionSDKLocationsTestFixture
+    public class GetPlatformExtensionSDKLocationsTestFixture : IDisposable
     {
         // Create delegates to mock the registry for the registry portion of the test.
-        private static Microsoft.Build.Shared.OpenBaseKey s_openBaseKey = new Microsoft.Build.Shared.OpenBaseKey(GetBaseKey);
-        internal static Microsoft.Build.Shared.GetRegistrySubKeyNames getRegistrySubKeyNames = new Microsoft.Build.Shared.GetRegistrySubKeyNames(GetRegistrySubKeyNames);
+        private Microsoft.Build.Shared.OpenBaseKey s_openBaseKey = new Microsoft.Build.Shared.OpenBaseKey(GetBaseKey);
+        internal Microsoft.Build.Shared.GetRegistrySubKeyNames getRegistrySubKeyNames = new Microsoft.Build.Shared.GetRegistrySubKeyNames(GetRegistrySubKeyNames);
         internal Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue;
 
         // Path to the fake SDk directory structure created under the temp directory.
-        private static string s_fakeStructureRoot = null;
-        private static string s_fakeStructureRoot2 = null;
+        private string s_fakeStructureRoot = null;
+        private string s_fakeStructureRoot2 = null;
 
         public GetPlatformExtensionSDKLocationsTestFixture()
         {
             getRegistrySubKeyDefaultValue = new Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
-        }
 
-        #region TestMethods
-
-        [ClassInitialize]
-        public static void ClassInit(TestContext context)
-        {
             s_fakeStructureRoot = MakeFakeSDKStructure();
             s_fakeStructureRoot2 = MakeFakeSDKStructure2();
         }
 
-        [ClassCleanup]
-        public static void ClassCleanup()
+        #region TestMethods
+
+        public void Dispose()
         {
             if (s_fakeStructureRoot != null)
             {

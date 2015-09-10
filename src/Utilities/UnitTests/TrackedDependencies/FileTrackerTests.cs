@@ -27,7 +27,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.FileTracking
 {
-    sealed public class FileTrackerTests
+    sealed public class FileTrackerTests : IDisposable
     {
         private static string s_defaultFileTrackerPathUnquoted;
         private static string s_defaultFileTrackerPath;
@@ -35,17 +35,12 @@ namespace Microsoft.Build.UnitTests.FileTracking
 
         private static string s_oldPath = null;
 
-        [ClassInitialize]
-        public static void ClassSetup(TestContext testContext)
+        public FileTrackerTests()
         {
             s_defaultFileTrackerPathUnquoted = FileTracker.GetFileTrackerPath(ExecutableType.SameAsCurrentProcess);
             s_defaultFileTrackerPath = "\"" + s_defaultFileTrackerPathUnquoted + "\"";
             s_defaultTrackerPath = FileTracker.GetTrackerPath(ExecutableType.SameAsCurrentProcess);
-        }
 
-        [TestInitialize]
-        public void Setup()
-        {
             // blank out the path so that we know we're not inadvertently depending on it.
             s_oldPath = Environment.GetEnvironmentVariable("PATH");
             Environment.SetEnvironmentVariable("PATH", Environment.ExpandEnvironmentVariables("%windir%\\system32;%windir%"));
@@ -57,8 +52,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             FileTracker.SetThreadCount(1);
         }
 
-        [TestCleanup]
-        public void CleanUp()
+        public void Dispose()
         {
             // Reset PATH to its original value. 
             if (s_oldPath != null)

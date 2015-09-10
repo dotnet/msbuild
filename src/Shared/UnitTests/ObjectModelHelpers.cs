@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
 
-                Assert.NotNull(expectedItem, String.Format("Item '{0}' was returned but not expected.", actualItem.ItemSpec));
+                Assert.NotNull(expectedItem); // String.Format("Item '{0}' was returned but not expected.", actualItem.ItemSpec));
 
                 // Make sure all the metadata on the expected item matches the metadata on the actual item.
                 // Don't check built-in metadata ... only check custom metadata.
@@ -254,15 +254,15 @@ namespace Microsoft.Build.UnitTests
 
                         Assert.Equal(
                                 expectedMetadataValue,
-                                actualMetadataValue,
-                                string.Format
-                                    (
-                                        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
-                                        actualItem.ItemSpec,
-                                        metadataName,
-                                        actualMetadataValue,
-                                        expectedMetadataValue
-                                    )
+                                actualMetadataValue
+                                //string.Format
+                                //    (
+                                //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
+                                //        actualItem.ItemSpec,
+                                //        metadataName,
+                                //        actualMetadataValue,
+                                //        expectedMetadataValue
+                                //    )
                             );
                     }
                 }
@@ -298,12 +298,12 @@ namespace Microsoft.Build.UnitTests
                 Assert.NotNull(actual); // "Result should be non-null."
             }
 
-            Assert.Equal(expected.Length, actual.Length, "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
+            Assert.Equal(expected.Length, actual.Length); // "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
 
             // Now that we've verified they're both non-null and of the same length, compare each item in the array. 
             for (int i = 0; i < expected.Length; i++)
             {
-                Assert.Equal(expected[i], actual[i], "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
+                Assert.Equal(expected[i], actual[i]); // "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
             }
         }
 
@@ -386,17 +386,7 @@ namespace Microsoft.Build.UnitTests
                 message = fileRelativePath + " doesn't exist, but it should.";
             }
 
-            AssertFileExistenceInTempProjectDirectory(fileRelativePath, message, true);
-        }
-
-        /// <summary>
-        /// Assert that a given file exists (or not) within the temp project directory.
-        /// </summary>
-        /// <param name="fileRelativePath"></param>
-        /// <param name="message">Can be null.</param>
-        private static void AssertFileExistenceInTempProjectDirectory(string fileRelativePath, string message, bool exists)
-        {
-            Assert.Equal(exists, File.Exists(Path.Combine(TempProjectDir, fileRelativePath)), message);
+            Assert.True(File.Exists(Path.Combine(TempProjectDir, fileRelativePath)), message);
         }
 
         /// <summary>
@@ -1194,9 +1184,9 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(false, "Neither threw");
             }
 
-            Assert.NotEqual(null, ex1, "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
-            Assert.NotEqual(null, ex2, "Second method did not throw, first: {0}", ex1 == null ? "" : ex1.GetType() + ex1.Message);
-            Assert.Equal(ex1.GetType(), ex2.GetType(), "Both methods threw but the first threw {0} '{1}' and the second threw {2} '{3}'", ex1.GetType(), ex1.Message, ex2.GetType(), ex2.Message);
+            Assert.NotNull(ex1); // "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
+            Assert.NotNull(ex2); // "Second method did not throw, first: {0}", ex1 == null ? "" : ex1.GetType() + ex1.Message);
+            Assert.Equal(ex1.GetType(), ex2.GetType()); // "Both methods threw but the first threw {0} '{1}' and the second threw {2} '{3}'", ex1.GetType(), ex1.Message, ex2.GetType(), ex2.Message);
 
             Console.WriteLine("COMPARE EXCEPTIONS:\n\n#1: {0}\n\n#2: {1}", ex1.Message, ex2.Message);
         }
@@ -1219,15 +1209,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             Debugger.Break();
-            Assert.True(false, "Did not throw but expected {0} exception", expectedExceptionType.ToString());
-        }
-
-        /// <summary>
-        /// Verify method throws invalid operation exception.
-        /// </summary>
-        internal static void VerifyAssertThrowsInvalidOperation(Action method)
-        {
-            VerifyAssertThrows(method, typeof(InvalidOperationException));
+            Assert.True(false, string.Format("Did not throw but expected {0} exception", expectedExceptionType.ToString()));
         }
 
         /// <summary>

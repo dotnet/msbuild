@@ -20,8 +20,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
     {
         private const int sleepTimeMilliseconds = 100;
 
-        [TestInitialize]
-        public void SetupTestEnvironment()
+        public TrackedDependenciesTests()
         {
             string tempPath = Path.GetTempPath();
             string tempTestFilesPath = Path.Combine(tempPath, "TestFiles");

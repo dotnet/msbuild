@@ -2227,13 +2227,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
 
-                Helpers.VerifyAssertThrows(() => expander.ExpandIntoStringLeaveEscaped("$([Microsoft.FOO.FileIO.FileSystem]::CurrentDirectory)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance), typeof(InvalidProjectFileException));
-                Helpers.VerifyAssertThrows(() => expander.ExpandIntoStringLeaveEscaped("$([Foo.Baz]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance), typeof(InvalidProjectFileException));
-                Helpers.VerifyAssertThrows(() => expander.ExpandIntoStringLeaveEscaped("$([Foo]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance), typeof(InvalidProjectFileException));
-                Helpers.VerifyAssertThrows(() => expander.ExpandIntoStringLeaveEscaped("$([Foo.]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance), typeof(InvalidProjectFileException));
-                Helpers.VerifyAssertThrows(() => expander.ExpandIntoStringLeaveEscaped("$([.Foo]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance), typeof(InvalidProjectFileException));
-                Helpers.VerifyAssertThrows(() => expander.ExpandIntoStringLeaveEscaped("$([.]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance), typeof(InvalidProjectFileException));
-                Helpers.VerifyAssertThrows(() => expander.ExpandIntoStringLeaveEscaped("$([]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance), typeof(InvalidProjectFileException));
+                Assert.Throws<InvalidProjectFileException>(() => expander.ExpandIntoStringLeaveEscaped("$([Microsoft.FOO.FileIO.FileSystem]::CurrentDirectory)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+                Assert.Throws<InvalidProjectFileException>(() => expander.ExpandIntoStringLeaveEscaped("$([Foo.Baz]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+                Assert.Throws<InvalidProjectFileException>(() => expander.ExpandIntoStringLeaveEscaped("$([Foo]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+                Assert.Throws<InvalidProjectFileException>(() => expander.ExpandIntoStringLeaveEscaped("$([Foo.]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+                Assert.Throws<InvalidProjectFileException>(() => expander.ExpandIntoStringLeaveEscaped("$([.Foo]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+                Assert.Throws<InvalidProjectFileException>(() => expander.ExpandIntoStringLeaveEscaped("$([.]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+                Assert.Throws<InvalidProjectFileException>(() => expander.ExpandIntoStringLeaveEscaped("$([]::new())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
             }
             finally
             {

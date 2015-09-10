@@ -156,28 +156,24 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            if (Directory.Exists(nonexistentDirectory))
+            Assert.False(Directory.Exists(nonexistentDirectory),
+                "Tried 10 times to get a nonexistent directory name and failed -- please try again");
+
+            bool exceptionCaught = false;
+            try
             {
-                Assert.True(false, "Directory.Exists(nonexistentDirectory)", "Tried 10 times to get a nonexistent directory name and failed -- please try again");
+                NativeMethodsShared.SetCurrentDirectory(nonexistentDirectory);
             }
-            else
+            catch (Exception e)
             {
-                bool exceptionCaught = false;
-                try
-                {
-                    NativeMethodsShared.SetCurrentDirectory(nonexistentDirectory);
-                }
-                catch (Exception e)
-                {
-                    exceptionCaught = true;
-                    Console.WriteLine(e.Message);
-                }
-                finally
-                {
-                    // verify that the current directory did not change
-                    Assert.False(exceptionCaught); // "SetCurrentDirectory should not throw!"
-                    Assert.Equal(currentDirectory, Directory.GetCurrentDirectory());
-                }
+                exceptionCaught = true;
+                Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                // verify that the current directory did not change
+                Assert.False(exceptionCaught); // "SetCurrentDirectory should not throw!"
+                Assert.Equal(currentDirectory, Directory.GetCurrentDirectory());
             }
         }
 
