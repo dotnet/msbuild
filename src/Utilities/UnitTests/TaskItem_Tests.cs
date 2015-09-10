@@ -6,20 +6,18 @@ using System.Reflection;
 using System.Collections;
 using System.IO;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class TaskItemTests
     {
         // Make sure a TaskItem can be constructed using an ITaskItem
-        [TestMethod]
+        [Fact]
         public void ConstructWithITaskItem()
         {
             TaskItem from = new TaskItem();
@@ -28,23 +26,23 @@ namespace Microsoft.Build.UnitTests
             from.SetMetadata("Cat", "Morris");
 
             TaskItem to = new TaskItem((ITaskItem)from);
-            Assert.AreEqual("Monkey.txt", to.ItemSpec);
-            Assert.AreEqual("Monkey.txt", (string)to);
-            Assert.AreEqual("Bingo", to.GetMetadata("Dog"));
-            Assert.AreEqual("Morris", to.GetMetadata("Cat"));
+            Assert.Equal("Monkey.txt", to.ItemSpec);
+            Assert.Equal("Monkey.txt", (string)to);
+            Assert.Equal("Bingo", to.GetMetadata("Dog"));
+            Assert.Equal("Morris", to.GetMetadata("Cat"));
 
             // Test that item metadata are case-insensitive.
             to.SetMetadata("CaT", "");
-            Assert.AreEqual("", to.GetMetadata("Cat"));
+            Assert.Equal("", to.GetMetadata("Cat"));
 
             // manipulate the item-spec a bit
-            Assert.AreEqual("Monkey", to.GetMetadata(FileUtilities.ItemSpecModifiers.Filename));
-            Assert.AreEqual(".txt", to.GetMetadata(FileUtilities.ItemSpecModifiers.Extension));
-            Assert.AreEqual(String.Empty, to.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir));
+            Assert.Equal("Monkey", to.GetMetadata(FileUtilities.ItemSpecModifiers.Filename));
+            Assert.Equal(".txt", to.GetMetadata(FileUtilities.ItemSpecModifiers.Extension));
+            Assert.Equal(String.Empty, to.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir));
         }
 
         // Make sure metadata can be cloned from an existing ITaskItem
-        [TestMethod]
+        [Fact]
         public void CopyMetadataFromITaskItem()
         {
             TaskItem from = new TaskItem();
@@ -60,53 +58,57 @@ namespace Microsoft.Build.UnitTests
             to.SetMetadata("Cat", "Mike");
             from.CopyMetadataTo(to);
 
-            Assert.AreEqual("Bonobo.txt", to.ItemSpec);          // ItemSpec is never overwritten
-            Assert.AreEqual("Bob", to.GetMetadata("Sponge"));   // Metadata not in source are preserved.
-            Assert.AreEqual("Harriet", to.GetMetadata("Dog"));  // Metadata present on destination are not overwritten.
-            Assert.AreEqual("Mike", to.GetMetadata("Cat"));
-            Assert.AreEqual("Big", to.GetMetadata("Bird"));
+            Assert.Equal("Bonobo.txt", to.ItemSpec);          // ItemSpec is never overwritten
+            Assert.Equal("Bob", to.GetMetadata("Sponge"));   // Metadata not in source are preserved.
+            Assert.Equal("Harriet", to.GetMetadata("Dog"));  // Metadata present on destination are not overwritten.
+            Assert.Equal("Mike", to.GetMetadata("Cat"));
+            Assert.Equal("Big", to.GetMetadata("Bird"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void NullITaskItem()
         {
-            ITaskItem item = null;
-            TaskItem taskItem = new TaskItem(item);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ITaskItem item = null;
+                TaskItem taskItem = new TaskItem(item);
 
-            // no NullReferenceException
+                // no NullReferenceException
+            }
+           );
         }
-
         /// <summary>
         /// Even without any custom metadata metadatanames should
         /// return the built in metadata
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MetadataNamesNoCustomMetadata()
         {
             TaskItem taskItem = new TaskItem("x");
 
-            Assert.AreEqual(FileUtilities.ItemSpecModifiers.All.Length, taskItem.MetadataNames.Count);
-            Assert.AreEqual(FileUtilities.ItemSpecModifiers.All.Length, taskItem.MetadataCount);
+            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length, taskItem.MetadataNames.Count);
+            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length, taskItem.MetadataCount);
 
             // Now add one
             taskItem.SetMetadata("m", "m1");
 
-            Assert.AreEqual(FileUtilities.ItemSpecModifiers.All.Length + 1, taskItem.MetadataNames.Count);
-            Assert.AreEqual(FileUtilities.ItemSpecModifiers.All.Length + 1, taskItem.MetadataCount);
+            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length + 1, taskItem.MetadataNames.Count);
+            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length + 1, taskItem.MetadataCount);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void NullITaskItemCast()
         {
-            TaskItem item = null;
-            string result = (string)item;
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                TaskItem item = null;
+                string result = (string)item;
 
-            // no NullReferenceException
+                // no NullReferenceException
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void ConstructFromDictionary()
         {
             Hashtable h = new Hashtable();
@@ -117,67 +119,70 @@ namespace Microsoft.Build.UnitTests
             TaskItem t = new TaskItem("bamboo.baz", h);
 
             // item-spec modifiers were not overridden by dictionary passed to constructor
-            Assert.AreEqual("bamboo", t.GetMetadata(FileUtilities.ItemSpecModifiers.Filename));
-            Assert.AreEqual(".baz", t.GetMetadata(FileUtilities.ItemSpecModifiers.Extension));
-            Assert.AreEqual("hello", t.GetMetadata("CUSTOM"));
+            Assert.Equal("bamboo", t.GetMetadata(FileUtilities.ItemSpecModifiers.Filename));
+            Assert.Equal(".baz", t.GetMetadata(FileUtilities.ItemSpecModifiers.Extension));
+            Assert.Equal("hello", t.GetMetadata("CUSTOM"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void CannotChangeModifiers()
         {
-            TaskItem t = new TaskItem("foo");
+            Assert.Throws<ArgumentException>(() =>
+            {
+                TaskItem t = new TaskItem("foo");
 
-            try
-            {
-                t.SetMetadata(FileUtilities.ItemSpecModifiers.FullPath, "bazbaz");
+                try
+                {
+                    t.SetMetadata(FileUtilities.ItemSpecModifiers.FullPath, "bazbaz");
+                }
+                catch (Exception e)
+                {
+                    // so I can see the exception message in NUnit's "Standard Out" window
+                    Console.WriteLine(e.Message);
+                    throw;
+                }
             }
-            catch (Exception e)
-            {
-                // so I can see the exception message in NUnit's "Standard Out" window
-                Console.WriteLine(e.Message);
-                throw;
-            }
+           );
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void CannotRemoveModifiers()
         {
-            TaskItem t = new TaskItem("foor");
+            Assert.Throws<ArgumentException>(() =>
+            {
+                TaskItem t = new TaskItem("foor");
 
-            try
-            {
-                t.RemoveMetadata(FileUtilities.ItemSpecModifiers.RootDir);
+                try
+                {
+                    t.RemoveMetadata(FileUtilities.ItemSpecModifiers.RootDir);
+                }
+                catch (Exception e)
+                {
+                    // so I can see the exception message in NUnit's "Standard Out" window
+                    Console.WriteLine(e.Message);
+                    throw;
+                }
             }
-            catch (Exception e)
-            {
-                // so I can see the exception message in NUnit's "Standard Out" window
-                Console.WriteLine(e.Message);
-                throw;
-            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void CheckMetadataCount()
         {
             TaskItem t = new TaskItem("foo");
 
-            Assert.AreEqual(FileUtilities.ItemSpecModifiers.All.Length, t.MetadataCount);
+            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length, t.MetadataCount);
 
             t.SetMetadata("grog", "RUM");
 
-            Assert.AreEqual(FileUtilities.ItemSpecModifiers.All.Length + 1, t.MetadataCount);
+            Assert.Equal(FileUtilities.ItemSpecModifiers.All.Length + 1, t.MetadataCount);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestFullPath()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.AreEqual
-            (
+            Assert.Equal(
                 Path.Combine
                 (
                     Directory.GetCurrentDirectory(),
@@ -187,13 +192,12 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestRootDir()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.AreEqual
-            (
+            Assert.Equal(
                 Path.GetPathRoot
                 (
                     from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath)
@@ -202,180 +206,161 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestFilename()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.AreEqual
-            (
+            Assert.Equal(
                 "Monkey",
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.Filename)
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestExtension()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.AreEqual
-            (
+            Assert.Equal(
                 ".txt",
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.Extension)
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestRelativeDir()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.IsTrue
-            (
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).Length == 0
-            );
+            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestDirectory()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = @"c:\subdir\Monkey.txt";
-            Assert.AreEqual
-            (
+            Assert.Equal(
                 @"subdir\",
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory)
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestDirectoryUNC()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = @"\\local\share\subdir\Monkey.txt";
-            Assert.AreEqual
-            (
+            Assert.Equal(
                 @"subdir\",
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory)
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestRecursiveDir()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
 
-            Assert.IsTrue
-            (
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir).Length == 0
-            );
+            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir).Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void NonexistentRequestIdentity()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            Assert.AreEqual
-            (
+            Assert.Equal(
                 "Monkey.txt",
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.Identity)
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void RequestTimeStamps()
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = FileUtilities.GetTemporaryFile();
 
-            Assert.IsTrue
-            (
+            Assert.True(
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length > 0
             );
 
-            Assert.IsTrue
-            (
+            Assert.True(
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length > 0
             );
 
-            Assert.IsTrue
-            (
+            Assert.True(
                 from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length > 0
             );
 
             File.Delete(from.ItemSpec);
 
-            Assert.IsTrue
-            (
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length == 0
-            );
+            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length);
 
-            Assert.IsTrue
-            (
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length == 0
-            );
+            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length);
 
-            Assert.IsTrue
-            (
-                from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length == 0
-            );
+            Assert.Equal(0, from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length);
         }
 
         /// <summary>
         /// Verify metadata cannot be created with null name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void CreateNullNamedMetadata()
         {
-            TaskItem item = new TaskItem("foo");
-            item.SetMetadata(null, "x");
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                TaskItem item = new TaskItem("foo");
+                item.SetMetadata(null, "x");
+            }
+           );
         }
-
         /// <summary>
         /// Verify metadata cannot be created with empty name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void CreateEmptyNamedMetadata()
         {
-            TaskItem item = new TaskItem("foo");
-            item.SetMetadata("", "x");
+            Assert.Throws<ArgumentException>(() =>
+            {
+                TaskItem item = new TaskItem("foo");
+                item.SetMetadata("", "x");
+            }
+           );
         }
-
         /// <summary>
         /// Create a TaskItem with a null metadata value -- this is allowed, but 
         /// internally converted to the empty string. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CreateTaskItemWithNullMetadata()
         {
             IDictionary<string, string> metadata = new Dictionary<string, string>();
             metadata.Add("m", null);
 
             TaskItem item = new TaskItem("bar", (IDictionary)metadata);
-            Assert.AreEqual(String.Empty, item.GetMetadata("m"));
+            Assert.Equal(String.Empty, item.GetMetadata("m"));
         }
 
         /// <summary>
         /// Set metadata value to null value -- this is allowed, but 
         /// internally converted to the empty string. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetNullMetadataValue()
         {
             TaskItem item = new TaskItem("bar");
             item.SetMetadata("m", null);
-            Assert.AreEqual(String.Empty, item.GetMetadata("m"));
+            Assert.Equal(String.Empty, item.GetMetadata("m"));
         }
 
         /// <summary>
         /// Test that task items can be successfully constructed based on a task item from another appdomain.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoteTaskItem()
         {
             AppDomain appDomain = null;
@@ -408,14 +393,14 @@ namespace Microsoft.Build.UnitTests
                 {
                     itemsInThisAppDomain[i] = new TaskItem(creator.CreatedTaskItems[i]);
 
-                    Assert.AreEqual(creator.CreatedTaskItems[i].ItemSpec, itemsInThisAppDomain[i].ItemSpec);
-                    Assert.AreEqual(creator.CreatedTaskItems[i].MetadataCount + 1, itemsInThisAppDomain[i].MetadataCount);
+                    Assert.Equal(creator.CreatedTaskItems[i].ItemSpec, itemsInThisAppDomain[i].ItemSpec);
+                    Assert.Equal(creator.CreatedTaskItems[i].MetadataCount + 1, itemsInThisAppDomain[i].MetadataCount);
 
                     foreach (string metadatum in creator.CreatedTaskItems[i].MetadataNames)
                     {
                         if (!String.Equals("OriginalItemSpec", metadatum))
                         {
-                            Assert.AreEqual(creator.CreatedTaskItems[i].GetMetadata(metadatum), itemsInThisAppDomain[i].GetMetadata(metadatum));
+                            Assert.Equal(creator.CreatedTaskItems[i].GetMetadata(metadatum), itemsInThisAppDomain[i].GetMetadata(metadatum));
                         }
                     }
                 }
