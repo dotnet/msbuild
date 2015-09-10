@@ -18,21 +18,7 @@
           SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="CopyXunitRunnerAssemblies">
-    <ItemGroup>
-      <AssembliesToCopyLocal Include="$(PackagesDir)xunit.abstractions.2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.abstractions.dll" />
-      <AssembliesToCopyLocal Include="$(PackagesDir)xunit.extensibility.core.$(XunitVersion)\lib\portable-net45+win8+wp8+wpa81\xunit.core.dll" />
-      <AssembliesToCopyLocal Include="$(PackagesDir)xunit.assert.$(XunitVersion)\lib\portable-net45+win8+wp8+wpa81\xunit.assert.dll" />
-      <AssembliesToCopyLocal Include="$(PackagesDir)xunit.core.$(XunitVersion)\build\_Desktop\xunit.execution.desktop.dll" />
-    </ItemGroup>
-
-    <Copy SourceFiles="@(AssembliesToCopyLocal)"
-          DestinationFolder="$(OutputPath)"
-          SkipUnchangedFiles="true"
-          UseHardlinksIfPossible="true" />
-  </Target>
-
   <Target Name="CopyPrerequisites"
-          DependsOnTargets="CopyCompilerTools;CopyXunitConfiguration;CopyXunitRunnerAssemblies" />
+          DependsOnTargets="CopyCompilerTools;CopyXunitConfiguration" />
 
 </Project>
