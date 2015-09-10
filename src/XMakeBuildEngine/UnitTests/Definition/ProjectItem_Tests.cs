@@ -16,8 +16,6 @@ using System.Xml;
 using System.Text;
 using System.Globalization;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
@@ -27,19 +25,19 @@ using System.Threading;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 using Microsoft.Build.Construction;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
     /// Class containing tests for the ProjectItem and related functionality.
     /// </summary>
-    [TestClass]
     public class ProjectItem_Tests
     {
         /// <summary>
         /// Make sure the the CopyFrom actually does a clone.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CopyFromClonesMetadata()
         {
             ProjectItem item1 = GetOneItemFromFragment(@"<i Include='i1'><m>m1</m></i>");
@@ -49,12 +47,12 @@ namespace Microsoft.Build.UnitTests.Definition
             item1.SetMetadataValue("m", "m2");
             item1.SetMetadataValue("n", "n1");
 
-            Assert.AreEqual(1, Helpers.MakeList(item2.Metadata).Count);
-            Assert.AreEqual(String.Empty, item2.GetMetadataValue("n"));
-            Assert.AreEqual(1 + 15 /* built-in metadata */, item2.MetadataCount);
+            Assert.Equal(1, Helpers.MakeList(item2.Metadata).Count);
+            Assert.Equal(String.Empty, item2.GetMetadataValue("n"));
+            Assert.Equal(1 + 15 /* built-in metadata */, item2.MetadataCount);
 
             // Should still point at the same XML items
-            Assert.AreEqual(true, Object.ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));
+            Assert.Equal(true, Object.ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));
         }
 
         /// <summary>
@@ -86,7 +84,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             IList<ProjectItem> items = GetItemsFromFragment(fragment);
 
-            Assert.AreEqual(1, items.Count);
+            Assert.Equal(1, items.Count);
             return items[0];
         }
 

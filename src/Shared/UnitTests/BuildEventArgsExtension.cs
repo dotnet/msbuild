@@ -11,10 +11,10 @@ using System.Collections;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
