@@ -35,7 +35,6 @@ TestResult.xml
 dlldata.c
 
 # Nuget v3
-project.lock.json
 *.nuget.targets
 
 *_i.c
