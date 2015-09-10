@@ -11,38 +11,37 @@ using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for MSBuildNameIgnoreCaseComparer
     /// </summary>
-    [TestClass]
     public class MSBuildNameIgnoreCaseComparer_Tests
     {
         /// <summary>
         /// Verify default comparer works on the whole string
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DefaultEquals()
         {
-            Assert.AreEqual(true, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "foo"));
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", " FOO"));
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOOA", "FOOB"));
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals("AFOO", "BFOO"));
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "FOO "));
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals("a", "b"));
-            Assert.AreEqual(true, MSBuildNameIgnoreCaseComparer.Default.Equals("", ""));
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
-            Assert.AreEqual(true, MSBuildNameIgnoreCaseComparer.Default.Equals(null, null));
+            Assert.Equal(true, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "foo"));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", " FOO"));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOOA", "FOOB"));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("AFOO", "BFOO"));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("FOO", "FOO "));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("a", "b"));
+            Assert.Equal(true, MSBuildNameIgnoreCaseComparer.Default.Equals("", ""));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
+            Assert.Equal(true, MSBuildNameIgnoreCaseComparer.Default.Equals(null, null));
         }
 
         /// <summary>
         /// Compare real expressions
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MatchProperty()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -54,12 +53,12 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             string s = "$(foo)";
             ProjectPropertyInstance value = MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, s, 2, 4);
 
-            Assert.IsTrue(Object.ReferenceEquals(p, value), "Should have returned the same object as was inserted");
+            Assert.True(Object.ReferenceEquals(p, value)); // "Should have returned the same object as was inserted"
 
             try
             {
                 MSBuildNameIgnoreCaseComparer.Mutable.SetConstraintsForUnitTestingOnly(s, 2, 4);
-                Assert.AreEqual(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("foo"), MSBuildNameIgnoreCaseComparer.Mutable.GetHashCode(s));
+                Assert.Equal(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("foo"), MSBuildNameIgnoreCaseComparer.Mutable.GetHashCode(s));
             }
             finally
             {
@@ -70,90 +69,100 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Default comparer is immutable
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void Immutable()
         {
-            Dictionary<string, Object> dictionary = new Dictionary<string, Object>(MSBuildNameIgnoreCaseComparer.Default);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                Dictionary<string, Object> dictionary = new Dictionary<string, Object>(MSBuildNameIgnoreCaseComparer.Default);
 
-            MSBuildNameIgnoreCaseComparer.Default.GetValueWithConstraints(dictionary, "x", 0, 1);
+                MSBuildNameIgnoreCaseComparer.Default.GetValueWithConstraints(dictionary, "x", 0, 1);
+            }
+           );
         }
-
         /// <summary>
         /// Objects work
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NonString()
         {
             Object o = new Object();
-            Assert.AreEqual(true, ((IEqualityComparer)MSBuildNameIgnoreCaseComparer.Default).Equals(o, o));
+            Assert.Equal(true, ((IEqualityComparer)MSBuildNameIgnoreCaseComparer.Default).Equals(o, o));
         }
 
         /// <summary>
         /// Null 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Null1()
         {
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals("x", null));
         }
 
         /// <summary>
         /// Null 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Null2()
         {
-            Assert.AreEqual(false, MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
+            Assert.Equal(false, MSBuildNameIgnoreCaseComparer.Default.Equals(null, "x"));
         }
 
         /// <summary>
         /// Make sure we can handle the case where the dictionary is null.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void NullDictionary()
         {
-            MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<Object>(null, "s", 0, 1);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<Object>(null, "s", 0, 1);
+            }
+           );
         }
-
         /// <summary>
         /// Invalid start 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void InvalidValue2()
         {
-            PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
-            MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "x", -1, 0);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
+                MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "x", -1, 0);
+            }
+           );
         }
-
         /// <summary>
         /// Invalid small end 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void InvalidValue4()
         {
-            PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
-            MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "x", 0, -1);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
+                MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "x", 0, -1);
+            }
+           );
         }
-
         /// <summary>
         /// Invalid large end 
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void InvalidValue5()
         {
-            PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
-            MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "x", 0, 2);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
+                MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "x", 0, 2);
+            }
+           );
         }
-
         /// <summary>
         /// End past the end of other string
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EqualsEndPastEnd1()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -163,13 +172,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             ProjectPropertyInstance value = MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "abbbaaa", 1, 3);
 
-            Assert.IsTrue(Object.ReferenceEquals(p, value), "Should have returned the same object as was inserted");
+            Assert.True(Object.ReferenceEquals(p, value)); // "Should have returned the same object as was inserted"
         }
 
         /// <summary>
         /// Same values means one char
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EqualsSameStartEnd1()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -182,13 +191,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             ProjectPropertyInstance value = MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "babbbb", 1, 1);
 
-            Assert.IsTrue(Object.ReferenceEquals(p1, value), "Should have returned the 'A' value");
+            Assert.True(Object.ReferenceEquals(p1, value)); // "Should have returned the 'A' value"
         }
 
         /// <summary>
         /// Same values means one char
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EqualsSameStartEnd2()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -201,13 +210,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             ProjectPropertyInstance value = MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "aabaa", 2, 2);
 
-            Assert.IsTrue(Object.ReferenceEquals(p2, value), "Should have returned the 'b' value");
+            Assert.True(Object.ReferenceEquals(p2, value)); // "Should have returned the 'b' value"
         }
 
         /// <summary>
         /// Same values means one char
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EqualsSameStartEnd3()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -220,13 +229,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             ProjectPropertyInstance value = MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "ab", 0, 0);
 
-            Assert.IsTrue(Object.ReferenceEquals(p1, value), "Should have returned the 'a' value");
+            Assert.True(Object.ReferenceEquals(p1, value)); // "Should have returned the 'a' value"
         }
 
         /// <summary>
         /// Start at 0
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EqualsStartZero()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -239,13 +248,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             ProjectPropertyInstance value = MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, "aabaa", 0, 2);
 
-            Assert.IsTrue(Object.ReferenceEquals(p1, value), "Should have returned the 'aab' value");
+            Assert.True(Object.ReferenceEquals(p1, value)); // "Should have returned the 'aab' value"
         }
 
         /// <summary>
         /// End at end
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EqualsEndEnd()
         {
             PropertyDictionary<ProjectPropertyInstance> dictionary = new PropertyDictionary<ProjectPropertyInstance>();
@@ -263,13 +272,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Should match o3
             ProjectPropertyInstance value1 = MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, constraint, 1, 5);
 
-            Assert.IsTrue(Object.ReferenceEquals(p3, value1), "Should have returned the 'abaaa' value");
+            Assert.True(Object.ReferenceEquals(p3, value1)); // "Should have returned the 'abaaa' value"
 
             dictionary.Remove("abaaa"); // get rid of o3
 
             ProjectPropertyInstance value2 = MSBuildNameIgnoreCaseComparer.Mutable.GetValueWithConstraints<ProjectPropertyInstance>(dictionary, constraint, 1, 5);
 
-            Assert.IsNull(value2, "Should not have been a match in the dictionary");
+            Assert.Null(value2); // "Should not have been a match in the dictionary"
 
             // Even if the string is exactly the same, if only a substring is being compared, then although it 
             // will be judged equal, the hash codes will NOT be the same, and for that reason, a lookup in the 
@@ -279,8 +288,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             {
                 MSBuildNameIgnoreCaseComparer.Mutable.SetConstraintsForUnitTestingOnly(constraint, 1, 5);
 
-                Assert.IsTrue(MSBuildNameIgnoreCaseComparer.Mutable.Equals("aabaaa", constraint)); // same on both sides
-                Assert.AreNotEqual(originalHashCode, MSBuildNameIgnoreCaseComparer.Mutable.GetHashCode(constraint));
+                Assert.True(MSBuildNameIgnoreCaseComparer.Mutable.Equals("aabaaa", constraint)); // same on both sides
+                Assert.NotEqual(originalHashCode, MSBuildNameIgnoreCaseComparer.Mutable.GetHashCode(constraint));
             }
             finally
             {
@@ -291,19 +300,19 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Default get hash code
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DefaultGetHashcode()
         {
-            Assert.AreEqual(true, 0 == MSBuildNameIgnoreCaseComparer.Default.GetHashCode(null));
+            Assert.Equal(true, 0 == MSBuildNameIgnoreCaseComparer.Default.GetHashCode(null));
 
             MSBuildNameIgnoreCaseComparer.Default.GetHashCode(""); // doesn't throw            
-            Assert.AreEqual(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("aBc"), MSBuildNameIgnoreCaseComparer.Default.GetHashCode("AbC"));
+            Assert.Equal(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("aBc"), MSBuildNameIgnoreCaseComparer.Default.GetHashCode("AbC"));
         }
 
         /// <summary>
         /// Indexed get hashcode
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IndexedGetHashcode1()
         {
             MSBuildNameIgnoreCaseComparer comparer = MSBuildNameIgnoreCaseComparer.Mutable;
@@ -315,9 +324,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
                 comparer.GetHashCode(""); // does not crash
 
-                Assert.AreEqual(true, 0 == comparer.GetHashCode(null));
-                Assert.AreEqual(comparer.GetHashCode("aBc"), comparer.GetHashCode("AbC"));
-                Assert.AreEqual(comparer.GetHashCode(s), comparer.GetHashCode("x"));
+                Assert.Equal(true, 0 == comparer.GetHashCode(null));
+                Assert.Equal(comparer.GetHashCode("aBc"), comparer.GetHashCode("AbC"));
+                Assert.Equal(comparer.GetHashCode(s), comparer.GetHashCode("x"));
             }
             finally
             {
@@ -328,7 +337,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Indexed get hashcode
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IndexedGetHashcode2()
         {
             MSBuildNameIgnoreCaseComparer comparer = MSBuildNameIgnoreCaseComparer.Mutable;
@@ -338,7 +347,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             {
                 comparer.SetConstraintsForUnitTestingOnly(s, 1, 2);
 
-                Assert.AreEqual(comparer.GetHashCode(s), comparer.GetHashCode("YZ"));
+                Assert.Equal(comparer.GetHashCode(s), comparer.GetHashCode("YZ"));
             }
             finally
             {
@@ -349,7 +358,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Indexed get hashcode
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IndexedGetHashcode3()
         {
             MSBuildNameIgnoreCaseComparer comparer = MSBuildNameIgnoreCaseComparer.Mutable;
@@ -359,7 +368,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             {
                 comparer.SetConstraintsForUnitTestingOnly(s, 0, 2);
 
-                Assert.AreEqual(comparer.GetHashCode(s), comparer.GetHashCode("abc"));
+                Assert.Equal(comparer.GetHashCode(s), comparer.GetHashCode("abc"));
             }
             finally
             {

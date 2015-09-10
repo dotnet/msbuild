@@ -52,7 +52,9 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void BadTooLongLastWriteTime()
         {
-            Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(new String('x', 5000)).LastWriteTime; }, delegate () { var x = new FileState(new String('x', 5000)).LastWriteTime; });
+            Helpers.VerifyAssertThrowsSameWay(
+                delegate () { var x = new FileInfo(new String('x', 5000)).LastWriteTime; },
+                delegate () { var x = new FileState(new String('x', 5000)).LastWriteTime; });
         }
 
         [TestMethod]

@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -255,14 +254,14 @@ namespace Microsoft.Build.UnitTests
                         Assert.Equal(
                                 expectedMetadataValue,
                                 actualMetadataValue
-                                //string.Format
-                                //    (
-                                //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
-                                //        actualItem.ItemSpec,
-                                //        metadataName,
-                                //        actualMetadataValue,
-                                //        expectedMetadataValue
-                                //    )
+                            //string.Format
+                            //    (
+                            //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
+                            //        actualItem.ItemSpec,
+                            //        metadataName,
+                            //        actualMetadataValue,
+                            //        expectedMetadataValue
+                            //    )
                             );
                     }
                 }
@@ -1189,27 +1188,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(ex1.GetType(), ex2.GetType()); // "Both methods threw but the first threw {0} '{1}' and the second threw {2} '{3}'", ex1.GetType(), ex1.Message, ex2.GetType(), ex2.Message);
 
             Console.WriteLine("COMPARE EXCEPTIONS:\n\n#1: {0}\n\n#2: {1}", ex1.Message, ex2.Message);
-        }
-
-        /// <summary>
-        /// Given a method accepting no parameters and returning none, verifies it 
-        /// throws an exception of the specified type.
-        /// </summary>
-        internal static void VerifyAssertThrows(Action method, Type expectedExceptionType)
-        {
-            try
-            {
-                method();
-            }
-            catch (Exception ex)
-            {
-                Assert.IsAssignableFrom(expectedExceptionType, ex);
-                Console.WriteLine("Caught '{0}'", ex.Message);
-                return;
-            }
-
-            Debugger.Break();
-            Assert.True(false, string.Format("Did not throw but expected {0} exception", expectedExceptionType.ToString()));
         }
 
         /// <summary>

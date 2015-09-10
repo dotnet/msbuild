@@ -7,39 +7,38 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using Microsoft.Build.UnitTests.BackEnd;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for ProjectMetadataInstance internal members
     /// </summary>
-    [TestClass]
     public class ProjectMetadataInstance_Internal_Tests
     {
         /// <summary>
         /// Cloning
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DeepClone()
         {
             ProjectMetadataInstance metadata = GetMetadataInstance();
 
             ProjectMetadataInstance clone = metadata.DeepClone();
 
-            Assert.AreEqual(false, Object.ReferenceEquals(metadata, clone));
-            Assert.AreEqual("m", clone.Name);
-            Assert.AreEqual("m1", clone.EvaluatedValue);
+            Assert.Equal(false, Object.ReferenceEquals(metadata, clone));
+            Assert.Equal("m", clone.Name);
+            Assert.Equal("m1", clone.EvaluatedValue);
         }
 
         /// <summary>
         /// Tests serialization
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Serialization()
         {
             ProjectMetadataInstance metadata = new ProjectMetadataInstance("m1", "v1", false);
@@ -48,8 +47,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectMetadataInstance deserializedMetadata = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedMetadata, ProjectMetadataInstance.FactoryForDeserialization);
 
-            Assert.AreEqual(metadata.Name, deserializedMetadata.Name);
-            Assert.AreEqual(metadata.EvaluatedValue, deserializedMetadata.EvaluatedValue);
+            Assert.Equal(metadata.Name, deserializedMetadata.Name);
+            Assert.Equal(metadata.EvaluatedValue, deserializedMetadata.EvaluatedValue);
         }
 
         /// <summary>

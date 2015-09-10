@@ -16,20 +16,19 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
 using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Unit tests for the TaskBuilder component
     /// </summary>
-    [TestClass]
     public class TaskBuilder_Tests : ITargetBuilderCallback
     {
         /// <summary>
@@ -183,7 +182,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Verifies that we do look up the task during execute when the condition is true.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TasksAreDiscoveredWhenTaskConditionTrue()
         {
             MockLogger logger = new MockLogger();
@@ -209,7 +208,7 @@ namespace ItemCreationTask
         /// the task.  We verify that we never loaded the task because if we did try, the task load itself would
         /// have failed, resulting in an error.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TasksNotDiscoveredWhenTaskConditionFalse()
         {
             MockLogger logger = new MockLogger();
@@ -232,7 +231,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Verify when task outputs are overridden the override messages are correctly displayed
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OverridePropertiesInCreateProperty()
         {
             MockLogger logger = new MockLogger();
@@ -272,7 +271,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Verify that when a task outputs are inferred the override messages are displayed
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OverridePropertiesInInferredCreateProperty()
         {
             string[] files = null;
@@ -333,7 +332,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Tests that tasks batch on outputs correctly.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TaskOutputBatching()
         {
             MockLogger logger = new MockLogger();
@@ -397,7 +396,7 @@ namespace ItemCreationTask
         /// MSbuildLastTaskResult property contains true or false indicating
         /// the success or failure of the last task.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildLastTaskResult()
         {
             string projectFileContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -450,7 +449,7 @@ namespace ItemCreationTask
         /// This is to support wildcards in CreateItem. Allowing anything
         /// else could let the item get corrupt (inconsistent values for Filename and FullPath, for example)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TasksCanAddRecursiveDirBuiltInMetadata()
         {
             MockLogger logger = new MockLogger();
@@ -471,7 +470,7 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogDoesntContain("[]");
             logger.AssertLogDoesntContain("MSB4118");
             logger.AssertLogDoesntContain("MSB3031");
@@ -480,7 +479,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Verify CreateItem prevents adding any built-in metadata explicitly, even recursivedir.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OtherBuiltInMetadataErrors()
         {
             MockLogger logger = new MockLogger();
@@ -498,14 +497,14 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
             logger.AssertLogContains("MSB3031");
         }
 
         /// <summary>
         /// Verify CreateItem prevents adding any built-in metadata explicitly, even recursivedir.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OtherBuiltInMetadataErrors2()
         {
             MockLogger logger = new MockLogger();
@@ -521,7 +520,7 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
             logger.AssertLogContains("MSB3031");
         }
 
@@ -529,7 +528,7 @@ namespace ItemCreationTask
         /// Verify that properties can be passed in to a task and out as items, despite the 
         /// built-in metadata restrictions.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PropertiesInItemsOutOfTask()
         {
             MockLogger logger = new MockLogger();
@@ -551,7 +550,7 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains("[.ext]");
         }
 
@@ -559,7 +558,7 @@ namespace ItemCreationTask
         /// Verify that properties can be passed in to a task and out as items, despite
         /// having illegal characters for a file name
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IllegalFileCharsInItemsOutOfTask()
         {
             MockLogger logger = new MockLogger();
@@ -581,14 +580,14 @@ namespace ItemCreationTask
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
             logger.AssertLogContains("[||illegal||]");
         }
 
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NullMetadataOnOutputItems()
         {
             string customTaskPath = CustomTaskHelper.GetAssemblyForTask(s_nullMetadataTaskContents);
@@ -612,7 +611,7 @@ namespace ItemCreationTask
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NullMetadataOnLegacyOutputItems()
         {
             string referenceAssembliesPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.VersionLatest);
@@ -646,7 +645,7 @@ namespace ItemCreationTask
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NullMetadataOnOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -686,8 +685,7 @@ namespace ItemCreationTask
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
-        [TestMethod]
-        [Ignore]
+        [Fact(Skip = "Ignored in MSTest")]
         // Ignore: Needs investigation, doesn't like Task.v4.0.dll
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
@@ -741,7 +739,7 @@ namespace ItemCreationTask
         /// various task output-related operations, using a task built against V4 MSBuild, 
         /// which didn't support the defining project metadata.  
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ValidateDefiningProjectMetadataOnTaskOutputs_LegacyItems()
         {
             string referenceAssembliesPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.VersionLatest);
@@ -760,7 +758,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Tests that putting the RunInSTA attribute on a task causes it to run in the STA thread.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSTAThreadRequired()
         {
             TestSTATask(true, false, false);
@@ -769,7 +767,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Tests an STA task with an exception
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSTAThreadRequiredWithException()
         {
             TestSTATask(true, false, true);
@@ -778,7 +776,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Tests an STA task with failure.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSTAThreadRequiredWithFailure()
         {
             TestSTATask(true, true, false);
@@ -787,7 +785,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Tests an MTA task.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSTAThreadNotRequired()
         {
             TestSTATask(false, false, false);
@@ -796,7 +794,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Tests an MTA task with an exception.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSTAThreadNotRequiredWithException()
         {
             TestSTATask(false, false, true);
@@ -805,7 +803,7 @@ namespace ItemCreationTask
         /// <summary>
         /// Tests an MTA task with failure.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestSTAThreadNotRequiredWithFailure()
         {
             TestSTATask(false, true, false);
@@ -970,7 +968,7 @@ namespace ItemCreationTask
             if (throwException)
             {
                 logger.AssertLogContains("EXCEPTION");
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 return;
             }
             else
@@ -981,7 +979,7 @@ namespace ItemCreationTask
             if (failTask)
             {
                 logger.AssertLogContains("FAIL");
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
             }
             else
             {
@@ -990,7 +988,7 @@ namespace ItemCreationTask
 
             if (!throwException && !failTask)
             {
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
             }
         }
 

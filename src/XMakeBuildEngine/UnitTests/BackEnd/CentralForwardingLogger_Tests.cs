@@ -6,92 +6,95 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Logging
 {
     /// <summary>
     /// Test the central forwarding logger by initializing a new one and sending events through it.
     /// </summary>
-    [TestClass]
     public class CentralForwardingLogger_Tests
     {
         /// <summary>
         /// Tests the basic getting and setting of the logger parameters
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetandSetLoggerParameters()
         {
             CentralForwardingLogger centralLogger = new CentralForwardingLogger();
 
             // Verify NodeId can be get and set properly
-            Assert.AreEqual(0, centralLogger.NodeId);
+            Assert.Equal(0, centralLogger.NodeId);
             centralLogger.NodeId = 4;
-            Assert.AreEqual(4, centralLogger.NodeId);
+            Assert.Equal(4, centralLogger.NodeId);
 
             // Verify Parameters can be get and set properly
-            Assert.IsTrue(string.IsNullOrEmpty(centralLogger.Parameters), "Expected parameters to be null or empty");
+            Assert.True(string.IsNullOrEmpty(centralLogger.Parameters)); // "Expected parameters to be null or empty"
             centralLogger.Parameters = "MyParameters";
-            Assert.IsTrue(string.Compare(centralLogger.Parameters, "MyParameters", StringComparison.OrdinalIgnoreCase) == 0, "Expected parameters equal MyParameters");
+            Assert.Equal(0, string.Compare(centralLogger.Parameters, "MyParameters", StringComparison.OrdinalIgnoreCase)); // "Expected parameters equal MyParameters"
 
             // Verify Verbosity can be get and set properly
-            Assert.IsTrue(centralLogger.Verbosity == LoggerVerbosity.Quiet, "Expected default to be Quiet");
+            Assert.Equal(centralLogger.Verbosity, LoggerVerbosity.Quiet); // "Expected default to be Quiet"
             centralLogger.Verbosity = LoggerVerbosity.Detailed;
-            Assert.IsTrue(centralLogger.Verbosity == LoggerVerbosity.Detailed, "Expected default to be Detailed");
+            Assert.Equal(centralLogger.Verbosity, LoggerVerbosity.Detailed); // "Expected default to be Detailed"
 
             // Verify BuildEventRedirector can be get and set properly
-            Assert.IsNull(centralLogger.BuildEventRedirector, "Expected BuildEventRedirector to be null");
+            Assert.Null(centralLogger.BuildEventRedirector); // "Expected BuildEventRedirector to be null"
             TestEventRedirector eventRedirector = new TestEventRedirector(null);
             centralLogger.BuildEventRedirector = eventRedirector;
-            Assert.IsTrue(centralLogger.BuildEventRedirector == eventRedirector, "Expected the BuildEventRedirector to match the passed in eventRedirector");
+            Assert.Equal(centralLogger.BuildEventRedirector, eventRedirector); // "Expected the BuildEventRedirector to match the passed in eventRedirector"
         }
 
         /// <summary>
         /// Verify the correct exception is thrown when the logger is initialized with a null 
         /// event source.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void InitializeWithNullEventSourceILogger()
         {
-            CentralForwardingLogger centralLogger = new CentralForwardingLogger();
-            centralLogger.Initialize(null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                CentralForwardingLogger centralLogger = new CentralForwardingLogger();
+                centralLogger.Initialize(null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify the correct exception is thrown when the logger is initialized with a null 
         /// event source.
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void InitializeWithNullEventSourceINodeLogger()
         {
-            CentralForwardingLogger centralLogger = new CentralForwardingLogger();
-            centralLogger.Initialize(null, 4);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                CentralForwardingLogger centralLogger = new CentralForwardingLogger();
+                centralLogger.Initialize(null, 4);
+            }
+           );
         }
-
         /// <summary>
         /// Verify the shutdown method will null out the event redirector
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestShutDown()
         {
             CentralForwardingLogger centralLogger = new CentralForwardingLogger();
             centralLogger.BuildEventRedirector = new TestEventRedirector(null);
 
-            Assert.IsNotNull(centralLogger.BuildEventRedirector);
+            Assert.NotNull(centralLogger.BuildEventRedirector);
 
             centralLogger.Shutdown();
-            Assert.IsNull(centralLogger.BuildEventRedirector);
+            Assert.Null(centralLogger.BuildEventRedirector);
         }
 
         /// <summary>
         /// Verify that the forwarding logger correctly forwards events when passed to it.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ForwardEvents()
         {
             BuildStartedEventArgs buildStarted = new BuildStartedEventArgs("Message", "Help");
@@ -113,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// event redirector is registered on the logger. This could happen
         /// if no central logger is registered with the system.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RaiseEventWithNoBuildEventRedirector()
         {
             BuildMessageEventArgs normalMessage = new BuildMessageEventArgs("Message2", "help", "sender", MessageImportance.Normal);
@@ -179,7 +182,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <param name="buildEvent">Build event to forward</param>
             public void ForwardEvent(BuildEventArgs buildEvent)
             {
-                Assert.IsTrue(_expectedEvent == buildEvent, "Expected the forwarded event to match the expected event");
+                Assert.Equal(_expectedEvent, buildEvent); // "Expected the forwarded event to match the expected event"
             }
 
             #endregion

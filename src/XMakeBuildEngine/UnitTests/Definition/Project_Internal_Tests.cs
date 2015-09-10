@@ -12,22 +12,21 @@ using System.Xml;
 using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
     /// Tests some manipulations of Project and ProjectCollection that require dealing with internal data. 
     /// </summary>
-    [TestClass]
     public class Project_Internal_Tests
     {
         /// <summary>
         /// Set default tools version; subsequent projects should use it 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetDefaultToolsVersion()
         {
             string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -45,7 +44,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 collection.DefaultToolsVersion = "x";
 
-                Assert.AreEqual("x", collection.DefaultToolsVersion);
+                Assert.Equal("x", collection.DefaultToolsVersion);
 
                 string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
@@ -55,7 +54,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)), null, null, collection);
 
-                Assert.AreEqual(project.ToolsVersion, "x");
+                Assert.Equal(project.ToolsVersion, "x");
             }
             finally
             {
@@ -70,7 +69,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// 
         /// ... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReloadProjectWithInvalidToolsVersionInFile()
         {
             string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -94,7 +93,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
-                Assert.IsTrue(Object.ReferenceEquals(project, project2));
+                Assert.True(Object.ReferenceEquals(project, project2));
             }
             finally
             {
@@ -107,7 +106,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Project.ToolsVersion should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ProjectToolsVersion20Present()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -131,11 +130,11 @@ namespace Microsoft.Build.UnitTests.Definition
                 project.Xml.ToolsVersion = "2.0";
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual("2.0", project.ToolsVersion);
+                Assert.Equal("2.0", project.ToolsVersion);
 
                 project.Xml.ToolsVersion = "4.0";
 
-                Assert.AreEqual("2.0", project.ToolsVersion);
+                Assert.Equal("2.0", project.ToolsVersion);
             }
             finally
             {
@@ -148,7 +147,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// $(MSBuildToolsVersion) should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MSBuildToolsVersionProperty()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -172,14 +171,14 @@ namespace Microsoft.Build.UnitTests.Definition
                 project.Xml.ToolsVersion = "2.0";
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual("2.0", project.GetPropertyValue("msbuildtoolsversion"));
+                Assert.Equal("2.0", project.GetPropertyValue("msbuildtoolsversion"));
 
                 project.Xml.ToolsVersion = "4.0";
-                Assert.AreEqual("2.0", project.GetPropertyValue("msbuildtoolsversion"));
+                Assert.Equal("2.0", project.GetPropertyValue("msbuildtoolsversion"));
 
                 project.ReevaluateIfNecessary();
 
-                Assert.AreEqual("4.0", project.GetPropertyValue("msbuildtoolsversion"));
+                Assert.Equal("4.0", project.GetPropertyValue("msbuildtoolsversion"));
             }
             finally
             {
