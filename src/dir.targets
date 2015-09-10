@@ -22,6 +22,9 @@
   <!-- OSS sign assemblies after compile runs. -->
   <Import Project="$(ToolsDir)\sign.targets" />
 
+  <!-- Use NuSpec.ReferenceGenerator to create / update the .NET Core dependencies of the packages -->
+  <Import Project="$(NuSpecReferenceGeneratorDir)\NuSpec.ReferenceGenerator.targets"/>
+
   <!-- Restore packages -->
   <PropertyGroup>
     <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$([System.IO.Path]::Combine($(MSBuildProjectDirectory), 'packages.config'))</PackagesConfig>

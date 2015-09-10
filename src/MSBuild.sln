@@ -49,6 +49,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableTask", "..\Samples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreCompileTest", "..\Samples\NetCoreCompileTest\NetCoreCompileTest.csproj", "{11B5D53E-90E4-4BD5-9883-B5921F7DE854}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{144F834D-9344-42E1-919D-4D1951F3E281}"
+	ProjectSection(SolutionItems) = preProject
+		nuget\Microsoft.Build.Framework.nuspec = nuget\Microsoft.Build.Framework.nuspec
+		nuget\Microsoft.Build.Tasks.Core.nuspec = nuget\Microsoft.Build.Tasks.Core.nuspec
+		nuget\Microsoft.Build.Utilities.Core.nuspec = nuget\Microsoft.Build.Utilities.Core.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
