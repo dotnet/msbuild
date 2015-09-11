@@ -15,8 +15,15 @@
       This package includes APIs that support writing MSBuild tasks.
     </description>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Microsoft.Build.Utilities.Core" targetFramework="net45" />
+    </frameworkAssemblies>
     <dependencies>
+      <group targetFramework="net45">
+        <dependency id="Microsoft.Build.Framework" />
+      </group>
       <group targetFramework="dotnet">
+        <dependency id="Microsoft.Build.Framework" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.0" />
         <dependency id="Microsoft.Win32.Registry" version="4.0.0-beta-23109" />
         <dependency id="System.Collections" version="4.0.10" />
@@ -52,5 +59,6 @@
   </metadata>
   <files>
     <file src="Microsoft.Build.Utilities.Core.dll" target="lib\dotnet" />
+    <file src="_._" target="lib\net45" />
   </files>
 </package>

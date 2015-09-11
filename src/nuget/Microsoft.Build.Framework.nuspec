@@ -10,12 +10,16 @@
     <licenseUrl>http://go.microsoft.com/fwlink/?LinkId=329770</licenseUrl>
     <projectUrl>http://go.microsoft.com/fwlink/?LinkId=518631</projectUrl>
     <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
-    <summary>MSBuild APIs for .NET Core</summary>
+    <summary>MSBuild APIs</summary>
     <description>
       This package includes APIs that support writing MSBuild tasks.
     </description>
     <copyright>Copyright © Microsoft Corporation</copyright>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Microsoft.Build.Framework" targetFramework="net45" />
+    </frameworkAssemblies>
     <dependencies>
+      <group targetFramework="net45" />
       <group targetFramework="dotnet">
         <dependency id="System.Collections" version="4.0.10" />
         <dependency id="System.Diagnostics.Debug" version="4.0.10" />
@@ -29,5 +33,6 @@
   </metadata>
   <files>
     <file src="Microsoft.Build.Framework.dll" target="lib\dotnet" />
+    <file src="_._" target="lib\net45" />
   </files>
 </package>

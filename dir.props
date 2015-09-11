@@ -46,6 +46,15 @@
     <ProjectPackagesConfigFile>$(NuGetConfigFile)</ProjectPackagesConfigFile>
   </PropertyGroup>
   
+  <!-- Copy the "_._" file to the output directory, which is used by the NuSpecs to indicate an empty folder -->
+  <ItemGroup>
+    <None Include="$(SourceDir)\nuget\_._">
+      <Link>_._</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+  </ItemGroup>
+  
   <!-- Set default Configuration and Platform -->
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' ==''">Debug</Configuration>
