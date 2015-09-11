@@ -16,7 +16,7 @@
   <PropertyGroup>
     <BuildToolsVersion>1.0.25-prerelease-00080</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
-    <XunitVersion>2.1.0-beta4-build3109</XunitVersion>
+    <XunitVersion>2.1.0-rc1-build3168</XunitVersion>
 
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
     <SourceDir>$(ProjectDir)src\</SourceDir>

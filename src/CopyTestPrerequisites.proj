@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="CopyPrerequisites" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\dir.props" />
+
+  <!-- Copy Roslyn Compiler tools to the output path (so we have csc.exe, etc) -->
+  <Target Name="CopyCompilerTools">
+    <ItemGroup>
+      <CompilerToolsFiles Include="$(CompilerToolsDir)\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CompilerToolsFiles)"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyXunitConfiguration">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)xunit.runner.json"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyPrerequisites"
+          DependsOnTargets="CopyCompilerTools;CopyXunitConfiguration" />
+
+</Project>
