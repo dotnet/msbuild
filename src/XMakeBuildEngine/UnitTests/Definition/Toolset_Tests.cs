@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
                 else
                 {
-                    Assert.True(false, "Sub-toolset {0} was lost in translation.", key);
+                    Assert.True(false, string.Format("Sub-toolset {0} was lost in translation.", key));
                 }
             }
 

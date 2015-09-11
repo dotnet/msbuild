@@ -274,7 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     if (!metadataFromY.Contains(metadataName))
                     {
-                        Assert.True(false, "Only one item contains the '{0}' metadata", metadataName.ToString());
+                        Assert.True(false, string.Format("Only one item contains the '{0}' metadata", metadataName));
                     }
                     else
                     {

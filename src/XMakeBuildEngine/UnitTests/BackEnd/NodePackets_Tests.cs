@@ -305,7 +305,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     break;
 
                 default:
-                    Assert.True(false, "Unexpected logging event type {0}", left.EventType);
+                    Assert.True(false, string.Format("Unexpected logging event type {0}", left.EventType));
                     break;
             }
         }
