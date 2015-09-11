@@ -13,21 +13,21 @@ namespace Microsoft.Build.UnitTests
 {
     public class ConfigureableForwardingLogger_Tests
     {
-        private static BuildFinishedEventArgs s_buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
-        private static BuildStartedEventArgs s_buildStarted = new BuildStartedEventArgs("Message", "Help");
-        private static BuildMessageEventArgs s_lowMessage = new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low);
-        private static BuildMessageEventArgs s_normalMessage = new BuildMessageEventArgs("Message2", "help", "sender", MessageImportance.Normal);
-        private static BuildMessageEventArgs s_highMessage = new BuildMessageEventArgs("Message3", "help", "sender", MessageImportance.High);
-        private static TaskStartedEventArgs s_taskStarted = new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName");
-        private static TaskFinishedEventArgs s_taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
-        private static TaskCommandLineEventArgs s_commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
-        private static BuildWarningEventArgs s_warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-        private static BuildErrorEventArgs s_error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-        private static TargetStartedEventArgs s_targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
-        private static TargetFinishedEventArgs s_targetFinished = new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true);
-        private static ProjectStartedEventArgs s_projectStarted = new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null);
-        private static ProjectFinishedEventArgs s_projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
-        private static ExternalProjectStartedEventArgs s_externalStartedEvent = new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames");
+        private BuildFinishedEventArgs s_buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
+        private BuildStartedEventArgs s_buildStarted = new BuildStartedEventArgs("Message", "Help");
+        private BuildMessageEventArgs s_lowMessage = new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low);
+        private BuildMessageEventArgs s_normalMessage = new BuildMessageEventArgs("Message2", "help", "sender", MessageImportance.Normal);
+        private BuildMessageEventArgs s_highMessage = new BuildMessageEventArgs("Message3", "help", "sender", MessageImportance.High);
+        private TaskStartedEventArgs s_taskStarted = new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName");
+        private TaskFinishedEventArgs s_taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
+        private TaskCommandLineEventArgs s_commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
+        private BuildWarningEventArgs s_warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+        private BuildErrorEventArgs s_error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+        private TargetStartedEventArgs s_targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
+        private TargetFinishedEventArgs s_targetFinished = new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true);
+        private ProjectStartedEventArgs s_projectStarted = new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null);
+        private ProjectFinishedEventArgs s_projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
+        private ExternalProjectStartedEventArgs s_externalStartedEvent = new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames");
 
         internal class TestForwardingLogger : ConfigurableForwardingLogger
         {
@@ -42,8 +42,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [ClassInitialize]
-        public static void FixtureSetup(TestContext testContext)
+        public ConfigureableForwardingLogger_Tests()
         {
             BuildEventContext context = new BuildEventContext(1, 2, 3, 4);
             s_error.BuildEventContext = context;
