@@ -258,16 +258,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IDictionary metadataFromX = x.CloneCustomMetadata();
                 IDictionary metadataFromY = y.CloneCustomMetadata();
 
-                if (x == null && y == null)
-                {
-                    return;
-                }
-
-                if (x == null || y == null)
-                {
-                    Assert.True(false, "The two items are not equal -- one of them is null");
-                }
-
                 Assert.Equal(metadataFromX.Count, metadataFromY.Count);
 
                 foreach (object metadataName in metadataFromX.Keys)
