@@ -245,7 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 Assert.True(false, "One threw KNF exception, the other didn't");
             }
 
-            Assert.Equal(result1, result2, "One returned {0} the other {1}", result1, result2);
+            Assert.Equal<R>(result1, result2); // "One returned {0} the other {1}", result1, result2
         }
 
         /// <summary>
