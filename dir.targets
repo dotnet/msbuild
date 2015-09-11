@@ -49,8 +49,8 @@
 
   <Target Name="_CopyCompilers" AfterTargets="_RestoreBuildTools" Condition="'$(UseRoslynCompilers)' == 'true'">
     <ItemGroup>
-      <BuildFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\build\*" />
-      <ToolsFiles Include="$(PackagesDir)Microsoft.Net.ToolsetCompilers*\tools\*" />
+      <BuildFiles Include="$(PackagesDir)Microsoft.Net.Compilers*\build\*" />
+      <ToolsFiles Include="$(PackagesDir)Microsoft.Net.Compilers*\tools\*" />
     </ItemGroup>
     
     <Copy
@@ -94,4 +94,5 @@
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
   </Target>
 
+  <Import Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props" /> 
 </Project>

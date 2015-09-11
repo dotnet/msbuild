@@ -195,6 +195,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.AreEqual(clone["test"], "2");
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Serialize basic case
         /// </summary>
@@ -242,5 +243,6 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 Assert.AreEqual(typeof(MSBuildNameIgnoreCaseComparer), dictionary2.Comparer.GetType());
             }
         }
+#endif
     }
 }

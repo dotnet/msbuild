@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if FEATURE_XML_SCHEMA_VALIDATION
 using System;
 using System.IO;
 using System.Reflection;
@@ -369,3 +370,4 @@ namespace Microsoft.Build.UnitTests
         #endregion // Helper Functions
     }
 }
+#endif

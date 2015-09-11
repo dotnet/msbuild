@@ -34,7 +34,11 @@ namespace Microsoft.Build.UnitTests
             string shellName;
             if (NativeMethodsShared.IsWindows)
             {
+#if FEATURE_SPECIAL_FOLDERS
                 expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+#else
+                expectedCmdPath = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "cmd.exe");
+#endif
                 shellName = "cmd.exe";
             }
             else
