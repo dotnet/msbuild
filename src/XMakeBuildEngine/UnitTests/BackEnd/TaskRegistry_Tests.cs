@@ -29,10 +29,102 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
+    public class TaskAssemblyFixture : IDisposable
+    {
+        public string TestTaskLocation { get; }
+
+        /// <summary>
+        /// Set up this test class -- generate the test task assembly used by 
+        /// several of the tests. 
+        /// </summary>
+        public TaskAssemblyFixture()
+        {
+            TestTaskLocation = GetTestTaskAssemblyLocation();
+        }
+
+        /// <summary>
+        /// Clean this test class up -- make sure the test task assembly we 
+        /// generated has been deleted. 
+        /// </summary>
+        public void Dispose()
+        {
+            if (File.Exists(TestTaskLocation))
+            {
+                FileUtilities.DeleteNoThrow(TestTaskLocation);
+            }
+        }
+
+        /// <summary>
+        /// Generates a test task assembly containing a single task named "TestTask"
+        /// and returns the path to that assembly.  
+        /// </summary>
+        private static string GetTestTaskAssemblyLocation()
+        {
+            string codeFile = null;
+            string outputFile = Path.Combine(Path.GetTempPath(), "TaskRegistryTests_TestTask.dll");
+            string codeContent = @"
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+
+namespace TestTask
+{
+    public class TestTask : Task
+    {
+        public override bool Execute()
+        {
+            return true;
+        }
+    }
+}";
+
+            File.Delete(outputFile);
+            bool succeeded = true;
+
+            try
+            {
+                codeFile = FileUtilities.GetTemporaryFile();
+                File.WriteAllText(codeFile, codeContent);
+                Csc csc = new Csc();
+                csc.BuildEngine = new MockEngine();
+                csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
+                csc.OutputAssembly = new TaskItem(outputFile);
+                csc.References = new ITaskItem[] { new TaskItem("Microsoft.Build.Framework.dll"), new TaskItem("Microsoft.Build.Utilities.Core.dll") };
+                csc.Platform = "AnyCPU";
+                csc.TargetType = "Library";
+                csc.Prefer32Bit = false;
+                succeeded = csc.Execute();
+            }
+            catch (Exception)
+            {
+                if (File.Exists(outputFile))
+                {
+                    FileUtilities.DeleteNoThrow(outputFile);
+                }
+
+                // now rethrow
+                throw;
+            }
+            finally
+            {
+                File.Delete(codeFile);
+            }
+
+            if (succeeded)
+            {
+                return outputFile;
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+
     /// <summary>
     /// Test the task registry
     /// </summary>
-    public class TaskRegistry_Tests
+    public class TaskRegistry_Tests : IClassFixture<TaskAssemblyFixture>
     {
         /// <summary>
         /// Name of the test task built into the test 
@@ -70,27 +162,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static ElementLocation s_elementLocation = ElementLocation.Create("c:\\project.proj", 0, 0);
 
-        /// <summary>
-        /// Set up this test class -- generate the test task assembly used by 
-        /// several of the tests. 
-        /// </summary>
-        [ClassInitialize]
-        public static void SetupClass(TestContext context)
+        public TaskRegistry_Tests(TaskAssemblyFixture fixture)
         {
-            s_testTaskLocation = GetTestTaskAssemblyLocation();
-        }
-
-        /// <summary>
-        /// Clean this test class up -- make sure the test task assembly we 
-        /// generated has been deleted. 
-        /// </summary>
-        [ClassCleanup]
-        public static void CleanupClass()
-        {
-            if (File.Exists(s_testTaskLocation))
-            {
-                FileUtilities.DeleteNoThrow(s_testTaskLocation);
-            }
+            s_testTaskLocation = fixture.TestTaskLocation;
         }
 
         /// <summary>
@@ -1989,71 +2063,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             element.AddUsingTaskBody(evaluate, body);
             elementList.Add(element);
             return elementList;
-        }
-
-        /// <summary>
-        /// Generates a test task assembly containing a single task named "TestTask"
-        /// and returns the path to that assembly.  
-        /// </summary>
-        private static string GetTestTaskAssemblyLocation()
-        {
-            string codeFile = null;
-            string outputFile = Path.Combine(Path.GetTempPath(), "TaskRegistryTests_TestTask.dll");
-            string codeContent = @"
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-
-namespace TestTask
-{
-    public class TestTask : Task
-    {
-        public override bool Execute()
-        {
-            return true;
-        }
-    }
-}";
-
-            File.Delete(outputFile);
-            bool succeeded = true;
-
-            try
-            {
-                codeFile = FileUtilities.GetTemporaryFile();
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine();
-                csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.References = new ITaskItem[] { new TaskItem("Microsoft.Build.Framework.dll"), new TaskItem("Microsoft.Build.Utilities.Core.dll") };
-                csc.Platform = "AnyCPU";
-                csc.TargetType = "Library";
-                csc.Prefer32Bit = false;
-                succeeded = csc.Execute();
-            }
-            catch (Exception)
-            {
-                if (File.Exists(outputFile))
-                {
-                    FileUtilities.DeleteNoThrow(outputFile);
-                }
-
-                // now rethrow
-                throw;
-            }
-            finally
-            {
-                File.Delete(codeFile);
-            }
-
-            if (succeeded)
-            {
-                return outputFile;
-            }
-            else
-            {
-                return null;
-            }
         }
 
         /// <summary>
