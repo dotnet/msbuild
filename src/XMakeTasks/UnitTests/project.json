@@ -1,0 +1,13 @@
+﻿{
+  "dependencies": {
+    "xunit": "2.1.0-rc1-build3168",
+    "xunit.runner.visualstudio": "2.1.0-rc1-build1124"
+  },
+  "frameworks": {
+    "net451": {},
+    "net46": {}
+  },
+  "runtimes": {
+    "win-": {}
+  }
+}
