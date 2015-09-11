@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
                 Assert.NotNull(createdTask);
-                Assert.IsNotInstanceOfType(createdTask, typeof(TaskHostTask));
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
                 Assert.NotNull(createdTask);
-                Assert.IsNotInstanceOfType(createdTask, typeof(TaskHostTask));
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -319,7 +319,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
                 Assert.NotNull(createdTask);
-                Assert.IsNotInstanceOfType(createdTask, typeof(TaskHostTask));
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
                 Assert.NotNull(createdTask);
-                Assert.IsNotInstanceOfType(createdTask, typeof(TaskHostTask));
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
                 Assert.NotNull(createdTask);
-                Assert.IsNotInstanceOfType(createdTask, typeof(TaskHostTask));
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
                 Assert.NotNull(createdTask);
-                Assert.IsNotInstanceOfType(createdTask, typeof(TaskHostTask));
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {
@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // #1: don't launch task host
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
                 Assert.NotNull(createdTask);
-                Assert.IsNotInstanceOfType(createdTask, typeof(TaskHostTask));
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {

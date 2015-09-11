@@ -451,7 +451,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance second = first.DeepCopy();
 
             // Task registry object should be immutable
-            Assert.ReferenceEquals(first.TaskRegistry, second.TaskRegistry);
+            Assert.Same(first.TaskRegistry, second.TaskRegistry);
         }
 
         /// <summary>
