@@ -12,16 +12,14 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CreateProperty_Tests
+    sealed public class CreateProperty_Tests : IDisposable
     {
-        [TestInitialize]
-        public void SetUp()
+        public CreateProperty_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }

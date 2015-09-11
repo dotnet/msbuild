@@ -21,8 +21,7 @@ namespace Microsoft.Build.UnitTests
         private MockEngine _mockEngine = null;
         private MockFileExists _mockExists = null;
 
-        [TestInitialize]
-        public void Setup()
+        public SdkToolsPathUtility_Tests()
         {
             // Create a delegate helper to make the testing of a method which uses a lot of fileExists a bit easier
             _mockExists = new MockFileExists(_defaultSdkToolsPath);

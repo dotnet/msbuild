@@ -23,7 +23,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
-    public class ResolveAssemblyReferenceTestFixture
+    public class ResolveAssemblyReferenceTestFixture : IDisposable
     {
         // Create the mocks.
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
@@ -166,14 +166,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 </FileList>"
 ;
 
-        [TestInitialize]
-        public void Setup()
+        public ResolveAssemblyReferenceTestFixture()
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", "1");
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        public void Dispose()
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", null);
         }
