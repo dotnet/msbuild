@@ -39,8 +39,8 @@ namespace Microsoft.Build.Tasks.Unittest
 
             // Assert
             Assert.True(redirectResults.ExecuteResult);
-            StringAssert.Contains(redirectResults.TargetAppConfigContent, "<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
-            StringAssert.Contains(redirectResults.TargetAppConfigContent, "newVersion=\"40.0.0.0\"");
+            Assert.Contains("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />", redirectResults.TargetAppConfigContent);
+            Assert.Contains("newVersion=\"40.0.0.0\"", redirectResults.TargetAppConfigContent);
         }
 
         /// <summary>
@@ -72,8 +72,8 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            StringAssert.Contains(redirectResults.TargetAppConfigContent, "MyAssembly");
-            StringAssert.Contains(redirectResults.TargetAppConfigContent, "<bindingRedirect oldVersion=\"0.0.0.0-40.0.0.0\" newVersion=\"40.0.0.0\"");
+            Assert.Contains("MyAssembly", redirectResults.TargetAppConfigContent );
+            Assert.Contains("<bindingRedirect oldVersion=\"0.0.0.0-40.0.0.0\" newVersion=\"40.0.0.0\"", redirectResults.TargetAppConfigContent);
         }
 
         /// <summary>
@@ -118,11 +118,11 @@ namespace Microsoft.Build.Tasks.Unittest
             Assert.True(redirectResults.ExecuteResult);
             // Naive check that target app.config contains custom redirects.
             // Output config should have max versions for both serviceBus and webhttp assemblies.
-            StringAssert.Contains(redirectResults.TargetAppConfigContent, string.Format(CultureInfo.InvariantCulture, "oldVersion=\"0.0.0.0-{0}\"", serviceBusRedirect.MaxVersion));
-            StringAssert.Contains(redirectResults.TargetAppConfigContent, string.Format(CultureInfo.InvariantCulture, "newVersion=\"{0}\"", serviceBusRedirect.MaxVersion));
+            Assert.Contains(string.Format(CultureInfo.InvariantCulture, "oldVersion=\"0.0.0.0-{0}\"", serviceBusRedirect.MaxVersion), redirectResults.TargetAppConfigContent);
+            Assert.Contains(string.Format(CultureInfo.InvariantCulture, "newVersion=\"{0}\"", serviceBusRedirect.MaxVersion), redirectResults.TargetAppConfigContent);
 
-            StringAssert.Contains(redirectResults.TargetAppConfigContent, string.Format(CultureInfo.InvariantCulture, "oldVersion=\"0.0.0.0-{0}\"", webHttpRedirect.MaxVersion));
-            StringAssert.Contains(redirectResults.TargetAppConfigContent, string.Format(CultureInfo.InvariantCulture, "newVersion=\"{0}\"", webHttpRedirect.MaxVersion));
+            Assert.Contains(string.Format(CultureInfo.InvariantCulture, "oldVersion=\"0.0.0.0-{0}\"", webHttpRedirect.MaxVersion), redirectResults.TargetAppConfigContent);
+            Assert.Contains(string.Format(CultureInfo.InvariantCulture, "newVersion=\"{0}\"", webHttpRedirect.MaxVersion), redirectResults.TargetAppConfigContent);
 
             XElement targetAppConfig = XElement.Parse(redirectResults.TargetAppConfigContent);
             Assert.Equal(1,
