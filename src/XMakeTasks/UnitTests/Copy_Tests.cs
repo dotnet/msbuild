@@ -17,7 +17,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    public abstract class Copy_Tests
+    public abstract class Copy_Tests : IDisposable
     {
         public bool useHardLinks = false;
 
@@ -39,8 +39,7 @@ namespace Microsoft.Build.UnitTests
         /// There are a couple of environment variables that can affect the operation of the Copy
         /// task.  Make sure none of them are set. 
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public Copy_Tests()
         {
             _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES");
             _alwaysRetry = Environment.GetEnvironmentVariable("MSBUILDALWAYSRETRY");
@@ -54,8 +53,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Restore the environment variables we cleared out at the beginning of the test. 
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", _alwaysOverwriteReadOnlyFiles);
             Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", _alwaysRetry);

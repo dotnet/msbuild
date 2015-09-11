@@ -16,16 +16,14 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CallTarget_Tests
+    sealed public class CallTarget_Tests : IDisposable
     {
-        [TestInitialize]
-        public void SetUp()
+        public CallTarget_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
