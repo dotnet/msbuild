@@ -23,29 +23,24 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 {
-    /// <summary>
-    /// Test the expansion of sdk reference assemblies.
-    /// </summary>
-    public class GetSDKReferenceFilesTestFixture
+    public class FakeSdkStructure : IDisposable
     {
-        private static string s_fakeSDKStructureRoot = null;
-        private static string s_sdkDirectory = null;
-        private static string s_sdkDirectory2 = null;
-        private static MockEngine.GetStringDelegate s_resourceDelegate;
-        private static GetAssemblyName s_getAssemblyName = GetAssemblyName;
-        private static GetAssemblyRuntimeVersion s_getAssemblyRuntimeVersion = GetImageRuntimeVersion;
-        private static string s_cacheDirectory = Path.Combine(Path.GetTempPath(), "GetSDKReferenceFiles");
+        private readonly string s_fakeSDKStructureRoot;
+        public string SdkDirectory { get; }
+        public string SdkDirectory2 { get; }
 
-        [ClassInitialize]
-        public static void ClassSetup(TestContext context)
+        public FakeSdkStructure()
         {
-            s_fakeSDKStructureRoot = CreateFakeSDKReferenceAssemblyDirectory1(out s_sdkDirectory);
-            CreateFakeSDKReferenceAssemblyDirectory2(out s_sdkDirectory2);
-            s_resourceDelegate = AssemblyResources.GetString;
+            string sdkDirectory;
+            s_fakeSDKStructureRoot = CreateFakeSDKReferenceAssemblyDirectory1(out sdkDirectory);
+            SdkDirectory = sdkDirectory;
+
+            string sdkDirectory2;
+            CreateFakeSDKReferenceAssemblyDirectory2(out sdkDirectory2);
+            SdkDirectory2 = sdkDirectory2;
         }
 
-        [ClassCleanup]
-        public static void ClassCleanup()
+        public void Dispose()
         {
             if (FileUtilities.DirectoryExistsNoThrow(s_fakeSDKStructureRoot))
             {
@@ -53,9 +48,158 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             }
         }
 
-        [TestInitialize]
-        public void Setup()
+        /// <summary>
+        /// Create a fake sdk structure on disk
+        /// </summary>
+        private static string CreateFakeSDKReferenceAssemblyDirectory1(out string sdkDirectory)
         {
+            string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "FakeSDKForReferenceAssemblies");
+            sdkDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\ExtensionSDKs\\SDkWithManifest\\2.0\\");
+            string referenceAssemblyDirectoryConfigx86 = Path.Combine(sdkDirectory, "References\\Retail\\X86");
+            string referenceAssemblyDirectoryConfigx64 = Path.Combine(sdkDirectory, "References\\Retail\\X64");
+            string referenceAssemblyDirectoryConfigNeutral = Path.Combine(sdkDirectory, "References\\Retail\\Neutral");
+            string referenceAssemblyDirectoryCommonConfigNeutral = Path.Combine(sdkDirectory, "References\\CommonConfiguration\\Neutral");
+            string referenceAssemblyDirectoryCommonConfigX86 = Path.Combine(sdkDirectory, "References\\CommonConfiguration\\X86");
+            string referenceAssemblyDirectoryCommonConfigX64 = Path.Combine(sdkDirectory, "References\\CommonConfiguration\\X64");
+
+            string redistDirectoryConfigx86 = Path.Combine(sdkDirectory, "Redist\\Retail\\X86");
+            string redistDirectoryConfigx64 = Path.Combine(sdkDirectory, "Redist\\Retail\\X64");
+            string redistDirectoryConfigNeutral = Path.Combine(sdkDirectory, "Redist\\Retail\\Neutral");
+            string redistDirectoryCommonConfigNeutral = Path.Combine(sdkDirectory, "Redist\\CommonConfiguration\\Neutral");
+            string redistDirectoryCommonConfigX86 = Path.Combine(sdkDirectory, "Redist\\CommonConfiguration\\X86");
+            string redistDirectoryCommonConfigX64 = Path.Combine(sdkDirectory, "Redist\\CommonConfiguration\\X64");
+
+            string designTimeDirectoryConfigx86 = Path.Combine(sdkDirectory, "DesignTime\\Retail\\X86");
+            string designTimeDirectoryConfigNeutral = Path.Combine(sdkDirectory, "DesignTime\\Retail\\Neutral");
+            string designTimeDirectoryCommonConfigNeutral = Path.Combine(sdkDirectory, "DesignTime\\CommonConfiguration\\Neutral");
+            string designTimeDirectoryCommonConfigX86 = Path.Combine(sdkDirectory, "DesignTime\\CommonConfiguration\\X86");
+
+            Directory.CreateDirectory(testDirectoryRoot);
+            Directory.CreateDirectory(sdkDirectory);
+
+            Directory.CreateDirectory(referenceAssemblyDirectoryConfigx86);
+            Directory.CreateDirectory(referenceAssemblyDirectoryConfigx64);
+            Directory.CreateDirectory(referenceAssemblyDirectoryConfigNeutral);
+            Directory.CreateDirectory(referenceAssemblyDirectoryCommonConfigNeutral);
+            Directory.CreateDirectory(referenceAssemblyDirectoryCommonConfigX86);
+            Directory.CreateDirectory(referenceAssemblyDirectoryCommonConfigX64);
+
+            Directory.CreateDirectory(redistDirectoryConfigx86);
+            Directory.CreateDirectory(redistDirectoryConfigx64);
+            Directory.CreateDirectory(redistDirectoryConfigNeutral);
+            Directory.CreateDirectory(Path.Combine(redistDirectoryConfigNeutral, "ASubDirectory\\TwoDeep"));
+            Directory.CreateDirectory(redistDirectoryCommonConfigNeutral);
+            Directory.CreateDirectory(redistDirectoryCommonConfigX86);
+            Directory.CreateDirectory(redistDirectoryCommonConfigX64);
+
+            Directory.CreateDirectory(designTimeDirectoryConfigx86);
+            Directory.CreateDirectory(designTimeDirectoryConfigNeutral);
+            Directory.CreateDirectory(designTimeDirectoryCommonConfigNeutral);
+            Directory.CreateDirectory(designTimeDirectoryCommonConfigX86);
+
+            string testWinMD = Path.Combine(referenceAssemblyDirectoryConfigx86, "A.winmd");
+            string testWinMD64 = Path.Combine(referenceAssemblyDirectoryConfigx64, "A.winmd");
+            string testWinMDNeutral = Path.Combine(referenceAssemblyDirectoryConfigNeutral, "B.winmd");
+            string testWinMDNeutralWinXML = Path.Combine(referenceAssemblyDirectoryConfigNeutral, "B.xml");
+            string testWinMDCommonConfigurationx86 = Path.Combine(referenceAssemblyDirectoryCommonConfigX86, "C.winmd");
+            string testWinMDCommonConfigurationx64 = Path.Combine(referenceAssemblyDirectoryCommonConfigX64, "C.winmd");
+            string testWinMDCommonConfigurationNeutral = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "D.winmd");
+            string testWinMDCommonConfigurationNeutralDupe = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "A.winmd");
+
+            string testRA = Path.Combine(referenceAssemblyDirectoryConfigx86, "E.dll");
+            string testRA64 = Path.Combine(referenceAssemblyDirectoryConfigx64, "E.dll");
+            string testRANeutral = Path.Combine(referenceAssemblyDirectoryConfigNeutral, "F.dll");
+            string testRACommonConfigurationx86 = Path.Combine(referenceAssemblyDirectoryCommonConfigX86, "G.dll");
+            string testRACommonConfigurationx64 = Path.Combine(referenceAssemblyDirectoryCommonConfigX64, "G.dll");
+            string testRACommonConfigurationNeutral = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "H.dll");
+            // Make duplicate of winmd but change to dll extenson so that we can make sure that we eliminate duplicate file names.
+            string testRACommonConfigurationNeutralDupe = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "A.dll");
+
+            string redist = Path.Combine(redistDirectoryConfigx86, "A.dll");
+            string redist64 = Path.Combine(redistDirectoryConfigx64, "A.dll");
+            string redistNeutral = Path.Combine(redistDirectoryConfigNeutral, "ASubDirectory\\TwoDeep\\B.dll");
+            string redistNeutralPri = Path.Combine(redistDirectoryConfigNeutral, "B.pri");
+            string redistCommonConfigurationx86 = Path.Combine(redistDirectoryCommonConfigX86, "C.dll");
+            string redistCommonConfigurationx64 = Path.Combine(redistDirectoryCommonConfigX64, "C.dll");
+            string redistCommonConfigurationNeutral = Path.Combine(redistDirectoryCommonConfigNeutral, "D.dll");
+            string redistCommonConfigurationNeutralDupe = Path.Combine(redistDirectoryCommonConfigNeutral, "A.dll");
+
+
+            File.WriteAllText(testWinMDNeutralWinXML, "TestXml");
+            File.WriteAllText(testWinMD, "TestWinmd");
+            File.WriteAllText(testWinMD64, "TestWinmd");
+            File.WriteAllText(testWinMDNeutral, "TestWinmd");
+            File.WriteAllText(testWinMDCommonConfigurationNeutral, "TestWinmd");
+            File.WriteAllText(testWinMDCommonConfigurationx86, "TestWinmd");
+            File.WriteAllText(testWinMDCommonConfigurationx64, "TestWinmd");
+            File.WriteAllText(testWinMDCommonConfigurationNeutralDupe, "TestWinmd");
+            File.WriteAllText(testRA, "TestWinmd");
+            File.WriteAllText(testRA64, "TestWinmd");
+            File.WriteAllText(testRANeutral, "TestWinmd");
+            File.WriteAllText(testRACommonConfigurationNeutral, "TestWinmd");
+            File.WriteAllText(testRACommonConfigurationx86, "TestWinmd");
+            File.WriteAllText(testRACommonConfigurationx64, "TestWinmd");
+            File.WriteAllText(testRACommonConfigurationNeutralDupe, "TestWinmd");
+
+            File.WriteAllText(redist, "TestWinmd");
+            File.WriteAllText(redist64, "TestWinmd");
+            File.WriteAllText(redistNeutral, "TestWinmd");
+            File.WriteAllText(redistNeutralPri, "TestWinmd");
+            File.WriteAllText(redistCommonConfigurationNeutral, "TestWinmd");
+            File.WriteAllText(redistCommonConfigurationx86, "TestWinmd");
+            File.WriteAllText(redistCommonConfigurationx64, "TestWinmd");
+            File.WriteAllText(redistCommonConfigurationNeutralDupe, "TestWinmd");
+
+            return testDirectoryRoot;
+        }
+
+        /// <summary>
+        /// Create a fake sdk structure on disk
+        /// </summary>
+        private static string CreateFakeSDKReferenceAssemblyDirectory2(out string sdkDirectory)
+        {
+            string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "FakeSDKForReferenceAssemblies");
+            sdkDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\ExtensionSDKs\\AnotherSDK\\2.0\\");
+            string referenceAssemblyDirectoryConfigx86 = Path.Combine(sdkDirectory, "References\\Retail\\X86");
+            string redistDirectoryConfigx86 = Path.Combine(sdkDirectory, "Redist\\Retail\\X86");
+
+            Directory.CreateDirectory(testDirectoryRoot);
+            Directory.CreateDirectory(sdkDirectory);
+
+            Directory.CreateDirectory(referenceAssemblyDirectoryConfigx86);
+            Directory.CreateDirectory(redistDirectoryConfigx86);
+
+            string testWinMD = Path.Combine(referenceAssemblyDirectoryConfigx86, "B.winmd");
+            string redist = Path.Combine(redistDirectoryConfigx86, "B.pri");
+            string redist2 = Path.Combine(redistDirectoryConfigx86, "B.dll");
+
+            File.WriteAllText(testWinMD, "TestWinmd");
+            File.WriteAllText(redist, "TestWinmd");
+            File.WriteAllText(redist2, "TestWinmd");
+
+            return testDirectoryRoot;
+        }
+    }
+
+
+    /// <summary>
+    /// Test the expansion of sdk reference assemblies.
+    /// </summary>
+    public class GetSDKReferenceFilesTestFixture : IDisposable, IClassFixture<FakeSdkStructure>
+    {
+        private readonly string s_sdkDirectory;
+        private readonly string s_sdkDirectory2;
+        private readonly MockEngine.GetStringDelegate s_resourceDelegate;
+        private readonly GetAssemblyName s_getAssemblyName = GetAssemblyName;
+        private readonly GetAssemblyRuntimeVersion s_getAssemblyRuntimeVersion = GetImageRuntimeVersion;
+        private readonly string s_cacheDirectory = Path.Combine(Path.GetTempPath(), "GetSDKReferenceFiles");
+
+        public GetSDKReferenceFilesTestFixture(FakeSdkStructure fakeSdkStructure)
+        {
+            s_sdkDirectory = fakeSdkStructure.SdkDirectory;
+            s_sdkDirectory2 = fakeSdkStructure.SdkDirectory2;
+            s_resourceDelegate = AssemblyResources.GetString;
+            
             if (FileUtilities.DirectoryExistsNoThrow(s_cacheDirectory))
             {
                 FileUtilities.DeleteDirectoryNoThrow(s_cacheDirectory, true);
@@ -64,8 +208,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Directory.CreateDirectory(s_cacheDirectory);
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        public void Dispose()
         {
             if (FileUtilities.DirectoryExistsNoThrow(s_cacheDirectory))
             {
@@ -111,30 +254,30 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             GetSDKFolders getReferenceFolders = new GetSDKFolders(ToolLocationHelper.GetSDKReferenceFolders);
             GetSDKFolders2 getReferenceFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKReferenceFolders);
 
-            VerifySDKFolders(getReferenceFolders, getReferenceFolders2, "References");
+            VerifySDKFolders(getReferenceFolders, getReferenceFolders2, "References", s_sdkDirectory);
         }
 
-        private static void VerifySDKFolders(GetSDKFolders singleParamDelegate, GetSDKFolders2 multiParamDelegate, string folderName)
+        private static void VerifySDKFolders(GetSDKFolders singleParamDelegate, GetSDKFolders2 multiParamDelegate, string folderName, string sdkDirectory)
         {
-            IList<string> sdkFolders = singleParamDelegate(s_sdkDirectory);
+            IList<string> sdkFolders = singleParamDelegate(sdkDirectory);
             Assert.Equal(2, sdkFolders.Count);
 
-            Assert.True(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
-            Assert.True(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
+            Assert.True(sdkFolders[0].Equals(Path.Combine(sdkDirectory, folderName + "\\Retail\\Neutral\\")));
+            Assert.True(sdkFolders[1].Equals(Path.Combine(sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
 
-            sdkFolders = multiParamDelegate(s_sdkDirectory, "Retail", "Neutral");
+            sdkFolders = multiParamDelegate(sdkDirectory, "Retail", "Neutral");
             Assert.Equal(2, sdkFolders.Count);
 
-            Assert.True(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
-            Assert.True(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
+            Assert.True(sdkFolders[0].Equals(Path.Combine(sdkDirectory, folderName + "\\Retail\\Neutral\\")));
+            Assert.True(sdkFolders[1].Equals(Path.Combine(sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
 
-            sdkFolders = multiParamDelegate(s_sdkDirectory, "Retail", "X86");
+            sdkFolders = multiParamDelegate(sdkDirectory, "Retail", "X86");
             Assert.Equal(4, sdkFolders.Count);
 
-            Assert.True(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\X86\\")));
-            Assert.True(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
-            Assert.True(sdkFolders[2].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\X86\\")));
-            Assert.True(sdkFolders[3].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
+            Assert.True(sdkFolders[0].Equals(Path.Combine(sdkDirectory, folderName + "\\Retail\\X86\\")));
+            Assert.True(sdkFolders[1].Equals(Path.Combine(sdkDirectory, folderName + "\\Retail\\Neutral\\")));
+            Assert.True(sdkFolders[2].Equals(Path.Combine(sdkDirectory, folderName + "\\CommonConfiguration\\X86\\")));
+            Assert.True(sdkFolders[3].Equals(Path.Combine(sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
         }
 
         /// <summary>
@@ -146,7 +289,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             GetSDKFolders getRedistFolders = new GetSDKFolders(ToolLocationHelper.GetSDKRedistFolders);
             GetSDKFolders2 getRedistFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKRedistFolders);
 
-            VerifySDKFolders(getRedistFolders, getRedistFolders2, "Redist");
+            VerifySDKFolders(getRedistFolders, getRedistFolders2, "Redist", s_sdkDirectory);
         }
 
         /// <summary>
@@ -158,7 +301,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             GetSDKFolders getDesignTimeFolders = new GetSDKFolders(ToolLocationHelper.GetSDKDesignTimeFolders);
             GetSDKFolders2 getDesignTimeFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKDesignTimeFolders);
 
-            VerifySDKFolders(getDesignTimeFolders, getDesignTimeFolders2, "DesignTime");
+            VerifySDKFolders(getDesignTimeFolders, getDesignTimeFolders2, "DesignTime", s_sdkDirectory);
         }
 
         /// <summary>
@@ -1264,138 +1407,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Create a fake sdk structure on disk
-        /// </summary>
-        private static string CreateFakeSDKReferenceAssemblyDirectory1(out string sdkDirectory)
-        {
-            string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "FakeSDKForReferenceAssemblies");
-            sdkDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\ExtensionSDKs\\SDkWithManifest\\2.0\\");
-            string referenceAssemblyDirectoryConfigx86 = Path.Combine(sdkDirectory, "References\\Retail\\X86");
-            string referenceAssemblyDirectoryConfigx64 = Path.Combine(sdkDirectory, "References\\Retail\\X64");
-            string referenceAssemblyDirectoryConfigNeutral = Path.Combine(sdkDirectory, "References\\Retail\\Neutral");
-            string referenceAssemblyDirectoryCommonConfigNeutral = Path.Combine(sdkDirectory, "References\\CommonConfiguration\\Neutral");
-            string referenceAssemblyDirectoryCommonConfigX86 = Path.Combine(sdkDirectory, "References\\CommonConfiguration\\X86");
-            string referenceAssemblyDirectoryCommonConfigX64 = Path.Combine(sdkDirectory, "References\\CommonConfiguration\\X64");
-
-            string redistDirectoryConfigx86 = Path.Combine(sdkDirectory, "Redist\\Retail\\X86");
-            string redistDirectoryConfigx64 = Path.Combine(sdkDirectory, "Redist\\Retail\\X64");
-            string redistDirectoryConfigNeutral = Path.Combine(sdkDirectory, "Redist\\Retail\\Neutral");
-            string redistDirectoryCommonConfigNeutral = Path.Combine(sdkDirectory, "Redist\\CommonConfiguration\\Neutral");
-            string redistDirectoryCommonConfigX86 = Path.Combine(sdkDirectory, "Redist\\CommonConfiguration\\X86");
-            string redistDirectoryCommonConfigX64 = Path.Combine(sdkDirectory, "Redist\\CommonConfiguration\\X64");
-
-            string designTimeDirectoryConfigx86 = Path.Combine(sdkDirectory, "DesignTime\\Retail\\X86");
-            string designTimeDirectoryConfigNeutral = Path.Combine(sdkDirectory, "DesignTime\\Retail\\Neutral");
-            string designTimeDirectoryCommonConfigNeutral = Path.Combine(sdkDirectory, "DesignTime\\CommonConfiguration\\Neutral");
-            string designTimeDirectoryCommonConfigX86 = Path.Combine(sdkDirectory, "DesignTime\\CommonConfiguration\\X86");
-
-            Directory.CreateDirectory(testDirectoryRoot);
-            Directory.CreateDirectory(sdkDirectory);
-
-            Directory.CreateDirectory(referenceAssemblyDirectoryConfigx86);
-            Directory.CreateDirectory(referenceAssemblyDirectoryConfigx64);
-            Directory.CreateDirectory(referenceAssemblyDirectoryConfigNeutral);
-            Directory.CreateDirectory(referenceAssemblyDirectoryCommonConfigNeutral);
-            Directory.CreateDirectory(referenceAssemblyDirectoryCommonConfigX86);
-            Directory.CreateDirectory(referenceAssemblyDirectoryCommonConfigX64);
-
-            Directory.CreateDirectory(redistDirectoryConfigx86);
-            Directory.CreateDirectory(redistDirectoryConfigx64);
-            Directory.CreateDirectory(redistDirectoryConfigNeutral);
-            Directory.CreateDirectory(Path.Combine(redistDirectoryConfigNeutral, "ASubDirectory\\TwoDeep"));
-            Directory.CreateDirectory(redistDirectoryCommonConfigNeutral);
-            Directory.CreateDirectory(redistDirectoryCommonConfigX86);
-            Directory.CreateDirectory(redistDirectoryCommonConfigX64);
-
-            Directory.CreateDirectory(designTimeDirectoryConfigx86);
-            Directory.CreateDirectory(designTimeDirectoryConfigNeutral);
-            Directory.CreateDirectory(designTimeDirectoryCommonConfigNeutral);
-            Directory.CreateDirectory(designTimeDirectoryCommonConfigX86);
-
-            string testWinMD = Path.Combine(referenceAssemblyDirectoryConfigx86, "A.winmd");
-            string testWinMD64 = Path.Combine(referenceAssemblyDirectoryConfigx64, "A.winmd");
-            string testWinMDNeutral = Path.Combine(referenceAssemblyDirectoryConfigNeutral, "B.winmd");
-            string testWinMDNeutralWinXML = Path.Combine(referenceAssemblyDirectoryConfigNeutral, "B.xml");
-            string testWinMDCommonConfigurationx86 = Path.Combine(referenceAssemblyDirectoryCommonConfigX86, "C.winmd");
-            string testWinMDCommonConfigurationx64 = Path.Combine(referenceAssemblyDirectoryCommonConfigX64, "C.winmd");
-            string testWinMDCommonConfigurationNeutral = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "D.winmd");
-            string testWinMDCommonConfigurationNeutralDupe = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "A.winmd");
-
-            string testRA = Path.Combine(referenceAssemblyDirectoryConfigx86, "E.dll");
-            string testRA64 = Path.Combine(referenceAssemblyDirectoryConfigx64, "E.dll");
-            string testRANeutral = Path.Combine(referenceAssemblyDirectoryConfigNeutral, "F.dll");
-            string testRACommonConfigurationx86 = Path.Combine(referenceAssemblyDirectoryCommonConfigX86, "G.dll");
-            string testRACommonConfigurationx64 = Path.Combine(referenceAssemblyDirectoryCommonConfigX64, "G.dll");
-            string testRACommonConfigurationNeutral = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "H.dll");
-            // Make duplicate of winmd but change to dll extenson so that we can make sure that we eliminate duplicate file names.
-            string testRACommonConfigurationNeutralDupe = Path.Combine(referenceAssemblyDirectoryCommonConfigNeutral, "A.dll");
-
-            string redist = Path.Combine(redistDirectoryConfigx86, "A.dll");
-            string redist64 = Path.Combine(redistDirectoryConfigx64, "A.dll");
-            string redistNeutral = Path.Combine(redistDirectoryConfigNeutral, "ASubDirectory\\TwoDeep\\B.dll");
-            string redistNeutralPri = Path.Combine(redistDirectoryConfigNeutral, "B.pri");
-            string redistCommonConfigurationx86 = Path.Combine(redistDirectoryCommonConfigX86, "C.dll");
-            string redistCommonConfigurationx64 = Path.Combine(redistDirectoryCommonConfigX64, "C.dll");
-            string redistCommonConfigurationNeutral = Path.Combine(redistDirectoryCommonConfigNeutral, "D.dll");
-            string redistCommonConfigurationNeutralDupe = Path.Combine(redistDirectoryCommonConfigNeutral, "A.dll");
-
-
-            File.WriteAllText(testWinMDNeutralWinXML, "TestXml");
-            File.WriteAllText(testWinMD, "TestWinmd");
-            File.WriteAllText(testWinMD64, "TestWinmd");
-            File.WriteAllText(testWinMDNeutral, "TestWinmd");
-            File.WriteAllText(testWinMDCommonConfigurationNeutral, "TestWinmd");
-            File.WriteAllText(testWinMDCommonConfigurationx86, "TestWinmd");
-            File.WriteAllText(testWinMDCommonConfigurationx64, "TestWinmd");
-            File.WriteAllText(testWinMDCommonConfigurationNeutralDupe, "TestWinmd");
-            File.WriteAllText(testRA, "TestWinmd");
-            File.WriteAllText(testRA64, "TestWinmd");
-            File.WriteAllText(testRANeutral, "TestWinmd");
-            File.WriteAllText(testRACommonConfigurationNeutral, "TestWinmd");
-            File.WriteAllText(testRACommonConfigurationx86, "TestWinmd");
-            File.WriteAllText(testRACommonConfigurationx64, "TestWinmd");
-            File.WriteAllText(testRACommonConfigurationNeutralDupe, "TestWinmd");
-
-            File.WriteAllText(redist, "TestWinmd");
-            File.WriteAllText(redist64, "TestWinmd");
-            File.WriteAllText(redistNeutral, "TestWinmd");
-            File.WriteAllText(redistNeutralPri, "TestWinmd");
-            File.WriteAllText(redistCommonConfigurationNeutral, "TestWinmd");
-            File.WriteAllText(redistCommonConfigurationx86, "TestWinmd");
-            File.WriteAllText(redistCommonConfigurationx64, "TestWinmd");
-            File.WriteAllText(redistCommonConfigurationNeutralDupe, "TestWinmd");
-
-            return testDirectoryRoot;
-        }
-
-        /// <summary>
-        /// Create a fake sdk structure on disk
-        /// </summary>
-        private static string CreateFakeSDKReferenceAssemblyDirectory2(out string sdkDirectory)
-        {
-            string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "FakeSDKForReferenceAssemblies");
-            sdkDirectory = Path.Combine(testDirectoryRoot, "MyPlatform\\8.0\\ExtensionSDKs\\AnotherSDK\\2.0\\");
-            string referenceAssemblyDirectoryConfigx86 = Path.Combine(sdkDirectory, "References\\Retail\\X86");
-            string redistDirectoryConfigx86 = Path.Combine(sdkDirectory, "Redist\\Retail\\X86");
-
-            Directory.CreateDirectory(testDirectoryRoot);
-            Directory.CreateDirectory(sdkDirectory);
-
-            Directory.CreateDirectory(referenceAssemblyDirectoryConfigx86);
-            Directory.CreateDirectory(redistDirectoryConfigx86);
-
-            string testWinMD = Path.Combine(referenceAssemblyDirectoryConfigx86, "B.winmd");
-            string redist = Path.Combine(redistDirectoryConfigx86, "B.pri");
-            string redist2 = Path.Combine(redistDirectoryConfigx86, "B.dll");
-
-            File.WriteAllText(testWinMD, "TestWinmd");
-            File.WriteAllText(redist, "TestWinmd");
-            File.WriteAllText(redist2, "TestWinmd");
-
-            return testDirectoryRoot;
         }
     }
 }
