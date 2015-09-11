@@ -2,23 +2,22 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Unit tests for the LC task
     /// </summary>
-    [TestClass]
     public class LC_Tests
     {
         /// <summary>
         /// Tests a simple case of valid arguments
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SimpleValidArgumentsCommandLine()
         {
             LC task = new LC();
@@ -43,7 +42,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests a simple case of valid arguments
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SimpleValidArgumentsResponseFile()
         {
             LC task = new LC();

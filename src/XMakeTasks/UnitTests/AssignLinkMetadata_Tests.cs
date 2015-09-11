@@ -4,38 +4,37 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Evaluation;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class AssignLinkMetadata_Tests
     {
         /// <summary>
         /// AssignLinkMetadata should behave nicely when no items are set to it
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoItems()
         {
             AssignLinkMetadata t = new AssignLinkMetadata();
             t.BuildEngine = new MockEngine();
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(0, t.OutputItems.Length);
+            Assert.True(success);
+            Assert.Equal(0, t.OutputItems.Length);
         }
 
         /// <summary>
         /// AssignLinkMetadata should behave nicely when there is an item with an 
         /// itemspec that contains invalid path characters.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidItemPath()
         {
             ITaskItem item = GetParentedTaskItem();
@@ -46,14 +45,14 @@ namespace Microsoft.Build.UnitTests
             t.Items = new ITaskItem[] { new TaskItem(item) };
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(0, t.OutputItems.Length);
+            Assert.True(success);
+            Assert.Equal(0, t.OutputItems.Length);
         }
 
         /// <summary>
         /// Test basic function of the AssignLinkMetadata task
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Basic()
         {
             ITaskItem item = GetParentedTaskItem();
@@ -63,13 +62,13 @@ namespace Microsoft.Build.UnitTests
             t.Items = new ITaskItem[] { new TaskItem(item) };
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(1, t.OutputItems.Length);
-            Assert.AreEqual(item.ItemSpec, t.OutputItems[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal(1, t.OutputItems.Length);
+            Assert.Equal(item.ItemSpec, t.OutputItems[0].ItemSpec);
 
             // Link metadata should have been added by the task, and OriginalItemSpec was added by the copy 
-            Assert.AreEqual(item.MetadataCount + 2, t.OutputItems[0].MetadataCount);
-            Assert.AreEqual(@"SubFolder\a.cs", t.OutputItems[0].GetMetadata("Link"));
+            Assert.Equal(item.MetadataCount + 2, t.OutputItems[0].MetadataCount);
+            Assert.Equal(@"SubFolder\a.cs", t.OutputItems[0].GetMetadata("Link"));
         }
 
         /// <summary>
@@ -77,7 +76,7 @@ namespace Microsoft.Build.UnitTests
         /// itemspec that contains invalid path characters, and still successfully 
         /// output any items that aren't problematic.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidItemPathWithOtherValidItem()
         {
             ITaskItem item1 = GetParentedTaskItem(itemSpec: "|||");
@@ -88,19 +87,19 @@ namespace Microsoft.Build.UnitTests
             t.Items = new ITaskItem[] { new TaskItem(item1), new TaskItem(item2) };
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(1, t.OutputItems.Length);
-            Assert.AreEqual(item2.ItemSpec, t.OutputItems[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal(1, t.OutputItems.Length);
+            Assert.Equal(item2.ItemSpec, t.OutputItems[0].ItemSpec);
 
             // Link metadata should have been added by the task, and OriginalItemSpec was added by the copy 
-            Assert.AreEqual(item2.MetadataCount + 2, t.OutputItems[0].MetadataCount);
-            Assert.AreEqual(@"SubFolder\a.cs", t.OutputItems[0].GetMetadata("Link"));
+            Assert.Equal(item2.MetadataCount + 2, t.OutputItems[0].MetadataCount);
+            Assert.Equal(@"SubFolder\a.cs", t.OutputItems[0].GetMetadata("Link"));
         }
 
         /// <summary>
         /// AssignLinkMetadata should not override if Link is already set
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DontOverrideLink()
         {
             ITaskItem item = GetParentedTaskItem(linkMetadata: @"SubFolder2\SubSubFolder\a.cs");
@@ -110,15 +109,15 @@ namespace Microsoft.Build.UnitTests
             t.Items = new ITaskItem[] { new TaskItem(item) };
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(0, t.OutputItems.Length);
+            Assert.True(success);
+            Assert.Equal(0, t.OutputItems.Length);
         }
 
         /// <summary>
         /// AssignLinkMetadata should not set Link if the item is outside the 
         /// defining project's cone
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OutsideDefiningProjectCone()
         {
             ITaskItem item = GetParentedTaskItem(itemSpec: @"c:\subfolder\a.cs");
@@ -128,15 +127,15 @@ namespace Microsoft.Build.UnitTests
             t.Items = new ITaskItem[] { new TaskItem(item) };
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(0, t.OutputItems.Length);
+            Assert.True(success);
+            Assert.Equal(0, t.OutputItems.Length);
         }
 
         /// <summary>
         /// AssignLinkMetadata should not set Link if the item does not know its
         /// defining project
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoDefiningProjectMetadata()
         {
             ITaskItem item = new TaskItem(@"SubFolder\a.cs");
@@ -146,8 +145,8 @@ namespace Microsoft.Build.UnitTests
             t.Items = new ITaskItem[] { item };
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(0, t.OutputItems.Length);
+            Assert.True(success);
+            Assert.Equal(0, t.OutputItems.Length);
         }
 
         /// <summary>

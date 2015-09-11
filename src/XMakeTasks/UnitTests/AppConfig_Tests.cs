@@ -7,21 +7,19 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Unit tests for the AppConfig class
     /// </summary>
-    [TestClass]
     public class AppConfig_Tests
     {
         /// <summary>
         /// A simple app.config.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Simple()
         {
             AppConfig app = new AppConfig();
@@ -40,13 +38,13 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.IsTrue(s.Contains("Dependent Assembly: Simple, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.0.0 oldVersionHigh=1.0.0.0 newVersion=2.0.0.0"));
+            Assert.True(s.Contains("Dependent Assembly: Simple, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.0.0 oldVersionHigh=1.0.0.0 newVersion=2.0.0.0"));
         }
 
         /// <summary>
         /// A simple app.config.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SimpleRange()
         {
             AppConfig app = new AppConfig();
@@ -65,13 +63,13 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.IsTrue(s.Contains("Dependent Assembly: Simple, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.0.0 oldVersionHigh=2.0.0.0 newVersion=2.0.0.0"));
+            Assert.True(s.Contains("Dependent Assembly: Simple, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.0.0 oldVersionHigh=2.0.0.0 newVersion=2.0.0.0"));
         }
 
         /// <summary>
         /// An app.config taken from rascal, that has some bindingRedirects.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RascalTest()
         {
             AppConfig app = new AppConfig();
@@ -111,15 +109,15 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.IsTrue(s.Contains("Dependent Assembly: Microsoft.VSDesigner, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=7.0.3300.0 oldVersionHigh=7.0.3300.0 newVersion=8.0.1000.0"));
-            Assert.IsTrue(s.Contains("Dependent Assembly: Microsoft.VisualStudio.Designer.Interfaces, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.3300.0 oldVersionHigh=1.0.3300.0 newVersion=1.2.3400.0"));
-            Assert.IsTrue(s.Contains("Dependent Assembly: Microsoft.VisualStudio, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.3300.0 oldVersionHigh=1.0.3300.0 newVersion=1.2.3400.0"));
+            Assert.True(s.Contains("Dependent Assembly: Microsoft.VSDesigner, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=7.0.3300.0 oldVersionHigh=7.0.3300.0 newVersion=8.0.1000.0"));
+            Assert.True(s.Contains("Dependent Assembly: Microsoft.VisualStudio.Designer.Interfaces, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.3300.0 oldVersionHigh=1.0.3300.0 newVersion=1.2.3400.0"));
+            Assert.True(s.Contains("Dependent Assembly: Microsoft.VisualStudio, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=1.0.3300.0 oldVersionHigh=1.0.3300.0 newVersion=1.2.3400.0"));
         }
 
         /// <summary>
         /// A machine.config file.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MachineConfig()
         {
             AppConfig app = new AppConfig();
@@ -175,13 +173,13 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.IsTrue(s.Contains("Dependent Assembly: Microsoft.VSDesigner, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=7.1.3300.0 oldVersionHigh=7.1.3300.0 newVersion=7.2.3300.0"));
+            Assert.True(s.Contains("Dependent Assembly: Microsoft.VSDesigner, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a oldVersionLow=7.1.3300.0 oldVersionHigh=7.1.3300.0 newVersion=7.2.3300.0"));
         }
 
         /// <summary>
         /// Make sure that only dependent assemblies under the configuration-->runtime tag work.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Regress339840_DependentAssemblyUnderAlienTag()
         {
             AppConfig app = new AppConfig();
@@ -200,7 +198,7 @@ namespace Microsoft.Build.UnitTests
 
             string s = Summarize(app);
 
-            Assert.IsTrue(s.Contains("Dependent Assembly"));
+            Assert.True(s.Contains("Dependent Assembly"));
         }
 
 

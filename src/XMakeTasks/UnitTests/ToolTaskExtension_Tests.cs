@@ -5,11 +5,10 @@ using System;
 using System.Reflection;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class ToolTaskExtensionTests
     {
         /// <summary>
@@ -17,7 +16,7 @@ namespace Microsoft.Build.UnitTests
         /// With moving ToolTask into Utilities, tasks inheriting from it now have to deal with 3 (THREE!) resource streams,
         /// which has a lot of potential for breaking. Make sure that tasks can access all of them using the correct logger helpers.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestResourceAccess()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
@@ -50,51 +49,53 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the above method actually tests something, that is make sure that non-existent resources throw
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void ResourceAccessSanityCheck()
         {
-            MyToolTaskExtension t = new MyToolTaskExtension();
-            MockEngine engine = new MockEngine();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                MyToolTaskExtension t = new MyToolTaskExtension();
+                MockEngine engine = new MockEngine();
 
-            t.BuildEngine = engine;
-            t.Log.LogErrorFromResources("Beyond Good and Evil");
+                t.BuildEngine = engine;
+                t.Log.LogErrorFromResources("Beyond Good and Evil");
+            }
+           );
         }
-
         /// <summary>
         /// Retrieve a non-existent value but ask for a default.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetNonExistentBoolWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
-            Assert.AreEqual(5, t.GetIntParameterWithDefault("Key", 5));
+            Assert.Equal(5, t.GetIntParameterWithDefault("Key", 5));
         }
 
         /// <summary>
         /// Retrieve a value that exists, but ask for a default. We expect the
         /// real value to win.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetBoolWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = true;
 
-            Assert.AreEqual(true, t.GetBoolParameterWithDefault("Key", false));
+            Assert.Equal(true, t.GetBoolParameterWithDefault("Key", false));
         }
 
         /// <summary>
         /// Retrieve a value that exists, but ask for a default. We expect the
         /// real value to win.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetIntWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = 5;
 
-            Assert.AreEqual(5, t.GetIntParameterWithDefault("Key", 9));
+            Assert.Equal(5, t.GetIntParameterWithDefault("Key", 9));
         }
 
         private class MyToolTaskExtension : ToolTaskExtension
