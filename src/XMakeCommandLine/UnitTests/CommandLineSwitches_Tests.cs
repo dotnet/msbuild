@@ -16,8 +16,7 @@ namespace Microsoft.Build.UnitTests
 {
     public class CommandLineSwitchesTests
     {
-        [ClassInitialize]
-        public static void Setup(TestContext testContext)
+        public CommandLineSwitchesTests()
         {
             // Make sure resources are initialized
             MSBuildApp.Initialize();
