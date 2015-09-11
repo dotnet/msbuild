@@ -22,18 +22,16 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    public class TargetUpToDateChecker_Tests
+    public class TargetUpToDateChecker_Tests : IDisposable
     {
         private MockHost _mockHost;
 
-        [TestInitialize]
-        public void SetUp()
+        public TargetUpToDateChecker_Tests()
         {
             _mockHost = new MockHost();
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             // Remove any temp files that have been created by each test
             ObjectModelHelpers.DeleteTempProjectDirectory();

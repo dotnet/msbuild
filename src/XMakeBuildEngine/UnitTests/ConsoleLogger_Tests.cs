@@ -163,8 +163,7 @@ namespace Microsoft.Build.UnitTests
 
         private class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
 
-        [TestInitialize]
-        public void SuiteSetup()
+        public ConsoleLoggerTest()
         {
             _environment = new Dictionary<string, string>();
 

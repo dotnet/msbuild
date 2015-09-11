@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
     using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
-    public class BuildRequestEngine_Tests
+    public class BuildRequestEngine_Tests : IDisposable
     {
         private delegate void EndpointOperationDelegate(NodeEndpointInProc endpoint);
 
@@ -273,8 +273,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private int _nodeRequestId;
         private int _globalRequestId;
 
-        [TestInitialize]
-        public void SetUp()
+        public BuildRequestEngine_Tests()
         {
             _host = new MockHost();
             _nodeRequestId = 1;
@@ -292,8 +291,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ConfigureEngine(_engine);
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             if (_engine.Status != BuildRequestEngineStatus.Uninitialized)
             {

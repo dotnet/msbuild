@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// Test for the TargetEntry class used by the TargetBuilder.  This class does most of the
     /// actual work to build a target.
     /// </summary>
-    public class TargetEntry_Tests : ITargetBuilderCallback
+    public class TargetEntry_Tests : ITargetBuilderCallback, IDisposable
     {
         /// <summary>
         /// The component host.
@@ -54,8 +54,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Called prior to each test.
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public TargetEntry_Tests()
         {
             _nodeRequestId = 1;
             _host = new MockHost();
@@ -65,8 +64,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Called after each test is run.
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             File.Delete("testProject.proj");
             _host = null;

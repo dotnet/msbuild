@@ -17,21 +17,17 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class MSBuildTask_Tests
+    sealed public class MSBuildTask_Tests : IDisposable
     {
-        [TestInitialize]
-        public void SetUp()
+        public MSBuildTask_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
-
-
 
         /// <summary>
         /// If we pass in an item spec that is over the max path but it can be normalized down to something under the max path, we should still work and not

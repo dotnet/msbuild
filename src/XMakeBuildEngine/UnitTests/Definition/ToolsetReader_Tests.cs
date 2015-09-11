@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Unit tests for ToolsetReader class and its derived classes
     /// </summary>
-    public class ToolsetReaderTests
+    public class ToolsetReaderTests : IDisposable
     {
         // The registry key that is passed as the baseKey parameter to the ToolsetRegistryReader class
         private RegistryKey _testRegistryKey = null;
@@ -46,10 +46,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Reset the testRegistryKey
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public ToolsetReaderTests()
         {
-            TearDown();
+            Dispose();
             _testRegistryKey = Registry.CurrentUser.CreateSubKey(testRegistryPath);
             _currentVersionRegistryKey = Registry.CurrentUser.CreateSubKey(testRegistryPath + "\\" + Constants.AssemblyVersion);
             _toolsVersionsRegistryKey = Registry.CurrentUser.CreateSubKey(testRegistryPath + "\\ToolsVersions");
@@ -59,8 +58,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ToolsetConfigurationReaderTestHelper.CleanUp();
 

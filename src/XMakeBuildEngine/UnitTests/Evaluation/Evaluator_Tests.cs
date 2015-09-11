@@ -34,13 +34,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// <summary>
     /// Tests mainly for project evaluation
     /// </summary>
-    public class Evaluator_Tests
+    public class Evaluator_Tests : IDisposable
     {
         /// <summary>
         /// Cleanup
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public Evaluator_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             GC.Collect();
@@ -49,8 +48,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Cleanup
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             GC.Collect();

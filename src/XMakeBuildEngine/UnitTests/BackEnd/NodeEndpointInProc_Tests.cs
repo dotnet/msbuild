@@ -351,20 +351,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.NotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
         }
 
-        [TestInitialize]
-        public void SetUp()
+        public NodeEndpointInProc_Tests()
         {
             _linkStatusTable = new Dictionary<INodeEndpoint, LinkStatusContext>();
             _host = new MockHost();
         }
-
-        [TestCleanup]
-        public void TearDown()
-        {
-            _linkStatusTable = null;
-            _host = null;
-        }
-
 
         private void CallOpOnEndpoints(NodeEndpointInProc.EndpointPair pair, EndpointOperationDelegate opDelegate)
         {

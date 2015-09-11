@@ -30,19 +30,17 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    public class SolutionProjectGenerator_Tests
+    public class SolutionProjectGenerator_Tests : IDisposable
     {
         private string _originalVisualStudioVersion = null;
 
-        [TestInitialize]
-        public void Setup()
+        public SolutionProjectGenerator_Tests()
         {
             // Save off the value for use during cleanup
             _originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        public void Dispose()
         {
             // Need to make sure the environment is cleared up for later tests
             Environment.SetEnvironmentVariable("VisualStudioVersion", _originalVisualStudioVersion);

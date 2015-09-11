@@ -17,17 +17,11 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Unit tests for ToolsetConfigurationReader class
     /// </summary>
-    public class ToolsetConfigurationReaderTests
+    public class ToolsetConfigurationReaderTests : IDisposable
     {
         private static string s_msbuildToolsets = "msbuildToolsets";
 
-        [TestInitialize]
-        public void Setup()
-        {
-        }
-
-        [TestCleanup]
-        public void Teardown()
+        public void Dispose()
         {
             ToolsetConfigurationReaderTestHelper.CleanUp();
         }

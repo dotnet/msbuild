@@ -32,18 +32,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Prepares to run the test
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public ConfigurationMetadata_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-        }
-
-        /// <summary>
-        /// Tears down after the test.
-        /// </summary>
-        [TestCleanup]
-        public void TearDown()
-        {
         }
 
         /// <summary>

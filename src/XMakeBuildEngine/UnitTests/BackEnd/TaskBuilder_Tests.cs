@@ -156,21 +156,10 @@ namespace ItemCreationTask
         /// <summary>
         /// Prepares the environment for the test.
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public TaskBuilder_Tests()
         {
             _host = new MockHost();
             _testProject = CreateTestProject();
-        }
-
-        /// <summary>
-        /// Cleans up after the test
-        /// </summary>
-        [TestCleanup]
-        public void TearDown()
-        {
-            _testProject = null;
-            _host = null;
         }
 
         /*********************************************************************************

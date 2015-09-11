@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Unit test for ToolsetRegistryReader class
     /// </summary>
-    public class ToolsetRegistryReader_Tests
+    public class ToolsetRegistryReader_Tests : IDisposable
     {
         // The registry key that is passed as the baseKey parameter to the ToolsetRegistryReader class
         private RegistryKey _testRegistryKey = null;
@@ -40,8 +40,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Reset the testRegistryKey
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public ToolsetRegistryReader_Tests()
         {
             DeleteTestRegistryKey();
             _testRegistryKey = Registry.CurrentUser.CreateSubKey(testRegistryPath);
@@ -52,8 +51,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             DeleteTestRegistryKey();
 

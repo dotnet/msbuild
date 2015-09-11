@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// The test fixture for the BuildManager
     /// </summary>
-    public class BuildManager_Tests
+    public class BuildManager_Tests : IDisposable
     {
         /// <summary>
         /// The mock logger for testing.
@@ -59,8 +59,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// SetUp
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public BuildManager_Tests()
         {
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
@@ -78,8 +77,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// TearDown
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             Environment.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", null);
             if (_buildManager != null)
@@ -1207,7 +1205,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// (retrieved from the cache). 
         /// </summary>
         [Fact]
-        [Timeout(10000)] // this initially caused a hang
         public void OverlappingIdenticalBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
