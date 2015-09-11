@@ -31,9 +31,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests of the scheduler.
     /// </summary>
-    //[TestClass]
     // Ignore: Causing issues with other tests
-    public class Scheduler_Tests : IDisposable
+    // NOTE: marked as "internal" to disable the entire test class, as was done for MSTest.
+    internal class Scheduler_Tests : IDisposable
     {
         /// <summary>
         /// The host object.
