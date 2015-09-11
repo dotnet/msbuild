@@ -29,21 +29,19 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
     public class GetSDKReferenceFilesTestFixture
     {
         private static string s_fakeSDKStructureRoot = null;
-        private static string s_fakeSDKStructureRoot2 = null;
         private static string s_sdkDirectory = null;
         private static string s_sdkDirectory2 = null;
-        private static Microsoft.Build.UnitTests.MockEngine.GetStringDelegate s_resourceDelegate;
-        private static FileExists s_fileExists = new FileExists(FileUtilities.FileExistsNoThrow);
-        private static GetAssemblyName s_getAssemblyName = new GetAssemblyName(GetAssemblyName);
-        private static GetAssemblyRuntimeVersion s_getAssemblyRuntimeVersion = new GetAssemblyRuntimeVersion(GetImageRuntimeVersion);
+        private static MockEngine.GetStringDelegate s_resourceDelegate;
+        private static GetAssemblyName s_getAssemblyName = GetAssemblyName;
+        private static GetAssemblyRuntimeVersion s_getAssemblyRuntimeVersion = GetImageRuntimeVersion;
         private static string s_cacheDirectory = Path.Combine(Path.GetTempPath(), "GetSDKReferenceFiles");
 
         [ClassInitialize]
         public static void ClassSetup(TestContext context)
         {
             s_fakeSDKStructureRoot = CreateFakeSDKReferenceAssemblyDirectory1(out s_sdkDirectory);
-            s_fakeSDKStructureRoot2 = CreateFakeSDKReferenceAssemblyDirectory2(out s_sdkDirectory2);
-            s_resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
+            CreateFakeSDKReferenceAssemblyDirectory2(out s_sdkDirectory2);
+            s_resourceDelegate = AssemblyResources.GetString;
         }
 
         [ClassCleanup]
