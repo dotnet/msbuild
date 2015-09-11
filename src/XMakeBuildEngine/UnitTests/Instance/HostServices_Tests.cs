@@ -24,8 +24,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Setup
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public HostServices_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }

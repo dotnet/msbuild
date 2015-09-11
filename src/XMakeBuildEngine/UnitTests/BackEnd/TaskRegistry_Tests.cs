@@ -96,8 +96,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Setup some logging services so we can see what is goign on.
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public TaskRegistry_Tests()
         {
             s_loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1) as ILoggingService;
             s_logger = new MockLogger();

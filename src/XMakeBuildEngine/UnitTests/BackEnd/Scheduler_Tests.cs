@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     //[TestClass]
     // Ignore: Causing issues with other tests
-    public class Scheduler_Tests
+    public class Scheduler_Tests : IDisposable
     {
         /// <summary>
         /// The host object.
@@ -68,8 +68,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Set up
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public Scheduler_Tests()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default 
             // one has properly relinquished the inproc node
@@ -99,8 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tear down
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             if (_buildManager != null)
             {

@@ -61,8 +61,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Set up and initialize before each test is run
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        ///
+        public TaskHost_Tests()
         {
             LoggingServiceFactory loggingFactory = new LoggingServiceFactory(LoggerMode.Synchronous, 1);
 
@@ -89,18 +89,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _taskHost = new TaskHost(_mockHost, entry, _elementLocation, null /*Dont care about the callback either unless doing a build*/);
             _taskHost.LoggingContext = new TaskLoggingContext(_loggingService, BuildEventContext.Invalid);
-        }
-
-        /// <summary>
-        /// Clean up after each tests is run
-        /// </summary>
-        [TestCleanup]
-        public void TearDown()
-        {
-            _customLogger = null;
-            _mockHost = null;
-            _elementLocation = null;
-            _taskHost = null;
         }
 
         /// <summary>

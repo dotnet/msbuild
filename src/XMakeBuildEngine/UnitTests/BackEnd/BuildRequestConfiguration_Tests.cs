@@ -22,16 +22,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class BuildRequestConfiguration_Tests
     {
-        [TestInitialize]
-        public void SetUp()
-        {
-        }
-
-        [TestCleanup]
-        public void TearDown()
-        {
-        }
-
         [Fact]
         public void TestConstructorNullFile()
         {

@@ -47,21 +47,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Initialize a task factory
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public AssemblyTaskFactory_Tests()
         {
             SetupTaskFactory(null, false);
-        }
-
-        /// <summary>
-        /// Tear down what was created in setup
-        /// </summary>
-        [TestCleanup]
-        public void TearDownAttribute()
-        {
-            _taskFactory = null;
-            _loadInfo = null;
-            _loadedType = null;
         }
 
         #region AssemblyTaskFactory

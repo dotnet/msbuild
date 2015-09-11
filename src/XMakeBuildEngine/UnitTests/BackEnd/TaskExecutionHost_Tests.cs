@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// The test class for the TaskExecutionHost
     /// </summary>
-    public class TaskExecutionHost_Tests : ITestTaskHost, IBuildEngine2
+    public class TaskExecutionHost_Tests : ITestTaskHost, IBuildEngine2, IDisposable
     {
         /// <summary>
         /// The set of parameters which have been initialized on the task.
@@ -115,8 +115,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Prepares the environment for the test.
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public TaskExecutionHost_Tests()
         {
             InitializeHost(false);
         }
@@ -124,8 +123,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Cleans up after the test
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             if (_host != null)
             {
@@ -645,7 +643,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Dictionary<string, Tuple<string, ElementLocation>> parameters = new Dictionary<string, Tuple<string, ElementLocation>>(StringComparer.OrdinalIgnoreCase);
                 parameters["ExecuteReturnParam"] = new Tuple<string, ElementLocation>("false", ElementLocation.Create("foo.proj"));
 
-                TearDown();
+                Dispose();
                 InitializeHost(true);
 
                 Assert.True(_host.SetTaskParameters(parameters));
@@ -986,7 +984,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 _loggingService = new MockLoggingService();
-                TearDown();
+                Dispose();
                 _host = new TaskExecutionHost();
                 TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
 
@@ -1015,7 +1013,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestTaskResolutionFailureWithNoUsingTask()
         {
-            TearDown();
+            Dispose();
             _host = new TaskExecutionHost();
             TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
 

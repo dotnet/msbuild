@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
     using System.Threading.Tasks;
 
-    public class RequestBuilder_Tests
+    public class RequestBuilder_Tests : IDisposable
     {
         private AutoResetEvent _newBuildRequestsEvent;
         private BuildRequestEntry _newBuildRequests_Entry;
@@ -42,8 +42,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
-        [TestInitialize]
-        public void SetUp()
+        public RequestBuilder_Tests()
         {
             _nodeRequestId = 1;
             _host = new MockHost();
@@ -60,17 +59,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _requestBuilder.OnNewBuildRequests += this.NewBuildRequestsCallback;
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ((IBuildComponent)_requestBuilder).ShutdownComponent();
             _host = null;
-        }
-
-        [Fact]
-        public void TestConstructor()
-        {
-            // The call to Setup will test this.
         }
 
         [Fact]

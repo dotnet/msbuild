@@ -49,8 +49,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// This method is run before each test case is run.
         /// We instantiate and initialize a new logging service each time
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public LoggingService_Tests()
         {
             InitializeLoggingService();
         }

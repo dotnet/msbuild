@@ -53,15 +53,14 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         }
     }
 
-    public class SimpleScenarios
+    public class SimpleScenarios : IDisposable
     {
         /// <summary>
         /// Since we create a project with the same name in many of these tests, and two projects with 
         /// the same name cannot be loaded in a ProjectCollection at the same time, we should unload the
         /// GlobalProjectCollection (into which all of these projects are placed by default) after each test.  
         /// </summary>
-        [TestCleanup]
-        public void UnloadGlobalProjectCollection()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }

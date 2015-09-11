@@ -24,17 +24,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
     {
         private int _nodeRequestId;
 
-        [TestInitialize]
-        public void SetUp()
-        {
-            _nodeRequestId++;
-        }
-
-        [TestCleanup]
-        public void TearDown()
-        {
-        }
-
         [Fact]
         public void TestConstructorGood()
         {

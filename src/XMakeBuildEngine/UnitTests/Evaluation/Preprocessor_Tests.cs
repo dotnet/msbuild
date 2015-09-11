@@ -22,12 +22,16 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     /// <summary>
     /// Tests mainly for project preprocessing
     /// </summary>
-    public class Preprocessor_Tests
+    public class Preprocessor_Tests : IDisposable
     {
+        public Preprocessor_Tests()
+        {
+            Setup();
+        }
+
         /// <summary>
         /// Clear out the cache
         /// </summary>
-        [TestInitialize]
         public void Setup()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -37,8 +41,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Clear out the cache
         /// </summary>
-        [TestCleanup]
-        public void Teardown()
+        public void Dispose()
         {
             Setup();
         }

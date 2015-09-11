@@ -22,13 +22,12 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
     /// <summary>
     /// Tests for ProjectRootElementCache
     /// </summary>
-    public class ProjectRootElementCache_Tests
+    public class ProjectRootElementCache_Tests : IDisposable
     {
         /// <summary>
         /// Set up the test
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public ProjectRootElementCache_Tests()
         {
             // Empty the cache
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -38,8 +37,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tear down the test
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             // Empty the cache
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();

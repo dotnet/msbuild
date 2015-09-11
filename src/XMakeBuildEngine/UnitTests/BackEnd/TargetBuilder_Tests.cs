@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// This is the unit test for the TargetBuilder.  This particular test is confined to just using the
     /// actual TargetBuilder, and uses a mock TaskBuilder on which TargetBuilder depends.
     /// </summary>
-    public class TargetBuilder_Tests : IRequestBuilderCallback
+    public class TargetBuilder_Tests : IRequestBuilderCallback, IDisposable
     {
         /// <summary>
         /// The component host.
@@ -62,8 +62,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Sets up to run tests.  Creates the host object.
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public TargetBuilder_Tests()
         {
             _nodeRequestId = 1;
             _host = new MockHost();
@@ -74,8 +73,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Executed after all tests are run.
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             File.Delete("testProject.proj");
             _mockLogger = null;
