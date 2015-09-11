@@ -26,33 +26,116 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
 {
+    public class FakeSDKStructure : IDisposable
+    {
+        public string FakeSdkStructureRoot { get; }
+        public string FakeSdkStructureRoot2 { get; }
+
+        public FakeSDKStructure()
+        {
+            FakeSdkStructureRoot = FakeSDKStructure.MakeFakeSDKStructure();
+            FakeSdkStructureRoot2 = FakeSDKStructure.MakeFakeSDKStructure2();
+        }
+
+        public void Dispose()
+        {
+            if (FileUtilities.DirectoryExistsNoThrow(FakeSdkStructureRoot))
+            {
+                FileUtilities.DeleteDirectoryNoThrow(FakeSdkStructureRoot, true);
+            }
+
+            if (FileUtilities.DirectoryExistsNoThrow(FakeSdkStructureRoot2))
+            {
+                FileUtilities.DeleteDirectoryNoThrow(FakeSdkStructureRoot2, true);
+            }
+        }
+
+        /// <summary>
+        /// Make a fake SDK structure on disk for testing.
+        /// </summary>
+        private static string MakeFakeSDKStructure()
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), "FakeSDKDirectory");
+            try
+            {
+                // Good
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0"));
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0"));
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0"));
+                File.WriteAllText(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0", "sdkmanifest.xml"), "Hello");
+                File.WriteAllText(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0", "sdkmanifest.xml"), "Hello");
+                File.WriteAllText(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0", "sdkmanifest.xml"), "Hello");
+
+                //Bad because of v in the sdk version
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\FluterShy\\v1.1"));
+
+                //Bad because no extensionSDKs directory under the platform version
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v3.0\\"));
+
+                // Bad because the directory under the identifier is not a version
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\NotAVersion\\"));
+
+                // Bad because the directory under the identifier is not a version
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\NotAVersion\\ExtensionSDKs\\Assembly\\1.0"));
+
+                // Good but are in a different target platform 
+                // Doors does not have an sdk manifest but does have extensionsdks under it so they should be found
+                // when we are targeting doors
+                Directory.CreateDirectory(Path.Combine(tempPath, "Doors\\2.0\\ExtensionSDKs\\MyAssembly\\3.0"));
+                File.WriteAllText(Path.Combine(tempPath, "Doors\\2.0\\ExtensionSDKs\\MyAssembly\\3.0\\", "sdkmanifest.xml"), "Hello");
+
+                // Walls has an SDK manifest so it should be found when looking for targetplatform sdks.
+                // But it has no extensionSDKs so none should be found
+                Directory.CreateDirectory(Path.Combine(tempPath, "Walls\\1.0\\"));
+                File.WriteAllText(Path.Combine(tempPath, "Walls\\1.0\\", "sdkmanifest.xml"), "Hello");
+            }
+            catch (Exception)
+            {
+                FileUtilities.DeleteDirectoryNoThrow(tempPath, true);
+                return null;
+            }
+
+            return tempPath;
+        }
+
+        /// <summary>
+        /// Make a fake SDK structure on disk for testing.
+        /// </summary>
+        private static string MakeFakeSDKStructure2()
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), "FakeSDKDirectory2");
+            try
+            {
+                // Good
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\4.0"));
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\5.0"));
+                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\6.0"));
+                File.WriteAllText(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\4.0", "sdkmanifest.xml"), "Hello");
+                File.WriteAllText(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\5.0", "sdkmanifest.xml"), "Hello");
+                File.WriteAllText(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\6.0", "sdkmanifest.xml"), "Hello");
+            }
+            catch (Exception)
+            {
+                FileUtilities.DeleteDirectoryNoThrow(tempPath, true);
+                return null;
+            }
+
+            return tempPath;
+        }
+    }
+
     /// <summary>
     /// Test the GetInstalledSDKLocations task
     /// </summary>
-    public class GetInstalledSDKLocationsTestFixture
+    public class GetInstalledSDKLocationsTestFixture : IClassFixture<FakeSDKStructure>
     {
-        private static string s_fakeSDKStructureRoot = null;
-        private static string s_fakeSDKStructureRoot2 = null;
+        private readonly string s_fakeSDKStructureRoot;
+        private readonly string s_fakeSDKStructureRoot2;
 
-        [ClassInitialize]
-        public static void ClassSetup(TestContext context)
+        public GetInstalledSDKLocationsTestFixture(FakeSDKStructure fakeSDKStructure)
         {
-            s_fakeSDKStructureRoot = MakeFakeSDKStructure();
-            s_fakeSDKStructureRoot2 = MakeFakeSDKStructure2();
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-            if (FileUtilities.DirectoryExistsNoThrow(s_fakeSDKStructureRoot))
-            {
-                FileUtilities.DeleteDirectoryNoThrow(s_fakeSDKStructureRoot, true);
-            }
-
-            if (FileUtilities.DirectoryExistsNoThrow(s_fakeSDKStructureRoot2))
-            {
-                FileUtilities.DeleteDirectoryNoThrow(s_fakeSDKStructureRoot2, true);
-            }
+            s_fakeSDKStructureRoot = fakeSDKStructure.FakeSdkStructureRoot;
+            s_fakeSDKStructureRoot2 = fakeSDKStructure.FakeSdkStructureRoot2;
         }
 
         #region TestMethods
@@ -306,78 +389,6 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocations_Tests
             }
         }
 
-        /// <summary>
-        /// Make a fake SDK structure on disk for testing.
-        /// </summary>
-        private static string MakeFakeSDKStructure()
-        {
-            string tempPath = Path.Combine(Path.GetTempPath(), "FakeSDKDirectory");
-            try
-            {
-                // Good
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0"));
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\1.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\2.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\3.0", "sdkmanifest.xml"), "Hello");
-
-                //Bad because of v in the sdk version
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\FluterShy\\v1.1"));
-
-                //Bad because no extensionSDKs directory under the platform version
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v3.0\\"));
-
-                // Bad because the directory under the identifier is not a version
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\NotAVersion\\"));
-
-                // Bad because the directory under the identifier is not a version
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\NotAVersion\\ExtensionSDKs\\Assembly\\1.0"));
-
-                // Good but are in a different target platform 
-                // Doors does not have an sdk manifest but does have extensionsdks under it so they should be found
-                // when we are targeting doors
-                Directory.CreateDirectory(Path.Combine(tempPath, "Doors\\2.0\\ExtensionSDKs\\MyAssembly\\3.0"));
-                File.WriteAllText(Path.Combine(tempPath, "Doors\\2.0\\ExtensionSDKs\\MyAssembly\\3.0\\", "sdkmanifest.xml"), "Hello");
-
-                // Walls has an SDK manifest so it should be found when looking for targetplatform sdks.
-                // But it has no extensionSDKs so none should be found
-                Directory.CreateDirectory(Path.Combine(tempPath, "Walls\\1.0\\"));
-                File.WriteAllText(Path.Combine(tempPath, "Walls\\1.0\\", "sdkmanifest.xml"), "Hello");
-            }
-            catch (Exception)
-            {
-                FileUtilities.DeleteDirectoryNoThrow(tempPath, true);
-                return null;
-            }
-
-            return tempPath;
-        }
-
-        /// <summary>
-        /// Make a fake SDK structure on disk for testing.
-        /// </summary>
-        private static string MakeFakeSDKStructure2()
-        {
-            string tempPath = Path.Combine(Path.GetTempPath(), "FakeSDKDirectory2");
-            try
-            {
-                // Good
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\4.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\5.0"));
-                Directory.CreateDirectory(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\6.0"));
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\v1.0\\ExtensionSDKs\\MyAssembly\\4.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\1.0\\ExtensionSDKs\\MyAssembly\\5.0", "sdkmanifest.xml"), "Hello");
-                File.WriteAllText(Path.Combine(tempPath, "Windows\\2.0\\ExtensionSDKs\\MyAssembly\\6.0", "sdkmanifest.xml"), "Hello");
-            }
-            catch (Exception)
-            {
-                FileUtilities.DeleteDirectoryNoThrow(tempPath, true);
-                return null;
-            }
-
-            return tempPath;
-        }
         #endregion
     }
 }
