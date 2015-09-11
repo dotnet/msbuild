@@ -129,11 +129,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance returned = p.AddItem("i", "i1", metadata);
 
-            Assert.ReferenceEquals(returned, Helpers.MakeList(p.GetItems("i"))[0]);
+            Assert.Same(returned, Helpers.MakeList(p.GetItems("i"))[0]);
 
             foreach (ProjectItemInstance item in p.Items)
             {
-                Assert.ReferenceEquals(returned, item);
+                Assert.Same(returned, item);
                 Assert.AreEqual("i1", item.EvaluatedInclude);
                 var metadataOut = Helpers.MakeList(item.Metadata);
                 Assert.AreEqual(3, metadataOut.Count);

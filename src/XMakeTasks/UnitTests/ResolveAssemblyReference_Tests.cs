@@ -13204,7 +13204,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 ArrayList whiteListErrors2 = new ArrayList();
                 ArrayList whiteListErrorFileNames2 = new ArrayList();
                 Hashtable blackList2 = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
-                Assert.ReferenceEquals(blackList, blackList2);
+                Assert.Same(blackList, blackList2);
             }
             finally
             {
@@ -13326,7 +13326,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 List<Exception> whiteListErrors2 = new List<Exception>();
                 List<string> whiteListErrorFileNames2 = new List<string>();
                 Hashtable blackList2 = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors2, whiteListErrorFileNames2);
-                Assert.ReferenceEquals(blackList, blackList2);
+                Assert.Same(blackList, blackList2);
             }
             finally
             {

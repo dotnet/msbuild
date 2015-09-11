@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            Assert.Equal(contains, dependencyExists, message);
+            Assert.Equal(contains, dependencyExists);
         }
 
         [Fact]
@@ -255,8 +255,8 @@ namespace Microsoft.Build.UnitTests
                 ComDependencyWalker walker = new ComDependencyWalker(new MarshalReleaseComObject(MockReleaseComObject));
                 walker.AnalyzeTypeLibrary(mainTypeLib);
 
-                Assert.Equal(1, walker.EncounteredProblems.Count, "Test failed for failure point " + failurePoint.ToString());
-                Assert.Equal(failureException, walker.EncounteredProblems[0], "Test failed for failure point " + failurePoint.ToString());
+                Assert.Equal(1, walker.EncounteredProblems.Count); // "Test failed for failure point " + failurePoint.ToString()
+                Assert.Equal(failureException, walker.EncounteredProblems[0]); // "Test failed for failure point " + failurePoint.ToString()
 
                 mainTypeLib.AssertAllHandlesReleased();
                 dependencyTypeLib.AssertAllHandlesReleased();
