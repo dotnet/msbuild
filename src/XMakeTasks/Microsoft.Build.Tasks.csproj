@@ -89,6 +89,9 @@
     <Compile Include="..\Shared\HybridDictionary.cs">
       <Link>HybridDictionary.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\NativeMethodsShared.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\NGen.cs">
       <Link>NGen.cs</Link>
     </Compile>
@@ -176,9 +179,6 @@
     </Compile>
     <Compile Include="..\Shared\InternalErrorException.cs">
     </Compile>
-    <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -204,6 +204,122 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyResources.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CallTarget.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CombinePath.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CommandLineBuilderExtension.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="BuildCacheDisposeWrapper.cs" />
+    <Compile Include="FileState.cs" />
+    <Compile Include="Copy.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CreateItem.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CreateProperty.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Delegate.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Delete.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Error.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Exec.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+
+    <Compile Include="MSBuild.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="NativeMethods.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ToolTaskExtension.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ErrorFromResources.cs" />
+    <Compile Include="ExtractedClassName.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="FileIO\ReadLinesFromFile.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="FileIO\WriteLinesToFile.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="FindInList.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="FormatVersion.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="FxCopExclusions\Microsoft.Build.Tasks.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="IAnalyzerHostObject.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ICscHostObject.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ICscHostObject2.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ICscHostObject3.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ICscHostObject4.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="IVbcHostObject.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="IVbcHostObject2.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="IVbcHostObject3.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="IVbcHostObject4.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="IVbcHostObject5.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="IVbcHostObjectFreeThreaded.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="InvalidParameterValueException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ListOperators\FindUnderPath.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ListOperators\RemoveDuplicates.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="MakeDir.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Move.cs" />
+    <Compile Include="RemoveDir.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Touch.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Warning.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
   </ItemGroup>
@@ -347,16 +463,7 @@
     <Compile Include="BootstrapperUtil\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="CallTarget.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="CodeTaskFactory.cs" />
-    <Compile Include="CombinePath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CommandLineBuilderExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="ComDependencyWalker.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -381,21 +488,10 @@
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="BuildCacheDisposeWrapper.cs" />
-    <Compile Include="FileState.cs" />
-    <Compile Include="Copy.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="CreateCSharpManifestResourceName.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="CreateItem.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="CreateManifestResourceName.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CreateProperty.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="CreateVisualBasicManifestResourceName.cs">
@@ -419,48 +515,17 @@
     <Compile Include="CultureStringUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Delegate.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Delete.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="Dependencies.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="DependencyFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Error.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ErrorFromResources.cs" />
-    <Compile Include="Exec.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ExtractedClassName.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FileIO\ReadLinesFromFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FileIO\WriteLinesToFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="FindAppConfigFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FindInList.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FindInvalidProjectReferences.cs" />
     <Compile Include="FormatUrl.cs" Condition="!$(Configuration.EndsWith('MONO'))">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FormatVersion.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FxCopExclusions\Microsoft.Build.Tasks.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GenerateApplicationManifest.cs" Condition="!$(Configuration.EndsWith('MONO'))">
@@ -496,65 +561,12 @@
     <Compile Include="IComReferenceResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ICscHostObject.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ICscHostObject2.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ICscHostObject3.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ICscHostObject4.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="InstalledSDKResolver.cs" />
     <Compile Include="RCWForCurrentContext.cs" />
-    <Compile Include="InvalidParameterValueException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject2.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject3.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject4.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject5.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObjectFreeThreaded.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IAnalyzerHostObject.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="LC.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ListOperators\FindUnderPath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ListOperators\RemoveDuplicates.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="MakeDir.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="ManifestUtil\*.cs" Condition="!$(Configuration.EndsWith('MONO'))">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Move.cs" />
-    <!-- Resource Files -->
-    <Compile Include="MSBuild.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="NativeMethods.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ParserState.cs">
@@ -567,9 +579,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="RegisterAssembly.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RemoveDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResGen.cs" />
@@ -629,12 +638,6 @@
     <Compile Include="TlbReference.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ToolTaskExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Touch.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="UnregisterAssembly.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -674,9 +677,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Warning.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
   </ItemGroup>

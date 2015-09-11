@@ -16,29 +16,26 @@
   <PropertyGroup>
     <BuildToolsVersion>1.0.25-prerelease-00080</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
-
-    <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
-    <SourceDir>$(ProjectDir)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
-    <BinDir>$(ProjectDir)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
+    <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <SourceDir>$(RepoRoot)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
+    <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
-    <PackagesDir>$(ProjectDir)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
+    <PackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
     <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion),"lib"))$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+    <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(PackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
+  
+    <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
+    <SolutionDir>$(SourceDir)</SolutionDir>
   </PropertyGroup>
 
-  <!-- list of nuget package sources passed to nuget.exe -->
-  <ItemGroup>
-    <NuGetSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-buildtools" />
-    <NuGetSourceList Include="https:%2F%2Fwww.nuget.org/api/v2" />
-  </ItemGroup>
-  
   <!-- Common nuget properties -->
   <PropertyGroup>
     <NuGetDir>$(PackagesDir)</NuGetDir>
     <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
     <NuGetConfigFile>$([System.IO.Path]::Combine($(SourceDir),".nuget","NuGet.Config"))</NuGetConfigFile>
-    <NuGetPackageSource>@(NuGetSourceList -> '-source %(Identity)', ' ')</NuGetPackageSource>
-    <NuGetConfigCommandLine>$(NuGetPackageSource) -ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
+    <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
     <NugetRestoreCommand>$(NugetRestoreCommand) install</NugetRestoreCommand>
@@ -48,6 +45,15 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
     <ProjectPackagesConfigFile>$(NuGetConfigFile)</ProjectPackagesConfigFile>
   </PropertyGroup>
+  
+  <!-- Copy the "_._" file to the output directory, which is used by the NuSpecs to indicate an empty folder -->
+  <ItemGroup>
+    <None Include="$(SourceDir)\nuget\_._">
+      <Link>_._</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </None>
+  </ItemGroup>
   
   <!-- Set default Configuration and Platform -->
   <PropertyGroup>
@@ -138,6 +144,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CULTUREINFO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
@@ -149,6 +156,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_GAC</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HANDLE_SAFEWAITHANDLE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HANDLEREF</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MEMORYSTREAM_GETBUFFER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>

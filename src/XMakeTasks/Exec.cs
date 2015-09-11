@@ -201,7 +201,7 @@ namespace Microsoft.Build.Tasks
             // just the OEM version.
             // See http://www.microsoft.com/globaldev/getWR/steps/wrg_codepage.mspx for a discussion of ANSI vs OEM
             // Note: 8/12/15 - Switched to use UTF8 on OS newer than 6.1 (Windows 7)
-            using (StreamWriter sw = new StreamWriter(_batchFile, false, GetEncodingWithOsFallback()))
+            using (StreamWriter sw = FileUtilities.OpenWrite(_batchFile, false, GetEncodingWithOsFallback()))
             {
                 if (!isUnix)
                 {
@@ -257,9 +257,9 @@ namespace Microsoft.Build.Tasks
 
                         // If we are trying to run a .exe file, prepend mono as the file may
                         // not be runnable
-                        if (exe.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase)
-                            || exe.EndsWith(".exe\"", StringComparison.InvariantCultureIgnoreCase)
-                            || exe.EndsWith(".exe'", StringComparison.InvariantCultureIgnoreCase))
+                        if (exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+                            || exe.EndsWith(".exe\"", StringComparison.OrdinalIgnoreCase)
+                            || exe.EndsWith(".exe'", StringComparison.OrdinalIgnoreCase))
                         {
                             Command = "mono " + FileUtilities.FixFilePath(exe) + commandLine;
                         }
@@ -621,12 +621,16 @@ namespace Microsoft.Build.Tasks
                 return Encoding.ASCII;
             }
 
+#if FEATURE_OSVERSION
             // Windows 7 (6.1) or greater
             var windows7 = new Version(6, 1);
 
             return Environment.OSVersion.Version >= windows7
                 ? s_utf8WithoutBom
                 : EncodingUtilities.CurrentSystemOemEncoding;
+#else
+            return s_utf8WithoutBom;
+#endif
         }
     }
 }
