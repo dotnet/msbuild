@@ -27,7 +27,11 @@ namespace Microsoft.Build.UnitTests
                 : base()
             {
                 _fullToolName = Path.Combine(
+#if FEATURE_SPECIAL_FOLDERS
                     Environment.GetFolderPath(Environment.SpecialFolder.System),
+#else
+                    FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System),
+#endif
                     NativeMethodsShared.IsUnixLike ? "/bin/sh" : "cmd.exe");
             }
 
@@ -168,7 +172,11 @@ namespace Microsoft.Build.UnitTests
 
                 // "cmd.exe" croaks big-time when given a very long command-line.  It pops up a message box on
                 // Windows XP.  We can't have that!  So use "attrib.exe" for this exercise instead.
+#if FEATURE_SPECIAL_FOLDERS
                 t.FullToolName = NativeMethodsShared.IsWindows ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "attrib.exe") :
+#else
+                t.FullToolName = NativeMethodsShared.IsWindows ? Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "attrib.exe") :
+#endif
                     "/bin/ps";
 
                 t.MockCommandLineCommands = new String('x', 32001);
@@ -351,7 +359,11 @@ namespace Microsoft.Build.UnitTests
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
                 t.FullToolName = "cmd.exe";
+#if FEATURE_SPECIAL_FOLDERS
                 string systemPath = Environment.GetFolderPath(Environment.SpecialFolder.System);
+#else
+                string systemPath = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System);
+#endif
                 t.ToolPath = systemPath;
 
                 t.Execute();
@@ -405,7 +417,11 @@ namespace Microsoft.Build.UnitTests
                 Assert.AreEqual(0, engine.Errors);
 
                 engine.AssertLogContains(
+#if FEATURE_SPECIAL_FOLDERS
                     Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), toolName));
+#else
+                    Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), toolName));
+#endif
             }
         }
 
@@ -530,7 +546,11 @@ namespace Microsoft.Build.UnitTests
             {
                 Assert.IsTrue(
                     String.Equals(
+#if FEATURE_SPECIAL_FOLDERS
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+#else
+                        FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System),
+#endif
                         startInfo.EnvironmentVariables["programfiles"],
                         StringComparison.OrdinalIgnoreCase));
             }

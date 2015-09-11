@@ -510,7 +510,11 @@ namespace Microsoft.Build.UnitTests
             // Anonymous in-memory projects use the current directory for $(MSBuildProjectDirectory).
             // We need to set the directory to something reasonable.
             string originalDir = Directory.GetCurrentDirectory();
+#if FEATURE_SPECIAL_FOLDERS
             Directory.SetCurrentDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+#else
+            Directory.SetCurrentDirectory(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData));
+#endif
 
             XmlReaderSettings readerSettings = new XmlReaderSettings();
             readerSettings.DtdProcessing = DtdProcessing.Ignore;

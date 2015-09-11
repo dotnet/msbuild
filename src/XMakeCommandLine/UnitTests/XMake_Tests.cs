@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual("c=d", parameters[1]);
         }
 
-#if !MONO
+#if !MONO && FEATURE_APPDOMAIN
         [Test]
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {
@@ -785,7 +785,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         private string _pathToMSBuildExe = Path.Combine(Environment.CurrentDirectory, "MSBuild.exe");
+#if FEATURE_SPECIAL_FOLDERS
         private string _pathToArbitraryBogusFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
+#else
+        private string _pathToArbitraryBogusFile = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
+#endif
 
         /// <summary>
         /// Basic case

@@ -20,6 +20,7 @@
         "Microsoft.NETCore.Portable.Compatibility": "1.0.0",
         "System.Console": "4.0.0-beta-23123",
         "System.Runtime": "4.0.20-beta-23109",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
         "Microsoft.NETCore.Runtime": "1.0.0",
         "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
       }

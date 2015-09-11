@@ -47,9 +47,6 @@
       <HintPath>$(PackagesDir)NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml" />
     <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
       <Name>Microsoft.Build.Utilities</Name>
@@ -66,6 +63,11 @@
       <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
       <Name>Microsoft.Build.Framework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <!-- IDE specific Information -->
   <ItemGroup>

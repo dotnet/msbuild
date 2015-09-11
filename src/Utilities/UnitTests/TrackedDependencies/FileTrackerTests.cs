@@ -22,6 +22,7 @@ using ObjectModelHelpers = Microsoft.Build.UnitTests.ObjectModelHelpers;
 using Microsoft.CodeAnalysis.BuildTasks;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
+#if FEATURE_FILE_TRACKER
 
 namespace Microsoft.Build.UnitTests.FileTracking
 {
@@ -2530,3 +2531,4 @@ namespace ConsoleApplication4
         }
     }
 }
+#endif
