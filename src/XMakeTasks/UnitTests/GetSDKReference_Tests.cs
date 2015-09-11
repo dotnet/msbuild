@@ -19,14 +19,13 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 {
     /// <summary>
     /// Test the expansion of sdk reference assemblies.
     /// </summary>
-    [TestClass]
     public class GetSDKReferenceFilesTestFixture
     {
         private static string s_fakeSDKStructureRoot = null;
@@ -79,7 +78,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// <summary>
         /// Make sure there are no outputs if no resolved sdk files are passed in.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PassReferenceWithNoReferenceDirectory()
         {
             MockEngine engine = new MockEngine();
@@ -95,10 +94,10 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.CacheFileFolderPath = s_cacheDirectory;
 
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 0);
-            Assert.IsTrue(t.RedistFiles.Length == 0);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(0, t.References.Length);
+            Assert.Equal(0, t.RedistFiles.Length);
         }
 
 
@@ -108,7 +107,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// <summary>
         /// Make sure we get the correct folder list when asking for it.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetSDKReferenceFolders()
         {
             GetSDKFolders getReferenceFolders = new GetSDKFolders(ToolLocationHelper.GetSDKReferenceFolders);
@@ -120,30 +119,30 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         private static void VerifySDKFolders(GetSDKFolders singleParamDelegate, GetSDKFolders2 multiParamDelegate, string folderName)
         {
             IList<string> sdkFolders = singleParamDelegate(s_sdkDirectory);
-            Assert.AreEqual(2, sdkFolders.Count);
+            Assert.Equal(2, sdkFolders.Count);
 
-            Assert.IsTrue(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
-            Assert.IsTrue(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
+            Assert.True(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
+            Assert.True(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
 
             sdkFolders = multiParamDelegate(s_sdkDirectory, "Retail", "Neutral");
-            Assert.AreEqual(2, sdkFolders.Count);
+            Assert.Equal(2, sdkFolders.Count);
 
-            Assert.IsTrue(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
-            Assert.IsTrue(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
+            Assert.True(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
+            Assert.True(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
 
             sdkFolders = multiParamDelegate(s_sdkDirectory, "Retail", "X86");
-            Assert.AreEqual(4, sdkFolders.Count);
+            Assert.Equal(4, sdkFolders.Count);
 
-            Assert.IsTrue(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\X86\\")));
-            Assert.IsTrue(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
-            Assert.IsTrue(sdkFolders[2].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\X86\\")));
-            Assert.IsTrue(sdkFolders[3].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
+            Assert.True(sdkFolders[0].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\X86\\")));
+            Assert.True(sdkFolders[1].Equals(Path.Combine(s_sdkDirectory, folderName + "\\Retail\\Neutral\\")));
+            Assert.True(sdkFolders[2].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\X86\\")));
+            Assert.True(sdkFolders[3].Equals(Path.Combine(s_sdkDirectory, folderName + "\\CommonConfiguration\\Neutral\\")));
         }
 
         /// <summary>
         /// Make sure we get the correct folder list when asking for it.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetSDKRedistFolders()
         {
             GetSDKFolders getRedistFolders = new GetSDKFolders(ToolLocationHelper.GetSDKRedistFolders);
@@ -155,7 +154,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// <summary>
         /// Make sure we get the correct folder list when asking for it.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetSDKDesignTimeFolders()
         {
             GetSDKFolders getDesignTimeFolders = new GetSDKFolders(ToolLocationHelper.GetSDKDesignTimeFolders);
@@ -167,7 +166,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// <summary>
         /// Make sure there are no outputs if an sdk which does not exist is passed in.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PassNoSDKReferences()
         {
             MockEngine engine = new MockEngine();
@@ -176,16 +175,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.CacheFileFolderPath = s_cacheDirectory;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 0);
-            Assert.IsTrue(t.RedistFiles.Length == 0);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(0, t.References.Length);
+            Assert.Equal(0, t.RedistFiles.Length);
         }
 
         /// <summary>
         /// Make sure there are no outputs if expand sdks is not true.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PassReferenceWithExpandFalse()
         {
             MockEngine engine = new MockEngine();
@@ -201,16 +200,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 0);
-            Assert.IsTrue(t.RedistFiles.Length == 0);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(0, t.References.Length);
+            Assert.Equal(0, t.RedistFiles.Length);
         }
 
         /// <summary>
         /// Make sure there are no redist outputs if CopyRedist is false
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PassReferenceWithCopyRedistFalse()
         {
             MockEngine engine = new MockEngine();
@@ -227,16 +226,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 0);
-            Assert.IsTrue(t.RedistFiles.Length == 0);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(0, t.References.Length);
+            Assert.Equal(0, t.RedistFiles.Length);
         }
 
         /// <summary>
         /// Verify we get the correct set of reference assemblies and copy local files when the CopyLocal flag is true
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetReferenceAssembliesWhenExpandTrueCopyLocalTrue()
         {
             MockEngine engine = new MockEngine();
@@ -252,56 +251,56 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 9);
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.True(success);
+            Assert.Equal(9, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
 
             string winmd = Path.Combine(s_sdkDirectory, "References\\Retail\\X86\\A.winmd");
 
-            Assert.IsTrue(t.References[0].ItemSpec.Equals(winmd, StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ImageRuntime").Equals("WindowsRuntime 1.0;CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("FusionName").Equals("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("CopyLocal").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].ItemSpec.Equals(winmd, StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ImageRuntime").Equals("WindowsRuntime 1.0;CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("FusionName").Equals("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("CopyLocal").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("ImageRuntime").Equals("CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("FusionName").Equals("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFileType").Length == 0);
-            Assert.IsTrue(t.References[4].GetMetadata("CopyLocal").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("ImageRuntime").Equals("CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("FusionName").Equals("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.References[4].GetMetadata("WinMDFileType").Length);
+            Assert.True(t.References[4].GetMetadata("CopyLocal").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.CopyLocalFiles[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[0].GetMetadata("ImageRuntime").Equals("WindowsRuntime 1.0;CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[0].GetMetadata("FusionName").Equals("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[0].GetMetadata("CopyLocal").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.CopyLocalFiles[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[0].GetMetadata("ImageRuntime").Equals("WindowsRuntime 1.0;CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[0].GetMetadata("FusionName").Equals("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[0].GetMetadata("CopyLocal").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.CopyLocalFiles[5].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[5].GetMetadata("ImageRuntime").Equals("CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[5].GetMetadata("FusionName").Equals("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[5].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[5].GetMetadata("WinMDFileType").Length == 0);
-            Assert.IsTrue(t.CopyLocalFiles[5].GetMetadata("CopyLocal").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[5].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.CopyLocalFiles[5].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.CopyLocalFiles[5].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[5].GetMetadata("ImageRuntime").Equals("CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[5].GetMetadata("FusionName").Equals("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[5].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.CopyLocalFiles[5].GetMetadata("WinMDFileType").Length);
+            Assert.True(t.CopyLocalFiles[5].GetMetadata("CopyLocal").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[5].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.CopyLocalFiles[5].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.CopyLocalFiles[2].ItemSpec).Equals("B.xml", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.CopyLocalFiles[2].ItemSpec).Equals("B.xml", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Verify reference is not processed by GetSDKReferenceFiles when "ReferenceOnly" metadata is set.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyNoCopyWhenReferenceOnlyIsTrue()
         {
             MockEngine engine = new MockEngine();
@@ -327,9 +326,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             // Process both regular and runtime-only references
             t.ResolvedSDKReferences = new ITaskItem[] { item1, item2 };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.Equal(8, t.References.Length);
 
             // Process regular references
             t = new GetSDKReferenceFiles();
@@ -338,9 +337,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item1 };
             success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.Equal(8, t.References.Length);
 
             // Process runtime-only references
             t = new GetSDKReferenceFiles();
@@ -349,15 +348,15 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item2 };
             success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.IsTrue(t.References.Length == 0);
+            Assert.Equal(0, t.References.Length);
         }
 
         /// <summary>
         /// Verify we get the correct set of reference assemblies and copy local files when the CopyLocal flag is false
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GetReferenceAssembliesWhenExpandTrueCopyLocalFalse()
         {
             MockEngine engine = new MockEngine();
@@ -374,43 +373,43 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
 
-            Assert.IsTrue(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ImageRuntime").Equals("WindowsRuntime 1.0;CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("FusionName").Equals("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ImageRuntime").Equals("WindowsRuntime 1.0;CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("FusionName").Equals("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.References[1].ItemSpec).Equals("B.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[1].GetMetadata("ImageRuntime").Equals("WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[1].GetMetadata("FusionName").Equals("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[1].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[1].GetMetadata("WinMDFileType").Equals("Native", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[1].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[1].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[1].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[1].ItemSpec).Equals("B.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[1].GetMetadata("ImageRuntime").Equals("WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[1].GetMetadata("FusionName").Equals("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[1].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[1].GetMetadata("WinMDFileType").Equals("Native", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[1].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[1].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[1].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("ImageRuntime").Equals("CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("FusionName").Equals("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFileType").Length == 0);
-            Assert.IsTrue(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("ImageRuntime").Equals("CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("FusionName").Equals("E, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.References[4].GetMetadata("WinMDFileType").Length);
+            Assert.True(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Verify that different cache files are created and used correctly for assemblies with the same identity but with files in different directories
         /// Also verifies that when 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyCacheFileNames()
         {
             MockEngine engine = new MockEngine();
@@ -426,7 +425,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
+            Assert.True(success);
             ITaskItem[] references1 = t.References;
 
             // Verify the task created a cache file
@@ -435,7 +434,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             string cacheFile = sdkIdentity + ",Set=" + FileUtilities.GetHexHash(sdkIdentity) + "-" + FileUtilities.GetHexHash(sdkRoot) + ",Hash=*.dat";
             Thread.Sleep(100);
             string[] existingCacheFiles = Directory.GetFiles(s_cacheDirectory, cacheFile);
-            Assert.IsTrue(existingCacheFiles.Length == 1);
+            Assert.Equal(1, existingCacheFiles.Length);
 
             GetSDKReferenceFiles t2 = new GetSDKReferenceFiles();
             t2.BuildEngine = engine;
@@ -451,12 +450,12 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t2.ResolvedSDKReferences = new ITaskItem[] { item2 };
             bool success2 = t2.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             ITaskItem[] references2 = t2.References;
-            Assert.IsTrue(success2);
+            Assert.True(success2);
 
             // References from the two builds should not overlap, otherwise the cache files are being misused
             foreach (var ref2 in references2)
             {
-                Assert.IsTrue(references1.Count(i => i.ItemSpec.Equals(ref2.ItemSpec, StringComparison.InvariantCultureIgnoreCase)) == 0);
+                Assert.Equal(0, references1.Count(i => i.ItemSpec.Equals(ref2.ItemSpec, StringComparison.InvariantCultureIgnoreCase)));
             }
 
             Thread.Sleep(100);
@@ -464,19 +463,19 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             string sdkRoot2 = item.ItemSpec;
             string cacheFile2 = sdkIdentity2 + ",Set=" + FileUtilities.GetHexHash(sdkIdentity2) + "-" + FileUtilities.GetHexHash(sdkRoot2) + ",Hash=*.dat";
             string[] existingCacheFiles2 = Directory.GetFiles(s_cacheDirectory, cacheFile);
-            Assert.IsTrue(existingCacheFiles2.Length == 1);
+            Assert.Equal(1, existingCacheFiles2.Length);
 
             // There should have two cache files with the same prefix and first hash
             Thread.Sleep(100);
             string[] allCacheFiles = Directory.GetFiles(s_cacheDirectory, sdkIdentity2 + ",Set=" + FileUtilities.GetHexHash(sdkIdentity2) + "*");
-            Assert.IsTrue(allCacheFiles.Length == 2);
+            Assert.Equal(2, allCacheFiles.Length);
         }
 
         /// <summary>
         /// Verify the correct reference files are found and that by default we do log the reference files 
         /// added.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyReferencesLogged()
         {
             MockEngine engine = new MockEngine();
@@ -492,9 +491,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
@@ -505,26 +504,26 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
 
-            Assert.IsTrue(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFileType").Length == 0);
-            Assert.IsTrue(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.References[4].GetMetadata("WinMDFileType").Length);
+            Assert.True(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Verify the correct reference files are found and that by default we do log the reference files 
         /// added.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyReferencesLoggedFilterOutWinmd()
         {
             MockEngine engine = new MockEngine();
@@ -541,9 +540,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.ReferenceExtensions = new string[] { ".dll" };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 5);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(5, t.References.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
@@ -551,25 +550,25 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
 
-            Assert.IsTrue(Path.GetFileName(t.References[0].ItemSpec).Equals("A.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFileType").Length == 0);
-            Assert.IsTrue(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.References[0].GetMetadata("WinMDFileType").Length);
+            Assert.True(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.References[4].ItemSpec).Equals("h.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFileType").Length == 0);
-            Assert.IsTrue(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[4].ItemSpec).Equals("h.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.References[4].GetMetadata("WinMDFileType").Length);
+            Assert.True(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Verify we log an error if no configuration is on the sdk reference
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogErrorWhenNoConfiguration()
         {
             MockEngine engine = new MockEngine();
@@ -585,14 +584,14 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsFalse(success);
+            Assert.False(success);
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration", s_sdkDirectory);
         }
 
         /// <summary>
         /// Verify we log an error if no configuration is on the sdk reference
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogErrorWhenNoArchitecture()
         {
             MockEngine engine = new MockEngine();
@@ -608,7 +607,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsFalse(success);
+            Assert.False(success);
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture", s_sdkDirectory);
         }
 
@@ -617,7 +616,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify the correct reference files are found and that by default we do log the reference files 
         /// added.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyReferencesLoggedAmd64()
         {
             MockEngine engine = new MockEngine();
@@ -633,9 +632,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
@@ -646,29 +645,29 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
 
-            Assert.IsTrue(t.References[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
-            Assert.IsTrue(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ReferenceGrouping").Equals("SDKWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ReferenceGroupingDisplayName").Length == 0);
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
+            Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ReferenceGrouping").Equals("SDKWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.References[0].GetMetadata("ReferenceGroupingDisplayName").Length);
+            Assert.True(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFileType").Length == 0);
-            Assert.IsTrue(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.References[4].GetMetadata("WinMDFileType").Length);
+            Assert.True(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Verify the correct reference files are found and that by default we do log the reference files 
         /// added.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyReferencesLoggedX64()
         {
             MockEngine engine = new MockEngine();
@@ -685,9 +684,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
@@ -698,28 +697,28 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
 
-            Assert.IsTrue(t.References[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
-            Assert.IsTrue(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ReferenceGrouping").Equals("SDKWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ReferenceGroupingDisplayName").Equals("SDKWithManifestDisplayName", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
+            Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ReferenceGrouping").Equals("SDKWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("WinMDFileType").Equals("Managed", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ReferenceGroupingDisplayName").Equals("SDKWithManifestDisplayName", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("WinMDFileType").Length == 0);
-            Assert.IsTrue(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.References[4].ItemSpec).Equals("E.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.References[4].GetMetadata("WinMDFileType").Length);
+            Assert.True(t.References[4].GetMetadata("CopyLocal").Equals("false", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.References[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Verify the correct reference files are found and that if we do not want to log them we can set a property to do so.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyLogReferencesFalse()
         {
             MockEngine engine = new MockEngine();
@@ -736,9 +735,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogReferencesList = false;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
 
             engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
             engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
@@ -754,7 +753,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify the correct redist files are found and that by default we do not log the redist files 
         /// added.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyRedistFilesLogRedistFalse()
         {
             MockEngine engine = new MockEngine();
@@ -773,10 +772,10 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogRedistFilesList = false;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
-            Assert.IsTrue(t.RedistFiles.Length == 5);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
+            Assert.Equal(5, t.RedistFiles.Length);
 
             engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
             engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
@@ -784,42 +783,42 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
             engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[0].ItemSpec).Equals("A.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[0].GetMetadata("TargetPath").Equals("Super\\A.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[0].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[0].ItemSpec).Equals("A.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[0].GetMetadata("TargetPath").Equals("Super\\A.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[0].GetMetadata("Root").Length);
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[1].ItemSpec).Equals("B.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[1].GetMetadata("TargetPath").Equals("Super\\ASubDirectory\\TwoDeep\\B.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[1].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[1].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[1].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[1].ItemSpec).Equals("B.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[1].GetMetadata("TargetPath").Equals("Super\\ASubDirectory\\TwoDeep\\B.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[1].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[1].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[1].GetMetadata("Root").Length);
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[2].ItemSpec).Equals("B.PRI", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[2].GetMetadata("TargetPath").Equals("Super\\B.PRI", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[2].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[2].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[2].GetMetadata("Root").Equals("Super", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.RedistFiles[2].ItemSpec).Equals("B.PRI", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[2].GetMetadata("TargetPath").Equals("Super\\B.PRI", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[2].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[2].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[2].GetMetadata("Root").Equals("Super", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[3].ItemSpec).Equals("C.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[3].GetMetadata("TargetPath").Equals("Super\\C.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[3].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[3].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[3].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[3].ItemSpec).Equals("C.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[3].GetMetadata("TargetPath").Equals("Super\\C.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[3].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[3].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[3].GetMetadata("Root").Length);
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[4].ItemSpec).Equals("D.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[4].GetMetadata("TargetPath").Equals("Super\\D.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[4].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[4].ItemSpec).Equals("D.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[4].GetMetadata("TargetPath").Equals("Super\\D.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[4].GetMetadata("Root").Length);
         }
 
         /// <summary>
         /// Verify the correct redist files are found and that by default we do not log the redist files 
         /// added.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyRedistFilesLogRedistTrue()
         {
             MockEngine engine = new MockEngine();
@@ -835,9 +834,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.RedistFiles.Length == 5);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(5, t.RedistFiles.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
@@ -850,7 +849,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify the correct redist files are found and that by default we do not log the redist files 
         /// added.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyRedistFilesLogRedistTrueX64()
         {
             MockEngine engine = new MockEngine();
@@ -866,11 +865,11 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.RedistFiles.Length == 5);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(5, t.RedistFiles.Length);
 
-            Assert.IsTrue(t.RedistFiles[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
+            Assert.True(t.RedistFiles[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
@@ -882,7 +881,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// Verify the correct redist files are found and that by default we do not log the redist files 
         /// added.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyRedistFilesLogRedistTrueAmd64()
         {
             MockEngine engine = new MockEngine();
@@ -898,11 +897,11 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.RedistFiles.Length == 5);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(5, t.RedistFiles.Length);
 
-            Assert.IsTrue(t.RedistFiles[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
+            Assert.True(t.RedistFiles[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
@@ -913,7 +912,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// <summary>
         /// Make sure by default conflicts between references are logged as a comment if they are within the sdk itself
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogNoWarningForReferenceConflictWithinSDK()
         {
             MockEngine engine = new MockEngine();
@@ -930,18 +929,18 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.True(success);
+            Assert.Equal(8, t.References.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.dll");
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.winmd");
-            Assert.AreEqual(0, engine.Warnings);
+            Assert.Equal(0, engine.Warnings);
         }
 
         /// <summary>
         /// Make sure that if the LogReferenceConflictsWithinSDKAsWarning is set log a warning for conflicts within an SDK for references.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogWarningForReferenceConflictWithinSDK()
         {
             MockEngine engine = new MockEngine();
@@ -959,18 +958,18 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogReferenceConflictWithinSDKAsWarning = true;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.References.Length == 8);
+            Assert.True(success);
+            Assert.Equal(8, t.References.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.dll");
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.winmd");
-            Assert.AreEqual(2, engine.Warnings);
+            Assert.Equal(2, engine.Warnings);
         }
 
         /// <summary>
         /// Make sure by default conflicts between references are logged as a comment if they are within the sdk itself
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogNoWarningForRedistConflictWithinSDK()
         {
             MockEngine engine = new MockEngine();
@@ -987,17 +986,17 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.RedistFiles.Length == 5);
+            Assert.True(success);
+            Assert.Equal(5, t.RedistFiles.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistSameSDK", "A.dll", "SDKWithManifest, Version=2.0", "Redist\\Retail\\X86\\A.dll", "Redist\\CommonConfiguration\\Neutral\\A.dll");
-            Assert.AreEqual(0, engine.Warnings);
+            Assert.Equal(0, engine.Warnings);
         }
 
         /// <summary>
         /// Make sure that if the LogRedistConflictsWithinSDKAsWarning is set log a warning for conflicts within an SDK for redist files.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogWarningForRedistConflictWithinSDK()
         {
             MockEngine engine = new MockEngine();
@@ -1015,17 +1014,17 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogRedistConflictWithinSDKAsWarning = true;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.RedistFiles.Length == 5);
+            Assert.True(success);
+            Assert.Equal(5, t.RedistFiles.Length);
 
             engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistSameSDK", "A.dll", "SDKWithManifest, Version=2.0", "Redist\\Retail\\X86\\A.dll", "Redist\\CommonConfiguration\\Neutral\\A.dll");
-            Assert.AreEqual(1, engine.Warnings);
+            Assert.Equal(1, engine.Warnings);
         }
 
         /// <summary>
         /// Verify if there are conflicts between references or redist files between sdks that we log a warning by default.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogReferenceAndRedistConflictBetweenSdks()
         {
             MockEngine engine = new MockEngine();
@@ -1051,11 +1050,11 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.LogReferencesList = false;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
-            Assert.IsTrue(t.RedistFiles.Length == 6);
-            Assert.IsTrue(engine.Warnings == 2);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
+            Assert.Equal(6, t.RedistFiles.Length);
+            Assert.Equal(2, engine.Warnings);
 
             string redistWinner = Path.Combine(s_sdkDirectory, "Redist\\Retail\\Neutral\\B.pri");
             string redistVictim = Path.Combine(s_sdkDirectory2, "Redist\\Retail\\X86\\B.pri");
@@ -1070,7 +1069,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// <summary>
         /// If a user create a target path that causes a conflict between two sdks then we want to warn
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogReferenceAndRedistConflictBetweenSdksDueToCustomTargetPath()
         {
             MockEngine engine = new MockEngine();
@@ -1097,11 +1096,11 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.LogReferencesList = false;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
-            Assert.IsTrue(t.RedistFiles.Length == 6);
-            Assert.IsTrue(engine.Warnings == 2);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
+            Assert.Equal(6, t.RedistFiles.Length);
+            Assert.Equal(2, engine.Warnings);
 
             string redistWinner = Path.Combine(s_sdkDirectory, "Redist\\Retail\\Neutral\\ASubDirectory\\TwoDeep\\B.dll");
             string redistVictim = Path.Combine(s_sdkDirectory2, "Redist\\Retail\\X86\\B.dll");
@@ -1112,7 +1111,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// <summary>
         /// Verify if there are conflicts between references or redist files between sdks that we do not log a warning if a certain property (LogxxxConflictBetweenSDKsAsWarning is set to false.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void LogReferenceAndRedistConflictBetweenSdksNowarning()
         {
             MockEngine engine = new MockEngine();
@@ -1140,11 +1139,11 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.LogRedistConflictBetweenSDKsAsWarning = false;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.CopyLocalFiles.Length == 0);
-            Assert.IsTrue(t.References.Length == 8);
-            Assert.IsTrue(t.RedistFiles.Length == 6);
-            Assert.IsTrue(engine.Warnings == 0);
+            Assert.True(success);
+            Assert.Equal(0, t.CopyLocalFiles.Length);
+            Assert.Equal(8, t.References.Length);
+            Assert.Equal(6, t.RedistFiles.Length);
+            Assert.Equal(0, engine.Warnings);
 
 
             string redistWinner = Path.Combine(s_sdkDirectory, "Redist\\Retail\\Neutral\\B.pri");
@@ -1159,7 +1158,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         /// <summary>
         /// If there are conflicting redist files between two sdks but their target paths are different then we should copy both to the appx
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TwoSDKSConflictRedistButDifferentTargetPaths()
         {
             MockEngine engine = new MockEngine();
@@ -1187,51 +1186,51 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.LogReferencesList = false;
             bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
-            Assert.IsTrue(success);
-            Assert.IsTrue(t.RedistFiles.Length == 7);
-            Assert.IsTrue(engine.Warnings == 0);
+            Assert.True(success);
+            Assert.Equal(7, t.RedistFiles.Length);
+            Assert.Equal(0, engine.Warnings);
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[0].ItemSpec).Equals("A.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[0].GetMetadata("TargetPath").Equals("SDK1\\A.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[0].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[0].ItemSpec).Equals("A.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[0].GetMetadata("TargetPath").Equals("SDK1\\A.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[0].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[0].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[0].GetMetadata("Root").Length);
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[1].ItemSpec).Equals("B.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[1].GetMetadata("TargetPath").Equals("SDK2\\B.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[1].GetMetadata("OriginalItemSpec").Equals("AnotherSDK, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[1].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[1].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[1].ItemSpec).Equals("B.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[1].GetMetadata("TargetPath").Equals("SDK2\\B.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[1].GetMetadata("OriginalItemSpec").Equals("AnotherSDK, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[1].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[1].GetMetadata("Root").Length);
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[2].ItemSpec).Equals("B.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[2].GetMetadata("TargetPath").Equals("SDK1\\ASubDirectory\\TwoDeep\\B.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[2].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[2].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[2].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[2].ItemSpec).Equals("B.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[2].GetMetadata("TargetPath").Equals("SDK1\\ASubDirectory\\TwoDeep\\B.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[2].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[2].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[2].GetMetadata("Root").Length);
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[3].ItemSpec).Equals("B.pri", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[3].GetMetadata("TargetPath").Equals("SDK2\\B.Pri", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[3].GetMetadata("OriginalItemSpec").Equals("AnotherSDK, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[3].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[3].GetMetadata("Root").Equals("SDK2", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.RedistFiles[3].ItemSpec).Equals("B.pri", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[3].GetMetadata("TargetPath").Equals("SDK2\\B.Pri", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[3].GetMetadata("OriginalItemSpec").Equals("AnotherSDK, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[3].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[3].GetMetadata("Root").Equals("SDK2", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[4].ItemSpec).Equals("B.PRI", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[4].GetMetadata("TargetPath").Equals("SDK1\\B.PRI", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[4].GetMetadata("Root").Equals("SDK1", StringComparison.OrdinalIgnoreCase));
+            Assert.True(Path.GetFileName(t.RedistFiles[4].ItemSpec).Equals("B.PRI", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[4].GetMetadata("TargetPath").Equals("SDK1\\B.PRI", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[4].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[4].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[4].GetMetadata("Root").Equals("SDK1", StringComparison.OrdinalIgnoreCase));
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[5].ItemSpec).Equals("C.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[5].GetMetadata("TargetPath").Equals("SDK1\\C.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[5].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[5].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[5].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[5].ItemSpec).Equals("C.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[5].GetMetadata("TargetPath").Equals("SDK1\\C.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[5].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[5].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[5].GetMetadata("Root").Length);
 
-            Assert.IsTrue(Path.GetFileName(t.RedistFiles[6].ItemSpec).Equals("D.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[6].GetMetadata("TargetPath").Equals("SDK1\\D.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[6].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[6].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
-            Assert.IsTrue(t.RedistFiles[6].GetMetadata("Root").Length == 0);
+            Assert.True(Path.GetFileName(t.RedistFiles[6].ItemSpec).Equals("D.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[6].GetMetadata("TargetPath").Equals("SDK1\\D.dll", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[6].GetMetadata("OriginalItemSpec").Equals("SDkWithManifest, Version=2.0", StringComparison.OrdinalIgnoreCase));
+            Assert.True(t.RedistFiles[6].GetMetadata("ResolvedFrom").Equals("GetSDKReferenceFiles", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.RedistFiles[6].GetMetadata("Root").Length);
         }
 
         private static AssemblyNameExtension GetAssemblyName(string path)

@@ -11,7 +11,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -22,10 +21,10 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Xml.Xsl;
 using System.Xml;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class XmlPeek_Tests
     {
         private string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
@@ -58,7 +57,7 @@ namespace Microsoft.Build.UnitTests
 </class>
 ";
 
-        [TestMethod]
+        [Fact]
         public void PeekWithNamespaceAttribute()
         {
             MockEngine engine = new MockEngine(true);
@@ -72,16 +71,16 @@ namespace Microsoft.Build.UnitTests
             p.Query = "//s:variable/@Name";
             p.Namespaces = "<Namespace Prefix=\"s\" Uri=\"http://nsurl\" />";
 
-            Assert.IsTrue(p.Execute(), "Test should've passed");
-            Assert.IsTrue(p.Result.Length == 3, "result Length should be 3");
+            Assert.True(p.Execute()); // "Test should've passed"
+            Assert.Equal(3, p.Result.Length); // "result Length should be 3"
             string[] results = new string[] { "a", "b", "c" };
             for (int i = 0; i < p.Result.Length; i++)
             {
-                Assert.IsTrue(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
+                Assert.True(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PeekWithNamespaceNode()
         {
             MockEngine engine = new MockEngine(true);
@@ -95,8 +94,8 @@ namespace Microsoft.Build.UnitTests
             p.Query = "//s:variable/.";
             p.Namespaces = "<Namespace Prefix=\"s\" Uri=\"http://nsurl\" />";
 
-            Assert.IsTrue(p.Execute(), "Test should've passed");
-            Assert.IsTrue(p.Result.Length == 3, "result Length should be 3");
+            Assert.True(p.Execute()); // "Test should've passed"
+            Assert.Equal(3, p.Result.Length); // "result Length should be 3"
 
             string[] results = new string[] {
                 "<s:variable Type=\"String\" Name=\"a\" xmlns:s=\"http://nsurl\"></s:variable>",
@@ -106,11 +105,11 @@ namespace Microsoft.Build.UnitTests
 
             for (int i = 0; i < p.Result.Length; i++)
             {
-                Assert.IsTrue(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
+                Assert.True(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PeekWithNamespaceText()
         {
             MockEngine engine = new MockEngine(true);
@@ -123,9 +122,9 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/text()";
             p.Namespaces = "<Namespace Prefix=\"s\" Uri=\"http://nsurl\" />";
-            Assert.IsTrue(p.Namespaces.Equals("<Namespace Prefix=\"s\" Uri=\"http://nsurl\" />"));
-            Assert.IsTrue(p.Execute(), "Test should've passed");
-            Assert.IsTrue(p.Result.Length == 3, "result Length should be 3");
+            Assert.True(p.Namespaces.Equals("<Namespace Prefix=\"s\" Uri=\"http://nsurl\" />"));
+            Assert.True(p.Execute()); // "Test should've passed"
+            Assert.Equal(3, p.Result.Length); // "result Length should be 3"
 
             string[] results = new string[] {
                 "This",
@@ -135,11 +134,11 @@ namespace Microsoft.Build.UnitTests
 
             for (int i = 0; i < p.Result.Length; i++)
             {
-                Assert.IsTrue(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
+                Assert.True(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PeekNoNamespace()
         {
             MockEngine engine = new MockEngine(true);
@@ -152,16 +151,16 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//variable/@Name";
 
-            Assert.IsTrue(p.Execute(), "Test should've passed");
-            Assert.IsTrue(p.Result.Length == 3, "result Length should be 3");
+            Assert.True(p.Execute()); // "Test should've passed"
+            Assert.Equal(3, p.Result.Length); // "result Length should be 3"
             string[] results = new string[] { "a", "b", "c" };
             for (int i = 0; i < p.Result.Length; i++)
             {
-                Assert.IsTrue(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
+                Assert.True(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PeekNoNSXmlContent()
         {
             MockEngine engine = new MockEngine(true);
@@ -172,16 +171,16 @@ namespace Microsoft.Build.UnitTests
             p.XmlContent = _xmlFileNoNs;
             p.Query = "//variable/@Name";
 
-            Assert.IsTrue(p.Execute(), "Test should've passed");
-            Assert.IsTrue(p.Result.Length == 3, "result Length should be 3");
+            Assert.True(p.Execute()); // "Test should've passed"
+            Assert.Equal(3, p.Result.Length); // "result Length should be 3"
             string[] results = new string[] { "a", "b", "c" };
             for (int i = 0; i < p.Result.Length; i++)
             {
-                Assert.IsTrue(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
+                Assert.True(p.Result[i].ItemSpec.Equals(results[i]), "Results don't match: " + p.Result[i].ItemSpec);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PeekNoNSXmlContentAndXmlInputError1()
         {
             MockEngine engine = new MockEngine(true);
@@ -194,17 +193,17 @@ namespace Microsoft.Build.UnitTests
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.XmlContent = _xmlFileNoNs;
-            Assert.IsTrue(p.XmlInputPath.ItemSpec.Equals(xmlInputPath));
-            Assert.IsTrue(p.XmlContent.Equals(_xmlFileNoNs));
+            Assert.True(p.XmlInputPath.ItemSpec.Equals(xmlInputPath));
+            Assert.True(p.XmlContent.Equals(_xmlFileNoNs));
 
             p.Query = "//variable/@Name";
-            Assert.IsTrue(p.Query.Equals("//variable/@Name"));
+            Assert.True(p.Query.Equals("//variable/@Name"));
 
-            Assert.IsFalse(p.Execute(), "Test should've failed");
-            Assert.IsTrue(engine.Log.Contains("MSB3741"), "Error message MSB3741 should fire");
+            Assert.False(p.Execute()); // "Test should've failed"
+            Assert.True(engine.Log.Contains("MSB3741")); // "Error message MSB3741 should fire"
         }
 
-        [TestMethod]
+        [Fact]
         public void PeekNoNSXmlContentAndXmlInputError2()
         {
             MockEngine engine = new MockEngine(true);
@@ -217,11 +216,11 @@ namespace Microsoft.Build.UnitTests
 
             p.Query = "//variable/@Name";
 
-            Assert.IsFalse(p.Execute(), "Test should've failed");
-            Assert.IsTrue(engine.Log.Contains("MSB3741"), "Error message MSB3741 should fire");
+            Assert.False(p.Execute()); // "Test should've failed"
+            Assert.True(engine.Log.Contains("MSB3741")); // "Error message MSB3741 should fire"
         }
 
-        [TestMethod]
+        [Fact]
         public void PeekNoNSWPrefixedQueryError()
         {
             MockEngine engine = new MockEngine(true);
@@ -234,11 +233,11 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
 
-            Assert.IsFalse(p.Execute(), "Test should've failed");
-            Assert.IsTrue(engine.Log.Contains("MSB3743"), "Engine log should contain error code MSB3743");
+            Assert.False(p.Execute()); // "Test should've failed"
+            Assert.True(engine.Log.Contains("MSB3743")); // "Engine log should contain error code MSB3743"
         }
 
-        [TestMethod]
+        [Fact]
         public void ErrorInNamespaceDecl()
         {
             MockEngine engine = new MockEngine(true);
@@ -252,11 +251,11 @@ namespace Microsoft.Build.UnitTests
             p.Namespaces = "<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />";
 
             bool executeResult = p.Execute();
-            Assert.IsTrue(engine.Log.Contains("MSB3742"), "Engine Log: " + engine.Log);
-            Assert.IsFalse(executeResult, "Execution should've failed");
+            Assert.True(engine.Log.Contains("MSB3742"), "Engine Log: " + engine.Log);
+            Assert.False(executeResult); // "Execution should've failed"
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingNamespaceParameters()
         {
             MockEngine engine = new MockEngine(true);
@@ -285,16 +284,16 @@ namespace Microsoft.Build.UnitTests
 
                 if (i == 3)
                 {
-                    Assert.IsTrue(result, "Only 3rd value should pass.");
+                    Assert.True(result); // "Only 3rd value should pass."
                 }
                 else
                 {
-                    Assert.IsFalse(result, "Only 3rd value should pass.");
+                    Assert.False(result); // "Only 3rd value should pass."
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PeekWithoutUsingTask()
         {
             string projectContents = @"

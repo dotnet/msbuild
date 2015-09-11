@@ -7,24 +7,23 @@
 
 using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Tests for write code fragment task
     /// </summary>
-    [TestClass]
     public class WriteCodeFragment_Tests
     {
         /// <summary>
         /// Need an available language
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidLanguage()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -34,14 +33,14 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem("foo");
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
             engine.AssertLogContains("MSB3712");
         }
 
         /// <summary>
         /// Need a language
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoLanguage()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -50,14 +49,14 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem("foo");
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
             engine.AssertLogContains("MSB3098");
         }
 
         /// <summary>
         /// Need a location
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoFileOrDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -66,14 +65,14 @@ namespace Microsoft.Build.UnitTests
             task.Language = "c#";
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
             engine.AssertLogContains("MSB3711");
         }
 
         /// <summary>
         /// Combine file and directory
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CombineFileDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -85,17 +84,17 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
             string file = Path.Combine(Path.GetTempPath(), "CombineFileDirectory.tmp");
-            Assert.AreEqual(file, task.OutputFile.ItemSpec);
-            Assert.AreEqual(true, File.Exists(file));
+            Assert.Equal(file, task.OutputFile.ItemSpec);
+            Assert.Equal(true, File.Exists(file));
         }
 
         /// <summary>
         /// Ignore directory if file is rooted
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DirectoryAndRootedFile()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -111,10 +110,10 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem("c:\\");
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
-            Assert.AreEqual(file, task.OutputFile.ItemSpec);
-            Assert.AreEqual(true, File.Exists(file));
+            Assert.Equal(file, task.OutputFile.ItemSpec);
+            Assert.Equal(true, File.Exists(file));
 
             Directory.Delete(folder, true);
         }
@@ -123,7 +122,7 @@ namespace Microsoft.Build.UnitTests
         /// Given nothing to write, should succeed but
         /// produce no output file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoAttributesShouldEmitNoFile()
         {
             string file = Path.Combine(Path.GetTempPath(), "NoAttributesShouldEmitNoFile.tmp");
@@ -141,16 +140,16 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem(file);
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
-            Assert.AreEqual(false, File.Exists(file));
-            Assert.AreEqual(null, task.OutputFile);
+            Assert.Equal(true, result);
+            Assert.Equal(false, File.Exists(file));
+            Assert.Equal(null, task.OutputFile);
         }
 
         /// <summary>
         /// Given nothing to write, should succeed but
         /// produce no output file
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoAttributesShouldEmitNoFile2()
         {
             string file = Path.Combine(Path.GetTempPath(), "NoAttributesShouldEmitNoFile.tmp");
@@ -168,15 +167,15 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem(file);
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
-            Assert.AreEqual(false, File.Exists(file));
-            Assert.AreEqual(null, task.OutputFile);
+            Assert.Equal(true, result);
+            Assert.Equal(false, File.Exists(file));
+            Assert.Equal(null, task.OutputFile);
         }
 
         /// <summary>
         /// Bad file path
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidFilePath()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -187,14 +186,14 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem("||invalid||");
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
             engine.AssertLogContains("MSB3713");
         }
 
         /// <summary>
         /// Bad directory path
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidDirectoryPath()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -205,14 +204,14 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem("||invalid||");
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
             engine.AssertLogContains("MSB3713");
         }
 
         /// <summary>
         /// Parameterless attribute
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneAttributeNoParams()
         {
             string file = Path.Combine(Path.GetTempPath(), "OneAttribute.tmp");
@@ -228,14 +227,14 @@ namespace Microsoft.Build.UnitTests
                 task.OutputFile = new TaskItem(file);
                 bool result = task.Execute();
 
-                Assert.AreEqual(true, result);
-                Assert.AreEqual(true, File.Exists(file));
+                Assert.Equal(true, result);
+                Assert.Equal(true, File.Exists(file));
 
                 string content = File.ReadAllText(file);
                 Console.WriteLine(content);
 
-                Assert.AreEqual(true, content.Contains("using System;"));
-                Assert.AreEqual(true, content.Contains("[assembly: System.AssemblyTrademarkAttribute()]"));
+                Assert.Equal(true, content.Contains("using System;"));
+                Assert.Equal(true, content.Contains("[assembly: System.AssemblyTrademarkAttribute()]"));
             }
             finally
             {
@@ -246,7 +245,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test with the VB language
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneAttributeNoParamsVb()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -258,19 +257,19 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
 
-            Assert.AreEqual(true, content.Contains("Imports System"));
-            Assert.AreEqual(true, content.Contains("<Assembly: System.AssemblyTrademarkAttribute()>"));
+            Assert.Equal(true, content.Contains("Imports System"));
+            Assert.Equal(true, content.Contains("<Assembly: System.AssemblyTrademarkAttribute()>"));
         }
 
         /// <summary>
         /// More than one attribute
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TwoAttributes()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -285,19 +284,19 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
 
-            Assert.AreEqual(true, content.Contains(@"[assembly: AssemblyTrademarkAttribute(Name=""Microsoft"")]"));
-            Assert.AreEqual(true, content.Contains(@"[assembly: System.AssemblyCultureAttribute(Culture=""en-US"")]"));
+            Assert.Equal(true, content.Contains(@"[assembly: AssemblyTrademarkAttribute(Name=""Microsoft"")]"));
+            Assert.Equal(true, content.Contains(@"[assembly: System.AssemblyCultureAttribute(Culture=""en-US"")]"));
         }
 
         /// <summary>
         /// Specify directory instead
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ToDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -309,10 +308,10 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
-            Assert.AreEqual(true, File.Exists(task.OutputFile.ItemSpec));
-            Assert.AreEqual(true, String.Equals(task.OutputFile.ItemSpec.Substring(0, Path.GetTempPath().Length), Path.GetTempPath(), StringComparison.OrdinalIgnoreCase));
-            Assert.AreEqual(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
+            Assert.Equal(true, result);
+            Assert.Equal(true, File.Exists(task.OutputFile.ItemSpec));
+            Assert.Equal(true, String.Equals(task.OutputFile.ItemSpec.Substring(0, Path.GetTempPath().Length), Path.GetTempPath(), StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
 
             File.Delete(task.OutputFile.ItemSpec);
         }
@@ -320,7 +319,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Regular case
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneAttributeTwoParams()
         {
             string file = Path.Combine(Path.GetTempPath(), "OneAttribute.tmp");
@@ -338,15 +337,15 @@ namespace Microsoft.Build.UnitTests
                 task.OutputFile = new TaskItem(file);
                 bool result = task.Execute();
 
-                Assert.AreEqual(true, result);
-                Assert.AreEqual(true, File.Exists(file));
+                Assert.Equal(true, result);
+                Assert.Equal(true, File.Exists(file));
 
                 string content = File.ReadAllText(file);
                 Console.WriteLine(content);
 
-                Assert.AreEqual(true, content.Contains("using System;"));
-                Assert.AreEqual(true, content.Contains("using System.Reflection;"));
-                Assert.AreEqual(true, content.Contains(@"[assembly: AssemblyTrademarkAttribute(Company=""Microsoft"", Year=""2009"")]"));
+                Assert.Equal(true, content.Contains("using System;"));
+                Assert.Equal(true, content.Contains("using System.Reflection;"));
+                Assert.Equal(true, content.Contains(@"[assembly: AssemblyTrademarkAttribute(Company=""Microsoft"", Year=""2009"")]"));
             }
             finally
             {
@@ -357,7 +356,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This produces invalid code, but the task works
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneAttributeTwoParamsSameName()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -371,7 +370,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
             File.Delete(task.OutputFile.ItemSpec);
         }
@@ -380,7 +379,7 @@ namespace Microsoft.Build.UnitTests
         /// Some attributes only allow positional constructor arguments.
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneAttributePositionalParamInvalidSuffix()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -393,7 +392,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
 
             engine.AssertLogContains("MSB3098");
         }
@@ -403,7 +402,7 @@ namespace Microsoft.Build.UnitTests
         /// Some attributes only allow positional constructor arguments.
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneAttributeTwoPositionalParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -417,12 +416,12 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
 
-            Assert.AreEqual(true, content.Contains(@"[assembly: AssemblyTrademarkAttribute(""Microsoft"", ""2009"")]"));
+            Assert.Equal(true, content.Contains(@"[assembly: AssemblyTrademarkAttribute(""Microsoft"", ""2009"")]"));
 
             File.Delete(task.OutputFile.ItemSpec);
         }
@@ -432,7 +431,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// If a parameter is skipped, it's an error.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneAttributeSkippedPositionalParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -445,7 +444,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
 
             engine.AssertLogContains("MSB3714");
         }
@@ -455,7 +454,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// This test is for "_ParameterX"
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidNumber()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -468,7 +467,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
 
             engine.AssertLogContains("MSB3098");
         }
@@ -478,7 +477,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// This test is for "_Parameter"
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoNumber()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -491,7 +490,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
+            Assert.Equal(false, result);
 
             engine.AssertLogContains("MSB3098");
         }
@@ -501,7 +500,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// These can also be combined with named params.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneAttributePositionalAndNamedParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -516,12 +515,12 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
+            Assert.Equal(true, result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
 
-            Assert.AreEqual(true, content.Contains(@"[assembly: AssemblyTrademarkAttribute(""Microsoft"", Date=""2009"", Copyright=""(C)"")]"));
+            Assert.Equal(true, content.Contains(@"[assembly: AssemblyTrademarkAttribute(""Microsoft"", Date=""2009"", Copyright=""(C)"")]"));
 
             File.Delete(task.OutputFile.ItemSpec);
         }

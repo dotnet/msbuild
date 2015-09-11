@@ -12,11 +12,10 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.Tasks.Unittest
 {
-    [TestClass]
     public class GenerateBindingRedirectsTests
     {
         /// <summary>
@@ -27,7 +26,7 @@ namespace Microsoft.Build.Tasks.Unittest
         /// Rationale:
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TargetAppConfigShouldContainsBindingRedirects()
         {
             // Arrange
@@ -39,7 +38,7 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            Assert.IsTrue(redirectResults.ExecuteResult);
+            Assert.True(redirectResults.ExecuteResult);
             StringAssert.Contains(redirectResults.TargetAppConfigContent, "<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
             StringAssert.Contains(redirectResults.TargetAppConfigContent, "newVersion=\"40.0.0.0\"");
         }
@@ -52,7 +51,7 @@ namespace Microsoft.Build.Tasks.Unittest
         /// Rationale:
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TargetAppConfigShouldContainsBindingRedirectsFromAppConfig()
         {
             // Arrange
@@ -86,7 +85,7 @@ namespace Microsoft.Build.Tasks.Unittest
         /// - assemblyBinding could have more than one dependentAssembly elements and <see cref="GenerateBindingRedirects"/>
         ///   should respect that.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void GenerateBindingRedirectsFromTwoDependentAssemblySections()
         {
             // Arrange
@@ -116,7 +115,7 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, serviceBusRedirect, webHttpRedirect);
 
             // Assert
-            Assert.IsTrue(redirectResults.ExecuteResult);
+            Assert.True(redirectResults.ExecuteResult);
             // Naive check that target app.config contains custom redirects.
             // Output config should have max versions for both serviceBus and webhttp assemblies.
             StringAssert.Contains(redirectResults.TargetAppConfigContent, string.Format(CultureInfo.InvariantCulture, "oldVersion=\"0.0.0.0-{0}\"", serviceBusRedirect.MaxVersion));
@@ -126,7 +125,7 @@ namespace Microsoft.Build.Tasks.Unittest
             StringAssert.Contains(redirectResults.TargetAppConfigContent, string.Format(CultureInfo.InvariantCulture, "newVersion=\"{0}\"", webHttpRedirect.MaxVersion));
 
             XElement targetAppConfig = XElement.Parse(redirectResults.TargetAppConfigContent);
-            Assert.AreEqual(1, targetAppConfig.Descendants().Count(e => e.Name.LocalName.Equals("assemblyBinding", StringComparison.InvariantCultureIgnoreCase)),
+            Assert.Equal(1, targetAppConfig.Descendants().Count(e => e.Name.LocalName.Equals("assemblyBinding", StringComparison.InvariantCultureIgnoreCase)),
                 "Bindind redirects should not add additional assemblyBinding sections into the target app.config: " + targetAppConfig);
 
             // Log file should contains a warning when GenerateBindingRedirects updates existing app.config entries
@@ -143,7 +142,7 @@ namespace Microsoft.Build.Tasks.Unittest
         /// - In initial implementation such app.config was considered invalid and MSB3835 was issued.
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AppConfigWithProbingPathAndWithoutDependentAssemblyShouldNotProduceWarningsBug1161241()
         {
             // Arrange
@@ -157,8 +156,8 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            Assert.AreEqual(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
-            Assert.AreEqual(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
         }
 
         /// <summary>
@@ -170,7 +169,7 @@ namespace Microsoft.Build.Tasks.Unittest
         /// - In initial implementation such app.config was considered invalid and MSB3835 was issued.
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AppConfigWithEmptyAssemblyBindingShouldNotProduceWarnings()
         {
             // Arrange
@@ -183,8 +182,8 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            Assert.AreEqual(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
-            Assert.AreEqual(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
         }
 
         /// <summary>
@@ -195,7 +194,7 @@ namespace Microsoft.Build.Tasks.Unittest
         /// Rationale:
         /// - Due to app.config xsd schema this is a valid configuration.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DependentAssemblySectionWithoutBindingRedirectShouldNotProduceWarnings()
         {
             // Arrange
@@ -213,8 +212,8 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            Assert.AreEqual(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
-            Assert.AreEqual(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
         }
 
         /// <summary>
@@ -225,7 +224,7 @@ namespace Microsoft.Build.Tasks.Unittest
         /// Rationale:
         /// - Due to MSDN documentation, assemblyBinding element should always have a dependentAssembly subsection.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AppConfigInvalidIfDependentAssemblyNodeIsEmpty()
         {
             // Construct the app.config.
