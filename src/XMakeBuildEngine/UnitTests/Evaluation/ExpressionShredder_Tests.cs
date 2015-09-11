@@ -448,7 +448,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 expected = new string[] { };
             }
 
-            Assert.Equal(actual.Count, expected.Length, "Expected " + expected.Length + " items but got " + actual.Count);
+            Assert.Equal(actual.Count, expected.Length); // "Expected " + expected.Length + " items but got " + actual.Count
 
             for (int i = 0; i < expected.Length; i++)
             {

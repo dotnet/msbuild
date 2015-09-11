@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 Assert.Equal(3, item.Length);
                 int processId;
-                Assert.True(int.TryParse(item[2].ItemSpec, out processId), "Process ID passed from the 'test' target is not a valid integer (actual is '{0}')", item[2].ItemSpec);
+                Assert.True(int.TryParse(item[2].ItemSpec, out processId), string.Format("Process ID passed from the 'test' target is not a valid integer (actual is '{0}')", item[2].ItemSpec));
                 Assert.NotEqual(System.Diagnostics.Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
             }
             finally

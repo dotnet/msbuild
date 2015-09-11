@@ -730,7 +730,7 @@ EndGlobal
             var automaticProjectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("automatic.msbuild", automaticProjectFileContents);
             var automaticProject = new Project(automaticProjectFile);
             var buildResult = automaticProject.Build(loggers);
-            Assert.Equal(true, buildResult, String.Join(Environment.NewLine, logger.Errors.Select(beea => beea.Message)));
+            Assert.True(buildResult, String.Join(Environment.NewLine, logger.Errors.Select(beea => beea.Message)));
         }
 
         /// <summary>

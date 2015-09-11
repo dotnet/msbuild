@@ -255,19 +255,19 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <typeparam name="V">value</typeparam>
         private void AssertDictionariesIdentical<K, V>(IDictionary<K, V> one, IDictionary<K, V> two)
         {
-            Assert.Equal(one.Count, two.Count, "Counts are unequal, {0} and {1}", one.Count, two.Count);
+            Assert.Equal(one.Count, two.Count); // "Counts are unequal, {0} and {1}", one.Count, two.Count
 
             foreach (KeyValuePair<K, V> entry in one)
             {
                 V value;
                 if (!two.TryGetValue(entry.Key, out value))
                 {
-                    Assert.True(false, "one had key {0} the other didn't", entry.Key);
+                    Assert.True(false, string.Format("one had key {0} the other didn't", entry.Key));
                 }
 
                 if (!value.Equals(entry.Value))
                 {
-                    Assert.True(false, "one had {0}={1} the other {2}={3}", entry.Key, entry.Value, entry.Key, value);
+                    Assert.True(false, string.Format("one had {0}={1} the other {2}={3}", entry.Key, entry.Value, entry.Key, value));
                 }
             }
 
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             oneValues.Sort();
             twoValues.Sort();
 
-            Assert.Equal(oneValues.Count, twoValues.Count, "Value counts are unequal, {0} and {1}", oneValues.Count, twoValues.Count);
+            Assert.Equal(oneValues.Count, twoValues.Count); //"Value counts are unequal, {0} and {1}", oneValues.Count, twoValues.Count
 
             for (int i = 0; i < oneValues.Count; i++)
             {
@@ -293,18 +293,18 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             IDictionary oneId = (IDictionary)one;
             IDictionary twoId = (IDictionary)two;
 
-            Assert.Equal(oneId.Count, twoId.Count, "Counts are unequal, {0} and {1}", oneId.Count, twoId.Count);
+            Assert.Equal(oneId.Count, twoId.Count); // "Counts are unequal, {0} and {1}", oneId.Count, twoId.Count
 
             foreach (DictionaryEntry entry in oneId)
             {
                 if (!twoId.Contains(entry.Key))
                 {
-                    Assert.True(false, "oneId had key {0} the other didn't", entry.Key);
+                    Assert.True(false, string.Format("oneId had key {0} the other didn't", entry.Key));
                 }
 
                 if (!entry.Value.Equals(twoId[entry.Key]))
                 {
-                    Assert.True(false, "oneId had {0}={1} the other {2}={3}", entry.Key, entry.Value, entry.Key, twoId[entry.Key]);
+                    Assert.True(false, string.Format("oneId had {0}={1} the other {2}={3}", entry.Key, entry.Value, entry.Key, twoId[entry.Key]));
                 }
             }
 
@@ -319,7 +319,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             oneIdValues.Sort();
             twoIdValues.Sort();
 
-            Assert.Equal(oneIdValues.Count, twoIdValues.Count, "Value counts are unequal, {0} and {1}", oneIdValues.Count, twoIdValues.Count);
+            Assert.Equal(oneIdValues.Count, twoIdValues.Count); // "Value counts are unequal, {0} and {1}", oneIdValues.Count, twoIdValues.Count
 
             for (int i = 0; i < oneIdValues.Count; i++)
             {
