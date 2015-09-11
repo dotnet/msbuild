@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.Null(missingAttr, message);
+                Assert.Null(missingAttr);
             }
         }
 
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.Null(resolvedPath, message);
+                Assert.Null(resolvedPath);
             }
         }
 
