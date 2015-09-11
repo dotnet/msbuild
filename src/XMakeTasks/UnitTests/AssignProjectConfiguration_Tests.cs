@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
                 itemSpec, projectGuid, package, name, xmlString, expectedResult, result, expectedFullConfiguration,
                 (resolvedProjectWithConfiguration == null) ? string.Empty : resolvedProjectWithConfiguration.GetMetadata("FullConfiguration"));
 
-            Assert.Equal(expectedResult, result, message);
+            Assert.Equal(expectedResult, result);
             if (result == true)
             {
                 Assert.Equal(expectedFullConfiguration, resolvedProjectWithConfiguration.GetMetadata("FullConfiguration"));

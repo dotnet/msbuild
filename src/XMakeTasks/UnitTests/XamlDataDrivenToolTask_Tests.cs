@@ -33,8 +33,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
     {
         private Assembly _fakeTaskDll;
 
-        [TestInitialize]
-        public void SetupGeneratedCode()
+        public GeneratedTask()
         {
             _fakeTaskDll = XamlTestHelpers.SetupGeneratedCode();
         }

@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(2, properties.Count, "Expected two properties but there were " + properties.Count);
+            Assert.Equal(2, properties.Count); // "Expected two properties but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "GlobalOptimizations switch should exist"
             Assert.Equal("GlobalOptimizations", properties.First.Value.Name);
             Assert.Equal("Og", properties.First.Value.SwitchName);
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(1, properties.Count, "Expected one property but there were " + properties.Count);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "KeepComments switch should exist"
             Assert.Equal("KeepComments", properties.First.Value.Name);
             Assert.Equal("C", properties.First.Value.SwitchName);
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(1, properties.Count, "Expected one property but there were " + properties.Count);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "SuppressStartupBanner switch should exist"
             Assert.Equal("SuppressStartupBanner", properties.First.Value.Name);
             Assert.Equal("nologo", properties.First.Value.SwitchName);
@@ -259,7 +259,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(1, properties.Count, "Expected one property but there were " + properties.Count);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "GeneratePreprocessedFile switch should exist"
             Assert.Equal("GeneratePreprocessedFile", properties.First.Value.Name);
             Assert.Equal(PropertyType.String, properties.First.Value.Type); // Enum properties are represented as string types
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(1, properties.Count, "Expected one property but there were " + properties.Count);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "CLBeforeTargets switch should exist"
             Assert.Equal("CLBeforeTargets", properties.First.Value.Name);
             Assert.Equal(PropertyType.String, properties.First.Value.Type); // Enum properties are represented as string types
@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(1, properties.Count, "Expected one property but there were " + properties.Count);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "TargetAssembly switch should exist"
             Assert.Equal("TargetAssembly", properties.First.Value.Name);
             Assert.Equal(PropertyType.String, properties.First.Value.Type);
@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(1, properties.Count, "Expected one property but there were " + properties.Count);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "TargetAssembly switch should exist"
             Assert.Equal("TargetAssembly", properties.First.Value.Name);
             Assert.Equal(PropertyType.StringArray, properties.First.Value.Type);
@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(1, properties.Count, "Expected one property but there were " + properties.Count);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "TargetAssembly switch should exist"
             Assert.Equal("TargetAssembly", properties.First.Value.Name);
             Assert.Equal(PropertyType.StringArray, properties.First.Value.Type);
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
             LinkedList<Property> properties = tp.Properties;
 
-            Assert.Equal(1, properties.Count, "Expected one property but there were " + properties.Count);
+            Assert.Equal(1, properties.Count); // "Expected one property but there were " + properties.Count
             Assert.NotNull(properties.First.Value); // "TargetAssembly switch should exist"
             Assert.Equal("TargetAssembly", properties.First.Value.Name);
             Assert.Equal(PropertyType.ItemArray, properties.First.Value.Type);  // Although it's a String array property, DataSource.SourceType overrides that

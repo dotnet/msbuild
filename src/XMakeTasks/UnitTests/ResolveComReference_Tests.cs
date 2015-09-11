@@ -787,7 +787,7 @@ namespace Microsoft.Build.UnitTests
 
             tlbRefInfo = (ComReferenceInfo)rcr.allProjectRefs[1];
             var embedInteropTypes = tlbRefInfo.taskItem.GetMetadata(ItemMetadataNames.embedInteropTypes);
-            Assert.Equal("false", embedInteropTypes, "The tlb wrapper for the activex control should have EmbedInteropTypes=false not " + embedInteropTypes);
+            Assert.Equal("false", embedInteropTypes); // "The tlb wrapper for the activex control should have EmbedInteropTypes=false not " + embedInteropTypes);
             Assert.True(ComReference.AreTypeLibAttrEqual(tlbRefInfo.attr, axRefInfo.attr)); // "reference information should be the same"
             Assert.Equal(TlbReference.GetWrapperFileName
                         (

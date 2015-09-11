@@ -125,8 +125,10 @@ namespace Microsoft.Build.Tasks.Unittest
             StringAssert.Contains(redirectResults.TargetAppConfigContent, string.Format(CultureInfo.InvariantCulture, "newVersion=\"{0}\"", webHttpRedirect.MaxVersion));
 
             XElement targetAppConfig = XElement.Parse(redirectResults.TargetAppConfigContent);
-            Assert.Equal(1, targetAppConfig.Descendants().Count(e => e.Name.LocalName.Equals("assemblyBinding", StringComparison.InvariantCultureIgnoreCase)),
-                "Bindind redirects should not add additional assemblyBinding sections into the target app.config: " + targetAppConfig);
+            Assert.Equal(1,
+                targetAppConfig.Descendants()
+                    .Count(e => e.Name.LocalName.Equals("assemblyBinding", StringComparison.InvariantCultureIgnoreCase)));
+            // "Binding redirects should not add additional assemblyBinding sections into the target app.config: " + targetAppConfig
 
             // Log file should contains a warning when GenerateBindingRedirects updates existing app.config entries
             redirectResults.Engine.AssertLogContains("MSB3836");
@@ -156,8 +158,8 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            Assert.Equal(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
-            Assert.Equal(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Errors); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log
+            Assert.Equal(0, redirectResults.Engine.Warnings); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log
         }
 
         /// <summary>
@@ -182,8 +184,8 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            Assert.Equal(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
-            Assert.Equal(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Errors); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Warnings); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log
         }
 
         /// <summary>
@@ -212,8 +214,8 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            Assert.Equal(0, redirectResults.Engine.Errors, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
-            Assert.Equal(0, redirectResults.Engine.Warnings, "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Errors); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
+            Assert.Equal(0, redirectResults.Engine.Warnings); // "Unexpected errors. Engine log: " + redirectResults.Engine.Log);
         }
 
         /// <summary>
