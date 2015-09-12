@@ -143,7 +143,8 @@
   </Target>
 
   <!-- Get access to the xunit task from the globally-installed location -->
-  <Import Project="$(PackagesDir)\xunit.runner.msbuild.$(XunitVersion)\build\portable-net45+win8+wp8+wpa81\xunit.runner.msbuild.props" />
+  <Import Project="$(PackagesDir)\xunit.runner.msbuild.$(XunitVersion)\build\portable-net45+win8+wp8+wpa81\xunit.runner.msbuild.props" 
+          Condition="'$(IsTestProject)' == 'true'" />
 
   <Target Name="Test"
           DependsOnTargets="Build;EnsurePrerequisitesCopied"
