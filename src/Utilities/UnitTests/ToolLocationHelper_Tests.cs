@@ -1812,12 +1812,12 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable("ProgramFiles(x86)", null);
                 string result = FrameworkLocationHelper.GenerateProgramFiles32();
-                Assert.True(programFiles.Equals(result, StringComparison.OrdinalIgnoreCase)); // "Expected to use program files but used program files x86"
+                Assert.Equal(programFiles, result, true); // "Expected to use program files but used program files x86"
 
                 Environment.SetEnvironmentVariable("ProgramFiles(x86)", String.Empty);
 
                 result = FrameworkLocationHelper.GenerateProgramFiles32();
-                Assert.True(programFiles.Equals(result, StringComparison.OrdinalIgnoreCase)); // "Expected to use program files but used program files x86"
+                Assert.Equal(programFiles, result, true); // "Expected to use program files but used program files x86"
             }
             finally
             {
