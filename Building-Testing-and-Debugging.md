@@ -1,9 +1,9 @@
 # Building, Testing, and Debugging
 
 ## Required Software
-**Microsoft Visual Studio Ultimate 2015 Preview**
+**Microsoft Visual Studio 2015 **
 
-This version of MSBuild closely aligns to the version that ships with Visual Studio 2015. You may be able to build and debug with Visual Studio 2013, but using the latest preview release is recommended. You can download the preview release (**CTP6**) for free from [http://www.visualstudio.com/downloads/visual-studio-2015-ctp-vs](http://www.visualstudio.com/downloads/visual-studio-2015-ctp-vs).
+This version of MSBuild closely aligns to the version that ships with Visual Studio 2015. You may be able to build and debug with Visual Studio 2013, but using Visual Studio 2015 is recommended. You can download the community edition from [https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx).
 > Please note this is intending as a standalone build engine, not integrated with Visual Studio. We may add support/documentation for that scenario if we see community interest for it.
 
 ## Getting the code
@@ -30,15 +30,12 @@ cd .\msbuild
 .\build.cmd
 .\RebuildWithLocalMSBuild.cmd
 ```
-Please note that at this time the `RebuildWithLocalMSBuild.cmd` script will build the solution and package with it dependencies installed on your machine found under `C:\Program Files (x86)\MSBuild\`. We intend to move these dependencies to NuGet packages at some point, but for now this is the primary reason Visual Studio 2015 is required.
 
 ## Build a Console App
 To build a console app, you first need a drop of MSBuild (built on your machine) with all the required dependencies. To do this, open a 'Developer Command Prompt for VS2015' and run the following command from your msbuild folder:
 ```
-BuildAndCopy.cmd bin\MSBuild true
+BuildAndCopy.cmd bin\MSBuild
 ``` 
-> If you're interested in this command and the 'true' flag, see [Microsoft.Build.Framework wiki page](https://github.com/Microsoft/msbuild/wiki/Microsoft.Build.Framework) for a complete explanation.
-
 Now, just point `bin\MSBuild\MSBuild.exe` at a project file. Here's a quick sample project that will build an application that runs on the .NET Core framework:
 ```
 cd ..\
