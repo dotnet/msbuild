@@ -162,16 +162,13 @@ namespace TestTask
         /// </summary>
         private static ElementLocation s_elementLocation = ElementLocation.Create("c:\\project.proj", 0, 0);
 
-        public TaskRegistry_Tests(TaskAssemblyFixture fixture)
-        {
-            s_testTaskLocation = fixture.TestTaskLocation;
-        }
-
         /// <summary>
         /// Setup some logging services so we can see what is goign on.
         /// </summary>
-        public TaskRegistry_Tests()
+        public TaskRegistry_Tests(TaskAssemblyFixture fixture)
         {
+            s_testTaskLocation = fixture.TestTaskLocation;
+
             s_loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1) as ILoggingService;
             s_logger = new MockLogger();
             s_targetLoggingContext = new TargetLoggingContext(s_loggingService, s_loggerContext);
