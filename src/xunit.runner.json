@@ -1,3 +1,6 @@
 {
-  "shadowCopy": false
+  "shadowCopy": false,
+  "maxParallelThreads": 1,
+  "parallelizeAssembly": false,
+  "methodDisplay": "method"
 }
