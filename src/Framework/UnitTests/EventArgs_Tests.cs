@@ -12,7 +12,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 #endif
 
 using Microsoft.Build.Framework;
-using NUnit.Framework;
+using Xunit;
 
 #pragma warning disable 0219
 
@@ -21,7 +21,6 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Unit test the base class BuildEventArgs
     /// </summary>
-    [TestFixture]
     public class EventArgs_Tests
     {
         #region BaseClass Equals Tests
@@ -35,8 +34,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Setup the test, this method is run ONCE for the entire test fixture
         /// </summary>
-        [TestFixtureSetUp]
-        public static void Setup()
+        public EventArgs_Tests()
         {
             s_baseGenericEvent = new GenericBuildEventArgs("Message", "HelpKeyword", "senderName");
             s_baseGenericEvent.BuildEventContext = new BuildEventContext(9, 8, 7, 6);
@@ -45,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise getHashCode.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestGetHashCode()
         {
             s_baseGenericEvent.GetHashCode();
@@ -54,7 +52,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [Test]
+        [Fact]
         public void EventArgsCtors()
         {
             GenericBuildEventArgs genericEventTest = new GenericBuildEventArgs();
@@ -65,8 +63,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify a whidbey project started event can be deserialized, the whidbey event is stored in a serialized base64 string.
         /// </summary>
-        [Test]
-        [Ignore("FEATURE: LEGACY TASKS")]
+        [Fact(Skip = "Ignored in MSTest")]
         // Ignore: Type in serialized string targets MSBuild retail public key, will not de-serialize
         public void TestDeserialization()
         {
@@ -77,19 +74,19 @@ namespace Microsoft.Build.UnitTests
             ms.Write(binaryObject, 0, binaryObject.Length);
             ms.Position = 0;
             ProjectStartedEventArgs pse = (ProjectStartedEventArgs)bf.Deserialize(ms);
-            Assert.IsTrue(string.Compare(pse.Message, "message", StringComparison.OrdinalIgnoreCase) == 0);
-            Assert.IsTrue(string.Compare(pse.ProjectFile, "projectFile", StringComparison.OrdinalIgnoreCase) == 0);
-            Assert.AreEqual(pse.ProjectId, -1);
-            Assert.IsTrue(string.Compare(pse.TargetNames, "targetNames", StringComparison.OrdinalIgnoreCase) == 0);
-            Assert.AreEqual(pse.BuildEventContext, BuildEventContext.Invalid);
-            Assert.AreEqual(pse.ParentProjectBuildEventContext, BuildEventContext.Invalid);
+            Assert.Equal(0, string.Compare(pse.Message, "message", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, string.Compare(pse.ProjectFile, "projectFile", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(pse.ProjectId, -1);
+            Assert.Equal(0, string.Compare(pse.TargetNames, "targetNames", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(pse.BuildEventContext, BuildEventContext.Invalid);
+            Assert.Equal(pse.ParentProjectBuildEventContext, BuildEventContext.Invalid);
         }
 #endif
 
         /// <summary>
         /// Verify the BuildEventContext is exercised
         /// </summary>
-        [Test]
+        [Fact]
         public void ExerciseBuildEventContext()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(0, 0, 0, 0);
@@ -104,42 +101,42 @@ namespace Microsoft.Build.UnitTests
 
             ProjectStartedEventArgs startedEvent = new ProjectStartedEventArgs(-1, "Message", "HELP", "File", "Targets", null, null, parentBuildEventContext);
             startedEvent.BuildEventContext = currentBuildEventContext;
-            Assert.IsTrue(parentBuildEventContext.GetHashCode() == 0);
+            Assert.Equal(0, parentBuildEventContext.GetHashCode());
 
             // Node is different
-            Assert.IsFalse(parentBuildEventContext.Equals(currentBuildEventContextNode));
+            Assert.False(parentBuildEventContext.Equals(currentBuildEventContextNode));
 
             // Target is different
-            Assert.IsFalse(parentBuildEventContext.Equals(currentBuildEventContextTarget));
+            Assert.False(parentBuildEventContext.Equals(currentBuildEventContextTarget));
 
             // PCI is different
-            Assert.IsFalse(parentBuildEventContext.Equals(currentBuildEventContextPci));
+            Assert.False(parentBuildEventContext.Equals(currentBuildEventContextPci));
 
             // Task is different
-            Assert.IsFalse(parentBuildEventContext.Equals(currentBuildEventContextTask));
+            Assert.False(parentBuildEventContext.Equals(currentBuildEventContextTask));
 
             // All fields are different
-            Assert.IsFalse(parentBuildEventContext.Equals(allDifferent));
+            Assert.False(parentBuildEventContext.Equals(allDifferent));
 
             // All fields are same
-            Assert.IsTrue(parentBuildEventContext.Equals(allSame));
+            Assert.True(parentBuildEventContext.Equals(allSame));
 
             // Compare with null
-            Assert.IsFalse(parentBuildEventContext.Equals(null));
+            Assert.False(parentBuildEventContext.Equals(null));
 
             // Compare with self
-            Assert.IsTrue(currentBuildEventContext.Equals(currentBuildEventContext));
-            Assert.IsFalse(currentBuildEventContext.Equals(new object()));
-            Assert.IsNotNull(startedEvent.BuildEventContext);
+            Assert.True(currentBuildEventContext.Equals(currentBuildEventContext));
+            Assert.False(currentBuildEventContext.Equals(new object()));
+            Assert.NotNull(startedEvent.BuildEventContext);
 
-            Assert.AreEqual(0, startedEvent.ParentProjectBuildEventContext.NodeId);
-            Assert.AreEqual(0, startedEvent.ParentProjectBuildEventContext.TargetId);
-            Assert.AreEqual(0, startedEvent.ParentProjectBuildEventContext.ProjectContextId);
-            Assert.AreEqual(0, startedEvent.ParentProjectBuildEventContext.TaskId);
-            Assert.AreEqual(0, startedEvent.BuildEventContext.NodeId);
-            Assert.AreEqual(2, startedEvent.BuildEventContext.TargetId);
-            Assert.AreEqual(1, startedEvent.BuildEventContext.ProjectContextId);
-            Assert.AreEqual(1, startedEvent.BuildEventContext.TaskId);
+            Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.NodeId);
+            Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.TargetId);
+            Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.ProjectContextId);
+            Assert.Equal(0, startedEvent.ParentProjectBuildEventContext.TaskId);
+            Assert.Equal(0, startedEvent.BuildEventContext.NodeId);
+            Assert.Equal(2, startedEvent.BuildEventContext.TargetId);
+            Assert.Equal(1, startedEvent.BuildEventContext.ProjectContextId);
+            Assert.Equal(1, startedEvent.BuildEventContext.TaskId);
         }
 
         /// <summary>

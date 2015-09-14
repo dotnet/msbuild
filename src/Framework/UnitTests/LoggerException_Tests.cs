@@ -7,17 +7,16 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Microsoft.Build.Framework;
-using NUnit.Framework;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class LoggerExceptionTests
     {
         /// <summary>
         /// Verify I implemented ISerializable correctly
         /// </summary>
-        [Test]
+        [Fact]
         public void SerializeDeserialize()
         {
             LoggerException e = new LoggerException("message",
@@ -34,17 +33,17 @@ namespace Microsoft.Build.UnitTests
 
                 LoggerException e2 = (LoggerException)frm.Deserialize(memstr);
 
-                Assert.AreEqual(e.ErrorCode, e2.ErrorCode);
-                Assert.AreEqual(e.HelpKeyword, e2.HelpKeyword);
-                Assert.AreEqual(e.Message, e2.Message);
-                Assert.AreEqual(e.InnerException.Message, e2.InnerException.Message);
+                Assert.Equal(e.ErrorCode, e2.ErrorCode);
+                Assert.Equal(e.HelpKeyword, e2.HelpKeyword);
+                Assert.Equal(e.Message, e2.Message);
+                Assert.Equal(e.InnerException.Message, e2.InnerException.Message);
             }
         }
 
         /// <summary>
         /// Verify I implemented ISerializable correctly, using other ctor
         /// </summary>
-        [Test]
+        [Fact]
         public void SerializeDeserialize2()
         {
             LoggerException e = new LoggerException("message");
@@ -58,10 +57,10 @@ namespace Microsoft.Build.UnitTests
 
                 LoggerException e2 = (LoggerException)frm.Deserialize(memstr);
 
-                Assert.AreEqual(null, e2.ErrorCode);
-                Assert.AreEqual(null, e2.HelpKeyword);
-                Assert.AreEqual(e.Message, e2.Message);
-                Assert.AreEqual(null, e2.InnerException);
+                Assert.Equal(null, e2.ErrorCode);
+                Assert.Equal(null, e2.HelpKeyword);
+                Assert.Equal(e.Message, e2.Message);
+                Assert.Equal(null, e2.InnerException);
             }
         }
     }

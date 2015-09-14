@@ -63,11 +63,16 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         Version46 = 7,
 
+        /// <summary>
+        /// version 4.6.1
+        /// </summary>
+        Version461 = 8,
+
         // keep this up to date, this should always point to the last entry
         /// <summary>
         /// the latest version available at the time of release
         /// </summary>
-        VersionLatest = Version46
+        VersionLatest = Version461
     }
 
     /// <summary>
@@ -1485,6 +1490,18 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Returns the path to the "bin" directory of the latest .NET Framework SDK. When targeting .NET 3.5 
+        /// or above, looks in the locations associated with Visual Studio 2010.  If you wish to target 
+        /// the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override 
+        /// that specifies a VisualStudioVersion. 
+        /// </summary>
+        /// <returns>Path string.</returns>
+        public static string GetPathToDotNetFrameworkSdk()
+        {
+            return GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest);
+        }
+
+        /// <summary>
         /// Returns the path to the "bin" directory of the .NET Framework SDK. When targeting .NET 3.5 
         /// or above, looks in the locations associated with Visual Studio 2010.  If you wish to target 
         /// the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override 
@@ -1749,6 +1766,9 @@ namespace Microsoft.Build.Utilities
 
                 case TargetDotNetFrameworkVersion.Version46:
                     return FrameworkLocationHelper.dotNetFrameworkVersion46;
+
+                case TargetDotNetFrameworkVersion.Version461:
+                    return FrameworkLocationHelper.dotNetFrameworkVersion461;
 
                 default:
                     ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedFrameworkVersion", version);
@@ -2980,6 +3000,19 @@ namespace Microsoft.Build.Utilities
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Get a fully qualified path to a file in the latest .NET Framework SDK. Error if the .NET Framework SDK can't be found.
+        /// When targeting .NET 3.5 or above, looks in the locations associated with Visual Studio 2010.  If you wish to 
+        /// target the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override that 
+        /// specifies a VisualStudioVersion. 
+        /// </summary>
+        /// <param name="fileName">File name to locate in the .NET Framework SDK directory</param>
+        /// <returns>Path string.</returns>
+        public static string GetPathToDotNetFrameworkSdkFile(string fileName)
+        {
+            return GetPathToDotNetFrameworkSdkFile(fileName, TargetDotNetFrameworkVersion.VersionLatest);
         }
 
         /// <summary>

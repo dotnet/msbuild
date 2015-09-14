@@ -1,4 +1,4 @@
-﻿{
+{
   "dependencies": {
 
   },
@@ -35,7 +35,8 @@
         "System.Xml.ReaderWriter": "4.0.10",
         "Microsoft.NETCore.Runtime": "1.0.0",
         "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123"
-      }
+      },
+      "imports": "portable-net451+win81"
     }
   }
 }

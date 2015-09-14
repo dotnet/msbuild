@@ -44,6 +44,10 @@ dlldata.c
 #project.lock.json
 artifacts/
 
+# Nuget v3
+*.nuget.targets
+
+
 *_i.c
 *_p.c
 *_i.h

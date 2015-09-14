@@ -3952,7 +3952,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     ParserOptions.AllowAll,
                     expander,
                     ExpanderOptions.ExpandProperties,
-                    Environment.CurrentDirectory,
+                    Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
                     null,
                     new BuildEventContext(1, 2, 3, 4));
@@ -3970,7 +3970,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ParserOptions.AllowAll,
                 expander,
                 ExpanderOptions.ExpandProperties,
-                Environment.CurrentDirectory,
+                Directory.GetCurrentDirectory(),
                 MockElementLocation.Instance,
                 null,
                 new BuildEventContext(1, 2, 3, 4)));

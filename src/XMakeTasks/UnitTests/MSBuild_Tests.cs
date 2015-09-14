@@ -40,10 +40,10 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void ProjectItemSpecTooLong()
         {
-            string currentDirectory = Environment.CurrentDirectory;
+            string currentDirectory = Directory.GetCurrentDirectory();
             try
             {
-                Environment.CurrentDirectory = Path.GetTempPath();
+                Directory.SetCurrentDirectory(Path.GetTempPath());
 
                 string tempPath = Path.GetTempPath();
 
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Environment.CurrentDirectory = currentDirectory;
+                Directory.SetCurrentDirectory(currentDirectory);
             }
         }
 

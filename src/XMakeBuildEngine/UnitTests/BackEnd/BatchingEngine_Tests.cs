@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 XmlAttribute tempXmlAttribute = (new XmlDocument()).CreateAttribute("attrib");
                 tempXmlAttribute.Value = "'$(Obj)'=='obj'";
 
-                Assert.IsTrue(ConditionEvaluator.EvaluateCondition(tempXmlAttribute.Value, ParserOptions.AllowAll, bucket.Expander, ExpanderOptions.ExpandAll, Environment.CurrentDirectory, MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
+                Assert.IsTrue(ConditionEvaluator.EvaluateCondition(tempXmlAttribute.Value, ParserOptions.AllowAll, bucket.Expander, ExpanderOptions.ExpandAll, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
                 Assert.AreEqual("a.doc;b.doc;c.doc;d.doc;e.doc", bucket.Expander.ExpandIntoStringAndUnescape("@(doc)", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
                 Assert.AreEqual("unittests.foo", bucket.Expander.ExpandIntoStringAndUnescape("$(bogus)$(UNITTESTS)", ExpanderOptions.ExpandPropertiesAndMetadata, MockElementLocation.Instance));
             }

@@ -88,78 +88,78 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link.9999-cvtres.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.[ID]-cvtres.write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.[ID]-cvtres.write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link.0000-cvtres.read.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.[ID]-cvtres.read.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.[ID]-cvtres.read.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link.4567-cvtres.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.[ID]-cvtres.write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.[ID]-cvtres.write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link.9999.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.[ID].write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.[ID].write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link.0000.read.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.[ID].read.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.[ID].read.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link.4567.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.[ID].write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.[ID].write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link2345.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link2345.write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link2345.write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("link.4567.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "link.[ID].write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "link.[ID].write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\a.1234.b\\link.4567.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\a.1234.b\\link.[ID].write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\a.1234.b\\link.[ID].write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("link.write.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "link.write.tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "link.write.tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("link%20with%20spaces.write.3.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "link with spaces.write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "link with spaces.write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[2] { new TaskItem("link.write.tlog"), new TaskItem("Debug\\link2345.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link2345.write.[ID].tlog").ToUpperInvariant() + "|" +
-                    Path.Combine(Environment.CurrentDirectory, "link.write.tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link2345.write.[ID].tlog").ToUpperInvariant() + "|" +
+                    Path.Combine(Directory.GetCurrentDirectory(), "link.write.tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("link.write.tlog1234") },
-                    Path.Combine(Environment.CurrentDirectory, "link.write.tlog1234").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "link.write.tlog1234").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("1234link.write.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "1234link.write.tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "1234link.write.tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("link-1234.write.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "link-1234.write.tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "link-1234.write.tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
@@ -169,17 +169,17 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("a\\") },
-                    Path.Combine(Environment.CurrentDirectory, "a\\").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "a\\").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link.45\\67.write.1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.45\\67.write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.45\\67.write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("Debug\\link.4567.write.1.tlog\\") },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.4567.write.1.tlog\\").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.4567.write.1.tlog\\").ToUpperInvariant()
                 );
             tests.Add
                 (
@@ -194,78 +194,78 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                             new TaskItem("Debug\\link.2345.write.1.tlog"),
                             new TaskItem("Debug\\link.2345-cvtres.6789-mspdbsrv.1111.write.4.tlog")
                         },
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.write.[ID].tlog").ToUpperInvariant() + "|" +
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.[ID]-cvtres.[ID]-mspdbsrv.[ID].write.[ID].tlog").ToUpperInvariant() + "|" +
-                    Path.Combine(Environment.CurrentDirectory, "Debug\\link.[ID].write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.write.[ID].tlog").ToUpperInvariant() + "|" +
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.[ID]-cvtres.[ID]-mspdbsrv.[ID].write.[ID].tlog").ToUpperInvariant() + "|" +
+                    Path.Combine(Directory.GetCurrentDirectory(), "Debug\\link.[ID].write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[3] { new TaskItem("link.1234-write.1.tlog"), new TaskItem("link.1234-write.3.tlog"), new TaskItem("cl.write.2.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "cl.write.[ID].tlog").ToUpperInvariant() + "|" +
-                    Path.Combine(Environment.CurrentDirectory, "link.[ID]-write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "cl.write.[ID].tlog").ToUpperInvariant() + "|" +
+                    Path.Combine(Directory.GetCurrentDirectory(), "link.[ID]-write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[3] { new TaskItem("lINk.1234-write.1.tlog"), new TaskItem("link.1234-WRitE.3.tlog"), new TaskItem("cl.write.2.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "cl.write.[ID].tlog").ToUpperInvariant() + "|" +
-                    Path.Combine(Environment.CurrentDirectory, "link.[ID]-write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "cl.write.[ID].tlog").ToUpperInvariant() + "|" +
+                    Path.Combine(Directory.GetCurrentDirectory(), "link.[ID]-write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[3] { new TaskItem("a\\link.1234-write.1.tlog"), new TaskItem("b\\link.1234-write.3.tlog"), new TaskItem("cl.write.2.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "a\\link.[ID]-write.[ID].tlog").ToUpperInvariant() + "|" +
-                    Path.Combine(Environment.CurrentDirectory, "b\\link.[ID]-write.[ID].tlog").ToUpperInvariant() + "|" +
-                    Path.Combine(Environment.CurrentDirectory, "cl.write.[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "a\\link.[ID]-write.[ID].tlog").ToUpperInvariant() + "|" +
+                    Path.Combine(Directory.GetCurrentDirectory(), "b\\link.[ID]-write.[ID].tlog").ToUpperInvariant() + "|" +
+                    Path.Combine(Directory.GetCurrentDirectory(), "cl.write.[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("foo\\.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "foo\\.tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "foo\\.tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("foo\\1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, "foo\\1.tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "foo\\1.tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("\\1.tlog") },
-                    Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "1.tlog").ToUpperInvariant()
+                    Path.Combine(Path.GetPathRoot(Directory.GetCurrentDirectory()), "1.tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem(".1.tlog") },
-                    Path.Combine(Environment.CurrentDirectory, ".[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), ".[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("-2") },
-                    Path.Combine(Environment.CurrentDirectory, "-2").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "-2").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem(".2") },
-                    Path.Combine(Environment.CurrentDirectory, ".2").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), ".2").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("2-") },
-                    Path.Combine(Environment.CurrentDirectory, "2-").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "2-").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("2.") },
-                    Path.Combine(Environment.CurrentDirectory, "2").ToUpperInvariant()
+                    Path.Combine(Directory.GetCurrentDirectory(), "2").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("\\.1.tlog") },
-                    Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), ".[ID].tlog").ToUpperInvariant()
+                    Path.Combine(Path.GetPathRoot(Directory.GetCurrentDirectory()), ".[ID].tlog").ToUpperInvariant()
                 );
             tests.Add
                 (
                     new ITaskItem[1] { new TaskItem("\\") },
-                    Path.GetPathRoot(Environment.CurrentDirectory).ToUpperInvariant()
+                    Path.GetPathRoot(Directory.GetCurrentDirectory()).ToUpperInvariant()
                 );
             tests.Add
                 (

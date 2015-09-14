@@ -383,34 +383,34 @@ namespace Microsoft.Build.UnitTests
                 fileLogger.Shutdown();
 
                 fileLogger.NodeId = 3;
-                fileLogger.Parameters = "logfile=" + Path.Combine(Environment.CurrentDirectory, "mylogfile.log");
+                fileLogger.Parameters = "logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "mylogfile.log");
                 fileLogger.Initialize(new EventSourceSink());
-                Assert.IsTrue(string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Environment.CurrentDirectory, "mylogfile3.log") + ";", StringComparison.OrdinalIgnoreCase) == 0);
+                Assert.IsTrue(string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "mylogfile3.log") + ";", StringComparison.OrdinalIgnoreCase) == 0);
                 fileLogger.Shutdown();
 
                 fileLogger.NodeId = 4;
-                fileLogger.Parameters = "logfile=" + Path.Combine(Environment.CurrentDirectory, "mylogfile.log");
+                fileLogger.Parameters = "logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "mylogfile.log");
                 fileLogger.Initialize(new EventSourceSink());
-                Assert.IsTrue(string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Environment.CurrentDirectory, "mylogfile4.log") + ";", StringComparison.OrdinalIgnoreCase) == 0);
+                Assert.IsTrue(string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "mylogfile4.log") + ";", StringComparison.OrdinalIgnoreCase) == 0);
                 fileLogger.Shutdown();
 
-                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "tempura"));
+                Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "tempura"));
                 fileLogger.NodeId = 1;
-                fileLogger.Parameters = "logfile=" + Path.Combine(Environment.CurrentDirectory, "tempura\\mylogfile.log");
+                fileLogger.Parameters = "logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "tempura\\mylogfile.log");
                 fileLogger.Initialize(new EventSourceSink());
-                Assert.IsTrue(string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Environment.CurrentDirectory, "tempura\\mylogfile1.log") + ";", StringComparison.OrdinalIgnoreCase) == 0);
+                Assert.IsTrue(string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "tempura\\mylogfile1.log") + ";", StringComparison.OrdinalIgnoreCase) == 0);
                 fileLogger.Shutdown();
             }
             finally
             {
-                if (Directory.Exists(Path.Combine(Environment.CurrentDirectory, "tempura")))
+                if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "tempura")))
                 {
-                    File.Delete(Path.Combine(Environment.CurrentDirectory, "tempura\\mylogfile1.log"));
-                    Directory.Delete(Path.Combine(Environment.CurrentDirectory, "tempura"));
+                    File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "tempura\\mylogfile1.log"));
+                    Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), "tempura"));
                 }
-                File.Delete(Path.Combine(Environment.CurrentDirectory, "mylogfile0.log"));
-                File.Delete(Path.Combine(Environment.CurrentDirectory, "mylogfile3.log"));
-                File.Delete(Path.Combine(Environment.CurrentDirectory, "mylogfile4.log"));
+                File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile0.log"));
+                File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile3.log"));
+                File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile4.log"));
             }
         }
 
@@ -425,7 +425,7 @@ namespace Microsoft.Build.UnitTests
             fileLogger.NodeId = 1;
             fileLogger.Parameters = "logfile="
                                     + Path.Combine(
-                                        Environment.CurrentDirectory,
+                                        Directory.GetCurrentDirectory(),
                                         Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar
                                         + "mylogfile.log");
             fileLogger.Initialize(new EventSourceSink());
@@ -434,7 +434,7 @@ namespace Microsoft.Build.UnitTests
                     fileLogger.InternalFilelogger.Parameters,
                     ";ShowCommandLine;logfile="
                     + Path.Combine(
-                        Environment.CurrentDirectory,
+                        Directory.GetCurrentDirectory(),
                         Path.DirectorySeparatorChar + "DONTEXIST" + Path.DirectorySeparatorChar + "mylogfile2.log"),
                     StringComparison.OrdinalIgnoreCase) == 0);
         }

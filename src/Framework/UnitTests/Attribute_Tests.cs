@@ -5,39 +5,38 @@ using System;
 using System.Reflection;
 
 using Microsoft.Build.Framework;
-using NUnit.Framework;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class AttributeTests
     {
         /// <summary>
         /// Test RequiredRuntimeAttribute
         /// </summary>
-        [Test]
+        [Fact]
         public void RequiredRuntimeAttribute()
         {
             RequiredRuntimeAttribute attribute =
                 (RequiredRuntimeAttribute)Attribute.GetCustomAttribute(typeof(X), typeof(RequiredRuntimeAttribute));
 
-            Assert.AreEqual("v5", attribute.RuntimeVersion);
+            Assert.Equal("v5", attribute.RuntimeVersion);
         }
 
-        [Test]
+        [Fact]
         public void OutputAttribute()
         {
             OutputAttribute attribute =
                 (OutputAttribute)Attribute.GetCustomAttribute(typeof(X).GetMember("TestValue2", BindingFlags.NonPublic | BindingFlags.Static)[0], typeof(OutputAttribute));
-            Assert.IsNotNull(attribute);
+            Assert.NotNull(attribute);
         }
 
-        [Test]
+        [Fact]
         public void RequiredAttribute()
         {
             RequiredAttribute attribute =
                 (RequiredAttribute)Attribute.GetCustomAttribute(typeof(X).GetMember("TestValue", BindingFlags.NonPublic | BindingFlags.Static)[0], typeof(RequiredAttribute));
-            Assert.IsNotNull(attribute);
+            Assert.NotNull(attribute);
         }
     }
 

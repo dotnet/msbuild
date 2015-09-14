@@ -1961,8 +1961,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            Assert.IsTrue(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot2.Endswith(`\`))' == 'true'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Environment.CurrentDirectory, MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
-            Assert.IsTrue(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot.Endswith(\))' == 'false'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Environment.CurrentDirectory, MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
+            Assert.IsTrue(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot2.Endswith(`\`))' == 'true'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
+            Assert.IsTrue(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot.Endswith(\))' == 'false'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
         }
 
         /// <summary>
@@ -2217,7 +2217,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 string result = expander.ExpandIntoStringLeaveEscaped("$([Microsoft.VisualBasic.FileIO.FileSystem]::CurrentDirectory)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-                Assert.AreEqual(0, String.Compare(Environment.CurrentDirectory, result, StringComparison.OrdinalIgnoreCase));
+                Assert.AreEqual(0, String.Compare(Directory.GetCurrentDirectory(), result, StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
