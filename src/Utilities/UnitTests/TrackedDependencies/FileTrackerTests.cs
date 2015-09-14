@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
         public void FileTrackerNoUIDll()
         {
             Console.WriteLine("Test: FileTrackerNoUIDll");
-            string testDirectory = Path.Combine(Environment.CurrentDirectory, "FileTrackerNoUIDll");
+            string testDirectory = Path.Combine(Directory.GetCurrentDirectory(), "FileTrackerNoUIDll");
             string testTrackerPath = Path.Combine(testDirectory, Path.GetFileName(s_defaultTrackerPath));
 
             try
@@ -454,7 +454,7 @@ namespace ConsoleApplication4
             File.Delete("writenoread.read.1.tlog");
             File.Delete("writenoread.write.1.tlog");
 
-            string testDirectory = Path.Combine(Environment.CurrentDirectory, "FileTrackerDoNotRecordWriteAsRead");
+            string testDirectory = Path.Combine(Directory.GetCurrentDirectory(), "FileTrackerDoNotRecordWriteAsRead");
 
             if (Directory.Exists(testDirectory))
             {
@@ -781,7 +781,7 @@ class X
         {
             Console.WriteLine("Test: FileTrackerFindStrInChainRepeatCommand");
 
-            string[] tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
+            string[] tlogFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "cmd*-findstr.*.1.tlog", SearchOption.TopDirectoryOnly);
             foreach (string tlogFile in tlogFiles)
             {
                 File.Delete(tlogFile);
@@ -789,7 +789,7 @@ class X
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
             int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " /c cmd /c cmd /c findstr /ip foo test.in");
-            tlogFiles = Directory.GetFiles(Environment.CurrentDirectory, "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
+            tlogFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "cmd*-findstr.read.1.tlog", SearchOption.TopDirectoryOnly);
             Console.WriteLine("");
             Assert.AreEqual(0, exit);
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), tlogFiles[0]);
@@ -1354,7 +1354,7 @@ class X
             {
                 FileTracker.StartTrackingContext(Path.GetFullPath("."), "InProcTrackingStartProcessFindStrIn");
                 BackEndNativeMethods.STARTUP_INFO startInfo = new BackEndNativeMethods.STARTUP_INFO();
-                startInfo.cb = Marshal.SizeOf(startInfo);
+                startInfo.cb = Marshal.SizeOf< BackEndNativeMethods.STARTUP_INFO>();
                 uint dwCreationFlags = BackEndNativeMethods.NORMALPRIORITYCLASS;
 
                 startInfo.hStdError = BackEndNativeMethods.InvalidHandle;
@@ -1365,8 +1365,8 @@ class X
 
                 BackEndNativeMethods.SECURITY_ATTRIBUTES pSec = new BackEndNativeMethods.SECURITY_ATTRIBUTES();
                 BackEndNativeMethods.SECURITY_ATTRIBUTES tSec = new BackEndNativeMethods.SECURITY_ATTRIBUTES();
-                pSec.nLength = Marshal.SizeOf(pSec);
-                tSec.nLength = Marshal.SizeOf(tSec);
+                pSec.nLength = Marshal.SizeOf<BackEndNativeMethods.SECURITY_ATTRIBUTES>();
+                tSec.nLength = Marshal.SizeOf<BackEndNativeMethods.SECURITY_ATTRIBUTES>();
 
                 BackEndNativeMethods.PROCESS_INFORMATION pInfo = new BackEndNativeMethods.PROCESS_INFORMATION();
 
@@ -1971,7 +1971,7 @@ class X
         public void LaunchMultipleOfSameTool_DifferentCommands3()
         {
             string testDir = Path.Combine(Path.GetTempPath(), "LaunchMultipleOfSameTool_DifferentCommands3");
-            string oldCurrentDirectory = Environment.CurrentDirectory;
+            string oldCurrentDirectory = Directory.GetCurrentDirectory();
             try
             {
                 if (FileUtilities.DirectoryExistsNoThrow(testDir))
@@ -2012,7 +2012,7 @@ class X
             {
                 if (oldCurrentDirectory != null)
                 {
-                    Environment.CurrentDirectory = oldCurrentDirectory;
+                    Directory.SetCurrentDirectory(oldCurrentDirectory);
                 }
 
                 if (FileUtilities.DirectoryExistsNoThrow(testDir))
@@ -2324,7 +2324,7 @@ namespace ConsoleApplication4
                 }
 
                 BackEndNativeMethods.STARTUP_INFO startInfo = new BackEndNativeMethods.STARTUP_INFO();
-                startInfo.cb = Marshal.SizeOf(startInfo);
+                startInfo.cb = Marshal.SizeOf< BackEndNativeMethods.STARTUP_INFO>();
                 uint dwCreationFlags = BackEndNativeMethods.NORMALPRIORITYCLASS;
 
                 startInfo.hStdError = BackEndNativeMethods.InvalidHandle;
@@ -2335,8 +2335,8 @@ namespace ConsoleApplication4
 
                 BackEndNativeMethods.SECURITY_ATTRIBUTES pSec = new BackEndNativeMethods.SECURITY_ATTRIBUTES();
                 BackEndNativeMethods.SECURITY_ATTRIBUTES tSec = new BackEndNativeMethods.SECURITY_ATTRIBUTES();
-                pSec.nLength = Marshal.SizeOf(pSec);
-                tSec.nLength = Marshal.SizeOf(tSec);
+                pSec.nLength = Marshal.SizeOf<BackEndNativeMethods.SECURITY_ATTRIBUTES>();
+                tSec.nLength = Marshal.SizeOf<BackEndNativeMethods.SECURITY_ATTRIBUTES>();
 
                 BackEndNativeMethods.PROCESS_INFORMATION pInfo = new BackEndNativeMethods.PROCESS_INFORMATION();
 

@@ -5,13 +5,13 @@
   "frameworks": {
     "net451": {
       "dependencies": {
-        "NUnit": "2.6.4"
+        "xunit": "2.1.0-rc1-build3168"
       }
     },
     "net46": {
       "dependencies": {
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
-        "NUnit": "2.6.4"
+        "xunit": "2.1.0-rc1-build3168"
       }
     },
     "dnxcore50": {
@@ -23,7 +23,8 @@
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
         "Microsoft.NETCore.Runtime": "1.0.0",
         "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
-      }
+      },
+      "imports": "portable-net451+win81"
     }
   }
 }

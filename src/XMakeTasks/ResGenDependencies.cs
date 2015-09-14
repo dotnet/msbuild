@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
                 // contains the .resx file as the path from which it should resolve
                 // relative paths. So we should base our timestamp/existence checking
                 // on the same switch & resolve in the same manner as ResGen.
-                BaseLinkedFileDirectory = value ? null : Environment.CurrentDirectory;
+                BaseLinkedFileDirectory = value ? null : Directory.GetCurrentDirectory();
             }
         }
 

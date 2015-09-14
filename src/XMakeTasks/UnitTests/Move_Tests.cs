@@ -534,7 +534,7 @@ namespace Microsoft.Build.UnitTests
             move.BuildEngine = new MockEngine();
             move.SourceFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
             move.DestinationFiles = new ITaskItem[] { new TaskItem("x") };
-            move.DestinationFolder = new TaskItem(Environment.CurrentDirectory);
+            move.DestinationFolder = new TaskItem(Directory.GetCurrentDirectory());
 
             Assert.AreEqual(false, move.Execute());
             ((MockEngine)move.BuildEngine).AssertLogContains("MSB3678");
@@ -549,7 +549,7 @@ namespace Microsoft.Build.UnitTests
             Move move = new Move();
             move.BuildEngine = new MockEngine();
             move.SourceFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
-            move.DestinationFiles = new ITaskItem[] { new TaskItem(Environment.CurrentDirectory) };
+            move.DestinationFiles = new ITaskItem[] { new TaskItem(Directory.GetCurrentDirectory()) };
 
             Assert.AreEqual(false, move.Execute());
             ((MockEngine)move.BuildEngine).AssertLogContains("MSB3676");
@@ -564,7 +564,7 @@ namespace Microsoft.Build.UnitTests
             Move move = new Move();
             move.BuildEngine = new MockEngine();
             move.DestinationFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
-            move.SourceFiles = new ITaskItem[] { new TaskItem(Environment.CurrentDirectory) };
+            move.SourceFiles = new ITaskItem[] { new TaskItem(Directory.GetCurrentDirectory()) };
 
             Assert.AreEqual(false, move.Execute());
             ((MockEngine)move.BuildEngine).AssertLogContains("MSB3681");
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Ignore("File names under Unix are case-sensitive and this test is not useful");
             }
 
-            string currdir = Environment.CurrentDirectory;
+            string currdir = Directory.GetCurrentDirectory();
             string filename = "2A333ED756AF4dc392E728D0F864A396";
             string file = Path.Combine(currdir, filename);
 

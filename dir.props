@@ -1,8 +1,16 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
+  -->
+  <PropertyGroup>
+    <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
+  </PropertyGroup>
+  
   <PropertyGroup>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <!-- This is to workaround an issue with a dependent assembly (Microsoft.Build.Tasks.CodeAnalysis.dll)
-         copying it's dependencies (which are in the GAC).	-->
+         copying its dependencies (which are in the GAC). -->
     <DoNotCopyLocalIfInGac>true</DoNotCopyLocalIfInGac>
   </PropertyGroup>
 
@@ -11,16 +19,21 @@
      <UseRoslynCompilers>true</UseRoslynCompilers>
      <DebugSymbols Condition="'$(UseRoslynCompilers)' == 'true'">false</DebugSymbols>
   </PropertyGroup>
-   
+
    <!-- Common repo directories -->
   <PropertyGroup>
     <BuildToolsVersion>1.0.25-prerelease-00080</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
+    <XunitVersion>2.1.0-rc1-build3168</XunitVersion>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <SourceDir>$(RepoRoot)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
+
+    <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
+    
+    <!-- Input Directories -->
     <PackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
     <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion),"lib"))$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
@@ -28,12 +41,20 @@
   
     <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
     <SolutionDir>$(SourceDir)</SolutionDir>
+
+    <BootstrapDestination>$(BinDir)Bootstrap\</BootstrapDestination>
   </PropertyGroup>
+
+  <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
+  <PropertyGroup Condition="'$(BootstrappedMSBuild)' == 'true'">
+    <MSBuildExtensionsPath>$(BootstrapDestination)</MSBuildExtensionsPath>
+  </PropertyGroup>
+
 
   <!-- Common nuget properties -->
   <PropertyGroup>
     <NuGetDir>$(PackagesDir)</NuGetDir>
-    <NuGetToolPath>$(PackagesDir)NuGet.exe</NuGetToolPath>
+    <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$(PackagesDir)NuGet.exe</NuGetToolPath>
     <NuGetConfigFile>$([System.IO.Path]::Combine($(SourceDir),".nuget","NuGet.Config"))</NuGetConfigFile>
     <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
 
@@ -45,7 +66,7 @@
     <NugetRestoreCommand>$(NugetRestoreCommand) -Verbosity detailed</NugetRestoreCommand>
     <ProjectPackagesConfigFile>$(NuGetConfigFile)</ProjectPackagesConfigFile>
   </PropertyGroup>
-  
+
   <!-- Copy the "_._" file to the output directory, which is used by the NuSpecs to indicate an empty folder -->
   <ItemGroup>
     <None Include="$(SourceDir)\nuget\_._">
@@ -60,7 +81,7 @@
     <Configuration Condition="'$(Configuration)' ==''">Debug</Configuration>
     <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
   </PropertyGroup>
-  
+
   <!-- Setup Default symbol and optimization for Configuration -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -123,6 +144,8 @@
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
     <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5.1</TargetFrameworkVersion>
+    <PlatformTarget>x86</PlatformTarget>
+    <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
@@ -133,7 +156,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
-    <ResolveNugetPackages>false</ResolveNugetPackages>
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
@@ -217,7 +239,7 @@
     <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
     <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
-    
+
     <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
     <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
   </PropertyGroup>

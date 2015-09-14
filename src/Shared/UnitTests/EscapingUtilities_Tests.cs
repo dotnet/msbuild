@@ -3,6 +3,7 @@
 
 #region Using directives
 
+
 using Microsoft.Build.Shared;
 
 using NUnit.Framework;

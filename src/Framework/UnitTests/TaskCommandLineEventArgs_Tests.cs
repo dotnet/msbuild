@@ -8,7 +8,7 @@
 using System;
 
 using Microsoft.Build.Framework;
-using NUnit.Framework;
+using Xunit;
 
 #pragma warning disable 0219
 
@@ -17,13 +17,12 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Verify the functioning of the TaskCommandLineEventArgs class.
     /// </summary>
-    [TestFixture]
     public class TaskCommandLineEventArgs_Tests
     {
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [Test]
+        [Fact]
         public void EventArgsCtors()
         {
             TaskCommandLineEventArgs taskCommandLineEvent = new TaskCommandLineEventArgs2();

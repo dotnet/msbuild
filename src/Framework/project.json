@@ -2,6 +2,9 @@
   "runtimes": {
     "win7-x86": { }
   },
+  "dependencies": {
+    
+  },
   "frameworks": {
     "net451": { },
     "net46": { },
@@ -13,7 +16,8 @@
         "System.Threading.Thread": "4.0.0-beta-23109",
         "Microsoft.NETCore.Runtime": "1.0.0",
         "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123"
-      }
+      },
+      "imports": "portable-net451+win81"
     }
   }
 }

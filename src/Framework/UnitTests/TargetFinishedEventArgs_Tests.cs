@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
-using NUnit.Framework;
+using Xunit;
 
 #pragma warning disable 0219
 
@@ -18,7 +18,6 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Verify the functioning of the TargetFinishedEventArgs class.
     /// </summary>
-    [TestFixture]
     public class TargetFinishedEventArgs_Tests
     {
         /// <summary>
@@ -29,7 +28,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [Test]
+        [Fact]
         public void EventArgsCtors()
         {
             List<ITaskItem> outputs = new List<ITaskItem>();

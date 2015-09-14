@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
    <!--
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" Condition="!$(Configuration.EndsWith('MONO'))"/>
@@ -11,6 +11,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Build.Framework.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.Framework.UnitTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
+    <CopyNuGetImplementations>true</CopyNuGetImplementations>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

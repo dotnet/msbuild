@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void GetItemSpecModifier()
         {
-            TestGetItemSpecModifier(Environment.CurrentDirectory);
+            TestGetItemSpecModifier(Directory.GetCurrentDirectory());
             TestGetItemSpecModifier(null);
         }
 
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests
         [ExpectedException(typeof(InvalidOperationException))]
         public void GetItemSpecModifierOnBadPath()
         {
-            TestGetItemSpecModifierOnBadPath(Environment.CurrentDirectory);
+            TestGetItemSpecModifierOnBadPath(Directory.GetCurrentDirectory());
         }
 
         /// <summary>
@@ -477,19 +477,19 @@ namespace Microsoft.Build.UnitTests
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
 
-            string currentDirectory = Environment.CurrentDirectory;
+            string currentDirectory = Directory.GetCurrentDirectory();
 
             try
             {
-                currentDirectory = Environment.CurrentDirectory;
-                Environment.CurrentDirectory = Environment.SystemDirectory;
+                currentDirectory = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.AreEqual(true, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath));
                 Assert.AreEqual(false, FileUtilities.FileOrDirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
             }
             finally
             {
-                Environment.CurrentDirectory = currentDirectory;
+                Directory.SetCurrentDirectory(currentDirectory);
             }
         }
 
@@ -531,19 +531,19 @@ namespace Microsoft.Build.UnitTests
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
 
-            string currentDirectory = Environment.CurrentDirectory;
+            string currentDirectory = Directory.GetCurrentDirectory();
 
             try
             {
-                currentDirectory = Environment.CurrentDirectory;
-                Environment.CurrentDirectory = Environment.SystemDirectory;
+                currentDirectory = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.AreEqual(true, FileUtilities.DirectoryExistsNoThrow(inputPath));
                 Assert.AreEqual(false, FileUtilities.DirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
             }
             finally
             {
-                Environment.CurrentDirectory = currentDirectory;
+                Directory.SetCurrentDirectory(currentDirectory);
             }
         }
 
@@ -574,19 +574,19 @@ namespace Microsoft.Build.UnitTests
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
 
-            string currentDirectory = Environment.CurrentDirectory;
+            string currentDirectory = Directory.GetCurrentDirectory();
 
             try
             {
-                currentDirectory = Environment.CurrentDirectory;
-                Environment.CurrentDirectory = Environment.SystemDirectory;
+                currentDirectory = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.AreEqual(true, FileUtilities.FileExistsNoThrow(inputPath));
                 Assert.AreEqual(false, FileUtilities.FileExistsNoThrow(inputPath.Replace('\\', 'X')));
             }
             finally
             {
-                Environment.CurrentDirectory = currentDirectory;
+                Directory.SetCurrentDirectory(currentDirectory);
             }
         }
 
@@ -617,19 +617,19 @@ namespace Microsoft.Build.UnitTests
 
             // "c:\windows\system32\<verylong>\..\..\windows\system32" exists
 
-            string currentDirectory = Environment.CurrentDirectory;
+            string currentDirectory = Directory.GetCurrentDirectory();
 
             try
             {
-                currentDirectory = Environment.CurrentDirectory;
-                Environment.CurrentDirectory = Environment.SystemDirectory;
+                currentDirectory = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(Environment.SystemDirectory);
 
                 Assert.AreEqual(true, FileUtilities.GetFileInfoNoThrow(inputPath) != null);
                 Assert.AreEqual(false, FileUtilities.GetFileInfoNoThrow(inputPath.Replace('\\', 'X')) != null);
             }
             finally
             {
-                Environment.CurrentDirectory = currentDirectory;
+                Directory.SetCurrentDirectory(currentDirectory);
             }
         }
 

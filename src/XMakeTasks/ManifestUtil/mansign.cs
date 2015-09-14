@@ -492,9 +492,9 @@ namespace System.Deployment.Internal.CodeSigning
                 fixed (byte* pbLicense = licenseXml)
                 {
                     Win32.AXL_SIGNER_INFO signerInfo = new Win32.AXL_SIGNER_INFO();
-                    signerInfo.cbSize = (uint)Marshal.SizeOf(typeof(Win32.AXL_SIGNER_INFO));
+                    signerInfo.cbSize = (uint)Marshal.SizeOf<Win32.AXL_SIGNER_INFO>();
                     Win32.AXL_TIMESTAMPER_INFO timestamperInfo = new Win32.AXL_TIMESTAMPER_INFO();
-                    timestamperInfo.cbSize = (uint)Marshal.SizeOf(typeof(Win32.AXL_TIMESTAMPER_INFO));
+                    timestamperInfo.cbSize = (uint)Marshal.SizeOf<Win32.AXL_TIMESTAMPER_INFO>();
                     Win32.CRYPT_DATA_BLOB licenseBlob = new Win32.CRYPT_DATA_BLOB();
                     IntPtr pvLicense = new IntPtr(pbLicense);
                     licenseBlob.cbData = (uint)licenseXml.Length;

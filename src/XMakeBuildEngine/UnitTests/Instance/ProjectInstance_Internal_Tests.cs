@@ -59,8 +59,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 ProjectInstance project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)))).CreateProjectInstance();
 
                 Assert.AreEqual(3, project.TaskRegistry.TaskRegistrations.Count);
-                Assert.AreEqual(Path.Combine(Environment.CurrentDirectory, "af0"), project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t0", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile);
-                Assert.AreEqual(Path.Combine(Environment.CurrentDirectory, "af1a"), project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile);
+                Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), "af0"), project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t0", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile);
+                Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), "af1a"), project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile);
                 Assert.AreEqual("an1", project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][1].TaskFactoryAssemblyLoadInfo.AssemblyName);
                 Assert.AreEqual("an2", project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t2", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyName);
             }
