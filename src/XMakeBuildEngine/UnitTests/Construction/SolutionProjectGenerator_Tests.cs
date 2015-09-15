@@ -1415,7 +1415,7 @@ EndGlobal
             msbuildProject.SetProperty("TargetFrameworkVersion", "v2.0");
             MockLogger logger = new MockLogger();
             bool success = msbuildProject.Build("GetFrameworkPathAndRedistList", new ILogger[] { logger });
-            Assert.Equal(true, success);
+            Assert.True(success);
 
             AssertProjectContainsItem(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", FrameworkLocationHelper.PathToDotNetFrameworkV20);
             AssertProjectItemNameCount(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", 1);
