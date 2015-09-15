@@ -5,13 +5,15 @@
   "frameworks": {
     "net451": {
       "dependencies": {
-        "Microsoft.Tpl.Dataflow": "4.5.24"
+        "Microsoft.Tpl.Dataflow": "4.5.24",
+        "NUnit": "2.6.4"
       }
     },
     "net46": {
       "dependencies": {
         "Microsoft.Tpl.Dataflow": "4.5.24",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213"
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
+        "NUnit": "2.6.4"
       }
     },
     "dnxcore50": {
