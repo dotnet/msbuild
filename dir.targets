@@ -176,5 +176,5 @@
            Xml="@(MainAssembly->'%(FullPath)_TestResults.xml')"/>
   </Target>
 
-  <Import Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props" /> 
+  <Import Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props" Condition="'$(IsTraversalBuild)'!='true'"/> 
 </Project>
