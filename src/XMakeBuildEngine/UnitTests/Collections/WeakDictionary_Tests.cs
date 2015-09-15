@@ -121,21 +121,23 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void IndexerRemovesDeadValue()
         {
+
+            object k = new Object();
+            object v = new Object();
+
+            var dictionary = new WeakDictionary<object, object>();
+            dictionary[k] = v;
+
+            v = null;
+            GC.Collect();
+
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                object k = new Object();
-                object v = new Object();
-
-                var dictionary = new WeakDictionary<object, object>();
-                dictionary[k] = v;
-
-                v = null;
-                GC.Collect();
-
-                object value = dictionary[k]; // throws
+                object value = dictionary[k];
             }
            );
         }
+
         /// <summary>
         /// If value target has been collected, key should not be present.
         /// (When accessed, if target is null, entry is removed instead of returned.)
