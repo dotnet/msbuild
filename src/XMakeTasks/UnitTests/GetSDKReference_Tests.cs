@@ -25,14 +25,14 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 {
     public class FakeSdkStructure : IDisposable
     {
-        private readonly string s_fakeSDKStructureRoot;
+        private readonly string _fakeSDKStructureRoot;
         public string SdkDirectory { get; }
         public string SdkDirectory2 { get; }
 
         public FakeSdkStructure()
         {
             string sdkDirectory;
-            s_fakeSDKStructureRoot = CreateFakeSDKReferenceAssemblyDirectory1(out sdkDirectory);
+            _fakeSDKStructureRoot = CreateFakeSDKReferenceAssemblyDirectory1(out sdkDirectory);
             SdkDirectory = sdkDirectory;
 
             string sdkDirectory2;
@@ -42,9 +42,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
         public void Dispose()
         {
-            if (FileUtilities.DirectoryExistsNoThrow(s_fakeSDKStructureRoot))
+            if (FileUtilities.DirectoryExistsNoThrow(_fakeSDKStructureRoot))
             {
-                FileUtilities.DeleteDirectoryNoThrow(s_fakeSDKStructureRoot, true);
+                FileUtilities.DeleteDirectoryNoThrow(_fakeSDKStructureRoot, true);
             }
         }
 
@@ -187,32 +187,32 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
     /// </summary>
     public class GetSDKReferenceFilesTestFixture : IDisposable, IClassFixture<FakeSdkStructure>
     {
-        private readonly string s_sdkDirectory;
-        private readonly string s_sdkDirectory2;
-        private readonly MockEngine.GetStringDelegate s_resourceDelegate;
-        private readonly GetAssemblyName s_getAssemblyName = GetAssemblyName;
-        private readonly GetAssemblyRuntimeVersion s_getAssemblyRuntimeVersion = GetImageRuntimeVersion;
-        private readonly string s_cacheDirectory = Path.Combine(Path.GetTempPath(), "GetSDKReferenceFiles");
+        private readonly string _sdkDirectory;
+        private readonly string _sdkDirectory2;
+        private readonly MockEngine.GetStringDelegate _resourceDelegate;
+        private readonly GetAssemblyName _getAssemblyName = GetAssemblyName;
+        private readonly GetAssemblyRuntimeVersion _getAssemblyRuntimeVersion = GetImageRuntimeVersion;
+        private readonly string _cacheDirectory = Path.Combine(Path.GetTempPath(), "GetSDKReferenceFiles");
 
         public GetSDKReferenceFilesTestFixture(FakeSdkStructure fakeSdkStructure)
         {
-            s_sdkDirectory = fakeSdkStructure.SdkDirectory;
-            s_sdkDirectory2 = fakeSdkStructure.SdkDirectory2;
-            s_resourceDelegate = AssemblyResources.GetString;
-            
-            if (FileUtilities.DirectoryExistsNoThrow(s_cacheDirectory))
+            _sdkDirectory = fakeSdkStructure.SdkDirectory;
+            _sdkDirectory2 = fakeSdkStructure.SdkDirectory2;
+            _resourceDelegate = AssemblyResources.GetString;
+
+            if (FileUtilities.DirectoryExistsNoThrow(_cacheDirectory))
             {
-                FileUtilities.DeleteDirectoryNoThrow(s_cacheDirectory, true);
+                FileUtilities.DeleteDirectoryNoThrow(_cacheDirectory, true);
             }
 
-            Directory.CreateDirectory(s_cacheDirectory);
+            Directory.CreateDirectory(_cacheDirectory);
         }
 
         public void Dispose()
         {
-            if (FileUtilities.DirectoryExistsNoThrow(s_cacheDirectory))
+            if (FileUtilities.DirectoryExistsNoThrow(_cacheDirectory))
             {
-                FileUtilities.DeleteDirectoryNoThrow(s_cacheDirectory, true);
+                FileUtilities.DeleteDirectoryNoThrow(_cacheDirectory, true);
             }
         }
 
@@ -232,9 +232,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(0, t.References.Length);
@@ -254,7 +254,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             GetSDKFolders getReferenceFolders = new GetSDKFolders(ToolLocationHelper.GetSDKReferenceFolders);
             GetSDKFolders2 getReferenceFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKReferenceFolders);
 
-            VerifySDKFolders(getReferenceFolders, getReferenceFolders2, "References", s_sdkDirectory);
+            VerifySDKFolders(getReferenceFolders, getReferenceFolders2, "References", _sdkDirectory);
         }
 
         private static void VerifySDKFolders(GetSDKFolders singleParamDelegate, GetSDKFolders2 multiParamDelegate, string folderName, string sdkDirectory)
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             GetSDKFolders getRedistFolders = new GetSDKFolders(ToolLocationHelper.GetSDKRedistFolders);
             GetSDKFolders2 getRedistFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKRedistFolders);
 
-            VerifySDKFolders(getRedistFolders, getRedistFolders2, "Redist", s_sdkDirectory);
+            VerifySDKFolders(getRedistFolders, getRedistFolders2, "Redist", _sdkDirectory);
         }
 
         /// <summary>
@@ -301,7 +301,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             GetSDKFolders getDesignTimeFolders = new GetSDKFolders(ToolLocationHelper.GetSDKDesignTimeFolders);
             GetSDKFolders2 getDesignTimeFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKDesignTimeFolders);
 
-            VerifySDKFolders(getDesignTimeFolders, getDesignTimeFolders2, "DesignTime", s_sdkDirectory);
+            VerifySDKFolders(getDesignTimeFolders, getDesignTimeFolders2, "DesignTime", _sdkDirectory);
         }
 
         /// <summary>
@@ -313,8 +313,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            t.CacheFileFolderPath = _cacheDirectory;
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
@@ -331,16 +331,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "false");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(0, t.References.Length);
@@ -356,9 +356,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("ExpandReferenceAssemblies", "false");
@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(0, t.References.Length);
@@ -382,8 +382,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            t.CacheFileFolderPath = _cacheDirectory;
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -391,12 +391,12 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(9, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
 
-            string winmd = Path.Combine(s_sdkDirectory, "References\\Retail\\X86\\A.winmd");
+            string winmd = Path.Combine(_sdkDirectory, "References\\Retail\\X86\\A.winmd");
 
             Assert.True(t.References[0].ItemSpec.Equals(winmd, StringComparison.OrdinalIgnoreCase));
             Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
@@ -447,16 +447,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item1 = new TaskItem(s_sdkDirectory);
+            ITaskItem item1 = new TaskItem(_sdkDirectory);
             item1.SetMetadata("ExpandReferenceAssemblies", "true");
             item1.SetMetadata("TargetedSDKConfiguration", "Retail");
             item1.SetMetadata("TargetedSDKArchitecture", "x86");
             item1.SetMetadata("CopyLocalExpandedReferenceAssemblies", "false");
             item1.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
-            ITaskItem item2 = new TaskItem(s_sdkDirectory);
+            ITaskItem item2 = new TaskItem(_sdkDirectory);
             item2.SetMetadata("ExpandReferenceAssemblies", "true");
             item2.SetMetadata("TargetedSDKConfiguration", "Retail");
             item2.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -466,7 +466,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             // Process both regular and runtime-only references
             t.ResolvedSDKReferences = new ITaskItem[] { item1, item2 };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
 
             Assert.Equal(8, t.References.Length);
@@ -474,10 +474,10 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             // Process regular references
             t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
             t.ResolvedSDKReferences = new ITaskItem[] { item1 };
-            success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
 
             Assert.Equal(8, t.References.Length);
@@ -485,10 +485,10 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             // Process runtime-only references
             t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
             t.ResolvedSDKReferences = new ITaskItem[] { item2 };
-            success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
 
             Assert.Equal(0, t.References.Length);
@@ -503,9 +503,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -513,7 +513,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
@@ -556,16 +556,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             ITaskItem[] references1 = t.References;
 
@@ -574,22 +574,22 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             string sdkRoot = item.ItemSpec;
             string cacheFile = sdkIdentity + ",Set=" + FileUtilities.GetHexHash(sdkIdentity) + "-" + FileUtilities.GetHexHash(sdkRoot) + ",Hash=*.dat";
             Thread.Sleep(100);
-            string[] existingCacheFiles = Directory.GetFiles(s_cacheDirectory, cacheFile);
+            string[] existingCacheFiles = Directory.GetFiles(_cacheDirectory, cacheFile);
             Assert.Equal(1, existingCacheFiles.Length);
 
             GetSDKReferenceFiles t2 = new GetSDKReferenceFiles();
             t2.BuildEngine = engine;
-            t2.CacheFileFolderPath = s_cacheDirectory;
+            t2.CacheFileFolderPath = _cacheDirectory;
 
             // Same SDK with different path
-            ITaskItem item2 = new TaskItem(s_sdkDirectory2);
+            ITaskItem item2 = new TaskItem(_sdkDirectory2);
             item2.SetMetadata("ExpandReferenceAssemblies", "true");
             item2.SetMetadata("TargetedSDKConfiguration", "Retail");
             item2.SetMetadata("TargetedSDKArchitecture", "x86");
             item2.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t2.ResolvedSDKReferences = new ITaskItem[] { item2 };
-            bool success2 = t2.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success2 = t2.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             ITaskItem[] references2 = t2.References;
             Assert.True(success2);
 
@@ -603,12 +603,12 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             string sdkIdentity2 = item.GetMetadata("OriginalItemSpec");
             string sdkRoot2 = item.ItemSpec;
             string cacheFile2 = sdkIdentity2 + ",Set=" + FileUtilities.GetHexHash(sdkIdentity2) + "-" + FileUtilities.GetHexHash(sdkRoot2) + ",Hash=*.dat";
-            string[] existingCacheFiles2 = Directory.GetFiles(s_cacheDirectory, cacheFile);
+            string[] existingCacheFiles2 = Directory.GetFiles(_cacheDirectory, cacheFile);
             Assert.Equal(1, existingCacheFiles2.Length);
 
             // There should have two cache files with the same prefix and first hash
             Thread.Sleep(100);
-            string[] allCacheFiles = Directory.GetFiles(s_cacheDirectory, sdkIdentity2 + ",Set=" + FileUtilities.GetHexHash(sdkIdentity2) + "*");
+            string[] allCacheFiles = Directory.GetFiles(_cacheDirectory, sdkIdentity2 + ",Set=" + FileUtilities.GetHexHash(sdkIdentity2) + "*");
             Assert.Equal(2, allCacheFiles.Length);
         }
 
@@ -622,28 +622,28 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[5].ItemSpec.Replace(t.References[5].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[5].ItemSpec.Replace(t.References[5].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
 
             Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
             Assert.True(t.References[0].GetMetadata("WinMDFile").Equals("true", StringComparison.OrdinalIgnoreCase));
@@ -670,9 +670,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -680,16 +680,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.ReferenceExtensions = new string[] { ".dll" };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(5, t.References.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
 
             Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.dll", StringComparison.OrdinalIgnoreCase));
             Assert.True(t.References[0].GetMetadata("WinMDFile").Equals("false", StringComparison.OrdinalIgnoreCase));
@@ -715,18 +715,18 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "");
             item.SetMetadata("TargetedSDKArchitecture", "amd64");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.False(success);
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration", s_sdkDirectory);
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration", _sdkDirectory);
         }
 
         /// <summary>
@@ -738,18 +738,18 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Debug");
             item.SetMetadata("TargetedSDKArchitecture", "");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.False(success);
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture", s_sdkDirectory);
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture", _sdkDirectory);
         }
 
 
@@ -763,28 +763,28 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "amd64");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[5].ItemSpec.Replace(t.References[5].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[5].ItemSpec.Replace(t.References[5].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
 
             Assert.True(t.References[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
             Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
@@ -814,9 +814,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x64");
@@ -824,19 +824,19 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[5].ItemSpec.Replace(t.References[5].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[5].ItemSpec.Replace(t.References[5].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
 
             Assert.True(t.References[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
             Assert.True(Path.GetFileName(t.References[0].ItemSpec).Equals("A.winmd", StringComparison.OrdinalIgnoreCase));
@@ -865,9 +865,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -875,19 +875,19 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogReferencesList = false;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
 
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[5].ItemSpec.Replace(t.References[5].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[0].ItemSpec.Replace(t.References[0].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[1].ItemSpec.Replace(t.References[1].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[2].ItemSpec.Replace(t.References[2].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[3].ItemSpec.Replace(t.References[3].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[4].ItemSpec.Replace(t.References[4].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[5].ItemSpec.Replace(t.References[5].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[6].ItemSpec.Replace(t.References[6].GetMetadata("SDKRootPath"), String.Empty));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingReference", t.References[7].ItemSpec.Replace(t.References[7].GetMetadata("SDKRootPath"), String.Empty));
         }
 
         /// <summary>
@@ -900,9 +900,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -912,17 +912,17 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogRedistFilesList = false;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
             Assert.Equal(5, t.RedistFiles.Length);
 
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
-            engine.AssertLogDoesntContainMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
+            engine.AssertLogDoesntContainMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
 
             Assert.True(Path.GetFileName(t.RedistFiles[0].ItemSpec).Equals("A.dll", StringComparison.OrdinalIgnoreCase));
             Assert.True(t.RedistFiles[0].GetMetadata("TargetPath").Equals("Super\\A.dll", StringComparison.OrdinalIgnoreCase));
@@ -965,25 +965,25 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("CopyRedist", "true");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(5, t.RedistFiles.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
         }
 
         /// <summary>
@@ -996,26 +996,26 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x64");
             item.SetMetadata("CopyRedist", "true");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(5, t.RedistFiles.Length);
 
             Assert.True(t.RedistFiles[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
         }
 
         /// <summary>
@@ -1028,26 +1028,26 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "amd64");
             item.SetMetadata("CopyRedist", "true");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(5, t.RedistFiles.Length);
 
             Assert.True(t.RedistFiles[0].ItemSpec.IndexOf("x64", StringComparison.OrdinalIgnoreCase) > -1);
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[0].ItemSpec.Replace(t.RedistFiles[0].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[0].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[1].ItemSpec.Replace(t.RedistFiles[1].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[1].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[2].ItemSpec.Replace(t.RedistFiles[2].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[2].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[3].ItemSpec.Replace(t.RedistFiles[3].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[3].GetMetadata("TargetPath"));
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.AddingRedistFile", t.RedistFiles[4].ItemSpec.Replace(t.RedistFiles[4].GetMetadata("SDKRootPath"), String.Empty), t.RedistFiles[4].GetMetadata("TargetPath"));
         }
 
         /// <summary>
@@ -1059,9 +1059,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1069,12 +1069,12 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(8, t.References.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.dll");
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.winmd");
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.dll");
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.winmd");
             Assert.Equal(0, engine.Warnings);
         }
 
@@ -1087,9 +1087,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1098,12 +1098,12 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogReferenceConflictWithinSDKAsWarning = true;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(8, t.References.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.dll");
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.winmd");
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.dll");
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceSameSDK", "SDKWithManifest, Version=2.0", "References\\Retail\\X86\\A.winmd", "References\\CommonConfiguration\\Neutral\\A.winmd");
             Assert.Equal(2, engine.Warnings);
         }
 
@@ -1116,9 +1116,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "false");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1126,11 +1126,11 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(5, t.RedistFiles.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistSameSDK", "A.dll", "SDKWithManifest, Version=2.0", "Redist\\Retail\\X86\\A.dll", "Redist\\CommonConfiguration\\Neutral\\A.dll");
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistSameSDK", "A.dll", "SDKWithManifest, Version=2.0", "Redist\\Retail\\X86\\A.dll", "Redist\\CommonConfiguration\\Neutral\\A.dll");
             Assert.Equal(0, engine.Warnings);
         }
 
@@ -1143,9 +1143,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "false");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1154,11 +1154,11 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogRedistConflictWithinSDKAsWarning = true;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
             Assert.True(success);
             Assert.Equal(5, t.RedistFiles.Length);
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistSameSDK", "A.dll", "SDKWithManifest, Version=2.0", "Redist\\Retail\\X86\\A.dll", "Redist\\CommonConfiguration\\Neutral\\A.dll");
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistSameSDK", "A.dll", "SDKWithManifest, Version=2.0", "Redist\\Retail\\X86\\A.dll", "Redist\\CommonConfiguration\\Neutral\\A.dll");
             Assert.Equal(1, engine.Warnings);
         }
 
@@ -1171,16 +1171,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("CopyRedist", "true");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
-            ITaskItem item2 = new TaskItem(s_sdkDirectory2);
+            ITaskItem item2 = new TaskItem(_sdkDirectory2);
             item2.SetMetadata("ExpandReferenceAssemblies", "true");
             item2.SetMetadata("TargetedSDKConfiguration", "Retail");
             item2.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1189,7 +1189,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item, item2 };
             t.LogReferencesList = false;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
@@ -1197,13 +1197,13 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal(6, t.RedistFiles.Length);
             Assert.Equal(2, engine.Warnings);
 
-            string redistWinner = Path.Combine(s_sdkDirectory, "Redist\\Retail\\Neutral\\B.pri");
-            string redistVictim = Path.Combine(s_sdkDirectory2, "Redist\\Retail\\X86\\B.pri");
-            string referenceWinner = Path.Combine(s_sdkDirectory, "References\\Retail\\Neutral\\B.WinMD");
-            string referenceVictim = Path.Combine(s_sdkDirectory2, "References\\Retail\\X86\\B.WinMD");
+            string redistWinner = Path.Combine(_sdkDirectory, "Redist\\Retail\\Neutral\\B.pri");
+            string redistVictim = Path.Combine(_sdkDirectory2, "Redist\\Retail\\X86\\B.pri");
+            string referenceWinner = Path.Combine(_sdkDirectory, "References\\Retail\\Neutral\\B.WinMD");
+            string referenceVictim = Path.Combine(_sdkDirectory2, "References\\Retail\\X86\\B.WinMD");
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistDifferentSDK", "B.PRI", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", redistWinner, redistVictim);
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceDifferentSDK", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", referenceWinner, referenceVictim);
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistDifferentSDK", "B.PRI", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", redistWinner, redistVictim);
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceDifferentSDK", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", referenceWinner, referenceVictim);
         }
 
 
@@ -1216,16 +1216,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("CopyRedist", "true");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
-            ITaskItem item2 = new TaskItem(s_sdkDirectory2);
+            ITaskItem item2 = new TaskItem(_sdkDirectory2);
             item2.SetMetadata("ExpandReferenceAssemblies", "true");
             item2.SetMetadata("TargetedSDKConfiguration", "Retail");
             item2.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1235,7 +1235,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item, item2 };
             t.LogReferencesList = false;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
@@ -1243,10 +1243,10 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal(6, t.RedistFiles.Length);
             Assert.Equal(2, engine.Warnings);
 
-            string redistWinner = Path.Combine(s_sdkDirectory, "Redist\\Retail\\Neutral\\ASubDirectory\\TwoDeep\\B.dll");
-            string redistVictim = Path.Combine(s_sdkDirectory2, "Redist\\Retail\\X86\\B.dll");
+            string redistWinner = Path.Combine(_sdkDirectory, "Redist\\Retail\\Neutral\\ASubDirectory\\TwoDeep\\B.dll");
+            string redistVictim = Path.Combine(_sdkDirectory2, "Redist\\Retail\\X86\\B.dll");
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistDifferentSDK", "ASUBDIRECTORY\\TWODEEP\\B.DLL", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", redistWinner, redistVictim);
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistDifferentSDK", "ASUBDIRECTORY\\TWODEEP\\B.DLL", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", redistWinner, redistVictim);
         }
 
         /// <summary>
@@ -1258,16 +1258,16 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("CopyRedist", "true");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
-            ITaskItem item2 = new TaskItem(s_sdkDirectory2);
+            ITaskItem item2 = new TaskItem(_sdkDirectory2);
             item2.SetMetadata("ExpandReferenceAssemblies", "true");
             item2.SetMetadata("TargetedSDKConfiguration", "Retail");
             item2.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1278,7 +1278,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.LogReferencesList = false;
             t.LogReferenceConflictBetweenSDKsAsWarning = false;
             t.LogRedistConflictBetweenSDKsAsWarning = false;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
@@ -1287,13 +1287,13 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal(0, engine.Warnings);
 
 
-            string redistWinner = Path.Combine(s_sdkDirectory, "Redist\\Retail\\Neutral\\B.pri");
-            string redistVictim = Path.Combine(s_sdkDirectory2, "Redist\\Retail\\X86\\B.pri");
-            string referenceWinner = Path.Combine(s_sdkDirectory, "References\\Retail\\Neutral\\B.WinMD");
-            string referenceVictim = Path.Combine(s_sdkDirectory2, "References\\Retail\\X86\\B.WinMD");
+            string redistWinner = Path.Combine(_sdkDirectory, "Redist\\Retail\\Neutral\\B.pri");
+            string redistVictim = Path.Combine(_sdkDirectory2, "Redist\\Retail\\X86\\B.pri");
+            string referenceWinner = Path.Combine(_sdkDirectory, "References\\Retail\\Neutral\\B.WinMD");
+            string referenceVictim = Path.Combine(_sdkDirectory2, "References\\Retail\\X86\\B.WinMD");
 
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistDifferentSDK", "B.PRI", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", redistWinner, redistVictim);
-            engine.AssertLogContainsMessageFromResource(s_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceDifferentSDK", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", referenceWinner, referenceVictim);
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictRedistDifferentSDK", "B.PRI", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", redistWinner, redistVictim);
+            engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.ConflictReferenceDifferentSDK", "SDKWithManifest, Version=2.0", "AnotherSDK, Version=2.0", referenceWinner, referenceVictim);
         }
 
         /// <summary>
@@ -1305,9 +1305,9 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             MockEngine engine = new MockEngine();
             GetSDKReferenceFiles t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
-            t.CacheFileFolderPath = s_cacheDirectory;
+            t.CacheFileFolderPath = _cacheDirectory;
 
-            ITaskItem item = new TaskItem(s_sdkDirectory);
+            ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "false");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1315,7 +1315,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("CopyRedist", "true");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
-            ITaskItem item2 = new TaskItem(s_sdkDirectory2);
+            ITaskItem item2 = new TaskItem(_sdkDirectory2);
             item2.SetMetadata("ExpandReferenceAssemblies", "false");
             item2.SetMetadata("TargetedSDKConfiguration", "Retail");
             item2.SetMetadata("TargetedSDKArchitecture", "x86");
@@ -1325,7 +1325,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item, item2 };
             t.LogReferencesList = false;
-            bool success = t.Execute(s_getAssemblyName, s_getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
 
             Assert.True(success);
             Assert.Equal(7, t.RedistFiles.Length);

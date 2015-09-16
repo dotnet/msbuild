@@ -121,7 +121,6 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void IndexerRemovesDeadValue()
         {
-
             object k = new Object();
             object v = new Object();
 

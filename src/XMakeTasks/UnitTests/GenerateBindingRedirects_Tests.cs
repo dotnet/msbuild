@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks.Unittest
             var redirectResults = GenerateBindingRedirects(appConfigFile, redirect);
 
             // Assert
-            Assert.Contains("MyAssembly", redirectResults.TargetAppConfigContent );
+            Assert.Contains("MyAssembly", redirectResults.TargetAppConfigContent);
             Assert.Contains("<bindingRedirect oldVersion=\"0.0.0.0-40.0.0.0\" newVersion=\"40.0.0.0\"", redirectResults.TargetAppConfigContent);
         }
 
