@@ -1316,7 +1316,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns>Combined bag of switches.</returns>
         private static void GatherAllSwitches(
 #if FEATURE_GET_COMMANDLINE
-            string commandLine, 
+            string commandLine,
 #else
             string [] commandLine,
 #endif

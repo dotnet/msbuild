@@ -1354,7 +1354,7 @@ class X
             {
                 FileTracker.StartTrackingContext(Path.GetFullPath("."), "InProcTrackingStartProcessFindStrIn");
                 BackEndNativeMethods.STARTUP_INFO startInfo = new BackEndNativeMethods.STARTUP_INFO();
-                startInfo.cb = Marshal.SizeOf< BackEndNativeMethods.STARTUP_INFO>();
+                startInfo.cb = Marshal.SizeOf<BackEndNativeMethods.STARTUP_INFO>();
                 uint dwCreationFlags = BackEndNativeMethods.NORMALPRIORITYCLASS;
 
                 startInfo.hStdError = BackEndNativeMethods.InvalidHandle;
@@ -2324,7 +2324,7 @@ namespace ConsoleApplication4
                 }
 
                 BackEndNativeMethods.STARTUP_INFO startInfo = new BackEndNativeMethods.STARTUP_INFO();
-                startInfo.cb = Marshal.SizeOf< BackEndNativeMethods.STARTUP_INFO>();
+                startInfo.cb = Marshal.SizeOf<BackEndNativeMethods.STARTUP_INFO>();
                 uint dwCreationFlags = BackEndNativeMethods.NORMALPRIORITYCLASS;
 
                 startInfo.hStdError = BackEndNativeMethods.InvalidHandle;

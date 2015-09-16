@@ -867,12 +867,10 @@ namespace Microsoft.Build.CommandLine
                 {
                     if (value is int)
                     {
-
                         return ((int)value) != 0;
                     }
                     else if (value is string)
                     {
-
                         bool result;
                         if (bool.TryParse((string)value, out result))
                         {
