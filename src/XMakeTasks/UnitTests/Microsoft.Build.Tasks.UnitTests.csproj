@@ -8,6 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Build.Tasks.UnitTests</RootNamespace>
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -132,12 +133,12 @@
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build.Tasks.CodeAnalysis">
       <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />

@@ -11,9 +11,9 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
+using Xunit;
 
 
 namespace Microsoft.Build.UnitTests
@@ -466,7 +466,7 @@ namespace Microsoft.Build.UnitTests
             if (index != contains.Length)
             {
                 Console.WriteLine(FullLog);
-                Assert.Fail(String.Format(CultureInfo.CurrentCulture, "Log was expected to contain '{0}', but did not.\n=======\n{1}\n=======", contains[index], FullLog));
+                Assert.True(false, String.Format(CultureInfo.CurrentCulture, "Log was expected to contain '{0}', but did not.\n=======\n{1}\n=======", contains[index], FullLog));
             }
         }
 
@@ -479,7 +479,7 @@ namespace Microsoft.Build.UnitTests
             if (FullLog.Contains(contains))
             {
                 Console.WriteLine(FullLog);
-                Assert.Fail(String.Format("Log was not expected to contain '{0}', but did.", contains));
+                Assert.True(false, String.Format("Log was not expected to contain '{0}', but did.", contains));
             }
         }
 
@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal void AssertNoErrors()
         {
-            Assert.AreEqual(0, _errorCount);
+            Assert.Equal(0, _errorCount);
         }
 
         /// <summary>
@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal void AssertNoWarnings()
         {
-            Assert.AreEqual(0, _warningCount);
+            Assert.Equal(0, _warningCount);
         }
     }
 }

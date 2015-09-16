@@ -11,7 +11,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -22,10 +21,10 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Xml.Xsl;
 using System.Xml;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class XmlPoke_Tests
     {
         private string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
@@ -46,7 +45,7 @@ namespace Microsoft.Build.UnitTests
   <method AccessModifier='public static' Name='GetVal' />
 </class>";
 
-        [TestMethod]
+        [Fact]
         public void PokeWithNamespace()
         {
             MockEngine engine = new MockEngine(true);
@@ -73,12 +72,12 @@ namespace Microsoft.Build.UnitTests
 
                 foreach (Match m in mc)
                 {
-                    Assert.IsTrue(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
+                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PokeNoNamespace()
         {
             MockEngine engine = new MockEngine(true);
@@ -104,12 +103,12 @@ namespace Microsoft.Build.UnitTests
 
                 foreach (Match m in mc)
                 {
-                    Assert.IsTrue(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
+                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PokeAttribute()
         {
             MockEngine engine = new MockEngine(true);
@@ -129,11 +128,11 @@ namespace Microsoft.Build.UnitTests
                 Regex r = new Regex("AccessModifier=\"&lt;Test&gt;Testing&lt;/Test&gt;\"");
                 MatchCollection mc = r.Matches(result);
 
-                Assert.IsTrue(mc.Count == 1, "Should match once");
+                Assert.Equal(1, mc.Count); // "Should match once"
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PokeChildren()
         {
             MockEngine engine = new MockEngine(true);
@@ -145,7 +144,7 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//class/.";
             p.Value = new TaskItem("<Test>Testing</Test>");
-            Assert.IsTrue(p.Execute(), engine.Log);
+            Assert.True(p.Execute(), engine.Log);
 
             string result;
             using (StreamReader sr = new StreamReader(xmlInputPath))
@@ -155,11 +154,11 @@ namespace Microsoft.Build.UnitTests
                 Regex r = new Regex("<Test>Testing</Test>");
                 MatchCollection mc = r.Matches(result);
 
-                Assert.IsTrue(mc.Count == 1, "Should match once");
+                Assert.Equal(1, mc.Count); // "Should match once"
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PokeMissingParams()
         {
             MockEngine engine = new MockEngine(true);
@@ -198,16 +197,16 @@ namespace Microsoft.Build.UnitTests
 
                 if (i < 7)
                 {
-                    Assert.IsTrue(exceptionThrown, "Expecting argumentnullexception for the first 7 tests");
+                    Assert.True(exceptionThrown); // "Expecting argumentnullexception for the first 7 tests"
                 }
                 else
                 {
-                    Assert.IsFalse(exceptionThrown, "Expecting argumentnullexception for the first 7 tests");
+                    Assert.False(exceptionThrown); // "Expecting argumentnullexception for the first 7 tests"
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ErrorInNamespaceDecl()
         {
             MockEngine engine = new MockEngine(true);
@@ -219,15 +218,15 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
             p.Namespaces = "<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />";
-            Assert.IsTrue(p.Namespaces.Equals("<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />"));
+            Assert.True(p.Namespaces.Equals("<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />"));
             p.Value = new TaskItem("Nur");
 
             bool executeResult = p.Execute();
-            Assert.IsTrue(engine.Log.Contains("MSB3731"));
-            Assert.IsFalse(executeResult, "Execution should've failed");
+            Assert.True(engine.Log.Contains("MSB3731"));
+            Assert.False(executeResult); // "Execution should've failed"
         }
 
-        [TestMethod]
+        [Fact]
         public void PokeNoNSWPrefixedQueryError()
         {
             MockEngine engine = new MockEngine(true);
@@ -240,11 +239,11 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
             p.Value = new TaskItem("Nur");
-            Assert.IsFalse(p.Execute(), "Test should've failed");
-            Assert.IsTrue(engine.Log.Contains("MSB3732"), "Engine log should contain error code MSB3732 " + engine.Log);
+            Assert.False(p.Execute()); // "Test should've failed"
+            Assert.True(engine.Log.Contains("MSB3732"), "Engine log should contain error code MSB3732 " + engine.Log);
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingNamespaceParameters()
         {
             MockEngine engine = new MockEngine(true);
@@ -273,16 +272,16 @@ namespace Microsoft.Build.UnitTests
 
                 if (i == 3)
                 {
-                    Assert.IsTrue(result, "Only 3rd value should pass.");
+                    Assert.True(result); // "Only 3rd value should pass."
                 }
                 else
                 {
-                    Assert.IsFalse(result, "Only 3rd value should pass.");
+                    Assert.False(result); // "Only 3rd value should pass."
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PokeElement()
         {
             MockEngine engine = new MockEngine(true);
@@ -292,14 +291,14 @@ namespace Microsoft.Build.UnitTests
             XmlPoke p = new XmlPoke();
             p.BuildEngine = engine;
             p.XmlInputPath = new TaskItem(xmlInputPath);
-            Assert.IsTrue(p.XmlInputPath.ItemSpec.Equals(xmlInputPath));
+            Assert.True(p.XmlInputPath.ItemSpec.Equals(xmlInputPath));
             p.Query = "//variable/.";
-            Assert.IsTrue(p.Query.Equals("//variable/."));
+            Assert.True(p.Query.Equals("//variable/."));
             string valueString = "<testing the=\"element\">With<somewhat complex=\"value\" /></testing>";
             p.Value = new TaskItem(valueString);
-            Assert.IsTrue(p.Value.ItemSpec.Equals(valueString));
+            Assert.True(p.Value.ItemSpec.Equals(valueString));
 
-            Assert.IsTrue(p.Execute());
+            Assert.True(p.Execute());
 
             List<int> positions = new List<int>();
             positions.AddRange(new int[] { 126, 249, 372 });
@@ -314,12 +313,12 @@ namespace Microsoft.Build.UnitTests
 
                 foreach (Match m in mc)
                 {
-                    Assert.IsTrue(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
+                    Assert.True(positions.Contains(m.Index), "This test should effect 3 positions. There should be 3 occurances of 'Mert'\n" + result);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PokeWithoutUsingTask()
         {
             string projectContents = @"

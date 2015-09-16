@@ -10,8 +10,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
@@ -22,13 +20,13 @@ using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
     public class IntrinsicTask_Tests
     {
-        [TestMethod]
+        [Fact]
         public void PropertyGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -44,12 +42,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
 
-            Assert.AreEqual(2, properties.Count);
-            Assert.AreEqual("v1", properties["p1"].EvaluatedValue);
-            Assert.AreEqual("v2", properties["p2"].EvaluatedValue);
+            Assert.Equal(2, properties.Count);
+            Assert.Equal("v1", properties["p1"].EvaluatedValue);
+            Assert.Equal("v2", properties["p2"].EvaluatedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyGroupWithComments()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -64,11 +62,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
 
-            Assert.AreEqual(1, properties.Count);
-            Assert.AreEqual("v1", properties["p1"].EvaluatedValue);
+            Assert.Equal(1, properties.Count);
+            Assert.Equal("v1", properties["p1"].EvaluatedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyGroupEmpty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -81,14 +79,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
 
-            Assert.AreEqual(0, properties.Count);
+            Assert.Equal(0, properties.Count);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void PropertyGroupWithReservedProperty()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <PropertyGroup>
@@ -96,17 +95,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </PropertyGroup>
             </Target>
             </Project>");
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task);
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task);
+            }
+           );
         }
 
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void PropertyGroupWithInvalidPropertyName()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(
-            @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(
+                @"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <PropertyGroup>
@@ -114,12 +115,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </PropertyGroup>
             </Target>
             </Project>"
-            );
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task);
+                );
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void BlankProperty()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -136,32 +138,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
 
-            Assert.AreEqual(1, properties.Count);
-            Assert.AreEqual("", properties["p1"].EvaluatedValue);
+            Assert.Equal(1, properties.Count);
+            Assert.Equal("", properties["p1"].EvaluatedValue);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void PropertyGroupWithInvalidSyntax1()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(
-            @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(
+                @"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <PropertyGroup>x</PropertyGroup>
             </Target>
             </Project>"
-            );
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task, null);
+                );
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task, null);
+            }
+           );
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void PropertyGroupWithInvalidSyntax2()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(
-            @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(
+                @"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <PropertyGroup>
@@ -169,12 +174,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </PropertyGroup>
             </Target>
             </Project>"
-            );
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task, null);
+                );
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task, null);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void PropertyGroupWithConditionOnGroup()
         {
             MockLogger logger = new MockLogger();
@@ -207,7 +213,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[v1][v2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyGroupWithConditionOnGroupUsingMetadataErrors()
         {
             MockLogger logger = new MockLogger();
@@ -226,7 +232,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("MSB4191"); // Metadata not allowed
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -244,11 +250,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
-            Assert.AreEqual("a1", i1Group.First().EvaluatedInclude);
-            Assert.AreEqual("b1", i2Group.First().EvaluatedInclude);
+            Assert.Equal("a1", i1Group.First().EvaluatedInclude);
+            Assert.Equal("b1", i2Group.First().EvaluatedInclude);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepDuplicatesEmptySameAsTrue()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -265,10 +271,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i1");
-            Assert.AreEqual(2, group.Count);
+            Assert.Equal(2, group.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepDuplicatesFalse()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -285,10 +291,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepDuplicatesAsCondition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -305,10 +311,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i1");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepDuplicatesFalseKeepsExistingDuplicates()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -326,10 +332,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i1");
-            Assert.AreEqual(2, group.Count);
+            Assert.Equal(2, group.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepDuplicatesFalseDuringCopyEliminatesDuplicates()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -347,13 +353,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i1");
-            Assert.AreEqual(2, group.Count);
+            Assert.Equal(2, group.Count);
 
             group = lookup.GetItems("i2");
-            Assert.AreEqual(1, group.Count);
+            Assert.Equal(1, group.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepDuplicatesFalseWithMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -375,10 +381,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i1");
-            Assert.AreEqual(2, group.Count);
+            Assert.Equal(2, group.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepMetadataEmptySameAsKeepAll()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -397,10 +403,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -421,13 +427,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m2"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m3"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal("m2", group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m3"));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepMetadataNotExistant()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -448,12 +454,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m3"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m3"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepMetadataList()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -474,12 +480,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m2"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m3"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal("m2", group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m3"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemKeepMetadataListExpansion()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -503,12 +509,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             scope.LeaveScope();
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
-            Assert.AreEqual("m2", group.First().GetMetadataValue("m2"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m3"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal("m2", group.First().GetMetadataValue("m2"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m3"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemRemoveMetadataEmptySameAsKeepAll()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -527,10 +533,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemRemoveMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -551,12 +557,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual("m1", group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal("m1", group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemRemoveMetadataList()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -577,12 +583,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemRemoveMetadataListExpansion()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -606,16 +612,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             scope.LeaveScope();
 
             var group = lookup.GetItems("i2");
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m1"));
-            Assert.AreEqual(String.Empty, group.First().GetMetadataValue("m2"));
-            Assert.AreEqual("m3", group.First().GetMetadataValue("m3"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m1"));
+            Assert.Equal(String.Empty, group.First().GetMetadataValue("m2"));
+            Assert.Equal("m3", group.First().GetMetadataValue("m3"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemKeepMetadataAndRemoveMetadataMutuallyExclusive()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup> 
@@ -628,15 +635,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </ItemGroup>
             </Target>
             </Project>");
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            ExecuteTask(task, lookup);
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                Lookup lookup = LookupHelpers.CreateEmptyLookup();
+                ExecuteTask(task, lookup);
+            }
+           );
         }
-
         /// <summary>
         /// Should not make items with an empty include.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithPropertyExpandingToNothing()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -652,10 +660,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            Assert.AreEqual(0, i1Group.Count);
+            Assert.Equal(0, i1Group.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithComments()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -675,14 +683,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            Assert.AreEqual("a1", i1Group.First().EvaluatedInclude);
-            Assert.AreEqual("m1", i1Group.First().GetMetadataValue("m"));
+            Assert.Equal("a1", i1Group.First().EvaluatedInclude);
+            Assert.Equal("m1", i1Group.First().GetMetadataValue("m"));
         }
 
         /// <summary>
         /// This is something that used to be done by CreateItem
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemGroupTrims()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -701,28 +709,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            Assert.AreEqual("v0", i1Group.First().EvaluatedInclude);
+            Assert.Equal("v0", i1Group.First().EvaluatedInclude);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemGroupWithInvalidSyntax1()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup>x</ItemGroup>
             </Target>
             </Project>");
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task, null);
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task, null);
+            }
+           );
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemGroupWithInvalidSyntax2()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup>
@@ -730,15 +741,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </ItemGroup>
             </Target>
             </Project>");
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task, null);
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task, null);
+            }
+           );
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ItemGroupWithInvalidSyntax3()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup>
@@ -746,11 +759,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </ItemGroup>
             </Target>
             </Project>");
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task, null);
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task, null);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithTransform()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -768,11 +782,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
-            Assert.AreEqual("a.cpp", i1Group.First().EvaluatedInclude);
-            Assert.AreEqual("a.obj", i2Group.First().EvaluatedInclude);
+            Assert.Equal("a.cpp", i1Group.First().EvaluatedInclude);
+            Assert.Equal("a.obj", i2Group.First().EvaluatedInclude);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithTransformInMetadataValue()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -791,11 +805,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
-            Assert.AreEqual("a.cpp", i2Group.First().EvaluatedInclude);
-            Assert.AreEqual("a.obj", i2Group.First().GetMetadataValue("m"));
+            Assert.Equal("a.cpp", i2Group.First().EvaluatedInclude);
+            Assert.Equal("a.obj", i2Group.First().GetMetadataValue("m"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithExclude()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -813,11 +827,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
-            Assert.AreEqual("a1", i1Group.First().EvaluatedInclude);
-            Assert.AreEqual("b2", i2Group.First().EvaluatedInclude);
+            Assert.Equal("a1", i1Group.First().EvaluatedInclude);
+            Assert.Equal("b2", i2Group.First().EvaluatedInclude);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithMetadataInExclude()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -837,13 +851,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
-            Assert.AreEqual(1, i1Group.Count);
-            Assert.AreEqual(1, i2Group.Count);
-            Assert.AreEqual("a1", i1Group.First().EvaluatedInclude);
-            Assert.AreEqual("b1", i2Group.First().EvaluatedInclude);
+            Assert.Equal(1, i1Group.Count);
+            Assert.Equal(1, i2Group.Count);
+            Assert.Equal("a1", i1Group.First().EvaluatedInclude);
+            Assert.Equal("b1", i2Group.First().EvaluatedInclude);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithConditionOnGroup()
         {
             MockLogger logger = new MockLogger();
@@ -877,7 +891,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[a1][b1]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithConditionOnGroupUsingMetadataErrors()
         {
             MockLogger logger = new MockLogger();
@@ -897,7 +911,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("MSB4191"); // Metadata not allowed
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyGroupWithExternalPropertyReferences()
         {
             // <PropertyGroup>
@@ -915,12 +929,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> properties = GeneratePropertyGroup();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
 
-            Assert.AreEqual(2, properties.Count);
-            Assert.AreEqual("v0", properties["p0"].EvaluatedValue);
-            Assert.AreEqual("v0", properties["p1"].EvaluatedValue);
+            Assert.Equal(2, properties.Count);
+            Assert.Equal("v0", properties["p0"].EvaluatedValue);
+            Assert.Equal("v0", properties["p1"].EvaluatedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithPropertyReferences()
         {
             // <PropertyGroup>
@@ -942,11 +956,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
-            Assert.AreEqual("v0", i1Group.First().EvaluatedInclude);
-            Assert.AreEqual("a2", i2Group.First().EvaluatedInclude);
+            Assert.Equal("v0", i1Group.First().EvaluatedInclude);
+            Assert.Equal("a2", i2Group.First().EvaluatedInclude);
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithMetadataReferences()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -970,16 +984,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
 
-            Assert.AreEqual("a1", i1Group.First().EvaluatedInclude);
-            Assert.AreEqual("a2", i1Group.ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual("m1", i2Group.First().EvaluatedInclude);
-            Assert.AreEqual("m2", i2Group.ElementAt(1).EvaluatedInclude);
+            Assert.Equal("a1", i1Group.First().EvaluatedInclude);
+            Assert.Equal("a2", i1Group.ElementAt(1).EvaluatedInclude);
+            Assert.Equal("m1", i2Group.First().EvaluatedInclude);
+            Assert.Equal("m2", i2Group.ElementAt(1).EvaluatedInclude);
 
-            Assert.AreEqual("m1", i1Group.First().GetMetadataValue("m"));
-            Assert.AreEqual("m2", i1Group.ElementAt(1).GetMetadataValue("m"));
+            Assert.Equal("m1", i1Group.First().GetMetadataValue("m"));
+            Assert.Equal("m2", i1Group.ElementAt(1).GetMetadataValue("m"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithMetadataReferencesOnMetadataConditions()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -1003,15 +1017,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
 
-            Assert.AreEqual(2, i2Group.Count);
-            Assert.AreEqual("a1", i2Group.First().EvaluatedInclude);
-            Assert.AreEqual("a2", i2Group.ElementAt(1).EvaluatedInclude);
+            Assert.Equal(2, i2Group.Count);
+            Assert.Equal("a1", i2Group.First().EvaluatedInclude);
+            Assert.Equal("a2", i2Group.ElementAt(1).EvaluatedInclude);
 
-            Assert.AreEqual("n1", i2Group.First().GetMetadataValue("n"));
-            Assert.AreEqual(String.Empty, i2Group.ElementAt(1).GetMetadataValue("n"));
+            Assert.Equal("n1", i2Group.First().GetMetadataValue("n"));
+            Assert.Equal(String.Empty, i2Group.ElementAt(1).GetMetadataValue("n"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithMetadataReferencesOnItemGroupAndItemConditionsErrors()
         {
             MockLogger logger = new MockLogger();
@@ -1027,7 +1041,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("MSB4191"); // Metadata not allowed
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemGroupWithExternalMetadataReferences()
         {
             // <ItemGroup>
@@ -1059,19 +1073,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
 
-            Assert.AreEqual("b1", i1Group.First().EvaluatedInclude);
-            Assert.AreEqual("b1", i1Group.ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual("b1", i1Group.ElementAt(2).EvaluatedInclude);
-            Assert.AreEqual("m1", i1Group.First().GetMetadataValue("m"));
-            Assert.AreEqual("m2", i1Group.ElementAt(1).GetMetadataValue("m"));
-            Assert.AreEqual("m3", i1Group.ElementAt(2).GetMetadataValue("m"));
+            Assert.Equal("b1", i1Group.First().EvaluatedInclude);
+            Assert.Equal("b1", i1Group.ElementAt(1).EvaluatedInclude);
+            Assert.Equal("b1", i1Group.ElementAt(2).EvaluatedInclude);
+            Assert.Equal("m1", i1Group.First().GetMetadataValue("m"));
+            Assert.Equal("m2", i1Group.ElementAt(1).GetMetadataValue("m"));
+            Assert.Equal("m3", i1Group.ElementAt(2).GetMetadataValue("m"));
 
-            Assert.AreEqual("m1", i2Group.First().EvaluatedInclude);
-            Assert.AreEqual("m2", i2Group.ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual("m3", i2Group.ElementAt(2).EvaluatedInclude);
+            Assert.Equal("m1", i2Group.First().EvaluatedInclude);
+            Assert.Equal("m2", i2Group.ElementAt(1).EvaluatedInclude);
+            Assert.Equal("m3", i2Group.ElementAt(2).EvaluatedInclude);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyGroupWithCumulativePropertyReferences()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -1088,12 +1102,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
 
-            Assert.AreEqual(2, properties.Count);
-            Assert.AreEqual("v2", properties["p1"].EvaluatedValue);
-            Assert.AreEqual("#v1#", properties["p2"].EvaluatedValue);
+            Assert.Equal(2, properties.Count);
+            Assert.Equal("v2", properties["p1"].EvaluatedValue);
+            Assert.Equal("#v1#", properties["p2"].EvaluatedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyGroupWithMetadataReferencesOnGroupErrors()
         {
             MockLogger logger = new MockLogger();
@@ -1109,7 +1123,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("MSB4191");
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyGroupWithMetadataReferencesOnProperty()
         {
             // <ItemGroup>
@@ -1138,10 +1152,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = GenerateLookup(task.Project);
             ExecuteTask(task, lookup);
 
-            Assert.AreEqual("n2", lookup.GetProperty("p1").EvaluatedValue);
+            Assert.Equal("n2", lookup.GetProperty("p1").EvaluatedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertiesCanReferenceItemsInSameTarget()
         {
             MockLogger logger = new MockLogger();
@@ -1163,7 +1177,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[#a1#*#a2#]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemsCanReferencePropertiesInSameTarget()
         {
             MockLogger logger = new MockLogger();
@@ -1185,7 +1199,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[v0]");
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyGroupInTargetCanOverwriteGlobalProperties()
         {
             MockLogger logger = new MockLogger();
@@ -1212,21 +1226,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectInstance p = project.CreateProjectInstance();
 
-            Assert.AreEqual("v0", p.GetProperty("global").EvaluatedValue);
+            Assert.Equal("v0", p.GetProperty("global").EvaluatedValue);
             p.Build(new string[] { "t2" }, new ILogger[] { logger });
 
             // PropertyGroup outside of target can't overwrite global property,
             // but PropertyGroup inside of target can overwrite it
             logger.AssertLogContains("start:[v0]", "end:[v2]", "final:[v2]");
-            Assert.AreEqual("v2", p.GetProperty("global").EvaluatedValue);
+            Assert.Equal("v2", p.GetProperty("global").EvaluatedValue);
 
             // Resetting the project goes back to the old value
             p = project.CreateProjectInstance();
-            Assert.AreEqual("v0", p.GetProperty("global").EvaluatedValue);
+            Assert.Equal("v0", p.GetProperty("global").EvaluatedValue);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void PropertiesAreRevertedAfterBuild()
         {
             MockLogger logger = new MockLogger();
@@ -1247,15 +1261,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             string value = p.GetProperty("p").EvaluatedValue;
-            Assert.AreEqual("p1", value);
+            Assert.Equal("p1", value);
 
             p = project.CreateProjectInstance();
 
             value = p.GetProperty("p").EvaluatedValue;
-            Assert.AreEqual("p0", value);
+            Assert.Equal("p0", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertiesVisibleToSubsequentTask()
         {
             MockLogger logger = new MockLogger();
@@ -1274,7 +1288,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[p1]");
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertiesVisibleToSubsequentTarget()
         {
             MockLogger logger = new MockLogger();
@@ -1295,7 +1309,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[p1]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemsVisibleToSubsequentTask()
         {
             MockLogger logger = new MockLogger();
@@ -1314,7 +1328,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[i1]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemsVisibleToSubsequentTarget()
         {
             MockLogger logger = new MockLogger();
@@ -1335,7 +1349,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[i1]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ItemsNotVisibleToParallelTargetBatches()
         {
             MockLogger logger = new MockLogger();
@@ -1359,7 +1373,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(new string[] { "start:[1.in]", "end:[1.in]", "start:[2.in]", "end:[2.in]" });
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertiesNotVisibleToParallelTargetBatches()
         {
             MockLogger logger = new MockLogger();
@@ -1384,7 +1398,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         // One input is built, the other is inferred
-        [TestMethod]
+        [Fact]
         public void ItemsInPartialBuild()
         {
             string[] oldFiles = null, newFiles = null;
@@ -1425,7 +1439,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         // One input is built, the other input is inferred
-        [TestMethod]
+        [Fact]
         public void PropertiesInPartialBuild()
         {
             string[] oldFiles = null, newFiles = null;
@@ -1467,7 +1481,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         // One input is built, the other is inferred
-        [TestMethod]
+        [Fact]
         public void ItemsInPartialBuildVisibleToSubsequentlyInferringTasks()
         {
             string[] oldFiles = null, newFiles = null;
@@ -1523,22 +1537,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void IncludeNoOp()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup> 
                     <i1 Include=''/>
                 </ItemGroup>
             </Target></Project>");
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task, null);
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task, null);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void RemoveNoOp()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -1552,10 +1568,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveItemInTarget()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -1570,14 +1586,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
         }
 
         /// <summary>
         /// Removes in one batch should never affect adds in a parallel batch, even if that
         /// parallel batch ran first.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveOfItemAddedInTargetByParallelTargetBatchDoesNothing()
         {
             MockLogger logger = new MockLogger();
@@ -1616,7 +1632,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(new string[] { "final:[a;b;d]" });
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveItemInTargetWithTransform()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -1632,10 +1648,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveWithMultipleIncludes()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -1651,10 +1667,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveAllItemsInList()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -1670,10 +1686,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveItemOutsideTarget()
         {
             // <ItemGroup>
@@ -1704,17 +1720,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i0Group = lookup.GetItems("i0");
 
-            Assert.AreEqual(3, i0Group.Count);
-            Assert.AreEqual("a1", i0Group.First().EvaluatedInclude);
-            Assert.AreEqual("a3", i0Group.ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual("a4", i0Group.ElementAt(2).EvaluatedInclude);
+            Assert.Equal(3, i0Group.Count);
+            Assert.Equal("a1", i0Group.First().EvaluatedInclude);
+            Assert.Equal("a3", i0Group.ElementAt(1).EvaluatedInclude);
+            Assert.Equal("a4", i0Group.ElementAt(2).EvaluatedInclude);
         }
 
         /// <summary>
         /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions 
         /// should be allowed
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConditionOnPropertyGroupUsingPropertiesAndItemListsAndTransforms()
         {
             // <ItemGroup>
@@ -1746,14 +1762,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string p1 = lookup.GetProperty("p1").EvaluatedValue;
 
-            Assert.AreEqual("v1", p1);
+            Assert.Equal("v1", p1);
         }
 
         /// <summary>
         /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions 
         /// should be allowed
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConditionOnItemGroupUsingPropertiesAndItemListsAndTransforms()
         {
             // <ItemGroup>
@@ -1785,8 +1801,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
 
-            Assert.AreEqual(1, i1Group.Count);
-            Assert.AreEqual("x", i1Group.First().EvaluatedInclude);
+            Assert.Equal(1, i1Group.Count);
+            Assert.Equal("x", i1Group.First().EvaluatedInclude);
         }
 
         /// <summary>
@@ -1796,7 +1812,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// prohibit batchable expressions on the ItemGroup conditions. It's just too hard to write such expressions
         /// in a comprehensible way.    
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RegressPCHBug()
         {
             // <ItemGroup>
@@ -1828,14 +1844,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> linkGroup = lookup.GetItems("link");
 
-            Assert.AreEqual(4, linkGroup.Count);
-            Assert.AreEqual("A_PCH", linkGroup.First().EvaluatedInclude);
-            Assert.AreEqual("m1.obj", linkGroup.ElementAt(1).EvaluatedInclude);
-            Assert.AreEqual("m2", linkGroup.ElementAt(2).EvaluatedInclude);
-            Assert.AreEqual("m2", linkGroup.ElementAt(3).EvaluatedInclude);
+            Assert.Equal(4, linkGroup.Count);
+            Assert.Equal("A_PCH", linkGroup.First().EvaluatedInclude);
+            Assert.Equal("m1.obj", linkGroup.ElementAt(1).EvaluatedInclude);
+            Assert.Equal("m2", linkGroup.ElementAt(2).EvaluatedInclude);
+            Assert.Equal("m2", linkGroup.ElementAt(3).EvaluatedInclude);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovesOfPersistedItemsAreReversed()
         {
             MockLogger logger = new MockLogger();
@@ -1858,16 +1874,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // The item was removed during the build
             logger.AssertLogContains("[]");
-            Assert.AreEqual(0, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(0, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(0, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(0, p.ItemsToBuildWith.ItemTypes.Count);
 
             p = project.CreateProjectInstance();
             // We should still have the item left
-            Assert.AreEqual(1, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(1, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(1, p.ItemsToBuildWith.ItemTypes.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovesOfPersistedItemsAreReversed1()
         {
             MockLogger logger = new MockLogger();
@@ -1890,16 +1906,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[]");
-            Assert.AreEqual(0, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(0, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(0, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(0, p.ItemsToBuildWith.ItemTypes.Count);
 
             p = project.CreateProjectInstance();
             // We should still have the item left
-            Assert.AreEqual(1, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(1, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(1, p.ItemsToBuildWith.ItemTypes.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovesOfPersistedItemsAreReversed2()
         {
             MockLogger logger = new MockLogger();
@@ -1926,17 +1942,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[a2;a1;a3][b1]");
-            Assert.AreEqual(3, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(1, p.ItemsToBuildWith["i1"].Count);
-            Assert.AreEqual(2, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(3, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i1"].Count);
+            Assert.Equal(2, p.ItemsToBuildWith.ItemTypes.Count);
 
             p = project.CreateProjectInstance();
-            Assert.AreEqual(2, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(1, p.ItemsToBuildWith["i1"].Count);
-            Assert.AreEqual(2, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(2, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i1"].Count);
+            Assert.Equal(2, p.ItemsToBuildWith.ItemTypes.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovesOfPersistedItemsAreReversed3()
         {
             MockLogger logger = new MockLogger();
@@ -1962,20 +1978,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[]");
-            Assert.AreEqual(0, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(0, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(0, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(0, p.ItemsToBuildWith.ItemTypes.Count);
 
             p = project.CreateProjectInstance();
-            Assert.AreEqual(1, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual("m1", p.ItemsToBuildWith["i0"].First().GetMetadataValue("m"));
-            Assert.AreEqual(1, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal("m1", p.ItemsToBuildWith["i0"].First().GetMetadataValue("m"));
+            Assert.Equal(1, p.ItemsToBuildWith.ItemTypes.Count);
         }
 
         /// <summary>
         /// Persisted item is copied into another item list by an ItemGroup -- the copy
         /// should be reversed
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemovesOfPersistedItemsAreReversed4()
         {
             MockLogger logger = new MockLogger();
@@ -1998,18 +2014,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[a1;a1][a1;a1]");
-            Assert.AreEqual(2, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(2, p.ItemsToBuildWith["i1"].Count);
-            Assert.AreEqual(2, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(2, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(2, p.ItemsToBuildWith["i1"].Count);
+            Assert.Equal(2, p.ItemsToBuildWith.ItemTypes.Count);
 
             p = project.CreateProjectInstance();
-            Assert.AreEqual(1, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual("a1", p.ItemsToBuildWith["i0"].First().EvaluatedInclude);
-            Assert.AreEqual(0, p.ItemsToBuildWith["i1"].Count);
-            Assert.AreEqual(1, p.ItemsToBuildWith.ItemTypes.Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal("a1", p.ItemsToBuildWith["i0"].First().EvaluatedInclude);
+            Assert.Equal(0, p.ItemsToBuildWith["i1"].Count);
+            Assert.Equal(1, p.ItemsToBuildWith.ItemTypes.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovesOfItemsOnlyWithMetadataValue()
         {
             MockLogger logger = new MockLogger();
@@ -2035,10 +2051,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[m2]");
-            Assert.AreEqual(1, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i0"].Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveBatchingOnRemoveValue()
         {
             MockLogger logger = new MockLogger();
@@ -2065,10 +2081,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[m3]");
-            Assert.AreEqual(1, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i0"].Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveWithWildcards()
         {
             string[] files = null;
@@ -2091,8 +2107,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Lookup lookup = LookupHelpers.CreateLookup(properties);
                 ExecuteTask(task, lookup);
 
-                Assert.AreEqual(1, lookup.GetItems("i1").Count);
-                Assert.AreEqual("other", lookup.GetItems("i1").First().EvaluatedInclude);
+                Assert.Equal(1, lookup.GetItems("i1").Count);
+                Assert.Equal("other", lookup.GetItems("i1").First().EvaluatedInclude);
             }
             finally
             {
@@ -2100,7 +2116,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovesNotVisibleToParallelTargetBatches()
         {
             MockLogger logger = new MockLogger();
@@ -2124,7 +2140,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(new string[] { "start:[1.in]", "end:[]", "start:[2.in]", "end:[]" });
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovesNotVisibleToParallelTargetBatches2()
         {
             MockLogger logger = new MockLogger();
@@ -2190,7 +2206,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// not visible to subsequent tasks in the calling target. (That was because the project
         /// items and properties had been cloned for the target batches.) We must match that behavior.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CalledTargetItemsAreNotVisibleToCallerTarget()
         {
             MockLogger logger = new MockLogger();
@@ -2231,7 +2247,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Items and properties should be visible within a CallTarget, even if the CallTargets are seperate tasks
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CalledTargetItemsAreVisibleWhenTargetsRunFromSeperateTasks()
         {
             MockLogger logger = new MockLogger();
@@ -2275,7 +2291,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Items and properties should be visible within a CallTarget, even if the targets
         /// are Run Seperately
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CalledTargetItemsAreVisibleWhenTargetsRunSeperately()
         {
             MockLogger logger = new MockLogger();
@@ -2318,7 +2334,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Items and properties should be visible within a CallTarget, even if the targets
         /// are Run Together
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CalledTargetItemsAreVisibleWhenTargetsRunTogether()
         {
             MockLogger logger = new MockLogger();
@@ -2362,7 +2378,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// not visible to the calling target. (That was because the project items and properties had been cloned for the target batches.) 
         /// We must match that behavior. (For now)
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CallerTargetItemsAreNotVisibleToCalledTarget()
         {
             MockLogger logger = new MockLogger();
@@ -2400,7 +2416,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(new string[] { "in target:[a][a]", "after target:[a;b;c][a;b;c]" });
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyNoOp()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -2414,10 +2430,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            Assert.AreEqual(0, lookup.GetItems("i1").Count);
+            Assert.Equal(0, lookup.GetItems("i1").Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemInTarget()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -2437,10 +2453,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             ProjectItemInstance item = lookup.GetItems("i1").First();
-            Assert.AreEqual("m2", item.GetMetadataValue("m"));
+            Assert.Equal("m2", item.GetMetadataValue("m"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemInTargetComplex()
         {
             MockLogger logger = new MockLogger();
@@ -2472,7 +2488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(@"[item1|v1|v2|v3]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemInTargetLastMetadataWins()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -2494,10 +2510,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteTask(task, lookup);
 
             ProjectItemInstance item = lookup.GetItems("i1").First();
-            Assert.AreEqual("m3", item.GetMetadataValue("m"));
+            Assert.Equal("m3", item.GetMetadataValue("m"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemEmittedByTask()
         {
             MockLogger logger = new MockLogger();
@@ -2521,7 +2537,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(new string[] { "[m2][n1]" });
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemInTargetWithCondition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -2545,13 +2561,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectItemInstance item1 = lookup.GetItems("i1").First();
             ProjectItemInstance item2 = lookup.GetItems("i1").ElementAt(1);
-            Assert.AreEqual("a1", item1.EvaluatedInclude);
-            Assert.AreEqual("a2", item2.EvaluatedInclude);
-            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
-            Assert.AreEqual("m3", item2.GetMetadataValue("m"));
+            Assert.Equal("a1", item1.EvaluatedInclude);
+            Assert.Equal("a2", item2.EvaluatedInclude);
+            Assert.Equal("m1", item1.GetMetadataValue("m"));
+            Assert.Equal("m3", item2.GetMetadataValue("m"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemInTargetWithConditionOnMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -2575,18 +2591,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectItemInstance item1 = lookup.GetItems("i1").First();
             ProjectItemInstance item2 = lookup.GetItems("i1").ElementAt(1);
-            Assert.AreEqual("a1", item1.EvaluatedInclude);
-            Assert.AreEqual("a2", item2.EvaluatedInclude);
-            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
-            Assert.AreEqual("m3", item2.GetMetadataValue("m"));
+            Assert.Equal("a1", item1.EvaluatedInclude);
+            Assert.Equal("a2", item2.EvaluatedInclude);
+            Assert.Equal("m1", item1.GetMetadataValue("m"));
+            Assert.Equal("m3", item2.GetMetadataValue("m"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ModifyItemWithUnqualifiedMetadataError()
         {
-            string content = ObjectModelHelpers.CleanupFileContents(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup>
                     <i1 Include='a1'/>
@@ -2595,11 +2612,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </i1>
                 </ItemGroup>
             </Target></Project>");
-            IntrinsicTask task = CreateIntrinsicTask(content);
-            ExecuteTask(task, null);
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                ExecuteTask(task, null);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void ModifyItemInTargetWithConditionWithoutItemTypeOnMetadataInCondition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -2623,14 +2641,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectItemInstance item1 = lookup.GetItems("i1").First();
             ProjectItemInstance item2 = lookup.GetItems("i1").ElementAt(1);
-            Assert.AreEqual("a1", item1.EvaluatedInclude);
-            Assert.AreEqual("a2", item2.EvaluatedInclude);
-            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
-            Assert.AreEqual("m3", item2.GetMetadataValue("m"));
+            Assert.Equal("a1", item1.EvaluatedInclude);
+            Assert.Equal("a2", item2.EvaluatedInclude);
+            Assert.Equal("m1", item1.GetMetadataValue("m"));
+            Assert.Equal("m3", item2.GetMetadataValue("m"));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemInTargetWithConditionOnMetadataWithoutItemTypeOnMetadataInCondition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -2654,13 +2672,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectItemInstance item1 = lookup.GetItems("i1").First();
             ProjectItemInstance item2 = lookup.GetItems("i1").ElementAt(1);
-            Assert.AreEqual("a1", item1.EvaluatedInclude);
-            Assert.AreEqual("a2", item2.EvaluatedInclude);
-            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
-            Assert.AreEqual("m3", item2.GetMetadataValue("m"));
+            Assert.Equal("a1", item1.EvaluatedInclude);
+            Assert.Equal("a2", item2.EvaluatedInclude);
+            Assert.Equal("m1", item1.GetMetadataValue("m"));
+            Assert.Equal("m3", item2.GetMetadataValue("m"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemOutsideTarget()
         {
             // <ItemGroup>
@@ -2694,14 +2712,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> i0Group = lookup.GetItems("i0");
 
-            Assert.AreEqual(4, i0Group.Count);
+            Assert.Equal(4, i0Group.Count);
             foreach (ProjectItemInstance item in i0Group)
             {
-                Assert.AreEqual("m4", item.GetMetadataValue("m"));
+                Assert.Equal("m4", item.GetMetadataValue("m"));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveComplexMidlExample()
         {
             MockLogger logger = new MockLogger();
@@ -2751,7 +2769,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                      @"[c.idl|dlldatadir\c_dlldata.c|myheader.h|tlbdir\c.tlb|proxydir\c_p.c|interfacedir\c_i.c]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifiesOfPersistedItemsAreReversed1()
         {
             MockLogger logger = new MockLogger();
@@ -2781,17 +2799,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[m1]");
 
             ProjectItemInstance item = p.ItemsToBuildWith["i0"].First();
-            Assert.AreEqual("m1", item.GetMetadataValue("m"));
+            Assert.Equal("m1", item.GetMetadataValue("m"));
 
             p = project.CreateProjectInstance();
             item = p.ItemsToBuildWith["i0"].First();
-            Assert.AreEqual("m0", item.GetMetadataValue("m"));
+            Assert.Equal("m0", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Modify of an item copied during the build
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ModifiesOfPersistedItemsAreReversed2()
         {
             MockLogger logger = new MockLogger();
@@ -2825,18 +2843,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             logger.AssertLogContains("[m0][n0]", "[m1][n1]");
 
-            Assert.AreEqual(1, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(1, p.ItemsToBuildWith["i1"].Count);
-            Assert.AreEqual("m0", p.ItemsToBuildWith["i0"].First().GetMetadataValue("m"));
-            Assert.AreEqual("n0", p.ItemsToBuildWith["i0"].First().GetMetadataValue("n"));
-            Assert.AreEqual("m1", p.ItemsToBuildWith["i1"].First().GetMetadataValue("m"));
-            Assert.AreEqual("n1", p.ItemsToBuildWith["i1"].First().GetMetadataValue("n"));
+            Assert.Equal(1, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(1, p.ItemsToBuildWith["i1"].Count);
+            Assert.Equal("m0", p.ItemsToBuildWith["i0"].First().GetMetadataValue("m"));
+            Assert.Equal("n0", p.ItemsToBuildWith["i0"].First().GetMetadataValue("n"));
+            Assert.Equal("m1", p.ItemsToBuildWith["i1"].First().GetMetadataValue("m"));
+            Assert.Equal("n1", p.ItemsToBuildWith["i1"].First().GetMetadataValue("n"));
 
             p = project.CreateProjectInstance();
-            Assert.AreEqual(1, p.ItemsToBuildWith["i0"].Count);
-            Assert.AreEqual(0, p.ItemsToBuildWith["i1"].Count);
-            Assert.AreEqual("m0", p.ItemsToBuildWith["i0"].First().GetMetadataValue("m"));
-            Assert.AreEqual("n0", p.ItemsToBuildWith["i0"].First().GetMetadataValue("n"));
+            Assert.Equal(1, p.ItemsToBuildWith["i0"].Count);
+            Assert.Equal(0, p.ItemsToBuildWith["i1"].Count);
+            Assert.Equal("m0", p.ItemsToBuildWith["i0"].First().GetMetadataValue("m"));
+            Assert.Equal("n0", p.ItemsToBuildWith["i0"].First().GetMetadataValue("n"));
         }
 
 
@@ -2844,7 +2862,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// The case is where a transform is done on an item to generate a pdb file name when the extension of an item is dll
         /// the resulting items is expected to have an extension metadata of pdb but instead has an extension of dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IncludeCheckOnMetadata()
         {
             MockLogger logger = new MockLogger();
@@ -2861,7 +2879,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                    </Target>
                 </Project> "))));
             bool success = p.Build(new string[] { "a" }, new ILogger[] { logger });
-            Assert.IsTrue(success);
+            Assert.True(success);
             logger.AssertLogContains("[a.dll]->[.dll]");
             logger.AssertLogContains("[a.pdb]->[.pdb]");
         }
@@ -2870,7 +2888,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// The case is where a transform is done on an item to generate a pdb file name the batching is done on the identity.
         /// If the identity was also copied over then we would only get one bucket instead of two buckets
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IncludeCheckOnMetadata2()
         {
             MockLogger logger = new MockLogger();
@@ -2888,7 +2906,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                    </Target>
                 </Project> "))));
             bool success = p.Build(new string[] { "a" }, new ILogger[] { logger });
-            Assert.IsTrue(success);
+            Assert.True(success);
             logger.AssertLogContains("[a.dll]->[.dll]");
             logger.AssertLogContains("[a.dll.pdb]->[.pdb]");
             logger.AssertLogContains("[a.dll.pdb.pdb]->[.pdb]");
@@ -2898,7 +2916,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure that recursive dir still gets the right file
         /// 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void IncludeCheckOnMetadata_3()
         {
             MockLogger logger = new MockLogger();
@@ -2931,7 +2949,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                      </Target>
                 </Project> "))));
                 bool success = p.Build(new string[] { "a" }, new ILogger[] { logger });
-                Assert.IsTrue(success);
+                Assert.True(success);
                 logger.AssertLogContains("[a.dll]->[.dll]->[]");
                 logger.AssertLogContains("[" + directoryForTest + @"\..\Test\a.dll]->[.dll]->[Test\]");
             }
@@ -2944,7 +2962,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveItemInImportedFile()
         {
             MockLogger logger = new MockLogger();
@@ -2982,7 +3000,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemInImportedFile()
         {
             MockLogger logger = new MockLogger();
@@ -3024,7 +3042,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Properties produced in one target batch are not visible to another
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OutputPropertiesInTargetBatchesCreateItem()
         {
             MockLogger logger = new MockLogger();
@@ -3055,7 +3073,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Properties produced in one task batch are not visible to another
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OutputPropertiesInTaskBatchesCreateItem()
         {
             MockLogger logger = new MockLogger();
@@ -3080,7 +3098,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// In this case gen.cpp was getting ObjectFile of def.obj.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PhoenixBatchingIssue()
         {
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
@@ -3107,12 +3125,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance instance = new ProjectInstance(xml);
             instance.Build();
 
-            Assert.AreEqual(2, instance.Items.Count());
-            Assert.AreEqual("gen.obj", instance.GetItems("CppCompile").First().GetMetadataValue("ObjectFile"));
-            Assert.AreEqual("def.obj", instance.GetItems("CppCompile").Last().GetMetadataValue("ObjectFile"));
+            Assert.Equal(2, instance.Items.Count());
+            Assert.Equal("gen.obj", instance.GetItems("CppCompile").First().GetMetadataValue("ObjectFile"));
+            Assert.Equal("def.obj", instance.GetItems("CppCompile").Last().GetMetadataValue("ObjectFile"));
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertiesInInferredBuildCreateProperty()
         {
             string[] files = null;
@@ -3151,7 +3169,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemPreviouslyModified()
         {
             MockLogger logger = new MockLogger();
@@ -3179,7 +3197,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void ModifyItemPreviouslyModified2()
         {
             MockLogger logger = new MockLogger();
@@ -3209,7 +3227,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveItemPreviouslyModified()
         {
             MockLogger logger = new MockLogger();
@@ -3235,7 +3253,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogDoesntContain("[2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveItemPreviouslyModified2()
         {
             MockLogger logger = new MockLogger();
@@ -3263,7 +3281,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogDoesntContain("[2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void FilterItemPreviouslyModified()
         {
             MockLogger logger = new MockLogger();
@@ -3291,7 +3309,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void FilterItemPreviouslyModified2()
         {
             MockLogger logger = new MockLogger();
@@ -3319,7 +3337,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void FilterItemPreviouslyModified3()
         {
             MockLogger logger = new MockLogger();
@@ -3355,7 +3373,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[a;b;c = m4]");
         }
 
-        [TestMethod]
+        [Fact]
         public void FilterItemPreviouslyModified4()
         {
             MockLogger logger = new MockLogger();
@@ -3383,7 +3401,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[a;c = m3]");
         }
 
-        [TestMethod]
+        [Fact]
         public void FilterItemPreviouslyModified5()
         {
             MockLogger logger = new MockLogger();
@@ -3412,7 +3430,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("[c = m2]");
         }
 
-        [TestMethod]
+        [Fact]
         public void FilterItemPreviouslyModified6()
         {
             MockLogger logger = new MockLogger();

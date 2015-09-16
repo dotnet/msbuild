@@ -4,25 +4,22 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
-    sealed public class CreateProperty_Tests
+    sealed public class CreateProperty_Tests : IDisposable
     {
-        [TestInitialize]
-        public void SetUp()
+        public CreateProperty_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
@@ -30,7 +27,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure that I can use the CreateProperty task to blank out a property value.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CreateBlankProperty()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -57,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure that I can use the CreateProperty task to create a property
         /// that has a parseable semicolon in it.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CreatePropertyWithSemicolon()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -85,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure that I can use the CreateProperty task to create a property
         /// that has a literal semicolon in it.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CreatePropertyWithLiteralSemicolon()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"

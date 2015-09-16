@@ -4,8 +4,6 @@
 using Microsoft.CSharp;
 using Microsoft.Build.Tasks.Xaml;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
@@ -14,6 +12,7 @@ using System.IO;
 using System.Reflection;
 using System.Xaml;
 using Microsoft.Build.Evaluation;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -99,7 +98,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Toolset currentToolset = ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
-                    Assert.IsNotNull(currentToolset, String.Format("For some reason, we couldn't get the current ({0}) toolset!", ObjectModelHelpers.MSBuildDefaultToolsVersion));
+                    Assert.NotNull(currentToolset); // String.Format("For some reason, we couldn't get the current ({0}) toolset!", ObjectModelHelpers.MSBuildDefaultToolsVersion)
                     s_pathToMSBuildBinaries = currentToolset.ToolsPath;
                 }
 
@@ -121,7 +120,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (XamlParseException)
             {
-                Assert.Fail("Parse of FakeTask XML failed");
+                Assert.True(false, "Parse of FakeTask XML failed");
             }
 
             TaskGenerator tg = new TaskGenerator(tp);
@@ -163,7 +162,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Console.WriteLine(sw.ToString());
                 }
-                Assert.IsTrue(cr.Errors.Count == 0, "Compilation Failed with errors: " + cr.Errors.Count.ToString());
+                Assert.Equal(0, cr.Errors.Count);
                 if (cr.Errors.Count > 0)
                 {
                     foreach (CompilerError error in cr.Errors)

@@ -11,51 +11,55 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
 using System.Globalization;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Test FileState utility class
     /// </summary>
-    [TestClass]
     public class FileStateTests
     {
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void BadNoName()
         {
-            new FileState("");
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new FileState("");
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void BadCharsCtorOK()
         {
             new FileState("|");
         }
 
-        [TestMethod]
+        [Fact]
         public void BadTooLongCtorOK()
         {
             new FileState(new String('x', 5000));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void BadChars()
         {
-            var state = new FileState("|");
-            var time = state.LastWriteTime;
+            Assert.Throws<ArgumentException>(() =>
+            {
+                var state = new FileState("|");
+                var time = state.LastWriteTime;
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void BadTooLongLastWriteTime()
         {
-            Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(new String('x', 5000)).LastWriteTime; }, delegate () { var x = new FileState(new String('x', 5000)).LastWriteTime; });
+            Helpers.VerifyAssertThrowsSameWay(
+                delegate () { var x = new FileInfo(new String('x', 5000)).LastWriteTime; },
+                delegate () { var x = new FileState(new String('x', 5000)).LastWriteTime; });
         }
 
-        [TestMethod]
+        [Fact]
         public void Exists()
         {
             string file = null;
@@ -66,7 +70,7 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.Exists, state.FileExists);
+                Assert.Equal(info.Exists, state.FileExists);
             }
             finally
             {
@@ -74,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Name()
         {
             string file = null;
@@ -85,7 +89,7 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.FullName, state.Name);
+                Assert.Equal(info.FullName, state.Name);
             }
             finally
             {
@@ -93,15 +97,15 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void IsDirectoryTrue()
         {
             var state = new FileState(Path.GetTempPath());
 
-            Assert.AreEqual(true, state.IsDirectory);
+            Assert.Equal(true, state.IsDirectory);
         }
 
-        [TestMethod]
+        [Fact]
         public void LastWriteTime()
         {
             string file = null;
@@ -112,7 +116,7 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.LastWriteTime, state.LastWriteTime);
+                Assert.Equal(info.LastWriteTime, state.LastWriteTime);
             }
             finally
             {
@@ -120,7 +124,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void LastWriteTimeUtc()
         {
             string file = null;
@@ -131,7 +135,7 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
+                Assert.Equal(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
             }
             finally
             {
@@ -139,7 +143,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Length()
         {
             string file = null;
@@ -150,7 +154,7 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.Length, state.Length);
+                Assert.Equal(info.Length, state.Length);
             }
             finally
             {
@@ -158,7 +162,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void AccessDenied()
         {
             string locked = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "system32\\notepad.exe");
@@ -166,7 +170,7 @@ namespace Microsoft.Build.UnitTests
             FileInfo info = new FileInfo(locked);
             FileState state = new FileState(locked);
 
-            Assert.AreEqual(info.Exists, state.FileExists);
+            Assert.Equal(info.Exists, state.FileExists);
 
             if (!info.Exists)
             {
@@ -174,9 +178,9 @@ namespace Microsoft.Build.UnitTests
                 return;
             }
 
-            Assert.AreEqual(info.Length, state.Length);
-            Assert.AreEqual(info.LastWriteTime, state.LastWriteTime);
-            Assert.AreEqual(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
+            Assert.Equal(info.Length, state.Length);
+            Assert.Equal(info.LastWriteTime, state.LastWriteTime);
+            Assert.Equal(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
         }
 
 #if CHECKING4GBFILESWORK
@@ -210,7 +214,7 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
-        [TestMethod]
+        [Fact]
         public void ReadOnly()
         {
             string file = null;
@@ -221,7 +225,7 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.IsReadOnly, state.IsReadOnly);
+                Assert.Equal(info.IsReadOnly, state.IsReadOnly);
             }
             finally
             {
@@ -229,7 +233,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExistsReset()
         {
             string file = null;
@@ -240,11 +244,11 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.Exists, state.FileExists);
+                Assert.Equal(info.Exists, state.FileExists);
                 File.Delete(file);
-                Assert.AreEqual(true, state.FileExists);
+                Assert.Equal(true, state.FileExists);
                 state.Reset();
-                Assert.AreEqual(false, state.FileExists);
+                Assert.Equal(false, state.FileExists);
             }
             finally
             {
@@ -255,7 +259,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NameReset()
         {
             string file = null;
@@ -266,14 +270,14 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.FullName, state.Name);
+                Assert.Equal(info.FullName, state.Name);
                 string originalName = info.FullName;
                 string oldFile = file;
                 file = oldFile + "2";
                 File.Move(oldFile, file);
-                Assert.AreEqual(originalName, state.Name);
+                Assert.Equal(originalName, state.Name);
                 state.Reset();
-                Assert.AreEqual(originalName, state.Name); // Name is from the constructor, didn't change
+                Assert.Equal(originalName, state.Name); // Name is from the constructor, didn't change
             }
             finally
             {
@@ -281,7 +285,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void LastWriteTimeReset()
         {
             string file = null;
@@ -292,14 +296,14 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.LastWriteTime, state.LastWriteTime);
+                Assert.Equal(info.LastWriteTime, state.LastWriteTime);
 
                 var time = new DateTime(2111, 1, 1);
                 info.LastWriteTime = time;
 
-                Assert.AreNotEqual(time, state.LastWriteTime);
+                Assert.NotEqual(time, state.LastWriteTime);
                 state.Reset();
-                Assert.AreEqual(time, state.LastWriteTime);
+                Assert.Equal(time, state.LastWriteTime);
             }
             finally
             {
@@ -307,7 +311,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void LastWriteTimeUtcReset()
         {
             string file = null;
@@ -318,14 +322,14 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
+                Assert.Equal(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
 
                 var time = new DateTime(2111, 1, 1);
                 info.LastWriteTime = time;
 
-                Assert.AreNotEqual(time.ToUniversalTime(), state.LastWriteTimeUtcFast);
+                Assert.NotEqual(time.ToUniversalTime(), state.LastWriteTimeUtcFast);
                 state.Reset();
-                Assert.AreEqual(time.ToUniversalTime(), state.LastWriteTimeUtcFast);
+                Assert.Equal(time.ToUniversalTime(), state.LastWriteTimeUtcFast);
             }
             finally
             {
@@ -333,7 +337,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void LengthReset()
         {
             string file = null;
@@ -344,13 +348,13 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.Length, state.Length);
+                Assert.Equal(info.Length, state.Length);
                 File.WriteAllText(file, "x");
 
-                Assert.AreEqual(info.Length, state.Length);
+                Assert.Equal(info.Length, state.Length);
                 state.Reset();
                 info.Refresh();
-                Assert.AreEqual(info.Length, state.Length);
+                Assert.Equal(info.Length, state.Length);
             }
             finally
             {
@@ -358,7 +362,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadOnlyReset()
         {
             string file = null;
@@ -369,10 +373,10 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(file);
 
-                Assert.AreEqual(info.IsReadOnly, state.IsReadOnly);
+                Assert.Equal(info.IsReadOnly, state.IsReadOnly);
                 info.IsReadOnly = !info.IsReadOnly;
                 state.Reset();
-                Assert.AreEqual(true, state.IsReadOnly);
+                Assert.Equal(true, state.IsReadOnly);
             }
             finally
             {
@@ -381,54 +385,54 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExistsButDirectory()
         {
-            Assert.AreEqual(new FileInfo(Path.GetTempPath()).Exists, new FileState(Path.GetTempPath()).FileExists);
-            Assert.AreEqual(true, (new FileState(Path.GetTempPath()).IsDirectory));
+            Assert.Equal(new FileInfo(Path.GetTempPath()).Exists, new FileState(Path.GetTempPath()).FileExists);
+            Assert.Equal(true, (new FileState(Path.GetTempPath()).IsDirectory));
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadOnlyOnDirectory()
         {
-            Assert.AreEqual(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath()).IsReadOnly);
+            Assert.Equal(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath()).IsReadOnly);
         }
 
-        [TestMethod]
+        [Fact]
         public void LastWriteTimeOnDirectory()
         {
-            Assert.AreEqual(new FileInfo(Path.GetTempPath()).LastWriteTime, new FileState(Path.GetTempPath()).LastWriteTime);
+            Assert.Equal(new FileInfo(Path.GetTempPath()).LastWriteTime, new FileState(Path.GetTempPath()).LastWriteTime);
         }
 
-        [TestMethod]
+        [Fact]
         public void LastWriteTimeUtcOnDirectory()
         {
-            Assert.AreEqual(new FileInfo(Path.GetTempPath()).LastWriteTimeUtc, new FileState(Path.GetTempPath()).LastWriteTimeUtcFast);
+            Assert.Equal(new FileInfo(Path.GetTempPath()).LastWriteTimeUtc, new FileState(Path.GetTempPath()).LastWriteTimeUtcFast);
         }
 
-        [TestMethod]
+        [Fact]
         public void LengthOnDirectory()
         {
             Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(Path.GetTempPath()).Length; }, delegate () { var x = new FileState(Path.GetTempPath()).Length; });
         }
 
-        [TestMethod]
+        [Fact]
         public void DoesNotExistLastWriteTime()
         {
             string file = Guid.NewGuid().ToString("N");
 
-            Assert.AreEqual(new FileInfo(file).LastWriteTime, new FileState(file).LastWriteTime);
+            Assert.Equal(new FileInfo(file).LastWriteTime, new FileState(file).LastWriteTime);
         }
 
-        [TestMethod]
+        [Fact]
         public void DoesNotExistLastWriteTimeUtc()
         {
             string file = Guid.NewGuid().ToString("N");
 
-            Assert.AreEqual(new FileInfo(file).LastWriteTimeUtc, new FileState(file).LastWriteTimeUtcFast);
+            Assert.Equal(new FileInfo(file).LastWriteTimeUtc, new FileState(file).LastWriteTimeUtcFast);
         }
 
-        [TestMethod]
+        [Fact]
         public void DoesNotExistLength()
         {
             string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
@@ -436,30 +440,32 @@ namespace Microsoft.Build.UnitTests
             Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(file).Length; }, delegate () { var x = new FileState(file).Length; });
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(FileNotFoundException))]
+        [Fact]
         public void DoesNotExistIsDirectory()
         {
-            string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
+            Assert.Throws<FileNotFoundException>(() =>
+            {
+                string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
 
-            var x = new FileState(file).IsDirectory;
+                var x = new FileState(file).IsDirectory;
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void DoesNotExistDirectoryOrFileExists()
         {
             string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
 
-            Assert.AreEqual(Directory.Exists(file), new FileState(file).DirectoryExists);
+            Assert.Equal(Directory.Exists(file), new FileState(file).DirectoryExists);
         }
 
-        [TestMethod]
+        [Fact]
         public void DoesNotExistParentFolderNotFound()
         {
             string file = Guid.NewGuid().ToString("N") + "\\x"; // presumably doesn't exist
 
-            Assert.AreEqual(false, new FileState(file).FileExists);
-            Assert.AreEqual(false, new FileState(file).DirectoryExists);
+            Assert.Equal(false, new FileState(file).FileExists);
+            Assert.Equal(false, new FileState(file).DirectoryExists);
         }
     }
 }

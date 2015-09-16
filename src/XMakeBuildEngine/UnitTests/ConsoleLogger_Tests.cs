@@ -9,8 +9,6 @@ using System.Collections;
 using System.Globalization;
 using System.Collections.Generic;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.BackEnd.Logging;
@@ -19,10 +17,10 @@ using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class ConsoleLoggerTest
     {
         /// <summary>
@@ -144,7 +142,7 @@ namespace Microsoft.Build.UnitTests
                     msg = "  " + msg;
                 }
 
-                Assert.AreEqual(shouldPrint ? msg + Environment.NewLine : String.Empty, sc.ToString());
+                Assert.Equal(shouldPrint ? msg + Environment.NewLine : String.Empty, sc.ToString());
             }
         }
 
@@ -165,8 +163,7 @@ namespace Microsoft.Build.UnitTests
 
         private class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
 
-        [TestInitialize]
-        public void SuiteSetup()
+        public ConsoleLoggerTest()
         {
             _environment = new Dictionary<string, string>();
 
@@ -182,7 +179,7 @@ namespace Microsoft.Build.UnitTests
         /// project name for for project started event and the target started event. 
         /// Test for BUG 579935
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestEmptyProjectNameForTargetStarted()
         {
             Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project();
@@ -202,13 +199,13 @@ namespace Microsoft.Build.UnitTests
             project.Build(loggerList);
 
             List<ProjectStartedEventArgs> projectStartedEvents = mockLogger.ProjectStartedEvents;
-            Assert.IsTrue(projectStartedEvents.Count == 1);
+            Assert.Equal(1, projectStartedEvents.Count);
             string projectStartedName = projectStartedEvents[0].ProjectFile;
-            Assert.IsFalse(String.IsNullOrEmpty(projectStartedName), "Expected project started name to not be null or empty");
+            Assert.False(String.IsNullOrEmpty(projectStartedName)); // "Expected project started name to not be null or empty"
 
             List<TargetStartedEventArgs> targetStartedEvents = mockLogger.TargetStartedEvents;
-            Assert.IsTrue(targetStartedEvents.Count == 1);
-            Assert.IsTrue(projectStartedName.Equals(targetStartedEvents[0].ProjectFile, StringComparison.OrdinalIgnoreCase), "Expected the project started and target started target names to match");
+            Assert.Equal(1, targetStartedEvents.Count);
+            Assert.True(projectStartedName.Equals(targetStartedEvents[0].ProjectFile, StringComparison.OrdinalIgnoreCase)); // "Expected the project started and target started target names to match"
         }
 
 
@@ -216,7 +213,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure the first message after a project started event prints out the target name. This was annoying a lot of people when there were messages right after the project
         /// started event but there was no target printed out.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestTargetAfterProjectStarted()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -225,13 +222,13 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             string log = sc.ToString();
-            Assert.IsTrue(log.IndexOf("XXX:", StringComparison.OrdinalIgnoreCase) != -1);
+            Assert.NotEqual(-1, log.IndexOf("XXX:", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Verify that on minimal verbosity the console logger does not log the target names.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestNoTargetNameOnMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -240,15 +237,15 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             string log = sc.ToString();
-            Assert.IsTrue(log.IndexOf("XXX:", StringComparison.OrdinalIgnoreCase) == -1);
-            Assert.IsTrue(log.IndexOf("YYY:", StringComparison.OrdinalIgnoreCase) == -1);
-            Assert.IsTrue(log.IndexOf("GGG:", StringComparison.OrdinalIgnoreCase) == -1);
+            Assert.Equal(-1, log.IndexOf("XXX:", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(-1, log.IndexOf("YYY:", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(-1, log.IndexOf("GGG:", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Make sure if a target has no messages logged that its started and finished events show up on detailed but not normal.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EmptyTargetsOnDetailedButNotNotmal()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -257,7 +254,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             string log = sc.ToString();
-            Assert.IsTrue(log.IndexOf("YYY:", StringComparison.OrdinalIgnoreCase) == -1);
+            Assert.Equal(-1, log.IndexOf("YYY:", StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
@@ -282,7 +279,7 @@ namespace Microsoft.Build.UnitTests
 
                 // it's a console, so it cuts off, so only look for the existence of the first bit (which should contains the "YYY")
                 targetStartedMessage = targetStartedMessage.Substring(0, 60);
-                Assert.IsTrue(log.IndexOf(targetStartedMessage, StringComparison.OrdinalIgnoreCase) != -1);
+                Assert.NotEqual(-1, log.IndexOf(targetStartedMessage, StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -296,7 +293,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test a number of cases where difference values from showcommandline are used with normal verbosity
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ShowCommandLineWithNormalVerbosity()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -305,7 +302,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             string log = sc.ToString();
-            Assert.IsTrue(log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase) != -1);
+            Assert.NotEqual(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
@@ -313,7 +310,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             log = sc.ToString();
-            Assert.IsTrue(log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase) != -1);
+            Assert.NotEqual(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
@@ -321,14 +318,14 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             log = sc.ToString();
-            Assert.IsTrue(log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase) == -1);
+            Assert.Equal(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
             logger.Parameters = "EnableMPLogging;ShowCommandLine=NotAbool";
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
             log = sc.ToString();
-            Assert.IsTrue(log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase) == -1);
+            Assert.Equal(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
 
             sc = new SimulatedConsole();
             logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
@@ -336,13 +333,13 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
 
             log = sc.ToString();
-            Assert.IsTrue(log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase) != -1);
+            Assert.NotEqual(-1, log.IndexOf("where.exe where", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// We should not crash when given a null message, etc.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NullEventFields()
         {
             EventSourceSink es = new EventSourceSink();
@@ -371,7 +368,7 @@ namespace Microsoft.Build.UnitTests
             // No exception raised
         }
 
-        [TestMethod]
+        [Fact]
         public void NullEventFieldsParallel()
         {
             EventSourceSink es = new EventSourceSink();
@@ -427,229 +424,229 @@ namespace Microsoft.Build.UnitTests
             // No exception raised
         }
 
-        [TestMethod]
+        [Fact]
         public void TestVerbosityLessThan()
         {
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new SerialConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new SerialConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Quiet)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Minimal)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Normal)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(false,
+            Assert.Equal(false,
                 (new ParallelConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
 
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Minimal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Normal));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-            Assert.AreEqual(true,
+            Assert.Equal(true,
                 (new ParallelConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
         }
 
         /// <summary>
         /// Test of single message printing
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_quiet_low()
         {
             SingleMessageTest(LoggerVerbosity.Quiet,
                              MessageImportance.Low, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_quiet_medium()
         {
             SingleMessageTest(LoggerVerbosity.Quiet,
                              MessageImportance.Normal, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_quiet_high()
         {
             SingleMessageTest(LoggerVerbosity.Quiet,
                              MessageImportance.High, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_medium_low()
         {
             SingleMessageTest(LoggerVerbosity.Minimal,
                              MessageImportance.Low, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_medium_medium()
         {
             SingleMessageTest(LoggerVerbosity.Minimal,
                              MessageImportance.Normal, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_medium_high()
         {
             SingleMessageTest(LoggerVerbosity.Minimal,
                              MessageImportance.High, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_normal_low()
         {
             SingleMessageTest(LoggerVerbosity.Normal,
                              MessageImportance.Low, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_normal_medium()
         {
             SingleMessageTest(LoggerVerbosity.Normal,
                              MessageImportance.Normal, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_normal_high()
         {
             SingleMessageTest(LoggerVerbosity.Normal,
                              MessageImportance.High, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_detailed_low()
         {
             SingleMessageTest(LoggerVerbosity.Detailed,
                              MessageImportance.Low, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_detailed_medium()
         {
             SingleMessageTest(LoggerVerbosity.Detailed,
                              MessageImportance.Normal, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_detailed_high()
         {
             SingleMessageTest(LoggerVerbosity.Detailed,
                              MessageImportance.High, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_diagnostic_low()
         {
             SingleMessageTest(LoggerVerbosity.Diagnostic,
                              MessageImportance.Low, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_diagnostic_medium()
         {
             SingleMessageTest(LoggerVerbosity.Diagnostic,
                              MessageImportance.Normal, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleMessageTests_diagnostic_high()
         {
             SingleMessageTest(LoggerVerbosity.Diagnostic,
                              MessageImportance.High, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void ErrorColorTest()
         {
             EventSourceSink es = new EventSourceSink();
@@ -660,10 +657,10 @@ namespace Microsoft.Build.UnitTests
 
             BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
             es.Consume(beea);
-            Assert.AreEqual("<red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine + "<reset color>", sc.ToString());
+            Assert.Equal("<red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine + "<reset color>", sc.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void ErrorColorTestParallel()
         {
             EventSourceSink es = new EventSourceSink();
@@ -682,13 +679,13 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(beea);
 
-            Assert.AreEqual(
+            Assert.Equal(
                "<red>file.vb(42): VBC error 31415: Some long message" +
                Environment.NewLine + "<reset color>",
                sc.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void WarningColorTest()
         {
             EventSourceSink es = new EventSourceSink();
@@ -704,13 +701,13 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(bwea);
 
-            Assert.AreEqual(
+            Assert.Equal(
                "<yellow>file.vb(42): VBC warning 31415: Some long message" +
                Environment.NewLine + "<reset color>",
                sc.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void WarningColorTestParallel()
         {
             EventSourceSink es = new EventSourceSink();
@@ -727,13 +724,13 @@ namespace Microsoft.Build.UnitTests
             bwea.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
             es.Consume(bwea);
 
-            Assert.AreEqual(
+            Assert.Equal(
                "<yellow>file.vb(42): VBC warning 31415: Some long message" +
                Environment.NewLine + "<reset color>",
                sc.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void LowMessageColorTest()
         {
             EventSourceSink es = new EventSourceSink();
@@ -749,13 +746,13 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(msg);
 
-            Assert.AreEqual(
+            Assert.Equal(
                "<darkgray>text" +
                Environment.NewLine + "<reset color>",
                sc.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void TestQuietWithHighMessage()
         {
             for (int i = 1; i <= 2; i++)
@@ -805,11 +802,11 @@ namespace Microsoft.Build.UnitTests
                 bfea.BuildEventContext = buildEventContext;
                 es.Consume(bfea);
 
-                Assert.AreEqual(String.Empty, sc.ToString());
+                Assert.Equal(String.Empty, sc.ToString());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestQuietWithError()
         {
             for (int i = 1; i <= 2; i++)
@@ -867,7 +864,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (i == 1)
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
                             ResourceUtilities.FormatResourceString("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
                             "<reset color><red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine +
@@ -877,7 +874,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine + "<reset color>",
                             sc.ToString());
                 }
@@ -888,7 +885,7 @@ namespace Microsoft.Build.UnitTests
         /// Quiet build with a warning; project finished should appear
         /// but not target finished
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestQuietWithWarning()
         {
             for (int i = 1; i <= 2; i++)
@@ -947,7 +944,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (i == 1)
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
                             ResourceUtilities.FormatResourceString("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
                             "<reset color><yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine +
@@ -957,7 +954,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>",
                             sc.ToString());
                 }
@@ -967,7 +964,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Minimal with no errors or warnings should emit nothing.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMinimalWithNormalMessage()
         {
             for (int i = 1; i <= 2; i++)
@@ -1017,14 +1014,14 @@ namespace Microsoft.Build.UnitTests
                 bfea.BuildEventContext = buildEventContext;
                 es.Consume(bfea);
 
-                Assert.AreEqual(String.Empty, sc.ToString());
+                Assert.Equal(String.Empty, sc.ToString());
             }
         }
 
         /// <summary>
         /// Minimal with error should emit project started, the error, and project finished
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMinimalWithError()
         {
             for (int i = 1; i <= 2; i++)
@@ -1082,7 +1079,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (i == 1)
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
                             ResourceUtilities.FormatResourceString("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
                             "<reset color><red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine +
@@ -1092,7 +1089,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine + "<reset color>",
                             sc.ToString());
                 }
@@ -1102,7 +1099,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Minimal with warning should emit project started, the warning, and project finished
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestMinimalWithWarning()
         {
             for (int i = 1; i <= 2; i++)
@@ -1161,7 +1158,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (i == 1)
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
                             ResourceUtilities.FormatResourceString("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
                             "<reset color><yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine +
@@ -1171,7 +1168,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>",
                             sc.ToString());
                 }
@@ -1181,7 +1178,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Minimal with warning should emit project started, the warning, and project finished
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestDirectEventHandlers()
         {
             for (int i = 1; i <= 2; i++)
@@ -1240,7 +1237,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (i == 1)
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
                             ResourceUtilities.FormatResourceString("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
                             "<reset color><yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine +
@@ -1250,14 +1247,14 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.AreEqual(
+                    Assert.Equal(
                             "<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>",
                             sc.ToString());
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleLineFormatNoop()
         {
             string s = "foo";
@@ -1266,10 +1263,10 @@ namespace Microsoft.Build.UnitTests
             string ss = cl.IndentString(s, 0);
 
             //should be a no-op
-            Assert.AreEqual("foo" + Environment.NewLine, ss);
+            Assert.Equal("foo" + Environment.NewLine, ss);
         }
 
-        [TestMethod]
+        [Fact]
         public void MultilineFormatWindowsLineEndings()
         {
             string newline = "\r\n";
@@ -1280,13 +1277,13 @@ namespace Microsoft.Build.UnitTests
             string ss = cl.IndentString(s, 4);
 
             //should convert lines to system format
-            Assert.AreEqual("    foo" + Environment.NewLine +
+            Assert.Equal("    foo" + Environment.NewLine +
                                    "    bar" + Environment.NewLine +
                                    "    baz" + Environment.NewLine +
                                    "    " + Environment.NewLine, ss);
         }
 
-        [TestMethod]
+        [Fact]
         public void MultilineFormatUnixLineEndings()
         {
             string s = "foo\nbar\nbaz\n";
@@ -1295,12 +1292,12 @@ namespace Microsoft.Build.UnitTests
             string ss = cl.IndentString(s, 0);
 
             //should convert lines to system format
-            Assert.AreEqual("foo" + Environment.NewLine +
+            Assert.Equal("foo" + Environment.NewLine +
                                    "bar" + Environment.NewLine +
                                    "baz" + Environment.NewLine + Environment.NewLine, ss);
         }
 
-        [TestMethod]
+        [Fact]
         public void MultilineFormatMixedLineEndings()
         {
             string s = "foo" + "\r\n\r\n" + "bar" + "\n" + "baz" + "\n\r\n\n" +
@@ -1311,7 +1308,7 @@ namespace Microsoft.Build.UnitTests
             string ss = cl.IndentString(s, 0);
 
             //should convert lines to system format
-            Assert.AreEqual("foo" + Environment.NewLine + Environment.NewLine +
+            Assert.Equal("foo" + Environment.NewLine + Environment.NewLine +
                                    "bar" + Environment.NewLine +
                                    "baz" + Environment.NewLine + Environment.NewLine + Environment.NewLine +
                                    "jazz" + Environment.NewLine +
@@ -1320,7 +1317,7 @@ namespace Microsoft.Build.UnitTests
                                    "end" + Environment.NewLine, ss);
         }
 
-        [TestMethod]
+        [Fact]
         public void NestedProjectMinimal()
         {
             EventSourceSink es = new EventSourceSink();
@@ -1341,7 +1338,7 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(new ProjectStartedEventArgs("ps2", null, "fname2", "", null, null));
 
-            Assert.AreEqual(string.Empty, sc.ToString());
+            Assert.Equal(string.Empty, sc.ToString());
 
             BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
                         "31415", "file.vb", 42, 0, 0, 0,
@@ -1349,7 +1346,7 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(beea);
 
-            Assert.AreEqual(
+            Assert.Equal(
                 "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
                 ResourceUtilities.FormatResourceString("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname1") + Environment.NewLine +
                                         Environment.NewLine + "<reset color>" +
@@ -1361,7 +1358,7 @@ namespace Microsoft.Build.UnitTests
                 sc.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void NestedProjectNormal()
         {
             EventSourceSink es = new EventSourceSink();
@@ -1387,7 +1384,7 @@ namespace Microsoft.Build.UnitTests
                         Environment.NewLine + "<reset color>";
             actualOutput = sc.ToString();
 
-            Assert.AreEqual(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput, actualOutput);
             Console.WriteLine("1 [" + expectedOutput + "] [" + actualOutput + "]");
             sc.Clear();
             #endregion
@@ -1399,7 +1396,7 @@ namespace Microsoft.Build.UnitTests
             actualOutput = sc.ToString();
 
             Console.WriteLine("2 [" + expectedOutput + "] [" + actualOutput + "]");
-            Assert.AreEqual(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput, actualOutput);
             sc.Clear();
             #endregion
 
@@ -1416,7 +1413,7 @@ namespace Microsoft.Build.UnitTests
             actualOutput = sc.ToString();
 
             Console.WriteLine("3 [" + expectedOutput + "] [" + actualOutput + "]");
-            Assert.AreEqual(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput, actualOutput);
             sc.Clear();
             #endregion
 
@@ -1428,7 +1425,7 @@ namespace Microsoft.Build.UnitTests
             actualOutput = sc.ToString();
 
             Console.WriteLine("4 [" + expectedOutput + "] [" + actualOutput + "]");
-            Assert.AreEqual(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput, actualOutput);
             sc.Clear();
             #endregion
 
@@ -1439,7 +1436,7 @@ namespace Microsoft.Build.UnitTests
             actualOutput = sc.ToString();
 
             Console.WriteLine("5 [" + expectedOutput + "] [" + actualOutput + "]");
-            Assert.AreEqual(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput, actualOutput);
             sc.Clear();
             #endregion
 
@@ -1450,7 +1447,7 @@ namespace Microsoft.Build.UnitTests
             actualOutput = sc.ToString();
 
             Console.WriteLine("6 [" + expectedOutput + "] [" + actualOutput + "]");
-            Assert.AreEqual(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput, actualOutput);
             sc.Clear();
             #endregion
 
@@ -1472,13 +1469,13 @@ namespace Microsoft.Build.UnitTests
             actualOutput = sc.ToString().Substring(0, expectedOutput.Length);
 
             Console.WriteLine("7 [" + expectedOutput + "] [" + actualOutput + "]");
-            Assert.AreEqual(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput, actualOutput);
             sc.Clear();
             #endregion
 
         }
 
-        [TestMethod]
+        [Fact]
         public void CustomDisplayedAtDetailed()
         {
             EventSourceSink es = new EventSourceSink();
@@ -1492,11 +1489,11 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(c);
 
-            Assert.AreEqual("msg" + Environment.NewLine,
+            Assert.Equal("msg" + Environment.NewLine,
                                    sc.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void CustomDisplayedAtDiagnosticMP()
         {
             EventSourceSink es = new EventSourceSink();
@@ -1510,10 +1507,10 @@ namespace Microsoft.Build.UnitTests
             c.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
             es.Consume(c);
 
-            Assert.IsTrue(sc.ToString().Contains("msg"));
+            Assert.True(sc.ToString().Contains("msg"));
         }
 
-        [TestMethod]
+        [Fact]
         public void CustomNotDisplayedAtNormal()
         {
             EventSourceSink es = new EventSourceSink();
@@ -1527,7 +1524,7 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(c);
 
-            Assert.AreEqual(String.Empty, sc.ToString());
+            Assert.Equal(String.Empty, sc.ToString());
         }
 
         /// <summary>
@@ -1570,22 +1567,22 @@ namespace Microsoft.Build.UnitTests
             // Being careful not to make locale assumptions here, eg about sorting
             if (expectToSeeLogging)
             {
-                Assert.IsTrue(log.Contains(prop1));
-                Assert.IsTrue(log.Contains(prop2));
-                Assert.IsTrue(log.Contains(prop3));
+                Assert.True(log.Contains(prop1));
+                Assert.True(log.Contains(prop2));
+                Assert.True(log.Contains(prop3));
             }
             else
             {
-                Assert.IsFalse(log.Contains(prop1));
-                Assert.IsFalse(log.Contains(prop2));
-                Assert.IsFalse(log.Contains(prop3));
+                Assert.False(log.Contains(prop1));
+                Assert.False(log.Contains(prop2));
+                Assert.False(log.Contains(prop3));
             }
         }
 
         /// <summary>
         /// Basic test of properties list display
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DisplayPropertiesList()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1602,7 +1599,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of properties list not being displayed except in Diagnostic
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotDisplayPropertiesListInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1620,7 +1617,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotDisplayEnvironmentInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1639,7 +1636,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DisplayEnvironmentInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1659,7 +1656,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DisplayEnvironmentInDiagnostic()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1674,7 +1671,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotDisplayEnvironmentInMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1693,7 +1690,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DisplayEnvironmentInMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1713,7 +1710,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of properties list not being displayed when disabled
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotDisplayPropertiesListIfDisabled()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1756,11 +1753,11 @@ namespace Microsoft.Build.UnitTests
 
                 if (expectToSeeLogging)
                 {
-                    Assert.IsTrue(log.Contains(message));
+                    Assert.True(log.Contains(message));
                 }
                 else
                 {
-                    Assert.IsFalse(log.Contains(message));
+                    Assert.False(log.Contains(message));
                 }
             }
         }
@@ -1823,30 +1820,30 @@ namespace Microsoft.Build.UnitTests
             // Being careful not to make locale assumptions here, eg about sorting
             if (expectToSeeLogging)
             {
-                Assert.IsTrue(log.Contains(item1type));
-                Assert.IsTrue(log.Contains(item2type));
-                Assert.IsTrue(log.Contains(item3type));
-                Assert.IsTrue(log.Contains(item1spec));
-                Assert.IsTrue(log.Contains(item2spec));
-                Assert.IsTrue(log.Contains(item3spec));
+                Assert.True(log.Contains(item1type));
+                Assert.True(log.Contains(item2type));
+                Assert.True(log.Contains(item3type));
+                Assert.True(log.Contains(item1spec));
+                Assert.True(log.Contains(item2spec));
+                Assert.True(log.Contains(item3spec));
 
                 if (!String.Equals(item3metadatum, String.Empty, StringComparison.OrdinalIgnoreCase))
                 {
-                    Assert.IsTrue(log.Contains(item3metadatum));
+                    Assert.True(log.Contains(item3metadatum));
                 }
             }
             else
             {
-                Assert.IsFalse(log.Contains(item1type));
-                Assert.IsFalse(log.Contains(item2type));
-                Assert.IsFalse(log.Contains(item3type));
-                Assert.IsFalse(log.Contains(item1spec));
-                Assert.IsFalse(log.Contains(item2spec));
-                Assert.IsFalse(log.Contains(item3type));
+                Assert.False(log.Contains(item1type));
+                Assert.False(log.Contains(item2type));
+                Assert.False(log.Contains(item3type));
+                Assert.False(log.Contains(item1spec));
+                Assert.False(log.Contains(item2spec));
+                Assert.False(log.Contains(item3type));
 
                 if (!String.Equals(item3metadatum, String.Empty, StringComparison.OrdinalIgnoreCase))
                 {
-                    Assert.IsFalse(log.Contains(item3metadatum));
+                    Assert.False(log.Contains(item3metadatum));
                 }
             }
         }
@@ -1855,7 +1852,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify passing in an empty item list does not print anything out
         /// </summary>
         /// <returns></returns>
-        [TestMethod]
+        [Fact]
         public void WriteItemsEmptyList()
         {
             Hashtable items = new Hashtable();
@@ -1888,7 +1885,7 @@ namespace Microsoft.Build.UnitTests
                 string log = sc.ToString();
 
                 // There should be nothing in the log
-                Assert.IsTrue(log.Length == 0, "Iteration of I: " + i);
+                Assert.Equal(0, log.Length);
                 Console.WriteLine("Iteration of i: " + i + "[" + log + "]");
             }
         }
@@ -1897,7 +1894,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify passing in an empty item list does not print anything out
         /// </summary>
         /// <returns></returns>
-        [TestMethod]
+        [Fact]
         public void WritePropertiesEmptyList()
         {
             Hashtable properties = new Hashtable();
@@ -1931,7 +1928,7 @@ namespace Microsoft.Build.UnitTests
                 string log = sc.ToString();
 
                 // There should be nothing in the log
-                Assert.IsTrue(log.Length == 0, "Iteration of I: " + i);
+                Assert.Equal(0, log.Length);
                 Console.WriteLine("Iteration of i: " + i + "[" + log + "]");
             }
         }
@@ -1939,7 +1936,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of item list display
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DisplayItemsList()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1956,7 +1953,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of item list not being displayed except in Diagnostic
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotDisplayItemListInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1973,7 +1970,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of item list not being displayed when disabled
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotDisplayItemListIfDisabled()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1991,7 +1988,7 @@ namespace Microsoft.Build.UnitTests
             WriteAndValidateItems(cl2, sc, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParametersEmptyTests()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -1999,11 +1996,11 @@ namespace Microsoft.Build.UnitTests
 
             L.Parameters = "";
             L.ParseParameters();
-            Assert.IsTrue(L.ShowSummary == false);
+            Assert.False(L.ShowSummary);
 
             L.Parameters = null;
             L.ParseParameters();
-            Assert.IsTrue(L.ShowSummary == false);
+            Assert.False(L.ShowSummary);
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
@@ -2013,7 +2010,7 @@ namespace Microsoft.Build.UnitTests
             WriteAndValidateItems(cl2, sc, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParametersParsingTests()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -2021,28 +2018,28 @@ namespace Microsoft.Build.UnitTests
 
             L.Parameters = "NoSuMmaRy";
             L.ParseParameters();
-            Assert.IsTrue(L.ShowSummary == false);
+            Assert.False(L.ShowSummary);
 
             L.Parameters = ";;NoSuMmaRy;";
             L.ParseParameters();
-            Assert.IsTrue(L.ShowSummary == false);
+            Assert.False(L.ShowSummary);
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger L2 = new ParallelConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
 
             L2.Parameters = "NoSuMmaRy";
             L2.ParseParameters();
-            Assert.IsTrue(L2.ShowSummary == false);
+            Assert.False(L2.ShowSummary);
 
             L2.Parameters = ";;NoSuMmaRy;";
             L2.ParseParameters();
-            Assert.IsTrue(L2.ShowSummary == false);
+            Assert.False(L2.ShowSummary);
         }
 
         /// <summary>
         /// ResetConsoleLoggerState should reset the state of the console logger
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ResetConsoleLoggerStateTestBasic()
         {
             // Create an event source
@@ -2091,10 +2088,10 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("==");
 
             // Verify that the log has correct error and warning string
-            Assert.IsTrue(actualLog.Contains(errorString));
-            Assert.IsTrue(actualLog.Contains(warningString));
-            Assert.IsTrue(actualLog.Contains("<red>"));
-            Assert.IsTrue(actualLog.Contains("<yellow>"));
+            Assert.True(actualLog.Contains(errorString));
+            Assert.True(actualLog.Contains(warningString));
+            Assert.True(actualLog.Contains("<red>"));
+            Assert.True(actualLog.Contains("<yellow>"));
 
             // Clear the log obtained so far
             sc.Clear();
@@ -2114,10 +2111,10 @@ namespace Microsoft.Build.UnitTests
 
             // Verify that the error and warning from the previous build is not
             // reported in the subsequent build
-            Assert.IsFalse(actualLog.Contains(errorString));
-            Assert.IsFalse(actualLog.Contains(warningString));
-            Assert.IsFalse(actualLog.Contains("<red>"));
-            Assert.IsFalse(actualLog.Contains("<yellow>"));
+            Assert.False(actualLog.Contains(errorString));
+            Assert.False(actualLog.Contains(warningString));
+            Assert.False(actualLog.Contains("<red>"));
+            Assert.False(actualLog.Contains("<yellow>"));
 
             // errorString = 0 Error(s)
             // warningString = 0 Warning(s)
@@ -2125,14 +2122,14 @@ namespace Microsoft.Build.UnitTests
             warningString = ResourceUtilities.FormatResourceString("WarningCount", 0);
 
             // Verify that the log has correct error and warning string
-            Assert.IsTrue(actualLog.Contains(errorString));
-            Assert.IsTrue(actualLog.Contains(warningString));
+            Assert.True(actualLog.Contains(errorString));
+            Assert.True(actualLog.Contains(warningString));
         }
 
         /// <summary>
         /// ConsoleLogger::Initialize() should reset the state of the console logger
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ResetConsoleLoggerState_Initialize()
         {
             // Create an event source
@@ -2181,8 +2178,8 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("==");
 
             // Verify that the log has correct error and warning string
-            Assert.IsTrue(actualLog.Contains("<red>"));
-            Assert.IsTrue(actualLog.Contains("<yellow>"));
+            Assert.True(actualLog.Contains("<red>"));
+            Assert.True(actualLog.Contains("<yellow>"));
 
             // Clear the log obtained so far
             sc.Clear();
@@ -2205,8 +2202,8 @@ namespace Microsoft.Build.UnitTests
 
             // Verify that the error and warning from the previous build is not
             // reported in the subsequent build
-            Assert.IsFalse(actualLog.Contains("<red>"));
-            Assert.IsFalse(actualLog.Contains("<yellow>"));
+            Assert.False(actualLog.Contains("<red>"));
+            Assert.False(actualLog.Contains("<yellow>"));
 
             // errorString = 0 Error(s)
             errorString = ResourceUtilities.FormatResourceString("ErrorCount", 0);
@@ -2214,14 +2211,14 @@ namespace Microsoft.Build.UnitTests
             warningString = ResourceUtilities.FormatResourceString("WarningCount", 0);
 
             // Verify that the log has correct error and warning string
-            Assert.IsTrue(actualLog.Contains(errorString));
-            Assert.IsTrue(actualLog.Contains(warningString));
+            Assert.True(actualLog.Contains(errorString));
+            Assert.True(actualLog.Contains(warningString));
         }
 
         /// <summary>
         /// ResetConsoleLoggerState should reset PerformanceCounters
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ResetConsoleLoggerState_PerformanceCounters()
         {
             for (int i = 1; i <= 2; i++)
@@ -2319,11 +2316,11 @@ namespace Microsoft.Build.UnitTests
 
                 // Verify that the log has perf summary
                 // Project perf summary
-                Assert.IsTrue(actualLog.Contains(prjPerfString));
+                Assert.True(actualLog.Contains(prjPerfString));
                 // Target perf summary
-                Assert.IsTrue(actualLog.Contains(targetPerfString));
+                Assert.True(actualLog.Contains(targetPerfString));
                 // Task Perf summary
-                Assert.IsTrue(actualLog.Contains(taskPerfString));
+                Assert.True(actualLog.Contains(taskPerfString));
 
                 // Clear the log obtained so far
                 sc.Clear();
@@ -2341,14 +2338,14 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("==");
 
                 // Verify that the log doesn't have perf summary
-                Assert.IsFalse(actualLog.Contains(prjPerfString));
-                Assert.IsFalse(actualLog.Contains(targetPerfString));
-                Assert.IsFalse(actualLog.Contains(taskPerfString));
+                Assert.False(actualLog.Contains(prjPerfString));
+                Assert.False(actualLog.Contains(targetPerfString));
+                Assert.False(actualLog.Contains(taskPerfString));
             }
         }
 
 
-        [TestMethod]
+        [Fact]
         public void DeferredMessages()
         {
             EventSourceSink es = new EventSourceSink();
@@ -2364,7 +2361,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(messsage1);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
             string actualLog = sc.ToString();
-            Assert.IsTrue(actualLog.Contains(ResourceUtilities.FormatResourceString("DeferredMessages")));
+            Assert.True(actualLog.Contains(ResourceUtilities.FormatResourceString("DeferredMessages")));
 
             es = new EventSourceSink();
             sc = new SimulatedConsole();
@@ -2378,7 +2375,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(messsage2);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
             actualLog = sc.ToString();
-            Assert.IsTrue(actualLog.Contains(ResourceUtilities.FormatResourceString("DeferredMessages")));
+            Assert.True(actualLog.Contains(ResourceUtilities.FormatResourceString("DeferredMessages")));
 
             es = new EventSourceSink();
             sc = new SimulatedConsole();
@@ -2395,10 +2392,10 @@ namespace Microsoft.Build.UnitTests
             es.Consume(project);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
             actualLog = sc.ToString();
-            Assert.IsTrue(actualLog.Contains("Message"));
+            Assert.True(actualLog.Contains("Message"));
         }
 
-        [TestMethod]
+        [Fact]
         public void VerifyMPLoggerSwitch()
         {
             for (int i = 0; i < 2; i++)
@@ -2435,11 +2432,11 @@ namespace Microsoft.Build.UnitTests
                 es.Consume(messsage1);
                 string actualLog = sc.ToString();
                 string resourceString = ResourceUtilities.FormatResourceString("ProjectStartedTopLevelProjectWithTargetNames", "None", 1, "Build");
-                Assert.IsTrue(actualLog.Contains(resourceString));
+                Assert.True(actualLog.Contains(resourceString));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestPrintTargetNamePerMessage()
         {
             EventSourceSink es = new EventSourceSink();
@@ -2478,7 +2475,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(messsage2);
             es.Consume(messsage3);
             string actualLog = sc.ToString();
-            Assert.IsTrue(actualLog.Contains("t:"));
+            Assert.True(actualLog.Contains("t:"));
         }
 
         /// <summary>
@@ -2487,7 +2484,7 @@ namespace Microsoft.Build.UnitTests
         /// nunit is showing up as an unknown output type, this causes us to not print the newline because we think it may be to a 
         /// text file.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestNewLineAfterProjectFinished()
         {
             bool runningWithCharDevice = IsRunningWithCharacterFileType();
@@ -2542,22 +2539,22 @@ namespace Microsoft.Build.UnitTests
                 {
                     case 0:
                         // There is no project finished event printed in normal verbosity
-                        Assert.IsFalse(actualLog.Contains(projectFinished.Message));
+                        Assert.False(actualLog.Contains(projectFinished.Message));
                         break;
                     // We are in single proc but logging with multiproc logging add an extra new line to make the log more readable.
                     case 1:
-                        Assert.IsTrue(actualLog.Contains(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine));
+                        Assert.True(actualLog.Contains(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine));
                         if (runningWithCharDevice)
                         {
-                            Assert.IsTrue(actualLog.Contains(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine));
+                            Assert.True(actualLog.Contains(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine));
                         }
                         else
                         {
-                            Assert.IsFalse(actualLog.Contains(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine));
+                            Assert.False(actualLog.Contains(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine));
                         }
                         break;
                     case 2:
-                        Assert.IsFalse(actualLog.Contains(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine));
+                        Assert.False(actualLog.Contains(ResourceUtilities.FormatResourceString("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine));
                         break;
                 }
             }

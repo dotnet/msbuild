@@ -6,13 +6,13 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Collections.Generic;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -20,7 +20,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// Each packet is split up into a region, the region contains the tests for 
     /// a given packet type.
     /// </summary>
-    [TestClass]
     public class NodePackets_Tests
     {
         #region LogMessagePacket Tests
@@ -28,18 +27,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify a null build event throws an exception
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void LogMessageConstructorNullBuildEvent()
         {
-            LogMessagePacket packet = new LogMessagePacket(null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                LogMessagePacket packet = new LogMessagePacket(null);
+            }
+           );
         }
-
         /// <summary>
         /// Verify when creating a LogMessagePacket
         /// that the correct Event Type is set.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VerifyEventType()
         {
             BuildFinishedEventArgs buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
@@ -74,7 +75,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serialization of LogMessagePacket with each kind of event type.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestTranslation()
         {
             TaskItem item = new TaskItem("Hello", "my.proj");
@@ -123,9 +124,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private static void VerifyLoggingPacket(BuildEventArgs buildEvent, LoggingEventType logEventType)
         {
             LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, buildEvent));
-            Assert.AreEqual(logEventType, packet.EventType);
-            Assert.AreEqual(NodePacketType.LogMessage, packet.Type);
-            Assert.IsTrue(Object.ReferenceEquals(buildEvent, packet.NodeBuildEvent.Value.Value), "Expected buildEvent to have the same object reference as packet.BuildEvent");
+            Assert.Equal(logEventType, packet.EventType);
+            Assert.Equal(NodePacketType.LogMessage, packet.Type);
+            Assert.True(Object.ReferenceEquals(buildEvent, packet.NodeBuildEvent.Value.Value)); // "Expected buildEvent to have the same object reference as packet.BuildEvent"
         }
 
         /// <summary>
@@ -138,19 +139,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             if (expectInvalidBuildEventContext)
             {
-                Assert.AreEqual(BuildEventContext.Invalid, right.BuildEventContext);
+                Assert.Equal(BuildEventContext.Invalid, right.BuildEventContext);
             }
             else
             {
-                Assert.AreEqual(left.BuildEventContext, right.BuildEventContext);
+                Assert.Equal(left.BuildEventContext, right.BuildEventContext);
             }
 
-            Assert.AreEqual(leftTuple.Key, rightTuple.Key);
-            Assert.AreEqual(left.HelpKeyword, right.HelpKeyword);
-            Assert.AreEqual(left.Message, right.Message);
-            Assert.AreEqual(left.SenderName, right.SenderName);
-            Assert.AreEqual(left.ThreadId, right.ThreadId);
-            Assert.AreEqual(left.Timestamp, right.Timestamp);
+            Assert.Equal(leftTuple.Key, rightTuple.Key);
+            Assert.Equal(left.HelpKeyword, right.HelpKeyword);
+            Assert.Equal(left.Message, right.Message);
+            Assert.Equal(left.SenderName, right.SenderName);
+            Assert.Equal(left.ThreadId, right.ThreadId);
+            Assert.Equal(left.Timestamp, right.Timestamp);
         }
 
         /// <summary>
@@ -158,8 +159,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private void CompareLogMessagePackets(LogMessagePacket left, LogMessagePacket right)
         {
-            Assert.AreEqual(left.EventType, right.EventType);
-            Assert.AreEqual(left.NodeBuildEvent.Value.Value.GetType(), right.NodeBuildEvent.Value.Value.GetType());
+            Assert.Equal(left.EventType, right.EventType);
+            Assert.Equal(left.NodeBuildEvent.Value.Value.GetType(), right.NodeBuildEvent.Value.Value.GetType());
 
             CompareNodeBuildEventArgs(left.NodeBuildEvent.Value, right.NodeBuildEvent.Value, left.EventType == LoggingEventType.CustomEvent /* expectInvalidBuildEventContext */);
 
@@ -168,82 +169,82 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 case LoggingEventType.BuildErrorEvent:
                     BuildErrorEventArgs leftError = left.NodeBuildEvent.Value.Value as BuildErrorEventArgs;
                     BuildErrorEventArgs rightError = right.NodeBuildEvent.Value.Value as BuildErrorEventArgs;
-                    Assert.IsNotNull(leftError);
-                    Assert.IsNotNull(rightError);
-                    Assert.AreEqual(leftError.Code, rightError.Code);
-                    Assert.AreEqual(leftError.ColumnNumber, rightError.ColumnNumber);
-                    Assert.AreEqual(leftError.EndColumnNumber, rightError.EndColumnNumber);
-                    Assert.AreEqual(leftError.EndLineNumber, rightError.EndLineNumber);
-                    Assert.AreEqual(leftError.File, rightError.File);
-                    Assert.AreEqual(leftError.LineNumber, rightError.LineNumber);
-                    Assert.AreEqual(leftError.Message, rightError.Message);
-                    Assert.AreEqual(leftError.Subcategory, rightError.Subcategory);
+                    Assert.NotNull(leftError);
+                    Assert.NotNull(rightError);
+                    Assert.Equal(leftError.Code, rightError.Code);
+                    Assert.Equal(leftError.ColumnNumber, rightError.ColumnNumber);
+                    Assert.Equal(leftError.EndColumnNumber, rightError.EndColumnNumber);
+                    Assert.Equal(leftError.EndLineNumber, rightError.EndLineNumber);
+                    Assert.Equal(leftError.File, rightError.File);
+                    Assert.Equal(leftError.LineNumber, rightError.LineNumber);
+                    Assert.Equal(leftError.Message, rightError.Message);
+                    Assert.Equal(leftError.Subcategory, rightError.Subcategory);
                     break;
 
                 case LoggingEventType.BuildFinishedEvent:
                     BuildFinishedEventArgs leftFinished = left.NodeBuildEvent.Value.Value as BuildFinishedEventArgs;
                     BuildFinishedEventArgs rightFinished = right.NodeBuildEvent.Value.Value as BuildFinishedEventArgs;
-                    Assert.IsNotNull(leftFinished);
-                    Assert.IsNotNull(rightFinished);
-                    Assert.AreEqual(leftFinished.Succeeded, rightFinished.Succeeded);
+                    Assert.NotNull(leftFinished);
+                    Assert.NotNull(rightFinished);
+                    Assert.Equal(leftFinished.Succeeded, rightFinished.Succeeded);
                     break;
 
                 case LoggingEventType.BuildMessageEvent:
                     BuildMessageEventArgs leftMessage = left.NodeBuildEvent.Value.Value as BuildMessageEventArgs;
                     BuildMessageEventArgs rightMessage = right.NodeBuildEvent.Value.Value as BuildMessageEventArgs;
-                    Assert.IsNotNull(leftMessage);
-                    Assert.IsNotNull(rightMessage);
-                    Assert.AreEqual(leftMessage.Importance, rightMessage.Importance);
+                    Assert.NotNull(leftMessage);
+                    Assert.NotNull(rightMessage);
+                    Assert.Equal(leftMessage.Importance, rightMessage.Importance);
                     break;
 
                 case LoggingEventType.BuildStartedEvent:
                     BuildStartedEventArgs leftBuildStart = left.NodeBuildEvent.Value.Value as BuildStartedEventArgs;
                     BuildStartedEventArgs rightBuildStart = right.NodeBuildEvent.Value.Value as BuildStartedEventArgs;
-                    Assert.IsNotNull(leftBuildStart);
-                    Assert.IsNotNull(rightBuildStart);
+                    Assert.NotNull(leftBuildStart);
+                    Assert.NotNull(rightBuildStart);
                     break;
 
                 case LoggingEventType.BuildWarningEvent:
                     BuildWarningEventArgs leftBuildWarn = left.NodeBuildEvent.Value.Value as BuildWarningEventArgs;
                     BuildWarningEventArgs rightBuildWarn = right.NodeBuildEvent.Value.Value as BuildWarningEventArgs;
-                    Assert.IsNotNull(leftBuildWarn);
-                    Assert.IsNotNull(rightBuildWarn);
-                    Assert.AreEqual(leftBuildWarn.Code, rightBuildWarn.Code);
-                    Assert.AreEqual(leftBuildWarn.ColumnNumber, rightBuildWarn.ColumnNumber);
-                    Assert.AreEqual(leftBuildWarn.EndColumnNumber, rightBuildWarn.EndColumnNumber);
-                    Assert.AreEqual(leftBuildWarn.EndLineNumber, rightBuildWarn.EndLineNumber);
-                    Assert.AreEqual(leftBuildWarn.File, rightBuildWarn.File);
-                    Assert.AreEqual(leftBuildWarn.LineNumber, rightBuildWarn.LineNumber);
-                    Assert.AreEqual(leftBuildWarn.Subcategory, rightBuildWarn.Subcategory);
+                    Assert.NotNull(leftBuildWarn);
+                    Assert.NotNull(rightBuildWarn);
+                    Assert.Equal(leftBuildWarn.Code, rightBuildWarn.Code);
+                    Assert.Equal(leftBuildWarn.ColumnNumber, rightBuildWarn.ColumnNumber);
+                    Assert.Equal(leftBuildWarn.EndColumnNumber, rightBuildWarn.EndColumnNumber);
+                    Assert.Equal(leftBuildWarn.EndLineNumber, rightBuildWarn.EndLineNumber);
+                    Assert.Equal(leftBuildWarn.File, rightBuildWarn.File);
+                    Assert.Equal(leftBuildWarn.LineNumber, rightBuildWarn.LineNumber);
+                    Assert.Equal(leftBuildWarn.Subcategory, rightBuildWarn.Subcategory);
                     break;
 
                 case LoggingEventType.CustomEvent:
                     ExternalProjectStartedEventArgs leftCustom = left.NodeBuildEvent.Value.Value as ExternalProjectStartedEventArgs;
                     ExternalProjectStartedEventArgs rightCustom = right.NodeBuildEvent.Value.Value as ExternalProjectStartedEventArgs;
-                    Assert.IsNotNull(leftCustom);
-                    Assert.IsNotNull(rightCustom);
-                    Assert.AreEqual(leftCustom.ProjectFile, rightCustom.ProjectFile);
-                    Assert.AreEqual(leftCustom.TargetNames, rightCustom.TargetNames);
+                    Assert.NotNull(leftCustom);
+                    Assert.NotNull(rightCustom);
+                    Assert.Equal(leftCustom.ProjectFile, rightCustom.ProjectFile);
+                    Assert.Equal(leftCustom.TargetNames, rightCustom.TargetNames);
                     break;
 
                 case LoggingEventType.ProjectFinishedEvent:
                     ProjectFinishedEventArgs leftProjectFinished = left.NodeBuildEvent.Value.Value as ProjectFinishedEventArgs;
                     ProjectFinishedEventArgs rightProjectFinished = right.NodeBuildEvent.Value.Value as ProjectFinishedEventArgs;
-                    Assert.IsNotNull(leftProjectFinished);
-                    Assert.IsNotNull(rightProjectFinished);
-                    Assert.AreEqual(leftProjectFinished.ProjectFile, rightProjectFinished.ProjectFile);
-                    Assert.AreEqual(leftProjectFinished.Succeeded, rightProjectFinished.Succeeded);
+                    Assert.NotNull(leftProjectFinished);
+                    Assert.NotNull(rightProjectFinished);
+                    Assert.Equal(leftProjectFinished.ProjectFile, rightProjectFinished.ProjectFile);
+                    Assert.Equal(leftProjectFinished.Succeeded, rightProjectFinished.Succeeded);
                     break;
 
                 case LoggingEventType.ProjectStartedEvent:
                     ProjectStartedEventArgs leftProjectStarted = left.NodeBuildEvent.Value.Value as ProjectStartedEventArgs;
                     ProjectStartedEventArgs rightProjectStarted = right.NodeBuildEvent.Value.Value as ProjectStartedEventArgs;
-                    Assert.IsNotNull(leftProjectStarted);
-                    Assert.IsNotNull(rightProjectStarted);
-                    Assert.AreEqual(leftProjectStarted.ParentProjectBuildEventContext, rightProjectStarted.ParentProjectBuildEventContext);
-                    Assert.AreEqual(leftProjectStarted.ProjectFile, rightProjectStarted.ProjectFile);
-                    Assert.AreEqual(leftProjectStarted.ProjectId, rightProjectStarted.ProjectId);
-                    Assert.AreEqual(leftProjectStarted.TargetNames, rightProjectStarted.TargetNames);
+                    Assert.NotNull(leftProjectStarted);
+                    Assert.NotNull(rightProjectStarted);
+                    Assert.Equal(leftProjectStarted.ParentProjectBuildEventContext, rightProjectStarted.ParentProjectBuildEventContext);
+                    Assert.Equal(leftProjectStarted.ProjectFile, rightProjectStarted.ProjectFile);
+                    Assert.Equal(leftProjectStarted.ProjectId, rightProjectStarted.ProjectId);
+                    Assert.Equal(leftProjectStarted.TargetNames, rightProjectStarted.TargetNames);
 
                     // UNDONE: (Serialization.) We don't actually serialize the items at this time.
                     // Assert.AreEqual(leftProjectStarted.Items, rightProjectStarted.Items);
@@ -254,57 +255,57 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 case LoggingEventType.TargetFinishedEvent:
                     TargetFinishedEventArgs leftTargetFinished = left.NodeBuildEvent.Value.Value as TargetFinishedEventArgs;
                     TargetFinishedEventArgs rightTargetFinished = right.NodeBuildEvent.Value.Value as TargetFinishedEventArgs;
-                    Assert.IsNotNull(leftTargetFinished);
-                    Assert.IsNotNull(rightTargetFinished);
-                    Assert.AreEqual(leftTargetFinished.ProjectFile, rightTargetFinished.ProjectFile);
-                    Assert.AreEqual(leftTargetFinished.Succeeded, rightTargetFinished.Succeeded);
-                    Assert.AreEqual(leftTargetFinished.TargetFile, rightTargetFinished.TargetFile);
-                    Assert.AreEqual(leftTargetFinished.TargetName, rightTargetFinished.TargetName);
+                    Assert.NotNull(leftTargetFinished);
+                    Assert.NotNull(rightTargetFinished);
+                    Assert.Equal(leftTargetFinished.ProjectFile, rightTargetFinished.ProjectFile);
+                    Assert.Equal(leftTargetFinished.Succeeded, rightTargetFinished.Succeeded);
+                    Assert.Equal(leftTargetFinished.TargetFile, rightTargetFinished.TargetFile);
+                    Assert.Equal(leftTargetFinished.TargetName, rightTargetFinished.TargetName);
                     break;
 
                 case LoggingEventType.TargetStartedEvent:
                     TargetStartedEventArgs leftTargetStarted = left.NodeBuildEvent.Value.Value as TargetStartedEventArgs;
                     TargetStartedEventArgs rightTargetStarted = right.NodeBuildEvent.Value.Value as TargetStartedEventArgs;
-                    Assert.IsNotNull(leftTargetStarted);
-                    Assert.IsNotNull(rightTargetStarted);
-                    Assert.AreEqual(leftTargetStarted.ProjectFile, rightTargetStarted.ProjectFile);
-                    Assert.AreEqual(leftTargetStarted.TargetFile, rightTargetStarted.TargetFile);
-                    Assert.AreEqual(leftTargetStarted.TargetName, rightTargetStarted.TargetName);
+                    Assert.NotNull(leftTargetStarted);
+                    Assert.NotNull(rightTargetStarted);
+                    Assert.Equal(leftTargetStarted.ProjectFile, rightTargetStarted.ProjectFile);
+                    Assert.Equal(leftTargetStarted.TargetFile, rightTargetStarted.TargetFile);
+                    Assert.Equal(leftTargetStarted.TargetName, rightTargetStarted.TargetName);
                     break;
 
                 case LoggingEventType.TaskCommandLineEvent:
                     TaskCommandLineEventArgs leftCommand = left.NodeBuildEvent.Value.Value as TaskCommandLineEventArgs;
                     TaskCommandLineEventArgs rightCommand = right.NodeBuildEvent.Value.Value as TaskCommandLineEventArgs;
-                    Assert.IsNotNull(leftCommand);
-                    Assert.IsNotNull(rightCommand);
-                    Assert.AreEqual(leftCommand.CommandLine, rightCommand.CommandLine);
-                    Assert.AreEqual(leftCommand.Importance, rightCommand.Importance);
-                    Assert.AreEqual(leftCommand.TaskName, rightCommand.TaskName);
+                    Assert.NotNull(leftCommand);
+                    Assert.NotNull(rightCommand);
+                    Assert.Equal(leftCommand.CommandLine, rightCommand.CommandLine);
+                    Assert.Equal(leftCommand.Importance, rightCommand.Importance);
+                    Assert.Equal(leftCommand.TaskName, rightCommand.TaskName);
                     break;
 
                 case LoggingEventType.TaskFinishedEvent:
                     TaskFinishedEventArgs leftTaskFinished = left.NodeBuildEvent.Value.Value as TaskFinishedEventArgs;
                     TaskFinishedEventArgs rightTaskFinished = right.NodeBuildEvent.Value.Value as TaskFinishedEventArgs;
-                    Assert.IsNotNull(leftTaskFinished);
-                    Assert.IsNotNull(rightTaskFinished);
-                    Assert.AreEqual(leftTaskFinished.ProjectFile, rightTaskFinished.ProjectFile);
-                    Assert.AreEqual(leftTaskFinished.Succeeded, rightTaskFinished.Succeeded);
-                    Assert.AreEqual(leftTaskFinished.TaskFile, rightTaskFinished.TaskFile);
-                    Assert.AreEqual(leftTaskFinished.TaskName, rightTaskFinished.TaskName);
+                    Assert.NotNull(leftTaskFinished);
+                    Assert.NotNull(rightTaskFinished);
+                    Assert.Equal(leftTaskFinished.ProjectFile, rightTaskFinished.ProjectFile);
+                    Assert.Equal(leftTaskFinished.Succeeded, rightTaskFinished.Succeeded);
+                    Assert.Equal(leftTaskFinished.TaskFile, rightTaskFinished.TaskFile);
+                    Assert.Equal(leftTaskFinished.TaskName, rightTaskFinished.TaskName);
                     break;
 
                 case LoggingEventType.TaskStartedEvent:
                     TaskStartedEventArgs leftTaskStarted = left.NodeBuildEvent.Value.Value as TaskStartedEventArgs;
                     TaskStartedEventArgs rightTaskStarted = right.NodeBuildEvent.Value.Value as TaskStartedEventArgs;
-                    Assert.IsNotNull(leftTaskStarted);
-                    Assert.IsNotNull(rightTaskStarted);
-                    Assert.AreEqual(leftTaskStarted.ProjectFile, rightTaskStarted.ProjectFile);
-                    Assert.AreEqual(leftTaskStarted.TaskFile, rightTaskStarted.TaskFile);
-                    Assert.AreEqual(leftTaskStarted.TaskName, rightTaskStarted.TaskName);
+                    Assert.NotNull(leftTaskStarted);
+                    Assert.NotNull(rightTaskStarted);
+                    Assert.Equal(leftTaskStarted.ProjectFile, rightTaskStarted.ProjectFile);
+                    Assert.Equal(leftTaskStarted.TaskFile, rightTaskStarted.TaskFile);
+                    Assert.Equal(leftTaskStarted.TaskName, rightTaskStarted.TaskName);
                     break;
 
                 default:
-                    Assert.Fail("Unexpected logging event type {0}", left.EventType);
+                    Assert.True(false, string.Format("Unexpected logging event type {0}", left.EventType));
                     break;
             }
         }

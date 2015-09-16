@@ -5,19 +5,17 @@ using System;
 using System.IO;
 using System.Reflection;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class FindUnderPath_Tests
     {
-        [TestMethod]
+        [Fact]
         public void BasicFilter()
         {
             FindUnderPath t = new FindUnderPath();
@@ -28,14 +26,14 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(1, t.InPath.Length);
-            Assert.AreEqual(1, t.OutOfPath.Length);
-            Assert.AreEqual(@"C:\MyProject\File1.txt", t.InPath[0].ItemSpec);
-            Assert.AreEqual(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal(1, t.InPath.Length);
+            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Equal(@"C:\MyProject\File1.txt", t.InPath[0].ItemSpec);
+            Assert.Equal(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Fact]
         public void InvalidFile()
         {
             FindUnderPath t = new FindUnderPath();
@@ -46,12 +44,12 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
             // Don't crash
         }
 
-        [TestMethod]
+        [Fact]
         public void InvalidPath()
         {
             FindUnderPath t = new FindUnderPath();
@@ -62,7 +60,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
             // Don't crash
         }
@@ -89,7 +87,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void VerifyFullPath()
         {
             FindUnderPath t = new FindUnderPath();
@@ -101,14 +99,14 @@ namespace Microsoft.Build.UnitTests
             bool success;
             RunTask(t, out testFile, out success);
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(1, t.InPath.Length);
-            Assert.AreEqual(1, t.OutOfPath.Length);
-            Assert.AreEqual(testFile.FullName, t.InPath[0].ItemSpec);
-            Assert.AreEqual(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal(1, t.InPath.Length);
+            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Equal(testFile.FullName, t.InPath[0].ItemSpec);
+            Assert.Equal(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
         }
 
-        [TestMethod]
+        [Fact]
         public void VerifyFullPathNegative()
         {
             FindUnderPath t = new FindUnderPath();
@@ -120,11 +118,11 @@ namespace Microsoft.Build.UnitTests
             bool success;
             RunTask(t, out testFile, out success);
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(1, t.InPath.Length);
-            Assert.AreEqual(1, t.OutOfPath.Length);
-            Assert.AreEqual(testFile.Name, t.InPath[0].ItemSpec);
-            Assert.AreEqual(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal(1, t.InPath.Length);
+            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Equal(testFile.Name, t.InPath[0].ItemSpec);
+            Assert.Equal(@"C:\SomeoneElsesProject\File2.txt", t.OutOfPath[0].ItemSpec);
         }
     }
 }

@@ -4,20 +4,19 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class RemoveDuplicates_Tests
     {
         /// <summary>
         /// Pass one item in, get the same item back.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OneItemNop()
         {
             RemoveDuplicates t = new RemoveDuplicates();
@@ -26,14 +25,14 @@ namespace Microsoft.Build.UnitTests
             t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt") };
 
             bool success = t.Execute();
-            Assert.IsTrue(success);
-            Assert.AreEqual("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
         }
 
         /// <summary>
         /// Pass in two of the same items.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TwoItemsTheSame()
         {
             RemoveDuplicates t = new RemoveDuplicates();
@@ -42,14 +41,14 @@ namespace Microsoft.Build.UnitTests
             t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt"), new TaskItem("MyFile.txt") };
 
             bool success = t.Execute();
-            Assert.IsTrue(success);
-            Assert.AreEqual("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
         }
 
         /// <summary>
         /// Pass in two items that are different.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TwoItemsDifferent()
         {
             RemoveDuplicates t = new RemoveDuplicates();
@@ -58,15 +57,15 @@ namespace Microsoft.Build.UnitTests
             t.Inputs = new ITaskItem[] { new TaskItem("MyFile1.txt"), new TaskItem("MyFile2.txt") };
 
             bool success = t.Execute();
-            Assert.IsTrue(success);
-            Assert.AreEqual("MyFile1.txt", t.Filtered[0].ItemSpec);
-            Assert.AreEqual("MyFile2.txt", t.Filtered[1].ItemSpec);
+            Assert.True(success);
+            Assert.Equal("MyFile1.txt", t.Filtered[0].ItemSpec);
+            Assert.Equal("MyFile2.txt", t.Filtered[1].ItemSpec);
         }
 
         /// <summary>
         /// Case should not matter.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CaseInsensitive()
         {
             RemoveDuplicates t = new RemoveDuplicates();
@@ -75,22 +74,22 @@ namespace Microsoft.Build.UnitTests
             t.Inputs = new ITaskItem[] { new TaskItem("MyFile.txt"), new TaskItem("MyFIle.tXt") };
 
             bool success = t.Execute();
-            Assert.IsTrue(success);
-            Assert.AreEqual("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
         }
 
         /// <summary>
         /// No inputs should result in zero-length outputs.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MissingInputs()
         {
             RemoveDuplicates t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(0, t.Filtered.Length);
+            Assert.True(success);
+            Assert.Equal(0, t.Filtered.Length);
         }
     }
 }

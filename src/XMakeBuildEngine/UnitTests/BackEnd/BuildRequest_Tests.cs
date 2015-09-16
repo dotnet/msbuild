@@ -8,135 +8,134 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    [TestClass]
     public class BuildRequest_Tests
     {
         private int _nodeRequestId;
 
-        [TestInitialize]
-        public void SetUp()
+        public BuildRequest_Tests()
         {
             _nodeRequestId = 1;
         }
 
-        [TestCleanup]
-        public void TearDown()
-        {
-        }
-
-        [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Fact]
         public void TestConstructorBad()
         {
-            BuildRequest request = CreateNewBuildRequest(0, null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                BuildRequest request = CreateNewBuildRequest(0, null);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void TestConstructorGood()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
         }
 
-        [TestMethod]
+        [Fact]
         public void TestConfigurationId()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
-            Assert.AreEqual(0, request.ConfigurationId);
+            Assert.Equal(0, request.ConfigurationId);
 
             BuildRequest request2 = CreateNewBuildRequest(1, new string[0] { });
-            Assert.AreEqual(1, request2.ConfigurationId);
+            Assert.Equal(1, request2.ConfigurationId);
 
             BuildRequest request3 = CreateNewBuildRequest(-1, new string[0] { });
-            Assert.AreEqual(-1, request3.ConfigurationId);
+            Assert.Equal(-1, request3.ConfigurationId);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestConfigurationResolved()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
-            Assert.IsFalse(request.IsConfigurationResolved);
+            Assert.False(request.IsConfigurationResolved);
 
             BuildRequest request2 = CreateNewBuildRequest(1, new string[0] { });
-            Assert.IsTrue(request2.IsConfigurationResolved);
+            Assert.True(request2.IsConfigurationResolved);
 
             BuildRequest request3 = CreateNewBuildRequest(-1, new string[0] { });
-            Assert.IsFalse(request3.IsConfigurationResolved);
+            Assert.False(request3.IsConfigurationResolved);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestTargets()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
-            Assert.IsNotNull(request.Targets);
-            Assert.AreEqual(0, request.Targets.Count);
+            Assert.NotNull(request.Targets);
+            Assert.Equal(0, request.Targets.Count);
 
             BuildRequest request2 = CreateNewBuildRequest(1, new string[1] { "a" });
-            Assert.IsNotNull(request2.Targets);
-            Assert.AreEqual(1, request2.Targets.Count);
-            Assert.AreEqual("a", request2.Targets[0]);
+            Assert.NotNull(request2.Targets);
+            Assert.Equal(1, request2.Targets.Count);
+            Assert.Equal("a", request2.Targets[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestPacketType()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
-            Assert.AreEqual(NodePacketType.BuildRequest, request.Type);
+            Assert.Equal(NodePacketType.BuildRequest, request.Type);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestResolveConfigurationGood()
         {
             BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
             request.ResolveConfiguration(1);
-            Assert.IsTrue(request.IsConfigurationResolved);
-            Assert.AreEqual(1, request.ConfigurationId);
+            Assert.True(request.IsConfigurationResolved);
+            Assert.Equal(1, request.ConfigurationId);
         }
 
-        [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Fact]
         public void TestResolveConfigurationBad()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0] { });
-            request.ResolveConfiguration(2);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                BuildRequest request = CreateNewBuildRequest(1, new string[0] { });
+                request.ResolveConfiguration(2);
+            }
+           );
         }
-
-        [ExpectedException(typeof(InternalErrorException))]
-        [TestMethod]
+        [Fact]
         public void TestResolveConfigurationBad2()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
-            request.ResolveConfiguration(-1);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+                request.ResolveConfiguration(-1);
+            }
+           );
         }
-
-        [TestMethod]
+        [Fact]
         public void TestTranslation()
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[] { "alpha", "omega" });
 
-            Assert.AreEqual(NodePacketType.BuildRequest, request.Type);
+            Assert.Equal(NodePacketType.BuildRequest, request.Type);
 
             ((INodePacketTranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             BuildRequest deserializedRequest = packet as BuildRequest;
 
-            Assert.AreEqual(request.BuildEventContext, deserializedRequest.BuildEventContext);
-            Assert.AreEqual(request.ConfigurationId, deserializedRequest.ConfigurationId);
-            Assert.AreEqual(request.GlobalRequestId, deserializedRequest.GlobalRequestId);
-            Assert.AreEqual(request.IsConfigurationResolved, deserializedRequest.IsConfigurationResolved);
-            Assert.AreEqual(request.NodeRequestId, deserializedRequest.NodeRequestId);
-            Assert.AreEqual(request.ParentBuildEventContext, deserializedRequest.ParentBuildEventContext);
-            Assert.AreEqual(request.Targets.Count, deserializedRequest.Targets.Count);
+            Assert.Equal(request.BuildEventContext, deserializedRequest.BuildEventContext);
+            Assert.Equal(request.ConfigurationId, deserializedRequest.ConfigurationId);
+            Assert.Equal(request.GlobalRequestId, deserializedRequest.GlobalRequestId);
+            Assert.Equal(request.IsConfigurationResolved, deserializedRequest.IsConfigurationResolved);
+            Assert.Equal(request.NodeRequestId, deserializedRequest.NodeRequestId);
+            Assert.Equal(request.ParentBuildEventContext, deserializedRequest.ParentBuildEventContext);
+            Assert.Equal(request.Targets.Count, deserializedRequest.Targets.Count);
             for (int i = 0; i < request.Targets.Count; i++)
             {
-                Assert.AreEqual(request.Targets[i], deserializedRequest.Targets[i]);
+                Assert.Equal(request.Targets[i], deserializedRequest.Targets[i]);
             }
         }
 

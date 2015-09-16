@@ -4,13 +4,11 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class XmlUtilities_Tests
     {
         // Various invalid names, with the first invalid character listed for each
@@ -31,7 +29,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get the right invalid char listed in the error string
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidNameErrorLocation()
         {
             for (int i = 0; i <= _invalidNames.GetUpperBound(0); i++)
@@ -59,7 +57,7 @@ namespace Microsoft.Build.UnitTests
                 actual = ex.Message;
             }
 
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
     }
 }

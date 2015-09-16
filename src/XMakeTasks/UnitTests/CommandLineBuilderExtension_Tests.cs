@@ -5,15 +5,14 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class CommandLineBuilderExtensionTest
     {
         /*
@@ -23,53 +22,55 @@ namespace Microsoft.Build.UnitTests
         * the boolean flag has a string value that cannot be converted to a boolean. In this
         * case we expect an exception.
         */
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void AppendItemWithInvalidBooleanAttribute()
         {
-            // Construct the task item.
-            TaskItem i = new TaskItem();
-            i.ItemSpec = "MyResource.bmp";
-            i.SetMetadata("Name", "Kenny");
-            i.SetMetadata("Private", "Yes");       // This is our flag.
-
-            CommandLineBuilderExtension c = new CommandLineBuilderExtension();
-
-            // Validate that a legitimate bool works first.
-            try
+            Assert.Throws<ArgumentException>(() =>
             {
+                // Construct the task item.
+                TaskItem i = new TaskItem();
+                i.ItemSpec = "MyResource.bmp";
+                i.SetMetadata("Name", "Kenny");
+                i.SetMetadata("Private", "Yes");       // This is our flag.
+
+                CommandLineBuilderExtension c = new CommandLineBuilderExtension();
+
+                // Validate that a legitimate bool works first.
+                try
+                {
+                    c.AppendSwitchIfNotNull
+                    (
+                        "/myswitch:",
+                        new ITaskItem[] { i },
+                        new string[] { "Name", "Private" },
+                        new bool[] { false, true }
+                    );
+                    Assert.Equal(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
+                }
+                catch (ArgumentException e)
+                {
+                    Assert.True(false, "Got an unexpected exception:" + e.Message);
+                }
+
+                // Now try a bogus boolean.
+                i.SetMetadata("Private", "Maybe");       // This is our flag.
                 c.AppendSwitchIfNotNull
                 (
                     "/myswitch:",
                     new ITaskItem[] { i },
                     new string[] { "Name", "Private" },
                     new bool[] { false, true }
-                );
-                Assert.AreEqual(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
+                );  // <-- Expect an ArgumentException here.
             }
-            catch (ArgumentException e)
-            {
-                Assert.Fail("Got an unexpected exception:" + e.Message);
-            }
-
-            // Now try a bogus boolean.
-            i.SetMetadata("Private", "Maybe");       // This is our flag.
-            c.AppendSwitchIfNotNull
-            (
-                "/myswitch:",
-                new ITaskItem[] { i },
-                new string[] { "Name", "Private" },
-                new bool[] { false, true }
-            );  // <-- Expect an ArgumentException here.
+           );
         }
-
         /// <summary>
         /// When appending an ITaskItem[] where some of the optional attributes are
         /// present, but others aren't.  We can't be emitted attributes in the wrong
         /// order on the command-line, so we skip all subsequent attributes as soon
         /// as we find one missing.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AppendItemWithMissingAttribute()
         {
             // Construct the task items.
@@ -93,7 +94,7 @@ namespace Microsoft.Build.UnitTests
                 new string[] { "Name", "HintPath", "Access" },
                 null
             );
-            Assert.AreEqual(@"/myswitch:MySoundEffect.wav,Kenny /myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public", c.ToString());
+            Assert.Equal(@"/myswitch:MySoundEffect.wav,Kenny /myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public", c.ToString());
         }
     }
 }

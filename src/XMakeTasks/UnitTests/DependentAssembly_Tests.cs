@@ -5,20 +5,18 @@ using System;
 using System.Collections;
 using System.Xml;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class DependentAssembly_Tests
     {
         /// <summary>
         /// Verify that a reference without a public key works correctly
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SerializeDeserialize()
         {
             DependentAssembly dependentAssembly = new DependentAssembly();
@@ -27,7 +25,7 @@ namespace Microsoft.Build.UnitTests
 
             dependentAssembly.Read(new XmlTextReader(xml, XmlNodeType.Document, null));
 
-            Assert.IsTrue(dependentAssembly.PartialAssemblyName != null);
+            Assert.NotNull(dependentAssembly.PartialAssemblyName);
         }
     }
 }

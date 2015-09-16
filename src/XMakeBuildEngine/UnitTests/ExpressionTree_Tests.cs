@@ -8,7 +8,6 @@ using System.Collections;
 using System.IO;
 using System.Xml;
 using System.Collections.Specialized;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -17,15 +16,15 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     public class ExpressionTreeTest
     {
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SimpleEvaluationTests()
         {
             Parser p = new Parser();
@@ -44,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EvaluateAVarietyOfExpressions()
         {
             string[] files = { "a", "a;b", "a'b", ";", "'" };
@@ -440,7 +439,7 @@ namespace Microsoft.Build.UnitTests
                                 ElementLocation.EmptyLocation
                             );
 
-                    Assert.IsTrue(tree.Evaluate(state), "expected true from '" + trueTests[i] + "'");
+                    Assert.True(tree.Evaluate(state), "expected true from '" + trueTests[i] + "'");
                 }
 
                 for (int i = 0; i < falseTests.GetLength(0); i++)
@@ -457,7 +456,7 @@ namespace Microsoft.Build.UnitTests
                                 ElementLocation.EmptyLocation
                             );
 
-                    Assert.IsFalse(tree.Evaluate(state), "expected false from '" + falseTests[i] + "' and got true");
+                    Assert.False(tree.Evaluate(state), "expected false from '" + falseTests[i] + "' and got true");
                 }
 
                 for (int i = 0; i < errorTests.GetLength(0); i++)
@@ -491,7 +490,7 @@ namespace Microsoft.Build.UnitTests
                         Console.WriteLine(errorTests[i] + " caused '" + ex.Message + "'");
                         caughtException = true;
                     }
-                    Assert.IsTrue((success == false || caughtException == true), "expected '" + errorTests[i] + "' to not parse or not be evaluated");
+                    Assert.True((success == false || caughtException == true), "expected '" + errorTests[i] + "' to not parse or not be evaluated");
                 }
             }
             finally
@@ -506,7 +505,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EqualityTests()
         {
             Parser p = new Parser();
@@ -531,7 +530,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RelationalTests()
         {
             Parser p = new Parser();
@@ -550,7 +549,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AndandOrTests()
         {
             Parser p = new Parser();
@@ -561,7 +560,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FunctionTests()
         {
             Parser p = new Parser();
@@ -587,7 +586,7 @@ namespace Microsoft.Build.UnitTests
                                 );
 
             value = tree.Evaluate(state);
-            Assert.IsTrue(value);
+            Assert.True(value);
 
             if (File.Exists(fileThatMustAlwaysExist))
             {
@@ -599,7 +598,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PropertyTests()
         {
             Parser p = new Parser();
@@ -643,7 +642,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ItemListTests()
         {
             Parser p = new Parser();
@@ -673,7 +672,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void StringExpansionTests()
         {
             Parser p = new Parser();
@@ -709,7 +708,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ComplexTests()
         {
             Parser p = new Parser();
@@ -741,7 +740,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure when a non number is used in an expression which expects a numeric value that a error is emitted.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void InvalidItemInConditionEvaluation()
         {
             Parser p = new Parser();
@@ -758,7 +757,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void OldSyntaxTests()
         {
             Parser p = new Parser();
@@ -787,7 +786,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConditionedPropertyUpdateTests()
         {
             Parser p = new Parser();
@@ -813,50 +812,50 @@ namespace Microsoft.Build.UnitTests
             List<string> properties = null;
 
             AssertParseEvaluate(p, "'0' == '1'", expander, false, state);
-            Assert.IsTrue(conditionedProperties.Count == 0);
+            Assert.Equal(0, conditionedProperties.Count);
 
             AssertParseEvaluate(p, "$(foo) == foo", expander, false, state);
-            Assert.IsTrue(conditionedProperties.Count == 1);
+            Assert.Equal(1, conditionedProperties.Count);
             properties = conditionedProperties["foo"];
-            Assert.IsTrue(properties.Count == 1);
+            Assert.Equal(1, properties.Count);
 
             AssertParseEvaluate(p, "'$(foo)' != 'bar'", expander, true, state);
-            Assert.IsTrue(conditionedProperties.Count == 1);
+            Assert.Equal(1, conditionedProperties.Count);
             properties = conditionedProperties["foo"];
-            Assert.IsTrue(properties.Count == 2);
+            Assert.Equal(2, properties.Count);
 
             AssertParseEvaluate(p, "'$(branch)|$(build)|$(platform)' == 'lab22dev|debug|x86'", expander, false, state);
-            Assert.IsTrue(conditionedProperties.Count == 4);
+            Assert.Equal(4, conditionedProperties.Count);
             properties = conditionedProperties["foo"];
-            Assert.IsTrue(properties.Count == 2);
+            Assert.Equal(2, properties.Count);
             properties = conditionedProperties["branch"];
-            Assert.IsTrue(properties.Count == 1);
+            Assert.Equal(1, properties.Count);
             properties = conditionedProperties["build"];
-            Assert.IsTrue(properties.Count == 1);
+            Assert.Equal(1, properties.Count);
             properties = conditionedProperties["platform"];
-            Assert.IsTrue(properties.Count == 1);
+            Assert.Equal(1, properties.Count);
 
             AssertParseEvaluate(p, "'$(branch)|$(build)|$(platform)' == 'lab21|debug|x86'", expander, false, state);
-            Assert.IsTrue(conditionedProperties.Count == 4);
+            Assert.Equal(4, conditionedProperties.Count);
             properties = conditionedProperties["foo"];
-            Assert.IsTrue(properties.Count == 2);
+            Assert.Equal(2, properties.Count);
             properties = conditionedProperties["branch"];
-            Assert.IsTrue(properties.Count == 2);
+            Assert.Equal(2, properties.Count);
             properties = conditionedProperties["build"];
-            Assert.IsTrue(properties.Count == 1);
+            Assert.Equal(1, properties.Count);
             properties = conditionedProperties["platform"];
-            Assert.IsTrue(properties.Count == 1);
+            Assert.Equal(1, properties.Count);
 
             AssertParseEvaluate(p, "'$(branch)|$(build)|$(platform)' == 'lab23|retail|ia64'", expander, false, state);
-            Assert.IsTrue(conditionedProperties.Count == 4);
+            Assert.Equal(4, conditionedProperties.Count);
             properties = conditionedProperties["foo"];
-            Assert.IsTrue(properties.Count == 2);
+            Assert.Equal(2, properties.Count);
             properties = conditionedProperties["branch"];
-            Assert.IsTrue(properties.Count == 3);
+            Assert.Equal(3, properties.Count);
             properties = conditionedProperties["build"];
-            Assert.IsTrue(properties.Count == 2);
+            Assert.Equal(2, properties.Count);
             properties = conditionedProperties["platform"];
-            Assert.IsTrue(properties.Count == 2);
+            Assert.Equal(2, properties.Count);
             DumpDictionary(conditionedProperties);
         }
 
@@ -878,7 +877,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NotTests()
         {
             Console.WriteLine("NegationParseTest()");
@@ -925,7 +924,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             bool result = tree.Evaluate(state);
-            Assert.AreEqual(expected, result);
+            Assert.Equal(expected, result);
         }
 
 
@@ -968,12 +967,12 @@ namespace Microsoft.Build.UnitTests
                 fExceptionCaught = true;
             }
 
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
         }
 
         /// <summary>
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NegativeTests()
         {
             Parser p = new Parser();

@@ -7,10 +7,10 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.Collections;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
@@ -18,13 +18,12 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// Tests for the HybridDictionary.  Most of the more interesting tests are handled by the CopyOnWriteDictionary tests
     /// which use this as a backing store.
     /// </summary>
-    [TestClass]
     public class HybridDictionary_Tests
     {
         /// <summary>
         /// Tests usage of the major functions.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestUsage()
         {
             var dict = new HybridDictionary<int, string>();
@@ -33,16 +32,16 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 dict[i] = (i * 2).ToString();
 
                 // Verify the entry exists.
-                Assert.IsTrue(dict.ContainsKey(i));
+                Assert.True(dict.ContainsKey(i));
 
                 // Verify the count has increased.
-                Assert.AreEqual(dict.Count, i);
+                Assert.Equal(dict.Count, i);
 
                 // Verify the correct item was added
-                Assert.AreEqual(dict[i], (i * 2).ToString());
+                Assert.Equal(dict[i], (i * 2).ToString());
 
                 // Verify we don't incorrectly find non-existent items
-                Assert.IsFalse(dict.ContainsKey(i + 10000));
+                Assert.False(dict.ContainsKey(i + 10000));
                 try
                 {
                     string x = dict[i + 10000];
@@ -57,14 +56,14 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
                 // Verify we can change the entry
                 dict[i] = (i * 3).ToString();
-                Assert.AreEqual(dict[i], (i * 3).ToString());
+                Assert.Equal(dict[i], (i * 3).ToString());
             }
         }
 
         /// <summary>
         /// Tests usage by random activities, comparing matching regular dictionary
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Medley()
         {
             string keys = "AAAAAAABCDEFGabcdefg";
@@ -98,7 +97,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                             if (shadow.Count > 0)
                             {
                                 var entry = shadow.ElementAt(rand.Next(shadow.Count - 1)).Key;
-                                Assert.AreEqual(dict.Remove(entry), shadow.Remove(entry));
+                                Assert.Equal(dict.Remove(entry), shadow.Remove(entry));
                                 AssertDictionariesIdentical(dict, shadow);
                             }
 
@@ -115,7 +114,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                             if (shadow.Count > 0)
                             {
                                 var entry2 = shadow.ElementAt(rand.Next(shadow.Count - 1)).Key;
-                                Assert.AreEqual(dict[entry2], shadow[entry2]);
+                                Assert.Equal(dict[entry2], shadow[entry2]);
                                 AssertDictionariesIdentical(dict, shadow);
                             }
 
@@ -134,8 +133,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                                 var entry2 = shadow.ElementAt(rand.Next(shadow.Count - 1)).Key;
                                 string value1;
                                 string value2;
-                                Assert.AreEqual(dict.TryGetValue(entry2, out value1), shadow.TryGetValue(entry2, out value2));
-                                Assert.AreEqual(value1, value2);
+                                Assert.Equal(dict.TryGetValue(entry2, out value1), shadow.TryGetValue(entry2, out value2));
+                                Assert.Equal(value1, value2);
                                 AssertDictionariesIdentical(dict, shadow);
                             }
 
@@ -145,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                             // Try look up something non existing
                             string value3;
                             string value4;
-                            Assert.AreEqual(dict.TryGetValue("ZZ", out value3), shadow.TryGetValue("ZZ", out value4));
+                            Assert.Equal(dict.TryGetValue("ZZ", out value3), shadow.TryGetValue("ZZ", out value4));
                             AssertDictionariesIdentical(dict, shadow);
                             break;
 
@@ -188,7 +187,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 }
 
                 dict.Clear();
-                Assert.IsTrue(dict.Count == 0);
+                Assert.Equal(0, dict.Count);
             }
         }
 
@@ -243,10 +242,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             if (caughtOne != null ^ caughtTwo != null)
             {
-                Assert.Fail("One threw KNF exception, the other didn't");
+                Assert.True(false, "One threw KNF exception, the other didn't");
             }
 
-            Assert.AreEqual(result1, result2, "One returned {0} the other {1}", result1, result2);
+            Assert.Equal<R>(result1, result2); // "One returned {0} the other {1}", result1, result2
         }
 
         /// <summary>
@@ -256,25 +255,25 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <typeparam name="V">value</typeparam>
         private void AssertDictionariesIdentical<K, V>(IDictionary<K, V> one, IDictionary<K, V> two)
         {
-            Assert.AreEqual(one.Count, two.Count, "Counts are unequal, {0} and {1}", one.Count, two.Count);
+            Assert.Equal(one.Count, two.Count); // "Counts are unequal, {0} and {1}", one.Count, two.Count
 
             foreach (KeyValuePair<K, V> entry in one)
             {
                 V value;
                 if (!two.TryGetValue(entry.Key, out value))
                 {
-                    Assert.Fail("one had key {0} the other didn't", entry.Key);
+                    Assert.True(false, string.Format("one had key {0} the other didn't", entry.Key));
                 }
 
                 if (!value.Equals(entry.Value))
                 {
-                    Assert.Fail("one had {0}={1} the other {2}={3}", entry.Key, entry.Value, entry.Key, value);
+                    Assert.True(false, string.Format("one had {0}={1} the other {2}={3}", entry.Key, entry.Value, entry.Key, value));
                 }
             }
 
             foreach (var key in one.Keys)
             {
-                Assert.AreEqual(true, two.ContainsKey(key));
+                Assert.Equal(true, two.ContainsKey(key));
             }
 
             var oneValues = new List<V>(one.Values);
@@ -283,35 +282,35 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             oneValues.Sort();
             twoValues.Sort();
 
-            Assert.AreEqual(oneValues.Count, twoValues.Count, "Value counts are unequal, {0} and {1}", oneValues.Count, twoValues.Count);
+            Assert.Equal(oneValues.Count, twoValues.Count); //"Value counts are unequal, {0} and {1}", oneValues.Count, twoValues.Count
 
             for (int i = 0; i < oneValues.Count; i++)
             {
-                Assert.AreEqual(oneValues[i], twoValues[i]);
+                Assert.Equal(oneValues[i], twoValues[i]);
             }
 
             // Now repeat, using IDictionary interface
             IDictionary oneId = (IDictionary)one;
             IDictionary twoId = (IDictionary)two;
 
-            Assert.AreEqual(oneId.Count, twoId.Count, "Counts are unequal, {0} and {1}", oneId.Count, twoId.Count);
+            Assert.Equal(oneId.Count, twoId.Count); // "Counts are unequal, {0} and {1}", oneId.Count, twoId.Count
 
             foreach (DictionaryEntry entry in oneId)
             {
                 if (!twoId.Contains(entry.Key))
                 {
-                    Assert.Fail("oneId had key {0} the other didn't", entry.Key);
+                    Assert.True(false, string.Format("oneId had key {0} the other didn't", entry.Key));
                 }
 
                 if (!entry.Value.Equals(twoId[entry.Key]))
                 {
-                    Assert.Fail("oneId had {0}={1} the other {2}={3}", entry.Key, entry.Value, entry.Key, twoId[entry.Key]);
+                    Assert.True(false, string.Format("oneId had {0}={1} the other {2}={3}", entry.Key, entry.Value, entry.Key, twoId[entry.Key]));
                 }
             }
 
             foreach (var key in oneId.Keys)
             {
-                Assert.AreEqual(true, twoId.Contains(key));
+                Assert.Equal(true, twoId.Contains(key));
             }
 
             var oneIdValues = new ArrayList(oneId.Values);
@@ -320,11 +319,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             oneIdValues.Sort();
             twoIdValues.Sort();
 
-            Assert.AreEqual(oneIdValues.Count, twoIdValues.Count, "Value counts are unequal, {0} and {1}", oneIdValues.Count, twoIdValues.Count);
+            Assert.Equal(oneIdValues.Count, twoIdValues.Count); // "Value counts are unequal, {0} and {1}", oneIdValues.Count, twoIdValues.Count
 
             for (int i = 0; i < oneIdValues.Count; i++)
             {
-                Assert.AreEqual(oneIdValues[i], twoIdValues[i]);
+                Assert.Equal(oneIdValues[i], twoIdValues[i]);
             }
         }
     }

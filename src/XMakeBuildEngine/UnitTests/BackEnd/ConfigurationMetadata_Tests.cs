@@ -13,7 +13,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -21,84 +20,79 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd;
 using System.IO;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Unit tests for ConfigurationMetadata
     /// </summary>
-    [TestClass]
     public class ConfigurationMetadata_Tests
     {
         /// <summary>
         /// Prepares to run the test
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public ConfigurationMetadata_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
         /// <summary>
-        /// Tears down after the test.
-        /// </summary>
-        [TestCleanup]
-        public void TearDown()
-        {
-        }
-
-        /// <summary>
         /// Verify that a null config throws an ArgumentNullException.
         /// </summary>
-        [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Fact]
         public void TestConstructorNullConfiguration()
         {
-            BuildRequestConfiguration config = null;
-            ConfigurationMetadata metadata = new ConfigurationMetadata(config);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                BuildRequestConfiguration config = null;
+                ConfigurationMetadata metadata = new ConfigurationMetadata(config);
+            }
+           );
         }
-
         /// <summary>
         /// Verify that a null project thrown an ArgumentNullException
         /// </summary>
-        [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
+        [Fact]
         public void TestConstructorNullProject()
         {
-            Project project = null;
-            ConfigurationMetadata metadata = new ConfigurationMetadata(project);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                Project project = null;
+                ConfigurationMetadata metadata = new ConfigurationMetadata(project);
+            }
+           );
         }
-
         /// <summary>
         /// Verify that we get the project path and tools version from the configuration
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestValidConfiguration()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
             ConfigurationMetadata metadata = new ConfigurationMetadata(config);
-            Assert.AreEqual(data.ProjectFullPath, metadata.ProjectFullPath);
-            Assert.AreEqual(data.ExplicitlySpecifiedToolsVersion, metadata.ToolsVersion);
+            Assert.Equal(data.ProjectFullPath, metadata.ProjectFullPath);
+            Assert.Equal(data.ExplicitlySpecifiedToolsVersion, metadata.ToolsVersion);
         }
 
         /// <summary>
         /// Verify that we get the project path and tools version from the project.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestValidProject()
         {
             Project project = CreateProject();
 
             ConfigurationMetadata metadata = new ConfigurationMetadata(project);
-            Assert.AreEqual(project.FullPath, metadata.ProjectFullPath);
-            Assert.AreEqual(project.ToolsVersion, metadata.ToolsVersion);
+            Assert.Equal(project.FullPath, metadata.ProjectFullPath);
+            Assert.Equal(project.ToolsVersion, metadata.ToolsVersion);
         }
 
         /// <summary>
         /// Verify that we get the same hash code from equivalent metadatas even if they come from different sources.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestGetHashCode()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
@@ -108,13 +102,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ConfigurationMetadata metadata1 = new ConfigurationMetadata(config);
             ConfigurationMetadata metadata2 = new ConfigurationMetadata(project);
-            Assert.AreEqual(metadata1.GetHashCode(), metadata2.GetHashCode());
+            Assert.Equal(metadata1.GetHashCode(), metadata2.GetHashCode());
         }
 
         /// <summary>
         /// Verify that the Equals method works correctly.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void TestEquals()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
@@ -124,17 +118,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ConfigurationMetadata metadata1 = new ConfigurationMetadata(config);
             ConfigurationMetadata metadata2 = new ConfigurationMetadata(project);
-            Assert.IsTrue(metadata1.Equals(metadata2));
+            Assert.True(metadata1.Equals(metadata2));
 
             data = new BuildRequestData("file2", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
             BuildRequestConfiguration config2 = new BuildRequestConfiguration(1, data, ObjectModelHelpers.MSBuildDefaultToolsVersion);
             ConfigurationMetadata metadata3 = new ConfigurationMetadata(config2);
-            Assert.IsFalse(metadata1.Equals(metadata3));
+            Assert.False(metadata1.Equals(metadata3));
 
             data = new BuildRequestData("file", new Dictionary<string, string>(), "3.0", new string[0], null);
             BuildRequestConfiguration config3 = new BuildRequestConfiguration(1, data, "3.0");
             ConfigurationMetadata metadata4 = new ConfigurationMetadata(config3);
-            Assert.IsFalse(metadata1.Equals(metadata4));
+            Assert.False(metadata1.Equals(metadata4));
         }
 
         /// <summary>

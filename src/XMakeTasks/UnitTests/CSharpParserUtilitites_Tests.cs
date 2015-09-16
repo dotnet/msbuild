@@ -5,19 +5,18 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     sealed public class CSharpParserUtilititesTests
     {
         // Try just and empty file
-        [TestMethod]
+        [Fact]
         public void EmptyFile()
         {
             AssertParse("", null);
@@ -25,258 +24,249 @@ namespace Microsoft.Build.UnitTests
 
         // Simplest case of getting a fully-qualified class name from 
         // a c# file.
-        [TestMethod]
+        [Fact]
         public void Simple()
         {
             AssertParse("namespace MyNamespace { class MyClass {} }", "MyNamespace.MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void EmbeddedComment()
         {
             AssertParse("namespace /**/ MyNamespace /**/ { /**/ class /**/ MyClass/**/{}} //", "MyNamespace.MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void MinSpace()
         {
             AssertParse("namespace MyNamespace{class MyClass{}}", "MyNamespace.MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void NoNamespace()
         {
             AssertParse("class MyClass{}", "MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void SneakyComment()
         {
             AssertParse("/*namespace MyNamespace { */ class MyClass {} /* } */", "MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void CompoundNamespace()
         {
             AssertParse("namespace MyNamespace.Feline { class MyClass {} }", "MyNamespace.Feline.MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void NestedNamespace()
         {
             AssertParse("namespace MyNamespace{ namespace Feline {class MyClass {} }}", "MyNamespace.Feline.MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void NestedNamespace2()
         {
             AssertParse("namespace MyNamespace{ namespace Feline {namespace Bovine{public sealed class MyClass {} }} }", "MyNamespace.Feline.Bovine.MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void NestedCompoundNamespace()
         {
             AssertParse("namespace MyNamespace/**/.A{ namespace Feline . B {namespace Bovine.C {sealed class MyClass {} }} }", "MyNamespace.A.Feline.B.Bovine.C.MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void DoubleClass()
         {
             AssertParse("namespace MyNamespace{class Feline{}class Bovine}", "MyNamespace.Feline");
         }
 
-        [TestMethod]
+        [Fact]
         public void EscapedKeywordClass()
         {
             AssertParse("namespace MyNamespace{class @class{}}", "MyNamespace.class");
         }
 
-        [TestMethod]
+        [Fact]
         public void LeadingUnderscore()
         {
             AssertParse("namespace _MyNamespace{class _MyClass{}}", "_MyNamespace._MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void SkipInterveningNamespaces()
         {
             AssertParse("namespace MyNamespace { namespace XXX {} class MyClass {} }", "MyNamespace.MyClass");
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SkipPeerNamespaces()
         {
             AssertParse("namespace XXX {} namespace MyNamespace {  class MyClass {} }", "MyNamespace.MyClass");
         }
 
-        [TestMethod]
+        [Fact]
         public void SolitaryNamespaceSyntaxError()
         {
             AssertParse("namespace", null);
         }
 
-        [TestMethod]
+        [Fact]
         public void NamespaceNamespaceSyntaxError()
         {
             AssertParse("namespace namespace", null);
         }
 
-        [TestMethod]
-        [Ignore] // "This should be a syntax error. But we can't tell because the preprocessor doesn't work yet."
+        [Fact(Skip = "Ignored in MSTest")]
         public void NamelessNamespaceSyntaxError()
         {
             AssertParse("namespace { class MyClass {} }", null);
         }
 
-        [TestMethod]
+        [Fact]
         public void ScopelessNamespaceClassSyntaxError()
         {
             AssertParse("namespace class {}", null);
         }
 
-        [TestMethod]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Fact(Skip = "Ignored in MSTest")]
         public void NamespaceDotDotSyntaxError()
         {
             AssertParse("namespace poo..i { class MyClass {} }", null);
         }
 
-        [TestMethod]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Fact(Skip = "Ignored in MSTest")]
         public void DotNamespaceSyntaxError()
         {
             AssertParse("namespace .i { class MyClass {} }", null);
         }
 
-        [TestMethod]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Fact(Skip = "Ignored in MSTest")]
         public void NamespaceDotNamespaceSyntaxError()
         {
             AssertParse("namespace i { namespace .j {class MyClass {}} }", null);
         }
 
-        [TestMethod]
-        [Ignore] // "This should be a syntax error, but we'd have to look-ahead past the class name."
+        [Fact(Skip = "Ignored in MSTest")]
         public void NamespaceClassDotClassSyntaxError()
         {
             AssertParse("namespace i { namespace j {class a.b {}} }", null);
         }
 
-        [TestMethod]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Fact(Skip = "Ignored in MSTest")]
         public void NamespaceCloseScopeSyntaxError()
         {
             AssertParse("namespace i } class a {} }", null);
         }
 
-        [TestMethod]
-        [Ignore] // "If we went to the trouble of tracking open and closing scopes, we really should do something like build up a parse tree. Too much hassle, just for this simple function."
+        [Fact(Skip = "Ignored in MSTest")]
         public void NamespaceEmbeddedScopeSyntaxError()
         {
             AssertParse("namespace i { {} class a {} }", null);
         }
 
-        [TestMethod]
-        [Ignore] // "This should be a syntax error, but since the preprocessor isn't working, we can't be sure."
+        [Fact(Skip = "Ignored in MSTest")]
         public void ScopelessNamespaceSyntaxError()
         {
             AssertParse("namespace i; namespace j { class a {} }", null);
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyAttributeBool()
         {
             AssertParse("[assembly :AssemblyDelaySign(false)] namespace i { class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyAttributeString()
         {
             AssertParse("[assembly :MyString(\"namespace\")] namespace i { class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyAttributeInt()
         {
             AssertParse("[assembly :MyInt(55)] namespace i { class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyAttributeReal()
         {
             AssertParse("[assembly :MyReal(5.5)] namespace i { class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyAttributeNull()
         {
             AssertParse("[assembly :MyNull(null)] namespace i { class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyAttributeChar()
         {
             AssertParse("[assembly :MyChar('a')] namespace i { class a { } }", "i.a");
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ClassAttributeBool()
         {
             AssertParse("namespace i { [ClassDelaySign(false)] class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void ClassAttributeString()
         {
             AssertParse("namespace i { [MyString(\"class b\")] class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void ClassAttributeInt()
         {
             AssertParse("namespace i { [MyInt(55)] class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void ClassAttributeReal()
         {
             AssertParse("namespace i { [MyReal(5.5)] class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void ClassAttributeNull()
         {
             AssertParse("[namespace i { MyNull(null)] class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void ClassAttributeChar()
         {
             AssertParse("namespace i { [MyChar('a')] class a { } }", "i.a");
         }
 
-        [TestMethod]
-        [Ignore] // "For this to pass, we need to support every kind of Char token in the tokenizer"
+        [Fact(Skip = "Ignored in MSTest")]
         public void ClassAttributeCharIsCloseScope()
         {
             AssertParse("namespace i { [MyChar('\x0000')] class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void ClassAttributeStringIsCloseScope()
         {
             AssertParse("namespace i { [MyString(\"}\")] class a { } }", "i.a");
         }
 
-        [TestMethod]
+        [Fact]
         public void NameSpaceStructEnum()
         {
             AssertParse("namespace n { public struct s {  enum e {} } class c {} }", "n.c");
         }
 
-        [TestMethod]
+        [Fact]
         public void PreprocessorControllingTwoNamespaces()
         {
             // This works by coincidence since preprocessor directives are currently ignored.
@@ -292,7 +282,7 @@ namespace n2
                 ", "n2.c");
         }
 
-        [TestMethod]
+        [Fact]
         public void PreprocessorControllingTwoNamespacesWithInterveningKeyword()
         {
             // This works by coincidence since preprocessor directives are currently ignored.
@@ -309,7 +299,7 @@ namespace n2
                 ", "n2.c");
         }
 
-        [TestMethod]
+        [Fact]
         public void Preprocessor()
         {
             AssertParse
@@ -328,8 +318,7 @@ namespace i
                 ", "i.a");
         }
 
-        [TestMethod]
-        [Ignore] // "Preprocessor is not yet implemented."
+        [Fact(Skip = "Ignored in MSTest")]
         public void PreprocessorNamespaceInFalsePreprocessorBlock()
         {
             AssertParse
@@ -351,7 +340,7 @@ namespace i
 
 
 
-        [TestMethod]
+        [Fact]
         public void Regress_Mutation_SingleLineCommentsShouldBeIgnored()
         {
             AssertParse
@@ -376,7 +365,7 @@ namespace n2
                 StreamHelpers.StringToStream(source)
             );
 
-            Assert.AreEqual(expectedClassName, className.Name);
+            Assert.Equal(expectedClassName, className.Name);
         }
     }
 }
