@@ -7,5 +7,7 @@
     <Project Include="Samples\dirs.proj" />
   </ItemGroup>
 
+  <Import Project="dir.targets" />
+
   <Import Project="dir.traversal.targets" />
 </Project>
