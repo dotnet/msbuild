@@ -8,6 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 using System.Reflection;
@@ -554,8 +555,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     propertyInfos[i] = new TaskPropertyInfo(
                         infos[i].Name,
                         infos[i].PropertyType,
-                        infos[i].GetCustomAttributes(typeof(OutputAttribute), false).Length > 0,
-                        infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Length > 0);
+                        infos[i].GetCustomAttributes(typeof(OutputAttribute), false).Count() > 0,
+                        infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Count() > 0);
                 }
 
                 return propertyInfos;

@@ -89,11 +89,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
             BuildResult result = new BuildResult(request);
             Assert.IsNull(result.Exception);
-
+#if FEATURE_VARIOUS_EXCEPTIONS
             AccessViolationException e = new AccessViolationException();
             result = new BuildResult(request, e);
 
             Assert.AreEqual(e, result.Exception);
+#endif
         }
 
         [Test]

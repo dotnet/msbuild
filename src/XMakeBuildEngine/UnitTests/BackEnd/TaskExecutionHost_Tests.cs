@@ -988,7 +988,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+#if FEATURE_APPDOMAIN
                 null,
+#endif
                 false,
                 CancellationToken.None
                 );
@@ -1016,7 +1018,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+#if FEATURE_APPDOMAIN
                 null,
+#endif
                 false,
                 CancellationToken.None
                 );
@@ -1119,9 +1123,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static bool IsTaskFactoryClass(Type type, object unused)
         {
-            return (type.IsClass &&
-                !type.IsAbstract &&
+            return (type.GetTypeInfo().IsClass &&
+                !type.GetTypeInfo().IsAbstract &&
+#if FEATURE_TYPE_GETINTERFACE
                 (type.GetInterface("Microsoft.Build.Framework.ITaskFactory") != null));
+#else
+                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITaskFactory"));
+#endif
         }
 
         /// <summary>
@@ -1140,7 +1148,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance project = CreateTestProject();
 
             TypeLoader typeLoader = new TypeLoader(new TypeFilter(IsTaskFactoryClass));
+#if FEATURE_ASSEMBLY_LOADFROM
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(Assembly.GetAssembly(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory)).FullName, null);
+#else
+            AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().FullName, null);
+#endif
             LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo);
 
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
@@ -1156,7 +1168,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+#if FEATURE_APPDOMAIN
                 null,
+#endif
                 false,
                 CancellationToken.None
                 );

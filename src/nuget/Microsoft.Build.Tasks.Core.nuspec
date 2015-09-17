@@ -30,7 +30,7 @@
         <dependency id="System.Collections.NonGeneric" version="4.0.0" />
         <dependency id="System.Console" version="4.0.0-beta-23123" />
         <dependency id="System.Diagnostics.Debug" version="4.0.10" />
-        <dependency id="System.Diagnostics.Process" version="4.0.0-beta-23109" />
+        <dependency id="System.Diagnostics.Process" version="4.0.0-beta-23123" />
         <dependency id="System.Diagnostics.TraceSource" version="4.0.0-beta-23019" />
         <dependency id="System.Globalization" version="4.0.10" />
         <dependency id="System.IO" version="4.0.10" />

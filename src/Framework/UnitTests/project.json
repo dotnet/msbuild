@@ -2,16 +2,16 @@
   "runtimes": {
     "win7-x86": { }
   },
+  "dependencies": {
+    "xunit": "2.1.0-beta3-*"
+  },
   "frameworks": {
     "net451": {
-      "dependencies": {
-        "xunit": "2.1.0-rc1-build3168"
-      }
+      "dependencies": {}
     },
     "net46": {
       "dependencies": {
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
-        "xunit": "2.1.0-rc1-build3168"
       }
     },
     "dnxcore50": {
@@ -19,7 +19,7 @@
         "Microsoft.NETCore": "5.0.0",
         "Microsoft.NETCore.Portable.Compatibility": "1.0.0",
         "System.Console": "4.0.0-beta-23123",
-        "System.Runtime": "4.0.20-beta-23109",
+        "System.Runtime": "4.0.20",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
         "Microsoft.NETCore.Runtime": "1.0.0",
         "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",

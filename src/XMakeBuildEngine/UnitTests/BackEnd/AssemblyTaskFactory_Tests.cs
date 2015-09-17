@@ -259,7 +259,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsNotInstanceOf<TaskHostTask>(createdTask);
             }
@@ -288,7 +292,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsNotInstanceOf<TaskHostTask>(createdTask);
             }
@@ -317,7 +325,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr4);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.GetCurrentMSBuildArchitecture());
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsNotInstanceOf<TaskHostTask>(createdTask);
             }
@@ -348,7 +360,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsNotInstanceOf<TaskHostTask>(createdTask);
             }
@@ -379,7 +395,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsNotInstanceOf<TaskHostTask>(createdTask);
             }
@@ -412,7 +432,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsNotInstanceOf<TaskHostTask>(createdTask);
             }
@@ -441,7 +465,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsInstanceOf<TaskHostTask>(createdTask);
             }
@@ -468,7 +496,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr2);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsInstanceOf<TaskHostTask>(createdTask);
             }
@@ -499,7 +531,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsInstanceOf<TaskHostTask>(createdTask);
             }
@@ -524,7 +560,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 SetupTaskFactory(null, true /* want task host */);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsInstanceOf<TaskHostTask>(createdTask);
             }
@@ -553,7 +593,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(taskParameters, true /* want task host */);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsInstanceOf<TaskHostTask>(createdTask);
             }
@@ -582,7 +626,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsInstanceOf<TaskHostTask>(createdTask);
             }
@@ -614,7 +662,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 // #1: don't launch task host
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsNotInstanceOf<TaskHostTask>(createdTask);
             }
@@ -633,7 +685,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr2);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters, new AppDomainSetup(), false);
+                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if FEATURE_APPDOMAIN
+                    new AppDomainSetup(),
+#endif
+                    false);
                 Assert.IsNotNull(createdTask);
                 Assert.IsInstanceOf<TaskHostTask>(createdTask);
             }
@@ -653,7 +709,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private void SetupTaskFactory(IDictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost)
         {
             _taskFactory = new AssemblyTaskFactory();
+#if FEATURE_ASSEMBLY_LOCATION
             _loadInfo = AssemblyLoadInfo.Create(null, Assembly.GetAssembly(typeof(TaskToTestFactories)).Location);
+#else
+            _loadInfo = AssemblyLoadInfo.Create(typeof(TaskToTestFactories).GetTypeInfo().Assembly.FullName, null);
+#endif
             _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
             Assert.IsTrue(_loadedType.Assembly.Equals(_loadInfo), "Expected the AssemblyLoadInfo to be equal");
         }
@@ -664,7 +724,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         ///  Create a task which can be used to test the factories
         /// </summary>
-        public class TaskToTestFactories : AppDomainIsolatedTask
+        public class TaskToTestFactories
+#if FEATURE_APPDOMAIN
+            : AppDomainIsolatedTask
+#endif
         {
             /// <summary>
             /// Give a parameter which can be considered expected
@@ -687,7 +750,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Execute the test
             /// </summary>
+#if FEATURE_APPDOMAIN
             public override bool Execute()
+#else
+            public bool Execute()
+#endif
             {
                 return true;
             }

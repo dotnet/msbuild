@@ -21,6 +21,7 @@ using Microsoft.Build.UnitTests.BackEnd;
 using System.Xml;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -322,6 +323,8 @@ namespace Microsoft.Build.UnitTests.Construction
             Helpers.VerifyAssertLineByLine(readWriteLoadLocations, readOnlyLoadLocations);
         }
 
+// Without save to file, this becomes identical to SaveReadOnly4
+#if FEATURE_XML_LOADPATH
         /// <summary>
         /// Save read only fails
         /// </summary>
@@ -333,6 +336,7 @@ namespace Microsoft.Build.UnitTests.Construction
             doc.Load(_pathToCommonTargets);
             doc.Save(FileUtilities.GetTemporaryFile());
         }
+#endif
 
         /// <summary>
         /// Save read only fails
@@ -342,7 +346,17 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly2()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+#if FEATURE_XML_LOADPATH
             doc.Load(_pathToCommonTargets);
+#else
+            using (
+                XmlReader xmlReader = XmlReader.Create(
+                    _pathToCommonTargets,
+                    new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
+            {
+                doc.Load(xmlReader);
+            }
+#endif
             doc.Save(new MemoryStream());
         }
 
@@ -354,7 +368,17 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly3()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+#if FEATURE_XML_LOADPATH
             doc.Load(_pathToCommonTargets);
+#else
+            using (
+                XmlReader xmlReader = XmlReader.Create(
+                    _pathToCommonTargets,
+                    new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
+            {
+                doc.Load(xmlReader);
+            }
+#endif
             doc.Save(new StringWriter());
         }
 
@@ -366,8 +390,23 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly4()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+#if FEATURE_XML_LOADPATH
             doc.Load(_pathToCommonTargets);
             doc.Save(XmlWriter.Create(FileUtilities.GetTemporaryFile()));
+#else
+            using (
+                XmlReader xmlReader = XmlReader.Create(
+                    _pathToCommonTargets,
+                    new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
+            {
+                doc.Load(xmlReader);
+            }
+
+            using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFile(), FileMode.Create)))
+            {
+                doc.Save(wr);
+            }
+#endif
         }
 
         /// <summary>
@@ -382,7 +421,17 @@ namespace Microsoft.Build.UnitTests.Construction
                 file = FileUtilities.GetTemporaryFile();
                 File.WriteAllText(file, content);
                 var doc = new XmlDocumentWithLocation(loadAsReadOnly: readOnly);
+#if FEATURE_XML_LOADPATH
                 doc.Load(file);
+#else
+                using (
+                    XmlReader xmlReader = XmlReader.Create(
+                        file,
+                        new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
+                {
+                    doc.Load(xmlReader);
+                }
+#endif
                 var allNodes = doc.SelectNodes("//*|//@*");
 
                 string locations = String.Empty;

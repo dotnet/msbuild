@@ -95,7 +95,9 @@ namespace Microsoft.Build.UnitTests.Logging
             List<Exception> exceptionList = new List<Exception>();
             exceptionList.Add(new LoggerException());
             exceptionList.Add(new ArgumentException());
+#if FEATURE_VARIOUS_EXCEPTIONS
             exceptionList.Add(new StackOverflowException());
+#endif
 
             foreach (Exception exception in exceptionList)
             {

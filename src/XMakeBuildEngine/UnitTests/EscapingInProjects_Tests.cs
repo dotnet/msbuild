@@ -110,6 +110,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
 
+#if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
         /// Make sure I can define a property with escaped characters and pass it into
         /// an ITaskItem[] task parameter.
@@ -166,6 +167,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
             logger.AssertLogContains("Received TaskItemParam: 123 abc ; def ; ghi 789");
         }
+#endif
 
         /// <summary>
         /// If I try to add a new item to a project, and my new item's Include has an unescaped semicolon
@@ -797,7 +799,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         </None>
                     </ItemGroup>
                 </Project>";
+#if FEATURE_XMLTEXTREADER
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+#else
+            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
+#endif
             Project project = new Project(reader);
             ProjectItem item = project.GetItems("None").Single();
 
@@ -843,7 +849,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
+#if FEATURE_XMLTEXTREADER
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+#else
+            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
+#endif
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
 
@@ -875,7 +885,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
+#if FEATURE_XMLTEXTREADER
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+#else
+            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
+#endif
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
 

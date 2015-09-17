@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                reader.Close();
+                reader.Dispose();
                 writer = null;
                 stream = null;
             }

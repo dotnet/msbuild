@@ -9,6 +9,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -1446,7 +1448,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Note output is false so these are only input parameters
             string output = bool.FalseString;
             string required = bool.TrueString;
+#if FEATURE_ASSEMBLY_LOCATION
             string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
+#else
+            string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
+#endif
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
@@ -1496,7 +1502,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             type = typeof(ITaskItem).FullName;
             VerifyTypeParameter(output, required, type);
 
+#if FEATURE_ASSEMBLY_LOCATION
             type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
+#else
+            type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
+#endif
             VerifyTypeParameter(output, required, type);
 
             type = typeof(ITaskItem[]).FullName;
@@ -1511,7 +1521,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             type = typeof(DateTime[]).FullName;
             VerifyTypeParameter(output, required, type);
 
+#if FEATURE_ASSEMBLY_LOCATION
             type = typeof(DerivedFromITaskItem[]).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
+#else
+            type = typeof(DerivedFromITaskItem[]).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
+#endif
             VerifyTypeParameter(output, required, type);
         }
 
@@ -1672,7 +1686,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.AreEqual(parameterInfo.Name, filledOutAttributesParameter.Name);
             Assert.AreEqual(parameterInfo.Output, bool.Parse(expandedOutput));
             Assert.AreEqual(parameterInfo.Required, bool.Parse(expandedRequired));
-            Assert.AreEqual(parameterInfo.PropertyType, Type.GetType(expandedType + "," + typeof(ITaskItem).Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */));
+            Assert.AreEqual(
+                parameterInfo.PropertyType,
+                Type.GetType(
+#if FEATURE_ASSEMBLY_LOCATION
+                    expandedType + "," + typeof(ITaskItem).Assembly.FullName,
+#else
+                    expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName,
+#endif
+                    false /* don't throw on error */,
+                    true /* case-insensitive */));
         }
         #endregion
 
@@ -1937,7 +1960,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // The type may be in the Microsoft.Build.Framework Assembly
             if (paramType == null)
             {
-                paramType = Type.GetType(type + "," + typeof(ITaskItem).Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
+                paramType = Type.GetType(
+#if FEATURE_ASSEMBLY_LOCATION
+                    type + "," + typeof(ITaskItem).Assembly.FullName,
+#else
+                    type + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName,
+#endif
+                    false /* don't throw on error */,
+                    true /* case-insensitive */);
             }
 
             Assert.IsTrue(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(paramType));
