@@ -14,8 +14,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Xunit;
 
-#pragma warning disable 0219
-
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

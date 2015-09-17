@@ -555,6 +555,7 @@ namespace ItemCreationTask
             logger.AssertLogContains("[.ext]");
         }
 
+#if FEATURE_CODEDOM
         /// <summary>
         /// Verify that properties can be passed in to a task and out as items, despite
         /// having illegal characters for a file name
@@ -642,6 +643,7 @@ namespace ItemCreationTask
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
             logger.AssertLogContains("[foo: ]");
         }
+#endif
 
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash. 
@@ -723,6 +725,7 @@ namespace ItemCreationTask
             logger.AssertLogContains("[foo: ]");
         }
 
+#if FEATURE_CODEDOM
         /// <summary>
         /// Validates that the defining project metadata is set (or not set) as expected in 
         /// various task output-related operations, using a task built against the current 
@@ -754,7 +757,9 @@ namespace ItemCreationTask
             string customTaskPath = CustomTaskHelper.GetAssemblyForTask(s_itemCreationTaskContents, referenceAssemblies);
             ValidateDefiningProjectMetadataOnTaskOutputsHelper(customTaskPath);
         }
+#endif
 
+#if FEATURE_APARTMENT_STATE
         /// <summary>
         /// Tests that putting the RunInSTA attribute on a task causes it to run in the STA thread.
         /// </summary>
@@ -808,6 +813,7 @@ namespace ItemCreationTask
         {
             TestSTATask(false, true, false);
         }
+#endif
 
         #region ITargetBuilderCallback Members
 
@@ -939,6 +945,7 @@ namespace ItemCreationTask
             }
         }
 
+#if FEATURE_APARTMENT_STATE
         /// <summary>
         /// Executes an STA task test.
         /// </summary>
@@ -1011,7 +1018,9 @@ namespace ItemCreationTask
 
             return project;
         }
+#endif
 
+#if FEATURE_CODEDOM
         /// <summary>
         /// Helper to create the STA test task.
         /// </summary>
@@ -1083,6 +1092,7 @@ namespace ClassLibrary2
 }";
             return CustomTaskHelper.GetAssemblyForTask(taskContents);
         }
+#endif
 
         /// <summary>
         /// Creates a test project.

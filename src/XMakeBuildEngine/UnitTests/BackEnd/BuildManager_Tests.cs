@@ -3585,7 +3585,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             //
             //   <Target Name="ChildBuild" />
             // </Project>
-            string rootProjectPath = Path.Combine(shutdownProjectDirectory, String.Format(CultureInfo.InvariantCulture, "RootProj_{0}.proj", Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)));
+            string rootProjectPath = Path.Combine(shutdownProjectDirectory, String.Format(CultureInfo.InvariantCulture, "RootProj_{0}.proj", Guid.NewGuid().ToString("N")));
             ProjectRootElement rootProject = ProjectRootElement.Create(rootProjectPath, projectCollection);
 
             ProjectTargetElement buildTarget = rootProject.AddTarget("Build");

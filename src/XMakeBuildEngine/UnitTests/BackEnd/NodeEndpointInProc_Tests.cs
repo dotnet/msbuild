@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Send data from the manager. We expect to receive it from the node endpoint, and it should
             // be on the same thread.
             endpoints.ManagerEndpoint.SendData(managerPacket);
-            if (!_host.DataReceivedEvent.WaitOne(1000, false))
+            if (!_host.DataReceivedEvent.WaitOne(1000))
             {
                 Assert.Fail("Data not received before timeout expired.");
             }
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Send data from the node.  We expect to receive it from the manager endpoint, and it should
             // be on the same thread.
             endpoints.NodeEndpoint.SendData(nodePacket);
-            if (!_host.DataReceivedEvent.WaitOne(1000, false))
+            if (!_host.DataReceivedEvent.WaitOne(1000))
             {
                 Assert.Fail("Data not received before timeout expired.");
             }

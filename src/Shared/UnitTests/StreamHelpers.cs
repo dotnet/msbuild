@@ -15,7 +15,11 @@ namespace Microsoft.Build.UnitTests
         static internal StreamReader StringToStreamReader(string value)
         {
             MemoryStream m = new MemoryStream();
+#if FEATURE_ENCODING_DEFAULT
             TextWriter w = new StreamWriter(m, System.Text.Encoding.Default);
+#else
+            TextWriter w = new StreamWriter(m, System.Text.Encoding.UTF8);
+#endif
 
             w.Write(value);
             w.Flush();

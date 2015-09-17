@@ -1158,7 +1158,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ";
 
             FileStream stream = File.Create("testProject.proj");
-            stream.Close();
+            stream.Dispose();
 
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
             return project.CreateProjectInstance();

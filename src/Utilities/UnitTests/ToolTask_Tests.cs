@@ -538,10 +538,17 @@ namespace Microsoft.Build.UnitTests
 
             ProcessStartInfo startInfo = task.StartInfo;
 
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+            Assert.AreEqual("b", startInfo.Environment["a"]);
+            Assert.AreEqual("d", startInfo.Environment["c"]);
+            Assert.AreEqual("x", startInfo.Environment[userVarName]);
+            Assert.AreEqual(String.Empty, startInfo.Environment["path"]);
+#else
             Assert.AreEqual("b", startInfo.EnvironmentVariables["a"]);
             Assert.AreEqual("d", startInfo.EnvironmentVariables["c"]);
             Assert.AreEqual("x", startInfo.EnvironmentVariables[userVarName]);
             Assert.AreEqual(String.Empty, startInfo.EnvironmentVariables["path"]);
+#endif
             if (NativeMethodsShared.IsWindows)
             {
                 Assert.IsTrue(
@@ -551,7 +558,11 @@ namespace Microsoft.Build.UnitTests
 #else
                         FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System),
 #endif
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+                        startInfo.Environment["programfiles"],
+#else
                         startInfo.EnvironmentVariables["programfiles"],
+#endif
                         StringComparison.OrdinalIgnoreCase));
             }
         }
@@ -568,7 +579,11 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
 
             Assert.AreEqual(true, result);
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+            Assert.AreEqual("b=c", task.StartInfo.Environment["a"]);
+#else
             Assert.AreEqual("b=c", task.StartInfo.EnvironmentVariables["a"]);
+#endif
         }
 
         /// <summary>
@@ -631,7 +646,11 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(true, task.ExecuteCalled);
             Assert.AreEqual(
                 true,
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+                task.StartInfo.Environment[NativeMethodsShared.IsWindows ? "username" : "USER"].Length > 0);
+#else
                 task.StartInfo.EnvironmentVariables[NativeMethodsShared.IsWindows ? "username" : "USER"].Length > 0);
+#endif
         }
     }
 }

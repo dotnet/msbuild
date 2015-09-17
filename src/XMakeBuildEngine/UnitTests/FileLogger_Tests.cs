@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="log"></param>
         private void WriteContentToFile(string log)
         {
-            using (StreamWriter sw = new StreamWriter(log))
+            using (StreamWriter sw = FileUtilities.OpenWrite(log, false))
             {
                 sw.WriteLine("existing content");
             }
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests
         private void VerifyFileContent(string file, string expectedContent)
         {
             string actualContent;
-            using (StreamReader sr = new StreamReader(file))
+            using (StreamReader sr = FileUtilities.OpenRead(file))
             {
                 actualContent = sr.ReadToEnd();
             }

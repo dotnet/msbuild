@@ -7,16 +7,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
 using NUnit.Framework;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -426,12 +424,19 @@ namespace Microsoft.Build.UnitTests
         public void Help()
         {
             Assert.AreEqual(MSBuildApp.ExitType.Success,
-                MSBuildApp.Execute(@"c:\bin\msbuild.exe -? "));
+                MSBuildApp.Execute(
+#if FEATURE_GET_COMMANDLINE
+                    @"c:\bin\msbuild.exe -? "
+#else
+                    new [] {@"c:\bin\msbuild.exe", "-?"}
+#endif
+                ));
         }
 
         [Test]
         public void ErrorCommandLine()
         {
+#if FEATURE_GET_COMMANDLINE
             Assert.AreEqual(MSBuildApp.ExitType.SwitchError,
                 MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk"));
 
@@ -440,6 +445,18 @@ namespace Microsoft.Build.UnitTests
 
             Assert.AreEqual(MSBuildApp.ExitType.InitializationError,
                 MSBuildApp.Execute(@"msbuild.exe @bogus.rsp"));
+#else
+            Assert.AreEqual(
+                MSBuildApp.ExitType.SwitchError,
+                MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", "-junk" }));
+
+            Assert.AreEqual(MSBuildApp.ExitType.SwitchError,
+                MSBuildApp.Execute(new[] { @"msbuild.exe", "-t" }));
+
+            Assert.AreEqual(
+                MSBuildApp.ExitType.InitializationError,
+                MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }));
+#endif
         }
 
         [Test]
@@ -507,6 +524,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "1025" });
         }
 
+#if FEATURE_CULTUREINFO_CONSOLE_FALLBACK
         /// <summary>
         /// Regression test for bug where the MSBuild.exe command-line app
         /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI 
@@ -532,6 +550,7 @@ namespace Microsoft.Build.UnitTests
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
         }
+#endif
 
         /// <summary>
         /// Invalid configuration file should not dump stack.
@@ -680,36 +699,36 @@ namespace Microsoft.Build.UnitTests
             psi.Arguments = parameters;
             string output = String.Empty;
             int exitCode = 1;
-            Process p = new Process();
-            p.EnableRaisingEvents = true;
-            p.StartInfo = psi;
 
-            p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
+            using (Process p = new Process { EnableRaisingEvents = true, StartInfo = psi })
             {
-                if (args != null)
-                {
-                    output += args.Data + "\r\n";
-                }
-            };
 
-            p.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
-            {
-                if (args != null)
-                {
-                    output += args.Data + "\r\n";
-                }
-            };
+                p.OutputDataReceived += delegate(object sender, DataReceivedEventArgs args)
+                    {
+                        if (args != null)
+                        {
+                            output += args.Data + "\r\n";
+                        }
+                    };
 
-            Console.WriteLine("Executing [{0} {1}]", process, parameters);
+                p.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs args)
+                    {
+                        if (args != null)
+                        {
+                            output += args.Data + "\r\n";
+                        }
+                    };
 
-            p.Start();
-            p.BeginOutputReadLine();
-            p.BeginErrorReadLine();
-            p.StandardInput.Close();
-            p.WaitForExit();
+                Console.WriteLine("Executing [{0} {1}]", process, parameters);
 
-            exitCode = p.ExitCode;
-            p.Close();
+                p.Start();
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+                p.StandardInput.Dispose();
+                p.WaitForExit();
+
+                exitCode = p.ExitCode;
+            }
 
             Console.WriteLine("==== OUTPUT ====");
             Console.WriteLine(output);
@@ -738,12 +757,18 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Environment.SetEnvironmentVariable("MyEnvVariable", "1");
-                using (StreamWriter sw = new StreamWriter(projectFileName))
+                using (StreamWriter sw = FileUtilities.OpenWrite(projectFileName, false))
                 {
                     sw.WriteLine(projectString);
                 }
                 //Should pass
+#if FEATURE_GET_COMMANDLINE
                 Assert.AreEqual(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName));
+#else
+                Assert.AreEqual(
+                    MSBuildApp.ExitType.Success,
+                    MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", quotedProjectFileName }));
+#endif
             }
             finally
             {
@@ -766,10 +791,11 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(projectFileName))
+                using (StreamWriter sw = FileUtilities.OpenWrite(projectFileName, false))
                 {
                     sw.WriteLine(projectString);
                 }
+#if FEATURE_GET_COMMANDLINE
                 //Should pass
                 Assert.AreEqual(MSBuildApp.ExitType.Success,
                     MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" " + quotedProjectFileName));
@@ -777,6 +803,28 @@ namespace Microsoft.Build.UnitTests
                 //Should fail as we are not changing existing lines
                 Assert.AreEqual(MSBuildApp.ExitType.InitializationError,
                         MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,Microsoft.Build,Version=11111 " + quotedProjectFileName));
+#else
+                //Should pass
+                Assert.AreEqual(
+                    MSBuildApp.ExitType.Success,
+                    MSBuildApp.Execute(
+                        new[]
+                            {
+                                @"c:\bin\msbuild.exe",
+                                @"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""",
+                                quotedProjectFileName
+                            }));
+
+                //Should fail as we are not changing existing lines
+                Assert.AreEqual(
+                    MSBuildApp.ExitType.InitializationError,
+                    MSBuildApp.Execute(
+                        new[]
+                            {
+                                @"c:\bin\msbuild.exe", "/logger:FileLogger,Microsoft.Build,Version=11111",
+                                quotedProjectFileName
+                            }));
+#endif
             }
             finally
             {

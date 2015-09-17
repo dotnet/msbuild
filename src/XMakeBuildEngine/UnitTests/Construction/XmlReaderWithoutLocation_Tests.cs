@@ -44,9 +44,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 get { return _wrappedReader.BaseURI; }
             }
 
-            public override void Close()
+            public void Close()
             {
-                _wrappedReader.Close();
+                _wrappedReader.Dispose();
             }
 
             public override int Depth

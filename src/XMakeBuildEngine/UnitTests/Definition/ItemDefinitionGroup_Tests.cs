@@ -1044,6 +1044,7 @@ namespace Microsoft.Build.UnitTests.Definition
             bool result = p.Build("t", new ILogger[] { logger });
         }
 
+#if FEATURE_ASSEMBLY_LOCATION
         // Verify that anyone with a task named "ItemDefinitionGroup" can still
         // use it by fully qualifying the name.
         [Test]
@@ -1060,6 +1061,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.IsTrue(ml.FullLog.Contains("In ItemDefinitionGroup task."));
         }
+#endif
 
         [Test]
         public void MetadataOnItemWins()
@@ -1718,7 +1720,7 @@ namespace Microsoft.Build.UnitTests.Definition
                   </Target>
                 </Project>";
 
-                using (StreamWriter writer = new StreamWriter(otherProject))
+                using (StreamWriter writer = FileUtilities.OpenWrite(otherProject, false))
                 {
                     writer.Write(otherProjectContent);
                 }
@@ -1776,7 +1778,7 @@ namespace Microsoft.Build.UnitTests.Definition
                   </Target>
                 </Project>";
 
-                using (StreamWriter writer = new StreamWriter(otherProject))
+                using (StreamWriter writer = FileUtilities.OpenWrite(otherProject, false))
                 {
                     writer.Write(otherProjectContent);
                 }

@@ -8,7 +8,9 @@
 
 using System;
 using System.Diagnostics;
+#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
+#endif
 
 namespace Microsoft.Build.Shared
 {

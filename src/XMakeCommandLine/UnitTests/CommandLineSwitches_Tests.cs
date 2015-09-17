@@ -1078,7 +1078,23 @@ namespace Microsoft.Build.UnitTests
                 filename = FileUtilities.GetTemporaryFile();
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.Save(filename);
-                MSBuildApp.BuildProject(filename, null, "ScoobyDoo", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), new ILogger[] { }, LoggerVerbosity.Normal, new DistributedLoggerRecord[] { }, false, null, 1, true, new StringWriter(), false, false);
+                MSBuildApp.BuildProject(
+                                        filename,
+                                        null,
+                                        "ScoobyDoo",
+                                        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                                        new ILogger[] { },
+                                        LoggerVerbosity.Normal,
+                                        new DistributedLoggerRecord[] { },
+#if FEATURE_XML_SCHEMA_VALIDATION
+                                        false,
+                                        null,
+#endif
+                                        1,
+                                        true,
+                                        new StringWriter(),
+                                        false,
+                                        false);
             }
             finally
             {

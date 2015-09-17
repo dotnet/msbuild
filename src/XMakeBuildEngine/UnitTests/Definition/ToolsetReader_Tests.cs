@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.IO;
 
 using Microsoft.Build.Collections;
@@ -65,7 +67,9 @@ namespace Microsoft.Build.UnitTests.Definition
         [TearDown]
         public void TearDown()
         {
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.CleanUp();
+#endif
 
             DeleteTestRegistryKey();
 
@@ -91,6 +95,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Test to make sure machine.config file has the section registered
         /// and we are picking it up from there.
@@ -125,8 +130,11 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(null, defaultToolsVersion);
             Assert.AreEqual(0, values.Count);
         }
+#endif
 
         #region "Reading from application configuration file tests"
+
+#if FEATURE_SYSTEM_CONFIGURATION
 
         /// <summary>
         /// Tests that the data is correctly populated using function GetToolsetDataFromConfiguration
@@ -621,6 +629,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
         }
+#endif
 
         /// <summary>
         /// Tests the case when a blank property name is specified in the registry
@@ -640,7 +649,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -671,13 +682,16 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            globalProperties,
                                                            ToolsetDefinitionLocations.Registry
                                                       );
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Tests the case when a blank property value is specified in the config file
         /// </summary>
@@ -706,6 +720,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
         }
+#endif
 
         /// <summary>
         /// Tests the case when a blank property value is specified in the registry
@@ -724,7 +739,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -751,7 +768,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -764,6 +783,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("", values["2.0"].SubToolsets["11.0"].Properties["foo"].EvaluatedValue);
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Tests the case when an invalid value of PropertyName is specified in the config file
         /// </summary>
@@ -793,6 +813,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
         }
+#endif
 
         /// <summary>
         /// Tests the case when an invalid value of PropertyName is specified in the registry
@@ -812,7 +833,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -839,14 +862,16 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
         }
 
-
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Tests that empty string is an invalid value for MSBuildBinPath
         /// </summary>
@@ -940,6 +965,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(1, values.Count);
             Assert.AreEqual(@"some>value", values["2>.0"].Properties["foo"].EvaluatedValue);
         }
+#endif
         #endregion
 
         #region "GetToolsetData tests"
@@ -965,6 +991,7 @@ namespace Microsoft.Build.UnitTests.Definition
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("4.0");
             key2.SetValue("MSBuildBinPath", binPath2);
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -979,6 +1006,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -986,7 +1014,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -1014,6 +1044,7 @@ namespace Microsoft.Build.UnitTests.Definition
             RegistryKey key2 = _testRegistryKey.CreateSubKey("55.0");
             key2.SetValue("MSBuildBinPath", @"D:\somepath2");
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1028,6 +1059,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1035,7 +1067,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.None
@@ -1068,6 +1102,7 @@ namespace Microsoft.Build.UnitTests.Definition
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("4.0");
             key2.SetValue("MSBuildBinPath", binPath2);
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1082,13 +1117,16 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -1118,7 +1156,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -1142,7 +1182,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -1172,7 +1214,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -1203,7 +1247,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -1226,6 +1272,7 @@ namespace Microsoft.Build.UnitTests.Definition
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("4.0");
             key2.SetValue("MSBuildBinPath", @"D:\somepath2");
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1240,6 +1287,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1247,7 +1295,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile
@@ -1281,6 +1331,7 @@ namespace Microsoft.Build.UnitTests.Definition
             key1.SetValue("SchemaLocation", @"Schemas");
             key1.SetValue(null, @"D:\somePathToDefault");  //this sets the default value for this key
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1294,6 +1345,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1301,7 +1353,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -1331,13 +1385,16 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            null,
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void SamePropertyDefinedMultipleTimesForSingleToolsVersionInConfigurationFile()
@@ -1507,6 +1564,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile
                                                        );
         }
+#endif
 
         [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
@@ -1523,7 +1581,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            null,
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
@@ -1546,13 +1606,16 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            null,
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Properties defined in previously processed toolset definitions should
         /// not affect the evaluation of subsequent toolset definitions.
@@ -1606,6 +1669,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(@"somevalue", values["4.0"].Properties["p2"].EvaluatedValue);
             Assert.AreEqual(@"propertyValue", values["4.0"].Properties["p3"].EvaluatedValue);
         }
+#endif
 
         /// <summary>
         /// Properties in the configuration file may refer to a registry location by using the syntax for example
@@ -1773,7 +1837,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                        (
                                            values,
                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                            GetStandardConfigurationReader(),
+#endif
                                            new ProjectCollection().EnvironmentProperties,
                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                            ToolsetDefinitionLocations.Registry
@@ -1811,6 +1877,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <param name="expectedValue"></param>
         private void ConfigFileValidRegistryExpressionHelper(string propertyExpression, string expectedValue)
         {
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1823,6 +1890,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1830,7 +1898,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                        (
                                            values,
                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                            GetStandardConfigurationReader(),
+#endif
                                            new ProjectCollection().EnvironmentProperties,
                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                            ToolsetDefinitionLocations.ConfigurationFile
@@ -1852,6 +1922,7 @@ namespace Microsoft.Build.UnitTests.Definition
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
             key1.SetValue("MSBuildBinPath", binPath);
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1863,6 +1934,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1870,7 +1942,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -1894,6 +1968,7 @@ namespace Microsoft.Build.UnitTests.Definition
             RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
             key1.SetValue("MSBuildBinPath", @"$([MSBuild]::SomeNonexistentPropertyFunction())");
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1905,6 +1980,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1912,7 +1988,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -1939,6 +2017,7 @@ namespace Microsoft.Build.UnitTests.Definition
             key1.SetValue("SomeRegistryProperty", @"SomeRegistryValue");
 
             // Set the config file contents as needed
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -1951,6 +2030,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1958,7 +2038,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2021,6 +2103,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void GetToolsetData_RegistryNotPresent()
         {
             string binPath = NativeMethodsShared.IsWindows ? @"D:\somedifferentpath" : "/somedifferentpath";
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -2032,6 +2115,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -2039,7 +2123,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2069,7 +2155,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2092,7 +2180,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2122,7 +2212,9 @@ namespace Microsoft.Build.UnitTests.Definition
             key1.SetValue("MSBuildBinPath", @"D:\somepath");
 
             // Set the config helper to throw exception
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -2130,7 +2222,9 @@ namespace Microsoft.Build.UnitTests.Definition
                        (
                            values,
                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                            GetStandardConfigurationReader(),
+#endif
                            new ProjectCollection().EnvironmentProperties,
                            new PropertyDictionary<ProjectPropertyInstance>(),
                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2147,6 +2241,7 @@ namespace Microsoft.Build.UnitTests.Definition
             RegistryKeyWrapper mockRegistryKey =
                 new MockRegistryKey(testRegistryPath, MockRegistryKey.WhereToThrow.OpenSubKey);
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -2158,6 +2253,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -2165,16 +2261,18 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), mockRegistryKey),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
         }
 
-        #endregion
+#endregion
 
-        #region "SetDefaultToolsetVersion tests"
+#region "SetDefaultToolsetVersion tests"
 
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified
@@ -2190,6 +2288,7 @@ namespace Microsoft.Build.UnitTests.Definition
             RegistryKey key2 = _toolsVersionsRegistryKey.CreateSubKey("4.0");
             key2.SetValue("MSBuildBinPath", @"D:\somepath2");
 
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -2204,6 +2303,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -2211,7 +2311,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2226,6 +2328,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void SetDefaultToolsetVersion_SpecifiedOnlyInRegistry()
         {
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -2240,6 +2343,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             // Set up registry with two tools versions and one property each
             _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "4.0");
@@ -2252,7 +2356,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2267,6 +2373,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void SetOverrideTasks_SpecifiedOnlyInRegistry()
         {
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -2281,6 +2388,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             string overridePath = NativeMethodsShared.IsWindows ? "c:\\TaskOverridePath" : "/TaskOverridePath";
             // Set up registry with two tools versions and one property each
@@ -2298,7 +2406,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2315,6 +2425,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void SetDefaultOverrideToolsVersion_SpecifiedOnlyInRegistry()
         {
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -2329,6 +2440,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             // Set up registry with two tools versions and one property each
             _currentVersionRegistryKey.SetValue("DefaultOverrideToolsVersion", "13.0");
@@ -2343,7 +2455,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2352,6 +2466,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("13.0", values["4.0"].DefaultOverrideToolsVersion);
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved
         /// when specified in config file only
@@ -2380,7 +2495,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2420,7 +2537,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2460,7 +2579,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2469,6 +2590,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual("5.0", defaultToolsVersion);
             Assert.AreEqual("3.0", values["4.0"].DefaultOverrideToolsVersion);
         }
+#endif
 
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified nowhere
@@ -2476,6 +2598,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void SetDefaultToolsetVersion_SpecifiedNowhere()
         {
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -2490,6 +2613,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -2497,7 +2621,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2514,6 +2640,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(null, values[expectedDefault].DefaultOverrideToolsVersion);
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Tests that properties are properly expanded when reading them from the config file
         /// </summary>
@@ -2542,7 +2669,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new ProjectCollection().GlobalPropertiesCollection,
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2590,7 +2719,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new ProjectCollection().GlobalPropertiesCollection,
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2605,6 +2736,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.AreEqual(expectedToolsPath, values["4.0"].ToolsPath);
             Assert.AreEqual("v3" + expectedToolsPath, values["4.0"].Properties["p3"].EvaluatedValue);
         }
+#endif
 
         /// <summary>
         /// Global properties are available, but they cannot be overwritten by other toolset properties, just as they cannot
@@ -2613,6 +2745,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Test]
         public void GlobalPropertiesInToolsetsAreExpandedButAreNotOverwritten()
         {
+#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
@@ -2627,6 +2760,7 @@ namespace Microsoft.Build.UnitTests.Definition
                      </toolset>
                    </msbuildToolsets>
                  </configuration>");
+#endif
 
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties["gp1"] = "gv1";
@@ -2637,7 +2771,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
+#if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
+#endif
                                                            e.EnvironmentProperties,
                                                            e.GlobalPropertiesCollection,
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
@@ -2654,11 +2790,13 @@ namespace Microsoft.Build.UnitTests.Definition
             return new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new MockRegistryKey(testRegistryPath));
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
             return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
                 ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
         }
+#endif
     }
 
     internal class MockRegistryKey : RegistryKeyWrapper

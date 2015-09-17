@@ -3,10 +3,10 @@
   "version": 1,
   "targets": {
     ".NETFramework,Version=v4.5.1": {
-      "xunit/2.0.0": {
+      "xunit/2.1.0-beta3-build3029": {
         "dependencies": {
-          "xunit.assert": "[2.0.0, 2.0.0]",
-          "xunit.core": "[2.0.0, 2.0.0]"
+          "xunit.assert": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]",
+          "xunit.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
         }
       },
       "xunit.abstractions/2.0.0": {
@@ -17,36 +17,36 @@
           "lib/net35/xunit.abstractions.dll": {}
         }
       },
-      "xunit.assert/2.0.0": {
+      "xunit.assert/2.1.0-beta3-build3029": {
         "compile": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
         }
       },
-      "xunit.core/2.0.0": {
+      "xunit.core/2.1.0-beta3-build3029": {
         "dependencies": {
-          "xunit.extensibility.core": "[2.0.0, 2.0.0]"
+          "xunit.extensibility.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
         }
       },
-      "xunit.extensibility.core/2.0.0": {
+      "xunit.extensibility.core/2.1.0-beta3-build3029": {
         "dependencies": {
           "xunit.abstractions": "[2.0.0, 2.0.0]"
         },
         "compile": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
         }
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x86": {
-      "xunit/2.0.0": {
+      "xunit/2.1.0-beta3-build3029": {
         "dependencies": {
-          "xunit.assert": "[2.0.0, 2.0.0]",
-          "xunit.core": "[2.0.0, 2.0.0]"
+          "xunit.assert": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]",
+          "xunit.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
         }
       },
       "xunit.abstractions/2.0.0": {
@@ -57,28 +57,28 @@
           "lib/net35/xunit.abstractions.dll": {}
         }
       },
-      "xunit.assert/2.0.0": {
+      "xunit.assert/2.1.0-beta3-build3029": {
         "compile": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
         }
       },
-      "xunit.core/2.0.0": {
+      "xunit.core/2.1.0-beta3-build3029": {
         "dependencies": {
-          "xunit.extensibility.core": "[2.0.0, 2.0.0]"
+          "xunit.extensibility.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
         }
       },
-      "xunit.extensibility.core/2.0.0": {
+      "xunit.extensibility.core/2.1.0-beta3-build3029": {
         "dependencies": {
           "xunit.abstractions": "[2.0.0, 2.0.0]"
         },
         "compile": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
         }
       }
     },
@@ -111,10 +111,10 @@
           "lib/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
         }
       },
-      "xunit/2.0.0": {
+      "xunit/2.1.0-beta3-build3029": {
         "dependencies": {
-          "xunit.assert": "[2.0.0, 2.0.0]",
-          "xunit.core": "[2.0.0, 2.0.0]"
+          "xunit.assert": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]",
+          "xunit.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
         }
       },
       "xunit.abstractions/2.0.0": {
@@ -125,28 +125,28 @@
           "lib/net35/xunit.abstractions.dll": {}
         }
       },
-      "xunit.assert/2.0.0": {
+      "xunit.assert/2.1.0-beta3-build3029": {
         "compile": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
         }
       },
-      "xunit.core/2.0.0": {
+      "xunit.core/2.1.0-beta3-build3029": {
         "dependencies": {
-          "xunit.extensibility.core": "[2.0.0, 2.0.0]"
+          "xunit.extensibility.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
         }
       },
-      "xunit.extensibility.core/2.0.0": {
+      "xunit.extensibility.core/2.1.0-beta3-build3029": {
         "dependencies": {
           "xunit.abstractions": "[2.0.0, 2.0.0]"
         },
         "compile": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
         }
       }
     },
@@ -179,10 +179,10 @@
           "lib/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
         }
       },
-      "xunit/2.0.0": {
+      "xunit/2.1.0-beta3-build3029": {
         "dependencies": {
-          "xunit.assert": "[2.0.0, 2.0.0]",
-          "xunit.core": "[2.0.0, 2.0.0]"
+          "xunit.assert": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]",
+          "xunit.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
         }
       },
       "xunit.abstractions/2.0.0": {
@@ -193,28 +193,28 @@
           "lib/net35/xunit.abstractions.dll": {}
         }
       },
-      "xunit.assert/2.0.0": {
+      "xunit.assert/2.1.0-beta3-build3029": {
         "compile": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
         }
       },
-      "xunit.core/2.0.0": {
+      "xunit.core/2.1.0-beta3-build3029": {
         "dependencies": {
-          "xunit.extensibility.core": "[2.0.0, 2.0.0]"
+          "xunit.extensibility.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
         }
       },
-      "xunit.extensibility.core/2.0.0": {
+      "xunit.extensibility.core/2.1.0-beta3-build3029": {
         "dependencies": {
           "xunit.abstractions": "[2.0.0, 2.0.0]"
         },
         "compile": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
         },
         "runtime": {
-          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
         }
       }
     },
@@ -901,7 +901,7 @@
           "lib/DNXCore50/System.Private.Networking.dll": {}
         }
       },
-      "System.Private.Uri/4.0.0-beta-23109": {
+      "System.Private.Uri/4.0.0": {
         "compile": {
           "ref/dnxcore50/_._": {}
         },
@@ -1040,9 +1040,9 @@
           "lib/DNXCore50/System.Resources.ResourceManager.dll": {}
         }
       },
-      "System.Runtime/4.0.20-beta-23109": {
+      "System.Runtime/4.0.20": {
         "dependencies": {
-          "System.Private.Uri": "[4.0.0-beta-23109, )"
+          "System.Private.Uri": "[4.0.0, )"
         },
         "compile": {
           "ref/dotnet/System.Runtime.dll": {}
@@ -1255,6 +1255,17 @@
           "lib/dotnet/System.Threading.Tasks.Parallel.dll": {}
         }
       },
+      "System.Threading.Thread/4.0.0-beta-23109": {
+        "dependencies": {
+          "System.Runtime": "[4.0.0-beta-23109, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Threading.Thread.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Threading.Thread.dll": {}
+        }
+      },
       "System.Threading.Timer/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -1309,6 +1320,56 @@
         },
         "runtime": {
           "lib/dotnet/System.Xml.XDocument.dll": {}
+        }
+      },
+      "xunit/2.1.0-beta3-build3029": {
+        "dependencies": {
+          "xunit.assert": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]",
+          "xunit.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
+        }
+      },
+      "xunit.abstractions/2.0.0": {
+        "compile": {
+          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.abstractions.dll": {}
+        }
+      },
+      "xunit.assert/2.1.0-beta3-build3029": {
+        "compile": {
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+        }
+      },
+      "xunit.core/2.1.0-beta3-build3029": {
+        "dependencies": {
+          "xunit.extensibility.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]",
+          "xunit.extensibility.execution": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
+        }
+      },
+      "xunit.extensibility.core/2.1.0-beta3-build3029": {
+        "dependencies": {
+          "xunit.abstractions": "[2.0.0, 2.0.0]"
+        },
+        "compile": {
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+        }
+      },
+      "xunit.extensibility.execution/2.1.0-beta3-build3029": {
+        "dependencies": {
+          "xunit.extensibility.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
+        },
+        "compile": {
+          "lib/dnxcore50/xunit.execution.dnx.dll": {}
+        },
+        "runtime": {
+          "lib/dnxcore50/xunit.execution.dnx.dll": {}
         }
       }
     },
@@ -2567,6 +2628,17 @@
           "lib/dotnet/System.Threading.Tasks.Parallel.dll": {}
         }
       },
+      "System.Threading.Thread/4.0.0-beta-23109": {
+        "dependencies": {
+          "System.Runtime": "[4.0.0-beta-23109, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Threading.Thread.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Threading.Thread.dll": {}
+        }
+      },
       "System.Threading.Timer/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -2621,6 +2693,56 @@
         },
         "runtime": {
           "lib/dotnet/System.Xml.XDocument.dll": {}
+        }
+      },
+      "xunit/2.1.0-beta3-build3029": {
+        "dependencies": {
+          "xunit.assert": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]",
+          "xunit.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
+        }
+      },
+      "xunit.abstractions/2.0.0": {
+        "compile": {
+          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.abstractions.dll": {}
+        }
+      },
+      "xunit.assert/2.1.0-beta3-build3029": {
+        "compile": {
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll": {}
+        }
+      },
+      "xunit.core/2.1.0-beta3-build3029": {
+        "dependencies": {
+          "xunit.extensibility.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]",
+          "xunit.extensibility.execution": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
+        }
+      },
+      "xunit.extensibility.core/2.1.0-beta3-build3029": {
+        "dependencies": {
+          "xunit.abstractions": "[2.0.0, 2.0.0]"
+        },
+        "compile": {
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll": {}
+        }
+      },
+      "xunit.extensibility.execution/2.1.0-beta3-build3029": {
+        "dependencies": {
+          "xunit.extensibility.core": "[2.1.0-beta3-build3029, 2.1.0-beta3-build3029]"
+        },
+        "compile": {
+          "lib/dnxcore50/xunit.execution.dnx.dll": {}
+        },
+        "runtime": {
+          "lib/dnxcore50/xunit.execution.dnx.dll": {}
         }
       }
     }
@@ -4193,21 +4315,6 @@
         "System.Private.Networking.nuspec"
       ]
     },
-    "System.Private.Uri/4.0.0-beta-23109": {
-      "sha512": "y6M7TxwDXBD2in5cCf+KzucZyx7YE7SJMcU24atzYnpwP2xFASUYCeI6NRg5bYcw2Do5HKBz+XdE9WiZrwpnFg==",
-      "type": "Package",
-      "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "lib/DNXCore50/System.Private.Uri.dll",
-        "lib/netcore50/System.Private.Uri.dll",
-        "package/services/metadata/core-properties/21141aa56bdd425b98452b6c9d930b41.psmdcp",
-        "ref/dnxcore50/_._",
-        "ref/netcore50/_._",
-        "runtimes/win8-aot/lib/netcore50/System.Private.Uri.dll",
-        "System.Private.Uri.nuspec"
-      ]
-    },
     "System.Private.Uri/4.0.0": {
       "sha512": "CtuxaCKcRIvPcsqquVl3mPp79EDZPMr2UogfiFCxCs+t2z1VjbpQsKNs1GHZ8VQetqbk1mr0V1yAfMe6y8CHDA==",
       "type": "Package",
@@ -4522,32 +4629,6 @@
         "ref/wpa81/_._",
         "runtimes/win8-aot/lib/netcore50/System.Resources.ResourceManager.dll",
         "System.Resources.ResourceManager.nuspec"
-      ]
-    },
-    "System.Runtime/4.0.20-beta-23109": {
-      "sha512": "6usAb6nZEPKugl3z5JR/RZrouH5/340n3tM0lhRfxVE/k3B3Sfh/sHSPiAOorrZgGm4cIDDhXTCGJQSWYphu3g==",
-      "type": "Package",
-      "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "lib/DNXCore50/System.Runtime.dll",
-        "lib/net46/_._",
-        "lib/netcore50/System.Runtime.dll",
-        "package/services/metadata/core-properties/e4e36bf9298645b0a95c9141c00078ef.psmdcp",
-        "ref/dotnet/de/System.Runtime.xml",
-        "ref/dotnet/es/System.Runtime.xml",
-        "ref/dotnet/fr/System.Runtime.xml",
-        "ref/dotnet/it/System.Runtime.xml",
-        "ref/dotnet/ja/System.Runtime.xml",
-        "ref/dotnet/ko/System.Runtime.xml",
-        "ref/dotnet/ru/System.Runtime.xml",
-        "ref/dotnet/System.Runtime.dll",
-        "ref/dotnet/System.Runtime.xml",
-        "ref/dotnet/zh-hans/System.Runtime.xml",
-        "ref/dotnet/zh-hant/System.Runtime.xml",
-        "ref/net46/_._",
-        "runtimes/win8-aot/lib/netcore50/System.Runtime.dll",
-        "System.Runtime.nuspec"
       ]
     },
     "System.Runtime/4.0.20": {
@@ -5042,6 +5123,30 @@
         "System.Threading.Tasks.Parallel.nuspec"
       ]
     },
+    "System.Threading.Thread/4.0.0-beta-23109": {
+      "sha512": "pOob5Fz4cRJ/bfBs2+ehmS99VGCN5Ei2mf7bl17STagcDGHUZBAzVLz8Kamq0hwQGX2pCFkuUZH+2Ycdts2PSQ==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/DNXCore50/System.Threading.Thread.dll",
+        "lib/net46/System.Threading.Thread.dll",
+        "package/services/metadata/core-properties/ba9a9919e2744245be86e42f4f3b93d1.psmdcp",
+        "ref/dotnet/de/System.Threading.Thread.xml",
+        "ref/dotnet/es/System.Threading.Thread.xml",
+        "ref/dotnet/fr/System.Threading.Thread.xml",
+        "ref/dotnet/it/System.Threading.Thread.xml",
+        "ref/dotnet/ja/System.Threading.Thread.xml",
+        "ref/dotnet/ko/System.Threading.Thread.xml",
+        "ref/dotnet/ru/System.Threading.Thread.xml",
+        "ref/dotnet/System.Threading.Thread.dll",
+        "ref/dotnet/System.Threading.Thread.xml",
+        "ref/dotnet/zh-hans/System.Threading.Thread.xml",
+        "ref/dotnet/zh-hant/System.Threading.Thread.xml",
+        "ref/net46/System.Threading.Thread.dll",
+        "System.Threading.Thread.nuspec"
+      ]
+    },
     "System.Threading.Timer/4.0.0": {
       "sha512": "BIdJH5/e4FnVl7TkRUiE3pWytp7OYiRUGtwUbyLewS/PhKiLepFetdtlW+FvDYOVn60Q2NMTrhHhJ51q+sVW5g==",
       "type": "Package",
@@ -5138,13 +5243,13 @@
         "System.Xml.XDocument.nuspec"
       ]
     },
-    "xunit/2.0.0": {
-      "sha512": "R3ff9uIPUm5/ZxG0GzNzezftMwAtYYBKFZn/iVWPPvugq96WCaFt+ItC32cqIWpFsxkxChQAcWQSJOKazaGW+A==",
+    "xunit/2.1.0-beta3-build3029": {
+      "sha512": "NMFXV0ePe/GrfhMSPGAlWmiUZCzjaatpdAGcavf2B6vYTRyMTpyJT01LI6jemMV/VSDXLrtHp0Ov9xZyR1cLLg==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
         "_rels/.rels",
-        "package/services/metadata/core-properties/a9547845358e4467be9179b19b1256c7.psmdcp",
+        "package/services/metadata/core-properties/d8f65b6e50974443be49b52c7aaafb11.psmdcp",
         "xunit.nuspec"
       ]
     },
@@ -5162,21 +5267,21 @@
         "xunit.abstractions.nuspec"
       ]
     },
-    "xunit.assert/2.0.0": {
-      "sha512": "zpAg9pQ+jzZqfMq8cgYMMYX2/QM0T2EoOR4xdrlMcGZ8Ev1B/+OfHmgEN2yjOE9NFuZm0hN/fBDvrbqdDXFFtA==",
+    "xunit.assert/2.1.0-beta3-build3029": {
+      "sha512": "AMS7Fv77DayXVRCBMmVEDwOXPcbxk8dCBA/iACsve+6+UQqopMtNyAynyIcXPFRK/peeitUKID4ChOXWisJmUw==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
         "_rels/.rels",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.pdb",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.xml",
-        "package/services/metadata/core-properties/62ba87ea64874d6fa100233fa714025d.psmdcp",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.dll",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.pdb",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.assert.xml",
+        "package/services/metadata/core-properties/38c52763215f45f28d084a9c1b6e4fa2.psmdcp",
         "xunit.assert.nuspec"
       ]
     },
-    "xunit.core/2.0.0": {
-      "sha512": "nL+V/XosvtydF8qwJWRjGQJEzwJpXcEw4AtYq+JtM7FIsLnolB+lG8iGS+N2V1Jo1FOnFj0Wtte6TAuTUtUh1g==",
+    "xunit.core/2.1.0-beta3-build3029": {
+      "sha512": "uDUBbwZSRx226BMwj6VylzXQPVpEIelNIulT+LxbSEH52y2a4btR9d5ptQmkSVjmJXP5/hGCc4cu1DSCu0pgUA==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
@@ -5186,48 +5291,79 @@
         "build/monoandroid/xunit.execution.MonoAndroid.dll",
         "build/monotouch/xunit.core.props",
         "build/monotouch/xunit.execution.MonoTouch.dll",
-        "build/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.props",
+        "build/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.props",
         "build/portable-win81+wpa81/xunit.core.props",
         "build/portable-win81+wpa81/xunit.core.targets",
         "build/portable-win81+wpa81/xunit.execution.universal.dll",
         "build/portable-win81+wpa81/xunit.execution.universal.pri",
-        "build/win8/xunit.core.props",
-        "build/win8/xunit.core.targets",
-        "build/win8/xunit.execution.win8.dll",
         "build/wp8/xunit.core.props",
         "build/wp8/xunit.core.targets",
         "build/wp8/xunit.execution.wp8.dll",
         "build/Xamarin.iOS/xunit.core.props",
         "build/Xamarin.iOS/xunit.execution.iOS-Universal.dll",
-        "package/services/metadata/core-properties/c2ef10ff791a4249ab27b44ada8fe978.psmdcp",
+        "package/services/metadata/core-properties/7cc532c455474d1dac8f8b0cfe0b3522.psmdcp",
         "xunit.core.nuspec"
       ]
     },
-    "xunit.extensibility.core/2.0.0": {
-      "sha512": "QDmEvruvqIfnzraEjPq0tcDBEhrLuSbkLY38xFnrv+H2Q6kHULq1l2nyj5W/xrY2Om3wmkaSs4FMaDXPmK7QCA==",
+    "xunit.extensibility.core/2.1.0-beta3-build3029": {
+      "sha512": "lsPro5U3NLasHI/RwqjKzXiRlh9N0IOlR3cluwXYVtihXbGtySeSnU/Fh5MTcWYxh+MVpoNop5zDD0/A2nrHsA==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
         "_rels/.rels",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll.tdnet",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.pdb",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.xml",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.runner.tdnet.dll",
-        "lib/portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.runner.utility.desktop.dll",
-        "package/services/metadata/core-properties/3a554b1309d94f8395382efab99e067f.psmdcp",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.dll.tdnet",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.pdb",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.core.xml",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.runner.tdnet.dll",
+        "lib/portable-net45+dnxcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS/xunit.runner.utility.desktop.dll",
+        "package/services/metadata/core-properties/40eb326fb1ea4e05a77fef0e7c6571cc.psmdcp",
         "xunit.extensibility.core.nuspec"
+      ]
+    },
+    "xunit.extensibility.execution/2.1.0-beta3-build3029": {
+      "sha512": "WuUYamK4RHrHxihvNuX7NkryMhQrpH1+ziJ/mPIQbm18zevSgre8BwUuVZvmLZa8uVob3xS4dvAah2+HCgLiXg==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/dnx451/xunit.execution.dnx.dll",
+        "lib/dnx451/xunit.execution.dnx.pdb",
+        "lib/dnx451/xunit.execution.dnx.xml",
+        "lib/dnxcore50/xunit.execution.dnx.dll",
+        "lib/dnxcore50/xunit.execution.dnx.pdb",
+        "lib/dnxcore50/xunit.execution.dnx.xml",
+        "lib/monoandroid/xunit.execution.MonoAndroid.dll",
+        "lib/monoandroid/xunit.execution.MonoAndroid.pdb",
+        "lib/monoandroid/xunit.execution.MonoAndroid.xml",
+        "lib/monotouch/xunit.execution.MonoTouch.dll",
+        "lib/monotouch/xunit.execution.MonoTouch.pdb",
+        "lib/monotouch/xunit.execution.MonoTouch.xml",
+        "lib/net45/xunit.execution.desktop.dll",
+        "lib/net45/xunit.execution.desktop.pdb",
+        "lib/net45/xunit.execution.desktop.xml",
+        "lib/portable-wpa81+win81/xunit.execution.universal.dll",
+        "lib/portable-wpa81+win81/xunit.execution.universal.pdb",
+        "lib/portable-wpa81+win81/xunit.execution.universal.pri",
+        "lib/portable-wpa81+win81/xunit.execution.universal.xml",
+        "lib/wp8/xunit.execution.wp8.dll",
+        "lib/wp8/xunit.execution.wp8.pdb",
+        "lib/wp8/xunit.execution.wp8.xml",
+        "lib/Xamarin.iOS/xunit.execution.iOS-Universal.dll",
+        "lib/Xamarin.iOS/xunit.execution.iOS-Universal.pdb",
+        "lib/Xamarin.iOS/xunit.execution.iOS-Universal.xml",
+        "package/services/metadata/core-properties/632d17654a7d4ee58b8c7032b6bae6bf.psmdcp",
+        "xunit.extensibility.execution.nuspec"
       ]
     }
   },
   "projectFileDependencyGroups": {
-    "": [],
-    ".NETFramework,Version=v4.5.1": [
-      "xunit >= 2.0.0"
+    "": [
+      "xunit >= 2.1.0-beta3-*"
     ],
+    ".NETFramework,Version=v4.5.1": [],
     ".NETFramework,Version=v4.6": [
-      "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213",
-      "xunit >= 2.0.0"
+      "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213"
     ],
     "DNXCore,Version=v5.0": [
       "Microsoft.NETCore >= 5.0.0",
@@ -5235,7 +5371,7 @@
       "Microsoft.NETCore.Runtime >= 1.0.0",
       "Microsoft.NETCore.TestHost-x86 >= 1.0.0-beta-23123",
       "System.Console >= 4.0.0-beta-23123",
-      "System.Runtime >= 4.0.20-beta-23109",
+      "System.Runtime >= 4.0.20",
       "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213"
     ]
   }

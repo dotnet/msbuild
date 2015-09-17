@@ -1299,9 +1299,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             xmlattribute.Value = "abc123" + new Random().Next();
             string expandedString = expander.ExpandIntoStringLeaveEscaped(xmlattribute.Value, ExpanderOptions.ExpandAll, MockElementLocation.Instance);
 
+#if FEATURE_STRING_INTERN
             // Verify neither string got interned, so that this test is meaningful
             Assert.IsTrue(null == string.IsInterned(xmlattribute.Value));
             Assert.IsTrue(null == string.IsInterned(expandedString));
+#endif
 
             // Finally verify Expander indeed didn't create a new string.
             Assert.IsTrue(Object.ReferenceEquals(xmlattribute.Value, expandedString));
@@ -2444,7 +2446,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Environment]::GetFolderPath(SpecialFolder.System))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
+#if FEATURE_SPECIAL_FOLDERS
             Assert.AreEqual(System.Environment.GetFolderPath(Environment.SpecialFolder.System), result);
+#else
+            Assert.AreEqual(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), result);
+#endif
         }
 
         /// <summary>
@@ -2492,7 +2498,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Globalization.CultureInfo]::GetCultureInfo(`en-US`).ToString())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.AreEqual(System.Globalization.CultureInfo.GetCultureInfo("en-US").ToString(), result);
+            Assert.AreEqual(new CultureInfo("en-US").ToString(), result);
         }
 
         /// <summary>
@@ -2635,6 +2641,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.IsTrue(String.Equals("true", result, StringComparison.OrdinalIgnoreCase));
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
@@ -2662,7 +2669,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 NodeProviderOutOfProcTaskHost.ClearCachedTaskHostPaths();
             }
         }
-
+#endif
 
         /// <summary>
         /// Expand property function calls a static bitwise method to retrieve file attribute

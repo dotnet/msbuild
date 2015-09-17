@@ -93,8 +93,16 @@ namespace Microsoft.Build.UnitTests
 </Project>");
                 File.WriteAllText(input, content);
 
+#if FEATURE_GET_COMMANDLINE
                 Assert.AreEqual(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + input +
                     (NativeMethodsShared.IsUnixLike ? @""" -pp:""" : @""" /pp:""") + output + @""""));
+#else
+                Assert.AreEqual(
+                    MSBuildApp.ExitType.Success,
+                    MSBuildApp.Execute(
+                        new[] { @"c:\bin\msbuild.exe", '"' + input + + '"',
+                    '"' + (NativeMethodsShared.IsUnixLike ? "-pp:" : "/pp:") + output + '"'}));
+#endif
 
                 bool foundDoNotModify = false;
                 foreach (string line in File.ReadLines(output))
