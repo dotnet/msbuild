@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks
     /// 
     ///      MyGlyph.fr.bmp          ==> MyGlyph.bmp [Culture='fr']
     /// 
-    /// This is because embedded resources are refered to this way.
+    /// This is because embedded resources are referred to this way.
     /// 
     /// There are plenty of corner cases with this task. See the unit test for
     /// more details.
