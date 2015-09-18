@@ -113,7 +113,7 @@
     <Copy Condition="Exists('$(NuGetCachedPath)')" SourceFiles="$(NuGetCachedPath)" DestinationFiles="$(NuGetToolPath)" SkipUnchangedFiles="true" />
 
     <DownloadFile FileName="$(NuGetToolPath)"
-                  Address="https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe"
+                  Address="https://dist.nuget.org/win-x86-commandline/v3.2.0/nuget.exe"
                   Condition="!Exists('$(NuGetToolPath)') and '$(OsEnvironment)'=='Windows_NT'" />
 
     <Exec Command="curl -sSL --create-dirs -o $(NuGetToolPath) https://api.nuget.org/downloads/nuget.exe"
