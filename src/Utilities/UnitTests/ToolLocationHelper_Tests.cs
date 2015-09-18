@@ -1201,9 +1201,9 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-            string targetFrameworkRootPath = NativeMethodsShared.IsWindows
-                                                 ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
-                                                 : "/usr/lib";
+                string targetFrameworkRootPath = NativeMethodsShared.IsWindows
+                                                     ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
+                                                     : "/usr/lib";
                 string targetFrameworkIdentifier = "Compact Framework" + new String(Path.GetInvalidFileNameChars());
                 Version targetFrameworkVersion = new Version("1.0");
                 string targetFrameworkProfile = "PocketPC";
@@ -1225,9 +1225,9 @@ namespace Microsoft.Build.UnitTests
             {
                 string pathTooLong = new String('a', 500);
 
-            string targetFrameworkRootPath = NativeMethodsShared.IsWindows
-                                                 ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
-                                                 : "/usr/lib";
+                string targetFrameworkRootPath = NativeMethodsShared.IsWindows
+                                                     ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
+                                                     : "/usr/lib";
                 string targetFrameworkIdentifier = "Compact Framework" + pathTooLong;
                 Version targetFrameworkVersion = new Version("1.0");
                 string targetFrameworkProfile = "PocketPC";

@@ -41,13 +41,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-            TaskHostConfiguration config = new TaskHostConfiguration(
-                1,
-                Directory.GetCurrentDirectory(),
-                null,
+                TaskHostConfiguration config = new TaskHostConfiguration(
+                    1,
+                    Directory.GetCurrentDirectory(),
+                    null,
 #if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
-                Thread.CurrentThread.CurrentUICulture,
+                    Thread.CurrentThread.CurrentUICulture,
 #else
                 CultureInfo.CurrentCulture,
                 CultureInfo.CurrentCulture,
@@ -56,10 +56,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
 #endif
                 1,
-                1,
-                @"c:\my project\myproj.proj",
-                _continueOnErrorDefault,
-                null,
+                    1,
+                    @"c:\my project\myproj.proj",
+                    _continueOnErrorDefault,
+                    null,
 #if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\my tasks\mytask.dll",
 #else
@@ -77,13 +77,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-            TaskHostConfiguration config = new TaskHostConfiguration(
-                1,
-                Directory.GetCurrentDirectory(),
-                null,
+                TaskHostConfiguration config = new TaskHostConfiguration(
+                    1,
+                    Directory.GetCurrentDirectory(),
+                    null,
 #if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
-                Thread.CurrentThread.CurrentUICulture,
+                    Thread.CurrentThread.CurrentUICulture,
 #else
                 CultureInfo.CurrentCulture,
                 CultureInfo.CurrentCulture,
@@ -92,10 +92,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
 #endif
                 1,
-                1,
-                @"c:\my project\myproj.proj",
-                _continueOnErrorDefault,
-                String.Empty,
+                    1,
+                    @"c:\my project\myproj.proj",
+                    _continueOnErrorDefault,
+                    String.Empty,
 #if FEATURE_ASSEMBLY_LOADFROM
                 @"c:\my tasks\mytask.dll",
 #else
@@ -113,13 +113,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-            TaskHostConfiguration config = new TaskHostConfiguration(
-                1,
-                Directory.GetCurrentDirectory(),
-                null,
+                TaskHostConfiguration config = new TaskHostConfiguration(
+                    1,
+                    Directory.GetCurrentDirectory(),
+                    null,
 #if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
-                Thread.CurrentThread.CurrentUICulture,
+                    Thread.CurrentThread.CurrentUICulture,
 #else
                 CultureInfo.CurrentCulture,
                 CultureInfo.CurrentCulture,
@@ -128,12 +128,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
 #endif
                 1,
-                1,
-                @"c:\my project\myproj.proj",
-                _continueOnErrorDefault,
-                "TaskName",
-                null,
-                null);
+                    1,
+                    @"c:\my project\myproj.proj",
+                    _continueOnErrorDefault,
+                    "TaskName",
+                    null,
+                    null);
             }
            );
         }
@@ -145,13 +145,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-            TaskHostConfiguration config = new TaskHostConfiguration(
-                1,
-                Directory.GetCurrentDirectory(),
-                null,
+                TaskHostConfiguration config = new TaskHostConfiguration(
+                    1,
+                    Directory.GetCurrentDirectory(),
+                    null,
 #if FEATURE_THREAD_CULTURE
                 Thread.CurrentThread.CurrentCulture,
-                Thread.CurrentThread.CurrentUICulture,
+                    Thread.CurrentThread.CurrentUICulture,
 #else
                 CultureInfo.CurrentCulture,
                 CultureInfo.CurrentCulture,
@@ -160,10 +160,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
 #endif
                 1,
-                1,
-                @"c:\my project\myproj.proj",
-                _continueOnErrorDefault,
-                "TaskName",
+                    1,
+                    @"c:\my project\myproj.proj",
+                    _continueOnErrorDefault,
+                    "TaskName",
 #if FEATURE_ASSEMBLY_LOADFROM
                 String.Empty,
 #else

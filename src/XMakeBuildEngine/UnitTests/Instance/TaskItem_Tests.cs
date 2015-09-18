@@ -217,7 +217,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task run in the task host also should not mess up special characters on the metadata. 
         /// </summary>
-        [Fact(Skip="FEATURE: TASKHOST")]
+        [Fact(Skip = "FEATURE: TASKHOST")]
         public void Escaping2()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -274,7 +274,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task run in the task host also should not mess up the escaping of the itemspec either. 
         /// </summary>
-        [Fact(Skip="FEATURE: TASKHOST")]
+        [Fact(Skip = "FEATURE: TASKHOST")]
         public void Escaping3()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

@@ -1109,7 +1109,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
             Assert.True(t.ResolvedSDKReferences[0].ItemSpec.Equals(_sdkPath, StringComparison.OrdinalIgnoreCase));
             Assert.Equal(0, t.ResolvedSDKReferences[0].GetMetadata("FrameworkIdentity").Length);
             Assert.Equal(0, t.ResolvedSDKReferences[0].GetMetadata("PlatformIdentity").Length);
-            Assert.Equal(0, t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length);            Assert.True(t.ResolvedSDKReferences[0].GetMetadata("CopyRedist").Equals("True", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(0, t.ResolvedSDKReferences[0].GetMetadata("AppXLocation").Length); Assert.True(t.ResolvedSDKReferences[0].GetMetadata("CopyRedist").Equals("True", StringComparison.OrdinalIgnoreCase));
             Assert.True(t.ResolvedSDKReferences[0].GetMetadata("ExpandReferenceAssemblies").Equals("True", StringComparison.OrdinalIgnoreCase));
             Assert.True(t.ResolvedSDKReferences[0].GetMetadata("CopyLocalExpandedReferenceAssemblies").Equals("True", StringComparison.OrdinalIgnoreCase));
             Assert.True(t.ResolvedSDKReferences[0].GetMetadata("TargetedSDKConfiguration").Equals("Retail", StringComparison.OrdinalIgnoreCase));

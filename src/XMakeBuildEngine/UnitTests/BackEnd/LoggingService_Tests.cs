@@ -376,14 +376,14 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-            _initializedService.ShutdownComponent();
-            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+                _initializedService.ShutdownComponent();
+                string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
 #if FEATURE_ASSEMBLY_LOCATION
-            LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
+                LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
             LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
 #endif
-            _initializedService.RegisterDistributedLogger(null, description);
+                _initializedService.RegisterDistributedLogger(null, description);
             }
            );
         }
@@ -572,16 +572,16 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+                string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
 #if FEATURE_ASSEMBLY_LOCATION
-            LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
+                LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
             LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
 #endif
-            _initializedService.ShutdownComponent();
-            List<LoggerDescription> tempList = new List<LoggerDescription>();
-            tempList.Add(description);
-            _initializedService.InitializeNodeLoggers(tempList, new EventSourceSink(), 2);
+                _initializedService.ShutdownComponent();
+                List<LoggerDescription> tempList = new List<LoggerDescription>();
+                tempList.Add(description);
+                _initializedService.InitializeNodeLoggers(tempList, new EventSourceSink(), 2);
             }
            );
         }

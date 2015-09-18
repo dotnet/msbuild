@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(value, deserializedValue);
         }
 
- #if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Tests serializing using the DotNet serializer.
         /// </summary>

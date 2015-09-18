@@ -324,11 +324,11 @@ namespace Microsoft.Build.UnitTests
             // Mono does not throw on this string
             if (!NativeMethodsShared.IsMono)
             {
-            Assert.Throws<FileLoadException>(() =>
-            {
-                AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
-            }
-           );
+                Assert.Throws<FileLoadException>(() =>
+                {
+                    AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
+                }
+               );
             }
         }
 
@@ -341,13 +341,13 @@ namespace Microsoft.Build.UnitTests
             // Mono does not throw on this string
             if (!NativeMethodsShared.IsMono)
             {
-            Assert.Throws<FileLoadException>(() =>
-            {
-                AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-                AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-                extension2.PartialNameCompare(extension);
-            }
-                                             );
+                Assert.Throws<FileLoadException>(() =>
+                {
+                    AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+                    AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+                    extension2.PartialNameCompare(extension);
+                }
+                                                 );
             }
         }
 

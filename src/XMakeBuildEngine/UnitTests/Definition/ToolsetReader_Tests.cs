@@ -652,24 +652,24 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "someBinPath");
-            rk.SetValue("", "foo");
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("MSBuildBinPath", "someBinPath");
+                rk.SetValue("", "foo");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                      );
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                          );
             }
            );
         }
@@ -682,29 +682,29 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "someBinPath");
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("MSBuildBinPath", "someBinPath");
 
-            RegistryKey subToolsetKey = rk.CreateSubKey("11.0");
-            subToolsetKey.SetValue("", "foo");
+                RegistryKey subToolsetKey = rk.CreateSubKey("11.0");
+                subToolsetKey.SetValue("", "foo");
 
-            PropertyDictionary<ProjectPropertyInstance> globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
-            globalProperties.Set(ProjectPropertyInstance.Create("VisualStudioVersion", "11.0"));
+                PropertyDictionary<ProjectPropertyInstance> globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
+                globalProperties.Set(ProjectPropertyInstance.Create("VisualStudioVersion", "11.0"));
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           globalProperties,
-                                                           ToolsetDefinitionLocations.Registry
-                                                      );
+                                                               globalProperties,
+                                                               ToolsetDefinitionLocations.Registry
+                                                          );
             }
            );
         }
@@ -844,24 +844,24 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "someBinPath");
-            rk.SetValue("foo|bar", "x");
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("MSBuildBinPath", "someBinPath");
+                rk.SetValue("foo|bar", "x");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
             }
            );
         }
@@ -873,26 +873,26 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
 
-            RegistryKey subToolsetKey = rk.CreateSubKey("10.0");
-            subToolsetKey.SetValue("MSBuildBinPath", "someBinPath");
-            subToolsetKey.SetValue("foo|bar", "x");
+                RegistryKey subToolsetKey = rk.CreateSubKey("10.0");
+                subToolsetKey.SetValue("MSBuildBinPath", "someBinPath");
+                subToolsetKey.SetValue("foo|bar", "x");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
             }
            );
         }
@@ -1170,26 +1170,26 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "someBinPath");
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("MSBuildBinPath", "someBinPath");
 
-            // Non-string
-            rk.SetValue("QuadWordValue", 42, RegistryValueKind.QWord);
+                // Non-string
+                rk.SetValue("QuadWordValue", 42, RegistryValueKind.QWord);
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
             }
            );
         }
@@ -1261,28 +1261,28 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("p0", "$(p1)");
-            rk.SetValue("p1", "v");
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("p0", "$(p1)");
+                rk.SetValue("p1", "v");
 
-            RegistryKey subToolsetKey = rk.CreateSubKey("dogfood");
-            subToolsetKey.SetValue("p2", "$(p1)");
-            subToolsetKey.SetValue("MSBuildToolsPath", "c:\\x$(p1)");
+                RegistryKey subToolsetKey = rk.CreateSubKey("dogfood");
+                subToolsetKey.SetValue("p2", "$(p1)");
+                subToolsetKey.SetValue("MSBuildToolsPath", "c:\\x$(p1)");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // throws
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                // throws
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
             }
            );
         }
@@ -1405,24 +1405,24 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "2.0");
-            RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\some\foo|bar\path\");
+                _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "2.0");
+                RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                key1.SetValue("MSBuildBinPath", @"D:\some\foo|bar\path\");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // should throw... 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                // should throw... 
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            null,
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
             }
            );
         }
@@ -1620,24 +1620,24 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            // Registry Read
-            RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
-            key1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
+                // Registry Read
+                RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                key1.SetValue("MSBuildBinPath", @"D:\somepath");
+                key1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
 
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            null,
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
             }
            );
         }
@@ -1647,25 +1647,25 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            // Registry Read
-            RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            RegistryKey subKey1 = key1.CreateSubKey("Foo");
+                // Registry Read
+                RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                RegistryKey subKey1 = key1.CreateSubKey("Foo");
 
-            subKey1.SetValue("MSBuildBinPath", @"D:\somepath");
-            subKey1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
+                subKey1.SetValue("MSBuildBinPath", @"D:\somepath");
+                subKey1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            null,
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
             }
            );
         }
@@ -2263,28 +2263,28 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.Throws<InvalidToolsetDefinitionException>(() =>
             {
-            // Registry Read
-            RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
+                // Registry Read
+                RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                key1.SetValue("MSBuildBinPath", @"D:\somepath");
 
-            // Set the config helper to throw exception
+                // Set the config helper to throw exception
 #if FEATURE_SYSTEM_CONFIGURATION
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
 #endif
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            ToolsetReader.ReadAllToolsets
-                       (
-                           values,
-                           GetStandardRegistryReader(),
+                ToolsetReader.ReadAllToolsets
+                           (
+                               values,
+                               GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                            GetStandardConfigurationReader(),
 #endif
                            new ProjectCollection().EnvironmentProperties,
-                           new PropertyDictionary<ProjectPropertyInstance>(),
-                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
-                       );
+                               new PropertyDictionary<ProjectPropertyInstance>(),
+                               ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                           );
             }
            );
         }
@@ -2331,7 +2331,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         #endregion
 
-#region "SetDefaultToolsetVersion tests"
+        #region "SetDefaultToolsetVersion tests"
 
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified

@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Helpers.VerifyAssertLineByLine(readWriteLoadLocations, readOnlyLoadLocations);
         }
 
-// Without save to file, this becomes identical to SaveReadOnly4
+        // Without save to file, this becomes identical to SaveReadOnly4
 #if FEATURE_XML_LOADPATH
         /// <summary>
         /// Save read only fails
@@ -352,9 +352,9 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+                var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
 #if FEATURE_XML_LOADPATH
-            doc.Load(_pathToCommonTargets);
+                doc.Load(_pathToCommonTargets);
 #else
             using (
                 XmlReader xmlReader = XmlReader.Create(
@@ -364,7 +364,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(xmlReader);
             }
 #endif
-            doc.Save(new MemoryStream());
+                doc.Save(new MemoryStream());
             }
            );
         }
@@ -376,9 +376,9 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+                var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
 #if FEATURE_XML_LOADPATH
-            doc.Load(_pathToCommonTargets);
+                doc.Load(_pathToCommonTargets);
 #else
             using (
                 XmlReader xmlReader = XmlReader.Create(
@@ -388,7 +388,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(xmlReader);
             }
 #endif
-            doc.Save(new StringWriter());
+                doc.Save(new StringWriter());
             }
            );
         }
@@ -400,10 +400,10 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+                var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
 #if FEATURE_XML_LOADPATH
-            doc.Load(_pathToCommonTargets);
-            doc.Save(XmlWriter.Create(FileUtilities.GetTemporaryFile()));
+                doc.Load(_pathToCommonTargets);
+                doc.Save(XmlWriter.Create(FileUtilities.GetTemporaryFile()));
 #else
             using (
                 XmlReader xmlReader = XmlReader.Create(

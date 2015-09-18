@@ -645,7 +645,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to empty and
         /// we launch a child node that we get no properties
         /// </summary>
-        [Fact(Skip="FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void ForwardNoPropertiesLaunchChildNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -770,7 +770,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// When a child node is launched by default we should not send any properties.
         /// we launch a child node that we get no properties
         /// </summary>
-        [Fact(Skip="FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void ForwardNoPropertiesLaunchChildNodeDefault()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1947,7 +1947,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node doesn't cause projects which don't require it to fail.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]        public void Regress239661()
+        [Fact(Skip = "FEATURE: OOP NODES")]
+        public void Regress239661()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -1984,7 +1985,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node when a project requires it will cause the build to fail, but not crash.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]        public void Regress239661_NodeUnavailable()
+        [Fact(Skip = "FEATURE: OOP NODES")]
+        public void Regress239661_NodeUnavailable()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -2012,7 +2014,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that properties and items are transferred to the out-of-proc node when an instance is used to start the build.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]        public void ProjectInstanceTransfersToOOPNode()
+        [Fact(Skip = "FEATURE: OOP NODES")]
+        public void ProjectInstanceTransfersToOOPNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -2082,7 +2085,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that a limited set of properties are transferred from a project instance to an OOP node.
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]        public void ProjectInstanceLimitedTransferToOOPNode()
+        [Fact(Skip = "FEATURE: OOP NODES")]
+        public void ProjectInstanceLimitedTransferToOOPNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -2457,7 +2461,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// targets, one of which depends on "A;B", the other of which depends on "B", which has a dependency of 
         /// its own on "A", that we still properly build.  
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]        public void Regress473114()
+        [Fact(Skip = "FEATURE: OOP NODES")]
+        public void Regress473114()
         {
             string projA = null;
             string projB = null;
@@ -2581,7 +2586,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// second request will bail out where the first request did, as though it had 
         /// executed the target, rather than skipping and continuing. 
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]        public void VerifyMultipleRequestForSameProjectWithErrors_Simple()
+        [Fact(Skip = "FEATURE: OOP NODES")]
+        public void VerifyMultipleRequestForSameProjectWithErrors_Simple()
         {
             string projA = null;
             string projB = null;
@@ -2685,7 +2691,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// expected in the first request, but be skipped by the second (since if it's "skipping 
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]        public void VerifyMultipleRequestForSameProjectWithErrors_OnErrorChain()
+        [Fact(Skip = "FEATURE: OOP NODES")]
+        public void VerifyMultipleRequestForSameProjectWithErrors_OnErrorChain()
         {
             string projA = null;
             string projB = null;
@@ -2819,7 +2826,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but 
         /// will continue executing (on the first request) or skipping (on the second)
         /// </summary>
-        [Fact(Skip = "FEATURE: OOP NODES")]        public void VerifyMultipleRequestForSameProjectWithErrors_ErrorAndContinue()
+        [Fact(Skip = "FEATURE: OOP NODES")]
+        public void VerifyMultipleRequestForSameProjectWithErrors_ErrorAndContinue()
         {
             string projA = null;
             string projB = null;
@@ -3481,7 +3489,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Within this directory should be a set of target results files, one for each of the targets we invoked.
             var resultsFiles = Directory.EnumerateFiles(directory).Select(Path.GetFileName);
-                
+
             Assert.Equal(3, resultsFiles.Count());
             Assert.True(resultsFiles.Contains("One.cache"));
             Assert.True(resultsFiles.Contains("Two.cache"));

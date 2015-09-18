@@ -715,8 +715,7 @@ namespace Microsoft.Build.UnitTests
 
             using (Process p = new Process { EnableRaisingEvents = true, StartInfo = psi })
             {
-
-                p.OutputDataReceived += delegate(object sender, DataReceivedEventArgs args)
+                p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
                     {
                         if (args != null)
                         {
@@ -724,7 +723,7 @@ namespace Microsoft.Build.UnitTests
                         }
                     };
 
-                p.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs args)
+                p.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
                     {
                         if (args != null)
                         {

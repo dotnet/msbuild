@@ -983,29 +983,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-            _loggingService = new MockLoggingService();
+                _loggingService = new MockLoggingService();
                 Dispose();
-            _host = new TaskExecutionHost();
-            TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+                _host = new TaskExecutionHost();
+                TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
 
-            ProjectInstance project = CreateTestProject();
-            _host.InitializeForTask
-                (
-                this,
-                tlc,
-                project,
-                "TaskWithMissingAssembly",
-                ElementLocation.Create("none", 1, 1),
-                this,
-                false,
+                ProjectInstance project = CreateTestProject();
+                _host.InitializeForTask
+                    (
+                    this,
+                    tlc,
+                    project,
+                    "TaskWithMissingAssembly",
+                    ElementLocation.Create("none", 1, 1),
+                    this,
+                    false,
 #if FEATURE_APPDOMAIN
                 null,
 #endif
                 false,
-                CancellationToken.None
-                );
-            _host.FindTask(null);
-            _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, null);
+                    CancellationToken.None
+                    );
+                _host.FindTask(null);
+                _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, null);
             }
            );
         }

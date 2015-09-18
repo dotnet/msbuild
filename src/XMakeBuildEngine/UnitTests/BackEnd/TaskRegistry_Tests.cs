@@ -1520,18 +1520,18 @@ namespace TestTask
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-            // Note output is false so these are only input parameters
-            string output = bool.FalseString;
-            string required = bool.TrueString;
+                // Note output is false so these are only input parameters
+                string output = bool.FalseString;
+                string required = bool.TrueString;
 #if FEATURE_ASSEMBLY_LOCATION
-            string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
+                string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
 #else
             string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
 #endif
 
-            List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.True(false);
+                List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
+                TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+                Assert.True(false);
             }
            );
         }
