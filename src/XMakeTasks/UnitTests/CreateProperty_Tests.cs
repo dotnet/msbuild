@@ -1,29 +1,20 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Evaluation;
-
-using NUnit.Framework;
+using System;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
-    sealed public class CreateProperty_Tests
+    sealed public class CreateProperty_Tests : IDisposable
     {
-        /// <summary>
-        /// Load projects before every test.
-        /// </summary>
-        [SetUp]
-        public void SetUp()
+        public CreateProperty_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
-        /// <summary>
-        /// Clean up after every test (unload projects).
-        /// </summary>
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
@@ -31,7 +22,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure that I can use the CreateProperty task to blank out a property value.
         /// </summary>
-        [Test]
+        [Fact]
         public void CreateBlankProperty()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -58,7 +49,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure that I can use the CreateProperty task to create a property
         /// that has a parseable semicolon in it.
         /// </summary>
-        [Test]
+        [Fact]
         public void CreatePropertyWithSemicolon()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -86,7 +77,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure that I can use the CreateProperty task to create a property
         /// that has a literal semicolon in it.
         /// </summary>
-        [Test]
+        [Fact]
         public void CreatePropertyWithLiteralSemicolon()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"

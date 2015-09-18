@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -14,20 +14,18 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 
-using NUnit.Framework;
-
 using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
 using RegistryException = Microsoft.Build.Exceptions.RegistryException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
     /// Unit tests for ToolsetReader class and its derived classes
     /// </summary>
-    [TestFixture]
-    public class ToolsetReaderTests
+    public class ToolsetReaderTests : IDisposable
     {
         // The registry key that is passed as the baseKey parameter to the ToolsetRegistryReader class
         private RegistryKey _testRegistryKey = null;
@@ -49,10 +47,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Reset the testRegistryKey
         /// </summary>
-        [SetUp]
-        public void Setup()
+        public ToolsetReaderTests()
         {
-            TearDown();
+            Dispose();
             _testRegistryKey = Registry.CurrentUser.CreateSubKey(testRegistryPath);
             _currentVersionRegistryKey = Registry.CurrentUser.CreateSubKey(testRegistryPath + "\\" + Constants.AssemblyVersion);
             _toolsVersionsRegistryKey = Registry.CurrentUser.CreateSubKey(testRegistryPath + "\\ToolsVersions");
@@ -62,8 +59,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
         }
 
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             ToolsetConfigurationReaderTestHelper.CleanUp();
 
@@ -95,12 +91,12 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Test to make sure machine.config file has the section registered
         /// and we are picking it up from there.
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_SectionNotRegisteredInConfigFile()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("The machine.config is only present on Windows");
+                return; // "The machine.config is only present on Windows"
             }
 
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -121,9 +117,9 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual(null, msbuildOverrideTasksPath);
-            Assert.AreEqual(null, defaultToolsVersion);
-            Assert.AreEqual(0, values.Count);
+            Assert.Equal(null, msbuildOverrideTasksPath);
+            Assert.Equal(null, defaultToolsVersion);
+            Assert.Equal(0, values.Count);
         }
 
         #region "Reading from application configuration file tests"
@@ -131,7 +127,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests that the data is correctly populated using function GetToolsetDataFromConfiguration
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_Basic()
         {
             string v2Folder = NativeMethodsShared.IsWindows
@@ -162,20 +158,20 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual("c:\\Cat", msbuildOverrideTasksPath);
-            Assert.AreEqual("4.0", defaultOverrideToolsVersion);
-            Assert.AreEqual("2.0", defaultToolsVersion);
-            Assert.AreEqual(2, values.Count);
-            Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(v2Folder, values["2.0"].ToolsPath);
-            Assert.AreEqual(0, values["4.0"].Properties.Count);
-            Assert.AreEqual(v4Folder, values["4.0"].ToolsPath);
+            Assert.Equal("c:\\Cat", msbuildOverrideTasksPath);
+            Assert.Equal("4.0", defaultOverrideToolsVersion);
+            Assert.Equal("2.0", defaultToolsVersion);
+            Assert.Equal(2, values.Count);
+            Assert.Equal(0, values["2.0"].Properties.Count);
+            Assert.Equal(v2Folder, values["2.0"].ToolsPath);
+            Assert.Equal(0, values["4.0"].Properties.Count);
+            Assert.Equal(v4Folder, values["4.0"].ToolsPath);
         }
 
         /// <summary>
         /// Relative paths can be used in a config file value
         /// </summary>
-        [Test]
+        [Fact]
         public void RelativePathInValue()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -208,20 +204,20 @@ namespace Microsoft.Build.UnitTests.Definition
             string expected1 = Path.GetFullPath(Path.Combine(FileUtilities.CurrentExecutableDirectory, "..", "foo"));
             string expected2 = Path.GetFullPath(Path.Combine(FileUtilities.CurrentExecutableDirectory, "..", "bar"));
             Console.WriteLine(values["2.0"].ToolsPath);
-            Assert.AreEqual(expected1, values["2.0"].ToolsPath);
-            Assert.AreEqual(expected2, values["3.0"].ToolsPath);
-            Assert.AreEqual("..\\Foo", msbuildOverrideTasksPath);
+            Assert.Equal(expected1, values["2.0"].ToolsPath);
+            Assert.Equal(expected2, values["3.0"].ToolsPath);
+            Assert.Equal("..\\Foo", msbuildOverrideTasksPath);
         }
 
         /// <summary>
         /// Invalid relative path in msbuildbinpath value
         /// </summary>
-        [Test]
+        [Fact]
         public void InvalidRelativePath()
         {
             if (NativeMethodsShared.IsUnix)
             {
-                Assert.Ignore("Cannot force invalid character name on Unix");
+                return; // "Cannot force invalid character name on Unix"
             }
 
             string invalidRelativePath = ".." + Path.DirectorySeparatorChar + ":|invalid|";
@@ -246,36 +242,39 @@ namespace Microsoft.Build.UnitTests.Definition
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             // Don't crash (consistent with invalid absolute path)
-            Assert.AreEqual(invalidRelativePath, values["2.0"].ToolsPath);
-            Assert.AreEqual(null, msbuildOverrideTasksPath);
+            Assert.Equal(invalidRelativePath, values["2.0"].ToolsPath);
+            Assert.Equal(null, msbuildOverrideTasksPath);
         }
 
         /// <summary>
         /// Tests the case where application configuration file is invalid
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetDataFromConfiguration_InvalidXmlFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"<INVALIDXML>");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"<INVALIDXML>");
 
-            ToolsetReader reader = GetStandardConfigurationReader();
+                ToolsetReader reader = GetStandardConfigurationReader();
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case where application configuration file is invalid
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetDataFromConfiguration_InvalidConfigFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -288,77 +287,84 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            ToolsetReader reader = GetStandardConfigurationReader();
+                ToolsetReader reader = GetStandardConfigurationReader();
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case where application configuration file is empty
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetDataFromConfiguration_FileEmpty()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"");
 
-            ToolsetReader reader = new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
-                ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
+                ToolsetReader reader = new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new ReadApplicationConfiguration(
+                    ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest));
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case when ReadConfiguration throws exception
         /// Make sure that we don't eat it and always throw ConfigurationErrorsException
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetDataFromConfiguration_ConfigurationExceptionThrown()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
 
-            ToolsetReader reader = GetStandardConfigurationReader();
+                ToolsetReader reader = GetStandardConfigurationReader();
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // this should throw ...
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                // this should throw ...
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case when ReadConfiguration throws exception
         /// Make sure that we don't eat it and always throw ConfigurationErrorsException
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetDataFromConfiguration_ConfigurationErrorsExceptionThrown()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
 
-            ToolsetReader reader = GetStandardConfigurationReader();
+                ToolsetReader reader = GetStandardConfigurationReader();
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // this should throw ...
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                // this should throw ...
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case where default attribute is not specified in the config file
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_DefaultAttributeNotSpecified()
         {
             string v2Folder = NativeMethodsShared.IsWindows
@@ -383,17 +389,17 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual(null, defaultToolsVersion);
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(v2Folder, values["2.0"].ToolsPath);
-            Assert.AreEqual("C:\\Cat", msbuildOverrideTasksPath);
+            Assert.Equal(null, defaultToolsVersion);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(0, values["2.0"].Properties.Count);
+            Assert.Equal(v2Folder, values["2.0"].ToolsPath);
+            Assert.Equal("C:\\Cat", msbuildOverrideTasksPath);
         }
 
         /// <summary>
         /// Default toolset has no toolsVersion element definition
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_DefaultToolsetUndefined()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -422,7 +428,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests the case where msbuildToolsets is not specified in the config file
         /// Basically in the code we should be checking if config.GetSection("msbuildToolsets") returns a null
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_MSBuildToolsetsNodeNotPresent()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -440,14 +446,14 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual(null, defaultToolsVersion);
-            Assert.AreEqual(0, values.Count);
+            Assert.Equal(null, defaultToolsVersion);
+            Assert.Equal(0, values.Count);
         }
 
         /// <summary>
         /// Tests that we handle empty MSBuildToolsets element correctly
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_EmptyMSBuildToolsetsNode()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -466,14 +472,14 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual(null, defaultToolsVersion);
-            Assert.AreEqual(0, values.Count);
+            Assert.Equal(null, defaultToolsVersion);
+            Assert.Equal(0, values.Count);
         }
 
         /// <summary>
         /// Tests the case where only default ToolsVersion is specified in the application configuration file
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_OnlyDefaultSpecified()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -493,13 +499,13 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual(0, values.Count);
+            Assert.Equal(0, values.Count);
         }
 
         /// <summary>
         /// Tests the case where only one ToolsVersion data is specified in the application configuration file
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_OneToolsVersionNode()
         {
             string v2Folder = NativeMethodsShared.IsWindows
@@ -526,19 +532,20 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual("2.0", defaultToolsVersion);
-            Assert.AreEqual(v2Folder, values["2.0"].ToolsPath);
-            Assert.AreEqual(1, values.Count);
+            Assert.Equal("2.0", defaultToolsVersion);
+            Assert.Equal(v2Folder, values["2.0"].ToolsPath);
+            Assert.Equal(1, values.Count);
         }
 
         /// <summary>
         /// Tests the case when an invalid value of ToolsVersion is specified
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetDataFromConfiguration_ToolsVersionIsEmptyString()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -553,24 +560,26 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            ToolsetReader reader = GetStandardConfigurationReader();
+                ToolsetReader reader = GetStandardConfigurationReader();
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            //this should throw ...
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                //this should throw ...
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// If both MSBuildToolsPath and MSBuildBinPath are present, they must match
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetDataFromConfiguration_ToolsPathAndBinPathDiffer()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -583,23 +592,25 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            ToolsetReader reader = GetStandardConfigurationReader();
+                ToolsetReader reader = GetStandardConfigurationReader();
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case when a blank value of PropertyName is specified in the config file
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void BlankPropertyNameInConfigFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -612,76 +623,81 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            ToolsetReader reader = GetStandardConfigurationReader();
+                ToolsetReader reader = GetStandardConfigurationReader();
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            //this should throw ...
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                //this should throw ...
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case when a blank property name is specified in the registry
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void BlankPropertyNameInRegistry()
         {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "someBinPath");
-            rk.SetValue("", "foo");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("MSBuildBinPath", "someBinPath");
+                rk.SetValue("", "foo");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                      );
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                          );
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case when a blank property name is specified in the registry in a 
         /// sub-toolset.
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void BlankPropertyNameInRegistrySubToolset()
         {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "someBinPath");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("MSBuildBinPath", "someBinPath");
 
-            RegistryKey subToolsetKey = rk.CreateSubKey("11.0");
-            subToolsetKey.SetValue("", "foo");
+                RegistryKey subToolsetKey = rk.CreateSubKey("11.0");
+                subToolsetKey.SetValue("", "foo");
 
-            PropertyDictionary<ProjectPropertyInstance> globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
-            globalProperties.Set(ProjectPropertyInstance.Create("VisualStudioVersion", "11.0"));
+                PropertyDictionary<ProjectPropertyInstance> globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
+                globalProperties.Set(ProjectPropertyInstance.Create("VisualStudioVersion", "11.0"));
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           globalProperties,
-                                                           ToolsetDefinitionLocations.Registry
-                                                      );
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               globalProperties,
+                                                               ToolsetDefinitionLocations.Registry
+                                                          );
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case when a blank property value is specified in the config file
         /// </summary>
-        [Test]
+        [Fact]
         public void BlankPropertyValueInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -710,7 +726,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when a blank property value is specified in the registry
         /// </summary>
-        [Test]
+        [Fact]
         public void BlankPropertyValueInRegistry()
         {
             RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
@@ -734,7 +750,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when a blank property value is specified in the registry
         /// </summary>
-        [Test]
+        [Fact]
         public void BlankPropertyValueInRegistrySubToolset()
         {
             string binPath = NativeMethodsShared.IsWindows ? @"c:\someBinPath" : "/someBinPath";
@@ -757,21 +773,22 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("2.0", defaultToolsVersion);
-            Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
-            Assert.AreEqual(1, values["2.0"].SubToolsets.Count);
-            Assert.AreEqual("", values["2.0"].SubToolsets["11.0"].Properties["foo"].EvaluatedValue);
+            Assert.Equal("2.0", defaultToolsVersion);
+            Assert.Equal(0, values["2.0"].Properties.Count);
+            Assert.Equal(binPath, values["2.0"].ToolsPath);
+            Assert.Equal(1, values["2.0"].SubToolsets.Count);
+            Assert.Equal("", values["2.0"].SubToolsets["11.0"].Properties["foo"].EvaluatedValue);
         }
 
         /// <summary>
         /// Tests the case when an invalid value of PropertyName is specified in the config file
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void InvalidPropertyNameInConfigFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -784,73 +801,78 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            ToolsetReader reader = GetStandardConfigurationReader();
+                ToolsetReader reader = GetStandardConfigurationReader();
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            //this should throw ...
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+                //this should throw ...
+                string msbuildOverrideTasksPath = null;
+                string defaultOverrideToolsVersion = null;
+                reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case when an invalid value of PropertyName is specified in the registry
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void InvalidPropertyNameInRegistry()
         {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "someBinPath");
-            rk.SetValue("foo|bar", "x");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("MSBuildBinPath", "someBinPath");
+                rk.SetValue("foo|bar", "x");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case when an invalid value of PropertyName is specified in the registry
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void InvalidPropertyNameInRegistrySubToolset()
         {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
 
-            RegistryKey subToolsetKey = rk.CreateSubKey("10.0");
-            subToolsetKey.SetValue("MSBuildBinPath", "someBinPath");
-            subToolsetKey.SetValue("foo|bar", "x");
+                RegistryKey subToolsetKey = rk.CreateSubKey("10.0");
+                subToolsetKey.SetValue("MSBuildBinPath", "someBinPath");
+                subToolsetKey.SetValue("foo|bar", "x");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
+            }
+           );
         }
-
 
         /// <summary>
         /// Tests that empty string is an invalid value for MSBuildBinPath
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_PropertyValueIsEmptyString1()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -873,13 +895,13 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual(0, values.Count);
+            Assert.Equal(0, values.Count);
         }
 
         /// <summary>
         /// Tests that empty string is a valid property value for an arbitrary property
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_PropertyValueIsEmptyString2()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -903,9 +925,9 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(1, values["2.0"].Properties.Count);
-            Assert.AreEqual(String.Empty, values["2.0"].Properties["foo"].EvaluatedValue);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(1, values["2.0"].Properties.Count);
+            Assert.Equal(String.Empty, values["2.0"].Properties["foo"].EvaluatedValue);
         }
 
         /// <summary>
@@ -913,7 +935,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Note that this comes for free with the current implementation using the 
         /// framework api to access section in the config file
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetDataFromConfiguration_XmlEscapedCharacters()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -936,9 +958,9 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.AreEqual("2>.0", defaultToolsVersion);
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(@"some>value", values["2>.0"].Properties["foo"].EvaluatedValue);
+            Assert.Equal("2>.0", defaultToolsVersion);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(@"some>value", values["2>.0"].Properties["foo"].EvaluatedValue);
         }
         #endregion
 
@@ -947,7 +969,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case where registry and config file contains different toolsVersion
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetData_NoConflict()
         {
             string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
@@ -993,18 +1015,18 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             // Verifications
-            Assert.AreEqual(4, values.Count);
-            Assert.AreEqual("4.5", defaultToolsVersion);
-            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
-            Assert.AreEqual(binPath2, values["4.0"].ToolsPath);
-            Assert.AreEqual(fworkPath2, values["4.5"].ToolsPath);
-            Assert.AreEqual(fworkPath4, values["5.0"].ToolsPath);
+            Assert.Equal(4, values.Count);
+            Assert.Equal("4.5", defaultToolsVersion);
+            Assert.Equal(binPath, values["2.0"].ToolsPath);
+            Assert.Equal(binPath2, values["4.0"].ToolsPath);
+            Assert.Equal(fworkPath2, values["4.5"].ToolsPath);
+            Assert.Equal(fworkPath4, values["5.0"].ToolsPath);
         }
 
         /// <summary>
         /// Tests that ToolsetInitialization are respected.
         /// </summary>
-        [Test]
+        [Fact]
         public void ToolsetInitializationFlagsSetToNone()
         {
             // Set up registry with two tools versions and one property each
@@ -1042,7 +1064,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             // Verifications
-            Assert.AreEqual(1, values.Count);
+            Assert.Equal(1, values.Count);
 
             string expectedDefault = "2.0";
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1050,13 +1072,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 expectedDefault = ObjectModelHelpers.MSBuildDefaultToolsVersion;
             }
 
-            Assert.AreEqual(expectedDefault, defaultToolsVersion);
+            Assert.Equal(expectedDefault, defaultToolsVersion);
         }
 
         /// <summary>
         /// Tests that ToolsetInitialization are respected.
         /// </summary>
-        [Test]
+        [Fact]
         public void ToolsetInitializationFlagsSetToRegistry()
         {
             string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
@@ -1095,37 +1117,39 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             // Verifications
-            Assert.AreEqual(2, values.Count);
-            Assert.AreEqual("2.0", defaultToolsVersion);
-            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
-            Assert.AreEqual(binPath2, values["4.0"].ToolsPath);
+            Assert.Equal(2, values.Count);
+            Assert.Equal("2.0", defaultToolsVersion);
+            Assert.Equal(binPath, values["2.0"].ToolsPath);
+            Assert.Equal(binPath2, values["4.0"].ToolsPath);
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void ThrowOnNonStringRegistryValueTypes()
         {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("MSBuildBinPath", "someBinPath");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("MSBuildBinPath", "someBinPath");
 
-            // Non-string
-            rk.SetValue("QuadWordValue", 42, RegistryValueKind.QWord);
+                // Non-string
+                rk.SetValue("QuadWordValue", 42, RegistryValueKind.QWord);
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // Should throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                // Should throw ...
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
+            }
+           );
         }
-
-        [Test]
+        [Fact]
         public void PropertiesInRegistryCannotReferToOtherPropertiesInRegistry()
         {
             string binPath = NativeMethodsShared.IsWindows ? "c:\\x" : "/x";
@@ -1148,13 +1172,13 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("", values["2.0"].Properties["p0"].EvaluatedValue);
-            Assert.AreEqual("v", values["2.0"].Properties["p1"].EvaluatedValue);
-            Assert.AreEqual("", values["2.0"].Properties["p2"].EvaluatedValue);
-            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
+            Assert.Equal("", values["2.0"].Properties["p0"].EvaluatedValue);
+            Assert.Equal("v", values["2.0"].Properties["p1"].EvaluatedValue);
+            Assert.Equal("", values["2.0"].Properties["p2"].EvaluatedValue);
+            Assert.Equal(binPath, values["2.0"].ToolsPath);
         }
 
-        [Test]
+        [Fact]
         public void SubToolsetPropertiesInRegistryCannotReferToOtherPropertiesInRegistry()
         {
             RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
@@ -1178,42 +1202,44 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("", values["2.0"].Properties["p0"].EvaluatedValue);
-            Assert.AreEqual("v", values["2.0"].Properties["p1"].EvaluatedValue);
-            Assert.AreEqual("", values["2.0"].SubToolsets["dogfood"].Properties["p2"].EvaluatedValue);
-            Assert.AreEqual("c:\\x", values["2.0"].SubToolsets["dogfood"].Properties["p3"].EvaluatedValue);
+            Assert.Equal("", values["2.0"].Properties["p0"].EvaluatedValue);
+            Assert.Equal("v", values["2.0"].Properties["p1"].EvaluatedValue);
+            Assert.Equal("", values["2.0"].SubToolsets["dogfood"].Properties["p2"].EvaluatedValue);
+            Assert.Equal("c:\\x", values["2.0"].SubToolsets["dogfood"].Properties["p3"].EvaluatedValue);
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void SubToolsetsCannotDefineMSBuildToolsPath()
         {
-            RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            rk.SetValue("p0", "$(p1)");
-            rk.SetValue("p1", "v");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                RegistryKey rk = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                rk.SetValue("p0", "$(p1)");
+                rk.SetValue("p1", "v");
 
-            RegistryKey subToolsetKey = rk.CreateSubKey("dogfood");
-            subToolsetKey.SetValue("p2", "$(p1)");
-            subToolsetKey.SetValue("MSBuildToolsPath", "c:\\x$(p1)");
+                RegistryKey subToolsetKey = rk.CreateSubKey("dogfood");
+                subToolsetKey.SetValue("p2", "$(p1)");
+                subToolsetKey.SetValue("MSBuildToolsPath", "c:\\x$(p1)");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // throws
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                // throws
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
+            }
+           );
         }
-
         /// <summary>
         /// Tests that ToolsetInitialization are respected.
         /// </summary>
-        [Test]
+        [Fact]
         public void ToolsetInitializationFlagsSetToConfigurationFile()
         {
             string v2Dir = NativeMethodsShared.IsWindows ? "D:\\windows\\Microsoft.NET\\Framework\\v2.0.x86ret" : "/windows/Microsoft.NET/Framework/v2.0.x86ret";
@@ -1254,10 +1280,10 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             // Verifications
-            Assert.AreEqual(2, values.Count);
-            Assert.AreEqual("4.5", defaultToolsVersion);
-            Assert.AreEqual(v2Dir, values["4.5"].ToolsPath);
-            Assert.AreEqual(v4Dir, values["5.0"].ToolsPath);
+            Assert.Equal(2, values.Count);
+            Assert.Equal("4.5", defaultToolsVersion);
+            Assert.Equal(v2Dir, values["4.5"].ToolsPath);
+            Assert.Equal(v4Dir, values["5.0"].ToolsPath);
         }
 
         /// <summary>
@@ -1266,12 +1292,12 @@ namespace Microsoft.Build.UnitTests.Definition
         /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
         /// the default value is desired.
         /// </summary>
-        [Test]
+        [Fact]
         public void PropertyInConfigurationFileReferencesRegistryLocation()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("Registry access is only supported under Windows.");
+                return; // "Registry access is only supported under Windows."
             }
 
             // Registry Read
@@ -1307,42 +1333,46 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(@"D:\somePathToTasks", values["2.0"].ToolsPath);
-            Assert.AreEqual(2, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"D:\somePathToDefault", values["2.0"].Properties["p1"].EvaluatedValue);
-            Assert.AreEqual(@"D:\somePathToDefault\somePathToTasks\Schemas\2.0", values["2.0"].Properties["p2"].EvaluatedValue);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(@"D:\somePathToTasks", values["2.0"].ToolsPath);
+            Assert.Equal(2, values["2.0"].Properties.Count);
+            Assert.Equal(@"D:\somePathToDefault", values["2.0"].Properties["p1"].EvaluatedValue);
+            Assert.Equal(@"D:\somePathToDefault\somePathToTasks\Schemas\2.0", values["2.0"].Properties["p2"].EvaluatedValue);
 
             Registry.CurrentUser.DeleteSubKeyTree(@"Software\Vendor");
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void ToolsPathInRegistryHasInvalidPathChars()
         {
-            _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "2.0");
-            RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\some\foo|bar\path\");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                _currentVersionRegistryKey.SetValue("DefaultToolsVersion", "2.0");
+                RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                key1.SetValue("MSBuildBinPath", @"D:\some\foo|bar\path\");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            // should throw... 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           null,
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                // should throw... 
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               null,
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
+            }
+           );
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void SamePropertyDefinedMultipleTimesForSingleToolsVersionInConfigurationFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -1357,24 +1387,27 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           null,
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile
-                                                       );
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               null,
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.ConfigurationFile
+                                                           );
+            }
+           );
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void SamePropertyDifferentCaseDefinedMultipleTimesForSingleToolsVersionInConfigurationFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -1389,24 +1422,28 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           null,
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile
-                                                       );
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               null,
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.ConfigurationFile
+                                                           );
+            }
+           );
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+
+        [Fact]
         public void SameToolsVersionDefinedMultipleTimesInConfigurationFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -1427,24 +1464,27 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           null,
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile
-                                                       );
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               null,
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.ConfigurationFile
+                                                           );
+            }
+           );
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void SameToolsVersionDifferentCaseDefinedMultipleTimesInConfigurationFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -1465,24 +1505,27 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           null,
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile
-                                                       );
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               null,
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.ConfigurationFile
+                                                           );
+            }
+           );
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void CannotSetReservedPropertyInConfigFile()
         {
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -1495,69 +1538,76 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           null,
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile
-                                                       );
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               null,
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.ConfigurationFile
+                                                           );
+            }
+           );
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void CannotSetReservedPropertyInRegistry()
         {
-            // Registry Read
-            RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
-            key1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                // Registry Read
+                RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                key1.SetValue("MSBuildBinPath", @"D:\somepath");
+                key1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
 
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           null,
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               null,
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
+            }
+           );
         }
 
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void CannotSetReservedPropertyInRegistrySubToolset()
         {
-            // Registry Read
-            RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            RegistryKey subKey1 = key1.CreateSubKey("Foo");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                // Registry Read
+                RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                RegistryKey subKey1 = key1.CreateSubKey("Foo");
 
-            subKey1.SetValue("MSBuildBinPath", @"D:\somepath");
-            subKey1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
+                subKey1.SetValue("MSBuildBinPath", @"D:\somepath");
+                subKey1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           GetStandardRegistryReader(),
-                                                           null,
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.Registry
-                                                       );
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               GetStandardRegistryReader(),
+                                                               null,
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.Registry
+                                                           );
+            }
+           );
         }
-
         /// <summary>
         /// Properties defined in previously processed toolset definitions should
         /// not affect the evaluation of subsequent toolset definitions.
         /// </summary>
-        [Test]
+        [Fact]
         public void NoInterferenceBetweenToolsetDefinitions()
         {
             string v20Dir = NativeMethodsShared.IsWindows ? @"D:\20\some\folder\on\disk" : "/20/some/folder/on/disk";
@@ -1594,17 +1644,17 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile
                                                        );
 
-            Assert.AreEqual(2, values.Count);
+            Assert.Equal(2, values.Count);
 
-            Assert.AreEqual(v20Dir, values["2.0"].ToolsPath);
-            Assert.AreEqual(2, values["2.0"].Properties.Count);
-            Assert.AreEqual(@"another", values["2.0"].Properties["p1"].EvaluatedValue);
-            Assert.AreEqual(@"fourthValue", values["2.0"].Properties["p4"].EvaluatedValue);
+            Assert.Equal(v20Dir, values["2.0"].ToolsPath);
+            Assert.Equal(2, values["2.0"].Properties.Count);
+            Assert.Equal(@"another", values["2.0"].Properties["p1"].EvaluatedValue);
+            Assert.Equal(@"fourthValue", values["2.0"].Properties["p4"].EvaluatedValue);
 
-            Assert.AreEqual(v35Dir, values["4.0"].ToolsPath);
-            Assert.AreEqual(2, values["4.0"].Properties.Count);
-            Assert.AreEqual(@"somevalue", values["4.0"].Properties["p2"].EvaluatedValue);
-            Assert.AreEqual(@"propertyValue", values["4.0"].Properties["p3"].EvaluatedValue);
+            Assert.Equal(v35Dir, values["4.0"].ToolsPath);
+            Assert.Equal(2, values["4.0"].Properties.Count);
+            Assert.Equal(@"somevalue", values["4.0"].Properties["p2"].EvaluatedValue);
+            Assert.Equal(@"propertyValue", values["4.0"].Properties["p3"].EvaluatedValue);
         }
 
         /// <summary>
@@ -1614,76 +1664,76 @@ namespace Microsoft.Build.UnitTests.Definition
         /// the default value is desired.
         /// </summary>
 
-        [Test]
+        [Fact]
         public void ConfigFileInvalidRegistryExpression1()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("Access local machine registry is for Windows only");
+                return; // "Access local machine registry is for Windows only"
             }
 
             // No location
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:)""/>");
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileInvalidRegistryExpression2()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("Access local machine registry is for Windows only");
+                return; // "Access local machine registry is for Windows only"
             }
 
             // Bogus key expression
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:__bogus__)""/>");
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileInvalidRegistryExpression3()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("Access local machine registry is for Windows only");
+                return; // "Access local machine registry is for Windows only"
             }
 
             // No registry location just @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:@)""/>");
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileInvalidRegistryExpression4()
         {
             // Double @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:HKEY_CURRENT_USER\Software\Vendor\Tools@@TaskLocation)""/>");
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileInvalidRegistryExpression5()
         {
             // Trailing @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:HKEY_CURRENT_USER\Software\Vendor\Tools@TaskLocation@)""/>");
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileInvalidRegistryExpression6()
         {
             // Leading @
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:@HKEY_CURRENT_USER\Software\Vendor\Tools@TaskLocation)""/>");
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileInvalidRegistryExpression7()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("Access registry is for Windows only");
+                return; // "Access registry is for Windows only"
             }
 
             // Bogus hive
             ConfigFileInvalidRegistryExpressionHelper(@"<property name=""p"" value=""$(Registry:BOGUS_HIVE\Software\Vendor\Tools@TaskLocation)""/>");
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileStringEmptyRegistryExpression1()
         {
             // Regular undefined property beginning with "Registry"
@@ -1691,7 +1741,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                           String.Empty);
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileStringEmptyRegistryExpression2()
         {
             // Nonexistent key
@@ -1699,7 +1749,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                           String.Empty);
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileNonPropertyRegistryExpression1()
         {
             // Property not terminated with paren, does not look like property
@@ -1707,7 +1757,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                           @"$(Registry:HKEY_CURRENT_USER\Software\Vendor\Tools@TaskLocation");
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileNonPropertyRegistryExpression2()
         {
             // Missing colon, looks like regular property (but with invalid property name chars, we will return blank as a result)
@@ -1715,7 +1765,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                           String.Empty);
         }
 
-        [Test]
+        [Fact]
         public void ConfigFileItemExpressionsDoNotExpandInConfigurationProperties()
         {
             // Expect that item expressions such as '@(SomeItem)' are not evaluated in any way, e.g., they are treated literally
@@ -1723,19 +1773,19 @@ namespace Microsoft.Build.UnitTests.Definition
                                           @"@(SomeItem)");
         }
 
-        [Test]
+        [Fact]
         public void RegistryInvalidRegistryExpression1()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("Access local machine registry is for Windows only");
+                return; // "Access local machine registry is for Windows only"
             }
 
             // Bogus key expression
             RegistryInvalidRegistryExpressionHelper("$(Registry:__bogus__)");
         }
 
-        [Test]
+        [Fact]
         public void RegistryValidRegistryExpression1()
         {
             // Regular undefined property beginning with "Registry"
@@ -1756,7 +1806,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 caught = true;
             }
 
-            Assert.AreEqual(true, caught);
+            Assert.Equal(true, caught);
         }
 
         private void RegistryValidRegistryExpressionHelper(string propertyExpression, string expectedValue)
@@ -1779,8 +1829,8 @@ namespace Microsoft.Build.UnitTests.Definition
                                            ToolsetDefinitionLocations.Registry
                                        );
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(expectedValue, values["2.0"].Properties["p"].EvaluatedValue);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(expectedValue, values["2.0"].Properties["p"].EvaluatedValue);
         }
 
         /// <summary>
@@ -1801,7 +1851,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 caught = true;
             }
 
-            Assert.AreEqual(true, caught);
+            Assert.Equal(true, caught);
         }
 
         /// <summary>
@@ -1836,14 +1886,14 @@ namespace Microsoft.Build.UnitTests.Definition
                                            ToolsetDefinitionLocations.ConfigurationFile
                                        );
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(expectedValue, values["2.0"].Properties["p"].EvaluatedValue);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(expectedValue, values["2.0"].Properties["p"].EvaluatedValue);
         }
 
         /// <summary>
         /// Tests the case where application configuration file overrides a value already specified in the registry
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetData_ConflictingPropertyValuesSameCase()
         {
             string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
@@ -1876,9 +1926,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(overrideBinPath, values["2.0"].ToolsPath);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(0, values["2.0"].Properties.Count);
+            Assert.Equal(overrideBinPath, values["2.0"].ToolsPath);
         }
 
         /// <summary>
@@ -1886,7 +1936,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// where that registry value is bogus and would otherwise throw.  However, since the config file also 
         /// contains an entry for that toolset, the registry toolset never gets read, and thus never throws.  
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetData_ConflictingPropertyValuesRegistryThrows()
         {
             string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
@@ -1918,9 +1968,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(0, values["2.0"].Properties.Count);
+            Assert.Equal(binPath, values["2.0"].ToolsPath);
         }
 
         /// <summary>
@@ -1928,7 +1978,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// well as in the config file for the same tools version.
         /// We should not merge them; we should take the config file ones only
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetData_NoMerging()
         {
             string binPath = NativeMethodsShared.IsWindows ? @"D:\somepath" : "/somepath";
@@ -1964,18 +2014,18 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(1, values["2.0"].Properties.Count);
-            Assert.AreEqual(overrideBinPath, values["2.0"].ToolsPath);
-            Assert.AreEqual(null, values["2.0"].Properties["SomeRegistryProperty"]); // Was zapped
-            Assert.AreEqual(@"SomeConfigValue", values["2.0"].Properties["SomeConfigProperty"].EvaluatedValue);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(1, values["2.0"].Properties.Count);
+            Assert.Equal(overrideBinPath, values["2.0"].ToolsPath);
+            Assert.Equal(null, values["2.0"].Properties["SomeRegistryProperty"]); // Was zapped
+            Assert.Equal(@"SomeConfigValue", values["2.0"].Properties["SomeConfigProperty"].EvaluatedValue);
         }
 
         /// <summary>
         /// The absence of the ToolsVersion attribute on the main Project element in a project file means
         /// that the engine's default tools version should be used.
         /// </summary>
-        [Test]
+        [Fact]
         public void ToolsVersionAttributeNotSpecifiedOnProjectElementAndDefaultVersionSpecifiedInRegistry()
         {
             string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -2004,8 +2054,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     defaultExpected = ObjectModelHelpers.MSBuildDefaultToolsVersion;
                 }
 
-                Assert.AreEqual(defaultExpected, project.ToolsVersion);
-                Assert.AreEqual(defaultExpected, projectCollection.DefaultToolsVersion);
+                Assert.Equal(defaultExpected, project.ToolsVersion);
+                Assert.Equal(defaultExpected, projectCollection.DefaultToolsVersion);
             }
             finally
             {
@@ -2017,7 +2067,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Tests the case when no values are specified in the registry
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetData_RegistryNotPresent()
         {
             string binPath = NativeMethodsShared.IsWindows ? @"D:\somedifferentpath" : "/somedifferentpath";
@@ -2045,9 +2095,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(0, values["2.0"].Properties.Count);
+            Assert.Equal(binPath, values["2.0"].ToolsPath);
         }
 
         /// <summary>
@@ -2055,7 +2105,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Note that config file not present is same as config file 
         /// with no MSBuildToolsets Section 
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetData_ConfigFileNotPresent()
         {
             // Registry Read
@@ -2075,15 +2125,15 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual(1, values.Count);
-            Assert.AreEqual(0, values["2.0"].Properties.Count);
-            Assert.AreEqual(binPath, values["2.0"].ToolsPath);
+            Assert.Equal(1, values.Count);
+            Assert.Equal(0, values["2.0"].Properties.Count);
+            Assert.Equal(binPath, values["2.0"].ToolsPath);
         }
 
         /// <summary>
         /// Tests the case where nothing is specified in registry and config file
         /// </summary>
-        [Test]
+        [Fact]
         public void GetToolsetData_RegistryAndConfigNotPresent()
         {
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -2099,55 +2149,58 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             // Should either be the last-ditch 2.0 toolset, or if 2.0 is not installed, then the last-last-ditch of 4.0
-            Assert.AreEqual(1, values.Count);
+            Assert.Equal(1, values.Count);
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
             {
-                Assert.AreEqual("2.0", defaultToolsVersion);
+                Assert.Equal("2.0", defaultToolsVersion);
             }
             else
             {
-                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, defaultToolsVersion);
+                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, defaultToolsVersion);
             }
         }
 
         /// <summary>
         /// Tests the case when reading config file throws an exception
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetData_ReadConfigThrowsException()
         {
-            // Registry Read
-            RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
-            key1.SetValue("MSBuildBinPath", @"D:\somepath");
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                // Registry Read
+                RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("2.0");
+                key1.SetValue("MSBuildBinPath", @"D:\somepath");
 
-            // Set the config helper to throw exception
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
+                // Set the config helper to throw exception
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"", new ConfigurationErrorsException());
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            ToolsetReader.ReadAllToolsets
-                       (
-                           values,
-                           GetStandardRegistryReader(),
-                           GetStandardConfigurationReader(),
-                           new ProjectCollection().EnvironmentProperties,
-                           new PropertyDictionary<ProjectPropertyInstance>(),
-                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
-                       );
+                ToolsetReader.ReadAllToolsets
+                           (
+                               values,
+                               GetStandardRegistryReader(),
+                               GetStandardConfigurationReader(),
+                               new ProjectCollection().EnvironmentProperties,
+                               new PropertyDictionary<ProjectPropertyInstance>(),
+                               ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                           );
+            }
+           );
         }
-
         /// <summary>
         /// Tests the case where reading from registry throws exception
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidToolsetDefinitionException))]
+        [Fact]
         public void GetToolsetData_ReadRegistryOpenSubKeyThrowsException()
         {
-            RegistryKeyWrapper mockRegistryKey =
-                new MockRegistryKey(testRegistryPath, MockRegistryKey.WhereToThrow.OpenSubKey);
+            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            {
+                RegistryKeyWrapper mockRegistryKey =
+                    new MockRegistryKey(testRegistryPath, MockRegistryKey.WhereToThrow.OpenSubKey);
 
-            ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
+                ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
                  <configuration>
                    <configSections>
                      <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -2159,19 +2212,20 @@ namespace Microsoft.Build.UnitTests.Definition
                    </msbuildToolsets>
                  </configuration>");
 
-            Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
-                                                       (
-                                                           values,
-                                                           new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), mockRegistryKey),
-                                                           GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
-                                                       );
+                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                                                           (
+                                                               values,
+                                                               new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), mockRegistryKey),
+                                                               GetStandardConfigurationReader(),
+                                                               new ProjectCollection().EnvironmentProperties,
+                                                               new PropertyDictionary<ProjectPropertyInstance>(),
+                                                               ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           );
+            }
+           );
         }
-
         #endregion
 
         #region "SetDefaultToolsetVersion tests"
@@ -2180,7 +2234,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Tests that the default ToolsVersion is correctly resolved when specified
         /// in registry and config file
         /// </summary>
-        [Test]
+        [Fact]
         public void SetDefaultToolsetVersion_SpecifiedInRegistryAndConfigFile()
         {
             // Set up registry with two tools versions and one property each
@@ -2217,13 +2271,13 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("5.0", defaultToolsVersion);
+            Assert.Equal("5.0", defaultToolsVersion);
         }
 
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified in registry only
         /// </summary>
-        [Test]
+        [Fact]
         public void SetDefaultToolsetVersion_SpecifiedOnlyInRegistry()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2258,13 +2312,13 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("4.0", defaultToolsVersion);
+            Assert.Equal("4.0", defaultToolsVersion);
         }
 
         /// <summary>
         /// Tests that the override task path is correctly resolved when specified in registry only
         /// </summary>
-        [Test]
+        [Fact]
         public void SetOverrideTasks_SpecifiedOnlyInRegistry()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2304,15 +2358,15 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("4.0", defaultToolsVersion);
-            Assert.AreEqual(overridePath, values["4.0"].OverrideTasksPath);
-            // Assert.AreEqual("c:\\OtherTaskOverridePath", values["5.0"].OverrideTasksPath); // UNDONE: Per-toolset override paths don't work.
+            Assert.Equal("4.0", defaultToolsVersion);
+            Assert.Equal(overridePath, values["4.0"].OverrideTasksPath);
+            // Assert.Equal("c:\\OtherTaskOverridePath", values["5.0"].OverrideTasksPath); // UNDONE: Per-toolset override paths don't work.
         }
 
         /// <summary>
         /// Tests that the override default toolsversion is correctly resolved when specified in registry only
         /// </summary>
-        [Test]
+        [Fact]
         public void SetDefaultOverrideToolsVersion_SpecifiedOnlyInRegistry()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2349,14 +2403,14 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("13.0", values["4.0"].DefaultOverrideToolsVersion);
+            Assert.Equal("13.0", values["4.0"].DefaultOverrideToolsVersion);
         }
 
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved
         /// when specified in config file only
         /// </summary>
-        [Test]
+        [Fact]
         public void SetDefaultToolsetVersion_SpecifiedOnlyInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2387,7 +2441,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
 
-            Assert.AreEqual("5.0", defaultToolsVersion);
+            Assert.Equal("5.0", defaultToolsVersion);
         }
 
         /// <summary>
@@ -2395,7 +2449,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// when specified in config file only.
         /// Also, that MSBuildOverrideTasksPath can be overridden.
         /// </summary>
-        [Test]
+        [Fact]
         public void SetOverrideTaskPath_SpecifiedOnlyInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2427,16 +2481,16 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
 
-            Assert.AreEqual("5.0", defaultToolsVersion);
-            Assert.AreEqual("C:\\TaskOverride", values["4.0"].OverrideTasksPath);
-            // Assert.AreEqual("C:\\OtherTaskOverride", values["5.0"].OverrideTasksPath); // UNDONE: Per-toolset override paths aren't working
+            Assert.Equal("5.0", defaultToolsVersion);
+            Assert.Equal("C:\\TaskOverride", values["4.0"].OverrideTasksPath);
+            // Assert.Equal("C:\\OtherTaskOverride", values["5.0"].OverrideTasksPath); // UNDONE: Per-toolset override paths aren't working
         }
 
         /// <summary>
         /// Tests that the override default ToolsVersion is correctly resolved
         /// when specified in config file only.
         /// </summary>
-        [Test]
+        [Fact]
         public void SetDefaultOverrideToolsVersion_SpecifiedOnlyInConfigFile()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2466,14 +2520,14 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("5.0", defaultToolsVersion);
-            Assert.AreEqual("3.0", values["4.0"].DefaultOverrideToolsVersion);
+            Assert.Equal("5.0", defaultToolsVersion);
+            Assert.Equal("3.0", values["4.0"].DefaultOverrideToolsVersion);
         }
 
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified nowhere
         /// </summary>
-        [Test]
+        [Fact]
         public void SetDefaultToolsetVersion_SpecifiedNowhere()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2509,15 +2563,15 @@ namespace Microsoft.Build.UnitTests.Definition
                 expectedDefault = ObjectModelHelpers.MSBuildDefaultToolsVersion;
             }
 
-            Assert.AreEqual(expectedDefault, defaultToolsVersion); // built-in default
-            Assert.AreEqual(null, values[expectedDefault].OverrideTasksPath);
-            Assert.AreEqual(null, values[expectedDefault].DefaultOverrideToolsVersion);
+            Assert.Equal(expectedDefault, defaultToolsVersion); // built-in default
+            Assert.Equal(null, values[expectedDefault].OverrideTasksPath);
+            Assert.Equal(null, values[expectedDefault].DefaultOverrideToolsVersion);
         }
 
         /// <summary>
         /// Tests that properties are properly expanded when reading them from the config file
         /// </summary>
-        [Test]
+        [Fact]
         public void PropertiesInToolsetsFromConfigFileAreExpanded()
         {
             // $(COMPUTERNAME) is just a convenient env var. $(NUMBER_OF_PROCESSORS) isn't defined on Longhorn
@@ -2548,16 +2602,16 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("v1", values["4.0"].Properties["p1"].EvaluatedValue);
+            Assert.Equal("v1", values["4.0"].Properties["p1"].EvaluatedValue);
             // Properties can refer to other properties also defined in the config file
-            Assert.AreEqual("__v1__", values["4.0"].Properties["p2"].EvaluatedValue);
-            Assert.AreEqual(Environment.MachineName, values["4.0"].Properties["p3"].EvaluatedValue);
+            Assert.Equal("__v1__", values["4.0"].Properties["p2"].EvaluatedValue);
+            Assert.Equal(Environment.MachineName, values["4.0"].Properties["p3"].EvaluatedValue);
         }
 
         /// <summary>
         /// Tests that properties in MSBuildToolsPath are properly expanded when reading them from the config file
         /// </summary>
-        [Test]
+        [Fact]
         public void PropertiesInToolsetsFromConfigFileAreExpandedInToolsPath()
         {
             string binPathConfig = NativeMethodsShared.IsWindows ?
@@ -2596,21 +2650,21 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("Microsoft.NET", values["4.0"].Properties["p1"].EvaluatedValue);
-            Assert.AreEqual("windows", values["4.0"].Properties["p2"].EvaluatedValue);
+            Assert.Equal("Microsoft.NET", values["4.0"].Properties["p1"].EvaluatedValue);
+            Assert.Equal("windows", values["4.0"].Properties["p2"].EvaluatedValue);
             string expectedToolsPath = NativeMethodsShared.IsWindows
                                            ? @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\"
                                              + Environment.MachineName
                                            : "/windows/Microsoft.NET/Framework/v2.0.x86ret";
-            Assert.AreEqual(expectedToolsPath, values["4.0"].ToolsPath);
-            Assert.AreEqual("v3" + expectedToolsPath, values["4.0"].Properties["p3"].EvaluatedValue);
+            Assert.Equal(expectedToolsPath, values["4.0"].ToolsPath);
+            Assert.Equal("v3" + expectedToolsPath, values["4.0"].Properties["p3"].EvaluatedValue);
         }
 
         /// <summary>
         /// Global properties are available, but they cannot be overwritten by other toolset properties, just as they cannot
         /// be overwritten by project file properties.
         /// </summary>
-        [Test]
+        [Fact]
         public void GlobalPropertiesInToolsetsAreExpandedButAreNotOverwritten()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(@"
@@ -2643,8 +2697,8 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
 
-            Assert.AreEqual("gv1", values["4.0"].Properties["p1"].EvaluatedValue);
-            Assert.AreEqual("gv1", values["4.0"].Properties["p2"].EvaluatedValue);
+            Assert.Equal("gv1", values["4.0"].Properties["p1"].EvaluatedValue);
+            Assert.Equal("gv1", values["4.0"].Properties["p2"].EvaluatedValue);
         }
 
         #endregion

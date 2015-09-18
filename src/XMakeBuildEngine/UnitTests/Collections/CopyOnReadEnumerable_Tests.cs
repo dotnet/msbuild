@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -8,20 +8,19 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using NUnit.Framework;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for CopyOnReadEnumerable
     /// </summary>
-    [TestFixture]
     public class CopyOnReadEnumerable_Tests
     {
         /// <summary>
         /// Verify basic case
         /// </summary>
-        [Test]
+        [Fact]
         public void NonCloneableBackingCollection()
         {
             List<int> values = new List<int>(new int[] { 1, 2, 3 });
@@ -33,7 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 foreach (int i in enumerable)
                 {
                     enumerator.MoveNext();
-                    Assert.AreEqual(i, enumerator.Current);
+                    Assert.Equal(i, enumerator.Current);
                 }
             }
         }
@@ -41,7 +40,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Verify cloning case
         /// </summary>
-        [Test]
+        [Fact]
         public void CloneableBackingCollection()
         {
             List<Cloneable> values = new List<Cloneable>(new Cloneable[] { new Cloneable(), new Cloneable(), new Cloneable() });
@@ -53,7 +52,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 foreach (Cloneable i in enumerable)
                 {
                     enumerator.MoveNext();
-                    Assert.IsFalse(Object.ReferenceEquals(i, enumerator.Current), "Enumerator copied references.");
+                    Assert.False(Object.ReferenceEquals(i, enumerator.Current)); // "Enumerator copied references."
                 }
             }
         }

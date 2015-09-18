@@ -8,7 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
+
 using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.UnitTests.OM.Collections

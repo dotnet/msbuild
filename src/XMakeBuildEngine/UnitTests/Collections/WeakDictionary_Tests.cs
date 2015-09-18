@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -7,7 +7,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using NUnit.Framework;
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -15,19 +14,19 @@ using System.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for the weak dictionary class
     /// </summary>
-    [TestFixture]
     public class WeakDictionary_Tests
     {
         /// <summary>
         /// Find with the same key inserted using the indexer
         /// </summary>
-        [Test]
+        [Fact]
         public void Indexer_ReferenceFound()
         {
             object k1 = new Object();
@@ -39,25 +38,27 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Now look for the same key we inserted
             object v2 = dictionary[k1];
 
-            Assert.AreEqual(true, Object.ReferenceEquals(v1, v2));
-            Assert.AreEqual(true, dictionary.Contains(k1));
+            Assert.Equal(true, Object.ReferenceEquals(v1, v2));
+            Assert.Equal(true, dictionary.Contains(k1));
         }
 
         /// <summary>
         /// Find something not present with the indexer
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(KeyNotFoundException))]
+        [Fact]
         public void Indexer_NotFound()
         {
-            var dictionary = new WeakDictionary<object, object>();
-            object value = dictionary[new Object()];
+            Assert.Throws<KeyNotFoundException>(() =>
+            {
+                var dictionary = new WeakDictionary<object, object>();
+                object value = dictionary[new Object()];
+            }
+           );
         }
-
         /// <summary>
         /// Find with the same key inserted using TryGetValue
         /// </summary>
-        [Test]
+        [Fact]
         public void TryGetValue_ReferenceFound()
         {
             object k1 = new Object();
@@ -70,14 +71,14 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             object v2;
             bool result = dictionary.TryGetValue(k1, out v2);
 
-            Assert.AreEqual(true, result);
-            Assert.AreEqual(true, Object.ReferenceEquals(v1, v2));
+            Assert.Equal(true, result);
+            Assert.Equal(true, Object.ReferenceEquals(v1, v2));
         }
 
         /// <summary>
         /// Find something not present with TryGetValue
         /// </summary>
-        [Test]
+        [Fact]
         public void TryGetValue_ReferenceNotFound()
         {
             var dictionary = new WeakDictionary<object, object>();
@@ -85,15 +86,15 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             object v;
             bool result = dictionary.TryGetValue(new Object(), out v);
 
-            Assert.AreEqual(false, result);
-            Assert.AreEqual(null, v);
-            Assert.AreEqual(false, dictionary.Contains(new Object()));
+            Assert.Equal(false, result);
+            Assert.Equal(null, v);
+            Assert.Equal(false, dictionary.Contains(new Object()));
         }
 
         /// <summary>
         /// Find a key that wasn't inserted but is equal
         /// </summary>
-        [Test]
+        [Fact]
         public void EqualityComparer()
         {
             string k1 = String.Concat("ke", "y");
@@ -106,24 +107,23 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Don't create it with a literal or the compiler will intern it!
             string k2 = String.Concat("k", "ey");
 
-            Assert.AreEqual(false, Object.ReferenceEquals(k1, k2));
+            Assert.Equal(false, Object.ReferenceEquals(k1, k2));
 
             object v2 = dictionary[k2];
 
-            Assert.AreEqual(true, Object.ReferenceEquals(v1, v2));
+            Assert.Equal(true, Object.ReferenceEquals(v1, v2));
         }
 
         /// <summary>
         /// If value target has been collected, key should not be present.
         /// (When accessed, if target is null, entry is removed instead of returned.)
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(KeyNotFoundException))]
+        [Fact]
         public void IndexerRemovesDeadValue()
         {
             if (NativeMethodsShared.IsMono)
             {
-                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+                return; // "Mono has conservative GC, does not remove weak references"
             }
 
             object k = new Object();
@@ -135,19 +135,23 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             v = null;
             GC.Collect();
 
-            object value = dictionary[k]; // throws
+            Assert.Throws<KeyNotFoundException>(() =>
+            {
+                object value = dictionary[k];
+            }
+           );
         }
 
         /// <summary>
         /// If value target has been collected, key should not be present.
         /// (When accessed, if target is null, entry is removed instead of returned.)
         /// </summary>
-        [Test]
+        [Fact]
         public void ContainsRemovesDeadValue()
         {
             if (NativeMethodsShared.IsMono)
             {
-                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+                return; // "Mono has conservative GC, does not remove weak references"
             }
 
             Console.WriteLine("Fixed contains test ..");
@@ -163,19 +167,19 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             v = null;
             GC.Collect();
 
-            Assert.AreEqual(false, dictionary.Contains(k));
+            Assert.Equal(false, dictionary.Contains(k));
         }
 
         /// <summary>
         /// If value target has been collected, key should not be present.
         /// (When accessed, if target is null, entry is removed instead of returned.)
         /// </summary>
-        [Test]
+        [Fact]
         public void TryGetRemovesDeadValue()
         {
             if (NativeMethodsShared.IsMono)
             {
-                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+                return; // "Mono has conservative GC, does not remove weak references"
             }
 
             object k = new Object();
@@ -190,19 +194,19 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             GC.Collect();
 
             object value;
-            Assert.AreEqual(false, dictionary.TryGetValue(k, out value));
-            Assert.AreEqual(0, dictionary.Count);
+            Assert.Equal(false, dictionary.TryGetValue(k, out value));
+            Assert.Equal(0, dictionary.Count);
         }
 
         /// <summary>
         /// Verify dictionary doesn't hold onto keys
         /// </summary>
-        [Test]
+        [Fact]
         public void KeysCollectable()
         {
             if (NativeMethodsShared.IsMono)
             {
-                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+                return; // "Mono has conservative GC, does not remove weak references"
             }
 
             string k1 = new string('k', 1000000);
@@ -222,7 +226,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             long difference = memory1 - memory2;
 
             Console.WriteLine("Start {0}, end {1}, diff {2}", memory1, memory2, difference);
-            Assert.AreEqual(true, difference > 1500000); // 2MB minus big noise allowance
+            Assert.Equal(true, difference > 1500000); // 2MB minus big noise allowance
 
             // This line is VERY important, as it keeps the GC from being too smart and collecting
             // the dictionary and its large strings because we never use them again.  
@@ -232,12 +236,12 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Verify dictionary doesn't hold onto values
         /// </summary>
-        [Test]
+        [Fact]
         public void ValuesCollectable()
         {
             if (NativeMethodsShared.IsMono)
             {
-                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+                return; // "Mono has conservative GC, does not remove weak references"
             }
 
             string k1 = new string('k', 1000000);
@@ -257,7 +261,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             long difference = memory1 - memory2;
 
             Console.WriteLine("Start {0}, end {1}, diff {2}", memory1, memory2, difference);
-            Assert.AreEqual(true, difference > 1500000); // 2MB minus big noise allowance
+            Assert.Equal(true, difference > 1500000); // 2MB minus big noise allowance
 
             // This line is VERY important, as it keeps the GC from being too smart and collecting
             // the dictionary and its large strings because we never use them again.  
@@ -267,12 +271,12 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Call Scavenge explicitly
         /// </summary>
-        [Test]
+        [Fact]
         public void ExplicitScavenge()
         {
             if (NativeMethodsShared.IsMono)
             {
-                Assert.Ignore("Mono has conservative GC, does not remove weak references");
+                return; // "Mono has conservative GC, does not remove weak references"
             }
 
             object k1 = new Object();
@@ -281,20 +285,20 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             var dictionary = new WeakDictionary<object, object>();
             dictionary[k1] = v1;
 
-            Assert.AreEqual(1, dictionary.Count);
+            Assert.Equal(1, dictionary.Count);
 
             k1 = null;
             GC.Collect();
 
             dictionary.Scavenge();
 
-            Assert.AreEqual(0, dictionary.Count);
+            Assert.Equal(0, dictionary.Count);
         }
 
         /// <summary>
         /// Growing should invoke Scavenge
         /// </summary>
-        [Test]
+        [Fact]
         public void ScavengeOnGrow()
         {
             var dictionary = new WeakDictionary<object, object>();
@@ -312,7 +316,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             // We should have scavenged at least once
             Console.WriteLine("Count {0}", dictionary.Count);
-            Assert.AreEqual(true, dictionary.Count < 100);
+            Assert.Equal(true, dictionary.Count < 100);
 
             // Finish with explicit scavenge
             int count1 = dictionary.Count;
@@ -320,7 +324,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             int count2 = dictionary.Count;
 
             Console.WriteLine("Removed {0}", removed);
-            Assert.AreEqual(removed, count1 - count2);
+            Assert.Equal(removed, count1 - count2);
         }
     }
 }

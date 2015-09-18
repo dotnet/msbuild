@@ -1,10 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,8 +15,9 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Xunit;
 
-using NUnit.Framework;
+
 
 namespace Microsoft.Build.UnitTests
 {
@@ -101,11 +101,11 @@ namespace Microsoft.Build.UnitTests
             int count = 0;
             foreach (ProjectItem item in items)
             {
-                Assert.AreEqual(itemInclude.ToUpperInvariant(), item.EvaluatedInclude.ToUpperInvariant());
+                Assert.Equal(itemInclude.ToUpperInvariant(), item.EvaluatedInclude.ToUpperInvariant());
                 ++count;
             }
 
-            Assert.AreEqual(1, count);
+            Assert.Equal(1, count);
 
             return items[0];
         }
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests
                     return;
                 }
             }
-            Assert.Fail("Didn't throw " + exception.ToString());
+            Assert.True(false, "Didn't throw " + exception.ToString());
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
 
-                Assert.IsNotNull(expectedItem, String.Format("Item '{0}' was returned but not expected.", actualItem.ItemSpec));
+                Assert.NotNull(expectedItem); // String.Format("Item '{0}' was returned but not expected.", actualItem.ItemSpec));
 
                 // Make sure all the metadata on the expected item matches the metadata on the actual item.
                 // Don't check built-in metadata ... only check custom metadata.
@@ -241,30 +241,27 @@ namespace Microsoft.Build.UnitTests
                         string expectedMetadataValue = expectedItem.GetMetadata(metadataName);
                         string actualMetadataValue = actualItem.GetMetadata(metadataName);
 
-                        Assert.IsTrue
-                            (
+                        Assert.True(
                                 actualMetadataValue.Length > 0 || expectedMetadataValue.Length == 0,
                                 string.Format("Item '{0}' does not have expected metadata '{1}'.", actualItem.ItemSpec, metadataName)
                             );
 
-                        Assert.IsTrue
-                            (
+                        Assert.True(
                                 actualMetadataValue.Length == 0 || expectedMetadataValue.Length > 0,
                                 string.Format("Item '{0}' has unexpected metadata {1}={2}.", actualItem.ItemSpec, metadataName, actualMetadataValue)
                             );
 
-                        Assert.AreEqual
-                            (
+                        Assert.Equal(
                                 expectedMetadataValue,
-                                actualMetadataValue,
-                                string.Format
-                                    (
-                                        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
-                                        actualItem.ItemSpec,
-                                        metadataName,
-                                        actualMetadataValue,
-                                        expectedMetadataValue
-                                    )
+                                actualMetadataValue
+                            //string.Format
+                            //    (
+                            //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
+                            //        actualItem.ItemSpec,
+                            //        metadataName,
+                            //        actualMetadataValue,
+                            //        expectedMetadataValue
+                            //    )
                             );
                     }
                 }
@@ -274,7 +271,7 @@ namespace Microsoft.Build.UnitTests
             // Log an error for any leftover items in the expectedItems collection.
             foreach (ITaskItem expectedItem in expectedItems)
             {
-                Assert.Fail(String.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
+                Assert.True(false, String.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
             }
 
             if (outOfOrder)
@@ -282,7 +279,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("ERROR:  Items were returned in the incorrect order...");
                 Console.WriteLine("Expected:  " + expectedItemSpecs);
                 Console.WriteLine("Actual:    " + actualItemSpecs);
-                Assert.Fail("Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
+                Assert.True(false, "Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
             }
         }
 
@@ -293,19 +290,19 @@ namespace Microsoft.Build.UnitTests
         {
             if (expected == null)
             {
-                Assert.IsNull(actual, "Expected a null array");
+                Assert.Null(actual); // "Expected a null array"
             }
             else
             {
-                Assert.IsNotNull(actual, "Result should be non-null.");
+                Assert.NotNull(actual); // "Result should be non-null."
             }
 
-            Assert.AreEqual(expected.Length, actual.Length, "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
+            Assert.Equal(expected.Length, actual.Length); // "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
 
             // Now that we've verified they're both non-null and of the same length, compare each item in the array. 
             for (int i = 0; i < expected.Length; i++)
             {
-                Assert.AreEqual(expected[i], actual[i], "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
+                Assert.Equal(expected[i], actual[i]); // "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
             }
         }
 
@@ -350,7 +347,7 @@ namespace Microsoft.Build.UnitTests
                             if (itemMetadataPieceTrimmed.Length > 0)
                             {
                                 int indexOfEquals = itemMetadataPieceTrimmed.IndexOf('=');
-                                Assert.IsTrue(indexOfEquals != -1, String.Format("Could not find <equals> in item metadata definition '{0}'", itemMetadataPieceTrimmed));
+                                Assert.NotEqual(-1, indexOfEquals);
 
                                 string itemMetadataName = itemMetadataPieceTrimmed.Substring(0, indexOfEquals).Trim();
                                 string itemMetadataValue = itemMetadataPieceTrimmed.Substring(indexOfEquals + 1).Trim();
@@ -388,17 +385,7 @@ namespace Microsoft.Build.UnitTests
                 message = fileRelativePath + " doesn't exist, but it should.";
             }
 
-            AssertFileExistenceInTempProjectDirectory(fileRelativePath, message, true);
-        }
-
-        /// <summary>
-        /// Assert that a given file exists (or not) within the temp project directory.
-        /// </summary>
-        /// <param name="fileRelativePath"></param>
-        /// <param name="message">Can be null.</param>
-        private static void AssertFileExistenceInTempProjectDirectory(string fileRelativePath, string message, bool exists)
-        {
-            Assert.AreEqual(exists, File.Exists(Path.Combine(TempProjectDir, fileRelativePath)), message);
+            Assert.True(File.Exists(Path.Combine(TempProjectDir, fileRelativePath)), message);
         }
 
         /// <summary>
@@ -566,7 +553,7 @@ namespace Microsoft.Build.UnitTests
             Project project = ObjectModelHelpers.CreateInMemoryProject(projectContents, logger);
 
             bool success = project.Build(logger);
-            Assert.IsTrue(success, "Build failed.  See Standard Out tab for details");
+            Assert.True(success); // "Build failed.  See Standard Out tab for details"
         }
 
         /// <summary>
@@ -595,7 +582,7 @@ namespace Microsoft.Build.UnitTests
             Project project = ObjectModelHelpers.CreateInMemoryProject(projectContents, logger);
 
             bool success = project.Build(logger);
-            Assert.IsFalse(success, "Build succeeded, but shouldn't have.  See Standard Out tab for details");
+            Assert.False(success); // "Build succeeded, but shouldn't have.  See Standard Out tab for details"
         }
 
         /// <summary>
@@ -625,7 +612,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("================================== ACTUAL ============================================");
             Console.WriteLine(newActualProjectContents);
             Console.WriteLine();
-            Assert.AreEqual(newExpectedProjectContents, newActualProjectContents, "Project XML does not match expected XML.  See 'Standard Out' tab for details.");
+            Assert.Equal(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
         }
 
 
@@ -710,7 +697,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="fileContents"></param>
         internal static string CreateFileInTempProjectDirectory(string fileRelativePath, string fileContents)
         {
-            Assert.IsFalse(String.IsNullOrEmpty(fileRelativePath));
+            Assert.False(String.IsNullOrEmpty(fileRelativePath));
             string fullFilePath = Path.Combine(TempProjectDir, fileRelativePath);
             Directory.CreateDirectory(Path.GetDirectoryName(fullFilePath));
 
@@ -759,7 +746,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger logger = new MockLogger();
             bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
 
-            Assert.IsTrue(success, "Build failed.  See Standard Out tab for details");
+            Assert.True(success); // "Build failed.  See Standard Out tab for details"
 
             return logger;
         }
@@ -772,7 +759,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger logger = new MockLogger();
             bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, null, null, logger);
 
-            Assert.IsFalse(success, "Build unexpectedly succeeded.  See Standard Out tab for details");
+            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
 
             return logger;
         }
@@ -785,7 +772,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger logger = new MockLogger();
             bool success = BuildTempProjectFileWithTargets(projectFileRelativePath, targets, additionalProperties, logger);
 
-            Assert.IsFalse(success, "Build unexpectedly succeeded.  See Standard Out tab for details");
+            Assert.False(success); // "Build unexpectedly succeeded.  See Standard Out tab for details"
 
             return logger;
         }
@@ -986,11 +973,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void AssertListsValueEqual<T>(IList<T> one, IList<T> two)
         {
-            Assert.AreEqual(one.Count, two.Count);
+            Assert.Equal(one.Count, two.Count);
 
             for (int i = 0; i < one.Count; i++)
             {
-                Assert.AreEqual(one[i], two[i]);
+                Assert.Equal(one[i], two[i]);
             }
         }
 
@@ -999,16 +986,16 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void AssertCollectionsValueEqual<T>(ICollection<T> one, ICollection<T> two)
         {
-            Assert.AreEqual(one.Count, two.Count);
+            Assert.Equal(one.Count, two.Count);
 
             foreach (T item in one)
             {
-                Assert.IsTrue(two.Contains(item));
+                Assert.True(two.Contains(item));
             }
 
             foreach (T item in two)
             {
-                Assert.IsTrue(one.Contains(item));
+                Assert.True(one.Contains(item));
             }
         }
 
@@ -1042,7 +1029,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger logger;
             bool result;
             BuildProjectWithNewOM(content, out logger, out result, false);
-            Assert.IsTrue(result);
+            Assert.True(result);
 
             return logger;
         }
@@ -1072,7 +1059,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger logger;
             bool result;
             BuildProjectWithNewOM(content, out logger, out result, allowTaskCrash);
-            Assert.IsFalse(result);
+            Assert.False(result);
             return logger;
         }
 
@@ -1098,7 +1085,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("================================== ACTUAL ============================================");
                 Console.WriteLine(newActualProjectContents);
                 Console.WriteLine();
-                Assert.AreEqual(newExpectedProjectContents, newActualProjectContents, "Project XML does not match expected XML.  See 'Standard Out' tab for details.");
+                Assert.Equal(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
             }
         }
 
@@ -1197,43 +1184,14 @@ namespace Microsoft.Build.UnitTests
 
             if (ex1 == null && ex2 == null)
             {
-                Assert.Fail("Neither threw");
+                Assert.True(false, "Neither threw");
             }
 
-            Assert.AreNotEqual(null, ex1, "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
-            Assert.AreNotEqual(null, ex2, "Second method did not throw, first: {0}", ex1 == null ? "" : ex1.GetType() + ex1.Message);
-            Assert.AreEqual(ex1.GetType(), ex2.GetType(), "Both methods threw but the first threw {0} '{1}' and the second threw {2} '{3}'", ex1.GetType(), ex1.Message, ex2.GetType(), ex2.Message);
+            Assert.NotNull(ex1); // "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
+            Assert.NotNull(ex2); // "Second method did not throw, first: {0}", ex1 == null ? "" : ex1.GetType() + ex1.Message);
+            Assert.Equal(ex1.GetType(), ex2.GetType()); // "Both methods threw but the first threw {0} '{1}' and the second threw {2} '{3}'", ex1.GetType(), ex1.Message, ex2.GetType(), ex2.Message);
 
             Console.WriteLine("COMPARE EXCEPTIONS:\n\n#1: {0}\n\n#2: {1}", ex1.Message, ex2.Message);
-        }
-
-        /// <summary>
-        /// Given a method accepting no parameters and returning none, verifies it 
-        /// throws an exception of the specified type.
-        /// </summary>
-        internal static void VerifyAssertThrows(Action method, Type expectedExceptionType)
-        {
-            try
-            {
-                method();
-            }
-            catch (Exception ex)
-            {
-                Assert.That(ex, Is.InstanceOf(expectedExceptionType));
-                Console.WriteLine("Caught '{0}'", ex.Message);
-                return;
-            }
-
-            Debugger.Break();
-            Assert.Fail("Did not throw but expected {0} exception", expectedExceptionType.ToString());
-        }
-
-        /// <summary>
-        /// Verify method throws invalid operation exception.
-        /// </summary>
-        internal static void VerifyAssertThrowsInvalidOperation(Action method)
-        {
-            VerifyAssertThrows(method, typeof(InvalidOperationException));
         }
 
         /// <summary>
@@ -1274,7 +1232,7 @@ namespace Microsoft.Build.UnitTests
                 string output = "\r\n#################################Expected#################################\n" + String.Join("\r\n", expectedLines);
                 output += "\r\n#################################Actual#################################\n" + String.Join("\r\n", actualLines);
 
-                Assert.Fail(output);
+                Assert.True(false, output);
             }
 
             if (actualLines.Length > expectedLines.Length)
@@ -1282,14 +1240,14 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
                 Console.WriteLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
 
-                Assert.Fail("Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
+                Assert.True(false, "Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
             }
             else if (actualLines.Length < expectedLines.Length)
             {
                 Console.WriteLine("\n#################################Expected#################################\n" + String.Join("\n", expectedLines));
                 Console.WriteLine("#################################Actual#################################\n" + String.Join("\n", actualLines));
 
-                Assert.Fail("Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
+                Assert.True(false, "Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
             }
         }
 
@@ -1299,7 +1257,7 @@ namespace Microsoft.Build.UnitTests
         internal static void ClearDirtyFlag(ProjectRootElement project)
         {
             project.Save(new StringWriter());
-            Assert.IsFalse(project.HasUnsavedChanges);
+            Assert.False(project.HasUnsavedChanges);
         }
 
         /// <summary>

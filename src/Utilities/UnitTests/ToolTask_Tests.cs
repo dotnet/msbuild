@@ -1,19 +1,18 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Diagnostics;
 using System.IO;
-
+using System.Reflection;
+using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Xunit;
 using Microsoft.Build.Utilities;
-
-using NUnit.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class ToolTask_Tests
     {
         internal class MyTool : ToolTask, IDisposable
@@ -130,7 +129,7 @@ namespace Microsoft.Build.UnitTests
             }
         };
 
-        [Test]
+        [Fact]
         public void Regress_Mutation_UserSuppliedToolPathIsLogged()
         {
             using (MyTool t = new MyTool())
@@ -146,7 +145,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Test]
+        [Fact]
         public void Regress_Mutation_MissingExecutableIsLogged()
         {
             using (MyTool t = new MyTool())
@@ -155,14 +154,14 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.ToolPath = @"C:\MyAlternatePath";
 
-                Assert.IsFalse(t.Execute());
+                Assert.False(t.Execute());
 
                 // There should be an error about invalid task location.
                 engine.AssertLogContains("MSB6004");
             }
         }
 
-        [Test]
+        [Fact]
         public void Regress_Mutation_WarnIfCommandLineTooLong()
         {
             using (MyTool t = new MyTool())
@@ -182,8 +181,8 @@ namespace Microsoft.Build.UnitTests
                 t.MockCommandLineCommands = new String('x', 32001);
 
                 // It's only a warning, we still succeed
-                Assert.IsTrue(t.Execute());
-                Assert.AreEqual(0, t.ExitCode);
+                Assert.True(t.Execute());
+                Assert.Equal(0, t.ExitCode);
                 // There should be a warning about the command-line being too long.
                 engine.AssertLogContains("MSB6002");
             }
@@ -192,7 +191,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
-        [Test]
+        [Fact]
         public void HandleExecutionErrorsWhenToolDoesntLogError()
         {
             using (MyTool t = new MyTool())
@@ -201,8 +200,8 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = "/C garbagegarbagegarbagegarbage.exe";
 
-                Assert.IsFalse(t.Execute());
-                Assert.AreEqual(NativeMethodsShared.IsWindows ? 1 : 127, t.ExitCode); // cmd.exe error code is 1, sh error code is 127
+                Assert.False(t.Execute());
+                Assert.Equal(NativeMethodsShared.IsWindows ? 1 : 127, t.ExitCode); // cmd.exe error code is 1, sh error code is 127
 
                 // We just tried to run "cmd.exe /C garbagegarbagegarbagegarbage.exe".  This should fail,
                 // but since "cmd.exe" doesn't log its errors in canonical format, no errors got
@@ -215,7 +214,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
-        [Test]
+        [Fact]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
             using (MyTool t = new MyTool())
@@ -226,15 +225,15 @@ namespace Microsoft.Build.UnitTests
                                                 ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
                     : @"-c ""echo \""Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used\""""";
 
-                Assert.IsFalse(t.Execute());
+                Assert.False(t.Execute());
 
                 // The above command logged a canonical error message.  Therefore ToolTask should
                 // not log its own error beyond that.
                 engine.AssertLogDoesntContain("MSB6006");
                 engine.AssertLogContains("CS0168");
                 engine.AssertLogContains("The variable 'foo' is declared but never used");
-                Assert.AreEqual(-1, t.ExitCode);
-                Assert.AreEqual(1, engine.Errors);
+                Assert.Equal(-1, t.ExitCode);
+                Assert.Equal(1, engine.Errors);
             }
         }
 
@@ -242,7 +241,7 @@ namespace Microsoft.Build.UnitTests
         /// ToolTask should never run String.Format on strings that are 
         /// not meant to be formatted.
         /// </summary>
-        [Test]
+        [Fact]
         public void DoNotFormatTaskCommandOrMessage()
         {
             MyTool t = new MyTool();
@@ -254,13 +253,13 @@ namespace Microsoft.Build.UnitTests
                                             : "-c echo hello world {";
             t.Execute();
             engine.AssertLogContains("echo hello world {");
-            Assert.AreEqual(0, engine.Errors);
+            Assert.Equal(0, engine.Errors);
         }
 
         /// <summary>
         /// When a message is logged to the standard error stream do not error is LogStandardErrorAsError is not true or set.
         /// </summary>
-        [Test]
+        [Fact]
         public void DoNotErrorWhenTextSentToStandardError()
         {
             using (MyTool t = new MyTool())
@@ -271,19 +270,19 @@ namespace Microsoft.Build.UnitTests
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
                                                 : "-c \"echo 'Who made you king anyways' 1>&2\"";
 
-                Assert.IsTrue(t.Execute());
+                Assert.True(t.Execute());
 
                 engine.AssertLogDoesntContain("MSB");
                 engine.AssertLogContains("Who made you king anyways");
-                Assert.AreEqual(0, t.ExitCode);
-                Assert.AreEqual(0, engine.Errors);
+                Assert.Equal(0, t.ExitCode);
+                Assert.Equal(0, engine.Errors);
             }
         }
 
         /// <summary>
         /// When a message is logged to the standard output stream do not error is LogStandardErrorAsError is  true
         /// </summary>
-        [Test]
+        [Fact]
         public void DoNotErrorWhenTextSentToStandardOutput()
         {
             using (MyTool t = new MyTool())
@@ -295,19 +294,19 @@ namespace Microsoft.Build.UnitTests
                                                 ? "/C Echo 'Who made you king anyways'"
                                                 : "-c 'echo Who made you king anyways'";
 
-                Assert.IsTrue(t.Execute());
+                Assert.True(t.Execute());
 
                 engine.AssertLogDoesntContain("MSB");
                 engine.AssertLogContains("Who made you king anyways");
-                Assert.AreEqual(0, t.ExitCode);
-                Assert.AreEqual(0, engine.Errors);
+                Assert.Equal(0, t.ExitCode);
+                Assert.Equal(0, engine.Errors);
             }
         }
 
         /// <summary>
         /// When a message is logged to the standard error stream error if LogStandardErrorAsError is true
         /// </summary>
-        [Test]
+        [Fact]
         public void ErrorWhenTextSentToStandardError()
         {
             using (MyTool t = new MyTool())
@@ -319,12 +318,12 @@ namespace Microsoft.Build.UnitTests
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
                                                 : "-c \"echo 'Who made you king anyways' 1>&2\"";
 
-                Assert.IsFalse(t.Execute());
+                Assert.False(t.Execute());
 
                 engine.AssertLogDoesntContain("MSB3073");
                 engine.AssertLogContains("Who made you king anyways");
-                Assert.AreEqual(-1, t.ExitCode);
-                Assert.AreEqual(1, engine.Errors);
+                Assert.Equal(-1, t.ExitCode);
+                Assert.Equal(1, engine.Errors);
             }
         }
 
@@ -332,7 +331,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When ToolExe is set, it is used instead of ToolName
         /// </summary>
-        [Test]
+        [Fact]
         public void ToolExeWinsOverToolName()
         {
             using (MyTool t = new MyTool())
@@ -341,9 +340,9 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.FullToolName = NativeMethodsShared.IsWindows ? "c:\\baz\\foo.exe" : "/baz/foo.exe";
 
-                Assert.AreEqual("foo.exe", t.ToolExe);
+                Assert.Equal("foo.exe", t.ToolExe);
                 t.ToolExe = "bar.exe";
-                Assert.AreEqual("bar.exe", t.ToolExe);
+                Assert.Equal("bar.exe", t.ToolExe);
             }
         }
 
@@ -351,7 +350,7 @@ namespace Microsoft.Build.UnitTests
         /// When ToolExe is set, it is appended to ToolPath instead
         /// of the regular tool name
         /// </summary>
-        [Test]
+        [Fact]
         public void ToolExeIsFoundOnToolPath()
         {
             using (MyTool t = new MyTool())
@@ -367,13 +366,13 @@ namespace Microsoft.Build.UnitTests
                 t.ToolPath = systemPath;
 
                 t.Execute();
-                Assert.AreEqual(Path.Combine(systemPath, "cmd.exe"), t.PathToToolUsed);
+                Assert.Equal(Path.Combine(systemPath, "cmd.exe"), t.PathToToolUsed);
                 engine.AssertLogContains("cmd.exe");
                 engine.Log = String.Empty;
 
                 t.ToolExe = "xcopy.exe";
                 t.Execute();
-                Assert.AreEqual(Path.Combine(systemPath, "xcopy.exe"), t.PathToToolUsed);
+                Assert.Equal(Path.Combine(systemPath, "xcopy.exe"), t.PathToToolUsed);
                 engine.AssertLogContains("xcopy.exe");
                 engine.AssertLogDoesntContain("cmd.exe");
             }
@@ -382,7 +381,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Task is not found on path - regress #499196
         /// </summary>
-        [Test]
+        [Fact]
         public void TaskNotFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -391,9 +390,9 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.FullToolName = "doesnotexist.exe";
 
-                Assert.IsFalse(t.Execute());
-                Assert.AreEqual(-1, t.ExitCode);
-                Assert.AreEqual(1, engine.Errors);
+                Assert.False(t.Execute());
+                Assert.Equal(-1, t.ExitCode);
+                Assert.Equal(1, engine.Errors);
 
                 // Does not throw an exception
             }
@@ -402,7 +401,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Task is found on path.
         /// </summary>
-        [Test]
+        [Fact]
         public void TaskFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -412,9 +411,9 @@ namespace Microsoft.Build.UnitTests
                 string toolName = NativeMethodsShared.IsWindows ? "cmd.exe" : "/bin/sh";
                 t.FullToolName = toolName;
 
-                Assert.IsTrue(t.Execute());
-                Assert.AreEqual(0, t.ExitCode);
-                Assert.AreEqual(0, engine.Errors);
+                Assert.True(t.Execute());
+                Assert.Equal(0, t.ExitCode);
+                Assert.Equal(0, engine.Errors);
 
                 engine.AssertLogContains(
 #if FEATURE_SPECIAL_FOLDERS
@@ -428,7 +427,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// StandardOutputImportance set to Low should now show up in our log
         /// </summary>
-        [Test]
+        [Fact]
         public void OverrideStdOutImportanceToLow()
         {
             string tempFile = FileUtilities.GetTemporaryFile();
@@ -444,9 +443,9 @@ namespace Microsoft.Build.UnitTests
                 t.MockCommandLineCommands = "\"hello\" \"" + tempFile + "\"";
                 t.StandardOutputImportance = "Low";
 
-                Assert.IsTrue(t.Execute());
-                Assert.AreEqual(0, t.ExitCode);
-                Assert.AreEqual(0, engine.Errors);
+                Assert.True(t.Execute());
+                Assert.Equal(0, t.ExitCode);
+                Assert.Equal(0, engine.Errors);
 
                 engine.AssertLogDoesntContain("hello world");
             }
@@ -456,7 +455,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// StandardOutputImportance set to Low should now show up in our log
         /// </summary>
-        [Test]
+        [Fact]
         public void OverrideStdOutImportanceToHigh()
         {
             string tempFile = FileUtilities.GetTemporaryFile();
@@ -472,9 +471,9 @@ namespace Microsoft.Build.UnitTests
                 t.MockCommandLineCommands = "\"hello\" \"" + tempFile + "\"";
                 t.StandardOutputImportance = "High";
 
-                Assert.IsTrue(t.Execute());
-                Assert.AreEqual(0, t.ExitCode);
-                Assert.AreEqual(0, engine.Errors);
+                Assert.True(t.Execute());
+                Assert.Equal(0, t.ExitCode);
+                Assert.Equal(0, engine.Errors);
 
                 engine.AssertLogContains("hello world");
             }
@@ -487,7 +486,7 @@ namespace Microsoft.Build.UnitTests
         /// himself.  This is so that in case the tool doesn't log its errors in canonical
         /// format, the task can still opt to do something reasonable with it.
         /// </summary>
-        [Test]
+        [Fact]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
             string tempFile = FileUtilities.GetTemporaryFile();
@@ -514,8 +513,8 @@ namespace Microsoft.Build.UnitTests
                 engine.AssertLogContains("BADTHINGHAPPENED");
                 engine.AssertLogContains("This is my custom error format");
 
-                Assert.AreEqual(1, engine.Warnings, "Expected one warning in log.");
-                Assert.AreEqual(1, engine.Errors, "Expected one error in log.");
+                Assert.Equal(1, engine.Warnings); // "Expected one warning in log."
+                Assert.Equal(1, engine.Errors); // "Expected one error in log."
             }
 
             File.Delete(tempFile);
@@ -524,7 +523,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing env vars through the tooltask public property
         /// </summary>
-        [Test]
+        [Fact]
         public void EnvironmentVariablesToToolTask()
         {
             MyTool task = new MyTool();
@@ -533,18 +532,18 @@ namespace Microsoft.Build.UnitTests
             task.EnvironmentVariables = new string[] { "a=b", "c=d", userVarName + "=x" /* built-in */, "path=" /* blank value */};
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
-            Assert.AreEqual(true, task.ExecuteCalled);
+            Assert.Equal(true, result);
+            Assert.Equal(true, task.ExecuteCalled);
 
             ProcessStartInfo startInfo = task.StartInfo;
 
-            Assert.AreEqual("b", startInfo.EnvironmentVariables["a"]);
-            Assert.AreEqual("d", startInfo.EnvironmentVariables["c"]);
-            Assert.AreEqual("x", startInfo.EnvironmentVariables[userVarName]);
-            Assert.AreEqual(String.Empty, startInfo.EnvironmentVariables["path"]);
+            Assert.Equal("b", startInfo.EnvironmentVariables["a"]);
+            Assert.Equal("d", startInfo.EnvironmentVariables["c"]);
+            Assert.Equal("x", startInfo.EnvironmentVariables[userVarName]);
+            Assert.Equal(String.Empty, startInfo.EnvironmentVariables["path"]);
             if (NativeMethodsShared.IsWindows)
             {
-                Assert.IsTrue(
+                Assert.True(
                     String.Equals(
 #if FEATURE_SPECIAL_FOLDERS
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
@@ -559,7 +558,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Equals sign in value
         /// </summary>
-        [Test]
+        [Fact]
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
             MyTool task = new MyTool();
@@ -567,14 +566,14 @@ namespace Microsoft.Build.UnitTests
             task.EnvironmentVariables = new string[] { "a=b=c" };
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
-            Assert.AreEqual("b=c", task.StartInfo.EnvironmentVariables["a"]);
+            Assert.Equal(true, result);
+            Assert.Equal("b=c", task.StartInfo.EnvironmentVariables["a"]);
         }
 
         /// <summary>
         /// No value provided
         /// </summary>
-        [Test]
+        [Fact]
         public void EnvironmentVariablesToToolTaskInvalid1()
         {
             MyTool task = new MyTool();
@@ -582,14 +581,14 @@ namespace Microsoft.Build.UnitTests
             task.EnvironmentVariables = new string[] { "x" };
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
-            Assert.AreEqual(false, task.ExecuteCalled);
+            Assert.Equal(false, result);
+            Assert.Equal(false, task.ExecuteCalled);
         }
 
         /// <summary>
         /// Empty string provided
         /// </summary>
-        [Test]
+        [Fact]
         public void EnvironmentVariablesToToolTaskInvalid2()
         {
             MyTool task = new MyTool();
@@ -597,14 +596,14 @@ namespace Microsoft.Build.UnitTests
             task.EnvironmentVariables = new string[] { "" };
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
-            Assert.AreEqual(false, task.ExecuteCalled);
+            Assert.Equal(false, result);
+            Assert.Equal(false, task.ExecuteCalled);
         }
 
         /// <summary>
         /// Empty name part provided
         /// </summary>
-        [Test]
+        [Fact]
         public void EnvironmentVariablesToToolTaskInvalid3()
         {
             MyTool task = new MyTool();
@@ -612,14 +611,14 @@ namespace Microsoft.Build.UnitTests
             task.EnvironmentVariables = new string[] { "=a;b=c" };
             bool result = task.Execute();
 
-            Assert.AreEqual(false, result);
-            Assert.AreEqual(false, task.ExecuteCalled);
+            Assert.Equal(false, result);
+            Assert.Equal(false, task.ExecuteCalled);
         }
 
         /// <summary>
         /// Not set should not wipe out other env vars
         /// </summary>
-        [Test]
+        [Fact]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
             MyTool task = new MyTool();
@@ -627,9 +626,9 @@ namespace Microsoft.Build.UnitTests
             task.EnvironmentVariables = null;
             bool result = task.Execute();
 
-            Assert.AreEqual(true, result);
-            Assert.AreEqual(true, task.ExecuteCalled);
-            Assert.AreEqual(
+            Assert.Equal(true, result);
+            Assert.Equal(true, task.ExecuteCalled);
+            Assert.Equal(
                 true,
                 task.StartInfo.EnvironmentVariables[NativeMethodsShared.IsWindows ? "username" : "USER"].Length > 0);
         }

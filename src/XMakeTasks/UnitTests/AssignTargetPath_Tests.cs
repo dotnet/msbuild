@@ -1,19 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-
-using NUnit.Framework;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class AssignTargetPath_Tests
     {
-        [Test]
+        [Fact]
         public void Regress314791()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -24,16 +22,16 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(
                 NativeMethodsShared.IsWindows ? @"c:\bin2\abc.efg" : "/bin2/abc.efg",
                 t.AssignedFiles[0].ItemSpec);
-            Assert.AreEqual(@"abc.efg", t.AssignedFiles[0].GetMetadata("TargetPath"));
+            Assert.Equal(@"abc.efg", t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
 
-        [Test]
+        [Fact]
         public void AtConeRoot()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -44,13 +42,13 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(@"file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(@"file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
 
-        [Test]
+        [Fact]
         public void OutOfCone()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -64,13 +62,13 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual("file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal("file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
 
-        [Test]
+        [Fact]
         public void InConeButAbsolute()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -84,10 +82,10 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.AreEqual(1, t.AssignedFiles.Length);
-            Assert.AreEqual(
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(
                 NativeMethodsShared.IsWindows ? @"f3\f4\file.txt" : "f3/f4/file.txt",
                 t.AssignedFiles[0].GetMetadata("TargetPath"));
         }

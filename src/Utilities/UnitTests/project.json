@@ -1,17 +1,22 @@
 ﻿{
+  "dependencies": {
+   "xunit": "2.1.0-rc1-build3168",
+   },
   "runtimes": {
     "win7-x86": { }
   },
   "frameworks": {
     "net451": {
       "dependencies": {
-        "NUnit": "2.6.4"
+        "Microsoft.Tpl.Dataflow": "4.5.24",
+        "xunit.runner.visualstudio": "2.1.0-rc1-build1124"
       }
     },
     "net46": {
       "dependencies": {
+        "Microsoft.Tpl.Dataflow": "4.5.24",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
-        "NUnit": "2.6.4"
+        "xunit.runner.visualstudio": "2.1.0-rc1-build1124"
       }
     },
     "dnxcore50": {
@@ -19,13 +24,14 @@
         "Microsoft.NETCore": "5.0.0",
         "Microsoft.NETCore.Portable.Compatibility": "1.0.0",
         "System.Console": "4.0.0-beta-23123",
-        "System.Diagnostics.Process": "4.0.0-beta-23109",
+        "System.Diagnostics.TraceSource": "4.0.0-beta-23019",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
+        "System.Xml.XmlDocument": "4.0.0",
+        "System.Xml.ReaderWriter": "4.0.10",
         "Microsoft.NETCore.Runtime": "1.0.0",
         "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
-        "System.Xml.XmlDocument": "4.0.0",
         "Microsoft.Win32.Registry": "4.0.0-beta-23127"
-      },
-      "imports": "portable-net451+win81"
+      }
     }
   }
 }

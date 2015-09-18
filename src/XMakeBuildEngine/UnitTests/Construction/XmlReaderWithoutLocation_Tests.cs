@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -16,13 +16,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
-using NUnit.Framework;
 using System.Xml;
 using System.IO;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    [TestFixture]
     public class XmlReaderWithoutLocation_Tests
     {
         private class XmlReaderNoIXmlLineInfo : XmlReader
@@ -165,7 +164,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        [Test]
+        [Fact]
         public void CreateProjectWithoutLineInfo()
         {
             XmlReader reader = XmlReader.Create(new StringReader
@@ -176,7 +175,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ));
             XmlReader noLineInfoReader = new XmlReaderNoIXmlLineInfo(reader);
             Project project = new Project(noLineInfoReader);
-            Assert.AreEqual(1, project.Targets.Count);
+            Assert.Equal(1, project.Targets.Count);
         }
     }
 }

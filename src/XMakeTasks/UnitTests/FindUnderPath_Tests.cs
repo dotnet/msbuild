@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -7,15 +7,15 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
-using NUnit.Framework;
+
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class FindUnderPath_Tests
     {
-        [Test]
+        [Fact]
         public void BasicFilter()
         {
             FindUnderPath t = new FindUnderPath();
@@ -26,19 +26,19 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(1, t.InPath.Length);
-            Assert.AreEqual(1, t.OutOfPath.Length);
-            Assert.AreEqual(FileUtilities.FixFilePath(@"C:\MyProject\File1.txt"), t.InPath[0].ItemSpec);
-            Assert.AreEqual(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
+            Assert.True(success);
+            Assert.Equal(1, t.InPath.Length);
+            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Equal(FileUtilities.FixFilePath(@"C:\MyProject\File1.txt"), t.InPath[0].ItemSpec);
+            Assert.Equal(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
 
-        [Test]
+        [Fact]
         public void InvalidFile()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("Cannot have invliad characters in file name on Unix");
+                return; // "Cannot have invliad characters in file name on Unix"
             }
 
             FindUnderPath t = new FindUnderPath();
@@ -49,17 +49,17 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
             // Don't crash
         }
 
-        [Test]
+        [Fact]
         public void InvalidPath()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("Cannot have invliad characters in file name on Unix");
+                return; // "Cannot have invliad characters in file name on Unix"
             }
 
             FindUnderPath t = new FindUnderPath();
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
             // Don't crash
         }
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Test]
+        [Fact]
         public void VerifyFullPath()
         {
             FindUnderPath t = new FindUnderPath();
@@ -110,15 +110,15 @@ namespace Microsoft.Build.UnitTests
             bool success;
             RunTask(t, out testFile, out success);
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(1, t.InPath.Length);
-            Assert.AreEqual(1, t.OutOfPath.Length);
-            Assert.AreEqual(testFile.FullName, t.InPath[0].ItemSpec);
-            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
+            Assert.True(success);
+            Assert.Equal(1, t.InPath.Length);
+            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Equal(testFile.FullName, t.InPath[0].ItemSpec);
+            Assert.Equal(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
                 t.OutOfPath[0].ItemSpec);
         }
 
-        [Test]
+        [Fact]
         public void VerifyFullPathNegative()
         {
             FindUnderPath t = new FindUnderPath();
@@ -130,11 +130,11 @@ namespace Microsoft.Build.UnitTests
             bool success;
             RunTask(t, out testFile, out success);
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(1, t.InPath.Length);
-            Assert.AreEqual(1, t.OutOfPath.Length);
-            Assert.AreEqual(testFile.Name, t.InPath[0].ItemSpec);
-            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
+            Assert.True(success);
+            Assert.Equal(1, t.InPath.Length);
+            Assert.Equal(1, t.OutOfPath.Length);
+            Assert.Equal(testFile.Name, t.InPath[0].ItemSpec);
+            Assert.Equal(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
                 t.OutOfPath[0].ItemSpec);
         }
     }

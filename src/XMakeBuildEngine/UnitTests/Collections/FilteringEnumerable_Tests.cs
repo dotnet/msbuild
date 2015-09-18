@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -8,20 +8,19 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using NUnit.Framework;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for FilteringEnumerable
     /// </summary>
-    [TestFixture]
     public class FilteringEnumerable_Tests
     {
         /// <summary>
         /// Verify basic case
         /// </summary>
-        [Test]
+        [Fact]
         public void FilteringEnumerableBasic()
         {
             A a1 = new A();
@@ -37,19 +36,19 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             var collection = new FilteringEnumerable<A, B>(list);
 
             List<B> result = new List<B>(collection);
-            Assert.AreEqual(2, result.Count);
+            Assert.Equal(2, result.Count);
         }
 
         /// <summary>
         /// Null collection should be like an empty collection
         /// (Seems useful for a general purpose class)
         /// </summary>
-        [Test]
+        [Fact]
         public void FilteringEnumerableNullBacking()
         {
             IEnumerable<B> enumerable = new FilteringEnumerable<A, B>(null);
 
-            Assert.AreEqual(false, enumerable.GetEnumerator().MoveNext());
+            Assert.Equal(false, enumerable.GetEnumerator().MoveNext());
         }
 
         /// <summary>

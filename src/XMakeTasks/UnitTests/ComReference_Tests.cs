@@ -1,15 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
+using System.Text;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class ComReference_Tests
     {
         private static Dictionary<string, string> s_existingFiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -36,21 +37,21 @@ namespace Microsoft.Build.UnitTests
             return ExistingFilesDictionary.ContainsKey(filepath);
         }
 
-        [Test]
+        [Fact]
         public void TestStripTypeLibNumber()
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Assert.Ignore("COM is only found on Windows");
+                return; // "COM is only found on Windows"
             }
 
-            Assert.AreEqual(@"C:\test\typelib1.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib1.dll", new FileExists(FileExistsMock)));
-            Assert.AreEqual(@"C:\test\typelib2\2.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib2\2.dll", new FileExists(FileExistsMock)));
-            Assert.AreEqual(@"C:\test\typelib3.\3dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib3.\3dll", new FileExists(FileExistsMock)));
-            Assert.AreEqual(@"C:\test\typelib4.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib4.dll\4", new FileExists(FileExistsMock)));
-            Assert.AreEqual(@"C:\test\typelib5.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib5.dll\555", new FileExists(FileExistsMock)));
-            Assert.AreEqual(@"", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib6.dll", new FileExists(FileExistsMock)));
-            Assert.AreEqual(@"", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib7.dll\7", new FileExists(FileExistsMock)));
+            Assert.Equal(@"C:\test\typelib1.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib1.dll", new FileExists(FileExistsMock)));
+            Assert.Equal(@"C:\test\typelib2\2.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib2\2.dll", new FileExists(FileExistsMock)));
+            Assert.Equal(@"C:\test\typelib3.\3dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib3.\3dll", new FileExists(FileExistsMock)));
+            Assert.Equal(@"C:\test\typelib4.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib4.dll\4", new FileExists(FileExistsMock)));
+            Assert.Equal(@"C:\test\typelib5.dll", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib5.dll\555", new FileExists(FileExistsMock)));
+            Assert.Equal(@"", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib6.dll", new FileExists(FileExistsMock)));
+            Assert.Equal(@"", ComReference.StripTypeLibNumberFromPath(@"C:\test\typelib7.dll\7", new FileExists(FileExistsMock)));
         }
     }
 }

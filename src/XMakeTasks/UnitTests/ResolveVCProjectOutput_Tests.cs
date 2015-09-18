@@ -7,7 +7,7 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
-using NUnit.Framework;
+
 
 namespace Microsoft.Build.UnitTests
 {

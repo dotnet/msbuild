@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -11,20 +11,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using NUnit.Framework;
+
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System.IO;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Unit Tests for TaskHostConfiguration packet.
     /// </summary>
-    [TestFixture]
     public class TaskHostConfiguration_Tests
     {
         /// <summary>
@@ -35,47 +35,55 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that an exception is thrown when the task name is null. 
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void ConstructorWithNullName()
         {
-            TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, null, @"c:\my tasks\mytask.dll", null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, null, @"c:\my tasks\mytask.dll", null);
+            }
+           );
         }
-
         /// <summary>
         /// Test that an exception is thrown when the task name is empty. 
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void ConstructorWithEmptyName()
         {
-            TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, String.Empty, @"c:\my tasks\mytask.dll", null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, String.Empty, @"c:\my tasks\mytask.dll", null);
+            }
+           );
         }
-
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is null
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void ConstructorWithNullLocation()
         {
-            TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", null, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", null, null);
+            }
+           );
         }
-
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is empty
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
+        [Fact]
         public void ConstructorWithEmptyLocation()
         {
-            TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", String.Empty, null);
+            Assert.Throws<InternalErrorException>(() =>
+            {
+                TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", String.Empty, null);
+            }
+           );
         }
-
         /// <summary>
         /// Test the valid constructors.  
         /// </summary>
-        [Test]
+        [Fact]
         public void TestValidConstructors()
         {
             TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", @"c:\MyTasks\MyTask.dll", null);
@@ -96,7 +104,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is null. 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestTranslationWithNullDictionary()
         {
             TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", @"c:\MyTasks\MyTask.dll", null);
@@ -106,15 +114,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
-            Assert.AreEqual(config.TaskName, deserializedConfig.TaskName);
-            Assert.AreEqual(config.TaskLocation, config.TaskLocation);
-            Assert.IsNull(deserializedConfig.TaskParameters);
+            Assert.Equal(config.TaskName, deserializedConfig.TaskName);
+            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.Null(deserializedConfig.TaskParameters);
         }
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is empty. 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestTranslationWithEmptyDictionary()
         {
             TaskHostConfiguration config = new TaskHostConfiguration(1, Directory.GetCurrentDirectory(), null, Thread.CurrentThread.CurrentCulture, Thread.CurrentThread.CurrentUICulture, null, 1, 1, @"c:\my project\myproj.proj", _continueOnErrorDefault, "TaskName", @"c:\MyTasks\MyTask.dll", new Dictionary<string, object>());
@@ -124,16 +132,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
-            Assert.AreEqual(config.TaskName, deserializedConfig.TaskName);
-            Assert.AreEqual(config.TaskLocation, config.TaskLocation);
-            Assert.IsNotNull(deserializedConfig.TaskParameters);
-            Assert.AreEqual(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
+            Assert.Equal(config.TaskName, deserializedConfig.TaskName);
+            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.NotNull(deserializedConfig.TaskParameters);
+            Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
         }
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains just value types. 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestTranslationWithValueTypesInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -146,18 +154,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
-            Assert.AreEqual(config.TaskName, deserializedConfig.TaskName);
-            Assert.AreEqual(config.TaskLocation, config.TaskLocation);
-            Assert.IsNotNull(deserializedConfig.TaskParameters);
-            Assert.AreEqual(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
-            Assert.AreEqual(config.TaskParameters["Text"].WrappedParameter, deserializedConfig.TaskParameters["Text"].WrappedParameter);
-            Assert.AreEqual(config.TaskParameters["BoolValue"].WrappedParameter, deserializedConfig.TaskParameters["BoolValue"].WrappedParameter);
+            Assert.Equal(config.TaskName, deserializedConfig.TaskName);
+            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.NotNull(deserializedConfig.TaskParameters);
+            Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
+            Assert.Equal(config.TaskParameters["Text"].WrappedParameter, deserializedConfig.TaskParameters["Text"].WrappedParameter);
+            Assert.Equal(config.TaskParameters["BoolValue"].WrappedParameter, deserializedConfig.TaskParameters["BoolValue"].WrappedParameter);
         }
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem. 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestTranslationWithITaskItemInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -169,17 +177,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
-            Assert.AreEqual(config.TaskName, deserializedConfig.TaskName);
-            Assert.AreEqual(config.TaskLocation, config.TaskLocation);
-            Assert.IsNotNull(deserializedConfig.TaskParameters);
-            Assert.AreEqual(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
+            Assert.Equal(config.TaskName, deserializedConfig.TaskName);
+            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.NotNull(deserializedConfig.TaskParameters);
+            Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
             TaskHostPacketHelpers.AreEqual((ITaskItem)config.TaskParameters["TaskItemValue"].WrappedParameter, (ITaskItem)deserializedConfig.TaskParameters["TaskItemValue"].WrappedParameter);
         }
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestTranslationWithITaskItemArrayInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -191,10 +199,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 
-            Assert.AreEqual(config.TaskName, deserializedConfig.TaskName);
-            Assert.AreEqual(config.TaskLocation, config.TaskLocation);
-            Assert.IsNotNull(deserializedConfig.TaskParameters);
-            Assert.AreEqual(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
+            Assert.Equal(config.TaskName, deserializedConfig.TaskName);
+            Assert.Equal(config.TaskLocation, config.TaskLocation);
+            Assert.NotNull(deserializedConfig.TaskParameters);
+            Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
 
             ITaskItem[] itemArray = (ITaskItem[])config.TaskParameters["TaskItemArrayValue"].WrappedParameter;
             ITaskItem[] deserializedItemArray = (ITaskItem[])deserializedConfig.TaskParameters["TaskItemArrayValue"].WrappedParameter;
@@ -219,12 +227,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (x == null || y == null)
                 {
-                    Assert.Fail("The two item lists are not equal -- one of them is null");
+                    Assert.True(false, "The two item lists are not equal -- one of them is null");
                 }
 
                 if (x.Length != y.Length)
                 {
-                    Assert.Fail("The two item lists have different lengths, so they cannot be equal");
+                    Assert.True(false, "The two item lists have different lengths, so they cannot be equal");
                 }
 
                 for (int i = 0; i < x.Length; i++)
@@ -245,35 +253,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (x == null || y == null)
                 {
-                    Assert.Fail("The two items are not equal -- one of them is null");
+                    Assert.True(false, "The two items are not equal -- one of them is null");
                 }
 
-                Assert.AreEqual(x.ItemSpec, y.ItemSpec);
+                Assert.Equal(x.ItemSpec, y.ItemSpec);
 
                 IDictionary metadataFromX = x.CloneCustomMetadata();
                 IDictionary metadataFromY = y.CloneCustomMetadata();
 
-                if (x == null && y == null)
-                {
-                    return;
-                }
-
-                if (x == null || y == null)
-                {
-                    Assert.Fail("The two items are not equal -- one of them is null");
-                }
-
-                Assert.AreEqual(metadataFromX.Count, metadataFromY.Count);
+                Assert.Equal(metadataFromX.Count, metadataFromY.Count);
 
                 foreach (object metadataName in metadataFromX.Keys)
                 {
                     if (!metadataFromY.Contains(metadataName))
                     {
-                        Assert.Fail("Only one item contains the '{0}' metadata", metadataName.ToString());
+                        Assert.True(false, string.Format("Only one item contains the '{0}' metadata", metadataName));
                     }
                     else
                     {
-                        Assert.AreEqual(metadataFromX[metadataName], metadataFromY[metadataName]);
+                        Assert.Equal(metadataFromX[metadataName], metadataFromY[metadataName]);
                     }
                 }
             }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -26,15 +26,16 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
-using NUnit.Framework;
+using Microsoft.Build.Construction;
+using System.Diagnostics;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// The test fixture for the BuildManager
     /// </summary>
-    [TestFixture]
-    public class BuildManager_Tests
+    public class BuildManager_Tests : IDisposable
     {
         /// <summary>
         /// The mock logger for testing.
@@ -59,8 +60,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// SetUp
         /// </summary>
-        [SetUp]
-        public void SetUp()
+        public BuildManager_Tests()
         {
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
@@ -80,8 +80,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// TearDown
         /// </summary>
-        [TearDown]
-        public void TearDown()
+        public void Dispose()
         {
             Environment.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", null);
             if (_buildManager != null)
@@ -94,17 +93,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Check that we behave reasonably when passed a null ProjectCollection
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void BuildParametersWithNullCollection()
         {
-            BuildParameters parameters = new BuildParameters(null);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                BuildParameters parameters = new BuildParameters(null);
+            }
+           );
         }
-
         /// <summary>
         /// A simple successful build.
         /// </summary>
-        [Test]
+        [Fact]
         public void SimpleBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -121,31 +122,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
             BuildRequestData data = GetBuildRequestData(contents);
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
+            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
             string propertyValue = null;
-            Assert.IsTrue(properties.TryGetValue("InitialProperty1", out propertyValue));
-            Assert.IsTrue(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
+            Assert.True(properties.TryGetValue("InitialProperty1", out propertyValue));
+            Assert.True(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
 
             propertyValue = null;
-            Assert.IsTrue(properties.TryGetValue("InitialProperty2", out propertyValue));
-            Assert.IsTrue(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
+            Assert.True(properties.TryGetValue("InitialProperty2", out propertyValue));
+            Assert.True(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
 
             propertyValue = null;
-            Assert.IsTrue(properties.TryGetValue("InitialProperty3", out propertyValue));
-            Assert.IsTrue(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+            Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
+            Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Verify that the environment between two msbuild calls to the same project are stored
         /// so that on the next call we get access to them
         /// </summary>
-        [Test]
+        [Fact]
         public void VerifyEnvironmentSavedBetweenCalls()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -184,7 +185,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(instance, new[] { "Build" }, _projectCollection.HostServices);
 
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("What does a cat say : When the dawn comes, tonight will be a memory too");
             }
             finally
@@ -201,7 +202,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// The final number of nodes has to be less or equal the number of nodes already in 
         /// the system before this method was called.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void ShutdownNodesAfterParallelBuild()
         {
             ProjectCollection projectCollection = new ProjectCollection();
@@ -237,7 +238,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Number of nodes after the build has to be greater than the original number
             int numberProcsAfterBuild = (new List<Process>(Process.GetProcessesByName("MSBuild"))).Count;
-            Assert.IsTrue(numberProcsOriginally < numberProcsAfterBuild);
+            Assert.True(numberProcsOriginally < numberProcsAfterBuild);
 
             // Shutdown all nodes
             shutdownManager.ShutdownAllNodes();
@@ -247,7 +248,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Number of nodes after the shutdown has to be smaller or equal the original number
             int numberProcsAfterShutdown = (new List<Process>(Process.GetProcessesByName("MSBuild"))).Count;
-            Assert.IsTrue(numberProcsAfterShutdown <= numberProcsOriginally);
+            Assert.True(numberProcsAfterShutdown <= numberProcsOriginally);
 
             // Delete directory with the dummy project
             if (Directory.Exists(shutdownProjectDirectory))
@@ -259,7 +260,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void SimpleBuildOutOfProcess()
         {
             RunOutOfProcBuild(_ => Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1"));
@@ -268,7 +269,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only. Triggered by setting build parameters' DisableInProcNode to true.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void DisableInProcNode()
         {
             RunOutOfProcBuild(buildParameters => buildParameters.DisableInProcNode = true);
@@ -314,11 +315,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TargetResult targetresult = result.ResultsByTarget["test"];
                 ITaskItem[] item = targetresult.Items;
 
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
-                Assert.AreEqual(3, item.Length);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(3, item.Length);
                 int processId;
-                Assert.IsTrue(int.TryParse(item[2].ItemSpec, out processId), "Process ID passed from the 'test' target is not a valid integer (actual is '{0}')", item[2].ItemSpec);
-                Assert.AreNotEqual(Process.GetCurrentProcess().Id, processId, "Build is expected to be out-of-proc. In fact it was in-proc.");
+                Assert.True(int.TryParse(item[2].ItemSpec, out processId), string.Format("Process ID passed from the 'test' target is not a valid integer (actual is '{0}')", item[2].ItemSpec));
+                Assert.NotEqual(Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
             }
             finally
             {
@@ -336,7 +337,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when we are doing an in-process build that even if the environment variable MSBUILDFORWARDPROPERTIESFROMCHILD is set that we still 
         /// get all of the initial properties.
         /// </summary>
-        [Test]
+        [Fact]
         public void InProcForwardPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -358,24 +359,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("MSBuildForwardPropertiesFromChild", "InitialProperty2;IAMNOTREAL");
                 BuildRequestData data = GetBuildRequestData(contents);
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
-                Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
+                Assert.Equal(1, _logger.ProjectStartedEvents.Count);
 
                 ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
                 Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
                 string propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty1", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty1", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
 
                 propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty2", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty2", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
 
                 propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty3", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -387,7 +388,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when we are doing an inprocess build that even if the environment variable MsBuildForwardAllPropertiesFromChild is set that we still
         /// get all of the initial properties.
         /// </summary>
-        [Test]
+        [Fact]
         public void InProcMsBuildForwardAllPropertiesFromChild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -409,24 +410,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("MsBuildForwardAllPropertiesFromChild", "InitialProperty2;IAMNOTREAL");
                 BuildRequestData data = GetBuildRequestData(contents);
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
-                Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
+                Assert.Equal(1, _logger.ProjectStartedEvents.Count);
 
                 ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
                 Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
                 string propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty1", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty1", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
 
                 propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty2", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty2", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
 
                 propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty3", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -438,7 +439,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when we launch a child node and set MsBuildForwardAllPropertiesFromChild that we get all of our properties. This needs to happen 
         /// even if the msbuildforwardpropertiesfromchild is set to something.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void MsBuildForwardAllPropertiesFromChildLaunchChildNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -466,24 +467,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 tempFile = project.FullPath;
                 BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
-                Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
+                Assert.Equal(1, _logger.ProjectStartedEvents.Count);
 
                 ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
                 Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
                 string propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty1", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty1", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty1", StringComparison.OrdinalIgnoreCase));
 
                 propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty2", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty2", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty2", StringComparison.OrdinalIgnoreCase));
 
                 propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty3", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -502,7 +503,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to a value and
         /// we launch a child node that we get only that value.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void OutOfProcNodeForwardCertainproperties()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -529,18 +530,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
 
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
-                Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
+                Assert.Equal(1, _logger.ProjectStartedEvents.Count);
 
                 ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
                 Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
-                Assert.IsTrue(properties.Count == 1);
+                Assert.Equal(1, properties.Count);
 
                 string propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty3", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -559,8 +560,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get only that value. Also, make sure that when a project is pulled from the results cache
         /// and we have a list of properties to serialize that we do not crash. This is to prevent a regression of 826594
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void OutOfProcNodeForwardCertainPropertiesAlsoGetResultsFromCache()
+        [Fact(Skip = "Test fails in xunit when multiple tests are run")]
+        public void OutOfProcNodeForwardCertainpropertiesAlsoGetResultsFromCache()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
@@ -600,21 +601,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
 
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
-                Assert.IsTrue(_logger.ProjectStartedEvents.Count == 3);
+                Assert.Equal(3, _logger.ProjectStartedEvents.Count);
 
                 ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[1];
+
+                // After conversion to xunit, this test sometimes fails at this assertion.
+                // Related to shared state that the test touches that's getting handled
+                // differently in xunit?
+                Assert.NotNull(projectStartedEvent.Properties);
+
                 Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
-                Assert.IsTrue(properties.Count == 1);
+                Assert.NotNull(properties);
+                Assert.Equal(1, properties.Count);
 
                 string propertyValue = null;
-                Assert.IsTrue(properties.TryGetValue("InitialProperty3", out propertyValue));
-                Assert.IsTrue(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+                Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
+                Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
 
                 projectStartedEvent = _logger.ProjectStartedEvents[2];
-                Assert.IsNull(projectStartedEvent.Properties);
+                Assert.Null(projectStartedEvent.Properties);
             }
             finally
             {
@@ -637,7 +645,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to empty and
         /// we launch a child node that we get no properties
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip="FEATURE: OOP NODES")]
         public void ForwardNoPropertiesLaunchChildNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -663,14 +671,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 tempFile = project.FullPath;
                 BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
                 _logger.AssertLogContains("[success]");
-                Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
+                Assert.Equal(1, _logger.ProjectStartedEvents.Count);
 
                 ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
                 Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-                Assert.IsNull(properties);
+                Assert.Null(properties);
             }
             finally
             {
@@ -689,7 +697,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// defined on the parent are also available on the child nodes for tasks which use the global project
         /// collection
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void VerifyCustomToolSetsPropagated()
         {
             string netFrameworkDirectory = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
@@ -745,7 +753,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildParameters customParameters = new BuildParameters(projectCollection);
                 customParameters.Loggers = new ILogger[] { _logger };
                 BuildResult result = _buildManager.Build(customParameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
             }
             finally
             {
@@ -762,7 +770,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// When a child node is launched by default we should not send any properties.
         /// we launch a child node that we get no properties
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip="FEATURE: OOP NODES")]
         public void ForwardNoPropertiesLaunchChildNodeDefault()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -789,13 +797,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequestData data = new BuildRequestData(tempFile, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[] { }, null);
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
-                Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
+                Assert.Equal(1, _logger.ProjectStartedEvents.Count);
 
                 ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
                 Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-                Assert.IsNull(properties);
+                Assert.Null(properties);
             }
             finally
             {
@@ -812,7 +820,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple failing build.
         /// </summary>
-        [Test]
+        [Fact]
         public void SimpleBuildWithFailure()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -824,7 +832,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
             BuildRequestData data = GetBuildRequestData(contents);
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
             _logger.AssertLogContains("[fail]");
         }
 
@@ -832,7 +840,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A build with a message, error and warning, verify that 
         /// we only get errors, warnings, and project started and finished when OnlyLogCriticalEvents is true
         /// </summary>
-        [Test]
+        [Fact]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsTrue()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -848,25 +856,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestData data = GetBuildRequestData(contents);
             _parameters.OnlyLogCriticalEvents = true;
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
             _logger.AssertLogContains("[fail]");
             _logger.AssertLogContains("[warn]");
             _logger.AssertLogDoesntContain("[message]");
-            Assert.IsTrue(_logger.BuildStartedEvents.Count == 1);
-            Assert.IsTrue(_logger.BuildFinishedEvents.Count == 1);
-            Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
-            Assert.IsTrue(_logger.ProjectFinishedEvents.Count == 1);
-            Assert.IsTrue(_logger.TargetStartedEvents.Count == 0);
-            Assert.IsTrue(_logger.TargetFinishedEvents.Count == 0);
-            Assert.IsTrue(_logger.TaskStartedEvents.Count == 0);
-            Assert.IsTrue(_logger.TaskFinishedEvents.Count == 0);
+            Assert.Equal(1, _logger.BuildStartedEvents.Count);
+            Assert.Equal(1, _logger.BuildFinishedEvents.Count);
+            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Equal(1, _logger.ProjectFinishedEvents.Count);
+            Assert.Equal(0, _logger.TargetStartedEvents.Count);
+            Assert.Equal(0, _logger.TargetFinishedEvents.Count);
+            Assert.Equal(0, _logger.TaskStartedEvents.Count);
+            Assert.Equal(0, _logger.TaskFinishedEvents.Count);
         }
 
         /// <summary>
         /// A build with a message, error and warning, verify that 
         /// we only get errors, warnings, messages, task and target messages OnlyLogCriticalEvents is false
         /// </summary>
-        [Test]
+        [Fact]
         public void SimpleBuildWithFailureAndWarningOnlyLogCriticalEventsFalse()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -882,53 +890,59 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestData data = GetBuildRequestData(contents);
             _parameters.OnlyLogCriticalEvents = false;
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
             _logger.AssertLogContains("[fail]");
             _logger.AssertLogContains("[warn]");
             _logger.AssertLogContains("[message]");
-            Assert.IsTrue(_logger.BuildStartedEvents.Count == 1);
-            Assert.IsTrue(_logger.BuildFinishedEvents.Count == 1);
-            Assert.IsTrue(_logger.ProjectStartedEvents.Count == 1);
-            Assert.IsTrue(_logger.ProjectFinishedEvents.Count == 1);
-            Assert.IsTrue(_logger.TargetStartedEvents.Count == 1);
-            Assert.IsTrue(_logger.TargetFinishedEvents.Count == 1);
-            Assert.IsTrue(_logger.TaskStartedEvents.Count == 3);
-            Assert.IsTrue(_logger.TaskFinishedEvents.Count == 3);
+            Assert.Equal(1, _logger.BuildStartedEvents.Count);
+            Assert.Equal(1, _logger.BuildFinishedEvents.Count);
+            Assert.Equal(1, _logger.ProjectStartedEvents.Count);
+            Assert.Equal(1, _logger.ProjectFinishedEvents.Count);
+            Assert.Equal(1, _logger.TargetStartedEvents.Count);
+            Assert.Equal(1, _logger.TargetFinishedEvents.Count);
+            Assert.Equal(3, _logger.TaskStartedEvents.Count);
+            Assert.Equal(3, _logger.TaskFinishedEvents.Count);
         }
 
         /// <summary>
         /// Submitting a synchronous build request before calling BeginBuild yields an InvalidOperationException.
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void BuildRequestWithoutBegin()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-            BuildResult result = _buildManager.BuildRequest(data);
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+                BuildResult result = _buildManager.BuildRequest(data);
+            }
+           );
         }
-
         /// <summary>
         /// Pending a build request before calling BeginBuild yields an InvalidOperationException.
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void PendBuildRequestWithoutBegin()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-            BuildSubmission submission = _buildManager.PendBuildRequest(data);
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+                BuildSubmission submission = _buildManager.PendBuildRequest(data);
+            }
+           );
         }
-
         /// <summary>
         /// Calling EndBuild before BeginBuild yields an InvalidOperationException.
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void EndWithoutBegin()
         {
-            _buildManager.EndBuild();
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                _buildManager.EndBuild();
+            }
+           );
         }
-
-        [Test]
+        [Fact]
         public void DisposeAfterUse()
         {
             string project = FrameworkLocationHelper.PathToDotNetFrameworkV45 + "\\Microsoft.Common.targets";
@@ -941,7 +955,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Test]
+        [Fact]
         public void DisposeWithoutUse()
         {
             var bm = new BuildManager();
@@ -951,7 +965,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Calling BeginBuild after BeginBuild has already been called yields an InvalidOperationException.
         /// </summary>
-        [Test]
+        [Fact]
         public void OverlappingBegin()
         {
             try
@@ -968,7 +982,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     exceptionCaught = true;
                 }
 
-                Assert.IsTrue(exceptionCaught);
+                Assert.True(exceptionCaught);
             }
             finally
             {
@@ -980,46 +994,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Starting and ending a build without submitting any requests is valid.
         /// </summary>
-        [Test]
+        [Fact]
         public void EmptyBuild()
         {
             _buildManager.BeginBuild(_parameters);
             _buildManager.EndBuild();
 
-            Assert.AreEqual(0, _logger.ErrorCount);
-            Assert.AreEqual(0, _logger.WarningCount);
+            Assert.Equal(0, _logger.ErrorCount);
+            Assert.Equal(0, _logger.WarningCount);
         }
 
         /// <summary>
         /// Calling EndBuild after it has already been called yields an InvalidOperationException.
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void ExtraEnds()
         {
-            _buildManager.BeginBuild(new BuildParameters());
-            _buildManager.EndBuild();
-            _buildManager.EndBuild();
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                _buildManager.BeginBuild(new BuildParameters());
+                _buildManager.EndBuild();
+                _buildManager.EndBuild();
+            }
+           );
         }
-
         /// <summary>
         /// Pending a request after EndBuild has been called yields an InvalidOperationException.
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void PendBuildRequestAfterEnd()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-            _buildManager.BeginBuild(new BuildParameters());
-            _buildManager.EndBuild();
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+                _buildManager.BeginBuild(new BuildParameters());
+                _buildManager.EndBuild();
 
-            BuildSubmission submission = _buildManager.PendBuildRequest(data);
+                BuildSubmission submission = _buildManager.PendBuildRequest(data);
+            }
+           );
         }
-
         /// <summary>
         /// Attempting a synchronous build when a build is in progress yields an InvalidOperationException.
         /// </summary>
-        [Test]
+        [Fact]
         public void BuildDuringBuild()
         {
             try
@@ -1036,7 +1054,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     exceptionCaught = true;
                 }
 
-                Assert.IsTrue(exceptionCaught);
+                Assert.True(exceptionCaught);
             }
             finally
             {
@@ -1048,7 +1066,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A sequential build.
         /// </summary>
-        [Test]
+        [Fact]
         public void EndBuildBlocks()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1064,16 +1082,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.BeginBuild(_parameters);
             BuildSubmission submission1 = _buildManager.PendBuildRequest(data);
             submission1.ExecuteAsync(null, null);
-            Assert.IsFalse(submission1.IsCompleted);
+            Assert.False(submission1.IsCompleted);
             _buildManager.EndBuild();
-            Assert.IsTrue(submission1.IsCompleted);
+            Assert.True(submission1.IsCompleted);
             _logger.AssertLogContains("[success 1]");
         }
 
         /// <summary>
         /// Validate that EndBuild can be called during a submission completion callback.
         /// </summary>
-        [Test]
+        [Fact]
         public void EndBuildCalledWithinSubmissionCallback()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1098,7 +1116,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null);
 
             // Wait for the build to finish
-            Assert.IsTrue(callbackFinished.WaitOne(5000), "Build is hung.");
+            Assert.True(callbackFinished.WaitOne(5000)); // "Build is hung."
 
             // EndBuild should now have been called, so invoking it again should give us an invalid operation error.
             bool invalidOperationReceived = false;
@@ -1111,13 +1129,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 invalidOperationReceived = true;
             }
 
-            Assert.IsTrue(invalidOperationReceived);
+            Assert.True(invalidOperationReceived);
         }
 
         /// <summary>
         /// A sequential build.
         /// </summary>
-        [Test]
+        [Fact]
         public void SequentialBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1140,10 +1158,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestData data2 = GetBuildRequestData(contents2);
             _buildManager.BeginBuild(_parameters);
             BuildResult result = _buildManager.BuildRequest(data);
-            Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
             BuildResult result2 = _buildManager.BuildRequest(data2);
-            Assert.AreEqual(BuildResultCode.Success, result2.OverallResult);
+            Assert.Equal(BuildResultCode.Success, result2.OverallResult);
             _buildManager.EndBuild();
 
             _logger.AssertLogContains("[success 1]");
@@ -1153,7 +1171,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A sequential build.
         /// </summary>
-        [Test]
+        [Fact]
         public void OverlappingBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1183,8 +1201,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = submission1.BuildResult;
             _buildManager.EndBuild();
 
-            Assert.AreEqual(BuildResultCode.Success, result2.OverallResult);
-            Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+            Assert.Equal(BuildResultCode.Success, result2.OverallResult);
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
             _logger.AssertLogContains("[success 1]");
             _logger.AssertLogContains("[success 2]");
@@ -1195,8 +1213,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// target involved that skipped, make sure that the second one successfully completes 
         /// (retrieved from the cache). 
         /// </summary>
-        [Test]
-        [Timeout(10000)] // this initially caused a hang
+        [Fact]
         public void OverlappingIdenticalBuildSubmissions()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1220,8 +1237,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _buildManager.EndBuild();
 
-            Assert.AreEqual(BuildResultCode.Success, submission1.BuildResult.OverallResult);
-            Assert.AreEqual(BuildResultCode.Success, submission2.BuildResult.OverallResult);
+            Assert.Equal(BuildResultCode.Success, submission1.BuildResult.OverallResult);
+            Assert.Equal(BuildResultCode.Success, submission2.BuildResult.OverallResult);
         }
 
         /// <summary>
@@ -1230,7 +1247,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// the target.  (E.g. despite the fact that the target results are in the cache already 
         /// as 'skipped', ensure that we retry execution in case conditions have changed.)
         /// </summary>
-        [Test]
+        [Fact]
         public void OverlappingBuildSubmissions_OnlyOneSucceeds()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1271,14 +1288,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _buildManager.EndBuild();
 
-            Assert.AreEqual(BuildResultCode.Success, submission1.BuildResult.OverallResult);
-            Assert.AreEqual(BuildResultCode.Failure, submission2.BuildResult.OverallResult);
+            Assert.Equal(BuildResultCode.Success, submission1.BuildResult.OverallResult);
+            Assert.Equal(BuildResultCode.Failure, submission2.BuildResult.OverallResult);
         }
 
         /// <summary>
         /// Calling EndBuild with an unexecuted submission.
         /// </summary>
-        [Test]
+        [Fact]
         public void EndWithUnexecutedSubmission()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1298,7 +1315,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A canceled build with a submission which is not executed yet.
         /// </summary>
-        [Test]
+        [Fact]
         public void CancelledBuildWithUnexecutedSubmission()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1319,7 +1336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A cancelled build
         /// </summary>
-        [Test]
+        [Fact]
         public void CancelledBuild()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1342,7 +1359,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             DateTime endTime = DateTime.Now;
             _buildManager.EndBuild();
 
-            Assert.AreEqual(BuildResultCode.Failure, result.OverallResult, "Build should have failed.");
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
             _logger.AssertLogDoesntContain("[fail]");
         }
 
@@ -1350,7 +1367,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
-        [Test]
+        [Fact]
         public void CancelledBuildWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1374,7 +1391,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult result = asyncResult.BuildResult;
                 _buildManager.EndBuild();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult, "Build should have failed.");
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
                 _logger.AssertLogDoesntContain("[fail]");
             }
         }
@@ -1383,7 +1400,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 2.0 task, we should
         /// wait until the task finishes normally (cancellation not supported.)
         /// </summary>
-        [Test]
+        [Fact]
         public void CancelledBuildInTaskHostWithDelay20()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
@@ -1408,7 +1425,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult result = asyncResult.BuildResult;
                 _buildManager.EndBuild();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult, "Build should have failed.");
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
                 _logger.AssertLogDoesntContain("[fail]");
 
                 // Task host should not have exited prematurely
@@ -1420,7 +1437,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.. task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
-        [Test]
+        [Fact]
         public void CancelledBuildWithDelay40()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1442,7 +1459,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = asyncResult.BuildResult;
             _buildManager.EndBuild();
 
-            Assert.AreEqual(BuildResultCode.Failure, result.OverallResult, "Build should have failed.");
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
             _logger.AssertLogDoesntContain("[fail]");
         }
 
@@ -1450,7 +1467,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.0 task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
         /// </summary>
-        [Test]
+        [Fact]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1473,7 +1490,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = asyncResult.BuildResult;
             _buildManager.EndBuild();
 
-            Assert.AreEqual(BuildResultCode.Failure, result.OverallResult, "Build should have failed.");
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
             _logger.AssertLogDoesntContain("[fail]");
 
             // Task host should not have exited prematurely
@@ -1483,7 +1500,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that builds of the same project instance in sequence are permitted.
         /// </summary>
-        [Test]
+        [Fact]
         public void SequentialBuildsOfTheSameProjectAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1503,16 +1520,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result2 = _buildManager.BuildRequest(new BuildRequestData(instance, new string[] { "target2" }));
             _buildManager.EndBuild();
 
-            Assert.AreEqual(BuildResultCode.Success, result1.OverallResult);
-            Assert.IsTrue(result1.HasResultsForTarget("target1"), "Results for target1 missing");
-            Assert.AreEqual(BuildResultCode.Success, result2.OverallResult);
-            Assert.IsTrue(result2.HasResultsForTarget("target2"), "Results for target2 missing");
+            Assert.Equal(BuildResultCode.Success, result1.OverallResult);
+            Assert.True(result1.HasResultsForTarget("target1")); // "Results for target1 missing"
+            Assert.Equal(BuildResultCode.Success, result2.OverallResult);
+            Assert.True(result2.HasResultsForTarget("target2")); // "Results for target2 missing"
         }
 
         /// <summary>
         /// This test verifies that overlapping builds of the same project are allowed.
         /// </summary>
-        [Test]
+        [Fact]
         public void OverlappingBuildsOfTheSameProjectDifferentTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1538,10 +1555,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 submission.WaitHandle.WaitOne();
                 var result1 = submission.BuildResult;
 
-                Assert.AreEqual(BuildResultCode.Success, result1.OverallResult);
-                Assert.IsTrue(result1.HasResultsForTarget("target1"), "Results for target1 missing");
-                Assert.AreEqual(BuildResultCode.Success, result2.OverallResult);
-                Assert.IsTrue(result2.HasResultsForTarget("target2"), "Results for target2 missing");
+                Assert.Equal(BuildResultCode.Success, result1.OverallResult);
+                Assert.True(result1.HasResultsForTarget("target1")); // "Results for target1 missing"
+                Assert.Equal(BuildResultCode.Success, result2.OverallResult);
+                Assert.True(result2.HasResultsForTarget("target2")); // "Results for target2 missing"
             }
             finally
             {
@@ -1552,7 +1569,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that overlapping builds of the same project are allowed.
         /// </summary>
-        [Test]
+        [Fact]
         public void OverlappingBuildsOfTheSameProjectSameTargetsAreAllowed()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1578,10 +1595,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 submission.WaitHandle.WaitOne();
                 var result1 = submission.BuildResult;
 
-                Assert.AreEqual(BuildResultCode.Success, result1.OverallResult);
-                Assert.IsTrue(result1.HasResultsForTarget("target1"), "Results for target1 missing");
-                Assert.AreEqual(BuildResultCode.Success, result2.OverallResult);
-                Assert.IsTrue(result2.HasResultsForTarget("target1"), "Results for target1 (second call) missing");
+                Assert.Equal(BuildResultCode.Success, result1.OverallResult);
+                Assert.True(result1.HasResultsForTarget("target1")); // "Results for target1 missing"
+                Assert.Equal(BuildResultCode.Success, result2.OverallResult);
+                Assert.True(result2.HasResultsForTarget("target1")); // "Results for target1 (second call) missing"
             }
             finally
             {
@@ -1592,7 +1609,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that the out-of-proc node won't lock the directory containing the target project.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void OutOfProcNodeDoesntLockWorkingDirectory()
         {
             string tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -1620,13 +1637,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             Directory.Delete(tempDir, true);
-            Assert.IsFalse(Directory.Exists(tempDir), "Temp directory should no longer exist.");
+            Assert.False(Directory.Exists(tempDir)); // "Temp directory should no longer exist."
         }
 
         /// <summary>
         /// Retrieving a ProjectInstance from the BuildManager stores it in the cache
         /// </summary>
-        [Test]
+        [Fact]
         public void ProjectInstanceStoredInCache()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1640,13 +1657,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             ProjectInstance instance2 = _buildManager.GetProjectInstanceForBuild(project);
 
-            Assert.IsTrue(ReferenceEquals(instance, instance2), "Instances don't match");
+            Assert.True(Object.ReferenceEquals(instance, instance2)); // "Instances don't match"
         }
 
         /// <summary>
         /// Retrieving a ProjectInstance from the BuildManager after a build.
         /// </summary>
-        [Test]
+        [Fact]
         public void ProjectInstanceRetrievedAfterBuildMatchesSourceProject()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1666,13 +1683,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Project project = _projectCollection.LoadProject(data.ProjectFullPath);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
-            Assert.AreEqual(instance.GetPropertyValue("Foo"), "bar");
+            Assert.Equal(instance.GetPropertyValue("Foo"), "bar");
         }
 
         /// <summary>
         /// Retrieving a ProjectInstance after resetting the cache clears the instances.
         /// </summary>
-        [Test]
+        [Fact]
         public void ResetCacheClearsInstances()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1692,19 +1709,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Project project = _projectCollection.LoadProject(data.ProjectFullPath);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
-            Assert.AreEqual("bar", instance.GetPropertyValue("Foo"));
+            Assert.Equal("bar", instance.GetPropertyValue("Foo"));
 
             _buildManager.BeginBuild(_parameters);
             _buildManager.EndBuild();
 
             instance = _buildManager.GetProjectInstanceForBuild(project);
-            Assert.IsNull(instance.GetProperty("Foo"));
+            Assert.Null(instance.GetProperty("Foo"));
         }
 
         /// <summary>
         /// Retrieving a ProjectInstance after another build without resetting the cache keeps the existing instance
         /// </summary>
-        [Test]
+        [Fact]
         public void DisablingCacheResetKeepsInstance()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1724,7 +1741,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Project project = _projectCollection.LoadProject(data.ProjectFullPath);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
-            Assert.AreEqual(instance.GetPropertyValue("Foo"), "bar");
+            Assert.Equal(instance.GetPropertyValue("Foo"), "bar");
 
             _logger.ClearLog();
             _parameters.ResetCaches = false;
@@ -1734,16 +1751,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // We should have built the same instance, with the same results, so the target will be skipped.
             string skippedMessage = ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "test");
-            Assert.AreEqual(true, _logger.FullLog.Contains(skippedMessage));
+            Assert.Equal(true, _logger.FullLog.Contains(skippedMessage));
 
             ProjectInstance instance2 = _buildManager.GetProjectInstanceForBuild(project);
-            Assert.IsTrue(Object.ReferenceEquals(instance, instance2), "Instances are not the same");
+            Assert.True(Object.ReferenceEquals(instance, instance2)); // "Instances are not the same"
         }
 
         /// <summary>
         /// Retrieving a ProjectInstance after another build without resetting the cache keeps the existing instance
         /// </summary>
-        [Test]
+        [Fact]
         public void GhostProjectRootElementCache()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -1823,7 +1840,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies that explicitly loaded projects' imports are all marked as also explicitly loaded.
         /// </summary>
-        [Test]
+        [Fact]
         public void VerifyImportedProjectRootElementsInheritExplicitLoadFlag()
         {
             string contents1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -1862,15 +1879,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _buildManager.ResetCaches();
 
                 // The semantic of TryOpen is to only retrieve the PRE if it is already in the weak cache.
-                Assert.IsNull(Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection), "The built project shouldn't be in the cache anymore.");
-                Assert.IsNull(Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection), "The built project's import shouldn't be in the cache anymore.");
+                Assert.Null(Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The built project shouldn't be in the cache anymore."
+                Assert.Null(Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The built project's import shouldn't be in the cache anymore."
 
                 Project project = projectCollection.LoadProject(rootProjectPath);
                 Microsoft.Build.Construction.ProjectRootElement preRoot, preImported;
-                Assert.IsNotNull(preRoot = Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection), "The root project file should be in the weak cache.");
-                Assert.IsNotNull(preImported = Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection), "The imported project file should be in the weak cache.");
-                Assert.IsTrue(preRoot.IsExplicitlyLoaded);
-                Assert.IsTrue(preImported.IsExplicitlyLoaded);
+                Assert.NotNull(preRoot = Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The root project file should be in the weak cache."
+                Assert.NotNull(preImported = Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The imported project file should be in the weak cache."
+                Assert.True(preRoot.IsExplicitlyLoaded);
+                Assert.True(preImported.IsExplicitlyLoaded);
 
                 // Run a simple build just to prove that it doesn't impact what is in the cache.
                 data = new BuildRequestData(rootProjectPath, ReadOnlyEmptyDictionary<string, string>.Instance, null, new[] { "test" }, null);
@@ -1882,22 +1899,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _buildManager.ResetCaches();
 
                 // Now make sure they are still in the weak cache.  Since they were loaded explictly before the build, the build shouldn't have unloaded them from the cache.
-                Assert.AreSame(preRoot, Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection), "The root project file should be in the weak cache after a build.");
-                Assert.AreSame(preImported, Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection), "The imported project file should be in the weak cache after a build.");
-                Assert.IsTrue(preRoot.IsExplicitlyLoaded);
-                Assert.IsTrue(preImported.IsExplicitlyLoaded);
+                Assert.Same(preRoot, Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The root project file should be in the weak cache after a build."
+                Assert.Same(preImported, Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The imported project file should be in the weak cache after a build."
+                Assert.True(preRoot.IsExplicitlyLoaded);
+                Assert.True(preImported.IsExplicitlyLoaded);
 
                 projectCollection.UnloadProject(project);
                 projectCollection.UnloadAllProjects();
-                Assert.IsNull(Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection), "The unloaded project shouldn't be in the cache anymore.");
-                Assert.IsNull(Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection), "The unloaded project's import shouldn't be in the cache anymore.");
+                Assert.Null(Microsoft.Build.Construction.ProjectRootElement.TryOpen(rootProjectPath, projectCollection)); // "The unloaded project shouldn't be in the cache anymore."
+                Assert.Null(Microsoft.Build.Construction.ProjectRootElement.TryOpen(importedProjectPath, projectCollection)); // "The unloaded project's import shouldn't be in the cache anymore."
             }
         }
 
         /// <summary>
         /// Verify that using a second BuildManager doesn't cause the system to crash.
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress251333()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1916,22 +1933,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // First a normal build
             BuildRequestData data = GetBuildRequestData(contents);
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.AreEqual(result.OverallResult, BuildResultCode.Success);
+            Assert.Equal(result.OverallResult, BuildResultCode.Success);
 
             // Now a build using a different build manager.
             using (BuildManager newBuildManager = new BuildManager())
             {
                 BuildRequestData data2 = GetBuildRequestData(contents);
                 BuildResult result2 = newBuildManager.Build(_parameters, data);
-                Assert.AreEqual(result2.OverallResult, BuildResultCode.Success);
+                Assert.Equal(result2.OverallResult, BuildResultCode.Success);
             }
         }
 
         /// <summary>
         /// Verify that disabling the in-proc node doesn't cause projects which don't require it to fail.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void Regress239661()
+        [Fact(Skip = "FEATURE: OOP NODES")]        public void Regress239661()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -1953,7 +1969,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(fileName, _projectCollection.GlobalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new string[0], null);
                 _parameters.DisableInProcNode = true;
                 BuildResult result = _buildManager.Build(_parameters, data);
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
                 _logger.AssertLogContains("[success]");
             }
             finally
@@ -1968,8 +1984,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node when a project requires it will cause the build to fail, but not crash.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void Regress239661_NodeUnavailable()
+        [Fact(Skip = "FEATURE: OOP NODES")]        public void Regress239661_NodeUnavailable()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -1989,7 +2004,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Require that this project build on the in-proc node, which will not be available.
             data.HostServices.SetNodeAffinity(data.ProjectFullPath, NodeAffinity.InProc);
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
             _logger.AssertLogDoesntContain("[success]");
             _logger.AssertLogContains("MSB4223");
         }
@@ -1997,8 +2012,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that properties and items are transferred to the out-of-proc node when an instance is used to start the build.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void ProjectInstanceTransfersToOOPNode()
+        [Fact(Skip = "FEATURE: OOP NODES")]        public void ProjectInstanceTransfersToOOPNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -2068,8 +2082,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that a limited set of properties are transferred from a project instance to an OOP node.
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void ProjectInstanceLimitedTransferToOOPNode()
+        [Fact(Skip = "FEATURE: OOP NODES")]        public void ProjectInstanceLimitedTransferToOOPNode()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -2114,7 +2127,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that cache files are created as expected and their lifetime is controlled appropriately.
         /// </summary>
-        [Test]
+        [Fact]
         public void CacheLifetime()
         {
             const string ForceCaching = "MSBUILDDEBUGFORCECACHING";
@@ -2143,14 +2156,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         innerBuildManager.ResetCaches();
                     }
 
-                    Assert.IsFalse(Directory.Exists(innerBuildCacheDirectory), "Inner build cache directory still exists after inner build manager was disposed.");
-                    Assert.IsTrue(Directory.Exists(outerBuildCacheDirectory), "Outer build cache directory doesn't exist after inner build manager was disposed.");
+                    Assert.False(Directory.Exists(innerBuildCacheDirectory)); // "Inner build cache directory still exists after inner build manager was disposed."
+                    Assert.True(Directory.Exists(outerBuildCacheDirectory)); // "Outer build cache directory doesn't exist after inner build manager was disposed."
 
                     // Force the cache for this build manager to be cleared.
                     outerBuildManager.ResetCaches();
                 }
 
-                Assert.IsFalse(Directory.Exists(outerBuildCacheDirectory), "Outer build cache directory still exists after outer build manager was disposed.");
+                Assert.False(Directory.Exists(outerBuildCacheDirectory)); // "Outer build cache directory still exists after outer build manager was disposed."
             }
             finally
             {
@@ -2163,7 +2176,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// overall build result -- and thus the return value of the MSBuild task -- should reflect
         /// that failure. 
         /// </summary>
-        [Test]
+        [Fact]
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure()
         {
             string projA = null;
@@ -2203,7 +2216,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 _logger.AssertNoWarnings();
             }
             finally
@@ -2228,7 +2241,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure.  Specifically tests where there are multiple entrypoint targets with 
         /// AfterTargets, only one of which fails. 
         /// </summary>
-        [Test]
+        [Fact]
         public void FailedAfterTargetInP2PShouldCauseOverallBuildFailure_MultipleEntrypoints()
         {
             string projA = null;
@@ -2280,7 +2293,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 _logger.AssertNoWarnings();
                 _logger.AssertLogContains("[Build]");
                 _logger.AssertLogContains("[Build2]");
@@ -2309,7 +2322,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// that failure. This should also be true if the AfterTarget is an AfterTarget of the 
         /// entrypoint target.
         /// </summary>
-        [Test]
+        [Fact]
         public void FailedNestedAfterTargetInP2PShouldCauseOverallBuildFailure()
         {
             string projA = null;
@@ -2353,7 +2366,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
                 _logger.AssertNoWarnings();
             }
             finally
@@ -2377,7 +2390,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// depend on non-overlapping sets of targets, and the first fails, the second 
         /// should not inherit that failure if all the targets it calls succeed. 
         /// </summary>
-        [Test]
+        [Fact]
         public void NonOverlappingEntrypointTargetsShouldNotInfluenceEachOthersResults()
         {
             string projA = null;
@@ -2420,8 +2433,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
-                Assert.AreEqual(1, _logger.ErrorCount);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(1, _logger.ErrorCount);
             }
             finally
             {
@@ -2444,8 +2457,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// targets, one of which depends on "A;B", the other of which depends on "B", which has a dependency of 
         /// its own on "A", that we still properly build.  
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void Regress473114()
+        [Fact(Skip = "FEATURE: OOP NODES")]        public void Regress473114()
         {
             string projA = null;
             string projB = null;
@@ -2526,7 +2538,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), "4.0", new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
             }
             finally
             {
@@ -2569,8 +2581,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// second request will bail out where the first request did, as though it had 
         /// executed the target, rather than skipping and continuing. 
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void VerifyMultipleRequestForSameProjectWithErrors_Simple()
+        [Fact(Skip = "FEATURE: OOP NODES")]        public void VerifyMultipleRequestForSameProjectWithErrors_Simple()
         {
             string projA = null;
             string projB = null;
@@ -2628,7 +2639,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
                 // We should never get to Error2, because it's supposed to execute after Error1, which failed.  
                 _logger.AssertLogDoesntContain("Error 2");
@@ -2674,8 +2685,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// expected in the first request, but be skipped by the second (since if it's "skipping 
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void VerifyMultipleRequestForSameProjectWithErrors_OnErrorChain()
+        [Fact(Skip = "FEATURE: OOP NODES")]        public void VerifyMultipleRequestForSameProjectWithErrors_OnErrorChain()
         {
             string projA = null;
             string projB = null;
@@ -2748,7 +2758,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
                 // We should never get to Error2, because it's supposed to execute after Error1, which failed.  
                 _logger.AssertLogDoesntContain("Error 2");
@@ -2809,8 +2819,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but 
         /// will continue executing (on the first request) or skipping (on the second)
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
-        public void VerifyMultipleRequestForSameProjectWithErrors_ErrorAndContinue()
+        [Fact(Skip = "FEATURE: OOP NODES")]        public void VerifyMultipleRequestForSameProjectWithErrors_ErrorAndContinue()
         {
             string projA = null;
             string projB = null;
@@ -2868,7 +2877,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
                 // We should see both Error1 and Error2
                 _logger.AssertLogContains("Error 1");
@@ -2916,7 +2925,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that if the errors are in AfterTargets, we still 
         /// exit as though the target that those targets run after has already run. 
         /// </summary>
-        [Test, Ignore("FEATURE: OOP NODES")]
+        [Fact(Skip = "FEATURE: OOP NODES")]
         public void VerifyMultipleRequestForSameProjectWithErrors_AfterTargets()
         {
             string projA = null;
@@ -2975,7 +2984,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
+                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
                 // We should never get to Error2, because we should never run its AfterTarget, after 
                 // the AfterTarget with Error1 failed
@@ -3008,7 +3017,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// request also runs that target, its skip-unsuccessful should behave in the same 
         /// way as if the target had actually errored. 
         /// </summary>
-        [Test]
+        [Fact]
         public void VerifyMultipleRequestForSameProjectWithErrors_DifferentEntrypoints()
         {
             string projA = null;
@@ -3066,7 +3075,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(projA, new Dictionary<string, string>(), null, new[] { "Build" }, new HostServices());
                 BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
-                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
                 // We should never get to Error2, because it's only ever executed in the second 
                 // request after Error1, which should skip-unsuccessful and exit
@@ -3092,7 +3101,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that we can submit multiple simultaneous submissions with 
         /// legacy threading mode active and successfully build.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData()
         {
             string projectPath1 = null;
@@ -3169,7 +3178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// legacy threading mode active and successfully build, and that one of those
         /// submissions can P2P to the other.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P()
         {
             string projectPath1 = null;
@@ -3226,7 +3235,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     BuildRequestData requestData = new BuildRequestData(pi, new[] { "MSDeployPublish" });
                     BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
                     BuildResult br = submission.Execute();
-                    Assert.AreEqual(BuildResultCode.Success, br.OverallResult);
+                    Assert.Equal(BuildResultCode.Success, br.OverallResult);
                     project1DoneEvent.Set();
                 });
 
@@ -3237,7 +3246,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     BuildRequestData requestData = new BuildRequestData(pi, new string[] { "CopyRunEnvironmentFiles" });
                     BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
                     BuildResult br = submission.Execute();
-                    Assert.AreEqual(BuildResultCode.Success, br.OverallResult);
+                    Assert.Equal(BuildResultCode.Success, br.OverallResult);
                     project2DoneEvent.Set();
                 });
 
@@ -3269,7 +3278,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// submissions aren't restricted to running strictly serially by the single in-proc 
         /// node.
         /// </summary>
-        [Test, Ignore]
+        [Fact(Skip = "Ignored in NUnit")]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P_MP()
         {
             string projectPath1 = null;
@@ -3327,7 +3336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     BuildRequestData requestData = new BuildRequestData(pi, new string[] { "MSDeployPublish" });
                     BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
                     BuildResult br = submission.Execute();
-                    Assert.AreEqual(BuildResultCode.Success, br.OverallResult);
+                    Assert.Equal(BuildResultCode.Success, br.OverallResult);
                     project1DoneEvent.Set();
                 });
 
@@ -3338,7 +3347,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     BuildRequestData requestData = new BuildRequestData(pi, new string[] { "CopyRunEnvironmentFiles" });
                     BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
                     BuildResult br = submission.Execute();
-                    Assert.AreEqual(BuildResultCode.Success, br.OverallResult);
+                    Assert.Equal(BuildResultCode.Success, br.OverallResult);
                     project2DoneEvent.Set();
                 });
 
@@ -3368,7 +3377,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This differs from transferring a project instance to an out-of-proc node because in this case the project
         /// was loaded by MSBuild, not supplied directly by the user.
         /// </remarks>
-        [Test, Ignore]
+        [Fact(Skip = "Ignored in NUnit")]
         public void Regress265010()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"
@@ -3459,7 +3468,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var services = new HostServices();
                 BuildRequestData data = new BuildRequestData(fileName, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, new[] { "One", "Two", "Three" }, services);
                 var result = localBuildManager.PendBuildRequest(data).Execute();
-                Assert.IsTrue(result.OverallResult == BuildResultCode.Success, "Test project failed to build correctly.");
+                Assert.Equal(result.OverallResult, BuildResultCode.Success); // "Test project failed to build correctly."
             }
             finally
             {
@@ -3472,10 +3481,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Within this directory should be a set of target results files, one for each of the targets we invoked.
             var resultsFiles = Directory.EnumerateFiles(directory).Select(Path.GetFileName);
-            Assert.IsTrue(resultsFiles.Count() == 3, "Expected 3 results, got {0}", resultsFiles.Count());
-            Assert.IsTrue(resultsFiles.Contains("One.cache"));
-            Assert.IsTrue(resultsFiles.Contains("Two.cache"));
-            Assert.IsTrue(resultsFiles.Contains("Three.cache"));
+                
+            Assert.Equal(3, resultsFiles.Count());
+            Assert.True(resultsFiles.Contains("One.cache"));
+            Assert.True(resultsFiles.Contains("Two.cache"));
+            Assert.True(resultsFiles.Contains("Three.cache"));
 
             // Return the cache directory created for this build.
             return directory;

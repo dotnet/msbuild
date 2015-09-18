@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -8,18 +8,17 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-
-using NUnit.Framework;
+using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class CreateCSharpManifestResourceName_Tests
     {
         /// <summary>
         /// Test the basic functionality.
         /// </summary>
-        [Test]
+        [Fact]
         public void Basic()
         {
             string result =
@@ -35,7 +34,7 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("MyStuff.Namespace.Class", result);
+            Assert.Equal("MyStuff.Namespace.Class", result);
         }
 
         /// <summary>
@@ -45,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         /// that its running on. This is because 'Ã' is a high ANSI character which is interpretted differently
         /// for different codepages.
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress172107()
         {
             // Can't embed the 'Ã' directly because the string is Unicode already and the Unicode<-->ANSI transform
@@ -79,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             StreamReader r = new StreamReader(m, System.Text.Encoding.Default, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
             string className = r.ReadToEnd();
 
-            Assert.AreEqual(className, result);
+            Assert.Equal(className, result);
         }
 
 
@@ -88,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         /// Test for a namespace that has UTF8 characters but there's no BOM at the start.
         ///
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress249540()
         {
             // Special character is 'Ä' in UTF8: 0xC3 84
@@ -113,13 +112,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("d\u00C4a.Class", result);
+            Assert.Equal("d\u00C4a.Class", result);
         }
 
         /// <summary>
         /// Test a dependent with a relative path
         /// </summary>
-        [Test]
+        [Fact]
         public void RelativeDependentUpon()
         {
             string result =
@@ -135,13 +134,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("Namespace.Class", result);
+            Assert.Equal("Namespace.Class", result);
         }
 
         /// <summary>
         /// Test a dependent with a relative path
         /// </summary>
-        [Test]
+        [Fact]
         public void AbsoluteDependentUpon()
         {
             string result =
@@ -157,13 +156,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("MyStuff.Namespace.Class", result);
+            Assert.Equal("MyStuff.Namespace.Class", result);
         }
 
         /// <summary>
         /// A dependent class plus there is a culture.
         /// </summary>
-        [Test]
+        [Fact]
         public void DependentWithCulture()
         {
             string result =
@@ -179,14 +178,14 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("MyStuff.Namespace.Class.en-GB", result);
+            Assert.Equal("MyStuff.Namespace.Class.en-GB", result);
         }
 
         /// <summary>
         /// A dependent class plus there is a culture that was expressed in the metadata of the 
         /// item rather than the filename.
         /// </summary>
-        [Test]
+        [Fact]
         public void DependentWithCultureMetadata()
         {
             string result =
@@ -202,13 +201,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("MyStuff.Namespace.Class.en-GB", result);
+            Assert.Equal("MyStuff.Namespace.Class.en-GB", result);
         }
 
         /// <summary>
         /// A dependent class plus there is a culture embedded in the .RESX filename.
         /// </summary>
-        [Test]
+        [Fact]
         public void DependentWithEmbeddedCulture()
         {
             string result =
@@ -224,14 +223,14 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("MyStuff.Namespace.Class.fr-fr", result);
+            Assert.Equal("MyStuff.Namespace.Class.fr-fr", result);
         }
 
         /// <summary>
         /// No dependent class, but there is a root namespace place.  Also, the .resx
         /// extension contains some upper-case characters.
         /// </summary>
-        [Test]
+        [Fact]
         public void RootnamespaceWithCulture()
         {
             string result =
@@ -247,13 +246,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("RootNamespace.SubFolder.MyForm.en-GB", result);
+            Assert.Equal("RootNamespace.SubFolder.MyForm.en-GB", result);
         }
 
         /// <summary>
         /// If there is a link file name then it is preferred over the main file name.
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress222308()
         {
             string result =
@@ -269,13 +268,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("RootNamespace.XmlEditor.rgs", result);
+            Assert.Equal("RootNamespace.XmlEditor.rgs", result);
         }
 
         /// <summary>
         /// A non-resx file in a subfolder, with a root namespace.
         /// </summary>
-        [Test]
+        [Fact]
         public void BitmapWithRootNamespace()
         {
             string result =
@@ -291,13 +290,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("RootNamespace.SubFolder.SplashScreen.bmp", result);
+            Assert.Equal("RootNamespace.SubFolder.SplashScreen.bmp", result);
         }
 
         /// <summary>
         /// A culture-specific non-resx file in a subfolder, with a root namespace.
         /// </summary>
-        [Test]
+        [Fact]
         public void CulturedBitmapWithRootNamespace()
         {
             string result =
@@ -313,13 +312,13 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual(FileUtilities.FixFilePath(@"fr\RootNamespace.SubFolder.SplashScreen.bmp"), result);
+            Assert.Equal(FileUtilities.FixFilePath(@"fr\RootNamespace.SubFolder.SplashScreen.bmp"), result);
         }
 
         /// <summary>
         /// A culture-specific non-resx file in a subfolder, with a root namespace, but no culture directory prefix
         /// </summary>
-        [Test]
+        [Fact]
         public void CulturedBitmapWithRootNamespaceNoDirectoryPrefix()
         {
             string result =
@@ -335,14 +334,14 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual(@"RootNamespace.SubFolder.SplashScreen.bmp", result);
+            Assert.Equal(@"RootNamespace.SubFolder.SplashScreen.bmp", result);
         }
 
         /// <summary>
         /// If the filename passed in as the "DependentUpon" file doesn't end in .cs then
         /// we want to fall back to the RootNamespace+FileName logic.
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress188319()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -358,12 +357,12 @@ namespace Microsoft.Build.UnitTests
                 new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream)
             );
 
-            Assert.IsTrue(success, "Expected the task to succceed.");
+            Assert.True(success); // "Expected the task to succceed."
 
             ITaskItem[] resourceNames = t.ManifestResourceNames;
 
-            Assert.AreEqual(1, resourceNames.Length);
-            Assert.AreEqual(@"CustomToolTest.SR1", resourceNames[0].ItemSpec);
+            Assert.Equal(1, resourceNames.Length);
+            Assert.Equal(@"CustomToolTest.SR1", resourceNames[0].ItemSpec);
         }
 
         /// <summary>
@@ -374,14 +373,14 @@ namespace Microsoft.Build.UnitTests
             string result = CreateCSharpManifestResourceName.CreateManifestNameImpl(resourcePath, null, true, "Root", null, null, null, null);
             string expected = "Root." + expectedName;
 
-            Assert.AreEqual(result, expected);
+            Assert.Equal(result, expected);
         }
 
         /// <summary>
         /// Need to convert any spaces in the directory name of embedded resource files to underscores. 
         /// Leave spaces in the file name itself alone. That's how Everett did it.
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress309027()
         {
             VerifyExpectedManifestResourceName(
@@ -392,7 +391,7 @@ namespace Microsoft.Build.UnitTests
         /// The folder part of embedded resource names (not the file name though) needs to be a proper identifier, 
         /// since that's how Everett used to do this
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress311473()
         {
             // First char must be a letter or a connector (underscore), others must be a letter/digit/connector or a combining mark
@@ -434,7 +433,7 @@ namespace Microsoft.Build.UnitTests
         /// 
         /// we continue to treat "ro" as the culture.
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress419591()
         {
             string result =
@@ -450,7 +449,7 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("ClassLibrary1.MyForm", result);
+            Assert.Equal("ClassLibrary1.MyForm", result);
         }
 
         /// <summary>
@@ -463,7 +462,7 @@ namespace Microsoft.Build.UnitTests
         /// The parent source file doesn't have a class name in it, we just use the culture neutral
         /// filename of the resource file.
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress419591_EmptySource()
         {
             string result =
@@ -479,7 +478,7 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-            Assert.AreEqual("RootNamespace.MyForm.en-GB", result);
+            Assert.Equal("RootNamespace.MyForm.en-GB", result);
         }
 
         /// <summary>
@@ -487,7 +486,7 @@ namespace Microsoft.Build.UnitTests
         /// we need to warn because we do not try to resolve the correct manifest name depending
         /// on conditional compilation of code.
         /// </summary>
-        [Test]
+        [Fact]
         public void Regress459265()
         {
             MockEngine m = new MockEngine();
@@ -522,8 +521,7 @@ namespace ClassLibrary3
                     c.Log
                 );
 
-            Assert.IsTrue
-            (
+            Assert.True(
                 m.Log.Contains
                 (
                     String.Format(AssemblyResources.GetString("CreateManifestResourceName.DefinitionFoundWithinConditionalDirective"), "MyForm.cs", "MyForm.resx")
@@ -544,7 +542,7 @@ namespace ClassLibrary3
             {
                 return StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }");
             }
-            Assert.Fail(String.Format("Encountered a new path {0}, needs unittesting support", path));
+            Assert.True(false, String.Format("Encountered a new path {0}, needs unittesting support", path));
             return null;
         }
 
@@ -552,7 +550,7 @@ namespace ClassLibrary3
         /// Tests to ensure that the ResourceFilesWithManifestResourceNames contains everything that
         /// the ResourceFiles property on the task contains, but with additional metadata called ManifestResourceName
         /// </summary>
-        [Test]
+        [Fact]
         public void ResourceFilesWithManifestResourceNamesContainsAdditionalMetadata()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -564,20 +562,20 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.IsTrue(success, "Expected the task to succceed.");
+            Assert.True(success); // "Expected the task to succceed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
-            Assert.AreEqual(1, resourceFiles.Length);
-            Assert.AreEqual(@"strings.resx", resourceFiles[0].ItemSpec);
-            Assert.AreEqual(@"ResourceRoot.strings", resourceFiles[0].GetMetadata("ManifestResourceName"));
+            Assert.Equal(1, resourceFiles.Length);
+            Assert.Equal(@"strings.resx", resourceFiles[0].ItemSpec);
+            Assert.Equal(@"ResourceRoot.strings", resourceFiles[0].GetMetadata("ManifestResourceName"));
         }
 
         /// <summary>
         /// Ensure that if no LogicalName is specified, that the same ManifestResourceName metadata
         /// gets applied as LogicalName
         /// </summary>
-        [Test]
+        [Fact]
         public void AddLogicalNameForNonResx()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -590,19 +588,19 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.IsTrue(success, "Expected the task to succceed.");
+            Assert.True(success); // "Expected the task to succceed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
-            Assert.AreEqual(1, resourceFiles.Length);
-            Assert.AreEqual(@"pic.bmp", resourceFiles[0].ItemSpec);
-            Assert.AreEqual(@"ResourceRoot.pic.bmp", resourceFiles[0].GetMetadata("LogicalName"));
+            Assert.Equal(1, resourceFiles.Length);
+            Assert.Equal(@"pic.bmp", resourceFiles[0].ItemSpec);
+            Assert.Equal(@"ResourceRoot.pic.bmp", resourceFiles[0].GetMetadata("LogicalName"));
         }
 
         /// <summary>
         /// Ensure that a LogicalName that is already present is preserved during manifest name generation
         /// </summary>
-        [Test]
+        [Fact]
         public void PreserveLogicalNameForNonResx()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -616,19 +614,19 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.IsTrue(success, "Expected the task to succceed.");
+            Assert.True(success); // "Expected the task to succceed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
-            Assert.AreEqual(1, resourceFiles.Length);
-            Assert.AreEqual(@"pic.bmp", resourceFiles[0].ItemSpec);
-            Assert.AreEqual(@"foo", resourceFiles[0].GetMetadata("LogicalName"));
+            Assert.Equal(1, resourceFiles.Length);
+            Assert.Equal(@"pic.bmp", resourceFiles[0].ItemSpec);
+            Assert.Equal(@"foo", resourceFiles[0].GetMetadata("LogicalName"));
         }
 
         /// <summary>
         /// Resx resources should not get ManifestResourceName metadata copied to the LogicalName value
         /// </summary>
-        [Test]
+        [Fact]
         public void NoLogicalNameAddedForResx()
         {
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
@@ -641,19 +639,19 @@ namespace ClassLibrary3
             t.RootNamespace = "ResourceRoot";
             bool success = t.Execute();
 
-            Assert.IsTrue(success, "Expected the task to succceed.");
+            Assert.True(success); // "Expected the task to succceed."
 
             ITaskItem[] resourceFiles = t.ResourceFilesWithManifestResourceNames;
 
-            Assert.AreEqual(1, resourceFiles.Length);
-            Assert.AreEqual(@"strings.resx", resourceFiles[0].ItemSpec);
-            Assert.AreEqual(String.Empty, resourceFiles[0].GetMetadata("LogicalName"));
+            Assert.Equal(1, resourceFiles.Length);
+            Assert.Equal(@"strings.resx", resourceFiles[0].ItemSpec);
+            Assert.Equal(String.Empty, resourceFiles[0].GetMetadata("LogicalName"));
         }
 
         /// <summary>
         /// A culture-specific resources file in a subfolder, with a root namespace
         /// </summary>
-        [Test]
+        [Fact]
         public void CulturedResourcesFileWithRootNamespaceWithinSubfolder()
         {
             string result =
@@ -669,13 +667,13 @@ namespace ClassLibrary3
                     null
                 );
 
-            Assert.AreEqual(@"RootNamespace.SubFolder.MyResource.fr.resources", result);
+            Assert.Equal(@"RootNamespace.SubFolder.MyResource.fr.resources", result);
         }
 
         /// <summary>
         /// A culture-specific resources file with a root namespace
         /// </summary>
-        [Test]
+        [Fact]
         public void CulturedResourcesFileWithRootNamespace()
         {
             string result =
@@ -691,13 +689,13 @@ namespace ClassLibrary3
                     null
                 );
 
-            Assert.AreEqual(@"RootNamespace.MyResource.fr.resources", result);
+            Assert.Equal(@"RootNamespace.MyResource.fr.resources", result);
         }
 
         /// <summary>
         /// A non-culture-specific resources file with a root namespace
         /// </summary>
-        [Test]
+        [Fact]
         public void ResourcesFileWithRootNamespace()
         {
             string result =
@@ -713,7 +711,7 @@ namespace ClassLibrary3
                     null
                 );
 
-            Assert.AreEqual(@"RootNamespace.MyResource.resources", result);
+            Assert.Equal(@"RootNamespace.MyResource.resources", result);
         }
     }
 }

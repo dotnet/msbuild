@@ -1,17 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
+using Microsoft.Build.Shared;
 using System.IO;
+using Xunit;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 
-using NUnit.Framework;
+
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class SGen_Tests
     {
         internal class SGenExtension : SGen
@@ -22,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Test]
+        [Fact]
         public void KeyFileQuotedOnCommandLineIfNecessary()
         {
             SGenExtension sgen = new SGenExtension();
@@ -40,10 +44,10 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
 
-            Assert.IsTrue(commandLine.IndexOf("/compiler:\"/keyfile:\\\"" + sgen.KeyFile + "\\\"\"", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.True(commandLine.IndexOf("/compiler:\"/keyfile:\\\"" + sgen.KeyFile + "\\\"\"", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        [Test]
+        [Fact]
         public void TestKeepFlagTrue()
         {
             SGenExtension sgen = new SGenExtension();
@@ -55,9 +59,9 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
 
-            Assert.IsTrue(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.True(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) >= 0);
         }
-        [Test]
+        [Fact]
         public void TestKeepFlagFalse()
         {
             SGenExtension sgen = new SGenExtension();
@@ -69,11 +73,11 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
 
-            Assert.IsTrue(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) < 0);
+            Assert.True(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) < 0);
         }
 
 
-        [Test]
+        [Fact]
         public void TestInputChecks1()
         {
             MockEngine engine = new MockEngine();
@@ -86,10 +90,10 @@ namespace Microsoft.Build.UnitTests
             // This should result in a quoted parameter...
             sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
             string commandLine = sgen.CommandLine();
-            Assert.IsTrue(engine.Errors == 1);
+            Assert.Equal(1, engine.Errors);
         }
 
-        [Test]
+        [Fact]
         public void TestInputChecks2()
         {
             MockEngine engine = new MockEngine();
@@ -102,43 +106,48 @@ namespace Microsoft.Build.UnitTests
             // This should result in a quoted parameter...
             sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
             string commandLine = sgen.CommandLine();
-            Assert.IsTrue(engine.Errors == 1);
+            Assert.Equal(1, engine.Errors);
         }
 
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void TestInputChecks3()
         {
-            MockEngine engine = new MockEngine();
-            SGenExtension sgen = new SGenExtension();
-            sgen.BuildEngine = engine;
-            sgen.BuildAssemblyName = null;
-            sgen.BuildAssemblyPath = "C:\\SomeFolder\\MyAsm.dll";
-            sgen.ShouldGenerateSerializer = true;
-            sgen.UseProxyTypes = false;
-            // This should result in a quoted parameter...
-            sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
-            string commandLine = sgen.CommandLine();
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                MockEngine engine = new MockEngine();
+                SGenExtension sgen = new SGenExtension();
+                sgen.BuildEngine = engine;
+                sgen.BuildAssemblyName = null;
+                sgen.BuildAssemblyPath = "C:\\SomeFolder\\MyAsm.dll";
+                sgen.ShouldGenerateSerializer = true;
+                sgen.UseProxyTypes = false;
+                // This should result in a quoted parameter...
+                sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
+                string commandLine = sgen.CommandLine();
+            }
+           );
         }
 
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void TestInputChecks4()
         {
-            MockEngine engine = new MockEngine();
-            SGenExtension sgen = new SGenExtension();
-            sgen.BuildEngine = engine;
-            sgen.BuildAssemblyName = "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
-            sgen.BuildAssemblyPath = null;
-            sgen.ShouldGenerateSerializer = true;
-            sgen.UseProxyTypes = false;
-            // This should result in a quoted parameter...
-            sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                MockEngine engine = new MockEngine();
+                SGenExtension sgen = new SGenExtension();
+                sgen.BuildEngine = engine;
+                sgen.BuildAssemblyName = "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+                sgen.BuildAssemblyPath = null;
+                sgen.ShouldGenerateSerializer = true;
+                sgen.UseProxyTypes = false;
+                // This should result in a quoted parameter...
+                sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
 
-            string commandLine = sgen.CommandLine();
+                string commandLine = sgen.CommandLine();
+            }
+           );
         }
-
-        [Test]
+        [Fact]
         public void TestInputPlatform()
         {
             SGenExtension sgen = new SGenExtension();
@@ -153,10 +162,10 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /compiler:/platform:x86";
 
-            Assert.IsTrue(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
+            Assert.True(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
         }
 
-        [Test]
+        [Fact]
         public void TestInputTypes()
         {
             SGenExtension sgen = new SGenExtension();
@@ -171,10 +180,10 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /type:System.String /type:System.Boolean";
 
-            Assert.IsTrue(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
+            Assert.True(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
         }
 
-        [Test]
+        [Fact]
         public void TestInputEmptyTypesAndPlatform()
         {
             SGenExtension sgen = new SGenExtension();
@@ -185,7 +194,8 @@ namespace Microsoft.Build.UnitTests
             string commandLine = sgen.CommandLine();
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"";
-            Assert.IsTrue(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
+
+            Assert.True(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

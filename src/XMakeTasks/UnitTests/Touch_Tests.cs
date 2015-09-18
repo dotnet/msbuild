@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -8,12 +8,10 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-
-using NUnit.Framework;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class Touch_Tests
     {
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
@@ -67,7 +65,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return true;
             }
-            Assert.Fail("Unexpected file exists: " + path);
+            Assert.True(false, "Unexpected file exists: " + path);
 
             return true;
         }
@@ -89,7 +87,7 @@ namespace Microsoft.Build.UnitTests
             }
 
 
-            Assert.Fail("Unexpected file create: " + path);
+            Assert.True(false, "Unexpected file create: " + path);
             return null;
         }
 
@@ -117,7 +115,7 @@ namespace Microsoft.Build.UnitTests
                 return a;
             }
 
-            Assert.Fail("Unexpected file attributes: " + path);
+            Assert.True(false, "Unexpected file attributes: " + path);
             return a;
         }
 
@@ -131,7 +129,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return;
             }
-            Assert.Fail("Unexpected set file attributes: " + path);
+            Assert.True(false, "Unexpected set file attributes: " + path);
         }
 
         /// <summary>
@@ -156,7 +154,7 @@ namespace Microsoft.Build.UnitTests
                 throw new IOException();
             }
 
-            Assert.Fail("Unexpected set last access time: " + path);
+            Assert.True(false, "Unexpected set last access time: " + path);
         }
 
         /// <summary>
@@ -181,10 +179,10 @@ namespace Microsoft.Build.UnitTests
             }
 
 
-            Assert.Fail("Unexpected set last write time: " + path);
+            Assert.True(false, "Unexpected set last write time: " + path);
         }
 
-        [Test]
+        [Fact]
         public void TouchExisting()
         {
             Touch t = new Touch();
@@ -198,12 +196,11 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.AreEqual(1, t.TouchedFiles.Length);
+            Assert.Equal(1, t.TouchedFiles.Length);
 
-            Assert.IsTrue
-            (
+            Assert.True(
                 engine.Log.Contains
                 (
                     String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt)
@@ -211,7 +208,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [Test]
+        [Fact]
         public void TouchNonExisting()
         {
             Touch t = new Touch();
@@ -226,10 +223,9 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Not success because the file doesn't exist
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
-            Assert.IsTrue
-            (
+            Assert.True(
                 engine.Log.Contains
                 (
                     String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt)
@@ -237,7 +233,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [Test]
+        [Fact]
         public void TouchNonExistingAlwaysCreate()
         {
             Touch t = new Touch();
@@ -253,10 +249,9 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Success because the file was created.
-            Assert.IsTrue(success);
+            Assert.True(success);
 
-            Assert.IsTrue
-            (
+            Assert.True(
                 engine.Log.Contains
                 (
                     String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate")
@@ -264,7 +259,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-        [Test]
+        [Fact]
         public void TouchNonExistingAlwaysCreateAndBadlyFormedTimestamp()
         {
             Touch t = new Touch();
@@ -282,12 +277,12 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Failed because of badly formed time string.
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
-            Assert.IsTrue(engine.Log.Contains("MSB3376"));
+            Assert.True(engine.Log.Contains("MSB3376"));
         }
 
-        [Test]
+        [Fact]
         public void TouchReadonly()
         {
             Touch t = new Touch();
@@ -303,13 +298,13 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Failed because file is readonly.
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
-            Assert.IsTrue(engine.Log.Contains("MSB3374"));
-            Assert.IsTrue(engine.Log.Contains(myreadonly_txt));
+            Assert.True(engine.Log.Contains("MSB3374"));
+            Assert.True(engine.Log.Contains(myreadonly_txt));
         }
 
-        [Test]
+        [Fact]
         public void TouchReadonlyForce()
         {
             Touch t = new Touch();
@@ -326,7 +321,7 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
         }
 
-        [Test]
+        [Fact]
         public void TouchNonExistingDirectoryDoesntExist()
         {
             Touch t = new Touch();
@@ -342,10 +337,10 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Failed because the target directory didn't exist.
-            Assert.IsTrue(!success);
+            Assert.False(success);
 
-            Assert.IsTrue(engine.Log.Contains("MSB3371"));
-            Assert.IsTrue(engine.Log.Contains(nonexisting_txt));
+            Assert.True(engine.Log.Contains("MSB3371"));
+            Assert.True(engine.Log.Contains(nonexisting_txt));
         }
     }
 }

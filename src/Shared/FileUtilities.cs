@@ -25,7 +25,7 @@ namespace Microsoft.Build.Shared
     {
         // A list of possible test runners. If the program running has one of these substrings in the name, we assume
         // this is a test harness.
-        private static readonly string[] s_testRunners = {
+        private static readonly string[] s_testRunners = { "XUNIT",
                                                   "NUNIT", "DEVENV", "MSTEST", "VSTEST", "TASKRUNNER", "VSTESTHOST",
                                                   "QTAGENT32", "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
                                               };

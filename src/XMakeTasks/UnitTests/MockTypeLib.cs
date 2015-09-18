@@ -1,15 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices.ComTypes;
-using NUnit.Framework;
 
 using Microsoft.Build.Tasks;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests
         {
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeLib_GetTypeInfo);
 
-            Assert.IsTrue(index >= 0 && index < _containedTypeInfos.Count);
+            Assert.True(index >= 0 && index < _containedTypeInfos.Count);
             ppTI = _containedTypeInfos[index];
         }
 
@@ -224,7 +224,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.Fail("unexpected guid in ITypeLib2.GetCustData");
+                Assert.True(false, "unexpected guid in ITypeLib2.GetCustData");
                 pVarVal = null;
             }
         }
