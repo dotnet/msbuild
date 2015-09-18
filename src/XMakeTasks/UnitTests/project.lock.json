@@ -10,6 +10,14 @@
         "runtime": {
           "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
         }
+      },
+      "NUnit/2.6.4": {
+        "compile": {
+          "lib/nunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/nunit.framework.dll": {}
+        }
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x86": {
@@ -20,6 +28,14 @@
         "runtime": {
           "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
         }
+      },
+      "NUnit/2.6.4": {
+        "compile": {
+          "lib/nunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/nunit.framework.dll": {}
+        }
       }
     },
     ".NETFramework,Version=v4.6": {
@@ -29,6 +45,14 @@
         },
         "runtime": {
           "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        }
+      },
+      "NUnit/2.6.4": {
+        "compile": {
+          "lib/nunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/nunit.framework.dll": {}
         }
       },
       "System.Resources.ResourceManager/4.0.0": {
@@ -67,6 +91,14 @@
         },
         "runtime": {
           "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        }
+      },
+      "NUnit/2.6.4": {
+        "compile": {
+          "lib/nunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/nunit.framework.dll": {}
         }
       },
       "System.Resources.ResourceManager/4.0.0": {
@@ -3495,6 +3527,19 @@
         "ref/net46/Microsoft.Win32.Registry.dll"
       ]
     },
+    "NUnit/2.6.4": {
+      "sha512": "cmSPvaCMRSP0DI19FP1Liw9DyJY3E/vOY1OrVaeJBZpZFWHkmT3fB9ngGWnZX/ftvA7zJEbghEaw3Yd+u4YFAw==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/nunit.framework.dll",
+        "lib/nunit.framework.xml",
+        "license.txt",
+        "NUnit.nuspec",
+        "package/services/metadata/core-properties/c346e7af292d401e86e307d6778e3cf7.psmdcp"
+      ]
+    },
     "System.AppContext/4.0.0": {
       "sha512": "gUoYgAWDC3+xhKeU5KSLbYDhTdBYk9GssrMSCcWUADzOglW+s0AmwVhOUGt2tL5xUl7ZXoYTPdA88zCgKrlG0A==",
       "type": "Package",
@@ -5879,10 +5924,12 @@
   "projectFileDependencyGroups": {
     "": [],
     ".NETFramework,Version=v4.5.1": [
-      "Microsoft.Tpl.Dataflow >= 4.5.24"
+      "Microsoft.Tpl.Dataflow >= 4.5.24",
+      "NUnit >= 2.6.4"
     ],
     ".NETFramework,Version=v4.6": [
       "Microsoft.Tpl.Dataflow >= 4.5.24",
+      "NUnit >= 2.6.4",
       "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213"
     ],
     "DNXCore,Version=v5.0": [
