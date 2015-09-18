@@ -221,7 +221,7 @@ namespace Microsoft.Build.Tasks
                 if (EncodingUtilities.CurrentSystemOemEncoding.CodePage != sw.Encoding.CodePage)
                 {
                     // Output to nul so we don't change output and logs.
-                    sw.WriteLine(string.Format("chcp {0}>nul", sw.Encoding.CodePage));
+                    sw.WriteLine(string.Format(@"%SystemRoot%\System32\chcp.com {0}>nul", sw.Encoding.CodePage));
                 }
 
                 // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
