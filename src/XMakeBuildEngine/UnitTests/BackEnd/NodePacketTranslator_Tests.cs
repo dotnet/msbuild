@@ -145,6 +145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(value, deserializedValue);
         }
 
+ #if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Tests serializing using the DotNet serializer.
         /// </summary>
@@ -174,6 +175,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
         }
+#endif
 
         /// <summary>
         /// Tests serializing an object with a default constructor.

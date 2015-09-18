@@ -537,10 +537,17 @@ namespace Microsoft.Build.UnitTests
 
             ProcessStartInfo startInfo = task.StartInfo;
 
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+            Assert.Equal("b", startInfo.Environment["a"]);
+            Assert.Equal("d", startInfo.Environment["c"]);
+            Assert.Equal("x", startInfo.Environment[userVarName]);
+            Assert.Equal(String.Empty, startInfo.Environment["path"]);
+#else
             Assert.Equal("b", startInfo.EnvironmentVariables["a"]);
             Assert.Equal("d", startInfo.EnvironmentVariables["c"]);
             Assert.Equal("x", startInfo.EnvironmentVariables[userVarName]);
             Assert.Equal(String.Empty, startInfo.EnvironmentVariables["path"]);
+#endif
             if (NativeMethodsShared.IsWindows)
             {
                 Assert.True(
@@ -550,7 +557,11 @@ namespace Microsoft.Build.UnitTests
 #else
                         FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System),
 #endif
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+                        startInfo.Environment["programfiles"],
+#else
                         startInfo.EnvironmentVariables["programfiles"],
+#endif
                         StringComparison.OrdinalIgnoreCase));
             }
         }
@@ -567,7 +578,11 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
 
             Assert.Equal(true, result);
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+            Assert.Equal("b=c", task.StartInfo.Environment["a"]);
+#else
             Assert.Equal("b=c", task.StartInfo.EnvironmentVariables["a"]);
+#endif
         }
 
         /// <summary>
@@ -630,7 +645,11 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(true, task.ExecuteCalled);
             Assert.Equal(
                 true,
+#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
+                task.StartInfo.Environment[NativeMethodsShared.IsWindows ? "username" : "USER"].Length > 0);
+#else
                 task.StartInfo.EnvironmentVariables[NativeMethodsShared.IsWindows ? "username" : "USER"].Length > 0);
+#endif
         }
     }
 }

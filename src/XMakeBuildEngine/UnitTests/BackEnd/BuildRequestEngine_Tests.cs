@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 bool completeSuccess = CompleteRequestSuccessfully;
 
-                if (_cancelEvent.WaitOne(1000, false))
+                if (_cancelEvent.WaitOne(1000))
                 {
                     BuildResult res = new BuildResult(_entry.Request, new BuildAbortedException());
                     _entry.Complete(res);
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     OnNewBuildRequests(_entry, NewRequests[i]);
                     WaitHandle[] handles = new WaitHandle[2] { _cancelEvent, _continueEvent };
-                    int evt = WaitHandle.WaitAny(handles, 5000, false);
+                    int evt = WaitHandle.WaitAny(handles, 5000);
                     if (evt == 0)
                     {
                         BuildResult res = new BuildResult(_entry.Request, new BuildAbortedException());
@@ -214,7 +214,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 if (!_builderThread.Join(5000))
                 {
                     Assert.True(false, "Builder thread did not terminate on cancel.");
+#if FEATURE_THREAD_ABORT
                     _builderThread.Abort();
+#endif
                 }
             }
 
@@ -299,12 +301,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             ((IBuildComponent)_engine).ShutdownComponent();
-            _engineStatusChangedEvent.Close();
-            _requestCompleteEvent.Close();
-            _requestResumedEvent.Close();
-            _newRequestEvent.Close();
-            _newConfigurationEvent.Close();
-            _engineExceptionEvent.Close();
+            _engineStatusChangedEvent.Dispose();
+            _requestCompleteEvent.Dispose();
+            _requestResumedEvent.Dispose();
+            _newRequestEvent.Dispose();
+            _newConfigurationEvent.Dispose();
+            _engineExceptionEvent.Dispose();
 
             _host = null;
         }
@@ -533,7 +535,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private void WaitForEvent(WaitHandle evt, string eventName)
         {
             WaitHandle[] events = new WaitHandle[2] { _engineExceptionEvent, evt };
-            int index = WaitHandle.WaitAny(events, 5000, false);
+            int index = WaitHandle.WaitAny(events, 5000);
             if (WaitHandle.WaitTimeout == index)
             {
                 Assert.True(false, "Did not receive " + eventName + " callback before the timeout expired.");

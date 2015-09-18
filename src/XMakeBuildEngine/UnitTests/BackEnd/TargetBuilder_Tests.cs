@@ -1172,7 +1172,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
       ";
             StringReader reader = new StringReader(projectContents);
+#if FEATURE_XMLTEXTREADER
             Project project = new Project(new XmlTextReader(reader), null, null);
+#else
+            Project project = new Project(XmlReader.Create(reader), null, null);
+#endif
             bool success = project.Build(_mockLogger);
             Assert.False(success);
         }
@@ -1383,7 +1387,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 try
                 {
-                    File.Create("testProject.proj").Close();
+                    File.Create("testProject.proj").Dispose();
                     break;
                 }
                 catch (Exception ex)

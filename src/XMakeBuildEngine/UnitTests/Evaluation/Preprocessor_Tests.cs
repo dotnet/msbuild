@@ -359,7 +359,18 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             ProjectRootElement twoXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(two)));
             twoXml.FullPath = "p2";
 
-            Project project = new Project(XmlTextReader.Create(new StringReader(one)));
+            Project project;
+            using (StringReader sr = new StringReader(one))
+            {
+#if FEATURE_XMLTEXTREADER
+                using (XmlReader xr = XmlTextReader.Create(sr))
+#else
+                using (XmlReader xr = XmlReader.Create(sr))
+#endif
+                {
+                    project = new Project(xr);
+                }
+            }
 
             StringWriter writer = new StringWriter();
 

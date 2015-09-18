@@ -9,8 +9,6 @@ using System;
 using Microsoft.Build.Framework;
 using Xunit;
 
-#pragma warning disable 0219
-
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

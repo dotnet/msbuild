@@ -1991,7 +1991,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(new ProjectCollection());
 
                 string msbuildPath = NativeMethodsShared.IsWindows ?
+#if FEATURE_SPECIAL_FOLDERS
                     Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + Path.DirectorySeparatorChar + "MSBuild" :
+#else
+                    FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles) + Path.DirectorySeparatorChar + "MSBuild" :
+#endif
                     "MSBuild";
                 Assert.Equal(msbuildPath, project.GetPropertyValue(specialPropertyName));
             }
@@ -2106,7 +2110,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             if (String.IsNullOrEmpty(expected))
             {
                 // 32 bit box
+#if FEATURE_SPECIAL_FOLDERS
                 expected = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+#else
+                expected = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles);
+#endif
             }
 
             string extensionsPath32Env = Environment.GetEnvironmentVariable("MSBuildExtensionsPath32");
@@ -2182,7 +2190,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 if (string.IsNullOrEmpty(expected))
                 {
                     // 64-bit window on a 64-bit machine -- ProgramFiles is correct
+#if FEATURE_SPECIAL_FOLDERS
                     expected = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+#else
+                    expected = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles);
+#endif
                 }
             }
 
@@ -2240,11 +2252,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void LocalAppDataDefault()
         {
+#if FEATURE_SPECIAL_FOLDERS
             string expected = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (String.IsNullOrEmpty(expected))
             {
                 expected = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             }
+#else
+            string expected = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData);
+            if (String.IsNullOrEmpty(expected))
+            {
+                expected = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData);
+            }
+#endif
 
             Project project = new Project();
 
@@ -3878,6 +3898,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+#if FEATURE_HTTP_LISTENER
         /// <summary>
         /// Verify that DTD processing is disabled when loading a project
         /// We create an HTTP server that waits for a request and load a project containing DTD code making reference to a ficticious file in the server.
@@ -3932,6 +3953,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Assert.True(t.IsAlive);
             }
         }
+#endif
 
         /// <summary>
         /// Verify that Condition Evaluator does reset the cached state when the evaluation throws an exception.
@@ -3976,6 +3998,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new BuildEventContext(1, 2, 3, 4)));
         }
 
+#if FEATURE_HTTP_LISTENER
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
         /// The test "VerifyDTDProcessingIsDisabled" creates a project with a url reference to this server from a DTD tag
@@ -3993,6 +4016,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // if reached this point it means the server answered a request triggered during DTD processing
             listener.Stop();
         }
+#endif
 
         /// <summary>
         /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:  

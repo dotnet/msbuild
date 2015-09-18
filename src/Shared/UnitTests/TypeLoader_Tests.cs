@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if FEATURE_ASSEMBLY_LOCATION
 using System;
 using System.Collections;
 using Microsoft.Build.Shared;
@@ -148,3 +149,4 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
+#endif

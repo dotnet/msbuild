@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -86,7 +87,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(sdkDirectory);
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
-                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(), String.Empty);
+                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
                 Assert.Equal(0, sdk.ExtensionSDKs.Count);
             }
@@ -109,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(sdkDirectory);
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
-                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(), String.Empty);
+                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
                 Assert.Equal(0, sdk.ExtensionSDKs.Count);
             }
@@ -133,7 +134,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(sdkDirectory);
                 File.WriteAllText(Path.Combine(sdkDirectory, "sdkManifest.xml"), "");
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
-                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(), String.Empty);
+                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
                 Assert.Equal(1, sdk.ExtensionSDKs.Count);
             }
@@ -157,7 +158,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(sdkDirectory);
                 File.WriteAllText(Path.Combine(sdkDirectory, "sdkManifest.xml"), "Garbaggggge");
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
-                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(), String.Empty);
+                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
                 Assert.Equal(1, sdk.ExtensionSDKs.Count);
             }
@@ -357,14 +358,14 @@ namespace Microsoft.Build.UnitTests
         public void FindFrameworksPathRunningThisTest()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
-                Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
+                Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName),
                 ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Version40),
                 new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
                 new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
                 SharedDotNetFrameworkArchitecture.Current
             );
 
-            Assert.Equal(Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName), path);
+            Assert.Equal(Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName), path);
         }
 
         /*
@@ -1150,7 +1151,7 @@ namespace Microsoft.Build.UnitTests
             expectedPath = Path.Combine(expectedPath, targetFrameworkProfile);
 
             string path = FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
-            Assert.True(String.Equals(expectedPath, path, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(String.Equals(expectedPath, path, StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -1166,7 +1167,7 @@ namespace Microsoft.Build.UnitTests
             expectedPath = Path.Combine(expectedPath, "v" + targetFrameworkVersion.ToString());
 
             string path = FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
-            Assert.True(String.Equals(expectedPath, path, StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(String.Equals(expectedPath, path, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -1283,7 +1284,7 @@ namespace Microsoft.Build.UnitTests
                 string path = ToolLocationHelper.ChainReferenceAssemblyPath(Path.Combine(tempDirectory, "v4.1"));
 
                 string expectedChainedPath = Path.Combine(tempDirectory, "v4.0");
-                Assert.True(String.Equals(path, expectedChainedPath, StringComparison.InvariantCultureIgnoreCase));
+                Assert.True(String.Equals(path, expectedChainedPath, StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -1824,7 +1825,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPathToReferenceAssembliesDefaultLocation99()
         {
+#if FEATURE_SPECIAL_FOLDERS
             string targetFrameworkRootPath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Reference Assemblies\\Microsoft\\Framework");
+#else
+            string targetFrameworkRootPath = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles), "Reference Assemblies\\Microsoft\\Framework");
+#endif
             string targetFrameworkIdentifier = ".Net Framework";
             Version targetFrameworkVersion = new Version("99.99");
 
@@ -2054,7 +2059,7 @@ namespace Microsoft.Build.UnitTests
             string frameworkDirectory2064bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness64);
             string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Current);
 
-            if (!Environment.Is64BitOperatingSystem)
+            if (!EnvironmentUtilities.Is64BitOperatingSystem)
             {
                 // "Not 64 bit OS "
                 return;
@@ -2075,7 +2080,7 @@ namespace Microsoft.Build.UnitTests
             pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "itanium");
             Assert.True(frameworkDirectory2064bit.Equals(pathToFramework, StringComparison.OrdinalIgnoreCase), String.Format("Expected {0} but got {1}", frameworkDirectory2064bit, pathToFramework));
 
-            if (!Environment.Is64BitProcess)
+            if (!EnvironmentUtilities.Is64BitProcess)
             {
                 pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "RandomPlatform");
                 Assert.True(frameworkDirectory2032bit.Equals(pathToFramework, StringComparison.OrdinalIgnoreCase), String.Format("Expected {0} but got {1}", frameworkDirectory2032bit, pathToFramework));
@@ -2100,7 +2105,7 @@ namespace Microsoft.Build.UnitTests
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
 
-            if (!Environment.Is64BitOperatingSystem)
+            if (!EnvironmentUtilities.Is64BitOperatingSystem)
             {
                 // "Not 64 bit OS "
                 return;
@@ -2145,7 +2150,7 @@ namespace Microsoft.Build.UnitTests
             string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness32);
             string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Current);
 
-            if (Environment.Is64BitOperatingSystem)
+            if (EnvironmentUtilities.Is64BitOperatingSystem)
             {
                 // "Is a 64 bit OS "
                 return;
@@ -2183,7 +2188,7 @@ namespace Microsoft.Build.UnitTests
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
 
-            if (Environment.Is64BitOperatingSystem)
+            if (EnvironmentUtilities.Is64BitOperatingSystem)
             {
                 // "Is 64 bit OS "
                 return;

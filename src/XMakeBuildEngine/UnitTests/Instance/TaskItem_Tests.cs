@@ -198,7 +198,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
+#if FEATURE_XMLTEXTREADER
             ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+#else
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+#endif
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -251,7 +255,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
+#if FEATURE_XMLTEXTREADER
             ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+#else
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+#endif
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -285,7 +293,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
+#if FEATURE_XMLTEXTREADER
             ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+#else
+            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+#endif
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();

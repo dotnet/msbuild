@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Reflection;
 using System.Resources;
 
 using Microsoft.Build.Framework;
@@ -29,7 +30,7 @@ namespace Microsoft.Build.UnitTests
         private void RegisterResources()
         {
             ResourceManager rm = new ResourceManager("Microsoft.Build.Utilities.UnitTests.strings",
-                typeof(MockTask).Assembly);
+                typeof(MockTask).GetTypeInfo().Assembly);
             this.Log.TaskResources = rm;
         }
 

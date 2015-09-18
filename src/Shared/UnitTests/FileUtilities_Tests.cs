@@ -317,7 +317,11 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 StringBuilder sb = new StringBuilder(NativeMethodsShared.MAX_PATH);
+#if FEATURE_HANDLEREF
                 NativeMethodsShared.GetModuleFileName(NativeMethodsShared.NullHandleRef, sb, sb.Capacity);
+#else
+                NativeMethodsShared.GetModuleFileName(IntPtr.Zero, sb, sb.Capacity);
+#endif
                 path = sb.ToString();
             }
 
@@ -477,6 +481,9 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(path);
             }
         }
+
+#if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
+        // These tests will need to be redesigned for Linux
 
         [Fact]
         public void FileOrDirectoryExistsNoThrowTooLongWithDots()
@@ -660,6 +667,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(currentDirectory);
             }
         }
+#endif
 
         /// <summary>
         /// Simple test, neither the base file nor retry files exist
@@ -712,7 +720,11 @@ namespace Microsoft.Build.UnitTests
         public void GenerateTempFileNameWithDirectoryAndExtension()
         {
             string path = null;
+#if FEATURE_SPECIAL_FOLDERS
             string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "subfolder");
+#else
+            string directory = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData), "subfolder");
+#endif
 
             try
             {

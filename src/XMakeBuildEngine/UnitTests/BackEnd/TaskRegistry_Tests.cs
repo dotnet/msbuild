@@ -1520,14 +1520,18 @@ namespace TestTask
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                // Note output is false so these are only input parameters
-                string output = bool.FalseString;
-                string required = bool.TrueString;
-                string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
+            // Note output is false so these are only input parameters
+            string output = bool.FalseString;
+            string required = bool.TrueString;
+#if FEATURE_ASSEMBLY_LOCATION
+            string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
+#else
+            string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
+#endif
 
-                List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
-                TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+            List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
+            TaskRegistry registry = TaskRegistryHelperMethods<ProjectPropertyInstance, ProjectItemInstance>.CreateTaskRegistryAndRegisterTasks(elementList);
+            Assert.True(false);
             }
            );
         }
@@ -1576,7 +1580,11 @@ namespace TestTask
             type = typeof(ITaskItem).FullName;
             VerifyTypeParameter(output, required, type);
 
+#if FEATURE_ASSEMBLY_LOCATION
             type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
+#else
+            type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
+#endif
             VerifyTypeParameter(output, required, type);
 
             type = typeof(ITaskItem[]).FullName;
@@ -1591,7 +1599,11 @@ namespace TestTask
             type = typeof(DateTime[]).FullName;
             VerifyTypeParameter(output, required, type);
 
+#if FEATURE_ASSEMBLY_LOCATION
             type = typeof(DerivedFromITaskItem[]).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
+#else
+            type = typeof(DerivedFromITaskItem[]).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
+#endif
             VerifyTypeParameter(output, required, type);
         }
 
@@ -1758,7 +1770,16 @@ namespace TestTask
             Assert.Equal(parameterInfo.Name, filledOutAttributesParameter.Name);
             Assert.Equal(parameterInfo.Output, bool.Parse(expandedOutput));
             Assert.Equal(parameterInfo.Required, bool.Parse(expandedRequired));
-            Assert.Equal(parameterInfo.PropertyType, Type.GetType(expandedType + "," + typeof(ITaskItem).Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */));
+            Assert.Equal(
+                parameterInfo.PropertyType,
+                Type.GetType(
+#if FEATURE_ASSEMBLY_LOCATION
+                    expandedType + "," + typeof(ITaskItem).Assembly.FullName,
+#else
+                    expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName,
+#endif
+                    false /* don't throw on error */,
+                    true /* case-insensitive */));
         }
         #endregion
 
@@ -2025,7 +2046,14 @@ namespace TestTask
             // The type may be in the Microsoft.Build.Framework Assembly
             if (paramType == null)
             {
-                paramType = Type.GetType(type + "," + typeof(ITaskItem).Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
+                paramType = Type.GetType(
+#if FEATURE_ASSEMBLY_LOCATION
+                    type + "," + typeof(ITaskItem).Assembly.FullName,
+#else
+                    type + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName,
+#endif
+                    false /* don't throw on error */,
+                    true /* case-insensitive */);
             }
 
             Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(paramType));

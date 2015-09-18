@@ -21,7 +21,11 @@ namespace Microsoft.Build.UnitTests
          */
         static internal Stream StringToStream(string value)
         {
+#if FEATURE_ENCODING_DEFAULT
             return StringToStream(value, System.Text.Encoding.Default); // We want this to be Default which is ANSI
+#else
+            return StringToStream(value, System.Text.Encoding.UTF8); // We want this to be Default which is ANSI
+#endif
         }
 
         /*

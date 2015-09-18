@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private void WaitForEvent(WaitHandle evt, string eventName)
         {
-            if (!evt.WaitOne(5000, false))
+            if (!evt.WaitOne(5000))
             {
                 Assert.True(false, "Did not receive " + eventName + " callback before the timeout expired.");
             }
@@ -350,7 +350,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             _requestBuilderCallback = callback;
 
-            if (cancellationToken.WaitHandle.WaitOne(1500, false))
+            if (cancellationToken.WaitHandle.WaitOne(1500))
             {
                 BuildResult result = new BuildResult(entry.Request);
                 foreach (string target in targets)
@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _requestBuilderCallback.BuildProjects(projectFiles, properties, toolsVersions, _newRequests[0].Targets, _newRequests[0].ResultsNeeded);
 
-                if (cancellationToken.WaitHandle.WaitOne(1500, false))
+                if (cancellationToken.WaitHandle.WaitOne(1500))
                 {
                     BuildResult result = new BuildResult(entry.Request);
                     foreach (string target in targets)

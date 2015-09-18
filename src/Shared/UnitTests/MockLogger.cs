@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Resources;
 using System.Text;
 using System.Xml;
@@ -403,7 +404,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (s_engineResourceManager == null)
                 {
-                    s_engineResourceManager = new ResourceManager("Microsoft.Build.Resources.Strings", typeof(ProjectCollection).Assembly);
+                    s_engineResourceManager = new ResourceManager("Microsoft.Build.Resources.Strings", typeof(ProjectCollection).GetTypeInfo().Assembly);
                 }
 
                 return s_engineResourceManager;

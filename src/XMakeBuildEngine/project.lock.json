@@ -218,15 +218,15 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Microsoft.Win32.Registry/4.0.0-beta-23109": {
+      "Microsoft.Win32.Registry/4.0.0-beta-23123": {
         "dependencies": {
-          "System.Runtime": "[4.0.20-beta-23109, )",
-          "System.Runtime.InteropServices": "[4.0.20-beta-23109, )",
-          "System.Resources.ResourceManager": "[4.0.0-beta-23109, )",
-          "System.Runtime.Handles": "[4.0.0-beta-23109, )",
-          "System.Runtime.Extensions": "[4.0.10-beta-23109, )",
-          "System.Collections": "[4.0.10-beta-23109, )",
-          "System.Globalization": "[4.0.10-beta-23109, )"
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices": "[4.0.20, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime.Handles": "[4.0.0, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )"
         },
         "compile": {
           "ref/dotnet/Microsoft.Win32.Registry.dll": {}
@@ -397,12 +397,12 @@
           "lib/DNXCore50/System.Diagnostics.Debug.dll": {}
         }
       },
-      "System.Diagnostics.FileVersionInfo/4.0.0-beta-23109": {
+      "System.Diagnostics.FileVersionInfo/4.0.0-beta-23123": {
         "dependencies": {
-          "System.Runtime": "[4.0.20-beta-23109, )",
-          "System.Runtime.InteropServices": "[4.0.20-beta-23109, )",
-          "System.IO.FileSystem": "[4.0.0-beta-23109, )",
-          "System.Globalization": "[4.0.10-beta-23109, )"
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices": "[4.0.20, )",
+          "System.IO.FileSystem": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )"
         },
         "compile": {
           "ref/dotnet/System.Diagnostics.FileVersionInfo.dll": {}
@@ -411,27 +411,27 @@
           "lib/DNXCore50/System.Diagnostics.FileVersionInfo.dll": {}
         }
       },
-      "System.Diagnostics.Process/4.0.0-beta-23109": {
+      "System.Diagnostics.Process/4.0.0-beta-23123": {
         "dependencies": {
-          "System.Runtime": "[4.0.20-beta-23109, )",
-          "System.Runtime.InteropServices": "[4.0.20-beta-23109, )",
-          "System.Resources.ResourceManager": "[4.0.0-beta-23109, )",
-          "System.Runtime.Handles": "[4.0.0-beta-23109, )",
-          "System.IO.FileSystem": "[4.0.0-beta-23109, )",
-          "System.Security.SecureString": "[4.0.0-beta-23109, )",
-          "Microsoft.Win32.Registry": "[4.0.0-beta-23109, )",
-          "Microsoft.Win32.Primitives": "[4.0.0-beta-23109, )",
-          "System.IO.FileSystem.Primitives": "[4.0.0-beta-23109, )",
-          "System.Threading.Thread": "[4.0.0-beta-23109, )",
-          "System.Text.Encoding": "[4.0.10-beta-23109, )",
-          "System.IO": "[4.0.10-beta-23109, )",
-          "System.Threading": "[4.0.10-beta-23109, )",
-          "System.Collections": "[4.0.10-beta-23109, )",
-          "System.Threading.Tasks": "[4.0.10-beta-23109, )",
-          "System.Threading.ThreadPool": "[4.0.10-beta-23109, )",
-          "System.Globalization": "[4.0.10-beta-23109, )",
-          "System.Text.Encoding.Extensions": "[4.0.10-beta-23109, )",
-          "System.Runtime.Extensions": "[4.0.10-beta-23109, )"
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices": "[4.0.20, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime.Handles": "[4.0.0, )",
+          "System.IO.FileSystem": "[4.0.0, )",
+          "System.Security.SecureString": "[4.0.0-beta-23123, )",
+          "Microsoft.Win32.Registry": "[4.0.0-beta-23123, )",
+          "Microsoft.Win32.Primitives": "[4.0.0, )",
+          "System.IO.FileSystem.Primitives": "[4.0.0, )",
+          "System.Threading.Thread": "[4.0.0-beta-23123, )",
+          "System.Text.Encoding": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Collections": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )",
+          "System.Threading.ThreadPool": "[4.0.10-beta-23123, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Text.Encoding.Extensions": "[4.0.10, )",
+          "System.Runtime.Extensions": "[4.0.10, )"
         },
         "compile": {
           "ref/dotnet/System.Diagnostics.Process.dll": {}
@@ -1073,13 +1073,13 @@
           "lib/dotnet/System.Security.Claims.dll": {}
         }
       },
-      "System.Security.Cryptography.Encryption/4.0.0-beta-23109": {
+      "System.Security.Cryptography.Encryption/4.0.0-beta-23123": {
         "dependencies": {
-          "System.Runtime": "[4.0.0-beta-23109, )",
-          "System.Resources.ResourceManager": "[4.0.0-beta-23109, )",
-          "System.IO": "[4.0.0-beta-23109, )",
-          "System.Threading.Tasks": "[4.0.0-beta-23109, )",
-          "System.Globalization": "[4.0.0-beta-23109, )"
+          "System.Runtime": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.IO": "[4.0.0, )",
+          "System.Threading.Tasks": "[4.0.0, )",
+          "System.Globalization": "[4.0.0, )"
         },
         "compile": {
           "ref/dotnet/System.Security.Cryptography.Encryption.dll": {}
@@ -1099,14 +1099,14 @@
           "lib/dotnet/System.Security.Principal.dll": {}
         }
       },
-      "System.Security.SecureString/4.0.0-beta-23109": {
+      "System.Security.SecureString/4.0.0-beta-23123": {
         "dependencies": {
-          "System.Runtime": "[4.0.20-beta-23109, )",
-          "System.Runtime.InteropServices": "[4.0.20-beta-23109, )",
-          "System.Resources.ResourceManager": "[4.0.0-beta-23109, )",
-          "System.Runtime.Handles": "[4.0.0-beta-23109, )",
-          "System.Security.Cryptography.Encryption": "[4.0.0-beta-23109, )",
-          "System.Threading": "[4.0.10-beta-23109, )"
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.InteropServices": "[4.0.20, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime.Handles": "[4.0.0, )",
+          "System.Security.Cryptography.Encryption": "[4.0.0-beta-23123, )",
+          "System.Threading": "[4.0.10, )"
         },
         "compile": {
           "ref/dotnet/System.Security.SecureString.dll": {}
@@ -3393,30 +3393,6 @@
         "[Content_Types].xml"
       ]
     },
-    "Microsoft.Win32.Registry/4.0.0-beta-23109": {
-      "sha512": "EGFd1xAy5TyB6zsOmyfWXcNUnPSX4+x1mNo923Y9Aerz5g8cm5ddv3730RWhbgHSNYQkakhA1M6pDtLJKkdkaw==",
-      "type": "Package",
-      "files": [
-        "_rels/.rels",
-        "Microsoft.Win32.Registry.nuspec",
-        "lib/DNXCore50/Microsoft.Win32.Registry.dll",
-        "lib/net46/Microsoft.Win32.Registry.dll",
-        "ref/dotnet/Microsoft.Win32.Registry.dll",
-        "ref/dotnet/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/zh-hant/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/de/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/fr/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/it/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/ja/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/ko/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/ru/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/zh-hans/Microsoft.Win32.Registry.xml",
-        "ref/dotnet/es/Microsoft.Win32.Registry.xml",
-        "ref/net46/Microsoft.Win32.Registry.dll",
-        "package/services/metadata/core-properties/2691709a5d23494cb575274499bcec66.psmdcp",
-        "[Content_Types].xml"
-      ]
-    },
     "Microsoft.Win32.Registry/4.0.0-beta-23123": {
       "sha512": "uDHpWnfXuynO2QyCsQbUjK3u6WZGXiiMOfHtFJ83Mkt/M3EtMeA6z3N/eHMnR9qBdfTAFon9yelVmwRBXXU1nQ==",
       "type": "Package",
@@ -3783,30 +3759,6 @@
         "[Content_Types].xml"
       ]
     },
-    "System.Diagnostics.FileVersionInfo/4.0.0-beta-23109": {
-      "sha512": "Pky4/2aXG5tDSE6REVx5YMQtibyTiKzyLDMNBv8Z7uZk899zPjhq8HUecFUJoKq3dSgQivX2sWZIEIjYcFO0Iw==",
-      "type": "Package",
-      "files": [
-        "_rels/.rels",
-        "System.Diagnostics.FileVersionInfo.nuspec",
-        "lib/DNXCore50/System.Diagnostics.FileVersionInfo.dll",
-        "lib/net46/System.Diagnostics.FileVersionInfo.dll",
-        "ref/dotnet/System.Diagnostics.FileVersionInfo.dll",
-        "ref/dotnet/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/zh-hant/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/de/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/fr/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/it/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/ja/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/ko/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/ru/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/zh-hans/System.Diagnostics.FileVersionInfo.xml",
-        "ref/dotnet/es/System.Diagnostics.FileVersionInfo.xml",
-        "ref/net46/System.Diagnostics.FileVersionInfo.dll",
-        "package/services/metadata/core-properties/f4c18087a7b84ebca8b3e741ef18f583.psmdcp",
-        "[Content_Types].xml"
-      ]
-    },
     "System.Diagnostics.FileVersionInfo/4.0.0-beta-23123": {
       "sha512": "RMpg/uZOZcORanGz9aqyatYgiHOE+w+5CfeMwnbE1WiLBdDA2d0v2m/lD7YQSkwk7HYsexYVmMkZflNcWPw3qQ==",
       "type": "Package",
@@ -3836,30 +3788,6 @@
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
         "package/services/metadata/core-properties/b6337943521840fbb8b9ca67c64bbdd8.psmdcp",
-        "[Content_Types].xml"
-      ]
-    },
-    "System.Diagnostics.Process/4.0.0-beta-23109": {
-      "sha512": "FbuzE+g2I8NA9qxrcJ+aelA5oy53ZHt5oygIcT1hhI19vLIPzi/xZgjrIbXDjmZKtOC+laiuUwe3UlnMsytC7A==",
-      "type": "Package",
-      "files": [
-        "_rels/.rels",
-        "System.Diagnostics.Process.nuspec",
-        "lib/DNXCore50/System.Diagnostics.Process.dll",
-        "lib/net46/System.Diagnostics.Process.dll",
-        "ref/dotnet/System.Diagnostics.Process.dll",
-        "ref/dotnet/System.Diagnostics.Process.xml",
-        "ref/dotnet/zh-hant/System.Diagnostics.Process.xml",
-        "ref/dotnet/de/System.Diagnostics.Process.xml",
-        "ref/dotnet/fr/System.Diagnostics.Process.xml",
-        "ref/dotnet/it/System.Diagnostics.Process.xml",
-        "ref/dotnet/ja/System.Diagnostics.Process.xml",
-        "ref/dotnet/ko/System.Diagnostics.Process.xml",
-        "ref/dotnet/ru/System.Diagnostics.Process.xml",
-        "ref/dotnet/zh-hans/System.Diagnostics.Process.xml",
-        "ref/dotnet/es/System.Diagnostics.Process.xml",
-        "ref/net46/System.Diagnostics.Process.dll",
-        "package/services/metadata/core-properties/1d4be6b4146c4fcbb10e1782688d514d.psmdcp",
         "[Content_Types].xml"
       ]
     },
@@ -5256,30 +5184,6 @@
         "[Content_Types].xml"
       ]
     },
-    "System.Security.Cryptography.Encryption/4.0.0-beta-23109": {
-      "sha512": "Lewf25aZTItYvFz8RtCFdNAniNQ737gkTPU9IObuzbOeX8MMGHRf9Le4AQ2SdkTTTljjhebGybF5KCKZ784DLA==",
-      "type": "Package",
-      "files": [
-        "_rels/.rels",
-        "System.Security.Cryptography.Encryption.nuspec",
-        "lib/DNXCore50/System.Security.Cryptography.Encryption.dll",
-        "lib/net46/System.Security.Cryptography.Encryption.dll",
-        "ref/dotnet/System.Security.Cryptography.Encryption.dll",
-        "ref/dotnet/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/zh-hant/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/de/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/fr/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/it/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/ja/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/ko/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/ru/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/zh-hans/System.Security.Cryptography.Encryption.xml",
-        "ref/dotnet/es/System.Security.Cryptography.Encryption.xml",
-        "ref/net46/System.Security.Cryptography.Encryption.dll",
-        "package/services/metadata/core-properties/3ee4ba1c540743d4a7948e470b79c126.psmdcp",
-        "[Content_Types].xml"
-      ]
-    },
     "System.Security.Cryptography.Encryption/4.0.0-beta-23123": {
       "sha512": "IjawUtwaF88Ao3xkigg2I6pVj/uevJvuYtDk2lKXD6gYp833yK7D3dyelGGq0wV/GJtmEp64YqXLi6gW69/JGg==",
       "type": "Package",
@@ -5342,30 +5246,6 @@
         "ref/wp80/_._",
         "ref/wpa81/_._",
         "package/services/metadata/core-properties/5d44fbabc99d4204b6a2f76329d0a184.psmdcp",
-        "[Content_Types].xml"
-      ]
-    },
-    "System.Security.SecureString/4.0.0-beta-23109": {
-      "sha512": "ZRmBb18JXF2sfEop6zESpMH+yCPnr3lPfB3o7pyU4hnoMPIzwGJq8T9pIWG0y1x+fB1RtsaXUXPf3T1ACR2T5w==",
-      "type": "Package",
-      "files": [
-        "_rels/.rels",
-        "System.Security.SecureString.nuspec",
-        "lib/DNXCore50/System.Security.SecureString.dll",
-        "lib/net46/System.Security.SecureString.dll",
-        "ref/dotnet/System.Security.SecureString.dll",
-        "ref/dotnet/System.Security.SecureString.xml",
-        "ref/dotnet/zh-hant/System.Security.SecureString.xml",
-        "ref/dotnet/de/System.Security.SecureString.xml",
-        "ref/dotnet/fr/System.Security.SecureString.xml",
-        "ref/dotnet/it/System.Security.SecureString.xml",
-        "ref/dotnet/ja/System.Security.SecureString.xml",
-        "ref/dotnet/ko/System.Security.SecureString.xml",
-        "ref/dotnet/ru/System.Security.SecureString.xml",
-        "ref/dotnet/zh-hans/System.Security.SecureString.xml",
-        "ref/dotnet/es/System.Security.SecureString.xml",
-        "ref/net46/System.Security.SecureString.dll",
-        "package/services/metadata/core-properties/f529806a9be74a3cb090de647dfd9b55.psmdcp",
         "[Content_Types].xml"
       ]
     },
@@ -5911,8 +5791,8 @@
       "System.Console >= 4.0.0-beta-23123",
       "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213",
       "System.Diagnostics.Contracts >= 4.0.0",
-      "System.Diagnostics.FileVersionInfo >= 4.0.0-beta-23109",
-      "System.Diagnostics.Process >= 4.0.0-beta-23109",
+      "System.Diagnostics.FileVersionInfo >= 4.0.0-beta-23123",
+      "System.Diagnostics.Process >= 4.0.0-beta-23123",
       "System.Diagnostics.TraceSource >= 4.0.0-beta-23019",
       "System.IO.Pipes >= 4.0.0-beta-23123",
       "System.Threading.Thread >= 4.0.0-beta-23123",

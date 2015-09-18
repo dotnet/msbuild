@@ -364,6 +364,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(String.Empty, item.GetMetadata("m"));
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Test that task items can be successfully constructed based on a task item from another appdomain.  
         /// </summary>
@@ -453,5 +454,6 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+#endif
     }
 }
