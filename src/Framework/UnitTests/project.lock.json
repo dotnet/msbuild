@@ -395,7 +395,7 @@
         }
       },
       "Microsoft.NETCore.Targets.DNXCore/4.9.0": {},
-      "Microsoft.NETCore.TestHost-x86/1.0.0-beta-23123": {},
+      "Microsoft.NETCore.TestHost/1.0.0-beta-23318": {},
       "Microsoft.VisualBasic/10.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -1303,17 +1303,6 @@
           "lib/dotnet/System.Threading.Tasks.Parallel.dll": {}
         }
       },
-      "System.Threading.Thread/4.0.0-beta-23109": {
-        "dependencies": {
-          "System.Runtime": "[4.0.0-beta-23109, )"
-        },
-        "compile": {
-          "ref/dotnet/System.Threading.Thread.dll": {}
-        },
-        "runtime": {
-          "lib/DNXCore50/System.Threading.Thread.dll": {}
-        }
-      },
       "System.Threading.Timer/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -1405,6 +1394,32 @@
           "lib/dotnet/xunit.assert.dll": {}
         }
       },
+      "xunit.console.netcore/1.0.2-prerelease-00096": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.Collections.Concurrent": "[4.0.10, )",
+          "System.Console": "[4.0.0-beta-23213, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.IO.FileSystem": "[4.0.0, )",
+          "System.IO.FileSystem.Primitives": "[4.0.0, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Text.RegularExpressions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )",
+          "System.Xml.XDocument": "[4.0.10, )",
+          "xunit.runner.utility": "[2.1.0-rc1-build3168, )"
+        },
+        "compile": {
+          "lib/dnxcore50/_._": {}
+        },
+        "runtime": {
+          "lib/dnxcore50/_._": {}
+        }
+      },
       "xunit.core/2.1.0-rc1-build3168": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -1455,6 +1470,29 @@
         },
         "runtime": {
           "lib/dotnet/xunit.execution.dotnet.dll": {}
+        }
+      },
+      "xunit.runner.utility/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "System.Collections": "[4.0.0, )",
+          "System.Diagnostics.Debug": "[4.0.0, )",
+          "System.Globalization": "[4.0.0, )",
+          "System.IO": "[4.0.0, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Reflection": "[4.0.0, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Runtime": "[4.0.0, )",
+          "System.Runtime.Extensions": "[4.0.0, )",
+          "System.Text.RegularExpressions": "[4.0.0, )",
+          "System.Threading": "[4.0.0, )",
+          "System.Threading.Tasks": "[4.0.0, )",
+          "xunit.abstractions": "[2.0.0, )"
+        },
+        "compile": {
+          "lib/dotnet/xunit.runner.utility.dotnet.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/xunit.runner.utility.dotnet.dll": {}
         }
       }
     },
@@ -1630,11 +1668,7 @@
         }
       },
       "Microsoft.NETCore.Targets.DNXCore/4.9.0": {},
-      "Microsoft.NETCore.TestHost-x86/1.0.0-beta-23123": {
-        "native": {
-          "runtimes/win7-x86/native/CoreRun.exe": {}
-        }
-      },
+      "Microsoft.NETCore.TestHost/1.0.0-beta-23318": {},
       "Microsoft.NETCore.Windows.ApiSets-x86/1.0.0": {
         "native": {
           "runtimes/win7-x86/native/API-MS-Win-Base-Util-L1-1-0.dll": {},
@@ -1797,6 +1831,11 @@
         },
         "runtime": {
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
+        }
+      },
+      "runtime.win7-x86.Microsoft.NETCore.TestHost/1.0.0-beta-23318": {
+        "native": {
+          "runtimes/win7-x86/native/CoreRun.exe": {}
         }
       },
       "System.AppContext/4.0.0": {
@@ -2713,17 +2752,6 @@
           "lib/dotnet/System.Threading.Tasks.Parallel.dll": {}
         }
       },
-      "System.Threading.Thread/4.0.0-beta-23109": {
-        "dependencies": {
-          "System.Runtime": "[4.0.0-beta-23109, )"
-        },
-        "compile": {
-          "ref/dotnet/System.Threading.Thread.dll": {}
-        },
-        "runtime": {
-          "lib/DNXCore50/System.Threading.Thread.dll": {}
-        }
-      },
       "System.Threading.Timer/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -2815,6 +2843,35 @@
           "lib/dotnet/xunit.assert.dll": {}
         }
       },
+      "xunit.console.netcore/1.0.2-prerelease-00096": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.Collections.Concurrent": "[4.0.10, )",
+          "System.Console": "[4.0.0-beta-23213, )",
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.IO": "[4.0.10, )",
+          "System.IO.FileSystem": "[4.0.0, )",
+          "System.IO.FileSystem.Primitives": "[4.0.0, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Text.RegularExpressions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )",
+          "System.Threading.Tasks": "[4.0.10, )",
+          "System.Xml.XDocument": "[4.0.10, )",
+          "xunit.runner.utility": "[2.1.0-rc1-build3168, )"
+        },
+        "compile": {
+          "lib/dnxcore50/_._": {}
+        },
+        "runtime": {
+          "lib/dnxcore50/_._": {}
+        },
+        "native": {
+          "runtimes/any/native/xunit.console.netcore.exe": {}
+        }
+      },
       "xunit.core/2.1.0-rc1-build3168": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -2865,6 +2922,29 @@
         },
         "runtime": {
           "lib/dotnet/xunit.execution.dotnet.dll": {}
+        }
+      },
+      "xunit.runner.utility/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "System.Collections": "[4.0.0, )",
+          "System.Diagnostics.Debug": "[4.0.0, )",
+          "System.Globalization": "[4.0.0, )",
+          "System.IO": "[4.0.0, )",
+          "System.Linq": "[4.0.0, )",
+          "System.Reflection": "[4.0.0, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Runtime": "[4.0.0, )",
+          "System.Runtime.Extensions": "[4.0.0, )",
+          "System.Text.RegularExpressions": "[4.0.0, )",
+          "System.Threading": "[4.0.0, )",
+          "System.Threading.Tasks": "[4.0.0, )",
+          "xunit.abstractions": "[2.0.0, )"
+        },
+        "compile": {
+          "lib/dotnet/xunit.runner.utility.dotnet.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/xunit.runner.utility.dotnet.dll": {}
         }
       }
     }
@@ -3066,15 +3146,15 @@
         "runtime.json"
       ]
     },
-    "Microsoft.NETCore.TestHost-x86/1.0.0-beta-23123": {
-      "sha512": "hLIFc0enPvCCOt1pXl3etWtkhvB+lb8qcjxWM39Jk9n8UTLvIH4lwzFbTv6Tij3LYmNbToTKEPKYmx3TfjUevw==",
+    "Microsoft.NETCore.TestHost/1.0.0-beta-23318": {
+      "sha512": "aa4Nc7Hqz8WIzkRkDtugEB/sfQ7Y9pb9HPuKEXeHmVnYHsYJfzBMbpHAMH9NQMgBIX9K4U9w0paNILpE+rmgzA==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
         "_rels/.rels",
-        "Microsoft.NETCore.TestHost-x86.nuspec",
-        "package/services/metadata/core-properties/71ad7e2008a84dfdb75618cb7527719a.psmdcp",
-        "runtimes/win7-x86/native/CoreRun.exe"
+        "Microsoft.NETCore.TestHost.nuspec",
+        "package/services/metadata/core-properties/eec14f32c7c740d48d02128dbde8c72d.psmdcp",
+        "runtime.json"
       ]
     },
     "Microsoft.NETCore.Windows.ApiSets-x86/1.0.0": {
@@ -3305,6 +3385,17 @@
         "ref/net46/Microsoft.Win32.Primitives.dll",
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._"
+      ]
+    },
+    "runtime.win7-x86.Microsoft.NETCore.TestHost/1.0.0-beta-23318": {
+      "sha512": "J/YXnHNp6GpesJPTxhRPgbUgZ31X0MurDc1sozSTwVqsVo4wbN5+dfQgQmJZ0ns9cWKVHU+EJLI1XCeIZsV28g==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "package/services/metadata/core-properties/a393c5d3c2534c28a1ec778d0ffb9e61.psmdcp",
+        "runtime.win7-x86.Microsoft.NETCore.TestHost.nuspec",
+        "runtimes/win7-x86/native/CoreRun.exe"
       ]
     },
     "System.AppContext/4.0.0": {
@@ -5245,30 +5336,6 @@
         "System.Threading.Tasks.Parallel.nuspec"
       ]
     },
-    "System.Threading.Thread/4.0.0-beta-23109": {
-      "sha512": "pOob5Fz4cRJ/bfBs2+ehmS99VGCN5Ei2mf7bl17STagcDGHUZBAzVLz8Kamq0hwQGX2pCFkuUZH+2Ycdts2PSQ==",
-      "type": "Package",
-      "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "lib/DNXCore50/System.Threading.Thread.dll",
-        "lib/net46/System.Threading.Thread.dll",
-        "package/services/metadata/core-properties/ba9a9919e2744245be86e42f4f3b93d1.psmdcp",
-        "ref/dotnet/de/System.Threading.Thread.xml",
-        "ref/dotnet/es/System.Threading.Thread.xml",
-        "ref/dotnet/fr/System.Threading.Thread.xml",
-        "ref/dotnet/it/System.Threading.Thread.xml",
-        "ref/dotnet/ja/System.Threading.Thread.xml",
-        "ref/dotnet/ko/System.Threading.Thread.xml",
-        "ref/dotnet/ru/System.Threading.Thread.xml",
-        "ref/dotnet/System.Threading.Thread.dll",
-        "ref/dotnet/System.Threading.Thread.xml",
-        "ref/dotnet/zh-hans/System.Threading.Thread.xml",
-        "ref/dotnet/zh-hant/System.Threading.Thread.xml",
-        "ref/net46/System.Threading.Thread.dll",
-        "System.Threading.Thread.nuspec"
-      ]
-    },
     "System.Threading.Timer/4.0.0": {
       "sha512": "BIdJH5/e4FnVl7TkRUiE3pWytp7OYiRUGtwUbyLewS/PhKiLepFetdtlW+FvDYOVn60Q2NMTrhHhJ51q+sVW5g==",
       "type": "Package",
@@ -5405,6 +5472,20 @@
         "xunit.assert.nuspec"
       ]
     },
+    "xunit.console.netcore/1.0.2-prerelease-00096": {
+      "sha512": "pQXuNHoWFIQXguhJcThUFUsBknfhlUca6H0SGmmcWIxwYno6ojtS1BaKu8/USgLUzwvqN2xmEpYU0x/4GIkpNg==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/aspnetcore50/xunit.console.netcore.exe",
+        "lib/dnxcore50/_._",
+        "lib/dotnet/_._",
+        "package/services/metadata/core-properties/b2ab91db268e41b2ab9ea4142b12887d.psmdcp",
+        "runtimes/any/native/xunit.console.netcore.exe",
+        "xunit.console.netcore.nuspec"
+      ]
+    },
     "xunit.core/2.1.0-rc1-build3168": {
       "sha512": "IcQo+pNEDYBC9HJfzY08k0NhLZMX8WXudrlhcrIAzkT2szhrLbGhUi1k6vU5n9crsVv+IxosvIH28kYf6/Z32w==",
       "type": "Package",
@@ -5487,6 +5568,28 @@
         "package/services/metadata/core-properties/3ba0c9def4ed43d782df6b4b2c8fef45.psmdcp",
         "xunit.extensibility.execution.nuspec"
       ]
+    },
+    "xunit.runner.utility/2.1.0-rc1-build3168": {
+      "sha512": "4raBhWPr7w8eQa+Rc1eYCVC5sTJeovtuJwj59OqCHUTpSyaTT/9rps2eI+mXRSD7uH46TS2o0IoQ3bsSsrcedQ==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/dnx451/xunit.runner.utility.dotnet.dll",
+        "lib/dnx451/xunit.runner.utility.dotnet.pdb",
+        "lib/dnx451/xunit.runner.utility.dotnet.xml",
+        "lib/dotnet/xunit.runner.utility.dotnet.dll",
+        "lib/dotnet/xunit.runner.utility.dotnet.pdb",
+        "lib/dotnet/xunit.runner.utility.dotnet.xml",
+        "lib/net35/xunit.runner.utility.desktop.dll",
+        "lib/net35/xunit.runner.utility.desktop.pdb",
+        "lib/net35/xunit.runner.utility.desktop.xml",
+        "lib/portable-net45+win8+wp8+wpa81/xunit.runner.utility.dotnet.dll",
+        "lib/portable-net45+win8+wp8+wpa81/xunit.runner.utility.dotnet.pdb",
+        "lib/portable-net45+win8+wp8+wpa81/xunit.runner.utility.dotnet.xml",
+        "package/services/metadata/core-properties/9d35b610bdb443c29dc6fe49f51a043f.psmdcp",
+        "xunit.runner.utility.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
@@ -5501,10 +5604,11 @@
       "Microsoft.NETCore >= 5.0.0",
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.0",
       "Microsoft.NETCore.Runtime >= 1.0.0",
-      "Microsoft.NETCore.TestHost-x86 >= 1.0.0-beta-23123",
+      "Microsoft.NETCore.TestHost >= 1.0.0-beta-23318",
       "System.Console >= 4.0.0-beta-23123",
       "System.Runtime >= 4.0.20",
-      "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213"
+      "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23213",
+      "xunit.console.netcore >= 1.0.2-prerelease-00096"
     ]
   }
 }
