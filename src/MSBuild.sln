@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskUsageLogger", "..\Sampl
 		{828566EE-6F6A-4EF4-98B0-513F7DF9C628} = {828566EE-6F6A-4EF4-98B0-513F7DF9C628}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Engine.OM.UnitTests", "XMakeBuildEngine\UnitTestsPublicOM\Microsoft.Build.Engine.OM.UnitTests.csproj", "{9D858C8F-8D71-467E-808E-4E4F48DD0A49}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -186,6 +188,18 @@ Global
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release|x64.Build.0 = Release|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release|x86.ActiveCfg = Release|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Release|x86.Build.0 = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|x64.Build.0 = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|x86.Build.0 = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x64.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x64.Build.0 = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x86.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
