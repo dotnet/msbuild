@@ -1,17 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.IO;
 using System.Reflection;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class Culture_Tests
     {
         /*
@@ -19,12 +18,12 @@ namespace Microsoft.Build.UnitTests
         *
         * Test the basic functionality.
         */
-        [Test]
+        [Fact]
         public void Basic()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.fr.resx", null);
-            Assert.AreEqual("fr", info.culture);
-            Assert.AreEqual("MyResource.resx", info.cultureNeutralFilename);
+            Assert.Equal("fr", info.culture);
+            Assert.Equal("MyResource.resx", info.cultureNeutralFilename);
         }
 
         /*
@@ -32,12 +31,12 @@ namespace Microsoft.Build.UnitTests
         *
         * The item doesn't have a culture, and there isn't one embedded in the file name.
         */
-        [Test]
+        [Fact]
         public void NonCultureFile()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.resx", null);
-            Assert.AreEqual(null, info.culture);
-            Assert.AreEqual("MyResource.resx", info.cultureNeutralFilename);
+            Assert.Equal(null, info.culture);
+            Assert.Equal("MyResource.resx", info.cultureNeutralFilename);
         }
 
 
@@ -46,12 +45,12 @@ namespace Microsoft.Build.UnitTests
         *
         * The item has something that looks like an embedded culture, but isn't.
         */
-        [Test]
+        [Fact]
         public void BogusEmbeddedCulture()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.notalocale.resx", null);
-            Assert.AreEqual(null, info.culture);
-            Assert.AreEqual("MyResource.notalocale.resx", info.cultureNeutralFilename);
+            Assert.Equal(null, info.culture);
+            Assert.Equal("MyResource.notalocale.resx", info.cultureNeutralFilename);
         }
     }
 }

@@ -1,30 +1,29 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class VisualBasicParserUtilititesTests
     {
         // Try just and empty file
-        [Test]
+        [Fact]
         public void EmptyFile()
         {
             AssertParse("", null);
         }
 
         // A simple form
-        [Test]
+        [Fact]
         public void SimpleForm()
         {
             AssertParse
@@ -38,7 +37,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A simple form with a namespace
-        [Test]
+        [Fact]
         public void Namespace()
         {
             AssertParse
@@ -55,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A simple form with a namespace
-        [Test]
+        [Fact]
         public void NestedNamespace()
         {
             AssertParse
@@ -69,7 +68,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A namespace the is ended before the class
-        [Test]
+        [Fact]
         public void NestedAndEndedNamespace()
         {
             AssertParse
@@ -90,7 +89,7 @@ namespace Microsoft.Build.UnitTests
         /// name was something like "BugResources.RemoveStuff.XYZ", because we would
         /// only match the "BugResources" bit.
         /// </summary>
-        [Test]
+        [Fact]
         public void NamespaceElementBeginsWithRem()
         {
             AssertParse
@@ -121,7 +120,7 @@ namespace Microsoft.Build.UnitTests
                 StreamHelpers.StringToStream(source)
             );
 
-            Assert.AreEqual(expectedClassName, className.Name);
+            Assert.Equal(expectedClassName, className.Name);
         }
     }
 }

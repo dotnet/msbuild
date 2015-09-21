@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Resources;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
-using NUnit.Framework;
+
 using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;

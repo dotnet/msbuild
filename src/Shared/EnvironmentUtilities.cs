@@ -26,7 +26,7 @@ namespace Microsoft.Build.Shared
         {
             internal const String KERNEL32 = "kernel32.dll";
 
-            [DllImport(KERNEL32, CharSet=NativeMethodsShared.AutoOrUnicode, SetLastError=true)]
+            [DllImport(KERNEL32, CharSet = NativeMethodsShared.AutoOrUnicode, SetLastError = true)]
             internal static extern IntPtr GetCurrentProcess();
 
             // Note - do NOT use this to call methods.  Use P/Invoke, which will
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Shared
             // stuff, better interactions with thread aborts, etc.  This is used
             // solely by DoesWin32MethodExist for avoiding try/catch EntryPointNotFoundException
             // in scenarios where an OS Version check is insufficient
-            [DllImport(KERNEL32, CharSet=CharSet.Ansi, BestFitMapping=false, SetLastError=true, ExactSpelling=true)]
+            [DllImport(KERNEL32, CharSet = CharSet.Ansi, BestFitMapping = false, SetLastError = true, ExactSpelling = true)]
             private static extern IntPtr GetProcAddress(IntPtr hModule, String methodName);
 
             [DllImport(KERNEL32, CharSet = NativeMethodsShared.AutoOrUnicode, BestFitMapping = false, SetLastError = true)]
@@ -62,7 +62,6 @@ namespace Microsoft.Build.Shared
                        IntPtr hSourceProcessHandle,
                        [Out, MarshalAs(UnmanagedType.Bool)]
                        out bool isWow64);
-
         }
     }
 }

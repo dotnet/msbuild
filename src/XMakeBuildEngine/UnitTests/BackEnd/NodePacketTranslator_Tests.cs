@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -12,7 +12,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -20,33 +19,33 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd;
 using System.IO;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Tests for the NodePacketTranslators
     /// </summary>
-    [TestFixture]
     public class NodePacketTranslator_Tests
     {
         /// <summary>
         /// Tests the SerializationMode property
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
             INodePacketTranslator translator = NodePacketTranslator.GetReadTranslator(stream, null);
-            Assert.AreEqual(TranslationDirection.ReadFromStream, translator.Mode);
+            Assert.Equal(TranslationDirection.ReadFromStream, translator.Mode);
 
             translator = NodePacketTranslator.GetWriteTranslator(stream);
-            Assert.AreEqual(TranslationDirection.WriteToStream, translator.Mode);
+            Assert.Equal(TranslationDirection.WriteToStream, translator.Mode);
         }
 
         /// <summary>
         /// Tests serializing bools.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeBool()
         {
             HelperTestSimpleType(false, true);
@@ -56,7 +55,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing bytes.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeByte()
         {
             byte val = 0x55;
@@ -67,7 +66,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing shorts.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeShort()
         {
             short val = 0x55AA;
@@ -78,7 +77,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing ints.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeInt()
         {
             int val = 0x55AA55AA;
@@ -89,7 +88,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing strings.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeString()
         {
             HelperTestSimpleType("foo", null);
@@ -100,7 +99,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing string arrays.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeStringArray()
         {
             HelperTestArray(new string[] { }, StringComparer.Ordinal);
@@ -111,7 +110,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing string arrays.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeStringList()
         {
             HelperTestList(new List<string>(), StringComparer.Ordinal);
@@ -125,7 +124,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serializing DateTimes.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDateTime()
         {
             HelperTestSimpleType(new DateTime(), DateTime.Now);
@@ -143,14 +142,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationDirection deserializedValue = TranslationDirection.WriteToStream;
             TranslationHelpers.GetReadTranslator().TranslateEnum(ref deserializedValue, (int)deserializedValue);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
- #if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Tests serializing using the DotNet serializer.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDotNet()
         {
             ArgumentNullException value = new ArgumentNullException("The argument was null", new InsufficientMemoryException());
@@ -159,13 +158,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ArgumentNullException deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
 
-            Assert.IsTrue(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
         }
 
         /// <summary>
         /// Tests serializing using the DotNet serializer passing in null.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDotNetNull()
         {
             ArgumentNullException value = null;
@@ -174,14 +173,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ArgumentNullException deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
 
-            Assert.IsTrue(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
         }
 #endif
 
         /// <summary>
         /// Tests serializing an object with a default constructor.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeINodePacketSerializable()
         {
             DerivedClass value = new DerivedClass(1, 2);
@@ -190,14 +189,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             DerivedClass deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.AreEqual(value.BaseValue, deserializedValue.BaseValue);
-            Assert.AreEqual(value.DerivedValue, deserializedValue.DerivedValue);
+            Assert.Equal(value.BaseValue, deserializedValue.BaseValue);
+            Assert.Equal(value.DerivedValue, deserializedValue.DerivedValue);
         }
 
         /// <summary>
         /// Tests serializing an object with a default constructor passed as null.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeINodePacketSerializableNull()
         {
             DerivedClass value = null;
@@ -206,13 +205,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             DerivedClass deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
         /// Tests serializing an object requiring a factory to construct.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeWithFactory()
         {
             BaseClass value = new BaseClass(1);
@@ -221,13 +220,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BaseClass deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
-            Assert.AreEqual(value.BaseValue, deserializedValue.BaseValue);
+            Assert.Equal(value.BaseValue, deserializedValue.BaseValue);
         }
 
         /// <summary>
         /// Tests serializing an object requiring a factory to construct, passing null for the value.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeWithFactoryNull()
         {
             BaseClass value = null;
@@ -236,13 +235,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BaseClass deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
         /// Tests serializing an array of objects with default constructors.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeArray()
         {
             DerivedClass[] value = new DerivedClass[] { new DerivedClass(1, 2), new DerivedClass(3, 4) };
@@ -251,13 +250,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             DerivedClass[] deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateArray(ref deserializedValue);
 
-            Assert.IsTrue(TranslationHelpers.CompareCollections(value, deserializedValue, DerivedClass.Comparer));
+            Assert.True(TranslationHelpers.CompareCollections(value, deserializedValue, DerivedClass.Comparer));
         }
 
         /// <summary>
         /// Tests serializing an array of objects with default constructors, passing null for the array.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeArrayNull()
         {
             DerivedClass[] value = null;
@@ -266,13 +265,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             DerivedClass[] deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateArray(ref deserializedValue);
 
-            Assert.IsTrue(TranslationHelpers.CompareCollections(value, deserializedValue, DerivedClass.Comparer));
+            Assert.True(TranslationHelpers.CompareCollections(value, deserializedValue, DerivedClass.Comparer));
         }
 
         /// <summary>
         /// Tests serializing an array of objects requiring factories to construct.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeArrayWithFactory()
         {
             BaseClass[] value = new BaseClass[] { new BaseClass(1), new BaseClass(2) };
@@ -281,13 +280,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BaseClass[] deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateArray(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
-            Assert.IsTrue(TranslationHelpers.CompareCollections(value, deserializedValue, BaseClass.Comparer));
+            Assert.True(TranslationHelpers.CompareCollections(value, deserializedValue, BaseClass.Comparer));
         }
 
         /// <summary>
         /// Tests serializing an array of objects requiring factories to construct, passing null for the array.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeArrayWithFactoryNull()
         {
             BaseClass[] value = null;
@@ -296,13 +295,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BaseClass[] deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateArray(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
-            Assert.IsTrue(TranslationHelpers.CompareCollections(value, deserializedValue, BaseClass.Comparer));
+            Assert.True(TranslationHelpers.CompareCollections(value, deserializedValue, BaseClass.Comparer));
         }
 
         /// <summary>
         /// Tests serializing a dictionary of { string, string }
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDictionaryStringString()
         {
             Dictionary<string, string> value = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -314,16 +313,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase);
 
-            Assert.AreEqual(value.Count, deserializedValue.Count);
-            Assert.AreEqual(value["foo"], deserializedValue["foo"]);
-            Assert.AreEqual(value["alpha"], deserializedValue["alpha"]);
-            Assert.AreEqual(value["FOO"], deserializedValue["FOO"]);
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(value["foo"], deserializedValue["foo"]);
+            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+            Assert.Equal(value["FOO"], deserializedValue["FOO"]);
         }
 
         /// <summary>
         /// Tests serializing a dictionary of { string, string }, passing null.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDictionaryStringStringNull()
         {
             Dictionary<string, string> value = null;
@@ -333,14 +332,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
         /// Tests serializing a dictionary of { string, T } where T requires a factory to construct and the dictionary
         /// requires a KeyComparer initializer.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDictionaryStringT()
         {
             Dictionary<string, BaseClass> value = new Dictionary<string, BaseClass>(StringComparer.OrdinalIgnoreCase);
@@ -352,17 +351,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, BaseClass> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
 
-            Assert.AreEqual(value.Count, deserializedValue.Count);
-            Assert.AreEqual(BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]), 0);
-            Assert.AreEqual(BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]), 0);
-            Assert.AreEqual(BaseClass.Comparer.Compare(value["FOO"], deserializedValue["FOO"]), 0);
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]), 0);
+            Assert.Equal(BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]), 0);
+            Assert.Equal(BaseClass.Comparer.Compare(value["FOO"], deserializedValue["FOO"]), 0);
         }
 
         /// <summary>
         /// Tests serializing a dictionary of { string, T } where T requires a factory to construct and the dictionary
         /// requires a KeyComparer initializer, passing null for the dictionary.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDictionaryStringTNull()
         {
             Dictionary<string, BaseClass> value = null;
@@ -372,14 +371,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, BaseClass> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
         /// Tests serializing a dictionary of { string, T } where T requires a factory to construct and the dictionary
         /// has a default constructor.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDictionaryStringTNoComparer()
         {
             Dictionary<string, BaseClass> value = new Dictionary<string, BaseClass>();
@@ -391,17 +390,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, BaseClass> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
-            Assert.AreEqual(value.Count, deserializedValue.Count);
-            Assert.AreEqual(BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]), 0);
-            Assert.AreEqual(BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]), 0);
-            Assert.IsFalse(deserializedValue.ContainsKey("FOO"));
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]), 0);
+            Assert.Equal(BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]), 0);
+            Assert.False(deserializedValue.ContainsKey("FOO"));
         }
 
         /// <summary>
         /// Tests serializing a dictionary of { string, T } where T requires a factory to construct and the dictionary
         /// has a default constructor, passing null for the dictionary.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestSerializeDictionaryStringTNoComparerNull()
         {
             Dictionary<string, BaseClass> value = null;
@@ -411,7 +410,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, BaseClass> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
@@ -425,7 +424,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             bool deserializedValue = deserializedInitialValue;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
@@ -439,7 +438,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             byte deserializedValue = deserializedInitialValue;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
@@ -453,7 +452,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             short deserializedValue = deserializedInitialValue;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
@@ -467,7 +466,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int deserializedValue = deserializedInitialValue;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
@@ -481,7 +480,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string deserializedValue = deserializedInitialValue;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
@@ -495,7 +494,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             DateTime deserializedValue = deserializedInitialValue;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.AreEqual(value, deserializedValue);
+            Assert.Equal(value, deserializedValue);
         }
 
         /// <summary>
@@ -509,7 +508,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string[] deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.IsTrue(TranslationHelpers.CompareCollections(value, deserializedValue, comparer));
+            Assert.True(TranslationHelpers.CompareCollections(value, deserializedValue, comparer));
         }
 
         /// <summary>
@@ -523,7 +522,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             List<string> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.IsTrue(TranslationHelpers.CompareCollections(value, deserializedValue, comparer));
+            Assert.True(TranslationHelpers.CompareCollections(value, deserializedValue, comparer));
         }
 
         /// <summary>

@@ -1,15 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 
-using NUnit.Framework;
-
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class XmlUtilities_Tests
     {
         // Various invalid names, with the first invalid character listed for each
@@ -30,7 +28,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get the right invalid char listed in the error string
         /// </summary>
-        [Test]
+        [Fact]
         public void InvalidNameErrorLocation()
         {
             for (int i = 0; i <= _invalidNames.GetUpperBound(0); i++)
@@ -58,7 +56,7 @@ namespace Microsoft.Build.UnitTests
                 actual = ex.Message;
             }
 
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -9,22 +9,21 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 
 using Microsoft.Build.BackEnd;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Unit Tests for TaskHostTaskCancelled packet.
     /// </summary>
-    [TestFixture]
     public class TaskHostTaskCancelled_Tests
     {
         /// <summary>
         /// Basic test of the constructor. 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestConstructor()
         {
             TaskHostTaskCancelled cancelled = new TaskHostTaskCancelled();
@@ -33,7 +32,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Basic test of serialization / deserialization. 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestTranslation()
         {
             TaskHostTaskCancelled cancelled = new TaskHostTaskCancelled();

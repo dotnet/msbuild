@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -8,24 +8,21 @@
 using System;
 using System.IO;
 
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-
-using NUnit.Framework;
-
+using Microsoft.Build.Evaluation;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Tests from Orcas
     /// </summary>
-    [TestFixture]
     sealed public class TargetsFile_Test
     {
         /// <summary>
         /// Check that the ARM flag is passed to the compiler when targeting ARM.
         /// </summary>
-        [Test]
+        [Fact]
         public void TargetARM()
         {
             string file = null;
@@ -77,7 +74,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), library type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void AnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -127,7 +124,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platform of anycpu, library type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void ExplicitAnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -178,7 +175,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), winmdobj type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void AnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -234,7 +231,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, winmdobj type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void ExplicitAnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -291,7 +288,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), exe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void AnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -341,7 +338,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, exe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void ExplicitAnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -392,7 +389,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), exe type assemblies 
         /// that are targeting .NET 4.0 do not get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void AnyCPU40ExeProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -442,7 +439,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, exe type assemblies that are 
         /// targeting .NET 4.0 do not get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void ExplicitAnyCPU40ExeProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -493,7 +490,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), appcontainerexe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void AnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -549,7 +546,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, appcontainerexe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Test]
+        [Fact]
         public void ExplicitAnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -606,7 +603,7 @@ namespace Microsoft.Build.UnitTests
         /// Although AnyCPU library projects should not default to AnyCPU32BitPreferred, because that platform is 
         /// not supported for library projects, if Prefer32Bit is explicitly set, we should still respect that. 
         /// </summary>
-        [Test]
+        [Fact]
         public void AnyCPULibraryProjectIs32BitPreferredIfPrefer32BitSet()
         {
             string file = null;
@@ -658,7 +655,7 @@ namespace Microsoft.Build.UnitTests
         /// A project with no explicit OutputType will end up defaulting its OutputType to exe, 
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
-        [Test]
+        [Fact]
         public void AnyCPUProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -708,7 +705,7 @@ namespace Microsoft.Build.UnitTests
         /// A project with no explicit OutputType will end up defaulting its OutputType to exe, 
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
-        [Test]
+        [Fact]
         public void AnyCPUJupiterProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -760,7 +757,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Validate that the GetFrameworkPaths target 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestGetFrameworkPaths()
         {
             MockLogger logger = new MockLogger();
@@ -795,7 +792,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Validate that the GetFrameworkPaths target 
         /// </summary>
-        [Test]
+        [Fact]
         public void TestTargetFrameworkPaths()
         {
             string[] targetFrameworkVersions = { "v2.0", "v3.0", "v3.5", "v4.0", "v4.5", "" };
@@ -860,7 +857,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Doesn't synthesize Link metadata if the items are defined in the project  
         /// </summary>
-        [Test]
+        [Fact]
         public void NoLinkMetadataSynthesisWhenDefinedInProject()
         {
             string[] files = null;
@@ -922,7 +919,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Synthesizes Link metadata if the items are defined in an import and are on the whitelist
         /// </summary>
-        [Test]
+        [Fact]
         public void SynthesizeLinkMetadataForItemsOnWhitelist()
         {
             string[] files = null;
@@ -1001,7 +998,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Don't synthesize link metadata if the SynthesizeLinkMetadata property is false
         /// </summary>
-        [Test]
+        [Fact]
         public void DontSynthesizeLinkMetadataIfPropertyNotSet()
         {
             string[] files = null;

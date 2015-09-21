@@ -6,7 +6,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using NUnit.Framework;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -12,24 +12,23 @@ using System.Xml;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 
-using NUnit.Framework;
 using MuxLogger = Microsoft.Build.Utilities.MuxLogger;
+using Xunit;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.VisualStudio.Build.UnitTest
 {
     /// <summary>
     /// Tests for the MuxLogger.
     /// </summary>
-    [TestFixture]
     public class MuxLogger_Tests
     {
         /// <summary>
         /// Verifies that an empty build with no loggers causes no exceptions.
         /// </summary>
-        [Test]
+        [Fact]
         public void EmptyBuildWithNoLoggers()
         {
             BuildManager buildManager = BuildManager.DefaultBuildManager;
@@ -43,7 +42,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies that a simple build with no loggers causes no exceptions.
         /// </summary>
-        [Test]
+        [Fact]
         public void SimpleBuildWithNoLoggers()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -66,18 +65,20 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies that attempting to register a logger before a build has started is invalid.
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void RegisteringLoggerBeforeBuildStartedThrows()
         {
-            MuxLogger muxLogger = new MuxLogger();
-            muxLogger.RegisterLogger(1, new MockLogger());
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                MuxLogger muxLogger = new MuxLogger();
+                muxLogger.RegisterLogger(1, new MockLogger());
+            }
+           );
         }
-
         /// <summary>
         /// Verifies that building with a logger attached to the mux logger is equivalent to building with the logger directly.
         /// </summary>
-        [Test]
+        [Fact]
         public void BuildWithMuxLoggerEquivalentToNormalLogger()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -122,16 +123,16 @@ namespace Microsoft.VisualStudio.Build.UnitTest
                 buildManager.EndBuild();
             }
 
-            Assert.IsTrue(mockLogger2.BuildFinishedEvents.Count > 0);
-            Assert.AreEqual(mockLogger2.BuildFinishedEvents.Count, mockLogger.BuildFinishedEvents.Count);
-            Assert.AreEqual(mockLogger2.BuildFinishedEvents[0].Succeeded, mockLogger.BuildFinishedEvents[0].Succeeded);
-            Assert.AreEqual(mockLogger2.FullLog, mockLogger.FullLog);
+            Assert.True(mockLogger2.BuildFinishedEvents.Count > 0);
+            Assert.Equal(mockLogger2.BuildFinishedEvents.Count, mockLogger.BuildFinishedEvents.Count);
+            Assert.Equal(mockLogger2.BuildFinishedEvents[0].Succeeded, mockLogger.BuildFinishedEvents[0].Succeeded);
+            Assert.Equal(mockLogger2.FullLog, mockLogger.FullLog);
         }
 
         /// <summary>
         /// Verifies correctness of a simple build with one logger.
         /// </summary>
-        [Test]
+        [Fact]
         public void OneSubmissionOneLogger()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -165,14 +166,14 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             mockLogger.AssertLogContains("Foo");
             mockLogger.AssertLogContains("Error");
-            Assert.AreEqual(1, mockLogger.ErrorCount);
+            Assert.Equal(1, mockLogger.ErrorCount);
             mockLogger.AssertNoWarnings();
         }
 
         /// <summary>
         /// Verifies correctness of a two submissions in a single build using separate loggers.
         /// </summary>
-        [Test]
+        [Fact]
         public void TwoSubmissionsWithSeparateLoggers()
         {
             string projectBody1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -223,21 +224,21 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             mockLogger1.AssertLogContains("Error");
             mockLogger1.AssertLogDoesntContain("Bar");
             mockLogger1.AssertLogDoesntContain("Warning");
-            Assert.AreEqual(1, mockLogger1.ErrorCount);
-            Assert.AreEqual(0, mockLogger1.WarningCount);
+            Assert.Equal(1, mockLogger1.ErrorCount);
+            Assert.Equal(0, mockLogger1.WarningCount);
 
             mockLogger2.AssertLogDoesntContain("Foo");
             mockLogger2.AssertLogDoesntContain("Error");
             mockLogger2.AssertLogContains("Bar");
             mockLogger2.AssertLogContains("Warning");
-            Assert.AreEqual(0, mockLogger2.ErrorCount);
-            Assert.AreEqual(1, mockLogger2.WarningCount);
+            Assert.Equal(0, mockLogger2.ErrorCount);
+            Assert.Equal(1, mockLogger2.WarningCount);
         }
 
         /// <summary>
         /// Verifies correctness of a simple build with one logger.
         /// </summary>
-        [Test]
+        [Fact]
         public void OneSubmissionTwoLoggers()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -272,21 +273,21 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             mockLogger1.AssertLogContains("Foo");
             mockLogger1.AssertLogContains("Error");
-            Assert.AreEqual(1, mockLogger1.ErrorCount);
+            Assert.Equal(1, mockLogger1.ErrorCount);
             mockLogger1.AssertNoWarnings();
 
             mockLogger2.AssertLogContains("Foo");
             mockLogger2.AssertLogContains("Error");
-            Assert.AreEqual(1, mockLogger2.ErrorCount);
+            Assert.Equal(1, mockLogger2.ErrorCount);
             mockLogger2.AssertNoWarnings();
 
-            Assert.AreEqual(mockLogger1.FullLog, mockLogger2.FullLog);
+            Assert.Equal(mockLogger1.FullLog, mockLogger2.FullLog);
         }
 
         /// <summary>
         /// Verifies correctness of a simple build with one logger.
         /// </summary>
-        [Test]
+        [Fact]
         public void RegisteringLoggerDuringBuildThrowsException()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -331,7 +332,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
                 buildManager.EndBuild();
             }
 
-            Assert.IsTrue(gotException, "Failed to get exception registering logger during build.");
+            Assert.True(gotException); // "Failed to get exception registering logger during build."
         }
 
         /// <summary>

@@ -1,22 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.IO;
 using System.Reflection;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using System.Resources;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class ResGenDependencies_Tests
     {
-        [Test]
+        [Fact]
         public void DirtyCleanScenario()
         {
             ResGenDependencies cache = new ResGenDependencies();
@@ -27,27 +26,27 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // A newly created cache is not dirty.
-                Assert.IsTrue(!cache.IsDirty);
+                Assert.False(cache.IsDirty);
 
                 // Getting a file that wasn't in the cache is a write operation.
                 cache.GetResXFileInfo(resx);
-                Assert.IsTrue(cache.IsDirty);
+                Assert.True(cache.IsDirty);
 
                 // Writing the file to disk should make the cache clean.
                 cache.SerializeCache(stateFile, /* Log */ null);
-                Assert.IsTrue(!cache.IsDirty);
+                Assert.False(cache.IsDirty);
 
                 // Deserialize from disk. Result should not be dirty.
                 cache = ResGenDependencies.DeserializeCache(stateFile, true, /* Log */ null);
-                Assert.IsTrue(!cache.IsDirty);
+                Assert.False(cache.IsDirty);
 
                 // Asking for a file that's in the cache should not dirty the cache.
                 cache.GetResXFileInfo(resx);
-                Assert.IsTrue(!cache.IsDirty);
+                Assert.False(cache.IsDirty);
 
                 // Changing UseSourcePath to false should dirty the cache.
                 cache.UseSourcePath = false;
-                Assert.IsTrue(cache.IsDirty);
+                Assert.True(cache.IsDirty);
             }
             finally
             {

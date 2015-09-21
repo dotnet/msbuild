@@ -48,10 +48,6 @@
     <Compile Include="TaskStartedEventArgs_Tests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>$(PackagesDir)NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <ProjectReference Include="..\Microsoft.Build.Framework.csproj">
       <Project>{571f09db-a81a-4444-945c-6f7b530054cd}</Project>
       <Name>Microsoft.Build.Framework</Name>

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Build.CommandLine;
-using NUnit.Framework;
+
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 

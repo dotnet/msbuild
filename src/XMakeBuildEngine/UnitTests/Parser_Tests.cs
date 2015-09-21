@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -6,12 +6,12 @@ using System.Reflection;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Xunit;
 
-using NUnit.Framework;
+
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ParserTest
     {
         /// <summary>
@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Test]
+        [Fact]
         public void SimpleParseTest()
         {
             Console.WriteLine("SimpleParseTest()");
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Test]
+        [Fact]
         public void ComplexParseTest()
         {
             Console.WriteLine("ComplexParseTest()");
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Test]
+        [Fact]
         public void NotParseTest()
         {
             Console.WriteLine("NegationParseTest()");
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests
         }
         /// <summary>
         /// </summary>
-        [Test]
+        [Fact]
         public void FunctionCallParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
             tree = p.Parse("SimpleFunctionCall( $(property), 1234, abcd, 'abcd efgh' )", ParserOptions.AllowAll, _elementLocation);
         }
 
-        [Test]
+        [Fact]
         public void ItemListParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -189,7 +189,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -201,7 +201,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -213,10 +213,10 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
         }
 
-        [Test]
+        [Fact]
         public void MetadataParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -294,12 +294,12 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
         }
 
         /// <summary>
         /// </summary>
-        [Test]
+        [Fact]
         public void NegativeTests()
         {
             Console.WriteLine("NegativeTests()");
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             try
             {
@@ -331,7 +331,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
             try
             {
                 fExceptionCaught = false;
@@ -343,7 +343,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             try
             {
@@ -356,7 +356,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             try
             {
@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             try
             {
@@ -382,7 +382,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
             try
             {
                 fExceptionCaught = false;
@@ -394,7 +394,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
 
             try
             {
@@ -407,7 +407,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
             try
             {
                 fExceptionCaught = false;
@@ -419,14 +419,14 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.IsTrue(fExceptionCaught);
+            Assert.True(fExceptionCaught);
         }
 
         /// <summary>
         /// This test verifies that we trigger warnings for expressions that
         /// could be incorrectly evaluated
         /// </summary>
-        [Test]
+        [Fact]
         public void VerifyWarningForOrder()
         {
             // Create a project file that has an expression
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests
                 "));
 
             // Make sure the log contains the correct strings.
-            Assert.IsTrue(ml.FullLog.Contains("MSB4130:"), "Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3.");
+            Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
                 "));
 
             // Make sure the log contains the correct strings.
-            Assert.IsTrue(ml.FullLog.Contains("MSB4130:"), "Need to warn for this expression - (a) == 1 or $(b) == 2 and $(c) == 3.");
+            Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - (a) == 1 or $(b) == 2 and $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -461,14 +461,14 @@ namespace Microsoft.Build.UnitTests
                 "));
 
             // Make sure the log contains the correct strings.
-            Assert.IsTrue(ml.FullLog.Contains("MSB4130:"), "Need to warn for this expression - ($(a) == 1 or $(b) == 2 and $(c) == 3) or $(d) == 4.");
+            Assert.True(ml.FullLog.Contains("MSB4130:")); // "Need to warn for this expression - ($(a) == 1 or $(b) == 2 and $(c) == 3) or $(d) == 4."
         }
 
         /// <summary>
         /// This test verifies that we don't trigger warnings for expressions that
         /// couldn't be incorrectly evaluated
         /// </summary>
-        [Test]
+        [Fact]
         public void VerifyNoWarningForOrder()
         {
             // Create a project file that has an expression
@@ -481,7 +481,7 @@ namespace Microsoft.Build.UnitTests
                 "));
 
             // Make sure the log contains the correct strings.
-            Assert.IsFalse(ml.FullLog.Contains("MSB4130:"), "No need to warn for this expression - (a) == 1 and $(b) == 2 and $(c) == 3.");
+            Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - (a) == 1 and $(b) == 2 and $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -492,7 +492,7 @@ namespace Microsoft.Build.UnitTests
                 "));
 
             // Make sure the log contains the correct strings.
-            Assert.IsFalse(ml.FullLog.Contains("MSB4130:"), "No need to warn for this expression - (a) == 1 or $(b) == 2 or $(c) == 3.");
+            Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - (a) == 1 or $(b) == 2 or $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -503,7 +503,7 @@ namespace Microsoft.Build.UnitTests
                 "));
 
             // Make sure the log contains the correct strings.
-            Assert.IsFalse(ml.FullLog.Contains("MSB4130:"), "No need to warn for this expression - ($(a) == 1 and $(b) == 2) or $(c) == 3.");
+            Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - ($(a) == 1 and $(b) == 2) or $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -514,7 +514,7 @@ namespace Microsoft.Build.UnitTests
                 "));
 
             // Make sure the log contains the correct strings.
-            Assert.IsFalse(ml.FullLog.Contains("MSB4130:"), "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3.");
+            Assert.False(ml.FullLog.Contains("MSB4130:")); // "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3."
         }
     }
 }

@@ -1,82 +1,81 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Shared.LanguageParser;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class VisualBasicTokenizer_Tests
     {
-        [Test]
+        [Fact]
         public void Empty() { AssertTokenize("", "", "", 0); }
-        [Test]
+        [Fact]
         public void OneSpace() { AssertTokenize(" ", " \x0d", ".eol", 1); }
-        [Test]
+        [Fact]
         public void TwoSpace() { AssertTokenize("  ", "  \x0d", ".eol", 1); }
-        [Test]
+        [Fact]
         public void Tab() { AssertTokenize("\t", "\t\x0d", ".eol", 1); }
-        [Test]
+        [Fact]
         public void TwoTab() { AssertTokenize("\t\t", "\t\t\x0d", ".eol", 1); }
-        [Test]
+        [Fact]
         public void SpaceTab() { AssertTokenize(" \t", " \t\x0d", ".eol", 1); }
 
         // Test line continuation character
-        [Test]
+        [Fact]
         public void SimpleLineContinuation() { AssertTokenize(" _\xd\xa", "."); }
-        [Test]
+        [Fact]
         public void LineContinuationWithspacesAfter() { AssertTokenize(" _ \xd\xa\xd\xa", "."); }
 
         // Comments
-        [Test]
+        [Fact]
         public void SimpleComment() { AssertTokenize("' This is a comment\xd", "Comment(' This is a comment)eol"); }
-        [Test]
+        [Fact]
         public void RemComment() { AssertTokenize("rEm This is a comment\xd", "Comment(rEm This is a comment)eol"); }
 
         // Identifiers
-        [Test]
+        [Fact]
         public void SimpleIdentifier() { AssertTokenize("_MyIdentifier3\xd", "Identifier(_MyIdentifier3)eol"); }
-        [Test]
+        [Fact]
         public void IdentifierWithEmbeddedUnderscore() { AssertTokenize("_M_\xd", "Identifier(_M_)eol"); }
-        [Test]
+        [Fact]
         public void IdentifierWithStringTypeCharacter() { AssertTokenize("MyString$\xd", "Identifier(MyString$)eol"); }
-        [Test]
+        [Fact]
         public void IdentifierWithLongTypeCharacter() { AssertTokenize("MyString&\xd", "Identifier(MyString&)eol"); }
-        [Test]
+        [Fact]
         public void IdentifierWithDecimalTypeCharacter() { AssertTokenize("MyString@\xd", "Identifier(MyString@)eol"); }
-        [Test]
+        [Fact]
         public void IdentifierWithSingleTypeCharacter() { AssertTokenize("MyString!\xd", "Identifier(MyString!)eol"); }
-        [Test]
+        [Fact]
         public void IdentifierWithDoubleTypeCharacter() { AssertTokenize("MyString#\xd", "Identifier(MyString#)eol"); }
-        [Test]
+        [Fact]
         public void IdentifierWithIntegerTypeCharacter() { AssertTokenize("MyString%\xd", "Identifier(MyString%)eol"); }
-        [Test]
+        [Fact]
         public void EscapedIdentifier() { AssertTokenize("[Namespace]\xd", "Namespace\xd", "Identifier(Namespace)eol", 1); }
-        [Test]
+        [Fact]
         public void UnfinishedEscapedIdentifier() { AssertTokenize("[Namespace\xd", "ExpectedIdentifier([Namespace)"); }
-        [Test]
+        [Fact]
         public void EscapedIdentifierWithoutGoodStart() { AssertTokenize("[3]\xd", "ExpectedIdentifier([)"); }
-        [Test]
+        [Fact]
         public void EscapedLineContinuation() { AssertTokenize("[_]\xd", "ExpectedIdentifier([_])"); }
-        [Test]
+        [Fact]
         public void EscapedButEmptyIdentifier() { AssertTokenize("[]\xd", "ExpectedIdentifier([)"); }
-        [Test]
+        [Fact]
         public void EscapedIdentifierHasType() { AssertTokenize("[MyString$]\xd", "ExpectedIdentifier([MyString)"); }
-        [Test]
+        [Fact]
         public void EscapedIdentifierHasTypeOnTheOutside() { AssertTokenize("[MyString]$\xd", "MyString$\xd", "Identifier(MyString)Unrecognized($)", 1); }
 
         // A lone underscore is an invalid identifier.
-        [Test]
+        [Fact]
         public void LoneUnderscore()
         {
             AssertTokenize
@@ -87,89 +86,89 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Boolean literals
-        [Test]
+        [Fact]
         public void BooleanTrue() { AssertTokenize("tRuE\xd", "BooleanLiteral(tRuE)eol"); }
-        [Test]
+        [Fact]
         public void BooleanFalse() { AssertTokenize("falsE\xd", "BooleanLiteral(falsE)eol"); }
 
         // Integer literals
-        [Test]
+        [Fact]
         public void HexInteger() { AssertTokenize("&H0123456789aBcDeF\xd", "HexIntegerLiteral(&H0123456789aBcDeF)eol"); }
-        [Test]
+        [Fact]
         public void Octalnteger() { AssertTokenize("&O01234567\xd", "OctalIntegerLiteral(&O01234567)eol"); }
-        [Test]
+        [Fact]
         public void HexIntegerLowerCase() { AssertTokenize("&h001\xd", "HexIntegerLiteral(&h001)eol"); }
-        [Test]
+        [Fact]
         public void OctalntegerUpperCase() { AssertTokenize("&o001\xd", "OctalIntegerLiteral(&o001)eol"); }
-        [Test]
+        [Fact]
         public void Decimallnteger() { AssertTokenize("001\xd", "DecimalIntegerLiteral(001)eol"); }
-        [Test]
+        [Fact]
         public void InvalidHexInteger() { AssertTokenize("&H00FG\xd", "HexIntegerLiteral(&H00F)Identifier(G)eol"); }
-        [Test]
+        [Fact]
         public void InvalidOctalnteger() { AssertTokenize("&O0089\xd", "OctalIntegerLiteral(&O00)DecimalIntegerLiteral(89)eol"); }
-        [Test]
+        [Fact]
         public void InvalidHexIntegerWithNoneValid() { AssertTokenize("&HG\xd", "ExpectedValidHexDigit(&H)"); }
-        [Test]
+        [Fact]
         public void InvalidOctalntegerWithNoneValid() { AssertTokenize("&O9\xd", "ExpectedValidOctalDigit(&O)"); }
-        [Test]
+        [Fact]
         public void HexIntegerShort() { AssertTokenize("&HaBcDeFS\xd", "HexIntegerLiteral(&HaBcDeFS)eol"); }
-        [Test]
+        [Fact]
         public void HexIntegerShortLower() { AssertTokenize("&HaBcDeFs\xd", "HexIntegerLiteral(&HaBcDeFs)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerShort() { AssertTokenize("123S\xd", "DecimalIntegerLiteral(123S)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerShortLower() { AssertTokenize("123s\xd", "DecimalIntegerLiteral(123s)eol"); }
-        [Test]
+        [Fact]
         public void OctalntegerShort() { AssertTokenize("&O01234567S\xd", "OctalIntegerLiteral(&O01234567S)eol"); }
-        [Test]
+        [Fact]
         public void OctalntegerShortLower() { AssertTokenize("&O01234567s\xd", "OctalIntegerLiteral(&O01234567s)eol"); }
-        [Test]
+        [Fact]
         public void HexIntegerInteger() { AssertTokenize("&HaBcDeFI\xd", "HexIntegerLiteral(&HaBcDeFI)eol"); }
-        [Test]
+        [Fact]
         public void HexIntegerIntegerLower() { AssertTokenize("&HaBcDeFi\xd", "HexIntegerLiteral(&HaBcDeFi)eol"); }
-        [Test]
+        [Fact]
         public void OctalntegerInteger() { AssertTokenize("&O01234567I\xd", "OctalIntegerLiteral(&O01234567I)eol"); }
-        [Test]
+        [Fact]
         public void OctalntegerIntegerLower() { AssertTokenize("&O01234567i\xd", "OctalIntegerLiteral(&O01234567i)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerInteger() { AssertTokenize("123I\xd", "DecimalIntegerLiteral(123I)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerIntegerLower() { AssertTokenize("123i\xd", "DecimalIntegerLiteral(123i)eol"); }
-        [Test]
+        [Fact]
         public void HexIntegerLong() { AssertTokenize("&HaBcDeFL\xd", "HexIntegerLiteral(&HaBcDeFL)eol"); }
-        [Test]
+        [Fact]
         public void HexIntegerLongLower() { AssertTokenize("&HaBcDeFl\xd", "HexIntegerLiteral(&HaBcDeFl)eol"); }
-        [Test]
+        [Fact]
         public void OctalntegerLong() { AssertTokenize("&O01234567L\xd", "OctalIntegerLiteral(&O01234567L)eol"); }
-        [Test]
+        [Fact]
         public void OctalntegerLongLower() { AssertTokenize("&O01234567l\xd", "OctalIntegerLiteral(&O01234567l)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerLong() { AssertTokenize("123L\xd", "DecimalIntegerLiteral(123L)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerIntegerLong() { AssertTokenize("123l\xd", "DecimalIntegerLiteral(123l)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerWithIntegerTypeChar() { AssertTokenize("1234%\xd", "DecimalIntegerLiteral(1234%)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerWithLongTypeChar() { AssertTokenize("1234&\xd", "DecimalIntegerLiteral(1234&)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerWithDecimalTypeChar() { AssertTokenize("1234@\xd", "DecimalIntegerLiteral(1234@)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerWithSingleTypeChar() { AssertTokenize("1234!\xd", "DecimalIntegerLiteral(1234!)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerWithDoubleTypeChar() { AssertTokenize("1234#\xd", "DecimalIntegerLiteral(1234#)eol"); }
-        [Test]
+        [Fact]
         public void DecimalIntegerWithStringTypeChar() { AssertTokenize("1234$\xd", "DecimalIntegerLiteral(1234)Unrecognized($)"); }
 
         // String literal
-        [Test]
+        [Fact]
         public void BasicString() { AssertTokenize("\"A string\"\xd", "StringLiteral(\"A string\")eol"); }
-        [Test]
+        [Fact]
         public void StringWithDoubledQuotesAsEscape() { AssertTokenize("\"\"\"\"\x0d", "\"\"\"\"\x0d", "StringLiteral(\"\"\"\")eol", 1); }
-        [Test]
+        [Fact]
         public void StringUnclosed() { AssertTokenize("\"string\x0d", "EndOfFileInsideString(\"string\x0d)"); }
 
         // Operators
-        [Test]
+        [Fact]
         public void CheckAllOperators()
         {
             AssertTokenize
@@ -180,7 +179,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Inplace arrays
-        [Test]
+        [Fact]
         public void InplaceArray()
         {
             AssertTokenize
@@ -191,11 +190,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Keywords
-        [Test]
+        [Fact]
         public void SimpleKeyword() { AssertTokenize("Namespace\xd", "Keyword(Namespace)eol"); }
 
         // From the real world
-        [Test]
+        [Fact]
         public void WackyBrackettedClassName()
         {
             AssertTokenize
@@ -204,7 +203,7 @@ namespace Microsoft.Build.UnitTests
                 "Keyword(Public).Keyword(Class).ExpectedIdentifier([)"
             );
         }
-        [Test]
+        [Fact]
         public void MyClassIsAKeyword()
         {
             AssertTokenize
@@ -215,7 +214,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [Test]
+        [Fact]
         public void Regress_Mutation_x0dx0aIsASingleLine()
         {
             AssertTokenize("\x0d\x0a", "\x0d\x0a", "eol", 1);
@@ -302,9 +301,9 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(tokenKey);
             }
 
-            Assert.AreEqual(expectedSource, results);
-            Assert.AreEqual(expectedTokenKey, tokenKey);
-            Assert.AreEqual(expectedLastLineNumber, lastLine);
+            Assert.Equal(expectedSource, results);
+            Assert.Equal(expectedTokenKey, tokenKey);
+            Assert.Equal(expectedLastLineNumber, lastLine);
         }
     }
 }

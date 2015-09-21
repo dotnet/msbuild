@@ -1,21 +1,26 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using NUnit.Framework;
-
+using System;
+using System.IO;
+using System.Reflection;
+using System.Collections;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using System.Text.RegularExpressions;
+using System.Globalization;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class WinMDExpTests
     {
         /// <summary>
         /// Tests the "References" parameter on the winmdexp task, and confirms that it sets
         /// the /reference switch on the command-line correctly.  
         /// </summary>
-        [Test]
+        [Fact]
         public void References()
         {
             WinMDExp t = new WinMDExp();
@@ -35,7 +40,7 @@ namespace Microsoft.Build.UnitTests
                 false);
         }
 
-        [Test]
+        [Fact]
         public void TestNoWarnSwitchWithWarnings()
         {
             WinMDExp t = new WinMDExp();
@@ -47,7 +52,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "GenerateDocumentation" and "DocumentationFile" parameters on the Vbc task,
         // and confirms that it sets the /doc switch on the command-line correctly.
-        [Test]
+        [Fact]
         public void DocumentationFile()
         {
             WinMDExp t = new WinMDExp();
@@ -60,7 +65,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/md:input.xml"), false);
         }
 
-        [Test]
+        [Fact]
         public void PDBFileTesting()
         {
             WinMDExp t = new WinMDExp();
@@ -73,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/mp:input.pdb"), false);
         }
 
-        [Test]
+        [Fact]
         public void WinMDModule()
         {
             WinMDExp t = new WinMDExp();
@@ -82,7 +87,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateContains(t, "Foo.dll", false);
         }
 
-        [Test]
+        [Fact]
         public void UsesrDefinedOutputFile()
         {
             WinMDExp t = new WinMDExp();
@@ -91,7 +96,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, CommandLineBuilder.FixCommandLineSwitch("/out:Bob.winmd"), false);
         }
 
-        [Test]
+        [Fact]
         public void NoOutputFileDefined()
         {
             WinMDExp t = new WinMDExp();

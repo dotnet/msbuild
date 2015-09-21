@@ -1,18 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Reflection;
 
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ToolTaskExtensionTests
     {
         /// <summary>
@@ -20,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         /// With moving ToolTask into Utilities, tasks inheriting from it now have to deal with 3 (THREE!) resource streams,
         /// which has a lot of potential for breaking. Make sure that tasks can access all of them using the correct logger helpers.
         /// </summary>
-        [Test]
+        [Fact]
         public void TestResourceAccess()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
@@ -53,51 +51,53 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the above method actually tests something, that is make sure that non-existent resources throw
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void ResourceAccessSanityCheck()
         {
-            MyToolTaskExtension t = new MyToolTaskExtension();
-            MockEngine engine = new MockEngine();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                MyToolTaskExtension t = new MyToolTaskExtension();
+                MockEngine engine = new MockEngine();
 
-            t.BuildEngine = engine;
-            t.Log.LogErrorFromResources("Beyond Good and Evil");
+                t.BuildEngine = engine;
+                t.Log.LogErrorFromResources("Beyond Good and Evil");
+            }
+           );
         }
-
         /// <summary>
         /// Retrieve a non-existent value but ask for a default.
         /// </summary>
-        [Test]
+        [Fact]
         public void GetNonExistentBoolWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
-            Assert.AreEqual(5, t.GetIntParameterWithDefault("Key", 5));
+            Assert.Equal(5, t.GetIntParameterWithDefault("Key", 5));
         }
 
         /// <summary>
         /// Retrieve a value that exists, but ask for a default. We expect the
         /// real value to win.
         /// </summary>
-        [Test]
+        [Fact]
         public void GetBoolWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = true;
 
-            Assert.AreEqual(true, t.GetBoolParameterWithDefault("Key", false));
+            Assert.Equal(true, t.GetBoolParameterWithDefault("Key", false));
         }
 
         /// <summary>
         /// Retrieve a value that exists, but ask for a default. We expect the
         /// real value to win.
         /// </summary>
-        [Test]
+        [Fact]
         public void GetIntWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = 5;
 
-            Assert.AreEqual(5, t.GetIntParameterWithDefault("Key", 9));
+            Assert.Equal(5, t.GetIntParameterWithDefault("Key", 9));
         }
 
         private class MyToolTaskExtension : ToolTaskExtension

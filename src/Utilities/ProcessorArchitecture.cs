@@ -93,7 +93,7 @@ namespace Microsoft.Build.Utilities
                     architecture = null;
                     break;
             }
-            
+
             return architecture;
         }
     }

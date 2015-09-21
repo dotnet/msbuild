@@ -82,7 +82,7 @@
       <BuildFiles Include="$(PackagesDir)Microsoft.Net.Compilers*\build\*" />
       <ToolsFiles Include="$(PackagesDir)Microsoft.Net.Compilers*\tools\*" />
     </ItemGroup>
-    
+
     <Copy
       SourceFiles="@(BuildFiles);@(ToolsFiles)"
       DestinationFolder="$(OutputPath)tools"
@@ -113,7 +113,7 @@
     <Copy Condition="Exists('$(NuGetCachedPath)')" SourceFiles="$(NuGetCachedPath)" DestinationFiles="$(NuGetToolPath)" SkipUnchangedFiles="true" />
 
     <DownloadFile FileName="$(NuGetToolPath)"
-                  Address="https://dist.nuget.org/win-x86-commandline/v3.2.0-rc/nuget.exe"
+                  Address="https://dist.nuget.org/win-x86-commandline/v3.2.0/nuget.exe"
                   Condition="!Exists('$(NuGetToolPath)') and '$(OsEnvironment)'=='Windows_NT'" />
 
     <Exec Command="curl -sSL --create-dirs -o $(NuGetToolPath) https://api.nuget.org/downloads/nuget.exe"
@@ -143,9 +143,9 @@
            ForceTouch="true" />
 
     <!-- Restore build tools -->
-    <!-- 
+    <!--
     <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget/packages.config&quot;" StandardOutputImportance="Low" />
-    -->    
+    -->
     <Exec Command="$(NugetRestoreCommand) &quot;$(SourceDir).nuget/packages.config&quot;" />
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
@@ -173,8 +173,8 @@
          (due to open source signing). -->
     <!-- No parallel execution because most of our tests do bad things
          with state.  They were passing because MSTest was serial. -->
-    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.x86.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml" />
+    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.x86.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt" />
   </Target>
 
-  <Import Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props" Condition="'$(IsTraversalBuild)'!='true'"/> 
+  <Import Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props" Condition="'$(IsTraversalBuild)'!='true'"/>
 </Project>
