@@ -88,7 +88,7 @@
 
   <Target Name="_RestoreBuildTools"
           Inputs="$(MSBuildThisFileDirectory)dir.props;$(SourceDir).nuget/packages.config"
-          Outputs="$(BuildToolsSemaphore)">
+          Outputs="$(NuGetToolPath);$(BuildToolsSemaphore)">
     <Message Importance="High" Text="Restoring build tools..." />
 
     <Copy Condition="Exists('$(NuGetCachedPath)')" SourceFiles="$(NuGetCachedPath)" DestinationFiles="$(NuGetToolPath)" SkipUnchangedFiles="true" />
