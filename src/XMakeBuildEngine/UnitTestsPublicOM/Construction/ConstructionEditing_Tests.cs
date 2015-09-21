@@ -1900,11 +1900,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void InvalidChooseOverflow()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
-            {
-                ProjectRootElement project = ProjectRootElement.Create();
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectElementContainer current = project;
 
-                ProjectElementContainer current = project;
+            Action infiniteChooseLoop = () =>
+            {
                 while (true)
                 {
                     ProjectChooseElement choose = project.CreateChooseElement();
@@ -1913,8 +1913,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     choose.AppendChild(when);
                     current = when;
                 }
-            }
-           );
+            };
+
+            Assert.Throws<InvalidProjectFileException>(infiniteChooseLoop);
         }
         /// <summary>
         /// Setting item condition should dirty project
