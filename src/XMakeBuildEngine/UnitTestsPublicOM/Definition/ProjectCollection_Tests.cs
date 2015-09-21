@@ -18,33 +18,31 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
     /// <summary>
     /// Tests for ProjectCollection
     /// </summary>
-    public class ProjectCollection_Tests
+    public class ProjectCollection_Tests : IDisposable
     {
         /// <summary>
         /// Gets or sets the test context.
         /// </summary>
-        public TestContext TestContext { get; set; }
+        public ITestOutputHelper TestOutput { get; set; }
 
-        /// <summary>
-        /// Clear out the global project collection
-        /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public ProjectCollection_Tests(ITestOutputHelper outputHelper)
         {
+            this.TestOutput = outputHelper;
+
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
         /// <summary>
         /// Clear out the global project collection
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
@@ -1311,7 +1309,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     Assert.Same(collection, sender);
                     Assert.Same(pre, e.ProjectXml);
-                    this.TestContext.WriteLine(e.Reason ?? String.Empty);
+                    this.TestOutput.WriteLine(e.Reason ?? String.Empty);
                     dirtyRaised = true;
                 };
             Assert.False(dirtyRaised);

@@ -27,13 +27,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests for Project public members
     /// </summary>
-    public class Project_Tests
+    public class Project_Tests : IDisposable
     {
         /// <summary>
         /// Clear out the global project collection
         /// </summary>
-        [TestInitialize]
-        public void SetUp()
+        public Project_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
@@ -41,8 +40,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Clear out the global project collection
         /// </summary>
-        [TestCleanup]
-        public void TearDown()
+        public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);

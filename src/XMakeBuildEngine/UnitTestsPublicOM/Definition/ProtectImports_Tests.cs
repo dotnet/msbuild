@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests for protecting imported files while editing
     /// </summary>
-    public class ProtectImports_Tests
+    public class ProtectImports_Tests : IDisposable
     {
         #region Constants
 
@@ -96,8 +96,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Configures the overall test.
         /// </summary>
-        [TestInitialize]
-        public void Setup()
+        public ProtectImports_Tests()
         {
             string importContents =
                 @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
@@ -125,8 +124,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Undoes the test configuration.
         /// </summary>
-        [TestCleanup]
-        public void Teardown()
+        public void Dispose()
         {
             if (File.Exists(_importFilename))
             {

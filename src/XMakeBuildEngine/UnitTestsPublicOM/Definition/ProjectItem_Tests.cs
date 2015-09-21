@@ -23,11 +23,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     public class ProjectItem_Tests
     {
         /// <summary>
-        /// Gets or sets the test context, assigned by the MSTest test runner.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        /// <summary>
         /// Project getter
         /// </summary>
         [Fact]
@@ -1289,7 +1284,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RenameItemInProjectWithWildcards()
         {
-            string projectDirectory = Path.Combine(this.TestContext.TestRunDirectory, Path.GetRandomFileName());
+            string projectDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(projectDirectory);
             try
             {
