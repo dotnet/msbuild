@@ -130,17 +130,8 @@
     <Compile Include="XmlPeek_Tests.cs" />
     <Compile Include="XmlPoke_Tests.cs" />
     <Compile Include="XslTransformation_Tests.cs" />
-    <None Include="..\..\Shared\UnitTests\App.config">
-      <Link>App.config</Link>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>$(PackagesDir)NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
       <Name>Microsoft.Build.Utilities</Name>
