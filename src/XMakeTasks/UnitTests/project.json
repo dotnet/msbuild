@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
-   "xunit": "2.1.0-rc1-build3168",
-   },
+    "xunit": "2.1.0-rc1-build3168"
+  },
   "runtimes": {
     "win7-x86": { }
   },
@@ -32,7 +32,8 @@
         "Microsoft.NETCore.Runtime": "1.0.0",
         "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
         "Microsoft.Win32.Registry": "4.0.0-beta-23127"
-      }
+      },
+      "imports": "portable-net451+win81"
     }
   }
 }
