@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // #1: don't launch task host
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null, new AppDomainSetup(), false);
                 Assert.NotNull(createdTask);
-                Assert.False(createdTask is  TaskHostTask);
+                Assert.False(createdTask is TaskHostTask);
             }
             finally
             {
