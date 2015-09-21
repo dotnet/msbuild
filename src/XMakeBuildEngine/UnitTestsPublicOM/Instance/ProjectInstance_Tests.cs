@@ -271,7 +271,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// is not the wildcard itself!
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void WildcardsInsideTargets()
         {
             string directory = null;
@@ -376,7 +376,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Null target name should imply the default target
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void BuildNullTargetNameIsDefaultTarget()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -393,7 +393,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// project instances.
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void BuildProjectInstancesConsecutively()
         {
             ProjectInstance instance1 = new Project().CreateProjectInstance();

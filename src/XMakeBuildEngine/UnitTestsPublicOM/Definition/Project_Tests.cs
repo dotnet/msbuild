@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// We test here newline, tab, and carriage return.
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void VerifyNewLinesAndTabsEvaluateToEmpty()
         {
             MockLogger mockLogger = new MockLogger();
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Make sure if we build a project and specify no loggers that the loggers registered on the project collection is the one used.
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void LogWithLoggersOnProjectCollection()
         {
             MockLogger mockLogger = new MockLogger();
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Make sure if we build a project and specify we specify a custom logger that the custom logger is used instead of the one registered on the project collection.
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void LogWithLoggersOnProjectCollectionCustomOneUsed()
         {
             MockLogger mockLogger = new MockLogger();
@@ -1810,7 +1810,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Building a nonexistent target should log an error and return false (not throw)
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void BuildNonExistentTarget()
         {
             Project project = new Project();
@@ -1824,7 +1824,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// When Project.Build is invoked with custom loggers, those loggers should contain the result of any evaluation warnings and errors.
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void BuildEvaluationUsesCustomLoggers()
         {
             string importProjectContent =

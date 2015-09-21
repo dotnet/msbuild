@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// for this metadata."
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void BatchingConsidersItemDefinitionMetadata()
         {
             string content =
@@ -421,7 +421,7 @@ ObjectModelHelpers.CleanupFileContents(
         /// on them, not the original items.
         /// </summary>
         [Fact]
-        [TestCategory("serialize")]
+        [Trait("Category", "serialize")]
         public void ExpandBuiltInMetadataAtPointOfUse_UseInBatching()
         {
             string content =
