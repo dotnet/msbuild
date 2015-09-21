@@ -10,39 +10,38 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectMetadataElement class
     /// </summary>
-    [TestClass]
     public class ProjectMetadataElement_Tests
     {
         /// <summary>
         /// Read simple metadatum
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadMetadata()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
 
-            Assert.AreEqual("m", metadatum.Name);
-            Assert.AreEqual("m1", metadatum.Value);
-            Assert.AreEqual("c", metadatum.Condition);
+            Assert.Equal("m", metadatum.Name);
+            Assert.Equal("m1", metadatum.Value);
+            Assert.Equal("c", metadatum.Condition);
         }
 
         /// <summary>
         /// Read metadatum with invalid attribute
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i Include='i1'>
@@ -52,17 +51,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read metadatum with invalid name characters (but legal xml)
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidName()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i Include='i1'>
@@ -72,17 +73,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read metadatum with invalid built-in metadata name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidBuiltInName()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i Include='i1'>
@@ -92,17 +95,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read metadatum with invalid built-in element name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidBuiltInElementName()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemGroup>
                             <i Include='i1'>
@@ -112,92 +117,98 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Set metadatum value
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetValue()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
 
             metadatum.Value = "m1b";
-            Assert.AreEqual("m1b", metadatum.Value);
+            Assert.Equal("m1b", metadatum.Value);
         }
 
         /// <summary>
         /// Rename
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetName()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
 
             metadatum.Name = "m2";
-            Assert.AreEqual("m2", metadatum.Name);
-            Assert.AreEqual(true, metadatum.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("m2", metadatum.Name);
+            Assert.Equal(true, metadatum.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename to same value should not mark dirty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetNameSame()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
             Helpers.ClearDirtyFlag(metadatum.ContainingProject);
 
             metadatum.Name = "m";
-            Assert.AreEqual("m", metadatum.Name);
-            Assert.AreEqual(false, metadatum.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("m", metadatum.Name);
+            Assert.Equal(false, metadatum.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename to illegal name
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void SetNameIllegal()
         {
-            ProjectMetadataElement metadatum = GetMetadataXml();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                ProjectMetadataElement metadatum = GetMetadataXml();
 
-            metadatum.Name = "ImportGroup";
+                metadatum.Name = "ImportGroup";
+            }
+           );
         }
-
         /// <summary>
         /// Set metadatum value to empty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetEmptyValue()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
 
             metadatum.Value = String.Empty;
-            Assert.AreEqual(String.Empty, metadatum.Value);
+            Assert.Equal(String.Empty, metadatum.Value);
         }
 
         /// <summary>
         /// Set metadatum value to null
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Fact]
         public void SetInvalidNullValue()
         {
-            ProjectMetadataElement metadatum = GetMetadataXml();
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ProjectMetadataElement metadatum = GetMetadataXml();
 
-            metadatum.Value = null;
+                metadatum.Value = null;
+            }
+           );
         }
-
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is an ItemDefinitionGroup
         /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidItemExpressionInMetadata()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemDefinitionGroup>
                             <i>
@@ -207,13 +218,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            }
+           );
         }
-
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is NOT an ItemDefinitionGroup
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReadValidItemExpressionInMetadata()
         {
             string content = @"
