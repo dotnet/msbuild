@@ -926,7 +926,7 @@ namespace Microsoft.Build.Tasks
                     // Is there a candidate satellite in that folder?
                     string cultureName = Path.GetFileName(subDirectory);
 
-                    if (CultureStringUtilities.IsValidCultureString(cultureName))
+                    if (CultureInfoCache.IsValidCultureString(cultureName))
                     {
                         string satelliteAssembly = Path.Combine(subDirectory, sateliteFilename);
                         if (_fileExists(satelliteAssembly))

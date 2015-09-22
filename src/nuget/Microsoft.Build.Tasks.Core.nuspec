@@ -27,6 +27,7 @@
         <dependency id="Microsoft.Win32.Primitives" version="4.0.0" />
         <dependency id="Microsoft.Win32.Registry" version="4.0.0-beta-23127" />
         <dependency id="System.Collections" version="4.0.10" />
+        <dependency id="System.Collections.Concurrent" version="4.0.10" />
         <dependency id="System.Collections.NonGeneric" version="4.0.0" />
         <dependency id="System.Console" version="4.0.0-beta-23123" />
         <dependency id="System.Diagnostics.Debug" version="4.0.10" />
