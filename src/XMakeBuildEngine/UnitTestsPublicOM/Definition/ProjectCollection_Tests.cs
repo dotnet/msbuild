@@ -1059,7 +1059,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 return;
             }
 
-            ProjectCollection collection = new ProjectCollection();
+            ProjectCollection collection = new ProjectCollection(null, null, ToolsetDefinitionLocations.Registry);
             Assert.Equal("2.0", collection.DefaultToolsVersion);
         }
 
@@ -1075,7 +1075,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 return;
             }
 
-            ProjectCollection collection = new ProjectCollection();
+            ProjectCollection collection = new ProjectCollection(null, null, ToolsetDefinitionLocations.Registry);
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
         }
 
