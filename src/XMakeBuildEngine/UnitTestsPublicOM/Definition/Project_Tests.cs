@@ -945,7 +945,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Dictionary<string, string> initial = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             initial.Add("p0", "v0");
             initial.Add("p1", "v1");
-            ProjectCollection collection = new ProjectCollection(initial, null, ToolsetDefinitionLocations.Registry);
+            ProjectCollection collection = new ProjectCollection(initial, null, ToolsetDefinitionLocations.ConfigurationFile);
             Project project = new Project(collection);
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("pp", "vv");
             propertyElement.Condition = "'$(p0)'=='v0' and '$(p1)'=='v1b'";
