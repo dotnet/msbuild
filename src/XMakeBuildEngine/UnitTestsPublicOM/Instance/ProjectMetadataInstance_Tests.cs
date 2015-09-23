@@ -9,27 +9,25 @@ using System;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
-using NUnit.Framework;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for ProjectMetadataInstance public members
     /// </summary>
-    [TestFixture]
     public class ProjectMetadataInstance_Tests
     {
         /// <summary>
         /// Get name and value
         /// </summary>
-        [Test]
+        [Fact]
         public void Accessors()
         {
             ProjectMetadataInstance metadata = GetMetadataInstance();
 
-            Assert.AreEqual("m", metadata.Name);
-            Assert.AreEqual("m1", metadata.EvaluatedValue);
+            Assert.Equal("m", metadata.Name);
+            Assert.Equal("m1", metadata.EvaluatedValue);
         }
 
         /// <summary>
