@@ -17,13 +17,12 @@ namespace Microsoft.Build.Tasks
     [Serializable()]
     internal class StateFileBase
     {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        internal StateFileBase()
-        {
-            // do nothing
-        }
+        // Current version for serialization. This should be changed when breaking changes
+        // are made to this class.
+        private const byte CurrentSerializationVersion = 1;
+
+        // Version this instance is serialized with.
+        private byte _serializedVersion = CurrentSerializationVersion;
 
         /// <summary>
         /// Writes the contents of this object out to the specified file.
@@ -33,7 +32,7 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                if (stateFile != null && stateFile.Length > 0)
+                if (!string.IsNullOrEmpty(stateFile))
                 {
                     if (File.Exists(stateFile))
                     {
@@ -73,7 +72,7 @@ namespace Microsoft.Build.Tasks
             // then we create one.  
             try
             {
-                if (stateFile != null && stateFile.Length > 0 && File.Exists(stateFile))
+                if (!string.IsNullOrEmpty(stateFile) && File.Exists(stateFile))
                 {
                     using (FileStream s = new FileStream(stateFile, FileMode.Open))
                     {
@@ -95,6 +94,13 @@ namespace Microsoft.Build.Tasks
                         {
                             log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile,
                                 log.FormatResourceString("General.IncompatibleStateFileType"));
+                            retVal = null;
+                        }
+
+                        // If we get back a valid object and internals were changed, things are likely to be null. Check the version before we use it.
+                        if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
+                        {
+                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                             retVal = null;
                         }
                     }
