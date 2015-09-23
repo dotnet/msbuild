@@ -2828,58 +2828,6 @@ namespace Microsoft.Build.Evaluation
             }
 
 #if !FEATURE_TYPE_INVOKEMEMBER
-            private MethodInfo BindMethod(object[] args, bool throwOnError = false)
-            {
-                StringComparison nameComparison =
-                    ((_bindingFlags & BindingFlags.IgnoreCase) == BindingFlags.IgnoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-
-                 var matchingMethods = _objectType.GetMethods(_bindingFlags)
-                                    .Where(method => method.Name.Equals(_name, nameComparison))
-                                    .Where(method =>
-                                    {
-                                        ParameterInfo[] parameters = method.GetParameters();
-                                        if (parameters.Length != args.Length)
-                                        {
-                                            return false;
-                                        }
-
-                                        for (int i = 0; i < parameters.Length; i++)
-                                        {
-                                            if (args[i] == null)
-                                            {
-                                                //  Can't bind null to a value type
-                                                if (parameters[i].ParameterType.GetTypeInfo().IsValueType)
-                                                {
-                                                    return false;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (!parameters[i].ParameterType.IsAssignableFrom(args[i].GetType()))
-                                                {
-                                                    return false;
-                                                }
-                                            }
-                                        }
-
-                                        return true;
-                                    }).ToArray();
-
-                if (matchingMethods.Length == 0)
-                {
-                    throw new MissingMethodException(_name);
-                }
-                else if (matchingMethods.Length == 1)
-                {
-                    
-                    return matchingMethods[0];
-                }
-                else
-                {
-                    throw new AmbiguousMatchException(_name);
-                }
-            }
-
             private MemberInfo BindFieldOrProperty()
             {
                 StringComparison nameComparison =
@@ -3005,9 +2953,7 @@ namespace Microsoft.Build.Evaluation
 #else
                             if (_invokeType == InvokeType.InvokeMethod)
                             {
-                                MethodInfo matchingMethod = BindMethod(args, throwOnError: true);
-
-                                functionResult = matchingMethod.Invoke(objectInstance, args);                                
+                                functionResult = _objectType.InvokeMember(_name, _bindingFlags, objectInstance, args, null, CultureInfo.InvariantCulture, null);
                             }
                             else if (_invokeType == InvokeType.GetPropertyOrField)
                             {
