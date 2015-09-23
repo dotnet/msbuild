@@ -14,8 +14,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
@@ -25,19 +23,19 @@ using Microsoft.Build.Shared;
 using System.Text;
 using System.IO;
 using Microsoft.Build.Internal;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.Framework
 {
     /// <summary>
     /// Tests for LazyFormattedEventArgs
     /// </summary>
-    [TestClass]
     public class LazyFormattedEventArgs_Tests
     {
         /// <summary>
         /// Don't crash when task logs with too few format markers
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotCrashOnInvalidFormatExpression()
         {
             string content = @"

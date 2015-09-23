@@ -10,27 +10,25 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for the ProjectOnErrorInstance class.
     /// </summary>
-    [TestClass]
     public class ProjectOnErrorInstance_Tests
     {
         /// <summary>
         /// Test accessors
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Accessors()
         {
             var onError = GetSampleOnErrorInstance();
 
-            Assert.AreEqual("et", onError.ExecuteTargets);
-            Assert.AreEqual("c", onError.Condition);
+            Assert.Equal("et", onError.ExecuteTargets);
+            Assert.Equal("c", onError.Condition);
         }
 
         /// <summary>

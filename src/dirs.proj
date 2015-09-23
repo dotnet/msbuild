@@ -3,20 +3,21 @@
 
   <ItemGroup>
     <Project Include="Framework\Microsoft.Build.Framework.csproj" />
-	<Project Include="Utilities\Microsoft.Build.Utilities.csproj" />
-	<Project Include="XMakeBuildEngine\Microsoft.Build.csproj" />
-	<Project Include="XMakeCommandLine\MSBuild.csproj" />
-	<Project Include="XMakeTasks\Microsoft.Build.Tasks.csproj" />
-	
-	<Project Include="Framework\UnitTests\Microsoft.Build.Framework.UnitTests.csproj" />
-	<Project Include="XMakeCommandLine\UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj" />
-	<Project Include="Utilities\UnitTests\Microsoft.Build.Utilities.UnitTests.csproj" />
-	<Project Include="XMakeTasks\UnitTests\Microsoft.Build.Tasks.UnitTests.csproj" />
+    <Project Include="Utilities\Microsoft.Build.Utilities.csproj" />
+    <Project Include="XMakeBuildEngine\Microsoft.Build.csproj" />
+    <Project Include="XMakeCommandLine\MSBuild.csproj" />
+    <Project Include="XMakeTasks\Microsoft.Build.Tasks.csproj" />
+
+    <Project Include="Framework\UnitTests\Microsoft.Build.Framework.UnitTests.csproj" />
+    <Project Include="XMakeCommandLine\UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj" />
+    <Project Include="Utilities\UnitTests\Microsoft.Build.Utilities.UnitTests.csproj" />
+    <Project Include="XMakeTasks\UnitTests\Microsoft.Build.Tasks.UnitTests.csproj" />
     <Project Include="XMakeBuildEngine\UnitTests\Microsoft.Build.Engine.UnitTests.csproj" />
+    <Project Include="XMakeBuildEngine\UnitTestsPublicOM\Microsoft.Build.Engine.OM.UnitTests.csproj" />
   </ItemGroup>
 
   <Import Project="..\dir.traversal.targets" />
-  
+
   <PropertyGroup>
     <!-- Explicitly set the OutDir as it is used by the packaging targets -->
     <OutDir>$(BaseOutputPathWithConfig)</OutDir>
