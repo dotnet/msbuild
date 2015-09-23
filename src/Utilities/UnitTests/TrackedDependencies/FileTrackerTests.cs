@@ -4,22 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.IO;
-using System.Xml;
 using System.Threading;
-using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
 using System.Linq;
 
 using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
-using ObjectModelHelpers = Microsoft.Build.UnitTests.ObjectModelHelpers;
 using Microsoft.CodeAnalysis.BuildTasks;
 using Xunit;
 

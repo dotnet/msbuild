@@ -7,15 +7,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
-
-using Constants = Microsoft.Build.Internal.Constants;
 
 namespace Microsoft.Build.Evaluation
 {

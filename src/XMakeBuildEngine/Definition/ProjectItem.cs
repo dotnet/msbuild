@@ -8,11 +8,9 @@
 using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System;
-using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Evaluation

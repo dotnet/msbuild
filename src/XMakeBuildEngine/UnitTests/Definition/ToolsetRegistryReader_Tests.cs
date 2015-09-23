@@ -3,14 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using Microsoft.Win32;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.Definition

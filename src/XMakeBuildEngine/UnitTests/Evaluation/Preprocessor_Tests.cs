@@ -7,11 +7,6 @@
 
 using System;
 using System.Xml;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using System.IO;

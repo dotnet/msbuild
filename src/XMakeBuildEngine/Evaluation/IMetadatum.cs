@@ -5,12 +5,6 @@
 // <summary>Interface representing a piece of metadata.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
-
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

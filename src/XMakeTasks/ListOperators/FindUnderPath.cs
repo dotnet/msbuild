@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Globalization;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;

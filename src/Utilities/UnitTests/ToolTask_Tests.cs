@@ -3,11 +3,8 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 using Xunit;

@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Xml;
-using System.Globalization;
 
 namespace Microsoft.Build.Shared
 {

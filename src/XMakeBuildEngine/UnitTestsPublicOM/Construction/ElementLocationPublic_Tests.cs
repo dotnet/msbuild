@@ -6,18 +6,8 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.Build.Collections;
 using System;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.UnitTests;
-using Microsoft.Build.Framework;
-using System.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
-using System.Xml;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using Xunit;
 

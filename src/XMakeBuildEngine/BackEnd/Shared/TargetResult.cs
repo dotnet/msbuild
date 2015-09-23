@@ -8,7 +8,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Globalization;
 using System.IO.Compression;
 using Microsoft.Build.BackEnd;

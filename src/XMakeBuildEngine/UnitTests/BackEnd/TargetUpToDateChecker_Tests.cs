@@ -3,14 +3,8 @@
 
 using System;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-using System.Text;
-using System.Globalization;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;

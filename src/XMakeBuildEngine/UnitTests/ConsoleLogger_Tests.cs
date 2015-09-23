@@ -4,7 +4,6 @@
 using System;
 using System.Text;
 using System.IO;
-using System.Reflection;
 using System.Collections;
 using System.Globalization;
 using System.Collections.Generic;
@@ -16,7 +15,6 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

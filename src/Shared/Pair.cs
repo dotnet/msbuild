@@ -5,9 +5,6 @@
 // <summary>A hack to prevent certain cases of Jitting in our NGen'd assemblies.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.Build.Framework;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Shared

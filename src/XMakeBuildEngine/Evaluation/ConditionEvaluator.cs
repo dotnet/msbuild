@@ -4,10 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -15,7 +12,6 @@ namespace Microsoft.Build.Evaluation
     using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
     using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
     using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-    using Microsoft.Build.Execution;
     using Microsoft.Build.Shared;
 
     internal static class ConditionEvaluator

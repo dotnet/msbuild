@@ -8,7 +8,6 @@
 using System;
 using System.IO;
 using System.Xml;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction

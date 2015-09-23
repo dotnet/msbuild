@@ -4,9 +4,7 @@
 using System;
 using System.IO;
 using System.Diagnostics;
-using System.Configuration;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 #if BUILDINGAPPXTASKS

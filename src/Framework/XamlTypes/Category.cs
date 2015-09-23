@@ -5,9 +5,7 @@
 // <summary> Represents a category to which a property can belong to. </summary>
 //--------------------------------------------------------------------------------
 
-using System;
 using System.ComponentModel;
-using System.Windows.Markup;
 
 namespace Microsoft.Build.Framework.XamlTypes
 {

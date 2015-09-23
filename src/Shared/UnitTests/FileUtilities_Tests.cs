@@ -2,14 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Diagnostics;
-using System.Text;
-
-using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using System.IO;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

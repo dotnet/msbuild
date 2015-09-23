@@ -5,12 +5,7 @@
 // <summary>Object which reads toolset information from the registry.</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Win32;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Security;
-
 using Microsoft.Build.Shared;
 using error = Microsoft.Build.Shared.ErrorUtilities;
 using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;

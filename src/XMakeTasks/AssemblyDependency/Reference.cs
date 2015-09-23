@@ -6,7 +6,6 @@ using System.IO;
 using System.Collections;
 using System.Reflection;
 using System.Diagnostics;
-using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;

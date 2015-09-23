@@ -4,9 +4,6 @@
 using System;
 using System.Collections;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;

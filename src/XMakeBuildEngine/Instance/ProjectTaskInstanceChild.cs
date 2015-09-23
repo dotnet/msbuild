@@ -5,8 +5,6 @@
 // <summary>Type for TaskOutputItem and TaskOutputProperty.</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Shared;
-
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Execution

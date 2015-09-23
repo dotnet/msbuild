@@ -4,13 +4,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Microsoft.Win32;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using System.Collections.Concurrent;

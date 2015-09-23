@@ -7,8 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;

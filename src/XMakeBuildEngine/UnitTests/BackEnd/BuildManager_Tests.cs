@@ -14,8 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Xml;
-using System.Security;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;

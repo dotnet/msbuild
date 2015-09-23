@@ -4,16 +4,11 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Diagnostics;
-
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;

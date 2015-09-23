@@ -5,9 +5,6 @@
 // <summary>Base type for categories in the property page schema data model.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>

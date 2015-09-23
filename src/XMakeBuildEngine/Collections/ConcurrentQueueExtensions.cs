@@ -5,7 +5,6 @@
 // <summary>Extension methods for the ConcurrentQueue.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Concurrent;
 using Microsoft.Build.Shared;
 

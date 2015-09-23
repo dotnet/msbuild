@@ -8,8 +8,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-
 using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Shared

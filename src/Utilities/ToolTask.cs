@@ -9,12 +9,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Resources;
 using System.Threading;
-using System.Reflection;
 using System.Diagnostics;
 using System.ComponentModel;
-using System.Globalization;
-using System.Runtime.InteropServices;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Diagnostics.CodeAnalysis;

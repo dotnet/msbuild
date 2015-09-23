@@ -19,7 +19,6 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using System.Threading;
 using Microsoft.Build.Evaluation;
-using System.Diagnostics;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction

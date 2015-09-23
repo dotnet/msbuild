@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Text;
-using System.Linq;
-using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;

@@ -2,16 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;

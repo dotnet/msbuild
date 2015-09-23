@@ -6,9 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.Win32;
 using System.Collections;
-using System.Globalization;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Shared

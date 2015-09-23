@@ -5,8 +5,6 @@
 // <summary>Verify the LoggingService Factory</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
 using Xunit;

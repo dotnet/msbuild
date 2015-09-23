@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-using System.Xml;
 using System.Threading;
-using System.Collections;
 using System.Resources;
 
 using Microsoft.Build.Framework;

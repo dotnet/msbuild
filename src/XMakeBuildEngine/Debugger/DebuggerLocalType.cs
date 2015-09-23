@@ -9,7 +9,6 @@
 
 using System;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
 
 namespace Microsoft.Build.Debugging
 {

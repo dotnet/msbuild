@@ -5,15 +5,9 @@
 // <summary>A logging context for tasks.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.BackEnd.Logging
 {

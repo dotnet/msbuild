@@ -6,7 +6,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using Microsoft.Win32;
-using System.Text;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;

@@ -5,12 +5,9 @@
 // <summary>Tests for ProjectPropertyInstance internal members</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using System;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 

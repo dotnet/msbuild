@@ -2,13 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.IO;
-using System.Xml;
-using System.Globalization;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
 using System.Collections.Concurrent;
 
 using Microsoft.Build.Collections;

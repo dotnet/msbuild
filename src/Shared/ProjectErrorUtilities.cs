@@ -3,8 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Xml;
-
 /******************************************************************************
  * 
  *                              !! WARNING !!
@@ -18,7 +16,6 @@ using System.Xml;
 #if FEATURE_MSBUILD_DEBUGGER
 using Microsoft.Build.Debugging;
 #endif
-using Microsoft.Build.Evaluation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.Shared

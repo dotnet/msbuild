@@ -5,9 +5,6 @@
 // <summary>Interface for properties</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Evaluation

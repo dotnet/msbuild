@@ -3,10 +3,7 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
-using System.Resources;
-using System.Globalization;
 using Microsoft.Build.Framework;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;

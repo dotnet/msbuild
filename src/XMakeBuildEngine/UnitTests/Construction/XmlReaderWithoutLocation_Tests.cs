@@ -5,17 +5,7 @@
 // <summary>Tests for the ElementLocation class</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests;
-using Microsoft.Build.UnitTests.BackEnd;
 using System.Xml;
 using System.IO;
 using Xunit;
