@@ -5,10 +5,7 @@
 // <summary>A collection of component factories.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Shared;
 

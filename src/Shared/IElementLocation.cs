@@ -5,8 +5,6 @@
 // <summary>An internal interface used to represent element locations for run-time error reporting.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Shared

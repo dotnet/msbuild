@@ -3,14 +3,8 @@
 
 using System;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
 using System.Collections;
-using System.Globalization;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 
 namespace Microsoft.Build.Tasks

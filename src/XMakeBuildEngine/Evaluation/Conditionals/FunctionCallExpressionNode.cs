@@ -3,15 +3,9 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System;
-using System.Text;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.Evaluation

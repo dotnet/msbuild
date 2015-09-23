@@ -3,16 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Framework;
-using System.Xml;
 using System.IO;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Linq;
 using Microsoft.CSharp;
 using System.Reflection;
-using Microsoft.Build.Shared;
 using System.Globalization;
 using Microsoft.Build.Tasks.Xaml;
 using System.Xaml;

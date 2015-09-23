@@ -8,7 +8,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Framework;
 using System.Reflection;
 

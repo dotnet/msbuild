@@ -3,12 +3,8 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Collections.Generic;
 using System.Configuration;
-using Microsoft.Win32;
 using System.Threading;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {

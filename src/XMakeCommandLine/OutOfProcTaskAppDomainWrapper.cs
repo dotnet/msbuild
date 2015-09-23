@@ -6,8 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.CommandLine

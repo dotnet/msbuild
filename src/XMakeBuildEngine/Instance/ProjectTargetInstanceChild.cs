@@ -5,8 +5,6 @@
 // <summary>Type for TaskInstance and ProjectPropertyGroupTaskInstance and ProjectItemGroupTaskInstance.</summary>
 //-----------------------------------------------------------------------
 
-using Microsoft.Build.Shared;
-
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Execution

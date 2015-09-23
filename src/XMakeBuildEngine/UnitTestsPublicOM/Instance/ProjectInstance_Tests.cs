@@ -16,7 +16,6 @@ using Microsoft.Build.Execution;
 
 using Microsoft.Build.Framework;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using Microsoft.Build.BackEnd;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance

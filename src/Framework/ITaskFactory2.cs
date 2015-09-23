@@ -5,9 +5,7 @@
 // <summary>Task factory Instance which will instantiate and execute tasks</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.Framework
 {

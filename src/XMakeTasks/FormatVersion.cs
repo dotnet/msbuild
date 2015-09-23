@@ -3,10 +3,7 @@
 
 using System;
 using System.Globalization;
-using System.Diagnostics;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {

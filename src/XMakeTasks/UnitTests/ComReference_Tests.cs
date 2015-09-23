@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Xunit;
 

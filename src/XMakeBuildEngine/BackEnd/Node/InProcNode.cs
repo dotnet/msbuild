@@ -6,22 +6,12 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-
-using BuildEventArgTransportSink = Microsoft.Build.BackEnd.Logging.BuildEventArgTransportSink;
-using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
-using LoggingServiceFactory = Microsoft.Build.BackEnd.Logging.LoggingServiceFactory;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using LoggingExceptionDelegate = Microsoft.Build.BackEnd.Logging.LoggingExceptionDelegate;

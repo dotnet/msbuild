@@ -5,9 +5,7 @@
 // <summary>Interface for an object which can create items for the Expander</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 

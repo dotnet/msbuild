@@ -2,11 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Security;
-
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using RegistryException = Microsoft.Build.Exceptions.RegistryException;

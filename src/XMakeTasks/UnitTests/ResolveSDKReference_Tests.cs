@@ -8,22 +8,13 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Globalization;
-using System.Resources;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using SDKReference = Microsoft.Build.Tasks.ResolveSDKReference.SDKReference;
-using ProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 using Microsoft.Build.Evaluation;
-using System.Linq;
 using Microsoft.Build.Execution;
 using Xunit;
 

@@ -6,10 +6,6 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
-using System;
 
 namespace Microsoft.Build.UnitTests
 {

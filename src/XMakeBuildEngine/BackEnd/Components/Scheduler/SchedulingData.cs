@@ -7,11 +7,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
 {

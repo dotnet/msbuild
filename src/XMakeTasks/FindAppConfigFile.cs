@@ -3,9 +3,7 @@
 
 using System;
 using System.IO;
-using System.Resources;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks

@@ -6,11 +6,6 @@
 // currently executing has been canceled.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

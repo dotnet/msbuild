@@ -6,21 +6,12 @@
 // <date>2008-12-28</date>
 // <summary>The unit tests for XslTransformation buildtask.</summary>
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Text;
-using System.Xml.Xsl;
-using System.Xml;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

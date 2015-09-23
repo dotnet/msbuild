@@ -3,7 +3,6 @@
 
 #region Using directives
 
-using System;
 using Microsoft.Build.Shared;
 using Xunit;
 

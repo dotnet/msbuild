@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;

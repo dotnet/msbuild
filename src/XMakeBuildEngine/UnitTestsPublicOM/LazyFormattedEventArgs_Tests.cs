@@ -5,24 +5,6 @@
 // <summary>Tests for LazyFormattedEventArgs</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Linq;
-using System.Xml;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Text.RegularExpressions;
-
-using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-using System.Text;
-using System.IO;
-using Microsoft.Build.Internal;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.Framework

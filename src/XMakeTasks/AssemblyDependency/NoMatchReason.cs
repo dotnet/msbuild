@@ -1,18 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Resources;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using System.Reflection;
-using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-
 namespace Microsoft.Build.Tasks
 {
     /// <summary>

@@ -5,12 +5,6 @@
 // <summary>Packet used to communicate configuration id back to the node</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

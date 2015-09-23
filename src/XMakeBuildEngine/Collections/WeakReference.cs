@@ -6,12 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections.ObjectModel;
-using System.Collections;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
 
 namespace Microsoft.Build.Collections
 {

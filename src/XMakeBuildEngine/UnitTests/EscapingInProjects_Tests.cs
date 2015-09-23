@@ -5,11 +5,7 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
-
-using Microsoft.Build.UnitTests;
-
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;

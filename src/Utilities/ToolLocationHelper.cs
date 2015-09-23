@@ -5,10 +5,8 @@ using System;
 using System.IO;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using Microsoft.Build.Shared;
 using System.Xml;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +14,6 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Microsoft.Win32;
-using System.Collections.ObjectModel;
 
 namespace Microsoft.Build.Utilities
 {

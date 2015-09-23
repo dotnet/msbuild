@@ -6,11 +6,8 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests;
 using System.IO;
 using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;

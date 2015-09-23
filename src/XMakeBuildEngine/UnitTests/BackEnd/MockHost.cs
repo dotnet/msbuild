@@ -7,9 +7,7 @@
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.UnitTests.BackEnd;
 using System;
-using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;

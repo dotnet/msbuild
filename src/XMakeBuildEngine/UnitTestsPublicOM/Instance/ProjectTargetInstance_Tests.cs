@@ -5,7 +5,6 @@
 // <summary>Tests for the ProjectTargetInstanceTests class.</summary>
 //-----------------------------------------------------------------------
 
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;

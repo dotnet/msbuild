@@ -4,11 +4,8 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Resources;
 using System.Threading;
-using System.Xml;
 using Microsoft.Build.CommandLine;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 

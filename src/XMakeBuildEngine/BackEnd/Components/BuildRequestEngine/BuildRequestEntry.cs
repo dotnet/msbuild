@@ -8,13 +8,11 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using System.Diagnostics;
 
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 namespace Microsoft.Build.BackEnd
 {

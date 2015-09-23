@@ -5,10 +5,6 @@
 // <summary>Interface for the node packet factory.</summary>
 //-----------------------------------------------------------------------using System;
 
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Framework;
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>

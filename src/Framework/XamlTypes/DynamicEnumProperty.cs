@@ -5,10 +5,8 @@
 // <summary> Represents the schema of a dynamic enumeration property. </summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Windows.Markup;
 
 namespace Microsoft.Build.Framework.XamlTypes
 {

@@ -2,14 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using BuildUtilities = Microsoft.Build.Utilities;
-using System.Runtime.InteropServices;
-using System.Reflection;
-using System.Diagnostics;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

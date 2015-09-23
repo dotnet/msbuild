@@ -5,7 +5,6 @@
 // <summary>Tests the FilteringEnumerable utility class</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Xunit;

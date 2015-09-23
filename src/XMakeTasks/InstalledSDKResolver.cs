@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Reflection;
 using System.Collections;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;

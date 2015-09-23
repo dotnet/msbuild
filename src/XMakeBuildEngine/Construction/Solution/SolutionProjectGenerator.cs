@@ -15,8 +15,6 @@ using System.Xml;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
-
 using Project = Microsoft.Build.Evaluation.Project;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using ProjectItem = Microsoft.Build.Evaluation.ProjectItem;

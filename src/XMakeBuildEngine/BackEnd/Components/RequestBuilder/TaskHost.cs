@@ -12,7 +12,6 @@ using System.Globalization;
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
 using System.Threading;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;

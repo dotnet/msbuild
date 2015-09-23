@@ -4,12 +4,10 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
 using System.Text;
 using Xunit;
 

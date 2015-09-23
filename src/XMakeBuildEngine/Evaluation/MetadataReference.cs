@@ -5,12 +5,6 @@
 // <summary>This struct represents a reference to a piece of item metadata.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

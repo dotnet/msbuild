@@ -5,10 +5,7 @@
 // <summary>Interface for a results cache.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
 namespace Microsoft.Build.BackEnd

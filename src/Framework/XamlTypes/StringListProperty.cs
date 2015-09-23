@@ -5,9 +5,6 @@
 // <summary> Represents the schema of a list-of-strings property. </summary>
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.ComponentModel;
-
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>

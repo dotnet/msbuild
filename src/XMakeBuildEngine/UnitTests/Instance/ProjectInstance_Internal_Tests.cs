@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using System.Collections;
 using System;
 using Microsoft.Build.Construction;
 using System.IO;

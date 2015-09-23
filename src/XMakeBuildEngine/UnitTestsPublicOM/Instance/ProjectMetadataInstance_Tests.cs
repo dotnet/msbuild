@@ -5,8 +5,6 @@
 // <summary>Tests for ProjectMetadataInstance public members</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Xunit;

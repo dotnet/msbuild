@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 #if !SILVERLIGHT
 using System.Runtime.ConstrainedExecution;
 #endif
-using System.Text;
 
 namespace Microsoft.Build.Collections
 {

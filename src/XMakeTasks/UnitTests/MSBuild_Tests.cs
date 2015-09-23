@@ -3,15 +3,10 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using System.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-
-using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

@@ -7,16 +7,9 @@
 
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections

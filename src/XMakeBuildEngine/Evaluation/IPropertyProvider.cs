@@ -5,10 +5,6 @@
 // <summary>Generic Interface for a property provider usable with the expander</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

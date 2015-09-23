@@ -3,7 +3,6 @@
 
 using System;
 using System.Globalization;
-using System.Collections.Generic;
 using System.Text;
 
 using Microsoft.Build.Framework;
