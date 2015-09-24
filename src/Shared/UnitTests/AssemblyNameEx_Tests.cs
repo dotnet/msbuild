@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

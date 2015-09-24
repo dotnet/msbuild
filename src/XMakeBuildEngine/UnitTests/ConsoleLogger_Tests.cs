@@ -16,7 +16,6 @@ using Microsoft.Build.Shared;
 
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Xunit;
 

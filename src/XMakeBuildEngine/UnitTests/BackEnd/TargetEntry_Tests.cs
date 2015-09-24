@@ -17,7 +17,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.BackEnd.Logging;
 using System.Threading.Tasks;
 using Xunit;
 using Microsoft.Build.Shared;
