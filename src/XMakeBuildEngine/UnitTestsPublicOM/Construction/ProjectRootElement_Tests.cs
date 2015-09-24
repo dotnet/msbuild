@@ -835,7 +835,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 // Security classes are not supported on Unix
                 return;
-            }            
+            }
 
             Assert.Throws<InvalidProjectFileException>(() =>
             {
@@ -889,7 +889,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 return; // FileSecurity class is not supported on Unix
             }
-            
+
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string projectFile = null;
