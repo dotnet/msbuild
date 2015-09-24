@@ -6,7 +6,7 @@
   <PropertyGroup>
     <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <!-- This is to workaround an issue with a dependent assembly (Microsoft.Build.Tasks.CodeAnalysis.dll)
@@ -32,17 +32,17 @@
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
     <TestWorkingDir>$(BinDir)tests$([System.IO.Path]::DirectorySeparatorChar)</TestWorkingDir>
-    
+
     <!-- Input Directories -->
     <PackagesDir>$(RepoRoot)packages$([System.IO.Path]::DirectorySeparatorChar)</PackagesDir>
     <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion),"lib"))$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
     <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(PackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
-  
+
     <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
     <SolutionDir>$(SourceDir)</SolutionDir>
 
-    <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar</BootstrapDestination>
+    <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
   </PropertyGroup>
 
   <!-- If we're building with a bootstrapped MSBuild, use fresh extensions instead of the installed ones. -->
@@ -76,7 +76,7 @@
       <Visible>False</Visible>
     </None>
   </ItemGroup>
-  
+
   <!-- Set default Configuration and Platform -->
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' ==''">Debug</Configuration>
@@ -130,7 +130,7 @@
     <DebugSymbols>false</DebugSymbols>
     <TargetPlatformIdentifier>$(OS)</TargetPlatformIdentifier>
   </PropertyGroup>
-  
+
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
         the .NET Core surface area.  This way we can build a binary to run ApiPort on to measure progress. -->
   <PropertyGroup Condition="'$(Configuration)' == 'Port-Progress'">
