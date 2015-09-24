@@ -530,6 +530,36 @@ namespace Microsoft.Build.UnitTests
 
             File.Delete(task.OutputFile.ItemSpec);
         }
+
+        /// <summary>
+        /// Some attributes only allow positional constructor arguments.
+        /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
+        /// These can also be combined with named params.
+        /// </summary>
+        [Fact]
+        public void OneAttributePositionalAndNamedParamsVisualBasic()
+        {
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            TaskItem attribute = new TaskItem("AssemblyTrademarkAttribute");
+            attribute.SetMetadata("_Parameter1", "Microsoft");
+            attribute.SetMetadata("_Parameter2", "2009");
+            attribute.SetMetadata("Copyright", "(C)");
+            task.AssemblyAttributes = new TaskItem[] { attribute };
+            task.Language = "visualbasic";
+            task.OutputDirectory = new TaskItem(Path.GetTempPath());
+            bool result = task.Execute();
+
+            Assert.Equal(true, result);
+
+            string content = File.ReadAllText(task.OutputFile.ItemSpec);
+            Console.WriteLine(content);
+
+            Assert.Equal(true, content.Contains(@"<Assembly: AssemblyTrademarkAttribute(""Microsoft"", ""2009"", Copyright:=""(C)"")>"));
+
+            File.Delete(task.OutputFile.ItemSpec);
+        }
     }
 }
 
