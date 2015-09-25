@@ -173,7 +173,12 @@
          (due to open source signing). -->
     <!-- No parallel execution because most of our tests do bad things
          with state.  They were passing because MSTest was serial. -->
-    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.x86.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt" />
+
+    <!-- Run tests on the full framework -->
+    <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.x86.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt"
+          Condition="'$(NetCoreBuild)' != 'true'" />
+
+    <!-- TODO: run tests using coreclr -->
   </Target>
 
   <Import Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props" Condition="'$(IsTraversalBuild)'!='true'"/>
