@@ -9,11 +9,6 @@ using Microsoft.Build.Shared;
 using System.IO;
 using Xunit;
 
-using Microsoft.Build.Shared;
-using Microsoft.Build.Tasks;
-
-
-
 namespace Microsoft.Build.UnitTests
 {
     public class SGen_Tests

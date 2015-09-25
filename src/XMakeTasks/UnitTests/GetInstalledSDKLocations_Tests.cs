@@ -13,7 +13,6 @@ using System.IO;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using System.Linq;
 using Microsoft.Build.Execution;

@@ -396,6 +396,7 @@
       },
       "Microsoft.NETCore.Targets.DNXCore/4.9.0": {},
       "Microsoft.NETCore.TestHost/1.0.0-beta-23318": {},
+      "Microsoft.NETCore.TestHost-x86/1.0.0-beta-23123": {},
       "Microsoft.VisualBasic/10.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -1303,6 +1304,17 @@
           "lib/dotnet/System.Threading.Tasks.Parallel.dll": {}
         }
       },
+      "System.Threading.Thread/4.0.0-beta-23109": {
+        "dependencies": {
+          "System.Runtime": "[4.0.0-beta-23109, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Threading.Thread.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Threading.Thread.dll": {}
+        }
+      },
       "System.Threading.Timer/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -1669,6 +1681,11 @@
       },
       "Microsoft.NETCore.Targets.DNXCore/4.9.0": {},
       "Microsoft.NETCore.TestHost/1.0.0-beta-23318": {},
+      "Microsoft.NETCore.TestHost-x86/1.0.0-beta-23123": {
+        "native": {
+          "runtimes/win7-x86/native/CoreRun.exe": {}
+        }
+      },
       "Microsoft.NETCore.Windows.ApiSets-x86/1.0.0": {
         "native": {
           "runtimes/win7-x86/native/API-MS-Win-Base-Util-L1-1-0.dll": {},
@@ -2752,6 +2769,17 @@
           "lib/dotnet/System.Threading.Tasks.Parallel.dll": {}
         }
       },
+      "System.Threading.Thread/4.0.0-beta-23109": {
+        "dependencies": {
+          "System.Runtime": "[4.0.0-beta-23109, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Threading.Thread.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Threading.Thread.dll": {}
+        }
+      },
       "System.Threading.Timer/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -3155,6 +3183,17 @@
         "Microsoft.NETCore.TestHost.nuspec",
         "package/services/metadata/core-properties/eec14f32c7c740d48d02128dbde8c72d.psmdcp",
         "runtime.json"
+      ]
+    },
+    "Microsoft.NETCore.TestHost-x86/1.0.0-beta-23123": {
+      "sha512": "hLIFc0enPvCCOt1pXl3etWtkhvB+lb8qcjxWM39Jk9n8UTLvIH4lwzFbTv6Tij3LYmNbToTKEPKYmx3TfjUevw==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "Microsoft.NETCore.TestHost-x86.nuspec",
+        "package/services/metadata/core-properties/71ad7e2008a84dfdb75618cb7527719a.psmdcp",
+        "runtimes/win7-x86/native/CoreRun.exe"
       ]
     },
     "Microsoft.NETCore.Windows.ApiSets-x86/1.0.0": {
@@ -5334,6 +5373,30 @@
         "ref/win8/_._",
         "ref/wpa81/_._",
         "System.Threading.Tasks.Parallel.nuspec"
+      ]
+    },
+    "System.Threading.Thread/4.0.0-beta-23109": {
+      "sha512": "pOob5Fz4cRJ/bfBs2+ehmS99VGCN5Ei2mf7bl17STagcDGHUZBAzVLz8Kamq0hwQGX2pCFkuUZH+2Ycdts2PSQ==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/DNXCore50/System.Threading.Thread.dll",
+        "lib/net46/System.Threading.Thread.dll",
+        "package/services/metadata/core-properties/ba9a9919e2744245be86e42f4f3b93d1.psmdcp",
+        "ref/dotnet/de/System.Threading.Thread.xml",
+        "ref/dotnet/es/System.Threading.Thread.xml",
+        "ref/dotnet/fr/System.Threading.Thread.xml",
+        "ref/dotnet/it/System.Threading.Thread.xml",
+        "ref/dotnet/ja/System.Threading.Thread.xml",
+        "ref/dotnet/ko/System.Threading.Thread.xml",
+        "ref/dotnet/ru/System.Threading.Thread.xml",
+        "ref/dotnet/System.Threading.Thread.dll",
+        "ref/dotnet/System.Threading.Thread.xml",
+        "ref/dotnet/zh-hans/System.Threading.Thread.xml",
+        "ref/dotnet/zh-hant/System.Threading.Thread.xml",
+        "ref/net46/System.Threading.Thread.dll",
+        "System.Threading.Thread.nuspec"
       ]
     },
     "System.Threading.Timer/4.0.0": {

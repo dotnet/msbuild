@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // ... strip the "." to make "en-US"
                     cultureName = cultureName.Substring(1);
-                    validCulture = CultureStringUtilities.IsValidCultureString(cultureName);
+                    validCulture = CultureInfoCache.IsValidCultureString(cultureName);
                 }
 
                 if (validCulture)

@@ -241,7 +241,6 @@
     <Compile Include="Exec.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-
     <Compile Include="MSBuild.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -325,6 +324,10 @@
     <Compile Include="Warning.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssignCulture.cs" />
+    <Compile Include="Culture.cs" />
+    <Compile Include="CultureInfoCache.cs" />
+    <Compile Include="WriteCodeFragment.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <Compile Include="Al.cs">
@@ -445,9 +448,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyRemapping.cs" />
-    <Compile Include="AssignCulture.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="AssignLinkMetadata.cs" />
     <Compile Include="AssignProjectConfiguration.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -510,12 +510,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\CSharptokenizer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Culture.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CultureStringUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Dependencies.cs">
@@ -651,7 +645,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="WinMDExp.cs" />
-    <Compile Include="WriteCodeFragment.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />

@@ -26,8 +26,6 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
-using Microsoft.Build.Construction;
-using System.Diagnostics;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
