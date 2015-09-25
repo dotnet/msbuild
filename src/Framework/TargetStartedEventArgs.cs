@@ -72,16 +72,16 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
-            _targetName = targetName;
-            _projectFile = projectFile;
-            _targetFile = targetFile;
-            _parentTarget = parentTarget;
+            this.targetName = targetName;
+            this.projectFile = projectFile;
+            this.targetFile = targetFile;
+            this.parentTarget = parentTarget;
         }
 
-        private string _targetName;
-        private string _projectFile;
-        private string _targetFile;
-        private string _parentTarget;
+        private string targetName;
+        private string projectFile;
+        private string targetFile;
+        private string parentTarget;
 
         #region CustomSerializationToStream
         /// <summary>
@@ -92,47 +92,47 @@ namespace Microsoft.Build.Framework
         {
             base.WriteToStream(writer);
             #region TargetName
-            if (_targetName == null)
+            if (targetName == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_targetName);
+                writer.Write(targetName);
             }
             #endregion
             #region ProjectFile
-            if (_projectFile == null)
+            if (projectFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_projectFile);
+                writer.Write(projectFile);
             }
             #endregion
             #region TargetFile
-            if (_targetFile == null)
+            if (targetFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_targetFile);
+                writer.Write(targetFile);
             }
             #endregion
             #region ParentTarget
-            if (_parentTarget == null)
+            if (parentTarget == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_parentTarget);
+                writer.Write(parentTarget);
             }
             #endregion
         }
@@ -148,31 +148,31 @@ namespace Microsoft.Build.Framework
             #region TargetName
             if (reader.ReadByte() == 0)
             {
-                _targetName = null;
+                targetName = null;
             }
             else
             {
-                _targetName = reader.ReadString();
+                targetName = reader.ReadString();
             }
             #endregion
             #region ProjectFile
             if (reader.ReadByte() == 0)
             {
-                _projectFile = null;
+                projectFile = null;
             }
             else
             {
-                _projectFile = reader.ReadString();
+                projectFile = reader.ReadString();
             }
             #endregion
             #region TargetFile
             if (reader.ReadByte() == 0)
             {
-                _targetFile = null;
+                targetFile = null;
             }
             else
             {
-                _targetFile = reader.ReadString();
+                targetFile = reader.ReadString();
             }
             #endregion
             #region ParentTarget
@@ -180,11 +180,11 @@ namespace Microsoft.Build.Framework
             {
                 if (reader.ReadByte() == 0)
                 {
-                    _parentTarget = null;
+                    parentTarget = null;
                 }
                 else
                 {
-                    _parentTarget = reader.ReadString();
+                    parentTarget = reader.ReadString();
                 }
             }
             #endregion
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _targetName;
+                return targetName;
             }
         }
 
@@ -209,7 +209,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _parentTarget;
+                return parentTarget;
             }
         }
 
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectFile;
+                return projectFile;
             }
         }
 
@@ -231,7 +231,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _targetFile;
+                return targetFile;
             }
         }
     }

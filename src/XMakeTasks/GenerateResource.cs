@@ -3546,9 +3546,9 @@ namespace Microsoft.Build.Tasks
         [Serializable]
         internal sealed class TextFileException : Exception
         {
-            private String _fileName;
-            private int _lineNumber;
-            private int _column;
+            private String fileName;
+            private int lineNumber;
+            private int column;
 
             /// <summary>
             /// Fxcop want to have the correct basic exception constructors implemented
@@ -3561,24 +3561,24 @@ namespace Microsoft.Build.Tasks
             internal TextFileException(String message, String fileName, int lineNumber, int linePosition)
                 : base(message)
             {
-                _fileName = fileName;
-                _lineNumber = lineNumber;
-                _column = linePosition;
+                this.fileName = fileName;
+                this.lineNumber = lineNumber;
+                column = linePosition;
             }
 
             internal String FileName
             {
-                get { return _fileName; }
+                get { return fileName; }
             }
 
             internal int LineNumber
             {
-                get { return _lineNumber; }
+                get { return lineNumber; }
             }
 
             internal int LinePosition
             {
-                get { return _column; }
+                get { return column; }
             }
         }
 

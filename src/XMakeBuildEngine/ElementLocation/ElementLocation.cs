@@ -238,17 +238,17 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// The source file.
             /// </summary>
-            private string _file;
+            private string file;
 
             /// <summary>
             /// The source line.
             /// </summary>
-            private int _line;
+            private int line;
 
             /// <summary>
             /// The source column.
             /// </summary>
-            private int _column;
+            private int column;
 
             /// <summary>
             /// Constructor for the case where we have most or all information.
@@ -260,9 +260,9 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(file, "file");
                 ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
 
-                _file = file ?? String.Empty;
-                _line = line;
-                _column = column;
+                this.file = file ?? String.Empty;
+                this.line = line;
+                this.column = column;
             }
 
             /// <summary>
@@ -274,7 +274,7 @@ namespace Microsoft.Build.Construction
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override string File
             {
-                get { return _file; }
+                get { return file; }
             }
 
             /// <summary>
@@ -285,7 +285,7 @@ namespace Microsoft.Build.Construction
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Line
             {
-                get { return _line; }
+                get { return line; }
             }
 
             /// <summary>
@@ -296,7 +296,7 @@ namespace Microsoft.Build.Construction
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Column
             {
-                get { return _column; }
+                get { return column; }
             }
         }
 
@@ -314,17 +314,17 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// The source file.
             /// </summary>
-            private string _file;
+            private string file;
 
             /// <summary>
             /// The source line.
             /// </summary>
-            private ushort _line;
+            private ushort line;
 
             /// <summary>
             /// The source column.
             /// </summary>
-            private ushort _column;
+            private ushort column;
 
             /// <summary>
             /// Constructor for the case where we have most or all information.
@@ -337,9 +337,9 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
                 ErrorUtilities.VerifyThrow(line <= 65535 && column <= 65535, "Use ElementLocation instead");
 
-                _file = file ?? String.Empty;
-                _line = Convert.ToUInt16(line);
-                _column = Convert.ToUInt16(column);
+                this.file = file ?? String.Empty;
+                this.line = Convert.ToUInt16(line);
+                this.column = Convert.ToUInt16(column);
             }
 
             /// <summary>
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Construction
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override string File
             {
-                get { return _file; }
+                get { return file; }
             }
 
             /// <summary>
@@ -362,7 +362,7 @@ namespace Microsoft.Build.Construction
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Line
             {
-                get { return (int)_line; }
+                get { return (int)line; }
             }
 
             /// <summary>
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Construction
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Column
             {
-                get { return (int)_column; }
+                get { return (int)column; }
             }
         }
     }

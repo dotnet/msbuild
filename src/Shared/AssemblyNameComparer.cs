@@ -40,14 +40,14 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Should the comparer consider the retargetable flag when doing comparisons
         /// </summary>
-        private bool _considerRetargetableFlag;
+        private bool considerRetargetableFlag;
 
         /// <summary>
         /// Private construct so there's only one instance.
         /// </summary>
         private AssemblyNameComparer(bool considerRetargetableFlag)
         {
-            _considerRetargetableFlag = considerRetargetableFlag;
+            this.considerRetargetableFlag = considerRetargetableFlag;
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Shared
             AssemblyNameExtension a1 = (AssemblyNameExtension)o1;
             AssemblyNameExtension a2 = (AssemblyNameExtension)o2;
 
-            int result = a1.CompareTo(a2, _considerRetargetableFlag);
+            int result = a1.CompareTo(a2, considerRetargetableFlag);
             return result;
         }
 
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         public bool Equals(AssemblyNameExtension x, AssemblyNameExtension y)
         {
-            bool result = x.Equals(y, _considerRetargetableFlag);
+            bool result = x.Equals(y, considerRetargetableFlag);
             return result;
         }
 
