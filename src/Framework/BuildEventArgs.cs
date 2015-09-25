@@ -30,33 +30,33 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Message
         /// </summary>
-        private string _message;
+        private string message;
 
         /// <summary>
         /// Help keyword
         /// </summary>
-        private string _helpKeyword;
+        private string helpKeyword;
 
         /// <summary>
         /// Sender name
         /// </summary>
-        private string _senderName;
+        private string senderName;
 
         /// <summary>
         /// Timestamp
         /// </summary>
-        private DateTime _timestamp;
+        private DateTime timestamp;
 
         /// <summary>
         /// Thread id
         /// </summary>
-        private int _threadId;
+        private int threadId;
 
         /// <summary>
         /// Build event context
         /// </summary>
         [OptionalField(VersionAdded = 2)]
-        private BuildEventContext _buildEventContext;
+        private BuildEventContext buildEventContext;
 
         /// <summary>
         /// Default constructor
@@ -86,11 +86,11 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimeStamp">TimeStamp of when the event was created</param>
         protected BuildEventArgs(string message, string helpKeyword, string senderName, DateTime eventTimestamp)
         {
-            _message = message;
-            _helpKeyword = helpKeyword;
-            _senderName = senderName;
-            _timestamp = eventTimestamp;
-            _threadId = System.Threading.Thread.CurrentThread.GetHashCode();
+            this.message = message;
+            this.helpKeyword = helpKeyword;
+            this.senderName = senderName;
+            timestamp = eventTimestamp;
+            threadId = System.Threading.Thread.CurrentThread.GetHashCode();
         }
 
         /// <summary>
@@ -103,12 +103,12 @@ namespace Microsoft.Build.Framework
                 // Rather than storing dates in Local time all the time, we store in UTC type, and only
                 // convert to Local when the user requests access to this field.  This lets us avoid the
                 // expensive conversion to Local time unless it's absolutely necessary.
-                if (_timestamp.Kind == DateTimeKind.Utc)
+                if (timestamp.Kind == DateTimeKind.Utc)
                 {
-                    _timestamp = _timestamp.ToLocalTime();
+                    timestamp = timestamp.ToLocalTime();
                 }
 
-                return _timestamp;
+                return timestamp;
             }
         }
 
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _threadId;
+                return threadId;
             }
         }
 
@@ -130,12 +130,12 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _message;
+                return message;
             }
 
             protected set
             {
-                _message = value;
+                message = value;
             }
         }
 
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _helpKeyword;
+                return helpKeyword;
             }
         }
 
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _senderName;
+                return senderName;
             }
         }
 
@@ -168,12 +168,12 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _buildEventContext;
+                return buildEventContext;
             }
 
             set
             {
-                _buildEventContext = value;
+                buildEventContext = value;
             }
         }
 
@@ -185,57 +185,57 @@ namespace Microsoft.Build.Framework
         internal virtual void WriteToStream(BinaryWriter writer)
         {
             #region Message
-            if (_message == null)
+            if (message == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_message);
+                writer.Write(message);
             }
             #endregion
             #region HelpKeyword
-            if (_helpKeyword == null)
+            if (helpKeyword == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_helpKeyword);
+                writer.Write(helpKeyword);
             }
             #endregion
             #region SenderName
-            if (_senderName == null)
+            if (senderName == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_senderName);
+                writer.Write(senderName);
             }
             #endregion
             #region TimeStamp
-            writer.Write((Int64)_timestamp.Ticks);
-            writer.Write((Int32)_timestamp.Kind);
+            writer.Write((Int64)timestamp.Ticks);
+            writer.Write((Int32)timestamp.Kind);
             #endregion
-            writer.Write((Int32)_threadId);
+            writer.Write((Int32)threadId);
             #region BuildEventContext
-            if (_buildEventContext == null)
+            if (buildEventContext == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write((Int32)_buildEventContext.NodeId);
-                writer.Write((Int32)_buildEventContext.ProjectContextId);
-                writer.Write((Int32)_buildEventContext.TargetId);
-                writer.Write((Int32)_buildEventContext.TaskId);
-                writer.Write((Int32)_buildEventContext.SubmissionId);
-                writer.Write((Int32)_buildEventContext.ProjectInstanceId);
+                writer.Write((Int32)buildEventContext.NodeId);
+                writer.Write((Int32)buildEventContext.ProjectContextId);
+                writer.Write((Int32)buildEventContext.TargetId);
+                writer.Write((Int32)buildEventContext.TaskId);
+                writer.Write((Int32)buildEventContext.SubmissionId);
+                writer.Write((Int32)buildEventContext.ProjectInstanceId);
             }
             #endregion
         }
@@ -250,31 +250,31 @@ namespace Microsoft.Build.Framework
             #region Message
             if (reader.ReadByte() == 0)
             {
-                _message = null;
+                message = null;
             }
             else
             {
-                _message = reader.ReadString();
+                message = reader.ReadString();
             }
             #endregion
             #region HelpKeyword
             if (reader.ReadByte() == 0)
             {
-                _helpKeyword = null;
+                helpKeyword = null;
             }
             else
             {
-                _helpKeyword = reader.ReadString();
+                helpKeyword = reader.ReadString();
             }
             #endregion
             #region SenderName
             if (reader.ReadByte() == 0)
             {
-                _senderName = null;
+                senderName = null;
             }
             else
             {
-                _senderName = reader.ReadString();
+                senderName = reader.ReadString();
             }
             #endregion
             #region TimeStamp
@@ -282,18 +282,18 @@ namespace Microsoft.Build.Framework
             if (version > 20)
             {
                 DateTimeKind kind = (DateTimeKind)reader.ReadInt32();
-                _timestamp = new DateTime(timestampTicks, kind);
+                timestamp = new DateTime(timestampTicks, kind);
             }
             else
             {
-                _timestamp = new DateTime(timestampTicks);
+                timestamp = new DateTime(timestampTicks);
             }
             #endregion
-            _threadId = reader.ReadInt32();
+            threadId = reader.ReadInt32();
             #region BuildEventContext
             if (reader.ReadByte() == 0)
             {
-                _buildEventContext = null;
+                buildEventContext = null;
             }
             else
             {
@@ -306,11 +306,11 @@ namespace Microsoft.Build.Framework
                 {
                     int submissionId = reader.ReadInt32();
                     int projectInstanceId = reader.ReadInt32();
-                    _buildEventContext = new BuildEventContext(submissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId);
+                    buildEventContext = new BuildEventContext(submissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId);
                 }
                 else
                 {
-                    _buildEventContext = new BuildEventContext(nodeId, targetId, projectContextId, taskId);
+                    buildEventContext = new BuildEventContext(nodeId, targetId, projectContextId, taskId);
                 }
             }
             #endregion
@@ -328,7 +328,7 @@ namespace Microsoft.Build.Framework
         {
             // Don't want to create a new one here as default all the time as that would be a lot of 
             // possibly useless allocations
-            _buildEventContext = null;
+            buildEventContext = null;
         }
 
         /// <summary>
@@ -337,9 +337,9 @@ namespace Microsoft.Build.Framework
         [OnDeserialized]
         private void SetBuildEventContextDefaultAfterSerialization(StreamingContext sc)
         {
-            if (_buildEventContext == null)
+            if (buildEventContext == null)
             {
-                _buildEventContext = new BuildEventContext
+                buildEventContext = new BuildEventContext
                                        (
                                        BuildEventContext.InvalidNodeId,
                                        BuildEventContext.InvalidTargetId,

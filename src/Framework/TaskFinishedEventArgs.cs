@@ -80,16 +80,16 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
-            _taskName = taskName;
-            _taskFile = taskFile;
-            _succeeded = succeeded;
-            _projectFile = projectFile;
+            this.taskName = taskName;
+            this.taskFile = taskFile;
+            this.succeeded = succeeded;
+            this.projectFile = projectFile;
         }
 
-        private string _taskName;
-        private string _projectFile;
-        private string _taskFile;
-        private bool _succeeded;
+        private string taskName;
+        private string projectFile;
+        private string taskFile;
+        private bool succeeded;
 
         #region CustomSerializationToStream
         /// <summary>
@@ -100,39 +100,39 @@ namespace Microsoft.Build.Framework
         {
             base.WriteToStream(writer);
             #region TaskName
-            if (_taskName == null)
+            if (taskName == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_taskName);
+                writer.Write(taskName);
             }
             #endregion
             #region ProjectFile
-            if (_projectFile == null)
+            if (projectFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_projectFile);
+                writer.Write(projectFile);
             }
             #endregion
             #region TaskFile
-            if (_taskFile == null)
+            if (taskFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_taskFile);
+                writer.Write(taskFile);
             }
             #endregion
-            writer.Write(_succeeded);
+            writer.Write(succeeded);
         }
 
         /// <summary>
@@ -146,34 +146,34 @@ namespace Microsoft.Build.Framework
             #region TaskName
             if (reader.ReadByte() == 0)
             {
-                _taskName = null;
+                taskName = null;
             }
             else
             {
-                _taskName = reader.ReadString();
+                taskName = reader.ReadString();
             }
             #endregion
             #region ProjectFile
             if (reader.ReadByte() == 0)
             {
-                _projectFile = null;
+                projectFile = null;
             }
             else
             {
-                _projectFile = reader.ReadString();
+                projectFile = reader.ReadString();
             }
             #endregion
             #region TaskFile
             if (reader.ReadByte() == 0)
             {
-                _taskFile = null;
+                taskFile = null;
             }
             else
             {
-                _taskFile = reader.ReadString();
+                taskFile = reader.ReadString();
             }
             #endregion
-            _succeeded = reader.ReadBoolean();
+            succeeded = reader.ReadBoolean();
         }
         #endregion
 
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _taskName;
+                return taskName;
             }
         }
 
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _succeeded;
+                return succeeded;
             }
         }
 
@@ -206,7 +206,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectFile;
+                return projectFile;
             }
         }
 
@@ -217,7 +217,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _taskFile;
+                return taskFile;
             }
         }
     }

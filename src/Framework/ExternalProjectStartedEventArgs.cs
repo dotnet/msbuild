@@ -69,11 +69,11 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
-            _projectFile = projectFile;
-            _targetNames = targetNames;
+            this.projectFile = projectFile;
+            this.targetNames = targetNames;
         }
 
-        private string _projectFile;
+        private string projectFile;
 
         /// <summary>
         /// Project name
@@ -82,11 +82,11 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectFile;
+                return projectFile;
             }
         }
 
-        private string _targetNames;
+        private string targetNames;
 
         /// <summary>
         /// Targets that we will build in the project. This may mean different things for different project types,
@@ -97,7 +97,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _targetNames;
+                return targetNames;
             }
         }
     }

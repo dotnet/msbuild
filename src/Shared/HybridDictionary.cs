@@ -34,12 +34,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// The dictionary, list, or pair used for a store
         /// </summary>
-        private Object _store;
+        private Object store;
 
         /// <summary>
         /// The comparer used to look up an item.
         /// </summary>
-        private IEqualityComparer<TKey> _comparer;
+        private IEqualityComparer<TKey> comparer;
 
         /// <summary>
         /// Static constructor
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Collections
         public HybridDictionary(IEqualityComparer<TKey> comparer)
             : this()
         {
-            _comparer = comparer;
+            this.comparer = comparer;
         }
 
         /// <summary>
@@ -87,19 +87,19 @@ namespace Microsoft.Build.Collections
         /// <param name="comparer">The comparer to use.</param>
         public HybridDictionary(int capacity, IEqualityComparer<TKey> comparer)
         {
-            _comparer = comparer;
-            if (_comparer == null)
+            this.comparer = comparer;
+            if (this.comparer == null)
             {
-                _comparer = EqualityComparer<TKey>.Default;
+                this.comparer = EqualityComparer<TKey>.Default;
             }
 
             if (capacity > MaxListSize)
             {
-                _store = new Dictionary<TKey, TValue>(capacity, comparer);
+                store = new Dictionary<TKey, TValue>(capacity, comparer);
             }
             else if (capacity > 1)
             {
-                _store = new List<KeyValuePair<TKey, TValue>>(capacity);
+                store = new List<KeyValuePair<TKey, TValue>>(capacity);
             }
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEqualityComparer<TKey> Comparer
         {
-            get { return _comparer; }
+            get { return comparer; }
         }
 
         /// <summary>
@@ -138,17 +138,17 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                if (_store == null)
+                if (store == null)
                 {
                     return ReadOnlyEmptyCollection<TKey>.Instance;
                 }
 
-                if (_store is KeyValuePair<TKey, TValue>)
+                if (store is KeyValuePair<TKey, TValue>)
                 {
-                    return new TKey[] { ((KeyValuePair<TKey, TValue>)_store).Key };
+                    return new TKey[] { ((KeyValuePair<TKey, TValue>)store).Key };
                 }
 
-                var list = _store as List<KeyValuePair<TKey, TValue>>;
+                var list = store as List<KeyValuePair<TKey, TValue>>;
                 if (list != null)
                 {
                     TKey[] keys = new TKey[list.Count];
@@ -160,7 +160,7 @@ namespace Microsoft.Build.Collections
                     return keys;
                 }
 
-                var dictionary = _store as Dictionary<TKey, TValue>;
+                var dictionary = store as Dictionary<TKey, TValue>;
                 if (dictionary != null)
                 {
                     return dictionary.Keys;
@@ -178,17 +178,17 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                if (_store == null)
+                if (store == null)
                 {
                     return ReadOnlyEmptyCollection<TValue>.Instance;
                 }
 
-                if (_store is KeyValuePair<TKey, TValue>) // Can't use 'as' for structs
+                if (store is KeyValuePair<TKey, TValue>) // Can't use 'as' for structs
                 {
-                    return new TValue[] { ((KeyValuePair<TKey, TValue>)_store).Value };
+                    return new TValue[] { ((KeyValuePair<TKey, TValue>)store).Value };
                 }
 
-                var list = _store as List<KeyValuePair<TKey, TValue>>;
+                var list = store as List<KeyValuePair<TKey, TValue>>;
                 if (list != null)
                 {
                     TValue[] values = new TValue[list.Count];
@@ -200,7 +200,7 @@ namespace Microsoft.Build.Collections
                     return values;
                 }
 
-                var dictionary = _store as Dictionary<TKey, TValue>;
+                var dictionary = store as Dictionary<TKey, TValue>;
                 if (dictionary != null)
                 {
                     return dictionary.Values;
@@ -218,17 +218,17 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                if (_store == null)
+                if (store == null)
                 {
                     return 0;
                 }
 
-                if (_store is KeyValuePair<TKey, TValue>)
+                if (store is KeyValuePair<TKey, TValue>)
                 {
                     return 1;
                 }
 
-                return ((ICollection)_store).Count;
+                return ((ICollection)store).Count;
             }
         }
 
@@ -304,33 +304,33 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                if (_store == null)
+                if (store == null)
                 {
-                    _store = new KeyValuePair<TKey, TValue>(key, value);
+                    store = new KeyValuePair<TKey, TValue>(key, value);
                     return;
                 }
 
-                if (_store is KeyValuePair<TKey, TValue>)
+                if (store is KeyValuePair<TKey, TValue>)
                 {
-                    var single = ((KeyValuePair<TKey, TValue>)_store);
-                    if (_comparer.Equals(single.Key, key))
+                    var single = ((KeyValuePair<TKey, TValue>)store);
+                    if (comparer.Equals(single.Key, key))
                     {
-                        _store = new KeyValuePair<TKey, TValue>(key, value);
+                        store = new KeyValuePair<TKey, TValue>(key, value);
                         return;
                     }
 
-                    _store = new List<KeyValuePair<TKey, TValue>> { { single }, { new KeyValuePair<TKey, TValue>(key, value) } };
+                    store = new List<KeyValuePair<TKey, TValue>> { { single }, { new KeyValuePair<TKey, TValue>(key, value) } };
                     return;
                 }
 
-                var list = _store as List<KeyValuePair<TKey, TValue>>;
+                var list = store as List<KeyValuePair<TKey, TValue>>;
                 if (list != null)
                 {
                     AddToOrUpdateList(list, key, value, throwIfPresent: false);
                     return;
                 }
 
-                var dictionary = _store as Dictionary<TKey, TValue>;
+                var dictionary = store as Dictionary<TKey, TValue>;
                 if (dictionary != null)
                 {
                     dictionary[key] = value;
@@ -357,32 +357,32 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentNull(key, "key");
 
-            if (_store == null)
+            if (store == null)
             {
-                _store = new KeyValuePair<TKey, TValue>(key, value);
+                store = new KeyValuePair<TKey, TValue>(key, value);
                 return;
             }
 
-            if (_store is KeyValuePair<TKey, TValue>)
+            if (store is KeyValuePair<TKey, TValue>)
             {
-                var single = ((KeyValuePair<TKey, TValue>)_store);
-                if (_comparer.Equals(single.Key, key))
+                var single = ((KeyValuePair<TKey, TValue>)store);
+                if (comparer.Equals(single.Key, key))
                 {
                     throw new ArgumentException("A value with the same key is already in the collection.");
                 }
 
-                _store = new List<KeyValuePair<TKey, TValue>> { { single }, { new KeyValuePair<TKey, TValue>(key, value) } };
+                store = new List<KeyValuePair<TKey, TValue>> { { single }, { new KeyValuePair<TKey, TValue>(key, value) } };
                 return;
             }
 
-            var list = _store as List<KeyValuePair<TKey, TValue>>;
+            var list = store as List<KeyValuePair<TKey, TValue>>;
             if (list != null)
             {
                 AddToOrUpdateList(list, key, value, throwIfPresent: true);
                 return;
             }
 
-            var dictionary = _store as Dictionary<TKey, TValue>;
+            var dictionary = store as Dictionary<TKey, TValue>;
             if (dictionary != null)
             {
                 dictionary.Add(key, value);
@@ -408,28 +408,28 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentNull(key, "key");
 
-            if (_store == null)
+            if (store == null)
             {
                 return false;
             }
 
-            if (_store is KeyValuePair<TKey, TValue>)
+            if (store is KeyValuePair<TKey, TValue>)
             {
-                if (_comparer.Equals(((KeyValuePair<TKey, TValue>)_store).Key, key))
+                if (comparer.Equals(((KeyValuePair<TKey, TValue>)store).Key, key))
                 {
-                    _store = null;
+                    store = null;
                     return true;
                 }
 
                 return false;
             }
 
-            var list = _store as List<KeyValuePair<TKey, TValue>>;
+            var list = store as List<KeyValuePair<TKey, TValue>>;
             if (list != null)
             {
                 for (int i = 0; i < list.Count; i++)
                 {
-                    if (_comparer.Equals(list[i].Key, key))
+                    if (comparer.Equals(list[i].Key, key))
                     {
                         list.RemoveAt(i); // POLICY: copy into new shorter list
                         return true;
@@ -439,7 +439,7 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            var dictionary = _store as Dictionary<TKey, TValue>;
+            var dictionary = store as Dictionary<TKey, TValue>;
             if (dictionary != null)
             {
                 return dictionary.Remove(key);
@@ -456,15 +456,15 @@ namespace Microsoft.Build.Collections
         {
             value = null;
 
-            if (_store == null)
+            if (store == null)
             {
                 return false;
             }
 
-            if (_store is KeyValuePair<TKey, TValue>)
+            if (store is KeyValuePair<TKey, TValue>)
             {
-                var single = ((KeyValuePair<TKey, TValue>)_store);
-                if (_comparer.Equals(single.Key, key))
+                var single = ((KeyValuePair<TKey, TValue>)store);
+                if (comparer.Equals(single.Key, key))
                 {
                     value = single.Value;
                     return true;
@@ -475,12 +475,12 @@ namespace Microsoft.Build.Collections
                 }
             }
 
-            var list = _store as List<KeyValuePair<TKey, TValue>>;
+            var list = store as List<KeyValuePair<TKey, TValue>>;
             if (list != null)
             {
                 foreach (var entry in list)
                 {
-                    if (_comparer.Equals(entry.Key, key))
+                    if (comparer.Equals(entry.Key, key))
                     {
                         value = entry.Value;
                         return true;
@@ -490,7 +490,7 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            var dictionary = _store as Dictionary<TKey, TValue>;
+            var dictionary = store as Dictionary<TKey, TValue>;
             if (dictionary != null)
             {
                 return dictionary.TryGetValue(key, out value);
@@ -513,7 +513,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            _store = null;
+            store = null;
         }
 
         /// <summary>
@@ -551,23 +551,23 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            if (_store == null)
+            if (store == null)
             {
                 return ReadOnlyEmptyCollection<KeyValuePair<TKey, TValue>>.Instance.GetEnumerator();
             }
 
-            if (_store is KeyValuePair<TKey, TValue>)
+            if (store is KeyValuePair<TKey, TValue>)
             {
-                return new SingleEnumerator((KeyValuePair<TKey, TValue>)_store);
+                return new SingleEnumerator((KeyValuePair<TKey, TValue>)store);
             }
 
-            var list = _store as List<KeyValuePair<TKey, TValue>>;
+            var list = store as List<KeyValuePair<TKey, TValue>>;
             if (list != null)
             {
                 return list.GetEnumerator();
             }
 
-            var dictionary = _store as Dictionary<TKey, TValue>;
+            var dictionary = store as Dictionary<TKey, TValue>;
             if (dictionary != null)
             {
                 return dictionary.GetEnumerator();
@@ -618,23 +618,23 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IDictionaryEnumerator IDictionary.GetEnumerator()
         {
-            if (_store == null)
+            if (store == null)
             {
                 return ((IDictionary)(ReadOnlyEmptyDictionary<TKey, TValue>.Instance)).GetEnumerator();
             }
 
-            if (_store is KeyValuePair<TKey, TValue>)
+            if (store is KeyValuePair<TKey, TValue>)
             {
-                return new SingleDictionaryEntryEnumerator(new DictionaryEntry(((KeyValuePair<TKey, TValue>)_store).Key, ((KeyValuePair<TKey, TValue>)_store).Value));
+                return new SingleDictionaryEntryEnumerator(new DictionaryEntry(((KeyValuePair<TKey, TValue>)store).Key, ((KeyValuePair<TKey, TValue>)store).Value));
             }
 
-            var list = _store as List<KeyValuePair<TKey, TValue>>;
+            var list = store as List<KeyValuePair<TKey, TValue>>;
             if (list != null)
             {
                 return new ListDictionaryEntryEnumerator<TKey, TValue>(list);
             }
 
-            var dictionary = _store as IDictionary;
+            var dictionary = store as IDictionary;
             if (dictionary != null)
             {
                 return dictionary.GetEnumerator();
@@ -661,7 +661,7 @@ namespace Microsoft.Build.Collections
             {
                 for (int i = 0; i < list.Count; i++)
                 {
-                    if (_comparer.Equals(list[i].Key, key))
+                    if (comparer.Equals(list[i].Key, key))
                     {
                         if (throwIfPresent)
                         {
@@ -677,7 +677,7 @@ namespace Microsoft.Build.Collections
             }
             else
             {
-                var newDictionary = new Dictionary<TKey, TValue>(list.Count + 1, _comparer); // POLICY: Don't aggressively encourage extra capacity
+                var newDictionary = new Dictionary<TKey, TValue>(list.Count + 1, comparer); // POLICY: Don't aggressively encourage extra capacity
                 foreach (KeyValuePair<TKey, TValue> entry in list)
                 {
                     newDictionary.Add(entry.Key, entry.Value);
@@ -692,7 +692,7 @@ namespace Microsoft.Build.Collections
                     newDictionary[key] = value;
                 }
 
-                _store = newDictionary;
+                store = newDictionary;
             }
         }
 
@@ -704,20 +704,20 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// The single value.
             /// </summary>
-            private KeyValuePair<TKey, TValue> _value;
+            private KeyValuePair<TKey, TValue> value;
 
             /// <summary>
             /// Flag indicating when we are at the end of the enumeration.
             /// </summary>
-            private bool _enumerationComplete;
+            private bool enumerationComplete;
 
             /// <summary>
             /// Constructor.
             /// </summary>
             public SingleEnumerator(KeyValuePair<TKey, TValue> value)
             {
-                _value = value;
-                _enumerationComplete = false;
+                this.value = value;
+                enumerationComplete = false;
             }
 
             /// <summary>
@@ -727,9 +727,9 @@ namespace Microsoft.Build.Collections
             {
                 get
                 {
-                    if (_enumerationComplete)
+                    if (enumerationComplete)
                     {
-                        return _value;
+                        return value;
                     }
 
                     throw new InvalidOperationException("Past end of enumeration");
@@ -756,9 +756,9 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public bool MoveNext()
             {
-                if (!_enumerationComplete)
+                if (!enumerationComplete)
                 {
-                    _enumerationComplete = true;
+                    enumerationComplete = true;
                     return true;
                 }
 
@@ -770,7 +770,7 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public void Reset()
             {
-                _enumerationComplete = false;
+                enumerationComplete = false;
             }
         }
 
@@ -786,20 +786,20 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// The single value.
             /// </summary>
-            private DictionaryEntry _value;
+            private DictionaryEntry value;
 
             /// <summary>
             /// Flag indicating when we are at the end of the enumeration.
             /// </summary>
-            private bool _enumerationComplete;
+            private bool enumerationComplete;
 
             /// <summary>
             /// Constructor.
             /// </summary>
             public SingleDictionaryEntryEnumerator(DictionaryEntry value)
             {
-                _value = value;
-                _enumerationComplete = false;
+                this.value = value;
+                enumerationComplete = false;
             }
 
             /// <summary>
@@ -833,9 +833,9 @@ namespace Microsoft.Build.Collections
             {
                 get
                 {
-                    if (_enumerationComplete)
+                    if (enumerationComplete)
                     {
-                        return _value;
+                        return value;
                     }
 
                     throw new InvalidOperationException("Past end of enumeration");
@@ -854,9 +854,9 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public bool MoveNext()
             {
-                if (!_enumerationComplete)
+                if (!enumerationComplete)
                 {
-                    _enumerationComplete = true;
+                    enumerationComplete = true;
                     return true;
                 }
 
@@ -868,7 +868,7 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public void Reset()
             {
-                _enumerationComplete = false;
+                enumerationComplete = false;
             }
         }
 
@@ -882,14 +882,14 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// The value.
             /// </summary>
-            private IEnumerator<KeyValuePair<KK, VV>> _enumerator;
+            private IEnumerator<KeyValuePair<KK, VV>> enumerator;
 
             /// <summary>
             /// Constructor.
             /// </summary>
             public ListDictionaryEntryEnumerator(List<KeyValuePair<KK, VV>> list)
             {
-                _enumerator = list.GetEnumerator();
+                enumerator = list.GetEnumerator();
             }
 
             /// <summary>
@@ -897,7 +897,7 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public object Key
             {
-                get { return _enumerator.Current.Key; }
+                get { return enumerator.Current.Key; }
             }
 
             /// <summary>
@@ -905,7 +905,7 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public object Value
             {
-                get { return _enumerator.Current.Value; }
+                get { return enumerator.Current.Value; }
             }
 
             /// <summary>
@@ -921,7 +921,7 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public DictionaryEntry Entry
             {
-                get { return new DictionaryEntry(_enumerator.Current.Key, _enumerator.Current.Value); }
+                get { return new DictionaryEntry(enumerator.Current.Key, enumerator.Current.Value); }
             }
 
             /// <summary>
@@ -936,7 +936,7 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public bool MoveNext()
             {
-                return _enumerator.MoveNext();
+                return enumerator.MoveNext();
             }
 
             /// <summary>
@@ -944,7 +944,7 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public void Reset()
             {
-                _enumerator.Reset();
+                enumerator.Reset();
             }
         }
     }

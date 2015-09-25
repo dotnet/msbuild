@@ -88,15 +88,15 @@ namespace Microsoft.Build.Exceptions
         private InvalidProjectFileException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            _file = info.GetString("projectFile");
-            _lineNumber = info.GetInt32("lineNumber");
-            _columnNumber = info.GetInt32("columnNumber");
-            _endLineNumber = info.GetInt32("endLineNumber");
-            _endColumnNumber = info.GetInt32("endColumnNumber");
-            _errorSubcategory = info.GetString("errorSubcategory");
-            _errorCode = info.GetString("errorCode");
-            _helpKeyword = info.GetString("helpKeyword");
-            _hasBeenLogged = info.GetBoolean("hasBeenLogged");
+            file = info.GetString("projectFile");
+            lineNumber = info.GetInt32("lineNumber");
+            columnNumber = info.GetInt32("columnNumber");
+            endLineNumber = info.GetInt32("endLineNumber");
+            endColumnNumber = info.GetInt32("endColumnNumber");
+            errorSubcategory = info.GetString("errorSubcategory");
+            errorCode = info.GetString("errorCode");
+            helpKeyword = info.GetString("helpKeyword");
+            hasBeenLogged = info.GetBoolean("hasBeenLogged");
         }
 
         /// <summary>
@@ -110,15 +110,15 @@ namespace Microsoft.Build.Exceptions
         {
             base.GetObjectData(info, context);
 
-            info.AddValue("projectFile", _file);
-            info.AddValue("lineNumber", _lineNumber);
-            info.AddValue("columnNumber", _columnNumber);
-            info.AddValue("endLineNumber", _endLineNumber);
-            info.AddValue("endColumnNumber", _endColumnNumber);
-            info.AddValue("errorSubcategory", _errorSubcategory);
-            info.AddValue("errorCode", _errorCode);
-            info.AddValue("helpKeyword", _helpKeyword);
-            info.AddValue("hasBeenLogged", _hasBeenLogged);
+            info.AddValue("projectFile", file);
+            info.AddValue("lineNumber", lineNumber);
+            info.AddValue("columnNumber", columnNumber);
+            info.AddValue("endLineNumber", endLineNumber);
+            info.AddValue("endColumnNumber", endColumnNumber);
+            info.AddValue("errorSubcategory", errorSubcategory);
+            info.AddValue("errorCode", errorCode);
+            info.AddValue("helpKeyword", helpKeyword);
+            info.AddValue("hasBeenLogged", hasBeenLogged);
         }
 
         #endregion
@@ -195,14 +195,14 @@ namespace Microsoft.Build.Exceptions
                 projectFile = (fullPath == null) ? projectFile : fullPath;
             }
 
-            _file = projectFile;
-            _lineNumber = lineNumber;
-            _columnNumber = columnNumber;
-            _endLineNumber = endLineNumber;
-            _endColumnNumber = endColumnNumber;
-            _errorSubcategory = errorSubcategory;
-            _errorCode = errorCode;
-            _helpKeyword = helpKeyword;
+            file = projectFile;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
+            this.endLineNumber = endLineNumber;
+            this.endColumnNumber = endColumnNumber;
+            this.errorSubcategory = errorSubcategory;
+            this.errorCode = errorCode;
+            this.helpKeyword = helpKeyword;
         }
 
         #endregion
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _file;
+                return file;
             }
         }
 
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _lineNumber;
+                return lineNumber;
             }
         }
 
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _columnNumber;
+                return columnNumber;
             }
         }
 
@@ -284,7 +284,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _endLineNumber;
+                return endLineNumber;
             }
         }
 
@@ -296,7 +296,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _endColumnNumber;
+                return endColumnNumber;
             }
         }
 
@@ -308,7 +308,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _errorSubcategory;
+                return errorSubcategory;
             }
         }
 
@@ -320,7 +320,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _errorCode;
+                return errorCode;
             }
         }
 
@@ -332,7 +332,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _helpKeyword;
+                return helpKeyword;
             }
         }
 
@@ -344,33 +344,33 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _hasBeenLogged;
+                return hasBeenLogged;
             }
             internal set
             {
-                _hasBeenLogged = value;
+                hasBeenLogged = value;
             }
         }
 
         #endregion
 
         // the project file that caused this exception
-        private string _file;
+        private string file;
         // the invalid line number in the project
-        private int _lineNumber;
+        private int lineNumber;
         // the invalid column number in the project
-        private int _columnNumber;
+        private int columnNumber;
         // the end of a range of invalid lines in the project
-        private int _endLineNumber;
+        private int endLineNumber;
         // the end of a range of invalid columns in the project
-        private int _endColumnNumber;
+        private int endColumnNumber;
         // the error sub-category that describes the type of this error
-        private string _errorSubcategory;
+        private string errorSubcategory;
         // the error code for the exception message
-        private string _errorCode;
+        private string errorCode;
         // the F1-help keyword for the host IDE
-        private string _helpKeyword;
+        private string helpKeyword;
         // Has this errors been sent to the loggers?
-        private bool _hasBeenLogged = false;
+        private bool hasBeenLogged = false;
     }
 }

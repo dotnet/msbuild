@@ -140,19 +140,19 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
-            _projectFile = projectFile;
+            this.projectFile = projectFile;
 
             if (targetNames == null)
             {
-                _targetNames = String.Empty;
+                this.targetNames = String.Empty;
             }
             else
             {
-                _targetNames = targetNames;
+                this.targetNames = targetNames;
             }
 
-            _properties = properties;
-            _items = items;
+            this.properties = properties;
+            this.items = items;
         }
 
         /// <summary>
@@ -181,8 +181,8 @@ namespace Microsoft.Build.Framework
         )
             : this(message, helpKeyword, projectFile, targetNames, properties, items, eventTimestamp)
         {
-            _parentProjectBuildEventContext = parentBuildEventContext;
-            _projectId = projectId;
+            parentProjectBuildEventContext = parentBuildEventContext;
+            this.projectId = projectId;
         }
 
         // ProjectId is only contained in the project started event.
@@ -190,18 +190,18 @@ namespace Microsoft.Build.Framework
         // used when debugging to determine if two projects with the same name
         // are the same project instance or different instances
         [OptionalField(VersionAdded = 2)]
-        private int _projectId;
+        private int projectId;
 
         public int ProjectId
         {
             get
             {
-                return _projectId;
+                return projectId;
             }
         }
 
         [OptionalField(VersionAdded = 2)]
-        private BuildEventContext _parentProjectBuildEventContext;
+        private BuildEventContext parentProjectBuildEventContext;
 
         /// <summary>
         /// Event context information, where the event was fired from in terms of the build location
@@ -210,14 +210,14 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _parentProjectBuildEventContext;
+                return parentProjectBuildEventContext;
             }
         }
 
         /// <summary>
         /// The name of the project file
         /// </summary>
-        private string _projectFile;
+        private string projectFile;
 
         /// <summary>
         /// Project name
@@ -226,14 +226,14 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectFile;
+                return projectFile;
             }
         }
 
         /// <summary>
         /// Targets that we will build in the project
         /// </summary>
-        private string _targetNames;
+        private string targetNames;
 
         /// <summary>
         /// Targets that we will build in the project
@@ -242,7 +242,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _targetNames;
+                return targetNames;
             }
         }
 
@@ -250,7 +250,7 @@ namespace Microsoft.Build.Framework
         /// Gets the set of global properties used to evaluate this project.
         /// </summary>
         [OptionalField(VersionAdded = 2)]
-        private IDictionary<string, string> _globalProperties;
+        private IDictionary<string, string> globalProperties;
 
         /// <summary>
         /// Gets the set of global properties used to evaluate this project.
@@ -259,17 +259,17 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _globalProperties;
+                return globalProperties;
             }
 
             internal set
             {
-                _globalProperties = value;
+                globalProperties = value;
             }
         }
 
         [OptionalField(VersionAdded = 2)]
-        private string _toolsVersion;
+        private string toolsVersion;
 
         /// <summary>
         /// Gets the tools version used to evaluate this project.
@@ -278,12 +278,12 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _toolsVersion;
+                return toolsVersion;
             }
 
             internal set
             {
-                _toolsVersion = value;
+                toolsVersion = value;
             }
         }
 
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Framework
         // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
         // (b) this event still makes sense when this field is "null"
         [NonSerialized]
-        private IEnumerable _properties;
+        private IEnumerable properties;
 
         /// <summary>
         /// List of properties in this project. This is a live, read-only list.
@@ -308,7 +308,7 @@ namespace Microsoft.Build.Framework
                 // up the live list of properties from the loaded project, which is stored in the configuration as well.
                 // By doing this, we no longer need to transmit properties using this message because they've already
                 // been transmitted as part of the BuildRequestConfiguration.
-                return _properties;
+                return properties;
             }
         }
 
@@ -316,7 +316,7 @@ namespace Microsoft.Build.Framework
         // (a) this event will not be thrown by tasks, so it should not generally cross AppDomain boundaries
         // (b) this event still makes sense when this field is "null"
         [NonSerialized]
-        private IEnumerable _items;
+        private IEnumerable items;
 
         /// <summary>
         /// List of items in this project. This is a live, read-only list.
@@ -332,7 +332,7 @@ namespace Microsoft.Build.Framework
                 // case, this access is to the live list.  For the central logger in the multi-proc case, the main node 
                 // has likely not loaded this project, and therefore the live items would not be available to them, which is 
                 // the same as the current functionality.
-                return _items;
+                return items;
             }
         }
 
@@ -345,38 +345,38 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
-            writer.Write((Int32)_projectId);
+            writer.Write((Int32)projectId);
             #region ParentProjectBuildEventContext
-            if (_parentProjectBuildEventContext == null)
+            if (parentProjectBuildEventContext == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write((Int32)_parentProjectBuildEventContext.NodeId);
-                writer.Write((Int32)_parentProjectBuildEventContext.ProjectContextId);
-                writer.Write((Int32)_parentProjectBuildEventContext.TargetId);
-                writer.Write((Int32)_parentProjectBuildEventContext.TaskId);
-                writer.Write((Int32)_parentProjectBuildEventContext.SubmissionId);
-                writer.Write((Int32)_parentProjectBuildEventContext.ProjectInstanceId);
+                writer.Write((Int32)parentProjectBuildEventContext.NodeId);
+                writer.Write((Int32)parentProjectBuildEventContext.ProjectContextId);
+                writer.Write((Int32)parentProjectBuildEventContext.TargetId);
+                writer.Write((Int32)parentProjectBuildEventContext.TaskId);
+                writer.Write((Int32)parentProjectBuildEventContext.SubmissionId);
+                writer.Write((Int32)parentProjectBuildEventContext.ProjectInstanceId);
             }
             #endregion
             #region ProjectFile
-            if (_projectFile == null)
+            if (projectFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_projectFile);
+                writer.Write(projectFile);
             }
             #endregion
 
             #region TargetNames
             // TargetNames cannot be null as per line 61 in the constructor
-            writer.Write(_targetNames);
+            writer.Write(targetNames);
             #endregion
 
             #region Properties
@@ -416,7 +416,7 @@ namespace Microsoft.Build.Framework
         /// <returns>Null if properties is null, or a list containing one or more of the  properties in the properties enumerator</returns>
         private Dictionary<string, string> GeneratePropertyList()
         {
-            if (_properties == null)
+            if (properties == null)
             {
                 return null;
             }
@@ -424,7 +424,7 @@ namespace Microsoft.Build.Framework
             Dictionary<string, string> propertyList = new Dictionary<string, string>();
 
             // Loop through the properties and add them to the keyvalue pair list
-            foreach (DictionaryEntry property in _properties)
+            foreach (DictionaryEntry property in properties)
             {
                 object propertyKey = property.Key;
                 object propertyValue = property.Value;
@@ -448,11 +448,11 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
-            _projectId = reader.ReadInt32();
+            projectId = reader.ReadInt32();
             #region ParentProjectBuildEventContext
             if (reader.ReadByte() == 0)
             {
-                _parentProjectBuildEventContext = null;
+                parentProjectBuildEventContext = null;
             }
             else
             {
@@ -465,34 +465,34 @@ namespace Microsoft.Build.Framework
                 {
                     int submissionId = reader.ReadInt32();
                     int projectInstanceId = reader.ReadInt32();
-                    _parentProjectBuildEventContext = new BuildEventContext(submissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId);
+                    parentProjectBuildEventContext = new BuildEventContext(submissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId);
                 }
                 else
                 {
-                    _parentProjectBuildEventContext = new BuildEventContext(nodeId, targetId, projectContextId, taskId);
+                    parentProjectBuildEventContext = new BuildEventContext(nodeId, targetId, projectContextId, taskId);
                 }
             }
             #endregion
             #region ProjectFile
             if (reader.ReadByte() == 0)
             {
-                _projectFile = null;
+                projectFile = null;
             }
             else
             {
-                _projectFile = reader.ReadString();
+                projectFile = reader.ReadString();
             }
             #endregion
             #region TargetNames
             // TargetNames cannot be null as per line 61 in the constructor
-            _targetNames = reader.ReadString();
+            targetNames = reader.ReadString();
             #endregion
             #region Properties
 
             // Check to see if properties was null
             if (reader.ReadByte() == 0)
             {
-                _properties = null;
+                properties = null;
             }
             else
             {
@@ -515,7 +515,7 @@ namespace Microsoft.Build.Framework
                     }
                 }
 
-                _properties = dictionaryList;
+                properties = dictionaryList;
             }
 
             #endregion
@@ -526,18 +526,18 @@ namespace Microsoft.Build.Framework
         [OnDeserializing] // Will happen before the object is deserialized
         private void SetDefaultsBeforeSerialization(StreamingContext sc)
         {
-            _projectId = InvalidProjectId;
+            projectId = InvalidProjectId;
             // Don't want to set the default before deserialization is completed to a new event context because
             // that would most likely be a lot of wasted allocations
-            _parentProjectBuildEventContext = null;
+            parentProjectBuildEventContext = null;
         }
 
         [OnDeserialized]
         private void SetDefaultsAfterSerialization(StreamingContext sc)
         {
-            if (_parentProjectBuildEventContext == null)
+            if (parentProjectBuildEventContext == null)
             {
-                _parentProjectBuildEventContext = new BuildEventContext
+                parentProjectBuildEventContext = new BuildEventContext
                                                 (
                                                     BuildEventContext.InvalidNodeId,
                                                     BuildEventContext.InvalidTargetId,

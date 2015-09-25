@@ -48,29 +48,29 @@ namespace Microsoft.Build.Collections
         /// This is necessary to prevent, e.g., someone from reading the comparer (through GetHashCode when setting 
         /// a property, for example) at the same time that someone else is writing to it. 
         /// </summary>
-        private Object _lockObject = new Object();
+        private Object lockObject = new Object();
 
         /// <summary>
         /// String to be constrained. 
         /// If null, comparer is unconstrained.
         /// If empty string, comparer is unconstrained and immutable.
         /// </summary>
-        private string _constraintString;
+        private string constraintString;
 
         /// <summary>
         /// Start of constraint
         /// </summary>
-        private int _startIndex;
+        private int startIndex;
 
         /// <summary>
         /// End of constraint
         /// </summary>
-        private int _endIndex;
+        private int endIndex;
 
         /// <summary>
         /// True if the comparer is immutable; false otherwise.
         /// </summary>
-        private bool _immutable;
+        private bool immutable;
 
         /// <summary>
         /// We need a static constructor to retrieve the running ProcessorArchitecture that way we can
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         private MSBuildNameIgnoreCaseComparer(bool immutable)
         {
-            _immutable = immutable;
+            this.immutable = immutable;
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace Microsoft.Build.Collections
         public T GetValueWithConstraints<T>(IDictionary<string, T> dictionary, string key, int startIndex, int endIndex)
             where T : class
         {
-            if (_immutable)
+            if (immutable)
             {
                 ErrorUtilities.ThrowInternalError("immutable");
             }
@@ -200,11 +200,11 @@ namespace Microsoft.Build.Collections
             }
 
             T returnValue;
-            lock (_lockObject)
+            lock (lockObject)
             {
-                _constraintString = key;
-                _startIndex = startIndex;
-                _endIndex = endIndex;
+                constraintString = key;
+                this.startIndex = startIndex;
+                this.endIndex = endIndex;
 
                 try
                 {
@@ -213,9 +213,9 @@ namespace Microsoft.Build.Collections
                 finally
                 {
                     // Make sure we always reset the constraint
-                    _constraintString = null;
-                    _startIndex = 0;
-                    _endIndex = 0;
+                    constraintString = null;
+                    this.startIndex = 0;
+                    this.endIndex = 0;
                 }
             }
 
@@ -258,7 +258,7 @@ namespace Microsoft.Build.Collections
             int start;
             int lengthToCompare;
 
-            if (_immutable)
+            if (immutable)
             {
                 // by definition we don't have a constraint
                 if (Object.ReferenceEquals(x, y))
@@ -273,12 +273,12 @@ namespace Microsoft.Build.Collections
             }
             else
             {
-                lock (_lockObject)
+                lock (lockObject)
                 {
-                    if (_constraintString != null)
+                    if (constraintString != null)
                     {
-                        bool constraintInX = Object.ReferenceEquals(x, _constraintString);
-                        bool constraintInY = Object.ReferenceEquals(y, _constraintString);
+                        bool constraintInX = Object.ReferenceEquals(x, constraintString);
+                        bool constraintInY = Object.ReferenceEquals(y, constraintString);
 
                         if (!constraintInX && !constraintInY)
                         {
@@ -289,8 +289,8 @@ namespace Microsoft.Build.Collections
                         compareToString = constraintInX ? y : x;
                         constrainedString = constraintInY ? y : x;
 
-                        start = _startIndex;
-                        lengthToCompare = _endIndex - _startIndex + 1;
+                        start = startIndex;
+                        lengthToCompare = endIndex - startIndex + 1;
                     }
                     else
                     {
@@ -337,14 +337,14 @@ namespace Microsoft.Build.Collections
             int start = 0;
             int length = obj.Length;
 
-            if (!_immutable)
+            if (!immutable)
             {
-                lock (_lockObject)
+                lock (lockObject)
                 {
-                    if (_constraintString != null && Object.ReferenceEquals(obj, _constraintString))
+                    if (constraintString != null && Object.ReferenceEquals(obj, constraintString))
                     {
-                        start = _startIndex;
-                        length = _endIndex - _startIndex + 1;
+                        start = startIndex;
+                        length = endIndex - startIndex + 1;
                     }
                 }
             }
@@ -411,7 +411,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void SetConstraintsForUnitTestingOnly(string constraintString, int startIndex, int endIndex)
         {
-            if (_immutable)
+            if (immutable)
             {
                 ErrorUtilities.ThrowInternalError("immutable");
             }
@@ -426,11 +426,11 @@ namespace Microsoft.Build.Collections
                 ErrorUtilities.ThrowInternalError("Invalid end index '{0}' {1} {2}", constraintString, startIndex, endIndex);
             }
 
-            lock (_lockObject)
+            lock (lockObject)
             {
-                _constraintString = constraintString;
-                _startIndex = startIndex;
-                _endIndex = endIndex;
+                this.constraintString = constraintString;
+                this.startIndex = startIndex;
+                this.endIndex = endIndex;
             }
         }
 
@@ -439,16 +439,16 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void RemoveConstraintsForUnitTestingOnly()
         {
-            if (_immutable)
+            if (immutable)
             {
                 ErrorUtilities.ThrowInternalError("immutable");
             }
 
-            lock (_lockObject)
+            lock (lockObject)
             {
-                _constraintString = null;
-                _startIndex = 0;
-                _endIndex = 0;
+                constraintString = null;
+                startIndex = 0;
+                endIndex = 0;
             }
         }
     }
