@@ -1,6 +1,10 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.targets" />
 
+  <PropertyGroup>
+    <CopyNuGetImplementations Condition="'$(IsTestProject)' == 'true'">true</CopyNuGetImplementations>
+  </PropertyGroup>
+  
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="'$(NetCoreBuild)' != 'true'"/>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" Condition="'$(NetCoreBuild)' == 'true'"/>
 
@@ -32,6 +36,21 @@
     <Exec Command="$(NugetRestoreCommand) &quot;$(PackagesConfig)&quot;" />
     <Touch Files="$(RestorePackagesSemaphore)" AlwaysCreate="true" />
   </Target>
+
+  <!-- Debugging support -->
+  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
+    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
+    <TestHost Condition="'$(OS)' == 'Windows_NT'">CoreRun.exe</TestHost>
+    <TestHost Condition="'$(OS)' != 'Windows_NT'">corerun</TestHost>
+    <StartProgram Condition="'$(StartProgram)'==''">$(OutputPath)\$(TestHost)</StartProgram>
+    <StartArguments>msbuild.exe</StartArguments>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(NetCoreBuild)' == 'true' And '$(IsTestProject)'=='true'">
+    <StartArguments>xunit.console.netcore.exe $(TargetFileName)</StartArguments>
+    <StartAction>Program</StartAction>
+  </PropertyGroup>
   
   
 </Project>

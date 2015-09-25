@@ -45,6 +45,7 @@ dlldata.c
 artifacts/
 
 # Nuget v3
+*.nuget.props
 *.nuget.targets
 
 

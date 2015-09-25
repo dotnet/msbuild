@@ -1,9 +1,10 @@
-﻿{
+﻿
+{
   "runtimes": {
-    "win7-x86": { }
+    "win7-x86": {}
   },
   "dependencies": {
-    "xunit": "2.1.0-beta3-*"
+    "xunit": "2.1.0-rc1-build3168"
   },
   "frameworks": {
     "net451": {
@@ -11,7 +12,7 @@
     },
     "net46": {
       "dependencies": {
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213"
       }
     },
     "dnxcore50": {
@@ -22,7 +23,8 @@
         "System.Runtime": "4.0.20",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
         "Microsoft.NETCore.Runtime": "1.0.0",
-        "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
+        "Microsoft.NETCore.TestHost": "1.0.0-beta-23318",
+        "xunit.console.netcore": "1.0.2-prerelease-00096"
       },
       "imports": "portable-net451+win81"
     }
