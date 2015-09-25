@@ -7,9 +7,6 @@ using System;
 using Microsoft.Build.Shared;
 using Xunit;
 
-
-using Microsoft.Build.Shared;
-
 #endregion
 
 namespace Microsoft.Build.UnitTests

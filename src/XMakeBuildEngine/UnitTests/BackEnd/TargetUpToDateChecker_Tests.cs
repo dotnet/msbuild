@@ -12,7 +12,6 @@ using System.Globalization;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using System.Threading;
 using Xunit;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;

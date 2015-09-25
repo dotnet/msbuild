@@ -18,7 +18,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System.IO;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd

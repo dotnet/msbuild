@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
@@ -28,6 +27,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Tasks.UnitTests", "XMakeTasks\UnitTests\Microsoft.Build.Tasks.UnitTests.csproj", "{32126DCE-7484-4E4B-85DA-12378C0F2FC7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Engine.UnitTests", "XMakeBuildEngine\UnitTests\Microsoft.Build.Engine.UnitTests.csproj", "{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Engine.OM.UnitTests", "XMakeBuildEngine\UnitTestsPublicOM\Microsoft.Build.Engine.OM.UnitTests.csproj", "{9D858C8F-8D71-467E-808E-4E4F48DD0A49}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4900B3B8-4310-4D5B-B1F7-2FDF9199765F}"
 	ProjectSection(SolutionItems) = preProject
@@ -449,6 +450,33 @@ Global
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Release-NetCore|Any CPU.ActiveCfg = Release-MONO|Any CPU
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Release-NetCore|x64.ActiveCfg = Release-MONO|Any CPU
 		{D06D5D07-9DFB-4896-B11F-0A8C44F8F971}.Release-NetCore|x86.ActiveCfg = Release-MONO|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|x64.Build.0 = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug|x86.Build.0 = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-MONO|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-MONO|x64.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-MONO|x86.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-NetCore|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-NetCore|x64.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Debug-NetCore|x86.ActiveCfg = Debug|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|Any CPU.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|x64.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Port-Progress|x86.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x64.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x64.Build.0 = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x86.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release|x86.Build.0 = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release-MONO|Any CPU.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release-MONO|x64.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release-MONO|x86.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release-NetCore|Any CPU.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release-NetCore|x64.ActiveCfg = Release|Any CPU
+		{9D858C8F-8D71-467E-808E-4E4F48DD0A49}.Release-NetCore|x86.ActiveCfg = Release|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A0E81B1-9E7A-4F9F-81B2-AB180833F754}.Debug|x64.ActiveCfg = Debug|Any CPU

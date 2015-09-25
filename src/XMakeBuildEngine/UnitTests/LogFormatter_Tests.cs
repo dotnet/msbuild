@@ -10,10 +10,6 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using Xunit;
 
-using Microsoft.Build.BackEnd.Logging;
-
-
-
 namespace Microsoft.Build.UnitTests
 {
     public class LogFormatterTest

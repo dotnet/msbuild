@@ -1195,6 +1195,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verify method throws invalid operation exception.
+        /// </summary>
+        internal static void VerifyAssertThrowsInvalidOperation(Action method)
+        {
+            Assert.Throws<InvalidOperationException>(method);
+        }
+
+        /// <summary>
         /// Verify that the expected content matches the actual content
         /// </summary>
         private static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual)

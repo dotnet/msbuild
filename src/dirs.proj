@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="dir.props" />
 
   <ItemGroup>
@@ -13,7 +13,7 @@
     <Project Include="XMakeCommandLine\UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj" />
     <Project Include="Utilities\UnitTests\Microsoft.Build.Utilities.UnitTests.csproj" />
     <Project Include="XMakeTasks\UnitTests\Microsoft.Build.Tasks.UnitTests.csproj" />
-    <Project Include="XMakeBuildEngine\UnitTests\Microsoft.Build.Engine.UnitTests.csproj" />  
+    <Project Include="XMakeBuildEngine\UnitTests\Microsoft.Build.Engine.UnitTests.csproj" />
   </ItemGroup>
 
   <Import Project="..\dir.targets" />
@@ -24,7 +24,7 @@
     <!-- Explicitly set the OutDir as it is used by the packaging targets -->
     <OutDir>$(BaseOutputPathWithConfig)</OutDir>
   </PropertyGroup>
-  
+
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
   <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />
 

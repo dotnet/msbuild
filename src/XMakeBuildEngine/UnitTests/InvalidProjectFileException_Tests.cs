@@ -8,7 +8,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 #endif
 using Microsoft.Build.Exceptions;
 using System.Text.RegularExpressions;
-using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

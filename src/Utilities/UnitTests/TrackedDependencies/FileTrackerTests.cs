@@ -9,9 +9,7 @@ using System.IO;
 using System.Xml;
 using System.Threading;
 using System.Collections;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;

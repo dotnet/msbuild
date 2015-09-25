@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
 // </copyright>
@@ -14,15 +14,14 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using NUnit.Framework;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
     /// Tests for the ProjectUsingParameterElement class
     /// </summary>
-    [TestFixture]
     public class UsingTaskParameterElement_Tests
     {
         /// <summary>
@@ -54,39 +53,40 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read simple task body
         /// </summary>
-        [Test]
+        [Fact]
         public void ReadParameterWithAllAttributes()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
 
-            Assert.AreEqual("MyParameter", parameter.Name);
-            Assert.AreEqual("System.String", parameter.ParameterType);
-            Assert.AreEqual("true", parameter.Output);
-            Assert.AreEqual("false", parameter.Required);
+            Assert.Equal("MyParameter", parameter.Name);
+            Assert.Equal("System.String", parameter.ParameterType);
+            Assert.Equal("true", parameter.Output);
+            Assert.Equal("false", parameter.Required);
         }
 
         /// <summary>
         /// Read simple task body
         /// </summary>
-        [Test]
+        [Fact]
         public void ReadParameterWithNOAttributes()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentNoAttributesSet);
 
-            Assert.AreEqual("MyParameter", parameter.Name);
-            Assert.AreEqual(typeof(String).FullName, parameter.ParameterType);
-            Assert.AreEqual(bool.FalseString, parameter.Output);
-            Assert.AreEqual(bool.FalseString, parameter.Required);
+            Assert.Equal("MyParameter", parameter.Name);
+            Assert.Equal(typeof(String).FullName, parameter.ParameterType);
+            Assert.Equal(bool.FalseString, parameter.Output);
+            Assert.Equal(bool.FalseString, parameter.Required);
         }
 
         /// <summary>
         /// Read parameter with an invalid attribute
         /// </summary>
-        [Test]
-        [ExpectedException(typeof(InvalidProjectFileException))]
+        [Fact]
         public void ReadInvalidAttribute()
         {
-            string content = @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
@@ -96,134 +96,135 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            Assert.Fail();
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                Assert.True(false);
+            }
+           );
         }
-
         /// <summary>
         /// Set type value
         /// </summary>
-        [Test]
+        [Fact]
         public void SetType()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.ParameterType = "newType";
-            Assert.AreEqual("newType", parameter.ParameterType);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("newType", parameter.ParameterType);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set output value
         /// </summary>
-        [Test]
+        [Fact]
         public void SetOutput()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Output = "output";
-            Assert.AreEqual("output", parameter.Output);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("output", parameter.Output);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set required value
         /// </summary>
-        [Test]
+        [Fact]
         public void SetRequired()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Required = "required";
-            Assert.AreEqual("required", parameter.Required);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal("required", parameter.Required);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set type type to empty
         /// </summary>
-        [Test]
+        [Fact]
         public void SetEmptyType()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.ParameterType = String.Empty;
-            Assert.AreEqual(typeof(String).FullName, parameter.ParameterType);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(typeof(String).FullName, parameter.ParameterType);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set type output to empty
         /// </summary>
-        [Test]
+        [Fact]
         public void SetEmptyOutput()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Output = String.Empty;
-            Assert.AreEqual(bool.FalseString, parameter.Output);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(bool.FalseString, parameter.Output);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set type required to empty
         /// </summary>
-        [Test]
+        [Fact]
         public void SetEmptyRequired()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Required = String.Empty;
-            Assert.AreEqual(bool.FalseString, parameter.Required);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(bool.FalseString, parameter.Required);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set type type to null
         /// </summary>
-        [Test]
+        [Fact]
         public void SetNullType()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.ParameterType = null;
-            Assert.AreEqual(typeof(String).FullName, parameter.ParameterType);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(typeof(String).FullName, parameter.ParameterType);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set type output to null
         /// </summary>
-        [Test]
+        [Fact]
         public void SetNullOutput()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Output = null;
-            Assert.AreEqual(bool.FalseString, parameter.Output);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(bool.FalseString, parameter.Output);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set type required to null
         /// </summary>
-        [Test]
+        [Fact]
         public void SetNullRequired()
         {
             ProjectUsingTaskParameterElement parameter = GetParameterXml(s_contentAllAttributesSet);
             Helpers.ClearDirtyFlag(parameter.ContainingProject);
 
             parameter.Required = null;
-            Assert.AreEqual(bool.FalseString, parameter.Required);
-            Assert.AreEqual(true, parameter.ContainingProject.HasUnsavedChanges);
+            Assert.Equal(bool.FalseString, parameter.Required);
+            Assert.Equal(true, parameter.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
