@@ -1086,7 +1086,8 @@ typedef enum _tagAssemblyComparisonResult
             AssemblyName an1 = new AssemblyName(assemblyIdentity1);
             AssemblyName an2 = new AssemblyName(assemblyIdentity2);
 
-            pfEquivalent = AssemblyName.ReferenceMatchesDefinition(an1, an2);
+            //pfEquivalent = AssemblyName.ReferenceMatchesDefinition(an1, an2);
+            pfEquivalent = RefMatchesDef(an1, an2);
             if (pfEquivalent)
             {
                 pResult = AssemblyComparisonResult.ACR_EquivalentFullMatch;
@@ -1119,7 +1120,7 @@ typedef enum _tagAssemblyComparisonResult
             pResult = pfEquivalent ? AssemblyComparisonResult.ACR_EquivalentFullMatch : AssemblyComparisonResult.ACR_NonEquivalent;
         }
 
-        //  Logic copied from coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
+        //  Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
         private static bool RefMatchesDef(AssemblyName @ref, AssemblyName def)
         {
             var refPkt = @ref.GetPublicKeyToken();
@@ -1130,15 +1131,49 @@ typedef enum _tagAssemblyComparisonResult
                 bool defStrongNamed = defPkt != null && defPkt.Length != 0;
 
                 return CompareRefToDef(@ref, def);
-                
             }
-
-            throw new NotImplementedException();
+            else
+            {
+                return @ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase);
+            }
         }
 
+        //  Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
         private static bool CompareRefToDef(AssemblyName @ref, AssemblyName def)
         {
-            throw new NotImplementedException();
+            if (!@ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            byte[] rpkt = @ref.GetPublicKeyToken();
+            byte[] dpkt = def.GetPublicKeyToken();
+
+            if (rpkt.Length != dpkt.Length)
+            {
+                return false;
+            }
+
+            for (int i=0; i<rpkt.Length; i++)
+            {
+                if (rpkt[i] != dpkt[i])
+                {
+                    return false;
+                }
+            }
+
+            if (@ref.Version != def.Version)
+            {
+                return false;
+            }
+
+            if (@ref.CultureName != null &&
+                @ref.CultureName != def.CultureName)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         internal enum AssemblyComparisonResult

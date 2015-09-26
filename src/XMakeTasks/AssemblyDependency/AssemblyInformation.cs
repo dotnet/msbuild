@@ -12,6 +12,9 @@ using System.Linq;
 using Microsoft.Build.Shared;
 using System.Text;
 using System.Runtime.Versioning;
+using System.Reflection.PortableExecutable;
+using System.Reflection.Metadata;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks
 {
@@ -23,9 +26,11 @@ namespace Microsoft.Build.Tasks
     {
         private AssemblyNameExtension[] _assemblyDependencies = null;
         private string[] _assemblyFiles = null;
+#if FEATURE_ASSEMBLY_LOADFROM
         private IMetaDataDispenser _metadataDispenser = null;
         private IMetaDataAssemblyImport _assemblyImport = null;
         private static Guid s_importerGuid = new Guid(((GuidAttribute)Attribute.GetCustomAttribute(typeof(IMetaDataImport), typeof(GuidAttribute), false)).Value);
+#endif
         private string _sourceFile;
         private FrameworkName _frameworkName;
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
@@ -36,10 +41,12 @@ namespace Microsoft.Build.Tasks
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
         private const int GENMAN_ENUM_TOKEN_BUF_SIZE = 16; // 128 from genman seems too big.
 
+#if FEATURE_ASSEMBLY_LOADFROM
         static AssemblyInformation()
         {
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ReflectionOnlyAssemblyResolve;
         }
+#endif
 
         /// <summary>
         /// Construct an instance for a source file.
@@ -51,6 +58,7 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrowArgumentNull(sourceFile, "sourceFile");
             _sourceFile = sourceFile;
 
+#if FEATURE_ASSEMBLY_LOADFROM
             if (NativeMethodsShared.IsWindows)
             {
                 // Create the metadata dispenser and open scope on the source file.
@@ -61,8 +69,10 @@ namespace Microsoft.Build.Tasks
             {
                 _assembly = Assembly.ReflectionOnlyLoadFrom(sourceFile);
             }
+#endif
         }
 
+#if FEATURE_ASSEMBLY_LOADFROM
         private static Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
             string[] nameParts = args.Name.Split(',');
@@ -99,6 +109,7 @@ namespace Microsoft.Build.Tasks
 
             return assembly;
         }
+#endif
 
         /// <summary>
         /// Get the dependencies.
@@ -249,6 +260,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private FrameworkName GetFrameworkName()
         {
+#if FEATURE_ASSEMBLY_LOADFROM
             if (!NativeMethodsShared.IsWindows)
             {
                 if (String.Equals(Environment.GetEnvironmentVariable("MONO29679"), "1", StringComparison.OrdinalIgnoreCase))
@@ -317,8 +329,103 @@ namespace Microsoft.Build.Tasks
             }
 
             return frameworkAttribute;
+#else
+            using (var stream = File.OpenRead(_sourceFile))
+            using (var peFile = new PEReader(stream))
+            {
+                var metadataReader = peFile.GetMetadataReader();
+
+                var attrs = metadataReader.GetAssemblyDefinition().GetCustomAttributes()
+                    .Select(ah => metadataReader.GetCustomAttribute(ah));
+
+                foreach (var attr in attrs)
+                {
+                    var ctorHandle = attr.Constructor;
+                    if (ctorHandle.Kind != HandleKind.MemberReference)
+                    {
+                        continue;
+                    }
+
+                    var container = metadataReader.GetMemberReference((MemberReferenceHandle)ctorHandle).Parent;
+                    var name = metadataReader.GetTypeReference((TypeReferenceHandle)container).Name;
+                    if (!string.Equals(metadataReader.GetString(name), "TargetFrameworkAttribute"))
+                    {
+                        continue;
+                    }
+
+                    var arguments = GetFixedStringArguments(metadataReader, attr);
+                    if (arguments.Count == 1)
+                    {
+                        return new FrameworkName(arguments[0]);
+                    }
+
+                }
+            }
+            return null;
+#endif
         }
 
+#if !FEATURE_ASSEMBLY_LOADFROM
+        //  This method copied from DNX source: https://github.com/aspnet/dnx/blob/e0726f769aead073af2d8cd9db47b89e1745d574/src/Microsoft.Dnx.Tooling/Utils/LockFileUtils.cs#L385
+        //  System.Reflection.Metadata 1.1 is expected to have an API that helps with this.
+        /// <summary>
+        /// Gets the fixed (required) string arguments of a custom attribute.
+        /// Only attributes that have only fixed string arguments.
+        /// </summary>
+        private static List<string> GetFixedStringArguments(MetadataReader reader, CustomAttribute attribute)
+        {
+            // TODO: Nick Guerrera (Nick.Guerrera@microsoft.com) hacked this method for temporary use.
+            // There is a blob decoder feature in progress but it won't ship in time for our milestone.
+            // Replace this method with the blob decoder feature when later it is availale.
+
+            var signature = reader.GetMemberReference((MemberReferenceHandle)attribute.Constructor).Signature;
+            var signatureReader = reader.GetBlobReader(signature);
+            var valueReader = reader.GetBlobReader(attribute.Value);
+            var arguments = new List<string>();
+
+            var prolog = valueReader.ReadUInt16();
+            if (prolog != 1)
+            {
+                // Invalid custom attribute prolog
+                return arguments;
+            }
+
+            var header = signatureReader.ReadSignatureHeader();
+            if (header.Kind != SignatureKind.Method || header.IsGeneric)
+            {
+                // Invalid custom attribute constructor signature
+                return arguments;
+            }
+
+            int parameterCount;
+            if (!signatureReader.TryReadCompressedInteger(out parameterCount))
+            {
+                // Invalid custom attribute constructor signature
+                return arguments;
+            }
+
+            var returnType = signatureReader.ReadSignatureTypeCode();
+            if (returnType != SignatureTypeCode.Void)
+            {
+                // Invalid custom attribute constructor signature
+                return arguments;
+            }
+
+            for (int i = 0; i < parameterCount; i++)
+            {
+                var signatureTypeCode = signatureReader.ReadSignatureTypeCode();
+                if (signatureTypeCode == SignatureTypeCode.String)
+                {
+                    // Custom attribute constructor must take only strings
+                    arguments.Add(valueReader.ReadSerializedString());
+                }
+            }
+
+            return arguments;
+        }
+#endif
+
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Release interface pointers on Dispose(). 
         /// </summary>
@@ -332,6 +439,7 @@ namespace Microsoft.Build.Tasks
                     Marshal.ReleaseComObject(_metadataDispenser);
             }
         }
+#endif
 
         /// <summary>
         /// Given a path get the CLR runtime version of the file
@@ -381,6 +489,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The array of assembly dependencies.</returns>
         private AssemblyNameExtension[] ImportAssemblyDependencies()
         {
+#if FEATURE_ASSEMBLY_LOADFROM
             ArrayList asmRefs = new ArrayList();
 
             if (!NativeMethodsShared.IsWindows)
@@ -464,6 +573,43 @@ namespace Microsoft.Build.Tasks
             }
 
             return (AssemblyNameExtension[])asmRefs.ToArray(typeof(AssemblyNameExtension));
+#else
+
+            List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
+
+            using (var stream = File.OpenRead(_sourceFile))
+            using (var peFile = new PEReader(stream))
+            {
+                var metadataReader = peFile.GetMetadataReader();
+
+                foreach (var handle in metadataReader.AssemblyReferences)
+                {
+                    var entry = metadataReader.GetAssemblyReference(handle);
+
+                    var assemblyName = new AssemblyName();
+                    assemblyName.Name = metadataReader.GetString(entry.Name);
+                    assemblyName.Version = entry.Version;
+                    assemblyName.CultureName = metadataReader.GetString(entry.Culture);
+                    var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
+                    if (publicKeyOrToken != null)
+                    {
+                        if (publicKeyOrToken.Length <= 8)
+                        {
+                            assemblyName.SetPublicKeyToken(publicKeyOrToken);
+                        }
+                        else
+                        {
+                            assemblyName.SetPublicKey(publicKeyOrToken);
+                        }
+                    }
+                    assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+
+                    ret.Add(new AssemblyNameExtension(assemblyName));
+                }
+            }
+
+            return ret.ToArray();
+#endif
         }
 
         /// <summary>
@@ -477,6 +623,7 @@ namespace Microsoft.Build.Tasks
                 return new string[0];
             }
 
+#if FEATURE_ASSEMBLY_LOADFROM
             ArrayList files = new ArrayList();
             IntPtr fileEnum = IntPtr.Zero;
             UInt32[] fileTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
@@ -514,8 +661,12 @@ namespace Microsoft.Build.Tasks
             }
 
             return (string[])files.ToArray(typeof(string));
+#else
+            return Array.Empty<string>();
+#endif
         }
 
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Allocate assembly metadata structure buffer.
         /// </summary>
@@ -602,6 +753,7 @@ namespace Microsoft.Build.Tasks
                 Marshal.FreeCoTaskMem(asmMetaPtr);
             }
         }
+#endif
     }
 
     /// <summary>

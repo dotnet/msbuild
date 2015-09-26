@@ -9,6 +9,9 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.IO;
+using System.Reflection.PortableExecutable;
+using System.Reflection.Metadata;
 
 namespace Microsoft.Build.Shared
 {
@@ -115,7 +118,6 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// To be used as a delegate. Gets the AssemblyName of the given file.
         /// </summary>
@@ -124,7 +126,7 @@ namespace Microsoft.Build.Shared
         internal static AssemblyNameExtension GetAssemblyNameEx(string path)
         {
             AssemblyName assemblyName = null;
-
+#if FEATURE_ASSEMBLY_LOADFROM
             try
             {
                 assemblyName = AssemblyName.GetAssemblyName(path);
@@ -141,14 +143,28 @@ namespace Microsoft.Build.Shared
             {
                 // Its pretty hard to get here, also since we do a file existence check right before calling this method so it can only happen if the file got deleted between that check and this call.
             }
+#else
+            using (var stream = File.OpenRead(path))
+            using (var peFile = new PEReader(stream))
+            {
+                var metadataReader = peFile.GetMetadataReader();
+                
+                var entry = metadataReader.GetAssemblyDefinition();
 
+                assemblyName = new AssemblyName();
+                assemblyName.Name = metadataReader.GetString(entry.Name);
+                assemblyName.Version = entry.Version;
+                assemblyName.CultureName = metadataReader.GetString(entry.Culture);
+                assemblyName.SetPublicKey(metadataReader.GetBlobBytes(entry.PublicKey));
+                assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
+            }
+#endif
             if (assemblyName == null)
             {
                 return null;
             }
             return new AssemblyNameExtension(assemblyName);
         }
-#endif
 
 #if FEATURE_BINARY_SERIALIZATION
         /// <summary>

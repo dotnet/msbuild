@@ -39,7 +39,9 @@
         <dependency id="System.IO.FileSystem.DriveInfo" version="4.0.0-beta-23302" />
         <dependency id="System.IO.FileSystem.Primitives" version="4.0.0" />
         <dependency id="System.Linq" version="4.0.0" />
+        <dependency id="System.ObjectModel" version="4.0.10" />
         <dependency id="System.Reflection" version="4.0.10" />
+        <dependency id="System.Reflection.Metadata" version="1.0.22" />
         <dependency id="System.Resources.ResourceManager" version="4.0.0" />
         <dependency id="System.Runtime" version="4.0.20" />
         <dependency id="System.Runtime.Extensions" version="4.0.10" />
@@ -51,8 +53,10 @@
         <dependency id="System.Text.RegularExpressions" version="4.0.10" />
         <dependency id="System.Threading" version="4.0.10" />
         <dependency id="System.Threading.Tasks" version="4.0.10" />
+        <dependency id="System.Threading.Tasks.Parallel" version="4.0.0" />
         <dependency id="System.Threading.Thread" version="4.0.0-beta-23123" />
         <dependency id="System.Xml.ReaderWriter" version="4.0.10" />
+        <dependency id="System.Xml.XDocument" version="4.0.10" />
       </group>
     </dependencies>
   </metadata>
