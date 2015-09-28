@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests
         /// Confirms we can find a file on the system path even if the path
         /// to the file is very long.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "This test causes crashes on CoreCLR because it alters MAX_PATH, causing a buffer overflow in SHGetFolderPathW.")]
         public void FindFileOnPathAfterResizingBuffer()
         {
             int savedMaxPath = NativeMethodsShared.MAX_PATH;
