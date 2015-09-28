@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks
                             // we should avoid calling it whenever possible
                             string itemSpecFullFileNamePath = Path.GetFullPath(Files[i].ItemSpec);
 
-                            if (String.Compare(fullRootPath, 0, itemSpecFullFileNamePath, 0, fullRootPath.Length, true, CultureInfo.CurrentCulture) == 0)
+                            if (String.Compare(fullRootPath, 0, itemSpecFullFileNamePath, 0, fullRootPath.Length, StringComparison.CurrentCultureIgnoreCase) == 0)
                             {
                                 // The item spec file is in the "cone" of the RootFolder. Return the relative path from the cone root.
                                 targetPath = itemSpecFullFileNamePath.Substring(fullRootPath.Length);

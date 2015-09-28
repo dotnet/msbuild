@@ -129,7 +129,10 @@ namespace Microsoft.Build.Tasks
                 OutputAppConfigFile.SetMetadata(ItemMetadataNames.targetPath, TargetName);
             }
 
-            doc.Save(OutputAppConfigFile.ItemSpec);
+            using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
+            {
+                doc.Save(stream);
+            }
 
             return !Log.HasLoggedErrors;
         }

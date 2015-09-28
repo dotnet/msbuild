@@ -248,6 +248,7 @@
     <Compile Include="AssemblyDependency\FrameworkPathResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssemblyDependency\GenerateBindingRedirects.cs" />
     <Compile Include="AssemblyDependency\HintPathResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -305,6 +306,9 @@
     <Compile Include="AssemblyResources.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssignTargetPath.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="CallTarget.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -340,23 +344,11 @@
     <Compile Include="FindAppConfigFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="GetFrameworkPath.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
-    <Compile Include="MSBuild.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Message.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="NativeMethods.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TaskExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ToolTaskExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="ErrorFromResources.cs" />
     <Compile Include="ExtractedClassName.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -421,11 +413,27 @@
     <Compile Include="MakeDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Message.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Move.cs" />
+    <Compile Include="MSBuild.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="NativeMethods.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="RedistList.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="RemoveDir.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ResolveCodeAnalysisRuleSet.cs" /> 
+    <Compile Include="TaskExtension.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ToolTaskExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Touch.cs">
@@ -452,7 +460,6 @@
     <Compile Include="AssemblyDependency\GacResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="AssemblyDependency\GenerateBindingRedirects.cs" />
     <Compile Include="AssemblyDependency\GlobalAssemblyCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -461,9 +468,6 @@
     </Compile>
     <Compile Include="AssignLinkMetadata.cs" />
     <Compile Include="AssignProjectConfiguration.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssignTargetPath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AxImp.cs" />
@@ -551,9 +555,6 @@
     <Compile Include="GetAssemblyIdentity.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GetFrameworkPath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="GetFrameworkSDKPath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -582,7 +583,6 @@
     <Compile Include="ResGenDependencies.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
     <Compile Include="ResolveComReference.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
