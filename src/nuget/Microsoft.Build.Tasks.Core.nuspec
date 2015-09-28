@@ -48,6 +48,7 @@
         <dependency id="System.Runtime.Handles" version="4.0.0" />
         <dependency id="System.Runtime.InteropServices" version="4.0.20" />
         <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0-beta-23213" />
+        <dependency id="System.Security.Cryptography.X509Certificates" version="4.0.0-beta-23328" />
         <dependency id="System.Text.Encoding" version="4.0.10" />
         <dependency id="System.Text.Encoding.Extensions" version="4.0.10" />
         <dependency id="System.Text.RegularExpressions" version="4.0.10" />

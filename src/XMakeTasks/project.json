@@ -24,6 +24,7 @@
         "System.Console": "4.0.0-beta-23123",
         "System.Diagnostics.TraceSource": "4.0.0-beta-23019",
         "System.IO.FileSystem.DriveInfo": "4.0.0-beta-23302",
+        "System.Security.Cryptography.X509Certificates": "4.0.0-beta-23328",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
         "System.Xml.XmlDocument": "4.0.0",
         "System.Xml.ReaderWriter": "4.0.10",
