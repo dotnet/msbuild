@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that the engine properly shuts down even if there is an active build request.
         /// This should cause that request to cancel and fail.
         /// </summary>
-        [Fact]
+        [Fact(Skip="Causes a crash on CoreCLR #235")]
         public void TestEngineShutdownWhileActive()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -353,7 +353,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that issuing a simple request results in a successful completion.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "Causes a crash on CoreCLR #235")]
+
         public void TestSimpleBuildScenario()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -380,7 +381,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that a project which has project dependencies can issue and consume them through the
         /// engine interface.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "Causes a crash on CoreCLR #235")]
+
         public void TestBuildWithChildren()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -433,7 +435,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that a project can issue a build request with an unresolved configuration and that if we resolve it,
         /// the build will continue and complete successfully.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "Causes a crash on CoreCLR #235")]
+
         public void TestBuildWithNewConfiguration()
         {
             BuildRequestData data = new BuildRequestData(Path.GetFullPath("TestFile"), new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
