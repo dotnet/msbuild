@@ -166,7 +166,7 @@
 
   <Target Name="Test"
           DependsOnTargets="Build;EnsurePrerequisitesCopied"
-          Condition="'$(IsTestProject)' == 'true' and '$(RunTests)' != 'false'">
+          Condition="'$(IsTestProject)' == 'true'">
     <!-- Exec the console runner instead of using the MSBuild runner,
          because our tests have dependencies on being run as x86. -->
     <!-- Noshadow because our assemblies do not pass the checks for it
