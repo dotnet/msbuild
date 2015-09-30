@@ -817,7 +817,7 @@ namespace Microsoft.Build.UnitTests
                         MSBuildApp.Execute(@"c:\bin\msbuild.exe /logger:FileLogger,Microsoft.Build,Version=11111 " + quotedProjectFileName));
 #else
                 //Should pass
-                Assert.AreEqual(
+                Assert.Equal(
                     MSBuildApp.ExitType.Success,
                     MSBuildApp.Execute(
                         new[]
@@ -828,7 +828,7 @@ namespace Microsoft.Build.UnitTests
                             }));
 
                 //Should fail as we are not changing existing lines
-                Assert.AreEqual(
+                Assert.Equal(
                     MSBuildApp.ExitType.InitializationError,
                     MSBuildApp.Execute(
                         new[]

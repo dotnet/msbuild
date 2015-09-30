@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         ~TaskExecutionHost()
         {
-            Debug.Fail("Unexpected finalization.  Dispose should already have been called.");
+            // Debug.Fail("Unexpected finalization.  Dispose should already have been called.");
             Dispose(false);
         }
 

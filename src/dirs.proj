@@ -3,13 +3,11 @@
 
   <ItemGroup>
     <Project Include="Framework\Microsoft.Build.Framework.csproj" />
-	<Project Include="Utilities\Microsoft.Build.Utilities.csproj" />
-	<Project Include="XMakeBuildEngine\Microsoft.Build.csproj" />
-	<Project Include="XMakeCommandLine\MSBuild.csproj" />
-	<Project Include="XMakeTasks\Microsoft.Build.Tasks.csproj" />
+    <Project Include="Utilities\Microsoft.Build.Utilities.csproj" />
+    <Project Include="XMakeBuildEngine\Microsoft.Build.csproj" />
+    <Project Include="XMakeCommandLine\MSBuild.csproj" />
+    <Project Include="XMakeTasks\Microsoft.Build.Tasks.csproj" />
     <Project Include="Framework\UnitTests\Microsoft.Build.Framework.UnitTests.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Project Include="XMakeCommandLine\UnitTests\Microsoft.Build.CommandLine.UnitTests.csproj" />
     <Project Include="Utilities\UnitTests\Microsoft.Build.Utilities.UnitTests.csproj" />
     <Project Include="XMakeTasks\UnitTests\Microsoft.Build.Tasks.UnitTests.csproj" />

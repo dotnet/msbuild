@@ -15,9 +15,5 @@ if not defined VS140COMNTOOLS (
     exit /b 1
 )
 
-:: Build and copy output to bin\bootstrap
-call "%~dp0BuildAndCopy.cmd"
-
-:: Rebuild with bootstrapped msbuild
-set MSBUILDCUSTOMPATH="%~dp0\bin\Bootstrap\14.1\Bin\MSBuild.exe"
-"%~dp0build.cmd" /t:RebuildAndTest /p:BootstrappedMSBuild=true
+:: Build and run tests on CoreCLR
+"%~dp0build.cmd" /t:RebuildAndTest /p:Configuration=Debug-NetCore
