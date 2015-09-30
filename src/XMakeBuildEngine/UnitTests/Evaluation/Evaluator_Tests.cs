@@ -53,10 +53,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Verify Exist condition used in Import or ImportGroup elements will succeed when in-memory project is available inside projectCollection. 
         /// </summary>
         [Fact]
-        public void VerifyExistsInMemoryProjecs()
+        public void VerifyExistsInMemoryProjects()
         {
-            string fooPath = NativeMethodsShared.IsWindows ? "c:\temp\foo.import" : "/temp/foo.import";
-            string barPath = NativeMethodsShared.IsWindows ? "c:\temp\bar.import" : "/temp/bar.import";
+            string fooPath = NativeMethodsShared.IsWindows ? @"c:\temp\foo.import" : "/temp/foo.import";
+            string barPath = NativeMethodsShared.IsWindows ? @"c:\temp\bar.import" : "/temp/bar.import";
             string projXml = ObjectModelHelpers.CleanupFileContents(@"
                                 <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
                                     <Import Project=""" + fooPath + @""" Condition=""Exists('" + fooPath + @"')""/>
