@@ -88,6 +88,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// Make sure I can define a property with escaped characters and pass it into
         /// a string parameter of a task, in this case the Message task.
@@ -109,6 +110,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
+#endif
 
 #if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
@@ -575,6 +577,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// Do an item transform, where the transform expression contains an unescaped semicolon as well
         /// as an escaped percent sign.
@@ -601,6 +604,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
             logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
         }
+#endif
 
         /// <summary>
         /// Tests that when we add an item and are in a directory with characters in need of escaping, and the 
@@ -694,6 +698,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// If %2A (escaped '*') or %3F (escaped '?') is in an item's Include, it should be treated 
         /// literally, not as a wildcard
@@ -729,6 +734,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 EscapingInProjectsHelper.CleanupWeirdoFiles();
             }
         }
+#endif
 
         /// <summary>
         /// Parity with Orcas: Target names are always unescaped, and in fact, if there are two targets,
@@ -902,6 +908,33 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
     public class FullProjectsUsingMicrosoftCommonTargets
     {
+        private const string SolutionFileContentsWithUnusualCharacters = @"Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2005
+                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Cons.ole;!@(foo)'^(Application1`, `Console;!@(foo)'^(Application1\Cons.ole;!@(foo)'^(Application1.csproj`, `{770F2381-8C39-49E9-8C96-0538FA4349A7}`
+                EndProject
+                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Class;!@(foo)'^(Library1`, `Class;!@(foo)'^(Library1\Class;!@(foo)'^(Library1.csproj`, `{0B4B78CC-C752-43C2-BE9A-319D20216129}`
+                EndProject
+                Global
+	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                Debug|Any CPU = Debug|Any CPU
+		                Release|Any CPU = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.Build.0 = Release|Any CPU
+	                EndGlobalSection
+	                GlobalSection(SolutionProperties) = preSolution
+		                HideSolutionNode = FALSE
+	                EndGlobalSection
+                EndGlobal
+                ";
+
         /// <summary>
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
@@ -960,6 +993,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             logger.AssertLogContains(String.Format("foo -> {0}", Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\a;b'c\ClassLibrary16.dll")));
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
@@ -1027,6 +1061,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
+#endif
 
         /// <summary>
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
@@ -1080,6 +1115,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             log.AssertLogContains(String.Format("foo -> {0}", Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\Debug\Class;Library16.dll")));
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
         /// </summary>
@@ -1141,6 +1177,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
+#endif
 
         /// <summary>
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
@@ -1194,6 +1231,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             log.AssertLogContains(String.Format("foo -> {0}", Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\Debug\Class$(prop)Library16.dll")));
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
         /// </summary>
@@ -1255,6 +1293,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
+#endif
 
         /// <summary>
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
@@ -1308,6 +1347,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             log.AssertLogContains(String.Format("foo -> {0}", Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\Debug\ClassLibrary16.dll")));
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
         /// </summary>
@@ -1369,6 +1409,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
+#endif
 
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
@@ -1386,33 +1427,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------------------------------------------------------
             ObjectModelHelpers.CreateFileInTempProjectDirectory(
                 @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln",
-
-                @"Microsoft Visual Studio Solution File, Format Version 11.00
-                # Visual Studio 2005
-                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Cons.ole;!@(foo)'^(Application1`, `Console;!@(foo)'^(Application1\Cons.ole;!@(foo)'^(Application1.csproj`, `{770F2381-8C39-49E9-8C96-0538FA4349A7}`
-                EndProject
-                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Class;!@(foo)'^(Library1`, `Class;!@(foo)'^(Library1\Class;!@(foo)'^(Library1.csproj`, `{0B4B78CC-C752-43C2-BE9A-319D20216129}`
-                EndProject
-                Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Debug|Any CPU = Debug|Any CPU
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-                EndGlobal
-                ");
+                SolutionFileContentsWithUnusualCharacters);
 
             // ---------------------------------------------------------------------
             // Console;!@(foo)'^(Application1.csproj
@@ -1562,6 +1577,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                     @"Did not find expected file Console;!@(foo)'^(Application1.exe"
         }
 
+#if FEATURE_TASKHOST
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
         /// have all sorts of crazy characters in their name. There
@@ -1583,33 +1599,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------------------------------------------------------
                 ObjectModelHelpers.CreateFileInTempProjectDirectory(
                     @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln",
-
-                    @"Microsoft Visual Studio Solution File, Format Version 11.00
-                # Visual Studio 2005
-                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Cons.ole;!@(foo)'^(Application1`, `Console;!@(foo)'^(Application1\Cons.ole;!@(foo)'^(Application1.csproj`, `{770F2381-8C39-49E9-8C96-0538FA4349A7}`
-                EndProject
-                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Class;!@(foo)'^(Library1`, `Class;!@(foo)'^(Library1\Class;!@(foo)'^(Library1.csproj`, `{0B4B78CC-C752-43C2-BE9A-319D20216129}`
-                EndProject
-                Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Debug|Any CPU = Debug|Any CPU
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {770F2381-8C39-49E9-8C96-0538FA4349A7}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {0B4B78CC-C752-43C2-BE9A-319D20216129}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-                EndGlobal
-                ");
+                    SolutionFileContentsWithUnusualCharacters);
 
                 // ---------------------------------------------------------------------
                 // Console;!@(foo)'^(Application1.csproj
@@ -1763,6 +1753,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
+#endif
     }
 
     internal class EscapingInProjectsHelper
