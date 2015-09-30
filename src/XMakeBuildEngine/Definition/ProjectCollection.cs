@@ -57,7 +57,18 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Read toolset information from the current exe path
         /// </summary>
-        Local = 4
+        Local = 4,
+
+        Default = None
+#if FEATURE_SYSTEM_CONFIGURATION
+                | ConfigurationFile
+#endif
+#if FEATURE_REGISTRY_TOOLSETS
+                | Registry
+#endif
+#if !FEATURE_SYSTEM_CONFIGURATION && !FEATURE_REGISTRY_TOOLSETS
+                | Local
+#endif
     }
 
     /// <summary>
@@ -222,7 +233,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="globalProperties">The default global properties to use. May be null.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties)
-            : this(globalProperties, null, ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry)
+            : this(globalProperties, null, ToolsetDefinitionLocations.Default)
         {
         }
 
@@ -1364,7 +1375,7 @@ namespace Microsoft.Build.Evaluation
             GC.SuppressFinalize(this);
         }
 
-        #region IBuildComponent Members
+#region IBuildComponent Members
 
         /// <summary>
         /// Initializes the component with the component host.
@@ -1383,7 +1394,7 @@ namespace Microsoft.Build.Evaluation
             _host = null;
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Unloads a project XML root element from the cache entirely, if it is not
@@ -1791,7 +1802,7 @@ namespace Microsoft.Build.Evaluation
                 _originalLogger = originalLogger;
             }
 
-            #region IEventSource Members
+#region IEventSource Members
 
             /// <summary>
             /// The Message logging event
@@ -1863,9 +1874,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public event AnyEventHandler AnyEventRaised;
 
-            #endregion
+#endregion
 
-            #region ILogger Members
+#region ILogger Members
 
             /// <summary>
             /// The logger verbosity
@@ -1957,7 +1968,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            #endregion
+#endregion
 
             /// <summary>
             /// Registers for all of the events on the specified event source.

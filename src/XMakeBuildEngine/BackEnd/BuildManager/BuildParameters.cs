@@ -198,7 +198,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The location of the toolset definitions.
         /// </summary>
-        private ToolsetDefinitionLocations _toolsetDefinitionLocations = ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry;
+        private ToolsetDefinitionLocations _toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
 
         /// <summary>
         /// The UI culture.

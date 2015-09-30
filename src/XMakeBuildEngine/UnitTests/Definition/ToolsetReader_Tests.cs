@@ -1045,7 +1045,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             // Verifications
@@ -1388,7 +1388,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal(1, values.Count);
@@ -2002,7 +2002,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal(1, values.Count);
@@ -2048,7 +2048,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal(1, values.Count);
@@ -2098,7 +2098,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal(1, values.Count);
@@ -2183,7 +2183,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal(1, values.Count);
@@ -2215,7 +2215,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal(1, values.Count);
@@ -2240,7 +2240,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             // Should either be the last-ditch 2.0 toolset, or if 2.0 is not installed, then the last-last-ditch of 4.0
@@ -2283,7 +2283,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                            new ProjectCollection().EnvironmentProperties,
                                new PropertyDictionary<ProjectPropertyInstance>(),
-                               ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                               ToolsetDefinitionLocations.Default
                            );
             }
            );
@@ -2324,7 +2324,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                                new PropertyDictionary<ProjectPropertyInstance>(),
-                                                               ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                               ToolsetDefinitionLocations.Default
                                                            );
             });
         }
@@ -2375,7 +2375,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal("5.0", defaultToolsVersion);
@@ -2420,7 +2420,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal("4.0", defaultToolsVersion);
@@ -2470,7 +2470,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal("4.0", defaultToolsVersion);
@@ -2519,7 +2519,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal("13.0", values["4.0"].DefaultOverrideToolsVersion);
@@ -2559,7 +2559,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
 
@@ -2601,7 +2601,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
 
@@ -2643,7 +2643,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal("5.0", defaultToolsVersion);
@@ -2685,7 +2685,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             string expectedDefault = "2.0";
@@ -2733,7 +2733,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new ProjectCollection().GlobalPropertiesCollection,
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal("v1", values["4.0"].Properties["p1"].EvaluatedValue);
@@ -2783,7 +2783,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            new ProjectCollection().EnvironmentProperties,
                                                            new ProjectCollection().GlobalPropertiesCollection,
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal("Microsoft.NET", values["4.0"].Properties["p1"].EvaluatedValue);
@@ -2835,7 +2835,7 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
                                                            e.EnvironmentProperties,
                                                            e.GlobalPropertiesCollection,
-                                                           ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
+                                                           ToolsetDefinitionLocations.Default
                                                        );
 
             Assert.Equal("gv1", values["4.0"].Properties["p1"].EvaluatedValue);
