@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks
         /// The reader is positioned on a &lt;bindingRedirect&gt; element--read it.
         /// </summary>
         /// <param name="reader"></param>
-        internal void Read(XmlTextReader reader)
+        internal void Read(XmlReader reader)
         {
             string oldVersion = reader.GetAttribute("oldVersion");
 

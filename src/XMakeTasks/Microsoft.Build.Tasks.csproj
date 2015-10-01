@@ -78,6 +78,9 @@
       <Link>Constants.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ConvertToAbsolutePath.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>ExtensionFoldersRegistryKey.cs</Link>
@@ -197,15 +200,78 @@
     <Compile Include="..\Shared\LanguageParser\tokenEnumerator.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Message.cs">
+    <Compile Include="AppConfig\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="TaskExtension.cs">
+    <Compile Include="AssemblyDependency\AssemblyNameReference.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssemblyDependency\AssemblyNameReferenceAscendingVersionComparer.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\AssemblyResolution.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\AssemblyResolutionConstants.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\BadImageReferenceException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\ConflictLossReason.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\CopyLocalState.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\DependencyResolutionException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\InstalledAssemblies.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\InvalidReferenceAssemblyNameException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\NoMatchReason.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\Reference.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\ReferenceResolutionException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\ReferenceTable.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\ResolutionSearchLocation.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\Resolver.cs">
+      <SubType>Code</SubType>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\ResolveAssemblyReference.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\TaskItemSpecFilenameComparer.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\UnificationReason.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\UnificationVersion.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\UnifiedAssemblyName.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyDependency\WarnOrErrorOnTargetArchitectureMismatchBehavior.cs" />
     <Compile Include="AssemblyInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssemblyRemapping.cs" />
     <Compile Include="AssemblyResources.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -241,10 +307,20 @@
     <Compile Include="Exec.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="FindAppConfigFile.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="MSBuild.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Message.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="NativeMethods.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="TaskExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ToolTaskExtension.cs">
@@ -315,6 +391,9 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Move.cs" />
+    <Compile Include="RedistList.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="RemoveDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -336,9 +415,6 @@
     <Compile Include="AppDomainIsolatedTaskExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="AppConfig\*.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="AspNetCompiler.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -351,31 +427,7 @@
     <Compile Include="AssemblyDependency\AssemblyInformation.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="AssemblyDependency\AssemblyNameReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyNameReferenceAscendingVersionComparer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyResolution.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyResolutionConstants.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\BadImageReferenceException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="AssemblyDependency\CandidateAssemblyFilesResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ConflictLossReason.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\CopyLocalState.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\DependencyResolutionException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\DirectoryResolver.cs">
@@ -397,57 +449,15 @@
     <Compile Include="AssemblyDependency\HintPathResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="AssemblyDependency\InstalledAssemblies.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\InvalidReferenceAssemblyNameException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\NoMatchReason.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="AssemblyDependency\RawFilenameResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="AssemblyDependency\Reference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ReferenceResolutionException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ReferenceTable.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ResolutionSearchLocation.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ResolveAssemblyReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\Resolver.cs">
-      <SubType>Code</SubType>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\TaskItemSpecFilenameComparer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\UnificationReason.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\UnificationVersion.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\UnifiedAssemblyName.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\WarnOrErrorOnTargetArchitectureMismatchBehavior.cs" />
     <Compile Include="AssemblyFolder.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyRegistrationCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="AssemblyRemapping.cs" />
     <Compile Include="AssignLinkMetadata.cs" />
     <Compile Include="AssignProjectConfiguration.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -488,9 +498,6 @@
     <Compile Include="ComReferenceWrapperInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ConvertToAbsolutePath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="CreateCSharpManifestResourceName.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -516,9 +523,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="DependencyFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FindAppConfigFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FindInvalidProjectReferences.cs" />
@@ -553,7 +557,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GetInstalledSDKLocations.cs" />
-    <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="GetSDKReferenceFiles.cs" />
     <Compile Include="IComReferenceResolver.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -570,9 +573,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="PiaReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RedistList.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="RegisterAssembly.cs">

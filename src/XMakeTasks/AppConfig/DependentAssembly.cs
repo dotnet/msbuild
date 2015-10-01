@@ -33,7 +33,11 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
+#if FEATURE_ASSEMBLYNAME_CLONE
                 _partialAssemblyName = (AssemblyName)value.Clone();
+#else
+                _partialAssemblyName = new AssemblyName(value.FullName);
+#endif
                 _partialAssemblyName.Version = null;
             }
             get
@@ -42,7 +46,11 @@ namespace Microsoft.Build.Tasks
                 {
                     return null;
                 }
+#if FEATURE_ASSEMBLYNAME_CLONE
                 return (AssemblyName)_partialAssemblyName.Clone();
+#else
+                return new AssemblyName(_partialAssemblyName.FullName);
+#endif
             }
         }
 
@@ -50,7 +58,7 @@ namespace Microsoft.Build.Tasks
         /// The reader is positioned on a &lt;dependentassembly&gt; element--read it.
         /// </summary>
         /// <param name="reader"></param>
-        internal void Read(XmlTextReader reader)
+        internal void Read(XmlReader reader)
         {
             ArrayList redirects = new ArrayList();
 

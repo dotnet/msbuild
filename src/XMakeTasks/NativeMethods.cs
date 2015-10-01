@@ -999,6 +999,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
         internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, StringBuilder cachePath, ref int pcchPath);
+#endif
 
         /*------------------------------------------------------------------------------
         CompareAssemblyIdentity
@@ -1069,7 +1070,8 @@ typedef enum _tagAssemblyComparisonResult
             out bool pfEquivalent,
             out AssemblyComparisonResult pResult)
         {
-            if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
+#if FEATURE_FUSION_COMPAREASSEMBLYIDENTITY
+            if (NativeMethodsShared.IsWindows)
             {
                 CompareAssemblyIdentityWindows(
                     assemblyIdentity1,
@@ -1079,6 +1081,7 @@ typedef enum _tagAssemblyComparisonResult
                     out pfEquivalent,
                     out pResult);
             }
+#endif
 
             AssemblyName an1 = new AssemblyName(assemblyIdentity1);
             AssemblyName an2 = new AssemblyName(assemblyIdentity2);
@@ -1090,7 +1093,7 @@ typedef enum _tagAssemblyComparisonResult
                 return;
             }
 
-            if (!an1.Name.Equals(an2.Name, StringComparison.InvariantCultureIgnoreCase))
+            if (!an1.Name.Equals(an2.Name, StringComparison.OrdinalIgnoreCase))
             {
                 pResult = AssemblyComparisonResult.ACR_NonEquivalent;
                 pfEquivalent = false;
@@ -1116,6 +1119,28 @@ typedef enum _tagAssemblyComparisonResult
             pResult = pfEquivalent ? AssemblyComparisonResult.ACR_EquivalentFullMatch : AssemblyComparisonResult.ACR_NonEquivalent;
         }
 
+        //  Logic copied from coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
+        private static bool RefMatchesDef(AssemblyName @ref, AssemblyName def)
+        {
+            var refPkt = @ref.GetPublicKeyToken();
+            bool refStrongNamed = refPkt != null && refPkt.Length != 0;
+            if (refStrongNamed)
+            {
+                var defPkt = def.GetPublicKeyToken();
+                bool defStrongNamed = defPkt != null && defPkt.Length != 0;
+
+                return CompareRefToDef(@ref, def);
+                
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private static bool CompareRefToDef(AssemblyName @ref, AssemblyName def)
+        {
+            throw new NotImplementedException();
+        }
+
         internal enum AssemblyComparisonResult
         {
             ACR_Unknown,                    // Unknown 
@@ -1132,7 +1157,6 @@ typedef enum _tagAssemblyComparisonResult
             ACR_EquivalentPartialFXUnified,
             ACR_NonEquivalentPartialVersion
         }
-#endif
 
         //------------------------------------------------------------------------------
         // PFXImportCertStore

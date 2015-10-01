@@ -35,12 +35,13 @@ namespace Microsoft.Build.Tasks
         {
         }
 
-
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Implement required constructors for serialization
         /// </summary>
         private ReferenceResolutionException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
+#endif
     }
 }

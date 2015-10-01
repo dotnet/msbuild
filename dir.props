@@ -178,6 +178,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_FUSION_COMPAREASSEMBLYIDENTITY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GAC</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HANDLE_SAFEWAITHANDLE</DefineConstants>

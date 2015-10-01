@@ -196,6 +196,7 @@ namespace Microsoft.Build.Tasks
                     monikerWithNoProfile = new FrameworkNameVersioning(moniker.Identifier, moniker.Version);
                 }
 
+#if FEATURE_GAC
                 // This is a very specific "hack" to ensure that when we're targeting certain .NET Framework versions that
                 // WPF gets to rely on .NET FX 3.5 SP1 being installed on the build machine.
                 // This only needs to occur when we are targeting a .NET FX prior to v4.0
@@ -218,6 +219,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled", TargetFrameworkMoniker);
                     }
                 }
+#endif
             }
             catch (ArgumentException e)
             {
