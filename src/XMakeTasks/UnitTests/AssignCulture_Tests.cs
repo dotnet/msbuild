@@ -35,28 +35,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*
-         * Method:   LooksLikeCultureButIsnt
-         *
-         * Not everything that looks like a culture, really is.
-         * Only a specific set of culture ids should be matched.
-         */
-        [Fact]
-        public void LooksLikeCultureButIsnt()
-        {
-            AssignCulture t = new AssignCulture();
-            t.BuildEngine = new MockEngine();
-            ITaskItem i = new TaskItem("MyResource.yy.resx");
-            t.Files = new ITaskItem[] { i };
-            t.Execute();
-
-            Assert.Equal(1, t.AssignedFiles.Length);
-            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
-            Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.Equal("MyResource.yy.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.Equal("MyResource.yy.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
-        }
-
-        /*
         * Method:   CultureAttributePrecedence
         *
         * Any pre-existing Culture attribute on the item is to be ignored
