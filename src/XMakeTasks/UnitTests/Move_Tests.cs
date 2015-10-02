@@ -497,7 +497,7 @@ namespace Microsoft.Build.UnitTests
         {
             Move move = new Move();
             move.BuildEngine = new MockEngine();
-            move.SourceFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
+            move.SourceFiles = new ITaskItem[] { new TaskItem("source") };
 
             Assert.Equal(false, move.Execute());
             ((MockEngine)move.BuildEngine).AssertLogContains("MSB3679");
@@ -511,7 +511,7 @@ namespace Microsoft.Build.UnitTests
         {
             Move move = new Move();
             move.BuildEngine = new MockEngine();
-            move.SourceFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
+            move.SourceFiles = new ITaskItem[] { new TaskItem("source") };
             move.DestinationFiles = new ITaskItem[] { new TaskItem("x") };
             move.DestinationFolder = new TaskItem(Directory.GetCurrentDirectory());
 
@@ -527,7 +527,7 @@ namespace Microsoft.Build.UnitTests
         {
             Move move = new Move();
             move.BuildEngine = new MockEngine();
-            move.SourceFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
+            move.SourceFiles = new ITaskItem[] { new TaskItem("source") };
             move.DestinationFiles = new ITaskItem[] { new TaskItem(Directory.GetCurrentDirectory()) };
 
             Assert.Equal(false, move.Execute());
@@ -542,7 +542,7 @@ namespace Microsoft.Build.UnitTests
         {
             Move move = new Move();
             move.BuildEngine = new MockEngine();
-            move.DestinationFiles = new ITaskItem[] { new TaskItem(Assembly.GetExecutingAssembly().Location) };
+            move.DestinationFiles = new ITaskItem[] { new TaskItem("destination") };
             move.SourceFiles = new ITaskItem[] { new TaskItem(Directory.GetCurrentDirectory()) };
 
             Assert.Equal(false, move.Execute());
