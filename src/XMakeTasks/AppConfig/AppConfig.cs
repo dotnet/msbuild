@@ -24,27 +24,46 @@ namespace Microsoft.Build.Tasks
         /// <param name="appConfigFile"></param>
         internal void Load(string appConfigFile)
         {
-            XmlTextReader reader = null;
+            XmlReader reader = null;
             try
             {
-                reader = new XmlTextReader(appConfigFile);
-                reader.DtdProcessing = DtdProcessing.Ignore;
+                var readerSettings = new XmlReaderSettings();
+                readerSettings.DtdProcessing = DtdProcessing.Ignore;
+                reader = XmlReader.Create(appConfigFile, readerSettings);
                 Read(reader);
             }
             catch (XmlException e)
             {
-                throw new AppConfigException(e.Message, appConfigFile, (reader != null ? reader.LineNumber : 0), (reader != null ? reader.LinePosition : 0), e);
+                int lineNumber = 0;
+                int linePosition = 0;
+
+                if (reader != null && reader is IXmlLineInfo)
+                {
+                    lineNumber = ((IXmlLineInfo)reader).LineNumber;
+                    linePosition = ((IXmlLineInfo)reader).LinePosition;
+                }
+
+                throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
             }
             catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
             {
                 if (ExceptionHandling.NotExpectedException(e))
                     throw;
 
-                throw new AppConfigException(e.Message, appConfigFile, (reader != null ? reader.LineNumber : 0), (reader != null ? reader.LinePosition : 0), e);
+                int lineNumber = 0;
+                int linePosition = 0;
+
+                if (reader != null && reader is IXmlLineInfo)
+                {
+                    lineNumber = ((IXmlLineInfo)reader).LineNumber;
+                    linePosition = ((IXmlLineInfo)reader).LinePosition;
+                }
+
+                throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
             }
             finally
             {
-                if (reader != null) reader.Close();
+                if (reader != null) reader.Dispose();
             }
         }
 
@@ -52,7 +71,7 @@ namespace Microsoft.Build.Tasks
         /// Read the .config from an XmlReader
         /// </summary>
         /// <param name="reader"></param>
-        internal void Read(XmlTextReader reader)
+        internal void Read(XmlReader reader)
         {
             // Read the app.config XML
             while (reader.Read())

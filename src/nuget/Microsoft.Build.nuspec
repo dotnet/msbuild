@@ -30,6 +30,7 @@
         <dependency id="System.Collections.Concurrent" version="4.0.10" />
         <dependency id="System.Collections.NonGeneric" version="4.0.0" />
         <dependency id="System.Console" version="4.0.0-beta-23123" />
+        <dependency id="System.Diagnostics.Contracts" version="4.0.0" />
         <dependency id="System.Diagnostics.Debug" version="4.0.10" />
         <dependency id="System.Diagnostics.FileVersionInfo" version="4.0.0-beta-23123" />
         <dependency id="System.Diagnostics.Process" version="4.0.0-beta-23123" />
@@ -44,6 +45,8 @@
         <dependency id="System.ObjectModel" version="4.0.10" />
         <dependency id="System.Reflection" version="4.0.10" />
         <dependency id="System.Reflection.Extensions" version="4.0.0" />
+        <dependency id="System.Reflection.Metadata" version="1.1.0-alpha-00014" />
+        <dependency id="System.Reflection.Primitives" version="4.0.0" />
         <dependency id="System.Reflection.TypeExtensions" version="4.0.0" />
         <dependency id="System.Resources.ResourceManager" version="4.0.0" />
         <dependency id="System.Runtime" version="4.0.20" />

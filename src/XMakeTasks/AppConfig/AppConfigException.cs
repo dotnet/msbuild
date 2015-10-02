@@ -10,7 +10,12 @@ namespace Microsoft.Build.Tasks
     /// An exception thrown while parsing through an app.config.
     /// </summary>
     [Serializable]
-    internal class AppConfigException : System.ApplicationException
+    internal class AppConfigException :
+#if FEATURE_VARIOUS_EXCEPTIONS
+        System.ApplicationException
+#else
+        Exception
+#endif
     {
         /// <summary>
         /// The name of the app.config file.
@@ -65,11 +70,13 @@ namespace Microsoft.Build.Tasks
             _column = column;
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Construct the exception.
         /// </summary>
         protected AppConfigException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
+#endif
     }
 }

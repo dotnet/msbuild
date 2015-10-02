@@ -10,7 +10,9 @@ using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if FEATURE_PFX_SIGNING
 using Microsoft.Runtime.Hosting;
+#endif
 
 namespace Microsoft.Build.Tasks
 {
@@ -159,6 +161,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
+#if FEATURE_PFX_SIGNING
                         pfxSuccess = false;
                         // it is .pfx file. It is being imported into key container with name = "VS_KEY_<MD5 check sum of the encrypted file>"
                         System.IO.FileStream fs = null;
@@ -219,6 +222,10 @@ namespace Microsoft.Build.Tasks
                                 fs.Close();
                             }
                         }
+#else
+                        Log.LogError("PFX signing not supported on .NET Core");
+                        pfxSuccess = false;
+#endif
                     }
                 }
             }
@@ -247,7 +254,11 @@ namespace Microsoft.Build.Tasks
                 }
                 finally
                 {
+#if FEATURE_PFX_SIGNING
                     personalStore.Close();
+#else
+                    personalStore.Dispose();
+#endif
                 }
                 if (!certSuccess)
                 {
@@ -257,6 +268,7 @@ namespace Microsoft.Build.Tasks
 
             if (!string.IsNullOrEmpty(CertificateFile) && !certInStore)
             {
+#if FEATURE_PFX_SIGNING
                 // if the cert isn't on disk, we can't import it
                 if (!File.Exists(CertificateFile))
                 {
@@ -318,6 +330,9 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
+#else
+                Log.LogError("Certificate signing not supported on .NET Core");
+#endif
             }
             else if (!certInStore && !string.IsNullOrEmpty(CertificateFile) && !string.IsNullOrEmpty(CertificateThumbprint))
             {

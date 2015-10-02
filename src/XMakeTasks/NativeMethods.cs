@@ -999,6 +999,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
         internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, StringBuilder cachePath, ref int pcchPath);
+#endif
 
         /*------------------------------------------------------------------------------
         CompareAssemblyIdentity
@@ -1069,7 +1070,8 @@ typedef enum _tagAssemblyComparisonResult
             out bool pfEquivalent,
             out AssemblyComparisonResult pResult)
         {
-            if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
+#if FEATURE_FUSION_COMPAREASSEMBLYIDENTITY
+            if (NativeMethodsShared.IsWindows)
             {
                 CompareAssemblyIdentityWindows(
                     assemblyIdentity1,
@@ -1079,18 +1081,20 @@ typedef enum _tagAssemblyComparisonResult
                     out pfEquivalent,
                     out pResult);
             }
+#endif
 
             AssemblyName an1 = new AssemblyName(assemblyIdentity1);
             AssemblyName an2 = new AssemblyName(assemblyIdentity2);
 
-            pfEquivalent = AssemblyName.ReferenceMatchesDefinition(an1, an2);
+            //pfEquivalent = AssemblyName.ReferenceMatchesDefinition(an1, an2);
+            pfEquivalent = RefMatchesDef(an1, an2);
             if (pfEquivalent)
             {
                 pResult = AssemblyComparisonResult.ACR_EquivalentFullMatch;
                 return;
             }
 
-            if (!an1.Name.Equals(an2.Name, StringComparison.InvariantCultureIgnoreCase))
+            if (!an1.Name.Equals(an2.Name, StringComparison.OrdinalIgnoreCase))
             {
                 pResult = AssemblyComparisonResult.ACR_NonEquivalent;
                 pfEquivalent = false;
@@ -1116,6 +1120,62 @@ typedef enum _tagAssemblyComparisonResult
             pResult = pfEquivalent ? AssemblyComparisonResult.ACR_EquivalentFullMatch : AssemblyComparisonResult.ACR_NonEquivalent;
         }
 
+        //  Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
+        private static bool RefMatchesDef(AssemblyName @ref, AssemblyName def)
+        {
+            var refPkt = @ref.GetPublicKeyToken();
+            bool refStrongNamed = refPkt != null && refPkt.Length != 0;
+            if (refStrongNamed)
+            {
+                var defPkt = def.GetPublicKeyToken();
+                bool defStrongNamed = defPkt != null && defPkt.Length != 0;
+
+                return CompareRefToDef(@ref, def);
+            }
+            else
+            {
+                return @ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        //  Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
+        private static bool CompareRefToDef(AssemblyName @ref, AssemblyName def)
+        {
+            if (!@ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            byte[] rpkt = @ref.GetPublicKeyToken();
+            byte[] dpkt = def.GetPublicKeyToken();
+
+            if (rpkt.Length != dpkt.Length)
+            {
+                return false;
+            }
+
+            for (int i=0; i<rpkt.Length; i++)
+            {
+                if (rpkt[i] != dpkt[i])
+                {
+                    return false;
+                }
+            }
+
+            if (@ref.Version != def.Version)
+            {
+                return false;
+            }
+
+            if (@ref.CultureName != null &&
+                @ref.CultureName != def.CultureName)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         internal enum AssemblyComparisonResult
         {
             ACR_Unknown,                    // Unknown 
@@ -1132,7 +1192,6 @@ typedef enum _tagAssemblyComparisonResult
             ACR_EquivalentPartialFXUnified,
             ACR_NonEquivalentPartialVersion
         }
-#endif
 
         //------------------------------------------------------------------------------
         // PFXImportCertStore

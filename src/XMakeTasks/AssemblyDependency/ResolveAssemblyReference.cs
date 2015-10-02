@@ -41,10 +41,13 @@ namespace Microsoft.Build.Tasks
         /// <returns>String array of redist or subset lists</returns>
         private delegate string[] GetListPath(string targetFrameworkDirectory);
 
+
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Cache of system state information, used to optimize performance.
         /// </summary>
         private SystemState _cache = null;
+#endif
 
         /// <summary>
         /// Construct
@@ -1812,6 +1815,7 @@ namespace Microsoft.Build.Tasks
             }
         }
         #endregion
+#if FEATURE_BINARY_SERIALIZATION
         #region StateFile
         /// <summary>
         /// Reads the state file (if present) into the cache.
@@ -1838,6 +1842,7 @@ namespace Microsoft.Build.Tasks
             }
         }
         #endregion
+#endif
         #region App.config
         /// <summary>
         /// Read the app.config and get any assembly remappings from it.
@@ -2040,6 +2045,7 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
+#if FEATURE_BINARY_SERIALIZATION
                     // Load any prior saved state.
                     ReadStateFile();
                     _cache.SetGetLastWriteTime(getLastWriteTime);
@@ -2051,6 +2057,7 @@ namespace Microsoft.Build.Tasks
                     fileExists = _cache.CacheDelegate(fileExists);
                     getDirectories = _cache.CacheDelegate(getDirectories);
                     getRuntimeVersion = _cache.CacheDelegate(getRuntimeVersion);
+#endif
 
                     _projectTargetFramework = FrameworkVersionFromString(_projectTargetFrameworkAsString);
 
@@ -2259,7 +2266,9 @@ namespace Microsoft.Build.Tasks
 
                     this.DependsOnSystemRuntime = useSystemRuntime.ToString();
 
+#if FEATURE_BINARY_SERIALIZATION
                     WriteStateFile();
+#endif
 
                     // Save the new state out and put into the file exists if it is actually on disk.
                     if (_stateFile != null && fileExists(_stateFile))
@@ -2878,7 +2887,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private string GetAssemblyPathInGac(AssemblyNameExtension assemblyName, SystemProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists, bool fullFusionName, bool specificVersion)
         {
+#if FEATURE_GAC
             return GlobalAssemblyCache.GetLocation(BuildEngine as IBuildEngine4, assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, null, null, specificVersion /* this value does not matter if we are passing a full fusion name*/);
+#else
+            return string.Empty;
+#endif
         }
 
         /// <summary>

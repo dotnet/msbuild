@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
         /// The reader is positioned on a &lt;runtime&gt; element--read it.
         /// </summary>
         /// <param name="reader"></param>
-        internal void Read(XmlTextReader reader)
+        internal void Read(XmlReader reader)
         {
             while (reader.Read())
             {

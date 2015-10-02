@@ -15,6 +15,7 @@
         "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23123",
         "System.Diagnostics.Process": "4.0.0-beta-23123",
         "System.Diagnostics.TraceSource": "4.0.0-beta-23019",
+        "System.Reflection.Metadata": "1.1.0-alpha-00014",
         "System.Threading.Thread": "4.0.0-beta-23123",
         "System.Xml.XmlDocument": "4.0.0",
         "System.Xml.XPath.XmlDocument": "4.0.0",

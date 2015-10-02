@@ -1075,7 +1075,11 @@ namespace Microsoft.Build.Tasks
                 string name = preUnificationAssemblyName.Name;
                 // First, unify the assembly name so that we're dealing with the right version.
                 // Not AssemblyNameExtension because we're going to write to it.
+#if FEATURE_ASSEMBLYNAME_CLONE
                 AssemblyNameExtension dependentAssembly = new AssemblyNameExtension((AssemblyName)preUnificationAssemblyName.AssemblyName.Clone());
+#else
+                AssemblyNameExtension dependentAssembly = new AssemblyNameExtension(new AssemblyName(preUnificationAssemblyName.AssemblyName.FullName));
+#endif
 
                 Version unifiedVersion;
                 bool isPrerequisite;
@@ -1884,7 +1888,11 @@ namespace Microsoft.Build.Tasks
                 byte[] pkt = assemblyName.GetPublicKeyToken();
                 if (pkt != null && pkt.Length > 0)
                 {
+#if FEATURE_ASSEMBLYNAME_CLONE
                     AssemblyName baseKey = (AssemblyName)assemblyName.AssemblyName.Clone();
+#else
+                    AssemblyName baseKey = new AssemblyName(assemblyName.AssemblyName.FullName);
+#endif
                     Version version = baseKey.Version;
                     baseKey.Version = null;
                     string key = baseKey.ToString();
@@ -2374,7 +2382,11 @@ namespace Microsoft.Build.Tasks
                 foreach (DependentAssembly remappedAssembly in _remappedAssemblies)
                 {
                     // First, exclude anything without the simple name match
+#if FEATURE_ASSEMBLYNAME_CLONE
                     AssemblyNameExtension comparisonAssembly = new AssemblyNameExtension((AssemblyName)remappedAssembly.PartialAssemblyName.Clone());
+#else
+                    AssemblyNameExtension comparisonAssembly = new AssemblyNameExtension(new AssemblyName(remappedAssembly.PartialAssemblyName.FullName));
+#endif
                     if (assemblyName.CompareBaseNameTo(comparisonAssembly) == 0)
                     {
                         // Comparison assembly is a partial name. Give it our version.

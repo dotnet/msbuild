@@ -675,7 +675,7 @@ namespace Microsoft.Build.Tasks
         {
             string path = assemblyTableInfo.Path;
             string redistName = null;
-            XmlTextReader reader = null;
+            XmlReader reader = null;
 
             // Keep track of what assembly entries we have read in from the redist list, we want to track this because we need to know if there are duplicate entries
             // if there are duplicate entries one with ingac = true and one with InGac=false we want to choose the one with ingac true.
@@ -684,8 +684,9 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                reader = new XmlTextReader(path);
-                reader.DtdProcessing = DtdProcessing.Ignore;
+                var readerSettings = new XmlReaderSettings();
+                readerSettings.DtdProcessing = DtdProcessing.Ignore;
+                reader = XmlReader.Create(path, readerSettings);
 
                 while (reader.Read())
                 {
@@ -739,7 +740,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (reader != null)
                 {
-                    reader.Close();
+                    reader.Dispose();
                 }
             }
 
@@ -754,7 +755,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Parse the remapping xml element in the redist list
         /// </summary>
-        private static void ParseRemapSection(AssemblyTableInfo assemblyTableInfo, string path, string redistName, XmlTextReader reader, List<AssemblyRemapping> mapping)
+        private static void ParseRemapSection(AssemblyTableInfo assemblyTableInfo, string path, string redistName, XmlReader reader, List<AssemblyRemapping> mapping)
         {
             AssemblyNameExtension fromEntry = null;
             AssemblyNameExtension toEntry = null;
@@ -811,7 +812,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Parse the FileList section in the redist list.
         /// </summary>
-        private static void ParseFileListSection(AssemblyTableInfo assemblyTableInfo, string path, string redistName, XmlTextReader reader, Dictionary<string, AssemblyEntry> assemblyEntries, List<AssemblyRemapping> remapEntries)
+        private static void ParseFileListSection(AssemblyTableInfo assemblyTableInfo, string path, string redistName, XmlReader reader, Dictionary<string, AssemblyEntry> assemblyEntries, List<AssemblyRemapping> remapEntries)
         {
             while (reader.Read())
             {
@@ -856,7 +857,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Parse an individual FileListEntry in the redist list
         /// </summary>
-        private static AssemblyEntry ReadFileListEntry(AssemblyTableInfo assemblyTableInfo, string path, string redistName, XmlTextReader reader, bool fullFusionNameRequired)
+        private static AssemblyEntry ReadFileListEntry(AssemblyTableInfo assemblyTableInfo, string path, string redistName, XmlReader reader, bool fullFusionNameRequired)
         {
             Dictionary<string, string> attributes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -906,7 +907,8 @@ namespace Microsoft.Build.Tasks
             }
 
             bool isValidEntry = !string.IsNullOrEmpty(name) && (!fullFusionNameRequired || (fullFusionNameRequired && !string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(publicKeyToken) && !string.IsNullOrEmpty(culture)));
-            Debug.Assert(isValidEntry, string.Format(CultureInfo.InvariantCulture, "Missing attribute in redist file: {0}, line #{1}", path, reader.LineNumber));
+            Debug.Assert(isValidEntry, string.Format(CultureInfo.InvariantCulture, "Missing attribute in redist file: {0}, line #{1}", path, 
+                reader is IXmlLineInfo ? ((IXmlLineInfo)reader).LineNumber : 0));
             AssemblyEntry newEntry = null;
             if (isValidEntry)
             {

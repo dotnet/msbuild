@@ -36,12 +36,12 @@ namespace Microsoft.Build.Tasks
 
             if (v1 == null)
             {
-                v1 = new Version();
+                v1 = new Version(0, 0);
             }
 
             if (v2 == null)
             {
-                v2 = new Version();
+                v2 = new Version(0, 0);
             }
 
             return v1.CompareTo(v2);
