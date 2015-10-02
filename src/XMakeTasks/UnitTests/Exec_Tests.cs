@@ -128,6 +128,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(true, result);
         }
 
+#if FEATURE_SPECIAL_FOLDERS
         [Fact]
         public void NonUNCWorkingDirectoryUsed()
         {
@@ -179,6 +180,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(cd);
             }
         }
+#endif
 
         /// <summary>
         /// Tests that Exec still executes properly when there's an '&' in the temp directory path

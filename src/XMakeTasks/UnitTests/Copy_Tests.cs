@@ -690,6 +690,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if FEATURE_SECURITY_PERMISSIONS
         /// <summary>
         /// When destination is inaccessible due to ACL, do NOT retry
         /// </summary>
@@ -761,6 +762,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Make sure we do not retry when the destination file is a folder

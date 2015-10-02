@@ -162,6 +162,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if FEATURE_SPECIAL_FOLDERS
         [Fact]
         public void AccessDenied()
         {
@@ -182,6 +183,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(info.LastWriteTime, state.LastWriteTime);
             Assert.Equal(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
         }
+#endif
 
 #if CHECKING4GBFILESWORK
         [Test]
