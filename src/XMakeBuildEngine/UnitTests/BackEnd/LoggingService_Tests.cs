@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests.Logging
 #if FEATURE_ASSEMBLY_LOCATION
                 LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
 #endif
                 _initializedService.RegisterDistributedLogger(null, description);
             }
@@ -576,7 +576,7 @@ namespace Microsoft.Build.UnitTests.Logging
 #if FEATURE_ASSEMBLY_LOCATION
                 LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
 #endif
                 _initializedService.ShutdownComponent();
                 List<LoggerDescription> tempList = new List<LoggerDescription>();

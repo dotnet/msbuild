@@ -70,8 +70,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(CompilerToolsDir)\Microsoft.Build.Tasks.CodeAnalysis.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
     <ProjectReference Include="..\Microsoft.Build.Utilities.csproj">
       <Project>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</Project>
       <Name>Microsoft.Build.Utilities</Name>

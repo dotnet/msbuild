@@ -1527,7 +1527,7 @@ namespace TestTask
 #if FEATURE_ASSEMBLY_LOCATION
                 string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
 #else
-            string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
+                string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
 #endif
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);

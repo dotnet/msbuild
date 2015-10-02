@@ -7,7 +7,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 #endif
 using Microsoft.Build.Exceptions;
-using System.Text.RegularExpressions;
+
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
