@@ -55,7 +55,7 @@
   <PropertyGroup>
     <NuGetDir>$(PackagesDir)</NuGetDir>
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$(PackagesDir)NuGet.exe</NuGetToolPath>
-    <NuGetConfigFile>$([System.IO.Path]::Combine($(SourceDir),".nuget","NuGet.Config"))</NuGetConfigFile>
+    <NuGetConfigFile>$([System.IO.Path]::Combine($(RepoRoot),"NuGet.Config"))</NuGetConfigFile>
     <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
