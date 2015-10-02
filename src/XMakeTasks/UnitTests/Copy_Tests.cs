@@ -890,8 +890,8 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
-                    fs2.Close();
+                    fs.Dispose();
+                    fs2.Dispose();
                 }
 
                 Copy t = new Copy();
@@ -973,7 +973,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
+                    fs.Dispose();
                 }
 
                 Copy t = new Copy();
@@ -1044,7 +1044,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
+                    fs.Dispose();
                 }
 
                 Copy t = new Copy();
@@ -1095,7 +1095,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
+                    fs.Dispose();
                 }
 
                 Copy t = new Copy();
@@ -1402,8 +1402,8 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
-                    fs2.Close();
+                    fs.Dispose();
+                    fs2.Dispose();
                 }
 
                 Copy t = new Copy();

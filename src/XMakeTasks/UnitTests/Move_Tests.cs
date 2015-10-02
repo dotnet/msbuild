@@ -401,8 +401,8 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
-                    fs2.Close();
+                    fs.Dispose();
+                    fs2.Dispose();
                 }
 
                 Move t = new Move();
@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
+                    fs.Dispose();
                 }
 
                 Move t = new Move();
@@ -619,7 +619,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
+                    fs.Dispose();
                 }
 
                 Move t = new Move();
@@ -716,8 +716,8 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    fs.Close();
-                    fs2.Close();
+                    fs.Dispose();
+                    fs2.Dispose();
                 }
 
                 Move t = new Move();
