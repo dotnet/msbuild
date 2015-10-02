@@ -228,6 +228,10 @@
          If not, then the corresponding properties on Thread (which aren't in .NET Core) need to be used. -->
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
 
+    <!-- This means that msbuild should (as much as possible) be xcopy deployable and not depend on anything
+         installed in the program files directory or other machine state. -->
+    <DefineConstants>$(DefineConstants);FEATURE_APPLOCAL_MSBUILD</DefineConstants>
+    
     <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
   </PropertyGroup>
 
