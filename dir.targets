@@ -156,10 +156,18 @@
   <Target Name="RebuildAndTest" DependsOnTargets="Rebuild;Test" />
   <Target Name="Test" />
 
+  <Target Name="EnsurePackageContentCopied"
+          BeforeTargets="Build">
+    <MSBuild Projects="$(RepoRoot)\targets\CopyPackageContent.proj"
+             Targets="CopyPackageContent"
+             BuildInParallel="true" />
+  </Target>
+          
+  
   <Target Name="EnsurePrerequisitesCopied"
           BeforeTargets="Build"
           Condition="'$(IsTestProject)' == 'true'">
-    <MSBuild Projects="$(SourceDir)CopyTestPrerequisites.proj"
+    <MSBuild Projects="$(RepoRoot)\targets\CopyTestPrerequisites.proj"
              Targets="CopyPrerequisites"
              BuildInParallel="true" />
   </Target>
