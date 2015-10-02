@@ -28,7 +28,7 @@ namespace Microsoft.Build.Shared
 #if FEATURE_ENCODING_DEFAULT
                 s_currentOemEncoding = Encoding.Default;
 #else
-                s_currentOemEncoding = Encoding.UTF8;
+                s_currentOemEncoding = Encoding.ASCII;
 #endif
 #if !MONO && FEATURE_ENCODING_DEFAULT
                 try
