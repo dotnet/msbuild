@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             string file = FileUtilities.GetTemporaryFile();
             try
             {
-                using (StreamWriter sw = new StreamWriter(file, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(file, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a temp file.");
 
                 ITaskItem f = new TaskItem(file);
@@ -122,9 +122,9 @@ namespace Microsoft.Build.UnitTests
             string destination = FileUtilities.GetTemporaryFile();
             try
             {
-                using (StreamWriter sw = new StreamWriter(source, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                     sw.Write("This is a source file.");
-                using (StreamWriter sw = new StreamWriter(destination, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
                     sw.Write("This is a destination file.");
 
                 File.SetAttributes(destination, FileAttributes.ReadOnly);
@@ -182,9 +182,9 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable("MSBUILDALWAYSOVERWRITEREADONLYFILES", "1   ");
 
-                using (StreamWriter sw = new StreamWriter(source, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                     sw.Write("This is a source file.");
-                using (StreamWriter sw = new StreamWriter(destination, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
                     sw.Write("This is a destination file.");
 
                 File.SetAttributes(destination, FileAttributes.ReadOnly);
@@ -242,9 +242,9 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBUILDALWAYSRETRY", "1   ");
                 Copy.RefreshInternalEnvironmentValues();
 
-                using (StreamWriter sw = new StreamWriter(source, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                     sw.Write("This is a source file.");
-                using (StreamWriter sw = new StreamWriter(destination, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
                     sw.Write("This is a destination file.");
 
                 File.SetAttributes(destination, FileAttributes.ReadOnly);
@@ -302,9 +302,9 @@ namespace Microsoft.Build.UnitTests
             string destination = FileUtilities.GetTemporaryFile();
             try
             {
-                using (StreamWriter sw = new StreamWriter(source, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                     sw.Write("This is a source file.");
-                using (StreamWriter sw = new StreamWriter(destination, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
                     sw.Write("This is a destination file.");
 
                 File.SetAttributes(destination, FileAttributes.ReadOnly);
@@ -360,13 +360,13 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(destinationFolder);
 
-                using (StreamWriter sw = new StreamWriter(source1, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(source1, true))
                     sw.Write("This is a source file1.");
-                using (StreamWriter sw = new StreamWriter(source2, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(source2, true))
                     sw.Write("This is a source file2.");
-                using (StreamWriter sw = new StreamWriter(destination1, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination1, true))
                     sw.Write("This is a destination file1.");
-                using (StreamWriter sw = new StreamWriter(destination2, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination2, true))
                     sw.Write("This is a destination file2.");
 
                 // Set one destination readonly.
@@ -429,10 +429,10 @@ namespace Microsoft.Build.UnitTests
             string destinationFile = FileUtilities.GetTemporaryFile();
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
-                using (StreamWriter sw = new StreamWriter(destinationFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a destination temp file.");
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
@@ -453,7 +453,7 @@ namespace Microsoft.Build.UnitTests
                 t.Execute();
 
                 string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
+                using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
                     destinationFileContents = sr.ReadToEnd();
 
                 Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
@@ -481,10 +481,10 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
-                using (StreamWriter sw = new StreamWriter(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a destination temp file.");
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
@@ -567,7 +567,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a destination temp file.");
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a destination temp file.");
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
@@ -657,7 +657,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(destinationFile, true)) // Keep it locked
+                using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true)) // Keep it locked
                 {
                     ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
 
@@ -773,7 +773,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
                     sw.Write("This is a destination temp file.");
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
@@ -817,7 +817,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a destination temp file.");
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
@@ -1139,7 +1139,7 @@ namespace Microsoft.Build.UnitTests
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
                 // Don't create the dest folder, let task do that
@@ -1166,7 +1166,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(File.Exists(destFile)); // "destination exists"
 
                 string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
+                using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
                 if (!useHardLinks)
@@ -1209,7 +1209,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                 {
                     sw.Write("This is a source temp file.");
                 }
@@ -1236,7 +1236,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(File.Exists(destFile)); // "destination exists"
 
                 string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
+                using (StreamReader sr = FileUtilities.OpenRead(destFile))
                 {
                     destinationFileContents = sr.ReadToEnd();
                 }
@@ -1275,7 +1275,7 @@ namespace Microsoft.Build.UnitTests
 
             foreach (ITaskItem item in sourceFiles)
             {
-                using (StreamWriter sw = new StreamWriter(item.ItemSpec))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(item.ItemSpec, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
                 {
                     sw.Write("This is a source temp file.");
                 }
@@ -1329,7 +1329,7 @@ namespace Microsoft.Build.UnitTests
 
             foreach (ITaskItem item in sourceFiles)
             {
-                using (StreamWriter sw = new StreamWriter(item.ItemSpec))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(item.ItemSpec, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
                 {
                     sw.Write("This is a source temp file.");
                 }
@@ -1448,7 +1448,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
@@ -1865,7 +1865,7 @@ namespace Microsoft.Build.UnitTests
             string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
                 // Don't create the dest folder, let task do that
@@ -1893,7 +1893,7 @@ namespace Microsoft.Build.UnitTests
                 me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
 
                 string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
+                using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
                 Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination hard linked file to contain the contents of source file."
@@ -1906,11 +1906,11 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is another source temp file.");
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = new StreamReader(destFile))
+                using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
                 Assert.Equal(destinationFileContents, "This is another source temp file."); //                     "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
@@ -1956,7 +1956,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
@@ -1985,7 +1985,7 @@ namespace Microsoft.Build.UnitTests
                 me.AssertLogContains("0x80070011");
 
                 string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
+                using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
                 Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
@@ -1998,11 +1998,11 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is another source temp file.");
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = new StreamReader(destFile))
+                using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
                 Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination copied file to contain the contents of original source file only."
@@ -2032,7 +2032,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                using (StreamWriter sw = new StreamWriter(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is a source temp file.");
 
                 if (!Directory.Exists(destFolder))
@@ -2075,7 +2075,7 @@ namespace Microsoft.Build.UnitTests
                 me.AssertLogContains("0x80070476");
 
                 string destinationFileContents;
-                using (StreamReader sr = new StreamReader(destFile))
+                using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
                 Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination file to contain the contents of source file."
@@ -2088,11 +2088,11 @@ namespace Microsoft.Build.UnitTests
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
                 // has the same content (i.e. it's been hard linked)
-                using (StreamWriter sw = new StreamWriter(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, false))    // HIGHCHAR: Test writes in UTF8 without preamble.
                     sw.Write("This is another source temp file.");
 
                 // Read the destination file (it should have the same modified content as the source)
-                using (StreamReader sr = new StreamReader(destFile))
+                using (StreamReader sr = FileUtilities.OpenRead(destFile))
                     destinationFileContents = sr.ReadToEnd();
 
                 Assert.Equal(destinationFileContents, "This is a source temp file."); //                     "Expected the destination copied file to contain the contents of original source file only."
