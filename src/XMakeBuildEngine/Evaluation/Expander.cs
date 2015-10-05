@@ -2934,7 +2934,7 @@ namespace Microsoft.Build.Evaluation
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
                     }
 
-                    // If we've been asked for and instance to be constructed, then we
+                    // If we've been asked to construct an instance, then we
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", _name, StringComparison.OrdinalIgnoreCase))
                     {
