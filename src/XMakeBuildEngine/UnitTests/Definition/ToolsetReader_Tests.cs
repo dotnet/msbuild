@@ -24,6 +24,8 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
+#if FEATURE_REGISTRY_TOOLSETS
+
     /// <summary>
     /// Unit tests for ToolsetReader class and its derived classes
     /// </summary>
@@ -128,7 +130,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 #endif
 
-        #region "Reading from application configuration file tests"
+    #region "Reading from application configuration file tests"
 
 #if FEATURE_SYSTEM_CONFIGURATION
 
@@ -992,9 +994,9 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(@"some>value", values["2>.0"].Properties["foo"].EvaluatedValue);
         }
 #endif
-        #endregion
+    #endregion
 
-        #region "GetToolsetData tests"
+    #region "GetToolsetData tests"
 
         /// <summary>
         /// Tests the case where registry and config file contains different toolsVersion
@@ -1732,7 +1734,6 @@ namespace Microsoft.Build.UnitTests.Definition
         /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
         /// the default value is desired.
         /// </summary>
-
         [Fact]
         public void ConfigFileInvalidRegistryExpression1()
         {
@@ -2329,9 +2330,9 @@ namespace Microsoft.Build.UnitTests.Definition
             });
         }
 
-        #endregion
+    #endregion
 
-        #region "SetDefaultToolsetVersion tests"
+    #region "SetDefaultToolsetVersion tests"
 
         /// <summary>
         /// Tests that the default ToolsVersion is correctly resolved when specified
@@ -2842,7 +2843,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal("gv1", values["4.0"].Properties["p2"].EvaluatedValue);
         }
 
-        #endregion
+    #endregion
 
         private ToolsetRegistryReader GetStandardRegistryReader()
         {
@@ -2857,6 +2858,8 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 #endif
     }
+
+#endif
 
     internal class MockRegistryKey : RegistryKeyWrapper
     {
