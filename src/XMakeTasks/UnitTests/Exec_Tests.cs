@@ -290,7 +290,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that Exec still executes properly when there's a non-ansi character in the command
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/251")]
         public void ExecTaskUnicodeCharacterInCommand()
         {
             string nonAnsiCharacters = "\u521B\u5EFA";
