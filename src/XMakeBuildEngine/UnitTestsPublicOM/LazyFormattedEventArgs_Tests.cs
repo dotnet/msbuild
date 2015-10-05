@@ -32,6 +32,7 @@ namespace Microsoft.Build.UnitTests.Framework
     /// </summary>
     public class LazyFormattedEventArgs_Tests
     {
+#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Don't crash when task logs with too few format markers
         /// </summary>
@@ -109,5 +110,6 @@ namespace Microsoft.Build.UnitTests.Framework
             log.AssertLogContains("[goodone]");
             log.AssertLogContains("[crashing]");
         }
+#endif
     }
 }
