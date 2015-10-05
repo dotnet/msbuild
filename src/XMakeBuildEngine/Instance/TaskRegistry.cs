@@ -1243,9 +1243,7 @@ namespace Microsoft.Build.Execution
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
 
-#if FEATURE_APPDOMAIN
                     if (isAssemblyTaskFactory || isTaskHostFactory)
-#endif
                     {
                         bool explicitlyLaunchTaskHost =
                             isTaskHostFactory ||
@@ -1260,9 +1258,9 @@ namespace Microsoft.Build.Execution
                         loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
                         factory = taskFactory;
                     }
-#if FEATURE_APPDOMAIN
                     else
                     {
+#if FEATURE_APPDOMAIN
                         // We are not one of the default factories. 
                         TaskEngineAssemblyResolver resolver = null;
 
@@ -1415,8 +1413,11 @@ namespace Microsoft.Build.Execution
                                 resolver = null;
                             }
                         }
-                    }
+#else
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskFactoryNotSupportedFailure", TaskFactoryAttributeName);
 #endif
+                    }
+
 
                     _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
                 }
