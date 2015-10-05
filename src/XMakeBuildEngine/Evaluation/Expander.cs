@@ -1019,7 +1019,8 @@ namespace Microsoft.Build.Evaluation
                 // If we have only a single result, then just return it
                 if (results == null && expression.Length == sourceIndex)
                 {
-                    return lastResult == null ? null : FileUtilities.MaybeAdjustFilePath(lastResult.ToString());
+                    var resultString = lastResult as string;
+                    return resultString != null ? FileUtilities.MaybeAdjustFilePath(resultString) : lastResult;
                 }
                 else
                 {
