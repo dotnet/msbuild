@@ -128,6 +128,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(true, result);
         }
 
+#if FEATURE_SPECIAL_FOLDERS
         [Fact]
         public void NonUNCWorkingDirectoryUsed()
         {
@@ -179,6 +180,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(cd);
             }
         }
+#endif
 
         /// <summary>
         /// Tests that Exec still executes properly when there's an '&' in the temp directory path
@@ -288,7 +290,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that Exec still executes properly when there's a non-ansi character in the command
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/251")]
         public void ExecTaskUnicodeCharacterInCommand()
         {
             string nonAnsiCharacters = "\u521B\u5EFA";

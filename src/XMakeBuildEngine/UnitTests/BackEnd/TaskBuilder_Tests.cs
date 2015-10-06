@@ -633,6 +633,7 @@ namespace ItemCreationTask
         }
 #endif
 
+#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash. 
         /// </summary>
@@ -713,6 +714,7 @@ namespace ItemCreationTask
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
             logger.AssertLogContains("[foo: ]");
         }
+#endif
 
 #if FEATURE_CODEDOM
         /// <summary>

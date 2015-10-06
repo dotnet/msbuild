@@ -48,6 +48,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
         }
 
+#if FEATURE_TASK_GENERATERESOURCES
         /// <summary>
         /// Target items and properties should be published to the project level even when a task that
         /// outputs them fails. (Of course the task must have populated its property before it errors.)
@@ -128,6 +129,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 File.Delete(resx);
             }
         }
+#endif
 
         /// <summary>
         /// Target items and properties should be published to the project level when an OnError
