@@ -14,4 +14,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # Makes development easier
 export PATH=$PATH:$DIR
 
-exec "dnx" -p "$DIR/../src/Microsoft.DotNet.Tools.Compiler" run "$@"
+exec "dnx" -p "$DIR/../src/Microsoft.DotNet.Tools.DependencyResolver" run "$@"

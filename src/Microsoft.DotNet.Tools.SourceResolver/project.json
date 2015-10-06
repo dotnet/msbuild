@@ -1,0 +1,25 @@
+﻿{
+    "version": "1.0.0-*",
+
+    "dependencies": {
+        "System.Collections": "4.0.10-beta-*",
+        "System.Console": "4.0.0-beta-*",
+        "System.Linq": "4.0.0-beta-*",
+        "System.Threading": "4.0.10-beta-*",
+        "System.IO.FileSystem": "4.0.1-beta-*",
+
+        "Microsoft.CSharp": "4.0.0-beta-23109",
+        "Microsoft.Framework.CommandLineUtils.Sources": "1.0.0-*",
+        "Microsoft.Dnx.Runtime": "1.0.0-*",
+
+        "Newtonsoft.Json": "7.0.1"
+    },
+
+    "commands": {
+        "dotnet-resolve-dependencies": ""
+    },
+
+    "frameworks": {
+        "dnxcore50": { }
+    }
+}

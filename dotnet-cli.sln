@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1F391100-F011-4630-8C25-D1A5355E4F19}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5AB144A3-3D0A-4DC7-9EE8-19FDD2DF8735}"
+	ProjectSection(SolutionItems) = preProject
+		dotnet-compile.cmd = dotnet-compile.cmd
+		dotnet-run.cmd = dotnet-run.cmd
+		global.json = global.json
+		NuGet.Config = NuGet.Config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{47858134-8A8D-4D5C-ABD5-E6630A66DA05}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TestApp", "test\TestApp\TestApp.xproj", "{58808BBC-371E-47D6-A3D0-4902145EDA4E}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DotNet.Tools.DependencyResolver", "src\DotNet.Tools.DependencyResolver\DotNet.Tools.DependencyResolver.xproj", "{A5D41198-209A-461B-A191-F48B9DBECD67}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58808BBC-371E-47D6-A3D0-4902145EDA4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58808BBC-371E-47D6-A3D0-4902145EDA4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58808BBC-371E-47D6-A3D0-4902145EDA4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58808BBC-371E-47D6-A3D0-4902145EDA4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5D41198-209A-461B-A191-F48B9DBECD67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5D41198-209A-461B-A191-F48B9DBECD67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5D41198-209A-461B-A191-F48B9DBECD67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5D41198-209A-461B-A191-F48B9DBECD67}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{58808BBC-371E-47D6-A3D0-4902145EDA4E} = {47858134-8A8D-4D5C-ABD5-E6630A66DA05}
+		{A5D41198-209A-461B-A191-F48B9DBECD67} = {1F391100-F011-4630-8C25-D1A5355E4F19}
+	EndGlobalSection
+EndGlobal
