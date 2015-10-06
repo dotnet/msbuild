@@ -1954,6 +1954,7 @@ namespace Microsoft.Build.Construction
                     }
 #else
                     XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                    xmlReaderSettings.CloseInput = true; // close the stream when disposing the reader
                     xmlReaderSettings.DtdProcessing = DtdProcessing.Ignore;
                     using (XmlReader xr = XmlReader.Create(File.OpenRead(fullPath), xmlReaderSettings))
                     {
