@@ -1,7 +1,4 @@
 ﻿{
-  "runtimes": {
-    "win7-x86": { }
-  },
   "frameworks": {
     "net451": { },
     "net46": { },

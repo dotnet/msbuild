@@ -6,8 +6,5 @@
   "frameworks": {
     "net451": {},
     "net46": {}
-  },
-  "runtimes": {
-    "win-": {}
   }
 }

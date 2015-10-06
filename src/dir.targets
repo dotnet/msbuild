@@ -2,7 +2,9 @@
   <Import Project="..\dir.targets" />
 
   <PropertyGroup>
-    <CopyNuGetImplementations Condition="'$(IsTestProject)' == 'true'">true</CopyNuGetImplementations>
+    <!-- Don't copy NuGet implementations directly, since that would require setting a runtime and targeting a specific architecture.
+         Instead, it they will be deployed by DeployDependencies.proj. -->
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
   
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="'$(NetCoreBuild)' != 'true'"/>
