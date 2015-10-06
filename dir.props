@@ -323,5 +323,5 @@
   </PropertyGroup>
 
 
-  <Import Condition="'$(IsTraversalBuild)'!='true' and Exists('$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props')" Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props"/>
+  <Import Condition="'$(IsTraversalBuild)'!='true' and '$(NetCoreBuild)' != 'true' and Exists('$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props')" Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props"/>
 </Project>

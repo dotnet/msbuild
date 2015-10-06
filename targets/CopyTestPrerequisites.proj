@@ -3,13 +3,16 @@
   <Import Project="..\dir.props" />
 
   <!-- Copy Roslyn Compiler tools to the output path (so we have csc.exe, etc) -->
-  <Target Name="CopyCompilerTools">
+  <!-- Don't copy compilers for .NET Core, as the compilers will be brought in via DeployDependencies and runtime.project.json -->
+  <Target Name="CopyCompilerTools" Condition="'$(NetCoreBuild)' != 'true'">
     <ItemGroup>
       <CompilerToolsFiles Include="$(CompilerToolsDir)\*.*" />
     </ItemGroup>
+    
     <Copy SourceFiles="@(CompilerToolsFiles)"
           DestinationFolder="$(OutputPath)"
-          SkipUnchangedFiles="true" />
+          SkipUnchangedFiles="true"           
+          />
   </Target>
 
   <Target Name="CopyXunitConfiguration">
