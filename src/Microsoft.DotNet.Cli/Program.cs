@@ -26,12 +26,7 @@ namespace Microsoft.DotNet.Cli
             {
                 c.Description = "Produce assemblies for the project in given directory";
 
-                c.OnExecute(() =>
-                {
-                    // Temporary!
-                    return Exec("dnu", new[] { "build" });
-                    // Exec("dotnet-compile", c.RemainingArguments);
-                });
+                c.OnExecute(() => Exec("dotnet-compile", c.RemainingArguments));
             });
 
             app.Command("restore", c =>
@@ -54,6 +49,8 @@ namespace Microsoft.DotNet.Cli
 
                 c.OnExecute(() => Exec("dotnet-publish", c.RemainingArguments));
             });
+            
+            // TODO: Handle unknown commands
 
             app.OnExecute(() =>
             {
@@ -61,27 +58,43 @@ namespace Microsoft.DotNet.Cli
                 return 2;
             });
 
-
-            return app.Execute(args);
+            try
+            {
+                return app.Execute(args);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return 1;
         }
 
-        private static int Exec(string executable, IList<string> remainingArguments)
+        private static int Exec(string executable, IList<string> args)
         {
             var comSpec = Environment.GetEnvironmentVariable("ComSpec");
             if (!string.IsNullOrEmpty(comSpec))
             {
-                remainingArguments =
+                args =
                     new[] { "/C", "\"", executable }
-                    .Concat(remainingArguments)
+                    .Concat(args)
                     .Concat(new[] { "\"" })
                     .ToArray();
                 executable = comSpec;
+            }
+            else  
+            {
+                // Temporary, we're doing this so that redirecting the output works
+                args = new[] { "bash", "-c", "\"", executable }
+                        .Concat(args.Select(argument => argument.Replace("\"", "\\\"")))
+                        .Concat(new[] { "\"" })
+                        .ToArray();
+                executable = "/usr/bin/env";
             }
 
             var psi = new ProcessStartInfo
             {
                 FileName = executable,
-                Arguments = string.Join(" ", remainingArguments),
+                Arguments = string.Join(" ", args),
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardError = true,

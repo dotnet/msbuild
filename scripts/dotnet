@@ -11,4 +11,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # work around restore timeouts on Mono
 [ -z "$MONO_THREADS_PER_CPU" ] && export MONO_THREADS_PER_CPU=50
 
+# Makes development easier
+export PATH=$PATH:$DIR
+
 exec "dnx" -p "$DIR/../src/Microsoft.DotNet.Cli" run "$@"

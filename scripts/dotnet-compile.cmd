@@ -1,0 +1,8 @@
+@Echo OFF
+SETLOCAL
+SET ERRORLEVEL=
+
+dnu build %*
+
+exit /b %ERRORLEVEL%
+ENDLOCAL
