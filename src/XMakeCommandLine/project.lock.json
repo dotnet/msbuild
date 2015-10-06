@@ -2,8 +2,92 @@
   "locked": false,
   "version": 1,
   "targets": {
-    ".NETFramework,Version=v4.5.1": {},
-    ".NETFramework,Version=v4.6": {},
+    ".NETFramework,Version=v4.5.1": {
+      "Microsoft.Tpl.Dataflow/4.5.24": {
+        "compile": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        }
+      },
+      "System.Collections.Immutable/1.1.36": {
+        "compile": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
+        }
+      },
+      "System.Reflection.Metadata/1.1.0-alpha-00014": {
+        "dependencies": {
+          "System.Collections.Immutable": "[1.1.36, )"
+        },
+        "compile": {
+          "lib/portable-net45+win8/System.Reflection.Metadata.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8/System.Reflection.Metadata.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.6": {
+      "Microsoft.Tpl.Dataflow/4.5.24": {
+        "compile": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        }
+      },
+      "System.Collections.Immutable/1.1.36": {
+        "compile": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll": {}
+        }
+      },
+      "System.Reflection.Metadata/1.1.0-alpha-00014": {
+        "dependencies": {
+          "System.Collections.Immutable": "[1.1.36, )"
+        },
+        "compile": {
+          "lib/portable-net45+win8/System.Reflection.Metadata.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8/System.Reflection.Metadata.dll": {}
+        }
+      },
+      "System.Resources.ResourceManager/4.0.0": {
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime/4.0.20": {
+        "compile": {
+          "ref/net46/_._": {}
+        },
+        "runtime": {
+          "lib/net46/_._": {}
+        }
+      },
+      "System.Runtime.InteropServices.RuntimeInformation/4.0.0-beta-23213": {
+        "dependencies": {
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
+        }
+      }
+    },
     "DNXCore,Version=v5.0": {
       "Microsoft.CSharp/4.0.0": {
         "dependencies": {
@@ -327,6 +411,17 @@
         },
         "runtime": {
           "lib/DNXCore50/System.Console.dll": {}
+        }
+      },
+      "System.Diagnostics.Contracts/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "[4.0.0, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Diagnostics.Contracts.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Diagnostics.Contracts.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -1487,6 +1582,21 @@
         "runtimes/win7-x86/native/CoreRun.exe"
       ]
     },
+    "Microsoft.Tpl.Dataflow/4.5.24": {
+      "sha512": "6BE4Vu74+dkv5AkJd+UxW1sFMepMZOVlUoMZDUKqhc4Bf7pe7yySzCj6QrowUZbCqcDPwOiQsAgz3nXiLQSyMw==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/portable-net45+win8+wp8+wpa81/System.Threading.Tasks.Dataflow.dll",
+        "lib/portable-net45+win8+wp8+wpa81/system.threading.tasks.dataflow.xml",
+        "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll",
+        "lib/portable-net45+win8+wpa81/system.threading.tasks.dataflow.xml",
+        "License-Stable.rtf",
+        "Microsoft.Tpl.Dataflow.nuspec",
+        "package/services/metadata/core-properties/3dd86853af3a4ae392f3331459714ce0.psmdcp"
+      ]
+    },
     "Microsoft.VisualBasic/10.0.0": {
       "sha512": "5BEm2/HAVd97whRlCChU7rmSh/9cwGlZ/NTNe3Jl07zuPWfKQq5TUvVNUmdvmEe8QRecJLZ4/e7WF1i1O8V42g==",
       "type": "Package",
@@ -1673,6 +1783,19 @@
         "System.Collections.Concurrent.nuspec"
       ]
     },
+    "System.Collections.Immutable/1.1.36": {
+      "sha512": "MOlivTIeAIQPPMUPWIIoMCvZczjFRLYUWSYwqi1szu8QPyeIbsaPeI+hpXe1DzTxNwnRnmfYaoToi6kXIfSPNg==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll",
+        "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.xml",
+        "License-Stable.rtf",
+        "package/services/metadata/core-properties/c8b7b781850445db852bd2d848380ca6.psmdcp",
+        "System.Collections.Immutable.nuspec"
+      ]
+    },
     "System.Collections.Immutable/1.1.37": {
       "sha512": "fTpqwZYBzoklTT+XjTRK8KxvmrGkYHzBiylCcKyQcxiOM8k+QvhNBxRvFHDWzy4OEP5f8/9n+xQ9mEgEXY+muA==",
       "type": "Package",
@@ -1846,6 +1969,40 @@
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
         "System.Console.nuspec"
+      ]
+    },
+    "System.Diagnostics.Contracts/4.0.0": {
+      "sha512": "lMc7HNmyIsu0pKTdA4wf+FMq5jvouUd+oUpV4BdtyqoV0Pkbg9u/7lTKFGqpjZRQosWHq1+B32Lch2wf4AmloA==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/DNXCore50/System.Diagnostics.Contracts.dll",
+        "lib/net45/_._",
+        "lib/netcore50/System.Diagnostics.Contracts.dll",
+        "lib/win8/_._",
+        "lib/wp80/_._",
+        "lib/wpa81/_._",
+        "package/services/metadata/core-properties/c6cd3d0bbc304cbca14dc3d6bff6579c.psmdcp",
+        "ref/dotnet/de/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/es/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/fr/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/it/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/ja/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/ko/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/ru/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/System.Diagnostics.Contracts.dll",
+        "ref/dotnet/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/zh-hans/System.Diagnostics.Contracts.xml",
+        "ref/dotnet/zh-hant/System.Diagnostics.Contracts.xml",
+        "ref/net45/_._",
+        "ref/netcore50/System.Diagnostics.Contracts.dll",
+        "ref/netcore50/System.Diagnostics.Contracts.xml",
+        "ref/win8/_._",
+        "ref/wp80/_._",
+        "ref/wpa81/_._",
+        "runtimes/win8-aot/lib/netcore50/System.Diagnostics.Contracts.dll",
+        "System.Diagnostics.Contracts.nuspec"
       ]
     },
     "System.Diagnostics.Debug/4.0.10": {

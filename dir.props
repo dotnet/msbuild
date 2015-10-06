@@ -145,12 +145,10 @@
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
     <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5.1</TargetFrameworkVersion>
-    <PlatformTarget>x86</PlatformTarget>
     <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <PlatformTarget>x86</PlatformTarget>
     <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
     <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
     <NetCoreSurface>true</NetCoreSurface>
@@ -248,6 +246,8 @@
 
   <!-- Setup the default output and intermediate paths -->
   <PropertyGroup>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+
     <BaseOutputPath>$(BinDir)</BaseOutputPath>
     <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath)$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
     <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseOutputPath)$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
