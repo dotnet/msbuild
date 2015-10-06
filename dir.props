@@ -55,7 +55,7 @@
   <PropertyGroup>
     <NuGetDir>$(PackagesDir)</NuGetDir>
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$(PackagesDir)NuGet.exe</NuGetToolPath>
-    <NuGetConfigFile>$([System.IO.Path]::Combine($(SourceDir),".nuget","NuGet.Config"))</NuGetConfigFile>
+    <NuGetConfigFile>$([System.IO.Path]::Combine($(RepoRoot),"NuGet.Config"))</NuGetConfigFile>
     <NuGetConfigCommandLine>-ConfigFile "$(NuGetConfigFile)"</NuGetConfigCommandLine>
 
     <NugetRestoreCommand>"$(NuGetToolPath)"</NugetRestoreCommand>
@@ -145,12 +145,10 @@
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
     <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5.1</TargetFrameworkVersion>
-    <PlatformTarget>x86</PlatformTarget>
     <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-    <PlatformTarget>x86</PlatformTarget>
     <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
     <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
     <NetCoreSurface>true</NetCoreSurface>
@@ -228,6 +226,10 @@
          If not, then the corresponding properties on Thread (which aren't in .NET Core) need to be used. -->
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
 
+    <!-- This means that msbuild should (as much as possible) be xcopy deployable and not depend on anything
+         installed in the program files directory or other machine state. -->
+    <DefineConstants>$(DefineConstants);FEATURE_APPLOCAL_MSBUILD</DefineConstants>
+    
     <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
   </PropertyGroup>
 
@@ -244,6 +246,8 @@
 
   <!-- Setup the default output and intermediate paths -->
   <PropertyGroup>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+
     <BaseOutputPath>$(BinDir)</BaseOutputPath>
     <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath)$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
     <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseOutputPath)$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>

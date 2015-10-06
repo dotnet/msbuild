@@ -1,8 +1,5 @@
 ﻿
 {
-  "runtimes": {
-    "win7-x86": {}
-  },
   "dependencies": {
     "xunit": "2.1.0-rc1-build3168"
   },

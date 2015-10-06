@@ -2,9 +2,6 @@
   "dependencies": {
     "xunit": "2.1.0-rc1-build3168"
   },
-  "runtimes": {
-    "win7-x86": { }
-  },
   "frameworks": {
     "net451": {
       "dependencies": {

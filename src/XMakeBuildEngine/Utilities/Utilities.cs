@@ -458,14 +458,23 @@ namespace Microsoft.Build.Internal
             // reserved properties; we need the ability for people to override our default in their 
             // environment or as a global property.  
 
+#if FEATURE_APPLOCAL_MSBUILD
+            string extensionsPath = Path.Combine(FileUtilities.CurrentExecutableDirectory, ReservedPropertyNames.appLocalExtensionsPathSuffix);
+            string extensionsPath32 = extensionsPath;
+#else
             // "MSBuildExtensionsPath32". This points to whatever the value of "Program Files (x86)" environment variable is;
             // but on a 32 bit box this isn't set, and we should use "Program Files" instead.
             string programFiles32 = FrameworkLocationHelper.programFiles32;
             string extensionsPath32 = NativeMethodsShared.IsWindows
                                           ? Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix)
                                           : programFiles32;
+#endif
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
 
+#if FEATURE_APPLOCAL_MSBUILD
+            string extensionsPath64 = extensionsPath;
+            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+#else
             // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a 
             // 64-bit machine, and is empty on a 32-bit machine.
             if (FrameworkLocationHelper.programFiles64 != null)
@@ -479,7 +488,9 @@ namespace Microsoft.Build.Internal
                                               : FrameworkLocationHelper.programFiles64;
                 environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
             }
+#endif
 
+#if !FEATURE_APPLOCAL_MSBUILD
             // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both 
             // 32-bit and 64-bit machines.  We have a switch to continue using that behavior; however the default is now for
             // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32. 
@@ -496,6 +507,7 @@ namespace Microsoft.Build.Internal
             {
                 extensionsPath = extensionsPath32;
             }
+#endif
 
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath, extensionsPath, true));
 
