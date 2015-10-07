@@ -1922,6 +1922,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Equal("A;B;C;D", result);
         }
+
         /// <summary>
         /// Expand property function that returns a Dictionary
         /// </summary>
@@ -1935,8 +1936,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string result = expander.ExpandIntoStringLeaveEscaped("$([System.Environment]::GetEnvironmentVariables())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ToUpperInvariant();
             string expected = ("OS=" + Environment.GetEnvironmentVariable("OS")).ToUpperInvariant();
 
-
-            Assert.True(result.Contains(expected));
+            Assert.Contains(expected, result);
         }
 
         /// <summary>
@@ -2191,8 +2191,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             object result = expander.ExpandPropertiesLeaveTypedAndEscaped(@"$([System.Version]::new($(ver1)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Version v = result as Version;
-            Assert.NotNull(v);
+            Assert.IsType<Version>(result);
+
+            Version v = (Version)result;
 
             Assert.Equal(1, v.Major);
             Assert.Equal(2, v.Minor);
@@ -2607,7 +2608,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::DoesTaskHostExist('CurrentRuntime', 'CurrentArchitecture'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             // This is the current, so it had better be true!
-            Assert.True(String.Equals("true", result, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("true", result, true);
         }
 
         /// <summary>
@@ -2928,9 +2929,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// A whole bunch error check tests
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Flaky test
+        [Fact(Skip = "Flaky test")]
         public void Medley()
         {
             // Make absolutely sure that the static method cache hasn't been polluted by the other tests.  

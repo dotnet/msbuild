@@ -1019,7 +1019,8 @@ namespace Microsoft.Build.Evaluation
                 // If we have only a single result, then just return it
                 if (results == null && expression.Length == sourceIndex)
                 {
-                    return lastResult == null ? null : FileUtilities.MaybeAdjustFilePath(lastResult.ToString());
+                    var resultString = lastResult as string;
+                    return resultString != null ? FileUtilities.MaybeAdjustFilePath(resultString) : lastResult;
                 }
                 else
                 {
@@ -2934,7 +2935,7 @@ namespace Microsoft.Build.Evaluation
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
                     }
 
-                    // If we've been asked for and instance to be constructed, then we
+                    // If we've been asked to construct an instance, then we
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", _name, StringComparison.OrdinalIgnoreCase))
                     {
