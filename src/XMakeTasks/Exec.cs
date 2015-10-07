@@ -466,7 +466,7 @@ namespace Microsoft.Build.Tasks
 
             // if the working directory is a UNC path, and all drive letters are mapped, bail out, because the pushd command
             // will not be able to auto-map to the UNC path
-            if (workingDirectoryIsUNC && (DriveInfo.GetDrives().Length == 26))
+            if (workingDirectoryIsUNC && NativeMethods.AllDrivesMapped())
             {
                 Log.LogErrorWithCodeFromResources("Exec.AllDriveLettersMappedError", _workingDirectory);
                 return false;

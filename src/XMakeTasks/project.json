@@ -5,29 +5,25 @@
   "frameworks": {
     "net451": {
       "dependencies": {
-        "Microsoft.Tpl.Dataflow": "4.5.24"
       }
     },
     "net46": {
       "dependencies": {
-        "Microsoft.Tpl.Dataflow": "4.5.24",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213"
       }
     },
     "dnxcore50": {
       "dependencies": {
-        "Microsoft.NETCore": "5.0.0",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.0",
-        "System.Console": "4.0.0-beta-23123",
-        "System.Diagnostics.TraceSource": "4.0.0-beta-23019",
-        "System.IO.FileSystem.DriveInfo": "4.0.0-beta-23302",
-        "System.Security.Cryptography.X509Certificates": "4.0.0-beta-23328",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
-        "System.Xml.XmlDocument": "4.0.0",
-        "System.Xml.ReaderWriter": "4.0.10",
-        "Microsoft.NETCore.Runtime": "1.0.0",
-        "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
-        "Microsoft.Win32.Registry": "4.0.0-beta-23127"
+        "System.Collections.Concurrent": "4.0.11-beta-23225",
+        "System.Net.NetworkInformation": "4.1.0-beta-23225",
+        "System.Reflection": "4.1.0-beta-23405",
+        "Microsoft.NETCore": "5.0.1-beta-23225",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23225",
+        "System.Console": "4.0.0-beta-23225",
+        "System.Diagnostics.TraceSource": "4.0.0-beta-23225",
+        "System.Diagnostics.Process": "4.0.0-beta-23225",
+        "System.Xml.XmlDocument": "4.0.1-beta-23225",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23405",
+        "Microsoft.NETCore.TestHost": "1.0.0-beta-23318",
       },
       "imports": "portable-net451+win81"
     }

@@ -967,6 +967,23 @@ namespace Microsoft.Build.Tasks
         [DllImport("dbghelp.dll", SetLastError = true)]
         internal static extern IntPtr ImageRvaToVa(IntPtr ntHeaders, IntPtr imageBase, uint Rva, out IntPtr LastRvaSection);
 
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern uint GetLogicalDrives();
+
+        internal static bool AllDrivesMapped()
+        {
+            const uint AllDriveMask = 0x0cffffff;
+            if (NativeMethodsShared.IsWindows)
+            {
+                // No limit to drive mount points
+                return false;
+            }
+
+            var driveMask = GetLogicalDrives();
+            // All drives are taken if the value has all 26 bits set
+            return driveMask >= AllDriveMask;
+        }
+
 #if FEATURE_COM_INTEROP
         //------------------------------------------------------------------------------
         // CreateAssemblyCache
