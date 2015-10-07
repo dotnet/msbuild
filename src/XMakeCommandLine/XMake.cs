@@ -1316,17 +1316,19 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
             ArrayList commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
-            // discard the first piece, because that's the path to the executable -- the rest are args
-            s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote((string)commandLineArgs[0]));
+            
+            s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote((string)commandLineArgs[0
+#else
+            ArrayList commandLineArgs = new ArrayList(commandLine);
+
+            s_exeName = FileUtilities.FixFilePath(Process.GetCurrentProcess().MainModule.FileName);
+#endif
 
             if (!s_exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
             {
                 s_exeName += ".exe";
             }
-#else
-            ArrayList commandLineArgs = new ArrayList(commandLine);
-            s_exeName = FileUtilities.FixFilePath(Process.GetCurrentProcess().MainModule.FileName);
-#endif
+
             // discard the first piece, because that's the path to the executable -- the rest are args
             commandLineArgs.RemoveAt(0);
 
