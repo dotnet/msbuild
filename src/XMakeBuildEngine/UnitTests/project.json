@@ -1,6 +1,7 @@
 ﻿{
   "dependencies": {
-    "xunit": "2.1.0-rc1-build3168"
+    "xunit": "2.1.0",
+    "Microsoft.Tpl.Dataflow": "4.5.24"
   },
   "runtimes": {
     "win7-x86": { }
@@ -8,33 +9,27 @@
   "frameworks": {
     "net451": {
       "dependencies": {
-        "Microsoft.Tpl.Dataflow": "4.5.24",
-        "xunit.runner.visualstudio": "2.1.0-rc1-build1124"
+        "xunit.runner.visualstudio": "2.1.0"
       }
     },
     "net46": {
       "dependencies": {
-        "Microsoft.Tpl.Dataflow": "4.5.24",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
-        "xunit.runner.visualstudio": "2.1.0-rc1-build1124"
+        "xunit.runner.visualstudio": "2.1.0"
       }
     },
     "dnxcore50": {
       "dependencies": {
-        "Microsoft.NETCore": "5.0.0",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.0",
-        "System.Console": "4.0.0-beta-23123",
-        "System.Diagnostics.Contracts": "4.0.0",
-        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23123",
-        "System.Diagnostics.Process": "4.0.0-beta-23123",
-        "System.Diagnostics.TraceSource": "4.0.0-beta-23019",
-        "System.Reflection.Metadata": "1.1.0-alpha-00014",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
-        "System.Xml.XmlDocument": "4.0.0",
-        "System.Xml.ReaderWriter": "4.0.10",
-        "Microsoft.NETCore.Runtime": "1.0.0",
-        "Microsoft.NETCore.TestHost-x86": "1.0.0-beta-23123",
-        "Microsoft.Win32.Registry": "4.0.0-beta-23127"
+        "System.Net.NetworkInformation": "4.1.0-beta-23225",
+        "Microsoft.NETCore": "5.0.1-beta-23225",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23225",
+        "System.Console": "4.0.0-beta-23225",
+        "System.Diagnostics.Contracts": "4.0.1-beta-23405",
+        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23225",
+        "System.Diagnostics.Process": "4.0.0-beta-23225",
+        "System.Diagnostics.TraceSource": "4.0.0-beta-23225",
+        "System.Xml.XmlDocument": "4.0.1-beta-23225",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23405",
+        "Microsoft.NETCore.TestHost": "1.0.0-beta-23318"
       },
       "imports": "portable-net451+win81"
     }

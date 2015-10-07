@@ -4,11 +4,11 @@
     "net46": { },
     "dnxcore50": {
       "dependencies": {
-        "System.Reflection.Metadata": "1.1.0-alpha-00014",
-        "Microsoft.NETCore": "5.0.0",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.0"
-      },
-      "imports": "portable-net451+win81"
+        "System.Net.NetworkInformation": "4.1.0-beta-23225",
+        "Microsoft.NETCore": "5.0.1-beta-23225",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23225",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23405"
+      }
     }
   }
 }

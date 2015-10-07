@@ -1,0 +1,28 @@
+{
+  "locked": false,
+  "version": -9996,
+  "targets": {
+    "DNXCore,Version=v5.0": {
+      "Microsoft.NETCore.TestHost/1.0.0-beta-23318": {}
+    },
+    "DNXCore,Version=v5.0/Ubuntu.14.04-x64": {
+      "Microsoft.NETCore.TestHost/1.0.0-beta-23318": {}
+    }
+  },
+  "libraries": {
+    "Microsoft.NETCore.TestHost/1.0.0-beta-23318": {
+      "sha512": "aa4Nc7Hqz8WIzkRkDtugEB/sfQ7Y9pb9HPuKEXeHmVnYHsYJfzBMbpHAMH9NQMgBIX9K4U9w0paNILpE+rmgzA==",
+      "files": [
+        "Microsoft.NETCore.TestHost.1.0.0-beta-23318.nupkg",
+        "Microsoft.NETCore.TestHost.1.0.0-beta-23318.nupkg.sha512",
+        "Microsoft.NETCore.TestHost.nuspec",
+        "runtime.json"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "": [
+      "Microsoft.NETCore.TestHost >= 1.0.0-beta-23318"
+    ]
+  }
+}

@@ -18,6 +18,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -45,26 +46,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Directory.GetCurrentDirectory(),
                     null,
 #if FEATURE_THREAD_CULTURE
-                Thread.CurrentThread.CurrentCulture,
+                    Thread.CurrentThread.CurrentCulture,
                     Thread.CurrentThread.CurrentUICulture,
 #else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
+                    CultureInfo.CurrentCulture,
+                    CultureInfo.CurrentCulture,
 #endif
 #if FEATURE_APPDOMAIN
-                null,
+                    null,
 #endif
-                1,
+                    1,
                     1,
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
                     null,
 #if FEATURE_ASSEMBLY_LOADFROM
-                @"c:\my tasks\mytask.dll",
+                    @"c:\my tasks\mytask.dll",
 #else
-                new AssemblyName("mytask"),
+                    new AssemblyName("mytask"),
 #endif
-                null);
+                    null);
             }
            );
         }
@@ -81,26 +82,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Directory.GetCurrentDirectory(),
                     null,
 #if FEATURE_THREAD_CULTURE
-                Thread.CurrentThread.CurrentCulture,
+                    Thread.CurrentThread.CurrentCulture,
                     Thread.CurrentThread.CurrentUICulture,
 #else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
+                    CultureInfo.CurrentCulture,
+                    CultureInfo.CurrentCulture,
 #endif
 #if FEATURE_APPDOMAIN
-                null,
+                    null,
 #endif
-                1,
+                    1,
                     1,
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
                     String.Empty,
 #if FEATURE_ASSEMBLY_LOADFROM
-                @"c:\my tasks\mytask.dll",
+                    @"c:\my tasks\mytask.dll",
 #else
-                new AssemblyName("mytask"),
+                    new AssemblyName("mytask"),
 #endif
-                null);
+                    null);
             }
            );
         }
@@ -117,16 +118,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Directory.GetCurrentDirectory(),
                     null,
 #if FEATURE_THREAD_CULTURE
-                Thread.CurrentThread.CurrentCulture,
+                    Thread.CurrentThread.CurrentCulture,
                     Thread.CurrentThread.CurrentUICulture,
 #else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
+                    CultureInfo.CurrentCulture,
+                    CultureInfo.CurrentCulture,
 #endif
 #if FEATURE_APPDOMAIN
-                null,
+                    null,
 #endif
-                1,
+                    1,
                     1,
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
@@ -149,26 +150,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Directory.GetCurrentDirectory(),
                     null,
 #if FEATURE_THREAD_CULTURE
-                Thread.CurrentThread.CurrentCulture,
+                    Thread.CurrentThread.CurrentCulture,
                     Thread.CurrentThread.CurrentUICulture,
 #else
-                CultureInfo.CurrentCulture,
-                CultureInfo.CurrentCulture,
+                    CultureInfo.CurrentCulture,
+                    CultureInfo.CurrentCulture,
 #endif
 #if FEATURE_APPDOMAIN
-                null,
+                    null,
 #endif
-                1,
+                    1,
                     1,
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
                     "TaskName",
 #if FEATURE_ASSEMBLY_LOADFROM
-                String.Empty,
+                    String.Empty,
 #else
-                new AssemblyName(String.Empty),
+                    new AssemblyName(String.Empty),
 #endif
-                null);
+                    null);
             }
            );
         }

@@ -856,9 +856,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                                values,
                                                                GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
-                                                           GetStandardConfigurationReader(),
+                                                               GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                               new ProjectCollection().EnvironmentProperties,
                                                                new PropertyDictionary<ProjectPropertyInstance>(),
                                                                ToolsetDefinitionLocations.Registry
                                                            );
@@ -1184,9 +1184,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                                values,
                                                                GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
-                                                           GetStandardConfigurationReader(),
+                                                               GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                               new ProjectCollection().EnvironmentProperties,
                                                                new PropertyDictionary<ProjectPropertyInstance>(),
                                                                ToolsetDefinitionLocations.Registry
                                                            );
@@ -1277,9 +1277,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                                values,
                                                                GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
-                                                           GetStandardConfigurationReader(),
+                                                               GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                               new ProjectCollection().EnvironmentProperties,
                                                                new PropertyDictionary<ProjectPropertyInstance>(),
                                                                ToolsetDefinitionLocations.Registry
                                                            );
@@ -1417,9 +1417,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                                values,
                                                                GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
-                                                           null,
+                                                               null,
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                               new ProjectCollection().EnvironmentProperties,
                                                                new PropertyDictionary<ProjectPropertyInstance>(),
                                                                ToolsetDefinitionLocations.Registry
                                                            );
@@ -1632,9 +1632,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                                values,
                                                                GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
-                                                           null,
+                                                               null,
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                               new ProjectCollection().EnvironmentProperties,
                                                                new PropertyDictionary<ProjectPropertyInstance>(),
                                                                ToolsetDefinitionLocations.Registry
                                                            );
@@ -1660,9 +1660,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                                values,
                                                                GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
-                                                           null,
+                                                               null,
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                               new ProjectCollection().EnvironmentProperties,
                                                                new PropertyDictionary<ProjectPropertyInstance>(),
                                                                ToolsetDefinitionLocations.Registry
                                                            );
@@ -2279,9 +2279,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                values,
                                GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
-                           GetStandardConfigurationReader(),
+                               GetStandardConfigurationReader(),
 #endif
-                           new ProjectCollection().EnvironmentProperties,
+                               new ProjectCollection().EnvironmentProperties,
                                new PropertyDictionary<ProjectPropertyInstance>(),
                                ToolsetDefinitionLocations.Default
                            );
@@ -2320,9 +2320,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                                values,
                                                                new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), mockRegistryKey),
 #if FEATURE_SYSTEM_CONFIGURATION
-                                                           GetStandardConfigurationReader(),
+                                                               GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                               new ProjectCollection().EnvironmentProperties,
                                                                new PropertyDictionary<ProjectPropertyInstance>(),
                                                                ToolsetDefinitionLocations.Default
                                                            );

@@ -918,25 +918,56 @@ namespace Microsoft.Build.Shared
         internal static int GetParentProcessId(int processId)
         {
             int ParentID = 0;
-            SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
-
-            if (!hProcess.IsInvalid)
+            if (IsUnixLike)
             {
+                string line = null;
+
                 try
                 {
-                    // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
-                    // For now just return zero and worst case we will not kill some children.
-                    PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
-                    int pSize = 0;
-
-                    if (0 == NtQueryInformationProcess(hProcess, PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, ref pSize))
+                    // /proc/<processID>/stat returns a bunch of space separated fields. Get that string
+                    using (var r = FileUtilities.OpenRead("/proc/" + processId + "/stat"))
                     {
-                        ParentID = (int)pbi.InheritedFromUniqueProcessId;
+                        line = r.ReadLine();
                     }
                 }
-                finally
+                catch // Ignore errors since the process may have terminated
                 {
-                    hProcess.Dispose();
+                }
+
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    // One of the fields is the process name. It may contain any characters, but since it's
+                    // in parenthesis, we can finds its end by looking for the last parenthesis. Afther that,
+                    // there comes a space, then the second fields separated by a space is the parent id.
+                    string[] statFields = line.Substring(line.LastIndexOf(')')).Split(new[] { ' ' }, 4);
+                    if (statFields.Length >= 3)
+                    {
+                        ParentID = Int32.Parse(statFields[2]);
+                    }
+                }
+            }
+            else
+            {
+                SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
+
+                if (!hProcess.IsInvalid)
+                {
+                    try
+                    {
+                        // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
+                        // For now just return zero and worst case we will not kill some children.
+                        PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
+                        int pSize = 0;
+
+                        if (0 == NtQueryInformationProcess(hProcess, PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, ref pSize))
+                        {
+                            ParentID = (int)pbi.InheritedFromUniqueProcessId;
+                        }
+                    }
+                    finally
+                    {
+                        hProcess.Dispose();
+                    }
                 }
             }
 

@@ -14,7 +14,7 @@
     <Project Include="XMakeBuildEngine\UnitTests\Microsoft.Build.Engine.UnitTests.csproj" />
   </ItemGroup>
 
-  <Import Project="..\dir.targets" />
+  <Import Project="dir.targets" />
 
   <Import Project="..\dir.traversal.targets" />
 

@@ -999,9 +999,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     this,
                     false,
 #if FEATURE_APPDOMAIN
-                null,
+                    null,
 #endif
-                false,
+                    false,
                     CancellationToken.None
                     );
                 _host.FindTask(null);

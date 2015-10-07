@@ -1077,22 +1077,22 @@ namespace Microsoft.Build.UnitTests
                     ProjectRootElement project = ProjectRootElement.Create();
                     project.Save(filename);
                     MSBuildApp.BuildProject(
-                                                                filename,
-                                                                null,
-                                                                "ScoobyDoo",
-                                                                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-                                                                new ILogger[] { },
-                                                                LoggerVerbosity.Normal,
-                                                                new DistributedLoggerRecord[] { },
+                                        filename,
+                                        null,
+                                        "ScoobyDoo",
+                                        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                                        new ILogger[] { },
+                                        LoggerVerbosity.Normal,
+                                        new DistributedLoggerRecord[] { },
 #if FEATURE_XML_SCHEMA_VALIDATION
                                         false,
-                                                                null,
+                                        null,
 #endif
                                         1,
-                                                                true,
-                                                                new StringWriter(),
-                                                                false,
-                                                                false);
+                                        true,
+                                        new StringWriter(),
+                                        false,
+                                        false);
                 }
                 finally
                 {

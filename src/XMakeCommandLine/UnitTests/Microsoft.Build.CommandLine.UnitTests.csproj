@@ -43,11 +43,13 @@
     <Compile Include="ProjectSchemaValidationHandler_Tests.cs" />
     <Compile Include="XMake_Tests.cs" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.XML" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj">
       <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
       <Name>Microsoft.Build.Utilities</Name>
