@@ -58,6 +58,7 @@
         <dependency id="System.Threading.Thread" version="4.0.0-beta-23225" />
         <dependency id="System.Xml.ReaderWriter" version="4.0.11-beta-23225" />
         <dependency id="System.Xml.XDocument" version="4.0.11-beta-23225" />
+        <dependency id="System.Xml.XmlDocument" version="4.0.0" />
       </group>
     </dependencies>
   </metadata>
