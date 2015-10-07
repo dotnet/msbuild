@@ -991,6 +991,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(success); // "Build Failed.  See Std Out for details."
         }
 
+#if FEATURE_CODETASKFACTORY
         [Fact]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
         {
@@ -1131,6 +1132,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success); // "Build Failed.  See Std Out for details."
         }
+#endif
 
         #region GenerateReferenceAssemblyPath
         [Fact]
