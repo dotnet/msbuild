@@ -1323,12 +1323,12 @@ namespace Microsoft.Build.CommandLine
             {
                 s_exeName += ".exe";
             }
-
-            commandLineArgs.RemoveAt(0);
 #else
             ArrayList commandLineArgs = new ArrayList(commandLine);
             s_exeName = FileUtilities.FixFilePath(Process.GetCurrentProcess().MainModule.FileName);
 #endif
+            // discard the first piece, because that's the path to the executable -- the rest are args
+            commandLineArgs.RemoveAt(0);
 
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
