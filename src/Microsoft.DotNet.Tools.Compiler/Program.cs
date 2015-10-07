@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -110,10 +109,10 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Build csc args
             var cscArgs = new[]
                 {
-                    "/nostdlib",
-                    $"/out:{Path.Combine(outputPath, projectDir.Name + ".dll")}"
+                    "-nostdlib",
+                    $"-out:{Path.Combine(outputPath, projectDir.Name + ".dll")}"
                 }
-                .Concat(references.Select(r => $"/r:{r}"))
+                .Concat(references.Select(r => $"-r:{r}"))
                 .Concat(sources);
             var rsp = Path.Combine(outputPath, "csc.rsp");
             if(File.Exists(rsp))

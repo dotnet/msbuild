@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.Dnx.Runtime;
-using Newtonsoft.Json.Linq;
 
-namespace DotNet.Tools.DependencyResolver
+namespace Microsoft.DotNet.Tools.SourceResolver
 {
     public static class Resolver
     {

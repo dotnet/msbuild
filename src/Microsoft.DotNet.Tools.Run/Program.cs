@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.Tools.Compiler
+namespace Microsoft.DotNet.Tools.Run
 {
     public class Program
     {

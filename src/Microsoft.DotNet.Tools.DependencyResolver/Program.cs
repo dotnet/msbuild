@@ -4,15 +4,16 @@ using System.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using NuGet.Frameworks;
 
-namespace DotNet.Tools.DependencyResolver
+namespace Microsoft.DotNet.Tools.DependencyResolver
 {
     public class Program
     {
         public void Main(string[] args)
         {
             var app = new CommandLineApplication();
-            app.HelpOption("-h|--help");
+            app.Name = "dotnet resolve-references";
             app.Description = "Resolves the absolute path of all dependencies for a project";
+            app.HelpOption("-h|--help");
 
             var packages = app.Option("-p|--packages <PACKAGES_DIRECTORY>", "Path to the directories containing packages to resolve.", CommandOptionType.MultipleValue);
             var framework = app.Option("-f|--framework <FRAMEWORK_NAME>", "The framework to resolve dependencies for.", CommandOptionType.SingleValue);

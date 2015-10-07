@@ -2,15 +2,16 @@
 using System.IO;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 
-namespace DotNet.Tools.DependencyResolver
+namespace Microsoft.DotNet.Tools.SourceResolver
 {
     public class Program
     {
         public void Main(string[] args)
         {
             var app = new CommandLineApplication();
-            app.HelpOption("-h|--help");
+            app.Name = "dotnet resolve-sources";
             app.Description = "Resolves the absolute path of all source files used by a project";
+            app.HelpOption("-h|--help");
 
             var output = app.Option("-o|--output <OUTPUT_FILE>", "The path in which to write the output file (formatted as text with one line per dependency)", CommandOptionType.SingleValue);
             var project = app.Argument("PROJECT", "The project to resolve. A directory or a path to a project.json may be used. Defaults to the current directory");
