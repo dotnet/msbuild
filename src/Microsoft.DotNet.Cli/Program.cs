@@ -11,16 +11,44 @@ namespace Microsoft.DotNet.Cli
             if (args.Length < 1)
             {
                 // Handle missing args
-                Console.Error.WriteLine("TODO: Help");
+                PrintCommandList();
                 return 1;
             }
 
-            return Command.Create("dotnet-" + args[0], args.Skip(1))
-                .ForwardStdErr(Console.Error)
-                .ForwardStdOut(Console.Out)
-                .RunAsync()
-                .Result
-                .ExitCode;
+            if (args[0].Equals("help", StringComparison.OrdinalIgnoreCase))
+            {
+                if (args.Length > 1)
+                {
+                    return Command.Create("dotnet-" + args[1], "--help")
+                        .ForwardStdErr()
+                        .ForwardStdOut()
+                        .RunAsync()
+                        .Result
+                        .ExitCode;
+                }
+                else
+                {
+                    PrintCommandList();
+                    return 0;
+                }
+            }
+            else
+            {
+                return Command.Create("dotnet-" + args[0], args.Skip(1))
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .RunAsync()
+                    .Result
+                    .ExitCode;
+            }
+        }
+
+        private static void PrintCommandList()
+        {
+            Console.WriteLine("Some dotnet Commands (use 'dotnet help <command>' to get help):");
+            Console.WriteLine("* compile - Compiles code");
+            Console.WriteLine("* publish - Publishes a project to a self-contained application");
+            Console.WriteLine("* run - Publishes and immediately runs a project");
         }
     }
 }
