@@ -4,7 +4,7 @@
     "emitEntryPoint": true
   },
   "commands": {
-    "dotnet": "Microsoft.DotNet.Cli"
+    "run": "Microsoft.DotNet.Cli"
   },
   "dependencies": {
     "System.Console": "4.0.0-*",
