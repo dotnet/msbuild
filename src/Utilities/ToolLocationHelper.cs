@@ -2212,10 +2212,12 @@ namespace Microsoft.Build.Utilities
                     Dictionary<TargetPlatformSDK, TargetPlatformSDK> monikers = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                     GatherSDKListFromDirectory(sdkDiskRoots, monikers);
 
+#if FEATURE_REGISTRY_SDKS
                     if (NativeMethodsShared.IsWindows)
                     {
                         GatherSDKListFromRegistry(registryRoot, monikers);
                     }
+#endif
 
                     collection = monikers.Keys.ToList();
                     s_cachedTargetPlatforms.Add(cachedTargetPlatformsKey, collection);
@@ -2414,6 +2416,7 @@ namespace Microsoft.Build.Utilities
             }
         }
 
+#if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Given a registry location enumerate the registry and find the installed SDKs.
         /// </summary>
@@ -2632,6 +2635,7 @@ namespace Microsoft.Build.Utilities
                 GatherSDKsFromRegistryImpl(platformMonikers, registryRoot, RegistryView.Default, RegistryHive.LocalMachine, getSubkeyNames, getRegistrySubKeyDefaultValue, openBaseKey, fileExists);
             }
         }
+#endif
 
         /// <summary>
         /// Get the disk locations to search for sdks under. This can be overridden by an environment variable

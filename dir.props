@@ -195,6 +195,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_PFX_SIGNING</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REGISTRY_TOOLSETS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REGISTRY_SDKS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REGISTRYHIVE_DYNDATA</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RUN_EXE_IN_TESTS</DefineConstants>

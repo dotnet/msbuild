@@ -3516,7 +3516,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
+#if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Setup some fake entries in the registry and verify we get the correct sdk from there.
         /// </summary>
@@ -3619,6 +3619,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
@@ -3746,6 +3747,7 @@ namespace Microsoft.Build.UnitTests
                 targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"]);
         }
 
+#if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
         /// get the expected set out.
@@ -3958,6 +3960,7 @@ namespace Microsoft.Build.UnitTests
                     StringComparison.OrdinalIgnoreCase));
             Assert.True(targetPlatforms[key].ExtensionSDKs.Count == 0);
         }
+#endif
 
         /// <summary>
         /// Make sure if the sdk identifier is null we get an ArgumentNullException because without specifying the
@@ -4101,6 +4104,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for pre-OneCore SDKs during evaluation time as a msbuild function.
         /// </summary>
@@ -4254,6 +4258,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Make a fake SDK structure on disk for testing.
@@ -4568,9 +4573,9 @@ namespace Microsoft.Build.UnitTests
 
             return tempPath;
         }
-        #endregion
+#endregion
 
-        #region HelperMethods
+#region HelperMethods
 
         /// <summary>
         /// Simplified registry access delegate. Given a baseKey and a subKey, get all of the subkey
@@ -4757,6 +4762,6 @@ namespace Microsoft.Build.UnitTests
             return null;
         }
 
-        #endregion
+#endregion
     }
 }
