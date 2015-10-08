@@ -1316,8 +1316,8 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
             ArrayList commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
-            
-            s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote((string)commandLineArgs[0
+
+            s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote((string) commandLineArgs[0]));
 #else
             ArrayList commandLineArgs = new ArrayList(commandLine);
 
