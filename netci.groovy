@@ -5,7 +5,7 @@ import jobs.generation.InternalUtilities;
 
 def project = 'dotnet/cli'
 // Define build strings
-def debugBuildString = '''build.sh'''
+def debugBuildString = '''./build.sh'''
 
 // Generate the builds for debug 
 
