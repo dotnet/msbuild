@@ -95,10 +95,10 @@ namespace Microsoft.Build.Exceptions
             ErrorUtilities.VerifyThrow((errorCode != null) && (errorCode.Length > 0), "Must specify the error message code.");
             ErrorUtilities.VerifyThrow((helpKeyword != null) && (helpKeyword.Length > 0), "Must specify the help keyword for the IDE.");
 
-            _e = e;
-            _errorCode = errorCode;
-            _helpKeyword = helpKeyword;
-            _initializationException = initializationException;
+            this.e = e;
+            this.errorCode = errorCode;
+            this.helpKeyword = helpKeyword;
+            this.initializationException = initializationException;
         }
 
 #if FEATURE_BINARY_SERIALIZATION
@@ -113,10 +113,10 @@ namespace Microsoft.Build.Exceptions
         private InternalLoggerException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            _e = (BuildEventArgs)info.GetValue("e", typeof(BuildEventArgs));
-            _errorCode = info.GetString("errorCode");
-            _helpKeyword = info.GetString("helpKeyword");
-            _initializationException = info.GetBoolean("initializationException");
+            e = (BuildEventArgs)info.GetValue("e", typeof(BuildEventArgs));
+            errorCode = info.GetString("errorCode");
+            helpKeyword = info.GetString("helpKeyword");
+            initializationException = info.GetBoolean("initializationException");
         }
 
         /// <summary>
@@ -130,10 +130,10 @@ namespace Microsoft.Build.Exceptions
         {
             base.GetObjectData(info, context);
 
-            info.AddValue("e", _e);
-            info.AddValue("errorCode", _errorCode);
-            info.AddValue("helpKeyword", _helpKeyword);
-            info.AddValue("initializationException", _initializationException);
+            info.AddValue("e", e);
+            info.AddValue("errorCode", errorCode);
+            info.AddValue("helpKeyword", helpKeyword);
+            info.AddValue("initializationException", initializationException);
         }
 
         /// <summary>
@@ -142,11 +142,11 @@ namespace Microsoft.Build.Exceptions
         [OnDeserializing] // Will happen before the object is deserialized
         private void SetDefaultsBeforeSerialization(StreamingContext sc)
         {
-            _initializationException = false;
+            initializationException = false;
         }
 
         /// <summary>
-        /// Dont actually have anything to do in the method, but the method is required when implementing an optional field
+        /// Don't actually have anything to do in the method, but the method is required when implementing an optional field
         /// </summary>
         [OnDeserialized]
         private void SetValueAfterDeserialization(StreamingContext sx)
@@ -166,7 +166,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _e;
+                return e;
             }
         }
 
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _errorCode;
+                return errorCode;
             }
         }
 
@@ -190,18 +190,18 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _helpKeyword;
+                return helpKeyword;
             }
         }
 
         /// <summary>
-        /// True if the exception occured during logger initialization
+        /// True if the exception occurred during logger initialization
         /// </summary>
         public bool InitializationException
         {
             get
             {
-                return _initializationException;
+                return initializationException;
             }
         }
 
@@ -233,16 +233,16 @@ namespace Microsoft.Build.Exceptions
         }
 
         // the event that was being logged when a logger failed (can be null)
-        private BuildEventArgs _e;
+        private BuildEventArgs e;
         // the error code for this exception's message (not the inner exception)
-        private string _errorCode;
+        private string errorCode;
         // the F1-help keyword for the host IDE
-        private string _helpKeyword;
+        private string helpKeyword;
 
         // This flag is set to indicate that the exception occured during logger initialization
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private bool _initializationException;
+        private bool initializationException;
     }
 }

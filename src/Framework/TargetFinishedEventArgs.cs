@@ -105,18 +105,18 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
-            _targetName = targetName;
-            _succeeded = succeeded;
-            _projectFile = projectFile;
-            _targetFile = targetFile;
-            _targetOutputs = targetOutputs;
+            this.targetName = targetName;
+            this.succeeded = succeeded;
+            this.projectFile = projectFile;
+            this.targetFile = targetFile;
+            this.targetOutputs = targetOutputs;
         }
 
-        private string _projectFile;
-        private string _targetFile;
-        private string _targetName;
-        private bool _succeeded;
-        private IEnumerable _targetOutputs;
+        private string projectFile;
+        private string targetFile;
+        private string targetName;
+        private bool succeeded;
+        private IEnumerable targetOutputs;
 
 #if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
@@ -128,39 +128,39 @@ namespace Microsoft.Build.Framework
         {
             base.WriteToStream(writer);
             #region ProjectFile
-            if (_projectFile == null)
+            if (projectFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_projectFile);
+                writer.Write(projectFile);
             }
             #endregion
             #region TargetFile
-            if (_targetFile == null)
+            if (targetFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_targetFile);
+                writer.Write(targetFile);
             }
             #endregion TargetFile
             #region TargetName
-            if (_targetName == null)
+            if (targetName == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_targetName);
+                writer.Write(targetName);
             }
             #endregion
-            writer.Write(_succeeded);
+            writer.Write(succeeded);
         }
 
         /// <summary>
@@ -174,34 +174,34 @@ namespace Microsoft.Build.Framework
             #region ProjectFile
             if (reader.ReadByte() == 0)
             {
-                _projectFile = null;
+                projectFile = null;
             }
             else
             {
-                _projectFile = reader.ReadString();
+                projectFile = reader.ReadString();
             }
             #endregion
             #region TargetFile
             if (reader.ReadByte() == 0)
             {
-                _targetFile = null;
+                targetFile = null;
             }
             else
             {
-                _targetFile = reader.ReadString();
+                targetFile = reader.ReadString();
             }
             #endregion
             #region TargetName
             if (reader.ReadByte() == 0)
             {
-                _targetName = null;
+                targetName = null;
             }
             else
             {
-                _targetName = reader.ReadString();
+                targetName = reader.ReadString();
             }
             #endregion
-            _succeeded = reader.ReadBoolean();
+            succeeded = reader.ReadBoolean();
         }
         #endregion
 
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _targetName;
+                return targetName;
             }
         }
 
@@ -224,7 +224,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _succeeded;
+                return succeeded;
             }
         }
 
@@ -235,7 +235,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectFile;
+                return projectFile;
             }
         }
 
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _targetFile;
+                return targetFile;
             }
         }
 
@@ -257,12 +257,12 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _targetOutputs;
+                return targetOutputs;
             }
 
             set
             {
-                _targetOutputs = value;
+                targetOutputs = value;
             }
         }
     }

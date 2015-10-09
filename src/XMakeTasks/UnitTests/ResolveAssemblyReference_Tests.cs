@@ -8307,7 +8307,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Simulate a CreateProject resolution. This is primarily for IO monitoring.
         /// </summary>
-        public void SimulateCreateProjectAgainstWhidbey(string fxfolder)
+        public void SimulateCreateProjectAgainstWhidbeyInternal(string fxfolder)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
             // times out the object used for remoting console writes.  Adding a write in the middle of
@@ -8352,7 +8352,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SimulateCreateProjectAgainstWhidbey()
         {
-            SimulateCreateProjectAgainstWhidbey(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45));
+            SimulateCreateProjectAgainstWhidbeyInternal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45));
         }
 
         /// <summary>
@@ -8361,7 +8361,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SimulateCreateProjectAgainstWhidbeyWithTrailingSlash()
         {
-            SimulateCreateProjectAgainstWhidbey(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45) + @"\");
+            SimulateCreateProjectAgainstWhidbeyInternal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45) + @"\");
         }
 
 

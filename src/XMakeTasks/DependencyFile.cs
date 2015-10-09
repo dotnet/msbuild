@@ -16,13 +16,13 @@ namespace Microsoft.Build.Tasks
     internal class DependencyFile
     {
         // Filename
-        private string _filename;
+        private string filename;
 
         // Date and time the file was last modified           
-        private DateTime _lastModified;
+        private DateTime lastModified;
 
         // Whether the file exists or not.
-        private bool _exists = false;
+        private bool exists = false;
 
         /// <summary>
         /// The name of the file.
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         internal string FileName
         {
-            get { return _filename; }
+            get { return filename; }
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         internal DateTime LastModified
         {
-            get { return _lastModified; }
+            get { return lastModified; }
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         internal bool Exists
         {
-            get { return _exists; }
+            get { return exists; }
         }
 
         /// <summary>
@@ -57,16 +57,16 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">The file name.</param>
         internal DependencyFile(string filename)
         {
-            _filename = FileUtilities.FixFilePath(filename);
+            this.filename = FileUtilities.FixFilePath(filename);
 
             if (File.Exists(FileName))
             {
-                _lastModified = File.GetLastWriteTime(FileName);
-                _exists = true;
+                lastModified = File.GetLastWriteTime(FileName);
+                exists = true;
             }
             else
             {
-                _exists = false;
+                exists = false;
             }
         }
 
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal bool HasFileChanged()
         {
-            FileInfo info = FileUtilities.GetFileInfoNoThrow(_filename);
+            FileInfo info = FileUtilities.GetFileInfoNoThrow(filename);
 
             // Obviously if the file no longer exists then we are not up to date.
             if (info == null || !info.Exists)
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks
             // Check the saved timestamp against the current timestamp.
             // If they are different then obviously we are out of date.
             DateTime curLastModified = info.LastWriteTime;
-            if (curLastModified != _lastModified)
+            if (curLastModified != lastModified)
             {
                 return true;
             }

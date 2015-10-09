@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework
 #endif
     public class BuildStartedEventArgs : BuildStatusEventArgs
     {
-        private IDictionary<string, string> _environmentOnBuildStart;
+        private IDictionary<string, string> environmentOnBuildStart;
 
         /// <summary>
         /// Default constructor
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Framework
         )
             : this(message, helpKeyword, DateTime.UtcNow)
         {
-            _environmentOnBuildStart = environmentOfBuild;
+            environmentOnBuildStart = environmentOfBuild;
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public IDictionary<string, string> BuildEnvironment
         {
-            get { return _environmentOnBuildStart; }
+            get { return environmentOnBuildStart; }
         }
     }
 }

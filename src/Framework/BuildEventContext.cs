@@ -22,32 +22,32 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Node event was in 
         /// </summary>
-        private int _nodeId;
+        private int nodeId;
 
         /// <summary>
         /// Target event was in
         /// </summary>
-        private int _targetId;
+        private int targetId;
 
         /// <summary>
         ///The node-unique project request context the event was in
         /// </summary>
-        private int _projectContextId;
+        private int projectContextId;
 
         /// <summary>
         /// Id of the task the event was caused from
         /// </summary>
-        private int _taskId;
+        private int taskId;
 
         /// <summary>
         /// The id of the project instance to which this event refers.
         /// </summary>
-        private int _projectInstanceId;
+        private int projectInstanceId;
 
         /// <summary>
         /// The id of the submission.
         /// </summary>
-        private int _submissionId;
+        private int submissionId;
 
         #endregion
 
@@ -96,12 +96,12 @@ namespace Microsoft.Build.Framework
             int taskId
         )
         {
-            _submissionId = submissionId;
-            _nodeId = nodeId;
-            _targetId = targetId;
-            _projectContextId = projectContextId;
-            _taskId = taskId;
-            _projectInstanceId = projectInstanceId;
+            this.submissionId = submissionId;
+            this.nodeId = nodeId;
+            this.targetId = targetId;
+            this.projectContextId = projectContextId;
+            this.taskId = taskId;
+            this.projectInstanceId = projectInstanceId;
         }
 
         #endregion
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _nodeId;
+                return nodeId;
             }
         }
 
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _targetId;
+                return targetId;
             }
         }
 
@@ -148,7 +148,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectContextId;
+                return projectContextId;
             }
         }
 
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _taskId;
+                return taskId;
             }
         }
 
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectInstanceId;
+                return projectInstanceId;
             }
         }
 
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _submissionId;
+                return submissionId;
             }
         }
 
@@ -192,7 +192,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return ((long)_nodeId << 32) + _projectContextId;
+                return ((long)nodeId << 32) + projectContextId;
             }
         }
 
@@ -289,10 +289,10 @@ namespace Microsoft.Build.Framework
         /// <returns>True if the value fields are the same, false if otherwise</returns>
         private bool InternalEquals(BuildEventContext buildEventContext)
         {
-            return ((_nodeId == buildEventContext.NodeId)
-                   && (_projectContextId == buildEventContext.ProjectContextId)
-                   && (_targetId == buildEventContext.TargetId)
-                   && (_taskId == buildEventContext.TaskId));
+            return ((nodeId == buildEventContext.NodeId)
+                   && (projectContextId == buildEventContext.ProjectContextId)
+                   && (targetId == buildEventContext.TargetId)
+                   && (taskId == buildEventContext.TaskId));
         }
         #endregion
 

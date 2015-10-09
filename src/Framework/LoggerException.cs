@@ -70,8 +70,8 @@ namespace Microsoft.Build.Framework
             : this(message, innerException)
         {
             // We do no verification of these parameters. Any can be null.
-            _errorCode = errorCode;
-            _helpKeyword = helpKeyword;
+            this.errorCode = errorCode;
+            this.helpKeyword = helpKeyword;
         }
 #if FEATURE_BINARY_SERIALIZATION
         #region Serialization (update when adding new class members)
@@ -85,8 +85,8 @@ namespace Microsoft.Build.Framework
         protected LoggerException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            _errorCode = info.GetString("errorCode");
-            _helpKeyword = info.GetString("helpKeyword");
+            errorCode = info.GetString("errorCode");
+            helpKeyword = info.GetString("helpKeyword");
         }
 
         /// <summary>
@@ -102,8 +102,8 @@ namespace Microsoft.Build.Framework
         {
             base.GetObjectData(info, context);
 
-            info.AddValue("errorCode", _errorCode);
-            info.AddValue("helpKeyword", _helpKeyword);
+            info.AddValue("errorCode", errorCode);
+            info.AddValue("helpKeyword", helpKeyword);
         }
 
         #endregion
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _errorCode;
+                return errorCode;
             }
         }
 
@@ -131,15 +131,15 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _helpKeyword;
+                return helpKeyword;
             }
         }
 
         #endregion
 
         // the error code for this exception's message (not the inner exception)
-        private string _errorCode;
+        private string errorCode;
         // the F1-help keyword for the host IDE
-        private string _helpKeyword;
+        private string helpKeyword;
     }
 }

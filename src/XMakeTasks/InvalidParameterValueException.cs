@@ -58,26 +58,26 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-        private string _paramName;
+        private string paramName;
 
         /// <summary>
         /// The name of the parameter.
         /// </summary>
         public string ParamName
         {
-            get { return _paramName; }
-            set { _paramName = value; }
+            get { return paramName; }
+            set { paramName = value; }
         }
 
-        private string _actualValue;
+        private string actualValue;
 
         /// <summary>
         /// The value supplied, that was bad.
         /// </summary>
         public string ActualValue
         {
-            get { return _actualValue; }
-            set { _actualValue = value; }
+            get { return actualValue; }
+            set { actualValue = value; }
         }
     }
 }

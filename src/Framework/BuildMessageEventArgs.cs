@@ -224,57 +224,57 @@ namespace Microsoft.Build.Framework
         )
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
-            _importance = importance;
-            _subcategory = subcategory;
-            _code = code;
-            _file = file;
-            _lineNumber = lineNumber;
-            _columnNumber = columnNumber;
-            _endLineNumber = endLineNumber;
-            _endColumnNumber = endColumnNumber;
+            this.importance = importance;
+            this.subcategory = subcategory;
+            this.code = code;
+            this.file = file;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
+            this.endLineNumber = endLineNumber;
+            this.endColumnNumber = endColumnNumber;
         }
 
-        private MessageImportance _importance;
+        private MessageImportance importance;
 
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private string _subcategory;
+        private string subcategory;
 
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private string _code;
+        private string code;
 
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private string _file;
+        private string file;
 
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private string _projectFile;
+        private string projectFile;
 
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private int _lineNumber;
+        private int lineNumber;
 
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private int _columnNumber;
+        private int columnNumber;
 
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private int _endLineNumber;
+        private int endLineNumber;
 
 #if FEATURE_BINARY_SERIALIZATION
         [OptionalField(VersionAdded = 2)]
 #endif
-        private int _endColumnNumber;
+        private int endColumnNumber;
 
 #if FEATURE_BINARY_SERIALIZATION
         #region CustomSerializationToStream
@@ -285,55 +285,55 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
-            writer.Write((Int32)_importance);
+            writer.Write((Int32)importance);
             #region SubCategory
-            if (_subcategory == null)
+            if (subcategory == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_subcategory);
+                writer.Write(subcategory);
             }
             #endregion
             #region Code
-            if (_code == null)
+            if (code == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_code);
+                writer.Write(code);
             }
             #endregion
             #region File
-            if (_file == null)
+            if (file == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_file);
+                writer.Write(file);
             }
             #endregion
             #region ProjectFile
-            if (_projectFile == null)
+            if (projectFile == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(_projectFile);
+                writer.Write(projectFile);
             }
             #endregion
-            writer.Write((Int32)_lineNumber);
-            writer.Write((Int32)_columnNumber);
-            writer.Write((Int32)_endLineNumber);
-            writer.Write((Int32)_endColumnNumber);
+            writer.Write((Int32)lineNumber);
+            writer.Write((Int32)columnNumber);
+            writer.Write((Int32)endLineNumber);
+            writer.Write((Int32)endColumnNumber);
         }
 
         /// <summary>
@@ -344,7 +344,7 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
-            _importance = (MessageImportance)reader.ReadInt32();
+            importance = (MessageImportance)reader.ReadInt32();
 
             //The data in the stream beyond this point are new to 4.0
             if (version > 20)
@@ -352,47 +352,47 @@ namespace Microsoft.Build.Framework
                 #region SubCategory
                 if (reader.ReadByte() == 0)
                 {
-                    _subcategory = null;
+                    subcategory = null;
                 }
                 else
                 {
-                    _subcategory = reader.ReadString();
+                    subcategory = reader.ReadString();
                 }
                 #endregion
                 #region Code
                 if (reader.ReadByte() == 0)
                 {
-                    _code = null;
+                    code = null;
                 }
                 else
                 {
-                    _code = reader.ReadString();
+                    code = reader.ReadString();
                 }
                 #endregion
                 #region File
                 if (reader.ReadByte() == 0)
                 {
-                    _file = null;
+                    file = null;
                 }
                 else
                 {
-                    _file = reader.ReadString();
+                    file = reader.ReadString();
                 }
                 #endregion
                 #region ProjectFile
                 if (reader.ReadByte() == 0)
                 {
-                    _projectFile = null;
+                    projectFile = null;
                 }
                 else
                 {
-                    _projectFile = reader.ReadString();
+                    projectFile = reader.ReadString();
                 }
                 #endregion
-                _lineNumber = reader.ReadInt32();
-                _columnNumber = reader.ReadInt32();
-                _endLineNumber = reader.ReadInt32();
-                _endColumnNumber = reader.ReadInt32();
+                lineNumber = reader.ReadInt32();
+                columnNumber = reader.ReadInt32();
+                endLineNumber = reader.ReadInt32();
+                endColumnNumber = reader.ReadInt32();
             }
         }
         #endregion
@@ -405,7 +405,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _importance;
+                return importance;
             }
         }
 
@@ -416,7 +416,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _subcategory;
+                return subcategory;
             }
         }
 
@@ -427,7 +427,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _code;
+                return code;
             }
         }
 
@@ -438,7 +438,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _file;
+                return file;
             }
         }
 
@@ -449,7 +449,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _lineNumber;
+                return lineNumber;
             }
         }
 
@@ -460,7 +460,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _columnNumber;
+                return columnNumber;
             }
         }
 
@@ -471,7 +471,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _endLineNumber;
+                return endLineNumber;
             }
         }
 
@@ -482,7 +482,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _endColumnNumber;
+                return endColumnNumber;
             }
         }
 
@@ -493,12 +493,12 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return _projectFile;
+                return projectFile;
             }
 
             set
             {
-                _projectFile = value;
+                projectFile = value;
             }
         }
     }

@@ -45,7 +45,7 @@ namespace Microsoft.Build.CommandLine
         ) :
             this(message)
         {
-            _commandLineArg = commandLineArg;
+            this.commandLineArg = commandLineArg;
         }
 
 
@@ -63,7 +63,7 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
-            _commandLineArg = info.GetString("commandLineArg");
+            commandLineArg = info.GetString("commandLineArg");
         }
 #endif
 
@@ -74,13 +74,13 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                if (_commandLineArg == null)
+                if (commandLineArg == null)
                 {
                     return base.Message;
                 }
                 else
                 {
-                    return base.Message + Environment.NewLine + ResourceUtilities.FormatResourceString("InvalidSwitchIndicator", _commandLineArg);
+                    return base.Message + Environment.NewLine + ResourceUtilities.FormatResourceString("InvalidSwitchIndicator", commandLineArg);
                 }
             }
         }
@@ -93,12 +93,12 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                return _commandLineArg;
+                return commandLineArg;
             }
         }
 
         // the invalid switch causing this exception
-        private string _commandLineArg;
+        private string commandLineArg;
 
 #if FEATURE_BINARY_SERIALIZATION
         /// <summary>
@@ -111,7 +111,7 @@ namespace Microsoft.Build.CommandLine
         {
             base.GetObjectData(info, context);
 
-            info.AddValue("commandLineArg", _commandLineArg, typeof(string));
+            info.AddValue("commandLineArg", commandLineArg, typeof(string));
         }
 #endif
 

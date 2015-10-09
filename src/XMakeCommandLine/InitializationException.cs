@@ -58,7 +58,7 @@ namespace Microsoft.Build.CommandLine
         ) :
             this(message)
         {
-            _invalidSwitch = invalidSwitch;
+            this.invalidSwitch = invalidSwitch;
         }
 
 #if FEATURE_BINARY_SERIALIZATION
@@ -75,7 +75,7 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
-            _invalidSwitch = info.GetString("invalidSwitch");
+            invalidSwitch = info.GetString("invalidSwitch");
         }
 #endif
 
@@ -86,19 +86,19 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                if (_invalidSwitch == null)
+                if (invalidSwitch == null)
                 {
                     return base.Message;
                 }
                 else
                 {
-                    return base.Message + Environment.NewLine + ResourceUtilities.FormatResourceString("InvalidSwitchIndicator", _invalidSwitch);
+                    return base.Message + Environment.NewLine + ResourceUtilities.FormatResourceString("InvalidSwitchIndicator", invalidSwitch);
                 }
             }
         }
 
         // the invalid switch causing this exception (can be null)
-        private string _invalidSwitch;
+        private string invalidSwitch;
 
 #if FEATURE_BINARY_SERIALIZATION
         /// <summary>
@@ -111,7 +111,7 @@ namespace Microsoft.Build.CommandLine
         {
             base.GetObjectData(info, context);
 
-            info.AddValue("invalidSwitch", _invalidSwitch, typeof(string));
+            info.AddValue("invalidSwitch", invalidSwitch, typeof(string));
         }
 #endif
 

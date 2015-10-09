@@ -21,7 +21,7 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// The MSBuild error code corresponding with this exception.
         /// </summary>
-        private string _errorCode = null;
+        private string errorCode = null;
 
         /// <summary>
         /// Basic constructor.
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Exceptions
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
-            _errorCode = info.GetString("errorCode");
+            errorCode = info.GetString("errorCode");
         }
 #endif
 
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Exceptions
         public InvalidToolsetDefinitionException(string message, string errorCode)
             : base(message)
         {
-            _errorCode = errorCode;
+            this.errorCode = errorCode;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Exceptions
         public InvalidToolsetDefinitionException(string message, string errorCode, Exception innerException)
             : base(message, innerException)
         {
-            _errorCode = errorCode;
+            this.errorCode = errorCode;
         }
 
 #if FEATURE_BINARY_SERIALIZATION
@@ -102,7 +102,7 @@ namespace Microsoft.Build.Exceptions
 
             base.GetObjectData(info, context);
 
-            info.AddValue("errorCode", _errorCode);
+            info.AddValue("errorCode", errorCode);
         }
 #endif
 
@@ -114,7 +114,7 @@ namespace Microsoft.Build.Exceptions
         {
             get
             {
-                return _errorCode;
+                return errorCode;
             }
         }
 
