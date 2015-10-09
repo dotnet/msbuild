@@ -3726,7 +3726,7 @@ namespace Microsoft.Build.UnitTests
                 targetPlatforms[key].Path);
             Assert.Equal(0, targetPlatforms[key].ExtensionSDKs.Count);
             Assert.Equal(3, targetPlatforms[key].Platforms.Count);
-            Assert.True(targetPlatforms[key].ContainsPlatform("Twilight", "0.1.2.3"));
+            Assert.True(targetPlatforms[key].ContainsPlatform("PlatformAssembly", "0.1.2.3"));
             Assert.Equal(
                 Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3" })
                 + Path.DirectorySeparatorChar,
