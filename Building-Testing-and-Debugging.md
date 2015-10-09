@@ -4,6 +4,9 @@
 **Microsoft Visual Studio 2015 **
 
 This version of MSBuild closely aligns to the version that ships with Visual Studio 2015. You may be able to build and debug with Visual Studio 2013, but using Visual Studio 2015 is recommended. You can download the community edition from [https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx).
+
+> MSBuild requires that you have the Windows SDK plugin installed with Visual Studio 2015. Make sure you have the plugin selected when installing Visual Studio (you can also modify your existing VS installation by running the installer again). ![](https://cloud.githubusercontent.com/assets/3347530/10229970/69396342-6840-11e5-8ef6-1f4434c4b36f.png)
+
 > Please note this is intending as a standalone build engine, not integrated with Visual Studio. We may add support/documentation for that scenario if we see community interest for it.
 
 ## Getting the code
