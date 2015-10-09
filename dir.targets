@@ -11,6 +11,13 @@
     <Message Importance="High" Text="Build binary target directory: '$(BaseOutputPathWithConfig)'" />
   </Target>
 
+  <!-- See https://github.com/Microsoft/msbuild/issues/224 -->
+  <Target Name="EnsureSDKTargetPresent"
+          AfterTargets="_DisplayBuildInfo" >
+    <Error Condition="!Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\Microsoft.NuGet.ImportAfter.targets')" 
+      Text="MSBuild depends on the 'Tools and Windows SDK' Visual Studio plugin. Please install it. Reference: https://github.com/Microsoft/msbuild/wiki/Building+Testing+and+Debugging" />
+  </Target>
+
   <Target Name="_CopyCompilers"
           AfterTargets="_RestoreBuildToolsWrapper"
           Condition="Exists($(BuildToolsSemaphore))">
@@ -47,7 +54,6 @@
              BuildInParallel="true" />
   </Target>
           
-  
   <Target Name="EnsurePrerequisitesCopied"
           BeforeTargets="Build"
           Condition="'$(IsTestProject)' == 'true'">
