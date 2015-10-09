@@ -76,6 +76,11 @@
           Condition="'$(NetCoreBuild)' == 'true'" />
   </Target>
 
+  <Target Name="EnsureSDKTargetPresent"
+          BeforeTargets="_RestoreBuildToolsWrapper" >
+    <Error Condition="!Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\Microsoft.NuGet.ImportAfter.targets')" 
+      Text="MSBuild depends on the 'Tools and Windows SDK' Visual Studio plugin. Please install it. Reference: https://github.com/Microsoft/msbuild/wiki/Building+Testing+and+Debugging" />
+  </Target>
+  
   <Import Project="$(NuGetConfigDir)\packageLoad.targets" />
-
 </Project>
