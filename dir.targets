@@ -154,4 +154,11 @@
     <Exec Command="$(PackagesDir)\xunit.runner.console.$(XunitVersion)\tools\xunit.console.x86.exe @(MainAssembly, ' ') -noshadow -parallel none -xml %(MainAssembly.FullPath)_TestResults.xml -html %(MainAssembly.FullPath)_TestResults.html > %(MainAssembly.FullPath)_stdout.txt" />
   </Target>
 
+  <!-- See https://github.com/Microsoft/msbuild/issues/224 -->
+  <Target Name="EnsureSDKTargetPresent"
+          BeforeTargets="_RestoreBuildToolsWrapper" >
+    <Error Condition="!Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\Microsoft.NuGet.ImportAfter.targets')" 
+      Text="MSBuild depends on the 'Tools and Windows SDK' Visual Studio plugin. Please install it. Reference: https://github.com/Microsoft/msbuild/wiki/Building+Testing+and+Debugging" />
+  </Target>
+
 </Project>
