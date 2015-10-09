@@ -365,7 +365,11 @@ namespace Microsoft.Build.UnitTests
                 SharedDotNetFrameworkArchitecture.Current
             );
 
+#if FEATURE_INSTALLED_MSBUILD
             Assert.Equal(Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName), path);
+#else
+            Assert.Null(path);
+#endif
         }
 
         /*
