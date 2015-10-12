@@ -93,6 +93,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Tests serialization with no exception in the result.
         /// </summary>
@@ -130,6 +131,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
             Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
         }
+#endif
 
         /// <summary>
         /// Test GetCacheDirectory is resilient to paths with strings that would normally make string.format to throw a FormatException
