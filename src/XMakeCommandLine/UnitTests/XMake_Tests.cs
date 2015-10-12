@@ -682,7 +682,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         if (Directory.Exists(path))
                         {
-                            Directory.Delete(path, true /*and files*/);
+                            FileUtilities.DeleteWithoutTrailingBackslash(path, true /*and files*/);
                         }
                         else if (File.Exists(path))
                         {
@@ -934,7 +934,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(currentDirectory);
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -966,7 +966,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -997,7 +997,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1071,11 +1071,11 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
 
                 File.Delete(exePath);
                 File.Delete(mainRspPath);
-                Directory.Delete(exeDirectory);
+                FileUtilities.DeleteWithoutTrailingBackslash(exeDirectory);
             }
         }
 
@@ -1112,7 +1112,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(projectPath);
                 File.Delete(rspPath);
                 File.Delete(exePath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1143,7 +1143,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1174,7 +1174,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1201,7 +1201,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 File.Delete(projectPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 #endif

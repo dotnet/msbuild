@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) Directory.Delete(newTmp);
+                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
             }
         }
 
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) Directory.Delete(newTmp);
+                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
             }
         }
 
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) Directory.Delete(newTmp);
+                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
             }
         }
 
@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) Directory.Delete(newTmp);
+                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
             }
         }
 
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 if (Directory.Exists(folder))
-                    Directory.Delete(folder, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(folder, true);
             }
         }
 

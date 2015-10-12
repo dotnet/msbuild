@@ -600,8 +600,8 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Directory.Delete(workingPathSubfolder);
-                Directory.Delete(workingPath);
+                FileUtilities.DeleteWithoutTrailingBackslash(workingPathSubfolder);
+                FileUtilities.DeleteWithoutTrailingBackslash(workingPath);
             }
         }
 
@@ -623,7 +623,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 File.Delete(fileName);
-                Directory.Delete(workingPath);
+                FileUtilities.DeleteWithoutTrailingBackslash(workingPath);
             }
 
             string result = String.Join(", ", files);
@@ -652,7 +652,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Directory.Delete(workingPath, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(workingPath, true);
             }
 
             string result = String.Join(", ", files);

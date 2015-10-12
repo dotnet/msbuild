@@ -1124,7 +1124,7 @@ namespace Microsoft.Build.UnitTests
         {
             try
             {
-                Directory.Delete(dir, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(dir, true);
             }
             catch
             {

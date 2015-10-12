@@ -2932,7 +2932,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 if (Directory.Exists(directoryForTest))
                 {
-                    Directory.Delete(directoryForTest, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(directoryForTest, true);
                 }
                 else
                 {
@@ -2962,7 +2962,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 if (Directory.Exists(directoryForTest))
                 {
-                    Directory.Delete(directoryForTest, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(directoryForTest, true);
                 }
             }
         }

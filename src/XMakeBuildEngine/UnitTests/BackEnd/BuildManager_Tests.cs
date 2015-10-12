@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Delete directory with the dummy project
             if (Directory.Exists(shutdownProjectDirectory))
             {
-                Directory.Delete(shutdownProjectDirectory, true /* recursive delete */);
+                FileUtilities.DeleteWithoutTrailingBackslash(shutdownProjectDirectory, true /* recursive delete */);
             }
         }
 
@@ -1634,7 +1634,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", String.Empty);
             }
 
-            Directory.Delete(tempDir, true);
+            FileUtilities.DeleteWithoutTrailingBackslash(tempDir, true);
             Assert.False(Directory.Exists(tempDir)); // "Temp directory should no longer exist."
         }
 

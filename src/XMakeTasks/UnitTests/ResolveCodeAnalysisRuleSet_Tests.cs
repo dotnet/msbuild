@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
 
             public void Dispose()
             {
-                Directory.Delete(_path, recursive: true);
+                FileUtilities.DeleteWithoutTrailingBackslash(_path, recursive: true);
             }
         }
 

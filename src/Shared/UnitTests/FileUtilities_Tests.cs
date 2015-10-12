@@ -737,7 +737,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 File.Delete(path);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 

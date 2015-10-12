@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Directory.Delete(dir);
+                FileUtilities.DeleteWithoutTrailingBackslash(dir);
             }
         }
 
@@ -105,9 +105,9 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Directory.Delete(dir);
+                FileUtilities.DeleteWithoutTrailingBackslash(dir);
                 File.Delete(file);
-                Directory.Delete(dir2);
+                FileUtilities.DeleteWithoutTrailingBackslash(dir2);
             }
         }
 
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Directory.Delete(dir);
+                FileUtilities.DeleteWithoutTrailingBackslash(dir);
             }
         }
 

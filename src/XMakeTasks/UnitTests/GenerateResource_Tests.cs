@@ -2295,7 +2295,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             {
                 if (txtFile != null) File.Delete(txtFile);
                 if (resourcesFile != null) File.Delete(resourcesFile);
-                if (dir != null) Directory.Delete(dir);
+                if (dir != null) FileUtilities.DeleteWithoutTrailingBackslash(dir);
             }
         }
 

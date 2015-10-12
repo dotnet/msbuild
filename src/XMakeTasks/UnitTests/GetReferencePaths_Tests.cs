@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(framework41Directory))
                 {
-                    Directory.Delete(framework41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework41Directory, true);
                 }
             }
         }
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(framework41Directory))
                 {
-                    Directory.Delete(framework41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework41Directory, true);
                 }
             }
         }
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(framework41Directory))
                 {
-                    Directory.Delete(framework41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework41Directory, true);
                 }
             }
         }
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(framework41Directory))
                 {
-                    Directory.Delete(framework41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework41Directory, true);
                 }
             }
         }

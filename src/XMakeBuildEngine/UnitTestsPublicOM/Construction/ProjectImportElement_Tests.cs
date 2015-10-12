@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 if (Directory.Exists(testTempPath))
                 {
-                    Directory.Delete(testTempPath, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(testTempPath, true);
                 }
 
                 if (File.Exists(targetsFile))
