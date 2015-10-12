@@ -809,6 +809,18 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Deletes a directory, ensuring that Directory.Delete does not get a path ending in a slash.
+        /// </summary>
+        /// <remarks>
+        /// This is a workaround for https://github.com/dotnet/corefx/issues/3780, which clashed with a common
+        /// pattern in our tests.
+        /// </remarks>
+        internal static void DeleteWithoutTrailingBackslash(string path, bool recursive = false)
+        {
+            Directory.Delete(EnsureNoTrailingSlash(path), recursive);
+        }
+
+        /// <summary>
         /// A variation of Path.IsRooted that not throw any IO exception.
         /// </summary>
         internal static bool IsRootedNoThrow(string path)
