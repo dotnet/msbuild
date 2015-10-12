@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
 using System.IO;
+using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.Preprocessor
@@ -780,7 +781,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 File.Delete(xml1.FullPath);
                 File.Delete(xml2.FullPath);
                 File.Delete(xml3.FullPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 

@@ -10282,7 +10282,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (Directory.Exists(testPath))
                 {
-                    Directory.Delete(testPath);
+                    FileUtilities.DeleteWithoutTrailingBackslash(testPath);
                 }
             }
         }
@@ -10319,7 +10319,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (Directory.Exists(testPath))
                 {
-                    Directory.Delete(testPath);
+                    FileUtilities.DeleteWithoutTrailingBackslash(testPath);
                 }
             }
         }
@@ -10357,7 +10357,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (Directory.Exists(testPath))
                 {
-                    Directory.Delete(testPath);
+                    FileUtilities.DeleteWithoutTrailingBackslash(testPath);
                 }
             }
         }
@@ -12139,7 +12139,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (Directory.Exists(testPath))
                 {
-                    Directory.Delete(testPath);
+                    FileUtilities.DeleteWithoutTrailingBackslash(testPath);
                 }
             }
         }
@@ -13670,7 +13670,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                Directory.Delete(frameworkDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(frameworkDirectory, true);
             }
         }
 
@@ -13696,7 +13696,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                Directory.Delete(frameworkDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(frameworkDirectory, true);
             }
         }
 
@@ -15956,7 +15956,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 if (Directory.Exists(fullFrameworkDirectory))
                 {
-                    Directory.Delete(fullFrameworkDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(fullFrameworkDirectory, true);
                 }
             }
         }
@@ -16005,7 +16005,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 if (Directory.Exists(fullFrameworkDirectory))
                 {
-                    Directory.Delete(fullFrameworkDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(fullFrameworkDirectory, true);
                 }
             }
         }
@@ -16050,7 +16050,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 if (Directory.Exists(fullFrameworkDirectory))
                 {
-                    Directory.Delete(fullFrameworkDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(fullFrameworkDirectory, true);
                 }
             }
         }
@@ -16100,7 +16100,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 if (Directory.Exists(fullFrameworkDirectory))
                 {
-                    Directory.Delete(fullFrameworkDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(fullFrameworkDirectory, true);
                 }
             }
         }
@@ -16153,7 +16153,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 useFrameworkFileExists = false;
                 if (Directory.Exists(fullFrameworkDirectory))
                 {
-                    Directory.Delete(fullFrameworkDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(fullFrameworkDirectory, true);
                 }
             }
         }
@@ -16207,7 +16207,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 if (Directory.Exists(fullFrameworkDirectory))
                 {
-                    Directory.Delete(fullFrameworkDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(fullFrameworkDirectory, true);
                 }
             }
         }
@@ -16221,7 +16221,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistDirectory = Path.GetDirectoryName(fullRedistList);
             if (Directory.Exists(redistDirectory))
             {
-                Directory.Delete(redistDirectory);
+                FileUtilities.DeleteWithoutTrailingBackslash(redistDirectory);
             }
 
             Directory.CreateDirectory(redistDirectory);
@@ -16233,7 +16233,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             redistDirectory = Path.GetDirectoryName(profileRedistList);
             if (Directory.Exists(redistDirectory))
             {
-                Directory.Delete(redistDirectory);
+                FileUtilities.DeleteWithoutTrailingBackslash(redistDirectory);
             }
 
             Directory.CreateDirectory(redistDirectory);

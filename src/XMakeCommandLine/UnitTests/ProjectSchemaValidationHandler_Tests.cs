@@ -305,7 +305,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     try
                     {
-                        Directory.Delete(msbuildXsdSubDirectory, true /* recursive */);
+                        FileUtilities.DeleteWithoutTrailingBackslash(msbuildXsdSubDirectory, true /* recursive */);
                         break;
                     }
                     catch (Exception)

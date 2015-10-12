@@ -587,7 +587,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             finally
             {
-                Directory.Delete(directory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory, true);
             }
         }
 
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             finally
             {
-                Directory.Delete(directory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory, true);
             }
         }
 

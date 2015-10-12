@@ -565,11 +565,11 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
+#if FEATURE_RUN_EXE_IN_TESTS
         /// <summary>
         /// Invalid configuration file should not dump stack.
         /// </summary>
         [Fact(Skip = "Ignored in MSTest")]
-
         // Ignore: Test requires installed toolset.
         public void ConfigurationInvalid()
         {
@@ -667,6 +667,7 @@ namespace Microsoft.Build.UnitTests
             // if there's not, we will catch when we try to read the toolsets. Either is fine; we just want to not crash.
             Assert.True(output.Contains("MSB1043") || output.Contains("MSB4136"));
         }
+#endif
 
         /// <summary>
         /// Try hard to delete a file or directory specified
@@ -681,7 +682,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         if (Directory.Exists(path))
                         {
-                            Directory.Delete(path, true /*and files*/);
+                            FileUtilities.DeleteWithoutTrailingBackslash(path, true /*and files*/);
                         }
                         else if (File.Exists(path))
                         {
@@ -698,6 +699,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if FEATURE_RUN_EXE_IN_TESTS
         /// <summary>
         /// Run the process and get stdout and stderr
         /// </summary>
@@ -750,6 +752,7 @@ namespace Microsoft.Build.UnitTests
 
             return output;
         }
+#endif
 
         /// <summary>
         /// Tests that the environment gets passed on to the node during build.
@@ -851,6 +854,7 @@ namespace Microsoft.Build.UnitTests
         private string _pathToArbitraryBogusFile = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
 #endif
 
+#if FEATURE_RUN_EXE_IN_TESTS
         /// <summary>
         /// Basic case
         /// </summary>
@@ -930,7 +934,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(currentDirectory);
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -962,7 +966,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -993,7 +997,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1025,7 +1029,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1067,11 +1071,11 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
 
                 File.Delete(exePath);
                 File.Delete(mainRspPath);
-                Directory.Delete(exeDirectory);
+                FileUtilities.DeleteWithoutTrailingBackslash(exeDirectory);
             }
         }
 
@@ -1108,7 +1112,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(projectPath);
                 File.Delete(rspPath);
                 File.Delete(exePath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1139,7 +1143,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1170,7 +1174,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectPath);
                 File.Delete(rspPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -1197,9 +1201,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 File.Delete(projectPath);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
+#endif
 
         #region IgnoreProjectExtensionTests
 

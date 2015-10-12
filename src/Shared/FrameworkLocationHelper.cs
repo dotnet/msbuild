@@ -612,6 +612,7 @@ namespace Microsoft.Build.Shared
             return GetDotNetFrameworkSpec(version).GetPathToDotNetFramework(architecture);
         }
 
+#if FEATURE_INSTALLED_MSBUILD
         /// <summary>
         /// Check the registry key and value to see if the .net Framework is installed on the machine.
         /// </summary>
@@ -642,6 +643,7 @@ namespace Microsoft.Build.Shared
 
             return true;
         }
+#endif
 
         /// <summary>
         /// Heuristic that first considers the current runtime path and then searches the base of that path for the given
@@ -1386,6 +1388,9 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetPathToDotNetFramework(DotNetFrameworkArchitecture architecture)
             {
+#if !FEATURE_INSTALLED_MSBUILD
+                return null;
+#else
                 string cachedPath;
                 if (this.pathsToDotNetFramework.TryGetValue(architecture, out cachedPath))
                 {
@@ -1428,6 +1433,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 return generatedPathToDotNetFramework;
+#endif
             }
 
             /// <summary>

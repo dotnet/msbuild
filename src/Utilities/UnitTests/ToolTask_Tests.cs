@@ -548,21 +548,21 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("x", startInfo.EnvironmentVariables[userVarName]);
             Assert.Equal(String.Empty, startInfo.EnvironmentVariables["path"]);
 #endif
+
             if (NativeMethodsShared.IsWindows)
             {
-                Assert.True(
-                    String.Equals(
+                Assert.Equal(
 #if FEATURE_SPECIAL_FOLDERS
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 #else
-                        FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System),
+                        FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles),
 #endif
 #if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
                         startInfo.Environment["programfiles"],
 #else
                         startInfo.EnvironmentVariables["programfiles"],
 #endif
-                        StringComparison.OrdinalIgnoreCase));
+                        true);
             }
         }
 

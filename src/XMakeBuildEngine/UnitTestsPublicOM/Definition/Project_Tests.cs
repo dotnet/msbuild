@@ -1586,7 +1586,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     File.Delete(filePathToRemove);
                 }
 
-                Directory.Delete(testFileRoot);
+                FileUtilities.DeleteWithoutTrailingBackslash(testFileRoot);
             }
         }
 
@@ -2317,7 +2317,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                Directory.Delete(directory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory, true);
             }
         }
 
@@ -2439,7 +2439,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 // Delete the temp directory that was created above.
                 if (Directory.Exists(myTempDir))
                 {
-                    Directory.Delete(myTempDir, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(myTempDir, true);
                 }
             }
         }

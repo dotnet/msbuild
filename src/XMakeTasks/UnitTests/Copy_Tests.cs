@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(source2);
                 File.Delete(destination1);
                 File.Delete(destination2);
-                Directory.Delete(destinationFolder, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(destinationFolder, true);
             }
         }
 
@@ -2015,7 +2015,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(sourceFile);
                 File.Delete(destFile);
-                Directory.Delete(destFolder, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
 
@@ -2105,7 +2105,7 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(sourceFile);
                 File.Delete(destFile);
-                Directory.Delete(destFolder, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
     }

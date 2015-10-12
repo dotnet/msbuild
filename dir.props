@@ -160,7 +160,7 @@
 
     <!-- Setting this to false stops the AppX targets, which aren't supported on .NET Core, from beeing imported -->
     <WindowsAppContainer>false</WindowsAppContainer>
-    
+
   </PropertyGroup>
 
   <PropertyGroup>
@@ -198,6 +198,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HANDLEREF</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HTTP_LISTENER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_INSTALLED_MSBUILD</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MEMORYSTREAM_GETBUFFER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_PARALLEL_BUILD</DefineConstants>
@@ -205,8 +206,10 @@
     <DefineConstants>$(DefineConstants);FEATURE_PFX_SIGNING</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REGISTRY_TOOLSETS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REGISTRY_SDKS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_REGISTRYHIVE_DYNDATA</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RUN_EXE_IN_TESTS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PRINCIPAL_WINDOWS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SPECIAL_FOLDERS</DefineConstants>
@@ -240,7 +243,7 @@
     <!-- This means that msbuild should (as much as possible) be xcopy deployable and not depend on anything
          installed in the program files directory or other machine state. -->
     <DefineConstants>$(DefineConstants);FEATURE_APPLOCAL_MSBUILD</DefineConstants>
-    
+
     <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
   </PropertyGroup>
 

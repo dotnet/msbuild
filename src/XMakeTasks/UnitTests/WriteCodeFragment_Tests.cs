@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(file, task.OutputFile.ItemSpec);
             Assert.Equal(true, File.Exists(file));
 
-            Directory.Delete(folder, true);
+            FileUtilities.DeleteWithoutTrailingBackslash(folder, true);
         }
 
         /// <summary>

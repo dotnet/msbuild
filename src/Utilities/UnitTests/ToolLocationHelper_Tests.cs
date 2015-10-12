@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(tempDirectory))
                 {
-                    Directory.Delete(tempDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
                 }
             }
         }
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(tempDirectory))
                 {
-                    Directory.Delete(tempDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
                 }
             }
         }
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(tempDirectory))
                 {
-                    Directory.Delete(tempDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
                 }
             }
         }
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(tempDirectory))
                 {
-                    Directory.Delete(tempDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
                 }
             }
         }
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(tempDirectory))
                 {
-                    Directory.Delete(tempDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
                 }
             }
         }
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(tempDirectory))
                 {
-                    Directory.Delete(tempDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
                 }
             }
         }
@@ -328,7 +328,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(tempDirectory))
                 {
-                    Directory.Delete(tempDirectory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(tempDirectory, true);
                 }
             }
         }
@@ -365,7 +365,11 @@ namespace Microsoft.Build.UnitTests
                 SharedDotNetFrameworkArchitecture.Current
             );
 
+#if FEATURE_INSTALLED_MSBUILD
             Assert.Equal(Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName), path);
+#else
+            Assert.Null(path);
+#endif
         }
 
         /*
@@ -468,7 +472,7 @@ namespace Microsoft.Build.UnitTests
                     SharedDotNetFrameworkArchitecture.Current
                 );
 
-            Directory.Delete(fakeEverettPath);
+            FileUtilities.DeleteWithoutTrailingBackslash(fakeEverettPath);
             Assert.Equal(null, path);
         }
 
@@ -991,6 +995,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(success); // "Build Failed.  See Std Out for details."
         }
 
+#if FEATURE_CODETASKFACTORY
         [Fact]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
         {
@@ -1131,6 +1136,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(success); // "Build Failed.  See Std Out for details."
         }
+#endif
 
         #region GenerateReferenceAssemblyPath
         [Fact]
@@ -1290,12 +1296,12 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(redist40Directory))
                 {
-                    Directory.Delete(redist40Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(redist40Directory, true);
                 }
 
                 if (Directory.Exists(redist41Directory))
                 {
-                    Directory.Delete(redist41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
                 }
             }
         }
@@ -1325,7 +1331,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(redist41Directory))
                 {
-                    Directory.Delete(redist41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
                 }
             }
         }
@@ -1355,7 +1361,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(redist41Directory))
                 {
-                    Directory.Delete(redist41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
                 }
             }
         }
@@ -1385,7 +1391,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(redist41Directory))
                 {
-                    Directory.Delete(redist41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
                 }
             }
         }
@@ -1415,7 +1421,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     if (Directory.Exists(redist40Directory))
                     {
-                        Directory.Delete(redist40Directory, true);
+                        FileUtilities.DeleteWithoutTrailingBackslash(redist40Directory, true);
                     }
                 }
             }
@@ -1448,7 +1454,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(redist41Directory))
                 {
-                    Directory.Delete(redist41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
                 }
             }
         }
@@ -1483,7 +1489,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     if (Directory.Exists(redist41Directory))
                     {
-                        Directory.Delete(redist41Directory, true);
+                        FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
                     }
                 }
             }
@@ -1518,7 +1524,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     if (Directory.Exists(redist41Directory))
                     {
-                        Directory.Delete(redist41Directory, true);
+                        FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
                     }
                 }
             }
@@ -1584,17 +1590,17 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(framework41Directory))
                 {
-                    Directory.Delete(framework41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework41Directory, true);
                 }
 
                 if (Directory.Exists(framework40Directory))
                 {
-                    Directory.Delete(framework40Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework40Directory, true);
                 }
 
                 if (Directory.Exists(framework39Directory))
                 {
-                    Directory.Delete(framework39Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework39Directory, true);
                 }
             }
         }
@@ -1645,12 +1651,12 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(framework40Directory))
                 {
-                    Directory.Delete(framework40Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework40Directory, true);
                 }
 
                 if (Directory.Exists(framework39Directory))
                 {
-                    Directory.Delete(framework39Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework39Directory, true);
                 }
             }
         }
@@ -1703,12 +1709,12 @@ namespace Microsoft.Build.UnitTests
             {
                 if (Directory.Exists(framework41Directory))
                 {
-                    Directory.Delete(framework41Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework41Directory, true);
                 }
 
                 if (Directory.Exists(framework40Directory))
                 {
-                    Directory.Delete(framework40Directory, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(framework40Directory, true);
                 }
             }
         }
@@ -3102,8 +3108,8 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Directory.Delete(frameworkPath, true /* for recursive deletion */);
-                Directory.Delete(frameworkPath2, true /* for recursive deletion */);
+                FileUtilities.DeleteWithoutTrailingBackslash(frameworkPath, true /* for recursive deletion */);
+                FileUtilities.DeleteWithoutTrailingBackslash(frameworkPath2, true /* for recursive deletion */);
             }
         }
         /// <summary>
@@ -3239,7 +3245,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Directory.Delete(manifestPath, true /* for recursive deletion */);
+                FileUtilities.DeleteWithoutTrailingBackslash(manifestPath, true /* for recursive deletion */);
             }
         }
 
@@ -3299,7 +3305,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                Directory.Delete(manifestPath, true /* for recursive deletion */);
+                FileUtilities.DeleteWithoutTrailingBackslash(manifestPath, true /* for recursive deletion */);
             }
         }
 
@@ -3514,7 +3520,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
+#if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Setup some fake entries in the registry and verify we get the correct sdk from there.
         /// </summary>
@@ -3617,6 +3623,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
@@ -3723,7 +3730,7 @@ namespace Microsoft.Build.UnitTests
                 targetPlatforms[key].Path);
             Assert.Equal(0, targetPlatforms[key].ExtensionSDKs.Count);
             Assert.Equal(3, targetPlatforms[key].Platforms.Count);
-            Assert.True(targetPlatforms[key].ContainsPlatform("Twilight", "0.1.2.3"));
+            Assert.True(targetPlatforms[key].ContainsPlatform("PlatformAssembly", "0.1.2.3"));
             Assert.Equal(
                 Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3" })
                 + Path.DirectorySeparatorChar,
@@ -3744,6 +3751,7 @@ namespace Microsoft.Build.UnitTests
                 targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"]);
         }
 
+#if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we 
         /// get the expected set out.
@@ -3956,6 +3964,7 @@ namespace Microsoft.Build.UnitTests
                     StringComparison.OrdinalIgnoreCase));
             Assert.True(targetPlatforms[key].ExtensionSDKs.Count == 0);
         }
+#endif
 
         /// <summary>
         /// Make sure if the sdk identifier is null we get an ArgumentNullException because without specifying the
@@ -4099,6 +4108,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for pre-OneCore SDKs during evaluation time as a msbuild function.
         /// </summary>
@@ -4252,6 +4262,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Make a fake SDK structure on disk for testing.
@@ -4566,9 +4577,9 @@ namespace Microsoft.Build.UnitTests
 
             return tempPath;
         }
-        #endregion
+#endregion
 
-        #region HelperMethods
+#region HelperMethods
 
         /// <summary>
         /// Simplified registry access delegate. Given a baseKey and a subKey, get all of the subkey
@@ -4755,6 +4766,6 @@ namespace Microsoft.Build.UnitTests
             return null;
         }
 
-        #endregion
+#endregion
     }
 }

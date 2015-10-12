@@ -635,7 +635,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             finally
             {
                 if (File.Exists(projectAbsolutePath)) File.Delete(projectAbsolutePath);
-                if (Directory.Exists(path)) Directory.Delete(path);
+                if (Directory.Exists(path)) FileUtilities.DeleteWithoutTrailingBackslash(path);
             }
         }
 

@@ -314,7 +314,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 File.Delete(file1);
                 File.Delete(file2);
                 File.Delete(file3);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 

@@ -414,7 +414,7 @@ namespace Microsoft.Build.UnitTests
                 if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "tempura")))
                 {
                     File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "tempura\\mylogfile1.log"));
-                    Directory.Delete(Path.Combine(Directory.GetCurrentDirectory(), "tempura"));
+                    FileUtilities.DeleteWithoutTrailingBackslash(Path.Combine(Directory.GetCurrentDirectory(), "tempura"));
                 }
                 File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile0.log"));
                 File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile3.log"));

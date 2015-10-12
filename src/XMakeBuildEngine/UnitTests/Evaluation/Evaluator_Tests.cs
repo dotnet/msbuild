@@ -436,7 +436,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 BuildParameters.WarnOnUninitializedProperty = originalValue;
-                Directory.Delete(targetDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
             }
         }
 
@@ -479,7 +479,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 Environment.SetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY", originalValue);
-                Directory.Delete(targetDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
             }
         }
 
@@ -521,7 +521,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 Environment.SetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY", originalValue);
-                Directory.Delete(targetDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
             }
         }
 
@@ -563,7 +563,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 Environment.SetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY", originalValue);
-                Directory.Delete(targetDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
             }
         }
 
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 Environment.SetEnvironmentVariable("MSBUILDWARNONUNINITIALIZEDPROPERTY", originalValue);
-                Directory.Delete(targetDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
             }
         }
 
@@ -654,7 +654,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 BuildParameters.WarnOnUninitializedProperty = originalValue;
-                Directory.Delete(targetDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
             }
         }
 
@@ -700,7 +700,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 BuildParameters.WarnOnUninitializedProperty = originalValue;
-                Directory.Delete(targetDirectory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true);
             }
         }
 
@@ -1047,8 +1047,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.Delete(importPath1);
                 File.Delete(importPath2);
                 File.Delete(projectPath);
-                Directory.Delete(directory2);
-                Directory.Delete(directory);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory2);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
@@ -2937,7 +2937,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -2962,7 +2962,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
             }
         }
@@ -2998,7 +2998,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -3023,7 +3023,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
             }
         }
@@ -3058,7 +3058,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -3083,7 +3083,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
             }
         }
@@ -3130,7 +3130,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -3159,7 +3159,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
             }
         }
@@ -3203,7 +3203,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -3232,7 +3232,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
             }
         }
@@ -3268,7 +3268,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -3293,7 +3293,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
             }
         }
@@ -3330,7 +3330,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -3355,7 +3355,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
             }
         }
@@ -3877,7 +3877,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -3931,7 +3931,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (Directory.Exists(projectDirectory))
                 {
-                    Directory.Delete(projectDirectory, true /* recursive delete */);
+                    FileUtilities.DeleteWithoutTrailingBackslash(projectDirectory, true /* recursive delete */);
                 }
 
                 Directory.CreateDirectory(projectDirectory);
@@ -4106,7 +4106,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 if (File.Exists(directory))
                 {
-                    Directory.Delete(directory);
+                    FileUtilities.DeleteWithoutTrailingBackslash(directory);
                 }
 
                 file0 = Path.Combine(directory, "my.proj");
@@ -4149,7 +4149,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.Delete(file2);
                 File.Delete(file3);
                 File.Delete(file4);
-                Directory.Delete(directory, true);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory, true);
             }
         }
 
