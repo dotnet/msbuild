@@ -60,12 +60,12 @@
         <dependency id="System.Text.RegularExpressions" version="4.0.11-beta-23225" />
         <dependency id="System.Threading" version="4.0.11-beta-23405" />
         <dependency id="System.Threading.Tasks" version="4.0.11-beta-23405" />
+        <dependency id="System.Threading.Tasks.Dataflow" version="4.5.26-beta-23225" />
         <dependency id="System.Threading.Thread" version="4.0.0-beta-23225" />
         <dependency id="System.Threading.ThreadPool" version="4.0.10-beta-23225" />
         <dependency id="System.Xml.ReaderWriter" version="4.0.11-beta-23225" />
         <dependency id="System.Xml.XmlDocument" version="4.0.1-beta-23225" />
         <dependency id="System.Xml.XPath.XmlDocument" version="4.0.1-beta-23225" />
-        <dependency id="System.Threading.Tasks.Dataflow" version="4.5.26-beta-23225" />
       </group>
     </dependencies>
   </metadata>
