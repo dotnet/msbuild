@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.ProjectModel;
+using Microsoft.Extensions.ProjectModel.Compilation;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -10,6 +14,8 @@ namespace Microsoft.DotNet.Tools.Compiler
     {
         public static int Main(string[] args)
         {
+            DebugHelper.HandleDebugSwitch(ref args);
+
             var app = new CommandLineApplication();
             app.Name = "dotnet compile";
             app.FullName = ".NET Compiler";
@@ -17,32 +23,36 @@ namespace Microsoft.DotNet.Tools.Compiler
             app.HelpOption("-h|--help");
 
             var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
-            var framework = app.Option("-f|--framework <FRAMEWORK>", "Target framework to compile for", CommandOptionType.SingleValue);
+            var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
+            var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             app.OnExecute(() =>
             {
-                // Validate arguments
-                CheckArg(framework, "--framework");
-
                 // Locate the project and get the name and full path
                 var path = project.Value;
                 if (string.IsNullOrEmpty(path))
                 {
                     path = Directory.GetCurrentDirectory();
                 }
-                if (!string.Equals(Path.GetFileName(path), "project.json", StringComparison.OrdinalIgnoreCase))
-                {
-                    path = Path.Combine(path, "project.json");
-                }
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"Could not find project: {path}");
-                    return 1;
-                }
-                var dir = new FileInfo(path).Directory;
 
-                return Compile(path, framework.Value(), dir, output.Value());
+                // Load project contexts for each framework and compile them
+                bool success = true;
+                if (framework.HasValue())
+                {
+                    foreach (var context in framework.Values.Select(f => ProjectContext.Create(path, NuGetFramework.Parse(f))))
+                    {
+                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value());
+                    }
+                }
+                else
+                {
+                    foreach (var context in ProjectContext.CreateContextForEachFramework(path))
+                    {
+                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value());
+                    }
+                }
+                return success ? 0 : 1;
             });
 
             try
@@ -56,78 +66,138 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static void CheckArg(CommandOption argument, string name)
+        private static bool Compile(ProjectContext context, string configuration, string outputPath)
         {
-            if (!argument.HasValue())
-            {
-                // TODO: GROOOOOOSS
-                throw new OperationCanceledException($"Missing required argument: {name}");
-            }
-        }
+            Reporter.Output.WriteLine($"Building {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
 
-        private static int Compile(string path, string framework, DirectoryInfo projectDir, string outputPath)
-        {
-            // Make output directory
-            // TODO(anurse): per-framework and per-configuration output dir
-            // TODO(anurse): configurable base output dir? (maybe dotnet compile doesn't support that?)
+            // Create the library exporter
+            var exporter = context.CreateExporter(configuration);
+
+            // Gather exports for the project
+            var dependencies = exporter.GetCompilationDependencies().ToList();
+
+            // Hackily trigger builds of the dependent projects
+            foreach (var dependency in dependencies.Where(d => d.CompilationAssemblies.Any()))
+            {
+                var projectDependency = dependency.Library as ProjectDescription;
+                if (projectDependency != null && !string.Equals(projectDependency.Identity.Name, context.RootProject.Identity.Name, StringComparison.Ordinal))
+                {
+                    var compileResult = Command.Create("dotnet-compile", $"--framework \"{projectDependency.Framework}\" --configuration \"{configuration}\" {projectDependency.Project.ProjectDirectory}")
+                        .ForwardStdOut()
+                        .ForwardStdErr()
+                        .RunAsync()
+                        .Result;
+                    if (compileResult.ExitCode != 0)
+                    {
+                        Console.Error.WriteLine($"Failed to compile dependency: {projectDependency.Identity.Name}");
+                        return false;
+                    }
+                }
+            }
+
+            // Dump dependency data
+            ShowDependencyInfo(dependencies);
+
+            // Hackily generate the output path
             if (string.IsNullOrEmpty(outputPath))
             {
-                outputPath = Path.Combine(projectDir.FullName, "bin");
+                outputPath = Path.Combine(
+                    context.Project.ProjectDirectory,
+                    "bin",
+                    configuration,
+                    context.TargetFramework.GetTwoDigitShortFolderName());
             }
-
             if (!Directory.Exists(outputPath))
             {
                 Directory.CreateDirectory(outputPath);
             }
 
-            // Resolve compilation references
-            var result = Command.Create("dotnet-resolve-references", $"--framework {framework} --assets compile {path}")
-                .CaptureStdOut()
-                .ForwardStdErr(Console.Error)
-                .RunAsync()
-                .Result;
-            if(result.ExitCode != 0)
-            {
-                Console.Error.WriteLine("Failed to resolve references");
-                return result.ExitCode;
-            }
-            var references = result.StdOut.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            // Get compilation options
+            var compilationOptions = context.Project.GetCompilerOptions(context.TargetFramework, configuration);
+            var outputName = Path.Combine(outputPath, context.Project.Name + ".dll");
 
-            // Resolve source files
-            result = Command.Create("dotnet-resolve-sources", $"{path}")
-                .CaptureStdOut()
-                .ForwardStdErr(Console.Error)
-                .RunAsync()
-                .Result;
-            if(result.ExitCode != 0)
+            // Assemble csc args
+            var cscArgs = new List<string>()
             {
-                Console.Error.WriteLine("Failed to resolve sources");
-                return result.ExitCode;
-            }
-            var sources = result.StdOut.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                "-nostdlib",
+                "-nologo",
+                $"-out:{outputName}"
+            };
 
-            // Build csc args
-            var cscArgs = new[]
-                {
-                    "-nostdlib",
-                    $"-out:{Path.Combine(outputPath, projectDir.Name + ".dll")}"
-                }
-                .Concat(references.Select(r => $"-r:{r}"))
-                .Concat(sources);
+            // Add compilation options to the args
+            ApplyCompilationOptions(compilationOptions, cscArgs);
+
+            foreach (var dependency in dependencies)
+            {
+                cscArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:{r}"));
+                cscArgs.AddRange(dependency.SourceReferences);
+            }
+
+            // Add project source files
+            cscArgs.AddRange(context.Project.Files.SourceFiles);
+
+            // Write RSP file
             var rsp = Path.Combine(outputPath, "csc.rsp");
-            if(File.Exists(rsp))
-            {
-                File.Delete(rsp);
-            }
             File.WriteAllLines(rsp, cscArgs);
 
-            // Run csc
-            return Command.Create("csc", $"@{rsp}")
-                .ForwardStdErr(Console.Error)
-                .ForwardStdOut(Console.Out)
+            // Execute CSC!
+            var result = Command.Create("csc", $"-noconfig @{rsp}")
+                .ForwardStdErr()
+                .ForwardStdOut()
                 .RunAsync()
-                .Result
-                .ExitCode;
+                .Result;
+            return result.ExitCode == 0;
+        }
+
+        private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs)
+        {
+            var targetType = (compilationOptions.EmitEntryPoint ?? false) ? "exe" : "library";
+            cscArgs.Add($"-target:{targetType}");
+            if (compilationOptions.AllowUnsafe == true)
+            {
+                cscArgs.Add("-unsafe+");
+            }
+            cscArgs.AddRange(compilationOptions.Defines.Select(d => $"-d:{d}"));
+            if (compilationOptions.Optimize == true)
+            {
+                cscArgs.Add("-optimize");
+            }
+            if (!string.IsNullOrEmpty(compilationOptions.Platform))
+            {
+                cscArgs.Add($"-platform:{compilationOptions.Platform}");
+            }
+            if (compilationOptions.WarningsAsErrors == true)
+            {
+                cscArgs.Add("-warnaserror");
+            }
+        }
+
+        private static void ShowDependencyInfo(IEnumerable<LibraryExport> dependencies)
+        {
+            foreach (var dependency in dependencies)
+            {
+                if (!dependency.Library.Resolved)
+                {
+                    Reporter.Error.WriteLine($"  Unable to resolve dependency {dependency.Library.Identity.ToString().Red().Bold()}");
+                    Reporter.Error.WriteLine("");
+                }
+                else
+                {
+                    Reporter.Output.WriteLine($"  Using {dependency.Library.Identity.Type.Value.Cyan().Bold()} dependency {dependency.Library.Identity.ToString().Cyan().Bold()}");
+                    Reporter.Output.WriteLine($"    Path: {dependency.Library.Path}");
+
+                    foreach (var metadataReference in dependency.CompilationAssemblies)
+                    {
+                        Reporter.Output.WriteLine($"    Assembly: {metadataReference}");
+                    }
+
+                    foreach (var sourceReference in dependency.SourceReferences)
+                    {
+                        Reporter.Output.WriteLine($"    Source: {sourceReference}");
+                    }
+                    Reporter.Output.WriteLine("");
+                }
+            }
         }
     }
 }

@@ -1,13 +1,15 @@
 ﻿{
-  "version": "1.0.0-*",
+    "version": "1.0.0-*",
 
-  "shared": "**/*.cs",
+    "shared": "**/*.cs",
 
-  "dependencies": {
-    "System.Console": "4.0.0-*",
-    "System.Diagnostics.Process": "4.1.0-*"
-  },
-  "frameworks": {
-    "dnxcore50": { }
-  }
+    "dependencies": {
+        "System.Console": "4.0.0-*",
+        "System.IO.FileSystem": "4.0.1-*",
+        "System.Diagnostics.Process": "4.1.0-*",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-*"
+    },
+    "frameworks": {
+        "dnxcore50": { }
+    }
 }

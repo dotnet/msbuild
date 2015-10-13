@@ -4,12 +4,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     public class Command
     {
+        private static readonly string[] WindowsExecutableExtensions = new[] { "exe", "cmd", "bat" };
+        
         private TaskCompletionSource<int> _processTcs;
         private Process _process;
 
@@ -59,6 +62,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
                     args = " " + args;
                 }
+                var cmd = executable + args;
+                cmd = cmd.Replace("\"", "\\\"");
                 args = $"/C \"{executable}{args}\"";
                 executable = comSpec;
             }

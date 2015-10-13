@@ -1,7 +1,11 @@
-
 var VERSION='0.1'
 var FULL_VERSION='0.1'
 var AUTHORS='Microsoft Open Technologies, Inc.'
 
 use-standard-lifecycle
 k-standard-goals
+
+#bootstrap
+    -// Build the compiler and publisher using dnu (kpm == dnu)
+    kpm-build projectFile='src/Microsoft.DotNet.Tools.Compiler/project.json'
+    kpm-build projectFile='src/Microsoft.DotNet.Tools.Publish/project.json'

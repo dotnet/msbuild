@@ -1,22 +1,25 @@
 {
-  "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
-  "commands": {
-    "run": "Microsoft.DotNet.Cli"
-  },
-  "dependencies": {
-    "System.Console": "4.0.0-*",
-    "System.Collections": "4.0.11-*",
-    "System.Linq": "4.0.1-*",
-    "System.Diagnostics.Process": "4.1.0-*",
-    "Microsoft.DotNet.Cli.Utils": {
-      "type": "build",
-      "version": "1.0.0-*"
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+    "commands": {
+        "dotnet": "Microsoft.DotNet.Cli"
+    },
+    "dependencies": {
+        "Microsoft.NETCore.ConsoleHost": "1.0.0-*",
+        "Microsoft.NETCore.Runtime": "1.0.1-*",
+
+        "System.Console": "4.0.0-*",
+        "System.Collections": "4.0.11-*",
+        "System.Linq": "4.0.1-*",
+        "System.Diagnostics.Process": "4.1.0-*",
+        "Microsoft.DotNet.Cli.Utils": {
+            "type": "build",
+            "version": "1.0.0-*"
+        }
+    },
+    "frameworks": {
+        "dnxcore50": { }
     }
-  },
-  "frameworks": {
-    "dnxcore50": { }
-  }
 }
