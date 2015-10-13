@@ -213,7 +213,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_GET_COMMANDLINE
                 Environment.CommandLine
 #else
-                args
+                ConstructArrayArg(args)
 #endif
                 ) == ExitType.Success) ? 0 : 1);
 
@@ -223,6 +223,21 @@ namespace Microsoft.Build.CommandLine
             }
 
             return exitCode;
+        }
+
+        /// <summary>
+        /// Insert the command executable path as the first element of the args array.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private static string[] ConstructArrayArg(string[] args)
+        {
+            string[] newArgArray = new string[args.Length + 1];
+
+            newArgArray[0] = FileUtilities.CurrentExecutablePath;
+            Array.Copy(args, 0, newArgArray, 1, args.Length);
+
+            return newArgArray;
         }
 
         /// <summary>
@@ -1321,7 +1336,7 @@ namespace Microsoft.Build.CommandLine
 #else
             ArrayList commandLineArgs = new ArrayList(commandLine);
 
-            s_exeName = FileUtilities.FixFilePath(Process.GetCurrentProcess().MainModule.FileName);
+            s_exeName = FileUtilities.CurrentExecutablePath;
 #endif
 
             if (!s_exeName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
