@@ -1045,6 +1045,7 @@ EndGlobal
             }
         }
 
+#if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
         /// Make sure that whatever the solution ToolsVersion is, it gets mapped to all its metaprojs, too. 
         /// </summary>
@@ -1054,7 +1055,6 @@ EndGlobal
             string solutionFileContents =
                 @"
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 12
 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ConsoleApplication2', 'ConsoleApplication2\ConsoleApplication2.csproj', '{5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}'
 	ProjectSection(ProjectDependencies) = postProject
 		{E0D295A1-CAFA-4E68-9929-468657DAAC6C} = {E0D295A1-CAFA-4E68-9929-468657DAAC6C}
@@ -1114,6 +1114,7 @@ EndGlobal
                 Assert.Equal(solutionToolsVersion, instances[1].ToolsVersion);
             }
         }
+#endif
 
         /// <summary>
         /// Test the SolutionProjectGenerator.Generate method has its toolset redirected correctly.

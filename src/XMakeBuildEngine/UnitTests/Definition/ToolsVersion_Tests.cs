@@ -435,6 +435,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
+#if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
         /// Validate that a custom defined toolset is honored
         /// </summary>
@@ -501,6 +502,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains("\"4.0\"");
             mockLogger.AssertLogDoesntContain(ObjectModelHelpers.CleanupFileContents("\"msbuilddefaulttoolsversion\""));
         }
+#endif
 
         /// <summary>
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
@@ -620,6 +622,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
+#if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
         /// </summary>
@@ -647,6 +650,7 @@ namespace Microsoft.Build.UnitTests.Definition
             mockLogger.AssertLogContains("\"4.0\"");
             mockLogger.AssertLogDoesntContain(ObjectModelHelpers.CleanupFileContents("\"msbuilddefaulttoolsversion\""));
         }
+#endif
 
         /// <summary>
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
@@ -688,6 +692,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
+#if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current. 
@@ -727,7 +732,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 InternalUtilities.RefreshInternalEnvironmentValues();
             }
         }
-
+#endif
 
         /// <summary>
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
@@ -771,6 +776,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
+#if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file. 
         /// </summary>
@@ -838,6 +844,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 InternalUtilities.RefreshInternalEnvironmentValues();
             }
         }
+#endif
 
         /// <summary>
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project, 
