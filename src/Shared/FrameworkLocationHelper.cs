@@ -396,6 +396,7 @@ namespace Microsoft.Build.Shared
                     {
                         s_fallbackDotNetFrameworkSdkInstallPath = NativeMethodsShared.FrameworkCurrentPath;
                     }
+#if FEATURE_WIN32_REGISTRY
                     else
                     {
                         s_fallbackDotNetFrameworkSdkInstallPath =
@@ -414,6 +415,7 @@ namespace Microsoft.Build.Shared
                                     RegistryView.Registry32);
                         }
                     }
+#endif
                 }
 
                 return s_fallbackDotNetFrameworkSdkInstallPath;
@@ -851,11 +853,13 @@ namespace Microsoft.Build.Shared
             // Much like when reading toolsets, first check the .exe.config
             string toolsPath = GetPathToBuildToolsFromConfig(toolsVersion);
 
+#if FEATURE_WIN32_REGISTRY
             if (String.IsNullOrEmpty(toolsPath) && NativeMethodsShared.IsWindows)
             {
                 // Or if it's not defined there, look it up in the registry
                 toolsPath = GetPathToBuildToolsFromRegistry(toolsVersion, architecture);
             }
+#endif
 #if !FEATURE_SYSTEM_CONFIGURATION && !FEATURE_REGISTRY_TOOLSETS
             if (string.IsNullOrEmpty(toolsPath))
             {
@@ -1013,6 +1017,7 @@ namespace Microsoft.Build.Shared
             return toolPath;
         }
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Look up the path to the build tools directory in the registry for the requested ToolsVersion and requested architecture  
         /// </summary>
@@ -1038,6 +1043,7 @@ namespace Microsoft.Build.Shared
             string toolsPath = FindRegistryValueUnderKey(toolsVersionSpecificKey, MSBuildConstants.ToolsPath, view);
             return toolsPath;
         }
+#endif
 
         #endregion // Internal methods
 
@@ -1060,6 +1066,7 @@ namespace Microsoft.Build.Shared
             return referenceAssemblyDirectory;
         }
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Look for the given registry value under the given key.
         /// </summary>
@@ -1110,6 +1117,7 @@ namespace Microsoft.Build.Shared
 
             return keyValueAsString;
         }
+#endif
 
         private static VisualStudioSpec GetVisualStudioSpec(Version version)
         {
@@ -1313,10 +1321,12 @@ namespace Microsoft.Build.Shared
             /// </summary>
             protected readonly ConcurrentDictionary<Version, string> pathsToDotNetFrameworkSdkTools;
 
+#if FEATURE_WIN32_REGISTRY
             /// <summary>
             /// Cached path of the corresponding windows sdk.
             /// </summary>
             protected string pathToWindowsSdk;
+#endif
 
             /// <summary>
             /// Cached path of .net framework reference assemblies.
@@ -1463,6 +1473,7 @@ namespace Microsoft.Build.Shared
                         generatedPathToDotNetFrameworkSdkTools = frameworkPath;
                     }
                 }
+#if FEATURE_WIN32_REGISTRY
                 else
                 {
                     string registryPath = string.Join(
@@ -1518,7 +1529,7 @@ namespace Microsoft.Build.Shared
                         }
                     }
                 }
-
+#endif
                 if (string.IsNullOrEmpty(generatedPathToDotNetFrameworkSdkTools))
                 {
                     // Fallback to "default" ultimately.
@@ -1574,6 +1585,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetPathToWindowsSdk()
             {
+#if FEATURE_WIN32_REGISTRY
                 if (this.pathToWindowsSdk == null)
                 {
                     ErrorUtilities.VerifyThrowArgument(this.visualStudioVersion != null, "FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk", this.version);
@@ -1593,8 +1605,10 @@ namespace Microsoft.Build.Shared
                         visualStudioSpec.WindowsSdkRegistryInstallationFolderName,
                         RegistryView.Registry32);
                 }
-
                 return this.pathToWindowsSdk;
+#else
+                return null;
+#endif
             }
 
             protected static string FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(Version dotNetFrameworkVersion, Version visualStudioVersion)
@@ -1632,7 +1646,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private class DotNetFrameworkSpecLegacy : DotNetFrameworkSpec
         {
+#if FEATURE_WIN32_REGISTRY
             private string _pathToDotNetFrameworkSdkTools;
+#endif
 
             public DotNetFrameworkSpecLegacy(
                 Version version,
@@ -1665,6 +1681,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public override string GetPathToDotNetFrameworkSdkTools(VisualStudioSpec visualStudioSpec)
             {
+#if FEATURE_WIN32_REGISTRY
                 if (_pathToDotNetFrameworkSdkTools == null)
                 {
                     _pathToDotNetFrameworkSdkTools = FindRegistryValueUnderKey(
@@ -1673,6 +1690,9 @@ namespace Microsoft.Build.Shared
                 }
 
                 return _pathToDotNetFrameworkSdkTools;
+#else
+                return null;
+#endif
             }
 
             /// <summary>
@@ -1734,9 +1754,11 @@ namespace Microsoft.Build.Shared
             {
                 if (this.pathToDotNetFrameworkReferenceAssemblies == null)
                 {
+#if FEATURE_WIN32_REGISTRY
                     this.pathToDotNetFrameworkReferenceAssemblies = FindRegistryValueUnderKey(
                         dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + this.dotNetFrameworkFolderPrefix,
                         referenceAssembliesRegistryValueName);
+#endif
 
                     if (this.pathToDotNetFrameworkReferenceAssemblies == null)
                     {

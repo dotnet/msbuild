@@ -1088,6 +1088,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+#if FEATURE_WIN32_REGISTRY
             if (dependencyTable.Resolvers != null)
             {
                 foreach (Resolver r in dependencyTable.Resolvers)
@@ -1108,6 +1109,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
+#endif
 
             return success;
         }
@@ -1883,11 +1885,15 @@ namespace Microsoft.Build.Tasks
             GetDirectories getDirectories,
             GetAssemblyName getAssemblyName,
             GetAssemblyMetadata getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
             GetRegistrySubKeyNames getRegistrySubKeyNames,
             GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue,
+#endif
             GetLastWriteTime getLastWriteTime,
             GetAssemblyRuntimeVersion getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
             OpenBaseKey openBaseKey,
+#endif
             GetAssemblyPathInGac getAssemblyPathInGac,
             IsWinMDFile isWinMDFile,
             ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader
@@ -2102,9 +2108,11 @@ namespace Microsoft.Build.Tasks
                         getDirectories,
                         getAssemblyName,
                         getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
                         getRegistrySubKeyNames,
                         getRegistrySubKeyDefaultValue,
                         openBaseKey,
+#endif
                         getRuntimeVersion,
                         targetedRuntimeVersion,
                         _projectTargetFramework,
@@ -2907,11 +2915,15 @@ namespace Microsoft.Build.Tasks
                 new GetDirectories(Directory.GetDirectories),
                 new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
                 new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
+#if FEATURE_WIN32_REGISTRY
                 new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames),
                 new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue),
+#endif
                 new GetLastWriteTime(NativeMethodsShared.GetLastWriteFileUtcTime),
                 new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
+#if FEATURE_WIN32_REGISTRY
                 new OpenBaseKey(RegistryHelper.OpenBaseKey),
+#endif
                 new GetAssemblyPathInGac(GetAssemblyPathInGac),
                 new IsWinMDFile(AssemblyInformation.IsWinMDFile),
                 new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)

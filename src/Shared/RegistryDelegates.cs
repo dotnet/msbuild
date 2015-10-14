@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#if FEATURE_WIN32_REGISTRY
 
 using System;
 using System.IO;
@@ -33,3 +34,4 @@ namespace Microsoft.Build.Shared
     /// <returns>A string containing the default value.</returns>
     internal delegate string GetRegistrySubKeyDefaultValue(RegistryKey baseKey, string subKey);
 }
+#endif

@@ -859,6 +859,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static bool? ReadLightupBool(string root, string valueName)
         {
+#if FEATURE_WIN32_REGISTRY
             try
             {
                 string key = String.Format(CultureInfo.InvariantCulture, @"{0}\software\microsoft\msbuild\{1}", root, MSBuildConstants.CurrentProductVersion);
@@ -898,6 +899,9 @@ namespace Microsoft.Build.CommandLine
                 Debug.Assert(false, "Could not read debugger enabled flag. {0}" + e.ToString());
                 return null;
             }
+#else
+            return null;
+#endif
         }
 
         /// <summary>

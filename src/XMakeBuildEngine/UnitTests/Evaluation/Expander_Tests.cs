@@ -1443,6 +1443,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
            );
         }
+#if FEATURE_WIN32_REGISTRY
         [Fact]
         public void RegistryPropertyString()
         {
@@ -1572,6 +1573,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
         }
+#endif
 
         [Fact]
         public void TestItemSpecModiferEscaping()
@@ -2810,6 +2812,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(String.Empty, result);
         }
 
+#if FEATURE_WIN32_REGISTRY
         [Fact]
         public void PropertyFunctionGetRegitryValue()
         {
@@ -2900,9 +2903,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
-        }        /// <summary>
-                 /// Expand a property function that references item metadata
-                 /// </summary>
+        }
+#endif
+
+        /// <summary>
+        /// Expand a property function that references item metadata
+        /// </summary>
         [Fact]
         public void PropertyFunctionConsumingItemMetadata()
         {

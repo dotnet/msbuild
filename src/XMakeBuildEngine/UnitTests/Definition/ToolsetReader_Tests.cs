@@ -16,8 +16,10 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 
+#if FEATURE_WIN32_REGISTRY
 using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
 using RegistryException = Microsoft.Build.Exceptions.RegistryException;
+#endif
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
@@ -646,6 +648,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 #endif
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Tests the case when a blank property name is specified in the registry
         /// </summary>
@@ -710,7 +713,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
            );
         }
-
+#endif
 #if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Tests the case when a blank property value is specified in the config file
@@ -2861,6 +2864,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
 #endif
 
+#if FEATURE_WIN32_REGISTRY
     internal class MockRegistryKey : RegistryKeyWrapper
     {
         public enum WhereToThrow
@@ -2987,5 +2991,6 @@ namespace Microsoft.Build.UnitTests.Definition
             return base.OpenSubKey(name);
         }
     }
+#endif
 }
 
