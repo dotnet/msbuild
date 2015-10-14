@@ -699,8 +699,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Run msbuild.exe within corerun.exe
-        /// It concatenates the given msbuild path to the given parameters and sends it to corerun.
+        /// Invoke msbuild.exe with the given parameters and return the stdout and stderr.
+        /// This method may invoke msbuild via other runtimes.
         /// </summary>
         private string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, bool expectSuccess = true)
         {
