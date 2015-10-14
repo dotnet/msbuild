@@ -137,6 +137,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
            );
         }
+
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is empty
         /// </summary>
@@ -164,15 +166,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
                     "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                     String.Empty,
-#else
-                    new AssemblyName(String.Empty),
-#endif
                     null);
             }
            );
         }
+#endif
+
         /// <summary>
         /// Test the valid constructors.  
         /// </summary>

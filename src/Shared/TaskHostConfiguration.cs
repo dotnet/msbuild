@@ -138,6 +138,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
 #if FEATURE_ASSEMBLY_LOADFROM
             ErrorUtilities.VerifyThrowInternalLength(taskLocation, "taskLocation");
+#else
+            ErrorUtilities.VerifyThrowInternalNull(taskAssemblyName, "taskAssemblyName");
 #endif
 
             _nodeId = nodeId;
