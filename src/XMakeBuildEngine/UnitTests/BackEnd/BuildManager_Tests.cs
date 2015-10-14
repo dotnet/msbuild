@@ -140,6 +140,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
         }
 
+#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Verify that the environment between two msbuild calls to the same project are stored
         /// so that on the next call we get access to them
@@ -194,6 +195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Verify if idle nodes are shutdown when BuildManager.ShutdownAllNodes is evoked.
