@@ -622,7 +622,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// /// Expand an item vector function that is an itemspec modifier
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void ExpandItemVectorFunctionsItemSpecModifier2()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -1910,7 +1910,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that returns an array
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionArrayReturn()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2221,7 +2221,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that is only available when MSBUILDENABLEALLPROPERTYFUNCTIONS=1
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyStaticFunctionAllEnabled()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -2511,7 +2511,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function calls GetCultureInfo
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionStaticMethodGetCultureInfo()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2526,7 +2526,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function calls a static arithmetic method
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionStaticMethodArithmeticAddInt32()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2541,7 +2541,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function calls a static arithmetic method
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionStaticMethodArithmeticAddDouble()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2598,7 +2598,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionDoesTaskHostExist()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2614,7 +2614,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionDoesTaskHostExist_Whitespace()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2646,10 +2646,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
            );
         }
+
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionDoesTaskHostExist_Evaluated()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2698,7 +2699,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function calls a static bitwise method to retrieve file attribute
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionStaticMethodFileAttributes()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2724,7 +2725,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand intrinsic property function calls a static arithmetic method
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
         public void PropertyFunctionStaticMethodIntrinsicMaths()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
