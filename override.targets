@@ -3,7 +3,7 @@
 
   <Target Name="ResolveNuGetPackageAssets" Condition="Exists('$(ProjectLockFile)') and '$(OsEnvironment)'!='Windows_NT'">
     <ResolveNuGetPackageAssets AllowFallbackOnRuntimeIdentifier="$(DesignTimeBuild)"
-                               BaseRuntimeIdentifier="$(BaseNuGetRuntimeIdentifier)"
+                               BaseRuntimeIdentifier="$(RuntimeSystem)"
                                Architecture="$(PlatformTarget)"
                                ProjectLanguage="$(Language)"
                                ProjectLockFile="$(ProjectLockFile)"

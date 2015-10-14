@@ -27,7 +27,7 @@
     <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)\runtime.project.lock.json</RuntimeProjectLockJson>
     <RestoreRuntimePackagesCommand>"$(NuGetToolPath)" restore $(RuntimeProjectJson)</RestoreRuntimePackagesCommand>
     <RuntimeDirectory Condition="'$(RuntimeDirectory)' ==''">$(OutputPath)</RuntimeDirectory>
-    <NuGetRuntimeIdentifier Condition="'$(NuGetRuntimeIdentifier)' ==''">win7-x86</NuGetRuntimeIdentifier>
+    <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="RestoreRuntimePackages"

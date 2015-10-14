@@ -45,8 +45,9 @@
     <!-- NuSpec.ReferenceGenerator targets use SolutionDir -->
     <SolutionDir>$(SourceDir)</SolutionDir>
 
-    <DnuToolPath Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(PackagesDir), "$(DnxDir).$(DnxVersion)", "bin", "dnu.cmd"))</DnuToolPath>
-    <DnuToolPath Condition="'$(OsEnvironment)'=='Unix'">$([System.IO.Path]::Combine($(PackagesDir), "$(DnxDir).$(DnxVersion)", "bin", "dnu"))</DnuToolPath>
+    <DnuToolDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(PackagesDir), "$(DnxDir).$(DnxVersion)"))</DnuToolDir>
+    <DnuToolPath Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu.cmd"))</DnuToolPath>
+    <DnuToolPath Condition="'$(OsEnvironment)'=='Unix'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu"))</DnuToolPath>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -93,12 +94,20 @@
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
+    <RuntimeSystem>win7</RuntimeSystem>
+    <RuntimeArchitecture>x86</RuntimeArchitecture>
+    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
+    <TargetSystem>Windows</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD;MONO</DefineConstants>
+    <RuntimeSystem>win7</RuntimeSystem>
+    <RuntimeArchitecture>x86</RuntimeArchitecture>
+    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
+    <TargetSystem>Mono</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -106,12 +115,19 @@
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
+    <RuntimeSystem>win7</RuntimeSystem>
+    <RuntimeArchitecture>x86</RuntimeArchitecture>
+    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
+    <TargetSystem>Windows</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD;MONO</DefineConstants>
+    <RuntimeSystem>win7</RuntimeSystem>
+    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
+    <TargetSystem>Mono</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -119,6 +135,10 @@
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
+    <RuntimeSystem>win7</RuntimeSystem>
+    <RuntimeArchitecture>x86</RuntimeArchitecture>
+    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
+    <TargetSystem>Windows_NetCore</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -126,12 +146,41 @@
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
+    <RuntimeSystem>win7</RuntimeSystem>
+    <RuntimeArchitecture>x86</RuntimeArchitecture>
+    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
+    <TargetSystem>Windows_NetCore</TargetSystem>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore-Ubuntu'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
+    <NetCoreBuild>true</NetCoreBuild>
+    <RuntimeSystem>ubuntu.14.04</RuntimeSystem>
+    <RuntimeArchitecture>x64</RuntimeArchitecture>
+    <TargetPlatformIdentifier>Unix</TargetPlatformIdentifier>
+    <TargetSystem>Ubuntu_NetCore</TargetSystem>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release-NetCore-Ubuntu'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
+    <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
+    <NetCoreBuild>true</NetCoreBuild>
+    <RuntimeSystem>ubuntu.14.04</RuntimeSystem>
+    <RuntimeArchitecture>x64</RuntimeArchitecture>
+    <TargetPlatformIdentifier>Unix</TargetPlatformIdentifier>
+    <TargetSystem>Ubuntu_NetCore</TargetSystem>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PlatformTarget>$(RuntimeArchitecture)</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
     <DebugType/>
     <DebugSymbols>false</DebugSymbols>
-    <TargetPlatformIdentifier>$(OS)</TargetPlatformIdentifier>
   </PropertyGroup>
 
   <!-- This configuration builds against the full .NET Framework but with the compilation constants to compile against
@@ -148,24 +197,17 @@
   <!-- .NET Core build support -->
   <PropertyGroup Condition="'$(NetCoreBuild)' != 'true'">
     <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5.1</TargetFrameworkVersion>
-    <BaseNuGetRuntimeIdentifier>win7</BaseNuGetRuntimeIdentifier>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
     <TargetFrameworkIdentifier>DNXCore</TargetFrameworkIdentifier>
     <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
-    <BaseNuGetRuntimeIdentifier Condition="'$(OsEnvironment)'=='Windows_NT'">win7</BaseNuGetRuntimeIdentifier>
-    <BaseNuGetRuntimeIdentifier Condition="'$(OsEnvironment)'=='Unix'">linux</BaseNuGetRuntimeIdentifier>
     <NetCoreSurface>true</NetCoreSurface>
 
     <!-- Setting this to false stops the AppX targets, which aren't supported on .NET Core, from beeing imported -->
     <WindowsAppContainer>false</WindowsAppContainer>
 
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <PlatformTarget Condition="'$(OsEnvironment)'=='Windows_NT'">x86</PlatformTarget>
-    <PlatformTarget Condition="'$(OsEnvironment)'=='Unix'">x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
@@ -254,6 +296,10 @@
     <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT'">
+    <DefineConstants>$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
+  </PropertyGroup>
+
   <!-- Setup some common paths -->
   <PropertyGroup>
     <CommonPath>$(SourceDir)Common\src</CommonPath>
@@ -265,16 +311,16 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <BaseOutputPath>$(BinDir)</BaseOutputPath>
-    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath)$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
-    <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseOutputPath)$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath)$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+    <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseOutputPath)$(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
     <OutputPath>$(BaseOutputPathWithConfig)</OutputPath>
 
     <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
-    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
 
-    <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
-    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(OS),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
+    <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
+    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
     <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
   </PropertyGroup>
 
