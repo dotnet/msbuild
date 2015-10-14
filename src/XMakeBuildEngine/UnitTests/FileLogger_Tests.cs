@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         /// Basic case of logging a message to a file
         /// Verify it logs and encoding is ANSI
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/pull/246")]
         public void BasicNoExistingFile()
         {
             string log = null;
