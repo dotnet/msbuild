@@ -2393,6 +2393,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("biz", project.GetPropertyValue("MSBuildProjectName"));
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Verify when a node count is passed through on the project collection that the correct number is used to evaluate the msbuildNodeCount
         /// </summary>
@@ -2427,6 +2428,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(true, result);
             logger.AssertLogContains(String.Format("[{0}]", 4));
         }
+#endif
 
         /// <summary>
         /// Verify when no node count is passed that we evaluate MsBuildNodeCount to 1

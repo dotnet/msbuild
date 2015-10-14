@@ -1144,6 +1144,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Verify stopOnFirstFailure with BuildInParallel override message are correctly logged when there are multiple nodes
         /// </summary>
@@ -1266,6 +1267,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(project2);
             }
         }
+#endif
 
         /// <summary>
         /// Test the skipping of the remaining projects. Verify the skip message is only displayed when there are projects to skip.
