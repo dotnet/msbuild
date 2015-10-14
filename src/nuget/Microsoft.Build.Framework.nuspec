@@ -21,13 +21,13 @@
     <dependencies>
       <group targetFramework="net45" />
       <group targetFramework="dotnet">
-        <dependency id="System.Collections" version="4.0.11-beta-23405" />
-        <dependency id="System.Diagnostics.Debug" version="4.0.11-beta-23405" />
-        <dependency id="System.Globalization" version="4.0.11-beta-23405" />
-        <dependency id="System.Runtime" version="4.0.21-beta-23405" />
-        <dependency id="System.Runtime.InteropServices" version="4.0.21-beta-23405" />
-        <dependency id="System.Threading" version="4.0.11-beta-23405" />
-        <dependency id="System.Threading.Thread" version="4.0.0-beta-23225" />
+        <dependency id="System.Collections" version="4.0.11-beta-23406" />
+        <dependency id="System.Diagnostics.Debug" version="4.0.11-beta-23406" />
+        <dependency id="System.Globalization" version="4.0.11-beta-23406" />
+        <dependency id="System.Runtime" version="4.0.21-beta-23406" />
+        <dependency id="System.Runtime.InteropServices" version="4.0.21-beta-23406" />
+        <dependency id="System.Threading" version="4.0.11-beta-23406" />
+        <dependency id="System.Threading.Thread" version="4.0.0-beta-23406" />
       </group>
     </dependencies>
   </metadata>

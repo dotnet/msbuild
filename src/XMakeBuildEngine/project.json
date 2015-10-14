@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "System.Threading.Tasks.Dataflow": "4.5.26-beta-23225",
-    "System.Reflection.Metadata": "1.1.0-alpha-00014"
+    "System.Reflection.Metadata": "1.0.23-beta-23406"
   },
   "frameworks": {
     "net451": {
@@ -10,7 +10,7 @@
     },
     "net46": {
       "dependencies": {
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23225"
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23406"
       }
     },
     "dnxcore50": {
@@ -18,16 +18,17 @@
         "System.Net.NetworkInformation": "4.1.0-beta-23225",
         "Microsoft.NETCore": "5.0.1-beta-23225",
         "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23225",
-        "System.Console": "4.0.0-beta-23225",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23225",
-        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23225",
-        "System.Diagnostics.Process": "4.0.0-beta-23225",
+        "System.Console": "4.0.0-beta-23406",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23406",
+        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23406",
+        "System.Diagnostics.Process": "4.1.0-beta-23406",
         "System.Diagnostics.TraceSource": "4.0.0-beta-23225",
-        "System.Diagnostics.Contracts": "4.0.1-beta-23405",
+        "System.Diagnostics.Contracts": "4.0.1-beta-23406",
         "System.IO.Pipes": "4.0.0-beta-23225",
         "System.Xml.XmlDocument": "4.0.1-beta-23225",
         "System.Xml.XPath.XmlDocument": "4.0.1-beta-23225",
-        "Microsoft.NETCore.Runtime": "1.0.1-beta-23405",
+        "Microsoft.Win32.Registry": "4.0.0-beta-23406",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23406",
         "Microsoft.NETCore.TestHost": "1.0.0-beta-23318"
       },
       "imports": "portable-net451+win81"
