@@ -1964,6 +1964,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(instance.InitialTargets[1], "q");
         }
 
+#if FEATURE_INSTALLED_MSBUILD
         /// <summary>
         /// Test that the default value for $(MSBuildExtensionsPath) points to "c:\program files\msbuild" in a 64-bit process
         /// or on a 32-bit machine and "c:\program files (x86)\msbuild" in a 32-bit process on a 64-bit machine. 
@@ -2009,6 +2010,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("msbuildtoolsversion", msbuildVar);
             }
         }
+#endif
 
         /// <summary>
         /// Test that the default value for $(MSBuildExtensionsPath) points to the 32-bit Program Files always 
@@ -2097,6 +2099,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(@"c:\devdiv\vscore\msbuild", project.GetPropertyValue("MSBuildExtensionsPath"));
         }
 
+#if FEATURE_INSTALLED_MSBUILD
         /// <summary>
         /// The default value for $(MSBuildExtensionsPath32) should point to "c:\program files (x86)\msbuild" on a 64 bit machine. 
         /// We can't test that unless we are on a 64 bit box, but this test will work on either
@@ -2132,6 +2135,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath32", extensionsPath32Env);
             }
         }
+#endif
 
         /// <summary>
         /// Set an env var called MSBuildExtensionsPath32 to some value, for the purpose
@@ -2170,6 +2174,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath32Value);
         }
 
+#if FEATURE_INSTALLED_MSBUILD
         /// <summary>
         /// The default value for $(MSBuildExtensionsPath64) should point to "c:\program files\msbuild" on a 64 bit machine, 
         /// and should be empty on a 32-bit machine. 
@@ -2207,6 +2212,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Equal(expected, project.GetPropertyValue("MSBuildExtensionsPath64"));
         }
+#endif
 
         /// <summary>
         /// Set an env var called MSBuildExtensionsPath64 to some value, for the purpose
