@@ -19,6 +19,7 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     sealed public class TargetsFile_Test
     {
+#if FEATURE_COMPILE_IN_TESTS
         /// <summary>
         /// Check that the ARM flag is passed to the compiler when targeting ARM.
         /// </summary>
@@ -1075,6 +1076,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         #endregion AssignLinkMetadata targets tests
+#endif
 
 #if _NOT_YET_FULLY_CONVERTED_
         /// <summary>
@@ -2711,6 +2713,6 @@ namespace Microsoft.Build.UnitTests
                 End Module
                 ");
         }
-#endif    
+#endif
     }
 }
