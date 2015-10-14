@@ -565,7 +565,6 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
-#if FEATURE_RUN_EXE_IN_TESTS
         /// <summary>
         /// Invalid configuration file should not dump stack.
         /// </summary>
@@ -633,7 +632,8 @@ namespace Microsoft.Build.UnitTests
                     "</Project>";
                 File.WriteAllText(pathToProjectFile, projectString);
 
-                output = RunProcessAndGetOutput(newPathToMSBuildExe, "\"" + pathToProjectFile + "\"", expectSuccess: false);
+                var msbuildParameters = "\"" + pathToProjectFile + "\"";
+                output = ExecMSBuild(newPathToMSBuildExe, msbuildParameters, expectSuccess: false);
             }
             catch (Exception ex)
             {
@@ -667,7 +667,6 @@ namespace Microsoft.Build.UnitTests
             // if there's not, we will catch when we try to read the toolsets. Either is fine; we just want to not crash.
             Assert.True(output.Contains("MSB1043") || output.Contains("MSB4136"));
         }
-#endif
 
         /// <summary>
         /// Try hard to delete a file or directory specified
@@ -699,7 +698,22 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Run msbuild.exe within corerun.exe
+        /// It concatenates the given msbuild path to the given parameters and sends it to corerun.
+        /// </summary>
+        private string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, bool expectSuccess = true)
+        {
 #if FEATURE_RUN_EXE_IN_TESTS
+            var pathToExecutable = pathToMsBuildExe;
+#else
+            var pathToExecutable = Path.Combine(FileUtilities.CurrentExecutableDirectory, "CoreRun.exe");
+            msbuildParameters = "\"" + pathToMsBuildExe + "\"" + " " + msbuildParameters;
+#endif
+
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, expectSuccess);
+        }
+
         /// <summary>
         /// Run the process and get stdout and stderr
         /// </summary>
@@ -752,7 +766,6 @@ namespace Microsoft.Build.UnitTests
 
             return output;
         }
-#endif
 
         /// <summary>
         /// Tests that the environment gets passed on to the node during build.
@@ -847,35 +860,25 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private string _pathToMSBuildExe = Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.exe");
+        private string _pathToMSBuildExe = FileUtilities.CurrentExecutablePath;
 #if FEATURE_SPECIAL_FOLDERS
         private string _pathToArbitraryBogusFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
 #else
         private string _pathToArbitraryBogusFile = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
 #endif
 
-#if FEATURE_RUN_EXE_IN_TESTS
         /// <summary>
         /// Basic case
         /// </summary>
         [Fact]
         public void GetCommandLine()
         {
-            string output = RunProcessAndGetOutput(_pathToMSBuildExe, "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag", expectSuccess: false);
+            var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag";
+            Assert.True(File.Exists(_pathToArbitraryBogusFile));
 
-            Assert.True(output.Contains(_pathToMSBuildExe + " /v:diag " + _pathToArbitraryBogusFile));
-        }
+            string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters, false);
 
-        /// <summary>
-        /// Quoted path
-        /// </summary>
-        [Fact]
-        public void GetCommandLineQuotedExe()
-        {
-            string quotedPathToMSBuildExe = "\"" + _pathToMSBuildExe + "\"";
-            string output = RunProcessAndGetOutput(quotedPathToMSBuildExe, "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag", expectSuccess: false);
-
-            Assert.True(output.Contains(_pathToMSBuildExe + " /v:diag " + _pathToArbitraryBogusFile));
+            Assert.Contains(_pathToMSBuildExe + " /v:diag " + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -891,14 +894,15 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(_pathToMSBuildExe));
 
-                output = RunProcessAndGetOutput("msbuild.exe", "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag", expectSuccess: false);
+                var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag";
+                output = ExecMSBuild("msbuild.exe", msbuildParameters, false);
             }
             finally
             {
                 Directory.SetCurrentDirectory(current);
             }
 
-            Assert.True(output.IndexOf(_pathToMSBuildExe + " /v:diag " + _pathToArbitraryBogusFile, StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.Contains(_pathToMSBuildExe + " /v:diag " + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -926,7 +930,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Find the project in the current directory
                 Directory.SetCurrentDirectory(directory);
-                string output = RunProcessAndGetOutput(_pathToMSBuildExe, String.Empty);
+                string output = ExecMSBuild(_pathToMSBuildExe, String.Empty);
                 Assert.True(output.Contains("[A=1]"));
             }
             finally
@@ -959,7 +963,8 @@ namespace Microsoft.Build.UnitTests
                 string rspContent = "/p:A=1";
                 File.WriteAllText(rspPath, rspContent);
 
-                string output = RunProcessAndGetOutput(_pathToMSBuildExe, "\"" + projectPath + "\"");
+                var msbuildParameters = "\"" + projectPath + "\"";
+                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters);
                 Assert.True(output.Contains("[A=1]"));
             }
             finally
@@ -990,7 +995,8 @@ namespace Microsoft.Build.UnitTests
                 string rspContent = "/p:A=1";
                 File.WriteAllText(rspPath, rspContent);
 
-                string output = RunProcessAndGetOutput(_pathToMSBuildExe, "\"" + projectPath + "\"");
+                var msbuildParameters = "\"" + projectPath + "\"";
+                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters);
                 Assert.True(output.Contains("[A=]"));
             }
             finally
@@ -1022,7 +1028,8 @@ namespace Microsoft.Build.UnitTests
                 string rspContent = "/p:A=1";
                 File.WriteAllText(rspPath, rspContent);
 
-                string output = RunProcessAndGetOutput(_pathToMSBuildExe, "\"" + projectPath + "\"" + " /p:A=2");
+                var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
+                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters);
                 Assert.True(output.Contains("[A=2]"));
             }
             finally
@@ -1037,9 +1044,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, 
         /// but lower precedence than the actual command line and higher than the msbuild.rsp next to msbuild.exe
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void ResponseFileInProjectDirectoryWinsOverMainMSBuildRsp()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1064,7 +1069,8 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(rspPath, "/p:A=1");
 
-                string output = RunProcessAndGetOutput(exePath, "\"" + projectPath + "\"");
+                var msbuildParameters = "\"" + projectPath + "\"";
+                string output = ExecMSBuild(exePath, msbuildParameters);
                 Assert.True(output.Contains("[A=1]"));
             }
             finally
@@ -1083,9 +1089,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, 
         /// but not if it's the same as the msbuild.exe directory
         /// </summary>
-        [Fact(Skip = "Ignored in MSTest")]
-
-        // Ignore: Test requires installed toolset.
+        [Fact]
         public void ProjectDirectoryIsMSBuildExeDirectory()
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1104,7 +1108,8 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(rspPath, "/p:A=1");
 
-                string output = RunProcessAndGetOutput(exePath, "\"" + projectPath + "\"");
+                var msbuildParameters = "\"" + projectPath + "\"";
+                string output = ExecMSBuild(exePath, msbuildParameters);
                 Assert.True(output.Contains("[A=1]"));
             }
             finally
@@ -1136,7 +1141,8 @@ namespace Microsoft.Build.UnitTests
                 string rspContent = "/p:A=1 /noautoresponse";
                 File.WriteAllText(rspPath, rspContent);
 
-                string output = RunProcessAndGetOutput(_pathToMSBuildExe, "\"" + projectPath + "\"", expectSuccess: false);
+                var msbuildParameters = "\"" + projectPath + "\"";
+                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters, expectSuccess: false);
                 Assert.True(output.Contains("MSB1027")); // msbuild.rsp cannot have /noautoresponse in it
             }
             finally
@@ -1167,7 +1173,8 @@ namespace Microsoft.Build.UnitTests
                 string rspContent = "/p:A=1 /noautoresponse";
                 File.WriteAllText(rspPath, rspContent);
 
-                string output = RunProcessAndGetOutput(_pathToMSBuildExe, "\"" + projectPath + "\" /noautoresponse", expectSuccess: true);
+                var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
+                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters, expectSuccess: true);
                 Assert.True(output.Contains("[A=]"));
             }
             finally
@@ -1195,7 +1202,8 @@ namespace Microsoft.Build.UnitTests
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);
 
-                string output = RunProcessAndGetOutput(_pathToMSBuildExe, "\"" + projectPath + "\"");
+                var msbuildParameters = "\"" + projectPath + "\"";
+                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters);
                 Assert.True(output.Contains("[A=]"));
             }
             finally
@@ -1204,7 +1212,6 @@ namespace Microsoft.Build.UnitTests
                 FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
-#endif
 
         #region IgnoreProjectExtensionTests
 
