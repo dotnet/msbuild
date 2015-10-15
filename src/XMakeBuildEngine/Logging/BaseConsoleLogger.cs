@@ -22,7 +22,38 @@ namespace Microsoft.Build.BackEnd.Logging
 
     abstract internal class BaseConsoleLogger : INodeLogger
     {
+        /// <summary>
+        /// When set, we'll try reading background color.
+        /// </summary>
+        internal static bool _supportReadingBackgroundColor = true;
+
         #region Properties
+
+        /// <summary>
+        /// Some platforms do not allow getting current background color. There
+        /// is not way to check, but not-supported exception is thrown. Assume
+        /// black, but don't crash.
+        /// </summary>
+        internal static ConsoleColor BackgroundColor
+        {
+            get
+            {
+                if (_supportReadingBackgroundColor)
+                {
+                    try
+                    {
+                        return Console.BackgroundColor;
+                    }
+                    catch (PlatformNotSupportedException)
+                    {
+                        _supportReadingBackgroundColor = false;
+                    }
+                }
+
+                return ConsoleColor.Black;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the level of detail to show in the event log.
         /// </summary>
@@ -349,7 +380,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Get the std out handle
                 IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
 
-                if (stdHandle != Microsoft.Build.BackEnd.NativeMethods.InvalidHandle)
+                if (stdHandle != NativeMethods.InvalidHandle)
                 {
                     uint fileType = NativeMethodsShared.GetFileType(stdHandle);
 
@@ -376,7 +407,7 @@ namespace Microsoft.Build.BackEnd.Logging
             try
             {
                 Console.ForegroundColor =
-                            TransformColor(c, Console.BackgroundColor);
+                            TransformColor(c, BackgroundColor);
             }
             catch (IOException)
             {
@@ -455,7 +486,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             try
             {
-                ConsoleColor c = Console.BackgroundColor;
+                ConsoleColor c = BackgroundColor;
             }
             catch (IOException)
             {
@@ -811,7 +842,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             // Edge meaning scope is finishing.
                             inScope = false;
 
-                            elapsedTime += (System.DateTime.Now - scopeStartTime);
+                            elapsedTime += (DateTime.Now - scopeStartTime);
                         }
                         else if (!InScope && value)
                         {
@@ -819,7 +850,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             inScope = true;
 
                             ++calls;
-                            scopeStartTime = System.DateTime.Now;
+                            scopeStartTime = DateTime.Now;
                         }
                         else
                         {
