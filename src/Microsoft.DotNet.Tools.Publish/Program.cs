@@ -115,6 +115,14 @@ namespace Microsoft.DotNet.Tools.Publish
                 return 1;
             }
 
+            // Allow CoreConsole to be replaced
+            string overrideCoreConsole = Environment.GetEnvironmentVariable("DOTNET_CORE_CONSOLE_PATH");
+            if(!string.IsNullOrEmpty(overrideCoreConsole) && File.Exists(overrideCoreConsole))
+            {
+                Console.WriteLine($"Using CoreConsole override: {overrideCoreConsole}");
+                File.Copy(overrideCoreConsole, coreConsole, overwrite: true);
+            }
+
             // Use the 'command' field to generate the name
             var outputExe = Path.Combine(outputPath, context.Project.Name + ".exe");
             if (File.Exists(outputExe))

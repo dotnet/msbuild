@@ -11,8 +11,6 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class Command
     {
-        private static readonly string[] WindowsExecutableExtensions = new[] { "exe", "cmd", "bat" };
-        
         private TaskCompletionSource<int> _processTcs;
         private Process _process;
 
@@ -53,9 +51,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static Command Create(string executable, string args)
         {
-            var comSpec = Environment.GetEnvironmentVariable("ComSpec");
-            if (!string.IsNullOrEmpty(comSpec))
+            // On Windows, we want to avoid using "cmd" if possible (it mangles the colors, and a bunch of other things)
+            // So, do a quick path search to see if we can just directly invoke it
+            var useCmd = ShouldUseCmd(executable);
+
+            if (useCmd)
             {
+                var comSpec = Environment.GetEnvironmentVariable("ComSpec");
+
                 // cmd doesn't like "foo.exe ", so we need to ensure that if
                 // args is empty, we just run "foo.exe"
                 if (!string.IsNullOrEmpty(args))
@@ -67,14 +70,48 @@ namespace Microsoft.DotNet.Cli.Utils
                 args = $"/C \"{executable}{args}\"";
                 executable = comSpec;
             }
-            else
-            {
-                // Temporary, we're doing this so that redirecting the output works
-                args = $"bash -c \"{executable} {args.Replace("\"", "\\\"")}\"";
-                executable = "/usr/bin/env";
-            }
 
             return new Command(executable, args);
+        }
+
+        private static bool ShouldUseCmd(string executable)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var extension = Path.GetExtension(executable);
+                if (!string.IsNullOrEmpty(executable))
+                {
+                    return string.Equals(executable, ".exe", StringComparison.Ordinal);
+                }
+                else if (executable.Contains(Path.DirectorySeparatorChar))
+                {
+                    // It's a relative path without an extension
+                    if (File.Exists(executable + ".exe"))
+                    {
+                        // It refers to an exe!
+                        return false;
+                    }
+                }
+                else
+                {
+                    // Search the path to see if we can find it 
+                    foreach (var path in Environment.GetEnvironmentVariable("PATH").Split(Path.PathSeparator))
+                    {
+                        var candidate = Path.Combine(path, executable + ".exe");
+                        if (File.Exists(candidate))
+                        {
+                            // We found an exe!
+                            return false;
+                        }
+                    }
+                }
+
+                // It's a non-exe :(
+                return true;
+            }
+
+            // Non-windows never uses cmd
+            return false;
         }
 
         public async Task<CommandResult> RunAsync()

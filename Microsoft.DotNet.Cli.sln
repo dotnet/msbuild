@@ -19,25 +19,20 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Comp
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Publish", "src\Microsoft.DotNet.Tools.Publish\Microsoft.DotNet.Tools.Publish.xproj", "{391D6AD6-0FD5-4E1E-A4C8-6B5439D197B5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{13F8C30C-1011-459C-82B2-0ACDD73EDA18}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{13F8C30C-1011-459C-82B2-0ACDD73EDA18}"
 	ProjectSection(SolutionItems) = preProject
-		scripts\dotnet = scripts\dotnet
-		scripts\dotnet-compile = scripts\dotnet-compile
-		scripts\dotnet-compile.cmd = scripts\dotnet-compile.cmd
-		scripts\dotnet-publish = scripts\dotnet-publish
-		scripts\dotnet-publish.cmd = scripts\dotnet-publish.cmd
-		scripts\dotnet-resolve-references = scripts\dotnet-resolve-references
-		scripts\dotnet-resolve-references.cmd = scripts\dotnet-resolve-references.cmd
-		scripts\dotnet-resolve-sources = scripts\dotnet-resolve-sources
-		scripts\dotnet-resolve-sources.cmd = scripts\dotnet-resolve-sources.cmd
-		scripts\dotnet-restore = scripts\dotnet-restore
-		scripts\dotnet-restore.cmd = scripts\dotnet-restore.cmd
-		scripts\dotnet-run = scripts\dotnet-run
-		scripts\dotnet-run.cmd = scripts\dotnet-run.cmd
-		scripts\dotnet.cmd = scripts\dotnet.cmd
+		scripts\bootstrap.cmd = scripts\bootstrap.cmd
 	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.ProjectModel", "src\Microsoft.Extensions.ProjectModel\Microsoft.Extensions.ProjectModel.xproj", "{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bootstrap", "bootstrap", "{07731125-77D7-4B83-B7B2-C865C6B8A6E8}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\bootstrap\dotnet-compile = scripts\bootstrap\dotnet-compile
+		scripts\bootstrap\dotnet-compile.cmd = scripts\bootstrap\dotnet-compile.cmd
+		scripts\bootstrap\dotnet-publish = scripts\bootstrap\dotnet-publish
+		scripts\bootstrap\dotnet-publish.cmd = scripts\bootstrap\dotnet-publish.cmd
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,5 +70,6 @@ Global
 		{0A309227-A9D8-4DDF-88DD-326B57B04378} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{391D6AD6-0FD5-4E1E-A4C8-6B5439D197B5} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
 		{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6} = {ED2FE3E2-F7E7-4389-8231-B65123F2076F}
+		{07731125-77D7-4B83-B7B2-C865C6B8A6E8} = {13F8C30C-1011-459C-82B2-0ACDD73EDA18}
 	EndGlobalSection
 EndGlobal
