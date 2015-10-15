@@ -1,6 +1,8 @@
 ﻿{
     "version": "1.0.0-*",
-    "emitEntryPoint": true,
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
 
     "dependencies": {
         "Microsoft.NETCore.ConsoleHost": "1.0.0-*",
