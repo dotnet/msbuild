@@ -458,7 +458,7 @@ namespace Microsoft.Build.Internal
             // reserved properties; we need the ability for people to override our default in their 
             // environment or as a global property.  
 
-#if FEATURE_APPLOCAL_MSBUILD
+#if !FEATURE_INSTALLED_MSBUILD
             string extensionsPath = Path.Combine(FileUtilities.CurrentExecutableDirectory, ReservedPropertyNames.appLocalExtensionsPathSuffix);
             string extensionsPath32 = extensionsPath;
 #else
@@ -471,7 +471,7 @@ namespace Microsoft.Build.Internal
 #endif
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
 
-#if FEATURE_APPLOCAL_MSBUILD
+#if !FEATURE_INSTALLED_MSBUILD
             string extensionsPath64 = extensionsPath;
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
 #else
@@ -490,7 +490,7 @@ namespace Microsoft.Build.Internal
             }
 #endif
 
-#if !FEATURE_APPLOCAL_MSBUILD
+#if FEATURE_INSTALLED_MSBUILD
             // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both 
             // 32-bit and 64-bit machines.  We have a switch to continue using that behavior; however the default is now for
             // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32. 
