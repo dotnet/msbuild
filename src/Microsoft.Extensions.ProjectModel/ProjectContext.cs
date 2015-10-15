@@ -16,20 +16,20 @@ namespace Microsoft.Extensions.ProjectModel
     // NOTE(anurse): Copied from ApplicationHostContext in DNX. This name seemed more appropriate for this :)
     public class ProjectContext
     {
-        public Project Project { get; }
 
         public GlobalSettings GlobalSettings { get; }
 
-        // TODO: Remove this, it's kinda hacky
         public ProjectDescription RootProject { get; }
 
         public NuGetFramework TargetFramework { get; }
 
         public string RuntimeIdentifier { get; }
 
+        public Project ProjectFile => RootProject.Project;
+
         public string RootDirectory => GlobalSettings.DirectoryPath;
 
-        public string ProjectDirectory => Project.ProjectDirectory;
+        public string ProjectDirectory => ProjectFile.ProjectDirectory;
 
         public string PackagesDirectory { get; }
 
@@ -38,7 +38,6 @@ namespace Microsoft.Extensions.ProjectModel
         public LibraryManager LibraryManager { get; }
 
         internal ProjectContext(
-            Project project,
             GlobalSettings globalSettings,
             ProjectDescription rootProject,
             NuGetFramework targetFramework,
@@ -47,7 +46,6 @@ namespace Microsoft.Extensions.ProjectModel
             FrameworkReferenceResolver frameworkResolver,
             LibraryManager libraryManager)
         {
-            Project = project;
             GlobalSettings = globalSettings;
             RootProject = rootProject;
             TargetFramework = targetFramework;

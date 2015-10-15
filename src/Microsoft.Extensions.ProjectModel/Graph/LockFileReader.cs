@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Versioning;
 using Microsoft.Extensions.ProjectModel.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,7 +19,7 @@ namespace Microsoft.Extensions.ProjectModel.Graph
     {
         public static LockFile Read(string path)
         {
-            using(var fs = FileSystemUtility.OpenFileStream(path))
+            using(var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 return Read(fs);
             }

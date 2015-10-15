@@ -95,7 +95,6 @@ namespace Microsoft.Extensions.ProjectModel
             AddLockFileDiagnostics(libraryManager, LockFile != null, validLockFile, lockFileValidationMessage);
 
             return new ProjectContext(
-                Project,
                 GlobalSettings,
                 mainProject,
                 TargetFramework,

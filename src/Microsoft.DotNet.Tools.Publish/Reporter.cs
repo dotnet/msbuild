@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 
 namespace Microsoft.DotNet.Cli.Utils

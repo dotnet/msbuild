@@ -102,8 +102,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             if (string.IsNullOrEmpty(outputPath))
             {
                 outputPath = Path.Combine(
-                    context.Project.ProjectDirectory,
-                    "bin",
+                    context.ProjectFile.ProjectDirectory,
+                    Constants.BinDirectoryName,
                     configuration,
                     context.TargetFramework.GetTwoDigitShortFolderName());
             }
@@ -113,15 +113,15 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Get compilation options
-            var compilationOptions = context.Project.GetCompilerOptions(context.TargetFramework, configuration);
-            var outputName = Path.Combine(outputPath, context.Project.Name + ".dll");
+            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+            var outputName = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
 
             // Assemble csc args
             var cscArgs = new List<string>()
             {
                 "-nostdlib",
                 "-nologo",
-                $"-out:{outputName}"
+                $"-out:\"{outputName}\""
             };
 
             // Add compilation options to the args
@@ -129,19 +129,19 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             foreach (var dependency in dependencies)
             {
-                cscArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:{r}"));
+                cscArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r}\""));
                 cscArgs.AddRange(dependency.SourceReferences);
             }
 
             // Add project source files
-            cscArgs.AddRange(context.Project.Files.SourceFiles);
+            cscArgs.AddRange(context.ProjectFile.Files.SourceFiles);
 
             // Write RSP file
-            var rsp = Path.Combine(outputPath, "csc.rsp");
+            var rsp = Path.Combine(outputPath, "dotnet-compile.csc.rsp");
             File.WriteAllLines(rsp, cscArgs);
 
             // Execute CSC!
-            var result = Command.Create("csc", $"-noconfig @{rsp}")
+            var result = Command.Create("csc", $"-noconfig @\"{rsp}\"")
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .RunAsync()
@@ -151,14 +151,14 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs)
         {
-            var targetType = (compilationOptions.EmitEntryPoint ?? false) ? "exe" : "library";
+            var targetType = compilationOptions.EmitEntryPoint.GetValueOrDefault() ? "exe" : "library";
             cscArgs.Add($"-target:{targetType}");
-            if (compilationOptions.AllowUnsafe == true)
+            if (compilationOptions.AllowUnsafe.GetValueOrDefault())
             {
                 cscArgs.Add("-unsafe+");
             }
             cscArgs.AddRange(compilationOptions.Defines.Select(d => $"-d:{d}"));
-            if (compilationOptions.Optimize == true)
+            if (compilationOptions.Optimize.GetValueOrDefault())
             {
                 cscArgs.Add("-optimize");
             }
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 cscArgs.Add($"-platform:{compilationOptions.Platform}");
             }
-            if (compilationOptions.WarningsAsErrors == true)
+            if (compilationOptions.WarningsAsErrors.GetValueOrDefault())
             {
                 cscArgs.Add("-warnaserror");
             }

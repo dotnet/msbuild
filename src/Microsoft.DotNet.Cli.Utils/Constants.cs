@@ -11,5 +11,6 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string ExeSuffix = ".exe";
         public static readonly string CoreConsoleName = "coreconsole" + ExeSuffix;
         public static readonly string DefaultConfiguration = "Debug";
+        public static readonly string BinDirectoryName = "bin";
     }
 }

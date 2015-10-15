@@ -29,8 +29,14 @@ namespace Microsoft.DotNet.Tools.Publish
 
             app.OnExecute(() =>
             {
-                CheckArg(framework);
-                CheckArg(runtime);
+                if(!CheckArg(framework))
+                {
+                    return 1;
+                }
+                if(!CheckArg(runtime))
+                {
+                    return 1;
+                }
 
                 // Locate the project and get the name and full path
                 var path = project.Value;
@@ -40,7 +46,9 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
 
                 // Load project context and publish it
-                var context = ProjectContext.Create(path, NuGetFramework.Parse(framework.Value()), new[] { runtime.Value() });
+                var fx = NuGetFramework.Parse(framework.Value());
+                var rids = new[] { runtime.Value() };
+                var context = ProjectContext.Create(path, fx, rids);
                 return Publish(context, output.Value(), configuration.Value() ?? Constants.DefaultConfiguration);
             });
 
@@ -55,13 +63,14 @@ namespace Microsoft.DotNet.Tools.Publish
             }
         }
 
-        private static void CheckArg(CommandOption argument)
+        private static bool CheckArg(CommandOption argument)
         {
             if (!argument.HasValue())
             {
-                // TODO: GROOOOOOSS
-                throw new OperationCanceledException($"Missing required argument: {argument.LongName}");
+                Reporter.Error.WriteLine($"Missing required argument: {argument.LongName.Red().Bold()}");
+                return false;
             }
+            return true;
         }
 
         private static int Publish(ProjectContext context, string outputPath, string configuration)
@@ -72,8 +81,8 @@ namespace Microsoft.DotNet.Tools.Publish
             if (string.IsNullOrEmpty(outputPath))
             {
                 outputPath = Path.Combine(
-                    context.Project.ProjectDirectory,
-                    "bin",
+                    context.ProjectFile.ProjectDirectory,
+                    Constants.BinDirectoryName,
                     configuration,
                     context.TargetFramework.GetTwoDigitShortFolderName(),
                     "publish");
@@ -84,14 +93,14 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-compile", $"--framework {context.TargetFramework.DotNetFrameworkName} {context.Project.ProjectDirectory}")
+            var result = Command.Create("dotnet-compile", $"--framework {context.TargetFramework.DotNetFrameworkName} {context.ProjectFile.ProjectDirectory}")
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .RunAsync()
                 .Result;
             if (result.ExitCode != 0)
             {
-                Console.Error.WriteLine("Compilation failed!");
+                Reporter.Error.WriteLine("Compilation failed!".Red().Bold());
                 return result.ExitCode;
             }
 
@@ -111,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Publish
             var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
             if (!File.Exists(coreConsole))
             {
-                Console.Error.WriteLine($"Unable to find {Constants.CoreConsoleName} at {coreConsole}. You must have an explicit dependency on Microsoft.NETCore.ConsoleHost (for now ;))");
+                Reporter.Error.WriteLine($"Unable to find {Constants.CoreConsoleName} at {coreConsole}. You must have an explicit dependency on Microsoft.NETCore.ConsoleHost (for now ;))".Red().Bold());
                 return 1;
             }
 
@@ -119,22 +128,22 @@ namespace Microsoft.DotNet.Tools.Publish
             string overrideCoreConsole = Environment.GetEnvironmentVariable("DOTNET_CORE_CONSOLE_PATH");
             if(!string.IsNullOrEmpty(overrideCoreConsole) && File.Exists(overrideCoreConsole))
             {
-                Console.WriteLine($"Using CoreConsole override: {overrideCoreConsole}");
+                Reporter.Output.WriteLine($"Using CoreConsole override: {overrideCoreConsole}");
                 File.Copy(overrideCoreConsole, coreConsole, overwrite: true);
             }
 
             // Use the 'command' field to generate the name
-            var outputExe = Path.Combine(outputPath, context.Project.Name + ".exe");
-            if (File.Exists(outputExe))
+            var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + ".exe");
+            File.Copy(coreConsole, outputExe, overwrite: true);
+            if (File.Exists(coreConsole))
             {
-                File.Delete(outputExe);
+                File.Delete(coreConsole);
             }
-            File.Move(coreConsole, outputExe);
 
             // Check if the a command name is specified, and rename the necessary files
-            if(context.Project.Commands.Count == 1)
+            if(context.ProjectFile.Commands.Count == 1)
             {
-                var commandName = context.Project.Commands.Single().Key;
+                var commandName = context.ProjectFile.Commands.Single().Key;
 
                 // Move coreconsole and the matching dll
                 var renamedExe = Path.Combine(outputPath, commandName + ".exe");
@@ -148,7 +157,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 outputExe = Path.Combine(outputPath, commandName + ".exe");
             }
 
-            Console.Error.WriteLine($"Published to {outputExe}");
+            Reporter.Output.WriteLine($"Published to {outputExe}".Green().Bold());
             return 0;
         }
 

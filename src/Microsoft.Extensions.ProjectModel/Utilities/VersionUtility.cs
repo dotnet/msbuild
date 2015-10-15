@@ -8,11 +8,7 @@ namespace Microsoft.Extensions.ProjectModel.Utilities
     {
         public static NuGetVersion GetAssemblyVersion(string path)
         {
-//#if NET451
-//            return new NuGetVersion(AssemblyName.GetAssemblyName(path).Version);
-//#else
             return new NuGetVersion(AssemblyLoadContext.GetAssemblyName(path).Version);
-//#endif
         }
     }
 }

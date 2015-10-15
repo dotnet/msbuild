@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.Internal;
 using NuGet;
 using NuGet.Versioning;
 
@@ -33,8 +34,6 @@ namespace Microsoft.Extensions.ProjectModel.Graph
 
         public bool Equals(LibraryIdentity other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
             return string.Equals(Name, other.Name) &&
                 Equals(Version, other.Version) &&
                 Equals(Type, other.Type);
@@ -42,20 +41,16 @@ namespace Microsoft.Extensions.ProjectModel.Graph
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((LibraryIdentity)obj);
+            return obj is LibraryIdentity && Equals((LibraryIdentity)obj);
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return ((Name != null ? Name.GetHashCode() : 0) * 397) ^
-                    (Version != null ? Version.GetHashCode() : 0) ^
-                    (Type.GetHashCode());
-            }
+            var combiner = HashCodeCombiner.Start();
+            combiner.Add(Name);
+            combiner.Add(Version);
+            combiner.Add(Type);
+            return combiner.CombinedHash;
         }
 
         public static bool operator ==(LibraryIdentity left, LibraryIdentity right)

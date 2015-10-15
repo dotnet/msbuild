@@ -267,18 +267,6 @@ namespace Microsoft.Extensions.ProjectModel
                         projectPath,
                         ((IJsonLineInfo)dependencyKey.Value).LineNumber,
                         ((IJsonLineInfo)dependencyKey.Value).LinePosition));
-
-                    //{
-                    //    LibraryRange = new LibraryRange(dependencyKey, isGacOrFrameworkReference)
-                    //    {
-                    //        VersionRange = dependencyVersionRange,
-                    //        FileName = projectPath,
-                    //        Line = dependencyValue.Line,
-                    //        Column = dependencyValue.Column,
-                    //        Target = target
-                    //    },
-                    //    Type = dependencyTypeValue
-                    //});
                 }
             }
         }

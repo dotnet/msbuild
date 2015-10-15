@@ -63,11 +63,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 // args is empty, we just run "foo.exe"
                 if (!string.IsNullOrEmpty(args))
                 {
-                    args = " " + args;
+                    executable = (executable + " " + args).Replace("\"", "\\\"");
                 }
-                var cmd = executable + args;
-                cmd = cmd.Replace("\"", "\\\"");
-                args = $"/C \"{executable}{args}\"";
+                args = $"/C \"{executable}\"";
                 executable = comSpec;
             }
 

@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.DotNet.Cli.Utils
 {
-    public static class AnsiExtensions
+    public static class AnsiColorExtensions
     {
         public static string Black(this string text)
         {

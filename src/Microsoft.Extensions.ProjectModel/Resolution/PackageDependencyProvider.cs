@@ -14,13 +14,11 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
     {
         private readonly string _packagesPath;
 
-        private readonly IEnumerable<VersionFolderPathResolver> _cacheResolvers;
         private readonly VersionFolderPathResolver _packagePathResolver;
 
         public PackageDependencyProvider(string packagesPath)
         {
             _packagesPath = packagesPath;
-            _cacheResolvers = GetCacheResolvers();
             _packagePathResolver = new VersionFolderPathResolver(packagesPath);
         }
 
@@ -41,7 +39,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             var dependencies = new List<LibraryRange>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
             PopulateDependencies(dependencies, targetLibrary);
 
-            var path = ResolvePackagePath(package);
+            var path = _packagePathResolver.GetInstallPath(package.Name, package.Version);
 
             var packageDescription = new PackageDescription(
                 new LibraryRange(package.Name, new VersionRange(package.Version), LibraryType.Package, LibraryDependencyType.Default),
@@ -72,25 +70,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                     LibraryType.ReferenceAssembly, 
                     LibraryDependencyType.Default));
             }
-        }
-
-        private string ResolvePackagePath(LockFilePackageLibrary package)
-        {
-            string expectedHash = package.Sha512;
-
-            foreach (var resolver in _cacheResolvers)
-            {
-                var cacheHashFile = resolver.GetHashPath(package.Name, package.Version);
-
-                // REVIEW: More efficient compare?
-                if (File.Exists(cacheHashFile) &&
-                    File.ReadAllText(cacheHashFile) == expectedHash)
-                {
-                    return resolver.GetInstallPath(package.Name, package.Version);
-                }
-            }
-
-            return _packagePathResolver.GetInstallPath(package.Name, package.Version);
         }
 
         public static string ResolveRepositoryPath(string rootDirectory, GlobalSettings settings)
@@ -135,30 +114,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 
             return packageCachePathValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                                         .Select(path => new VersionFolderPathResolver(path));
-        }
-
-        private class AssemblyNameComparer : IEqualityComparer<AssemblyName>
-        {
-            public static IEqualityComparer<AssemblyName> OrdinalIgnoreCase = new AssemblyNameComparer();
-
-            public bool Equals(AssemblyName x, AssemblyName y)
-            {
-                return
-                    string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(x.CultureName ?? "", y.CultureName ?? "", StringComparison.OrdinalIgnoreCase);
-            }
-
-            public int GetHashCode(AssemblyName obj)
-            {
-                var hashCode = 0;
-                if (obj.Name != null)
-                {
-                    hashCode ^= obj.Name.ToUpperInvariant().GetHashCode();
-                }
-
-                hashCode ^= (obj.CultureName?.ToUpperInvariant() ?? "").GetHashCode();
-                return hashCode;
-            }
         }
     }
 }

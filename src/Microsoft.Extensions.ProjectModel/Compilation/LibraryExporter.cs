@@ -92,21 +92,6 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
             }
         }
 
-        private void QueueDependencies(Queue<Node> queue, Node node)
-        {
-            // Queue up all the dependencies to be exported
-            foreach (var dependency in node.Library.Dependencies)
-            {
-                var childNode = new Node
-                {
-                    Library = LibraryManager.GetLibrary(dependency.Name),
-                    Parent = node
-                };
-
-                queue.Enqueue(childNode);
-            }
-        }
-
         private LibraryExport GetExport(LibraryDescription library)
         {
             // Don't even try to export unresolved libraries
@@ -184,7 +169,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
         {
             return Path.Combine(
                 project.Project.ProjectDirectory,
-                "bin",
+                "bin", // This can't access the Constant in Cli Utils. But the output path stuff is temporary right now anyway
                 _configuration,
                 project.Framework.GetTwoDigitShortFolderName(),
                 project.Project.Name + ".dll");
@@ -245,13 +230,6 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                 var path = Path.Combine(package.Path, assemblyPath);
                 paths.Add(path);
             }
-        }
-
-        private class Node
-        {
-            public LibraryDescription Library { get; set; }
-
-            public Node Parent { get; set; }
         }
     }
 }
