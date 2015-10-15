@@ -141,12 +141,23 @@ namespace Microsoft.DotNet.Tools.Compiler
             File.WriteAllLines(rsp, cscArgs);
 
             // Execute CSC!
-            var result = Command.Create("csc", $"-noconfig @\"{rsp}\"")
+            var result = RunCsc($"-noconfig @\"{rsp}\"")
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .RunAsync()
                 .Result;
             return result.ExitCode == 0;
+        }
+
+        private static Command RunCsc(string cscArgs)
+        {
+            // Hack -- if we find csc + corerun in the app directory we should
+            // use that, otherwise just try to find csc on the PATH
+            var corerun = Path.Combine(AppContext.BaseDirectory, "CoreRun.exe");
+            var csc_exe = Path.Combine(AppContext.BaseDirectory, "csc.exe");
+            return File.Exists(corerun) && File.Exists(csc_exe)
+                ? Command.Create(corerun, $@"""{csc_exe}"" {cscArgs}")
+                : Command.Create("csc.exe", cscArgs);
         }
 
         private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs)

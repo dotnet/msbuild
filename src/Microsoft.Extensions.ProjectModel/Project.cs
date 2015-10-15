@@ -123,7 +123,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
 
             // Assume the directory name is the project name if none was specified
-            var projectName = PathUtility.GetDirectoryName(path);
+            var projectName = PathUtility.GetDirectoryName(Path.GetFullPath(path));
             projectPath = Path.GetFullPath(projectPath);
 
             if (!File.Exists(projectPath))

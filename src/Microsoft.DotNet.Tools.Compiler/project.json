@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "Microsoft.NETCore.ConsoleHost": "1.0.0-*",
+        "Microsoft.NETCore.TestHost": "1.0.0-*",
         "Microsoft.NETCore.Runtime": "1.0.1-*",
 
         "System.Console": "4.0.0-*",
@@ -23,7 +24,8 @@
         "Microsoft.Extensions.CommandLineUtils.Sources": {
             "type": "build",
             "version": "1.0.0-*"
-        }
+        },
+        "Microsoft.Net.Compilers.netcore": "1.1.0-*",
     },
     "frameworks": {
         "dnxcore50": { }
