@@ -2826,7 +2826,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (ExceptionHandling.IsCriticalException(e))
                 {
-                    throw e;
+                    throw;
                 }
 
                 _log.LogErrorWithCodeFromResources("ResolveAssemblyReference.ProblemReadingImplementationDll", dllPath, e.Message);
