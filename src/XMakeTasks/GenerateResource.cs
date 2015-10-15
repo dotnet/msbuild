@@ -12,18 +12,26 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+#if FEATURE_BINARY_SERIALIZATION
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Xml;
 using System.Runtime.InteropServices;
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.Security;
+#if FEATURE_RESX_RESOURCE_READER
 using System.ComponentModel.Design;
+#endif
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+#endif
 
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -31,6 +39,7 @@ using Microsoft.Internal.Performance;
 using System.Runtime.Versioning;
 
 using Microsoft.Build.Utilities;
+using System.Xml.Linq;
 
 namespace Microsoft.Build.Tasks
 {
@@ -41,10 +50,19 @@ namespace Microsoft.Build.Tasks
     [RequiredRuntime("v2.0")]
     public sealed partial class GenerateResource : TaskExtension
     {
+
+#if !FEATURE_CODEDOM
+        private readonly string CSharpLanguageName = "CSharp";
+        private readonly string VisualBasicLanguageName = "VisualBasic";
+#endif
+
+
         #region Fields
 
+#if FEATURE_BINARY_SERIALIZATION
         // This cache helps us track the linked resource files listed inside of a resx resource file
         private ResGenDependencies _cache;
+#endif
 
         // This is where we store the list of input files/sources
         private ITaskItem[] _sources = null;
@@ -705,14 +723,17 @@ namespace Microsoft.Build.Tasks
                         // even though we're not actually running resgen.exe
                         LogResgenCommandLine(inputsToProcess, outputsToProcess);
 
+#if FEATURE_APPDOMAIN
                         // Figure out whether a separate AppDomain is required because an assembly would be locked.
                         bool needSeparateAppDomain = NeedSeparateAppDomain();
 
                         AppDomain appDomain = null;
+#endif
                         ProcessResourceFiles process = null;
 
                         try
                         {
+#if FEATURE_APPDOMAIN
                             if (needSeparateAppDomain)
                             {
                                 // we're going to be remoting across the appdomain boundary, so
@@ -742,6 +763,7 @@ namespace Microsoft.Build.Tasks
                                 RecordItemsForDisconnectIfNecessary(outputsToProcess);
                             }
                             else
+#endif
                             {
                                 process = new ProcessResourceFiles();
                             }
@@ -765,12 +787,14 @@ namespace Microsoft.Build.Tasks
                             if (ExtractResWFiles)
                             {
                                 ITaskItem[] outputResources = process.ExtractedResWFiles.ToArray();
+#if FEATURE_APPDOMAIN
                                 if (needSeparateAppDomain)
                                 {
                                     // Ensure we can unload the other AppDomain, yet still use the
                                     // ITaskItems we got back.  Clone them.
                                     outputResources = CloneValuesInThisAppDomain(outputResources);
                                 }
+#endif
 
                                 if (cachedOutputFiles.Count > 0)
                                 {
@@ -783,18 +807,21 @@ namespace Microsoft.Build.Tasks
                                     OutputResources = outputResources;
                                 }
 
+#if FEATURE_APPDOMAIN
                                 // Get portable library cache info (and if needed, marshal it to this AD).
                                 List<ResGenDependencies.PortableLibraryFile> portableLibraryCacheInfo = process.PortableLibraryCacheInfo;
                                 for (int i = 0; i < portableLibraryCacheInfo.Count; i++)
                                 {
                                     _cache.UpdatePortableLibrary(portableLibraryCacheInfo[i]);
                                 }
+#endif
                             }
 
                             process = null;
                         }
                         finally
                         {
+#if FEATURE_APPDOMAIN
                             if (needSeparateAppDomain && appDomain != null)
                             {
                                 Log.MarkAsInactive();
@@ -819,12 +846,15 @@ namespace Microsoft.Build.Tasks
 
                                 _remotedTaskItems = null;
                             }
+#endif
                         }
                     }
                 }
 
+#if FEATURE_BINARY_SERIALIZATION
                 // And now we serialize the cache to save our resgen linked file resolution for later use.
                 WriteStateFile();
+#endif
 
                 RemoveUnsuccessfullyCreatedResourcesFromOutputResources();
 
@@ -871,6 +901,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the path is found (or it doesn't matter because we're executing in memory), false otherwise</returns>
         private bool ComputePathToResGen()
         {
+#if FEATURE_RESGEN
             _resgenPath = null;
 
             if (String.IsNullOrEmpty(_sdkToolsPath))
@@ -911,6 +942,10 @@ namespace Microsoft.Build.Tasks
             }
 
             return _resgenPath != null;
+#else
+            _resgenPath = string.Empty;
+            return true;
+#endif
         }
 
         /// <summary>
@@ -921,6 +956,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputsToProcess">Array of output names corresponding to the inputs</param>
         private bool GenerateResourcesUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
+#if FEATURE_RESGEN
             bool resGenSucceeded = false;
 
             if (StronglyTypedLanguage != null)
@@ -933,8 +969,14 @@ namespace Microsoft.Build.Tasks
             }
 
             return resGenSucceeded;
+#else
+            Log.LogError("ResGen.exe not supported on .NET Core MSBuild");
+            return false;
+#endif
         }
 
+
+#if FEATURE_RESGEN
         /// <summary>
         /// Given an instance of the ResGen task with everything but the strongly typed 
         /// resource-related parameters filled out, execute the task and return the result
@@ -1018,6 +1060,8 @@ namespace Microsoft.Build.Tasks
 
             return succeeded;
         }
+#endif
+
 
         /// <summary>
         /// Given the list of inputs and outputs, returns the number of resources (starting at the provided initial index)
@@ -1058,6 +1102,8 @@ namespace Microsoft.Build.Tasks
             return numberOfResourcesToAdd;
         }
 
+
+#if FEATURE_RESGEN
         /// <summary>
         /// Given an instance of the ResGen task with everything but the strongly typed 
         /// resource-related parameters filled out, execute the task and return the result
@@ -1113,6 +1159,7 @@ namespace Microsoft.Build.Tasks
 
             return resGen;
         }
+#endif
 
         /// <summary>
         /// Check for parameter errors.
@@ -1168,9 +1215,11 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private void GetResourcesToProcess(out List<ITaskItem> inputsToProcess, out List<ITaskItem> outputsToProcess, out List<ITaskItem> cachedOutputFiles)
         {
+#if FEATURE_BINARY_SERIALIZATION
             // First we look to see if we have a resgen linked files cache.  If so, then we can use that
             // cache to speed up processing.
             ReadStateFile();
+#endif
 
             bool nothingOutOfDate = true;
             inputsToProcess = new List<ITaskItem>();
@@ -1182,6 +1231,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (ExtractResWFiles)
                 {
+#if FEATURE_BINARY_SERIALIZATION
                     // We can't cheaply predict the output files, since that would require
                     // loading each assembly.  So don't even try guessing what they will be.
                     // However, our cache will sometimes record all the info we need (for incremental builds).
@@ -1193,8 +1243,11 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
+#endif
                         inputsToProcess.Add(Sources[i]);
+#if FEATURE_BINARY_SERIALIZATION
                     }
+#endif
 
                     continue;
                 }
@@ -1235,6 +1288,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Given a cached portable library that is up to date, create ITaskItems to represent the output of the task, as if we did real work.
         /// </summary>
@@ -1254,6 +1308,7 @@ namespace Microsoft.Build.Tasks
                 cachedOutputFiles.Add(item);
             }
         }
+#endif
 
         /// <summary>
         /// Checks if this list contain any duplicates.  Do this so we don't have any races where we have two
@@ -1324,6 +1379,7 @@ namespace Microsoft.Build.Tasks
                 return NeedToRebuildSourceFile(sourceInfo, outputInfo);
             }
 
+#if FEATURE_BINARY_SERIALIZATION
             // OK, we have a .resx file
 
             // PERF: Regardless of whether the outputFile exists, if the source file is a .resx 
@@ -1381,6 +1437,9 @@ namespace Microsoft.Build.Tasks
             }
 
             return false;
+#else
+            return true;
+#endif
         }
 
         /// <summary>
@@ -1424,12 +1483,16 @@ namespace Microsoft.Build.Tasks
             {
                 if (StronglyTypedFileName == null)
                 {
+#if FEATURE_CODEDOM
                     CodeDomProvider provider = null;
 
                     if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
                     {
                         StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(provider, OutputResources[0].ItemSpec);
                     }
+#else
+                    StronglyTypedFileName = TryGenerateDefaultStronglyTypedFilename();
+#endif
                 }
             }
             catch (Exception e)
@@ -1544,6 +1607,7 @@ namespace Microsoft.Build.Tasks
             return _newestUncorrelatedInputWriteTime;
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Make the decision about whether a separate AppDomain is needed.
         /// If this algorithm is unsure about whether a separate AppDomain is
@@ -1574,13 +1638,14 @@ namespace Microsoft.Build.Tasks
                 if (String.Compare(extension, ".resx", StringComparison.OrdinalIgnoreCase) == 0 ||
                     String.Compare(extension, ".resw", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    XmlTextReader reader = null;
+                    XmlReader reader = null;
                     string name = null;
 
                     try
                     {
-                        reader = new XmlTextReader(source.ItemSpec);
-                        reader.DtdProcessing = DtdProcessing.Ignore;
+                        XmlReaderSettings readerSettings = new XmlReaderSettings();
+                        readerSettings.DtdProcessing = DtdProcessing.Ignore;
+                        reader = XmlReader.Create(source.ItemSpec, readerSettings);
 
                         while (reader.Read())
                         {
@@ -1606,7 +1671,7 @@ namespace Microsoft.Build.Tasks
                                             string resolvedTypeName = typeName;
 
                                             // This type name might be an alias, so first resolve that if any.  
-                                            int indexOfSeperator = typeName.IndexOf(",", StringComparison.InvariantCulture);
+                                            int indexOfSeperator = typeName.IndexOf(",", StringComparison.Ordinal);
 
                                             if (indexOfSeperator != -1)
                                             {
@@ -1791,7 +1856,7 @@ namespace Microsoft.Build.Tasks
         /// Deserializes the data content in order to figure out whether it implies a new app domain
         /// should be used to process resources.
         /// </summary>
-        private bool NeedSeparateAppDomainBasedOnSerializedType(XmlTextReader reader)
+        private bool NeedSeparateAppDomainBasedOnSerializedType(XmlReader reader)
         {
             while (reader.Read())
             {
@@ -1818,7 +1883,9 @@ namespace Microsoft.Build.Tasks
             // Return true to err on the side of caution. Error will appear later.
             return true;
         }
+#endif
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Deserializes a base64 block from a resx in order to figure out if its type is in the GAC.
         /// Because we're not providing any assembly resolution callback, deserialization
@@ -1838,6 +1905,7 @@ namespace Microsoft.Build.Tasks
                 return (result != null);
             }
         }
+#endif
 
         /// <summary>
         /// Chars that should be ignored in the nicely justified block of base64
@@ -1980,6 +2048,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (StronglyTypedFileName == null)
                 {
+#if FEATURE_CODEDOM
                     CodeDomProvider provider = null;
 
                     if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
@@ -1987,12 +2056,36 @@ namespace Microsoft.Build.Tasks
                         StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(
                             provider, OutputResources[0].ItemSpec);
                     }
+#else
+                    StronglyTypedFileName = TryGenerateDefaultStronglyTypedFilename();
+#endif
                 }
 
                 _filesWritten.Add(new TaskItem(this.StronglyTypedFileName));
             }
         }
 
+#if !FEATURE_CODEDOM
+        private string TryGenerateDefaultStronglyTypedFilename()
+        {
+            string extension = null;
+            if (StronglyTypedLanguage == CSharpLanguageName)
+            {
+                extension = ".cs";
+            }
+            else if (StronglyTypedLanguage == VisualBasicLanguageName)
+            {
+                extension = ".vb";
+            }
+            if (extension != null)
+            {
+                return Path.ChangeExtension(OutputResources[0].ItemSpec, extension);
+            }
+            return null;
+        }
+#endif
+
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Read the state file if able.
         /// </summary>
@@ -2018,6 +2111,7 @@ namespace Microsoft.Build.Tasks
                 _cache.SerializeCache((StateFile == null) ? null : StateFile.ItemSpec, Log);
             }
         }
+#endif
     }
 
     /// <summary>
@@ -2025,7 +2119,10 @@ namespace Microsoft.Build.Tasks
     /// Its designed to be called from a separate AppDomain so that any files locked by ResXResourceReader
     /// can be released.
     /// </summary>
-    internal sealed class ProcessResourceFiles : MarshalByRefObject
+    internal sealed class ProcessResourceFiles
+#if FEATURE_APPDOMAIN
+        : MarshalByRefObject
+#endif
     {
         #region fields
         /// <summary>
@@ -2084,6 +2181,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _stronglyTypedClassIsPublic;
 
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Class that gets called by the ResxResourceReader to resolve references
         /// to assemblies within the .RESX.
@@ -2094,6 +2192,7 @@ namespace Microsoft.Build.Tasks
         /// Handles assembly resolution events.
         /// </summary>
         private ResolveEventHandler _eventHandler;
+#endif
 
         /// <summary>
         /// The referenced assemblies
@@ -2144,6 +2243,7 @@ namespace Microsoft.Build.Tasks
         }
         private List<ITaskItem> _extractedResWFiles;
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Record all the information about outputs here to avoid future incremental builds.
         /// </summary>
@@ -2152,6 +2252,7 @@ namespace Microsoft.Build.Tasks
             get { return _portableLibraryCacheInfo; }
         }
         private List<ResGenDependencies.PortableLibraryFile> _portableLibraryCacheInfo;
+#endif
 
         /// <summary>
         /// List of output files that we failed to create due to an error.
@@ -2212,20 +2313,26 @@ namespace Microsoft.Build.Tasks
             _readers = new List<ReaderInfo>();
             _extractResWFiles = extractingResWFiles;
             _resWOutputDirectory = resWOutputDirectory;
+#if FEATURE_BINARY_SERIALIZATION
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
+#endif
 
+#if FEATURE_ASSEMBLY_LOADFROM
             // If references were passed in, we will have to give the ResxResourceReader an object
             // by which it can resolve types that are referenced from within the .RESX.
             if ((_assemblyFiles != null) && (_assemblyFiles.Length > 0))
             {
                 _typeResolver = new AssemblyNamesTypeResolutionService(_assemblyFiles);
             }
+#endif
 
             try
             {
+#if FEATURE_ASSEMBLY_LOADFROM
                 // Install assembly resolution event handler.
                 _eventHandler = new ResolveEventHandler(ResolveAssembly);
                 AppDomain.CurrentDomain.AssemblyResolve += _eventHandler;
+#endif
 
                 for (int i = 0; i < _inFiles.Count; ++i)
                 {
@@ -2243,12 +2350,15 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
+#if FEATURE_ASSEMBLY_LOADFROM
                 // Remove the event handler.
                 AppDomain.CurrentDomain.AssemblyResolve -= _eventHandler;
                 _eventHandler = null;
+#endif
             }
         }
 
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Callback to resolve assembly names to assemblies.
         /// </summary>
@@ -2328,6 +2438,7 @@ namespace Microsoft.Build.Tasks
 
             return null;
         }
+#endif
 
         #region Code from ResGen.EXE
 
@@ -2401,7 +2512,10 @@ namespace Microsoft.Build.Tasks
                 // DDB #9819
                 // SerializationException and TargetInvocationException can occur when trying to deserialize a type from a resource format (typically with other exceptions inside)
                 // This is a bug in the type being serialized, so the best we can do is dump diagnostic information and move on to the next input resource file.
-                if (e is SerializationException ||
+                if (
+#if FEATURE_BINARY_SERIALIZATION
+                    e is SerializationException ||
+#endif
                     e is TargetInvocationException)
                 {
                     _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0, "General.InvalidResxFile", e.Message);
@@ -2430,8 +2544,10 @@ namespace Microsoft.Build.Tasks
             {
                 if (GetFormat(inFile) == Format.Assembly)
                 {
+#if FEATURE_BINARY_SERIALIZATION
                     // Prepare cache data
                     ResGenDependencies.PortableLibraryFile library = new ResGenDependencies.PortableLibraryFile(inFile);
+#endif
                     List<string> resWFilesForThisAssembly = new List<string>();
 
                     foreach (ReaderInfo reader in _readers)
@@ -2471,17 +2587,23 @@ namespace Microsoft.Build.Tasks
                         ITaskItem newOutputFile = new TaskItem(escapedOutputFile);
                         resWFilesForThisAssembly.Add(escapedOutputFile);
                         newOutputFile.SetMetadata("ResourceIndexName", reader.assemblySimpleName);
+#if FEATURE_BINARY_SERIALIZATION
                         library.AssemblySimpleName = reader.assemblySimpleName;
+#endif
                         if (reader.fromNeutralResources)
                         {
                             newOutputFile.SetMetadata("NeutralResourceLanguage", reader.cultureName);
+#if FEATURE_BINARY_SERIALIZATION
                             library.NeutralResourceLanguage = reader.cultureName;
+#endif
                         }
                         ExtractedResWFiles.Add(newOutputFile);
                     }
 
+#if FEATURE_BINARY_SERIALIZATION
                     library.OutputFiles = resWFilesForThisAssembly.ToArray();
                     _portableLibraryCacheInfo.Add(library);
+#endif
                 }
                 else
                 {
@@ -2559,7 +2681,10 @@ namespace Microsoft.Build.Tasks
                 // DDB #9819
                 // SerializationException and TargetInvocationException can occur when trying to serialize a type into a resource format (typically with other exceptions inside)
                 // This is a bug in the type being serialized, so the best we can do is dump diagnostic information and move on to the next input resource file.
-                if (e is SerializationException ||
+                if (
+#if FEATURE_BINARY_SERIALIZATION
+                    e is SerializationException ||
+#endif
                     e is TargetInvocationException)
                 {
                     _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput", FileUtilities.GetFullPathNoThrow(inFile), e.Message); // Input file is more useful to log
@@ -2738,7 +2863,11 @@ namespace Microsoft.Build.Tasks
 
             if (format == Format.Assembly) // Multiple input .resources files within one assembly
             {
+#if FEATURE_ASSEMBLY_LOADFROM
                 ReadAssemblyResources(filename, outFileOrDir);
+#else
+                _logger.LogError("Reading resources from Assembly not supported on .NET Core MSBuild");
+#endif
             }
             else
             {
@@ -2751,6 +2880,7 @@ namespace Microsoft.Build.Tasks
                         break;
 
                     case Format.XML:
+#if FEATURE_RESX_RESOURCE_READER
                         ResXResourceReader resXReader = null;
                         if (_typeResolver != null)
                         {
@@ -2769,9 +2899,22 @@ namespace Microsoft.Build.Tasks
                         // ReadResources closes the reader for us
                         ReadResources(reader, resXReader, filename);
                         break;
-
+#else
+                        XDocument doc = XDocument.Load(filename, LoadOptions.PreserveWhitespace);
+                        foreach (XElement dataElem in doc.Element("root").Elements("data"))
+                        {
+                            string name = dataElem.Attribute("name").Value;
+                            string value = dataElem.Element("value").Value;
+                            AddResource(reader, name, value, filename);
+                        }
+                        break;
+#endif
                     case Format.Binary:
+#if FEATURE_RESX_RESOURCE_READER
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
+#else
+                        _logger.LogError("ResGen.exe not supported on .NET Core MSBuild");
+#endif
                         break;
 
                     default:
@@ -2783,6 +2926,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Reads resources from an assembly.
         /// </summary>
@@ -3000,6 +3144,7 @@ namespace Microsoft.Build.Tasks
                     return true;
             return false;
         }
+#endif
 
         /// <summary>
         /// Write resources from the resources ArrayList to the specified output file
@@ -3015,16 +3160,23 @@ namespace Microsoft.Build.Tasks
                     break;
 
                 case Format.XML:
+#if FEATURE_RESX_RESOURCE_READER
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
+#else
+                    _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
+#endif
                     break;
+
 
                 case Format.Assembly:
                     _logger.LogErrorFromResources("GenerateResource.CannotWriteAssembly", filename);
                     break;
 
                 case Format.Binary:
-                    WriteResources(reader, new ResourceWriter(filename)); // closes writer for us
+
+                    WriteResources(reader, new ResourceWriter(File.OpenWrite(filename))); // closes writer for us
                     break;
+
 
                 default:
                     // We should never get here, we've already checked the format
@@ -3033,6 +3185,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+
         /// <summary>
         /// Create a strongly typed resource class
         /// </summary>
@@ -3040,6 +3193,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="inputFileName">Input resource filename, for error messages</param>
         private void CreateStronglyTypedResources(ReaderInfo reader, String outFile, String inputFileName, out String sourceFile)
         {
+#if FEATURE_CODEDOM
             CodeDomProvider provider = null;
 
             if (!TryCreateCodeDomProvider(_logger, _stronglyTypedLanguage, out provider))
@@ -3098,8 +3252,13 @@ namespace Microsoft.Build.Tasks
                 // and it should get added to FilesWritten. So set a flag to indicate this.
                 _stronglyTypedResourceSuccessfullyCreated = true;
             }
+#else
+            sourceFile = null;
+            _logger.LogError("Generating strongly typed resource files not currently supported on .NET Core MSBuild");
+#endif
         }
 
+#if FEATURE_CODEDOM
         /// <summary>
         /// If no strongly typed resource class filename was specified, we come up with a default based on the
         /// input file name and the default language extension. 
@@ -3147,7 +3306,9 @@ namespace Microsoft.Build.Tasks
 
             return provider != null;
         }
+#endif
 
+#if FEATURE_RESX_RESOURCE_READER
         /// <summary>
         /// Read resources from an XML or binary format file
         /// </summary>
@@ -3166,6 +3327,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Read resources from a text format file
@@ -3341,12 +3503,18 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+
         /// <summary>
         /// Write resources to an XML or binary format resources file.
         /// </summary>
         /// <remarks>Closes writer automatically</remarks>
         /// <param name="writer">Appropriate IResourceWriter</param>
-        private void WriteResources(ReaderInfo reader, IResourceWriter writer)
+        private void WriteResources(ReaderInfo reader,
+#if FEATURE_RESX_RESOURCE_READER
+            IResourceWriter writer)
+#else
+            ResourceWriter writer)
+#endif
         {
             Exception capturedException = null;
             try
@@ -3355,7 +3523,11 @@ namespace Microsoft.Build.Tasks
                 {
                     string key = entry.name;
                     object value = entry.value;
+#if FEATURE_RESX_RESOURCE_READER
                     writer.AddResource(key, value);
+#else
+                    writer.AddResource(key, (string) value);
+#endif
                 }
             }
             catch (Exception e)
@@ -3366,17 +3538,17 @@ namespace Microsoft.Build.Tasks
             {
                 if (capturedException == null)
                 {
-                    writer.Close(); // If this throws, exceptions will be caught upstream.
+                    writer.Dispose(); // If this throws, exceptions will be caught upstream.
                 }
                 else
                 {
                     // It doesn't hurt to call Close() twice. In the event of a full disk, we *need* to call Close() twice.
                     // In that case, the first time we catch an exception indicating that the XML written to disk is malformed,
                     // specifically an InvalidOperationException: "Token EndElement in state Error would result in an invalid XML document."
-                    try { writer.Close(); }
+                    try { writer.Dispose(); }
                     catch (Exception) { } // We agressively catch all exception types since we already have one we will throw.
                     // The second time we catch the out of disk space exception.
-                    try { writer.Close(); }
+                    try { writer.Dispose(); }
                     catch (Exception) { } // We agressively catch all exception types since we already have one we will throw.
                     throw capturedException; // In the event of a full disk, this is an out of disk space IOException.
                 }
@@ -3389,7 +3561,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="fileName">Output resources file</param>
         private void WriteTextResources(ReaderInfo reader, String fileName)
         {
-            using (StreamWriter writer = new StreamWriter(fileName, false, Encoding.UTF8))
+            using (StreamWriter writer = FileUtilities.OpenWrite(fileName, false, Encoding.UTF8))
             {
                 foreach (Entry entry in reader.resources)
                 {
@@ -3477,7 +3649,7 @@ namespace Microsoft.Build.Tasks
             private int _col;
 
             internal LineNumberStreamReader(String fileName, Encoding encoding, bool detectEncoding)
-                : base(fileName, encoding, detectEncoding)
+                : base(File.Open(fileName, FileMode.Open), encoding, detectEncoding)
             {
                 _lineNumber = 1;
                 _col = 0;
@@ -3559,6 +3731,7 @@ namespace Microsoft.Build.Tasks
             private int lineNumber;
             private int column;
 
+#if FEATURE_BINARY_SERIALIZATION
             /// <summary>
             /// Fxcop want to have the correct basic exception constructors implemented
             /// </summary>
@@ -3566,6 +3739,7 @@ namespace Microsoft.Build.Tasks
                 : base(info, context)
             {
             }
+#endif
 
             internal TextFileException(String message, String fileName, int lineNumber, int linePosition)
                 : base(message)
@@ -3608,6 +3782,7 @@ namespace Microsoft.Build.Tasks
         #endregion // Code from ResGen.EXE
     }
 
+#if FEATURE_ASSEMBLY_LOADFROM
     /// <summary>
     /// This implemention of ITypeResolutionService is passed into the ResxResourceReader
     /// class, which calls back into the methods on this class in order to resolve types
@@ -3782,4 +3957,5 @@ namespace Microsoft.Build.Tasks
             throw new NotSupportedException();
         }
     }
+#endif
 }

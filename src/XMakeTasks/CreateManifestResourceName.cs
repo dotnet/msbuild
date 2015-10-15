@@ -261,7 +261,7 @@ namespace Microsoft.Build.Tasks
         {
             return
                 char.IsLetter(c) ||
-                char.GetUnicodeCategory(c) == UnicodeCategory.ConnectorPunctuation;
+                CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.ConnectorPunctuation;
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static bool IsValidEverettIdChar(char c)
         {
-            UnicodeCategory cat = char.GetUnicodeCategory(c);
+            UnicodeCategory cat = CharUnicodeInfo.GetUnicodeCategory(c);
 
             return
                 char.IsLetterOrDigit(c) ||
