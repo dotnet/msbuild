@@ -88,6 +88,7 @@ package_all(){
     package_package_root_placement
     package_absolute_placement
     package_samples
+    package_docs
 }
 
 generate_all(){
@@ -170,7 +171,7 @@ generate_manpage_manifest(){
 
     # Get path relative to $PACKAGE_SOURCE_DIR to prepend to each filename
     # This syntax is bash substring removal
-    docs_rel_path=${DOCS_DIR#${PACKAGE_SOURCE_DIR}}
+    docs_rel_path=${DOCS_DIR#${PACKAGE_SOURCE_DIR}/}
 
     # Remove any existing manifest
     rm -f ${DEBIAN_DIR}/${PACKAGE_NAME}.manpages
