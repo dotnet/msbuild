@@ -707,12 +707,22 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
 #else
-            var pathToExecutable = Path.Combine(FileUtilities.CurrentExecutableDirectory, "CoreRun.exe");
+            var pathToExecutable = ResolveRuntimeExecutableName();
             msbuildParameters = "\"" + pathToMsBuildExe + "\"" + " " + msbuildParameters;
 #endif
 
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, expectSuccess);
         }
+
+#if !FEATURE_RUN_EXE_IN_TESTS
+        /// <summary>
+        /// Resolve the platform specific path to the runtime executable that msbuild.exe needs to be run in (unix-mono, {unix, windows}-corerun).
+        /// </summary>
+        private static string ResolveRuntimeExecutableName()
+        {
+            return NativeMethodsShared.IsMono ? "mono" : Path.Combine(FileUtilities.CurrentExecutableDirectory, "CoreRun");
+        }
+#endif
 
         /// <summary>
         /// Run the process and get stdout and stderr
