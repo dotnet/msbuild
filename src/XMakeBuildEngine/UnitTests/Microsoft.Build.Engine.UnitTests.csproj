@@ -123,7 +123,6 @@
     <Compile Include="Collections\MSBuildNameIgnoreCaseComparer_Tests.cs" />
     <Compile Include="Collections\MultiDictionary_Tests.cs" />
     <Compile Include="Collections\OMcollections_tests.cs" />
-    <Compile Include="Collections\WeakDictionary_Tests.cs" />
     <Compile Include="ConfigureableForwardingLogger_Tests.cs" />
     <Compile Include="ConsoleLogger_Tests.cs" />
     <Compile Include="Construction\ElementLocation_Tests.cs" />
