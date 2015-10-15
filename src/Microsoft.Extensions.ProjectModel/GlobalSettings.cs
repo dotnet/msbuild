@@ -4,13 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.JsonParser.Sources;
 
 namespace Microsoft.Extensions.ProjectModel
 {
     public class GlobalSettings
     {
-        public const string GlobalFileName = "global.json";
+        public const string FileName = "global.json";
 
         public IList<string> ProjectSearchPaths { get; private set; }
         public string PackagesPath { get; private set; }
@@ -28,7 +28,7 @@ namespace Microsoft.Extensions.ProjectModel
             globalSettings = null;
             string globalJsonPath = null;
 
-            if (Path.GetFileName(path) == GlobalFileName)
+            if (Path.GetFileName(path) == FileName)
             {
                 globalJsonPath = path;
                 path = Path.GetDirectoryName(path);
@@ -39,7 +39,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
             else
             {
-                globalJsonPath = Path.Combine(path, GlobalFileName);
+                globalJsonPath = Path.Combine(path, FileName);
             }
 
             globalSettings = new GlobalSettings();
@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.ProjectModel
                 using (var fs = File.OpenRead(globalJsonPath))
                 {
                     var reader = new StreamReader(fs);
-                    var jobject = JObject.Parse(reader.ReadToEnd());
+                    var jobject = JsonDeserializer.Deserialize(reader) as JsonObject;
 
                     if (jobject == null)
                     {
@@ -61,7 +61,7 @@ namespace Microsoft.Extensions.ProjectModel
                                              new string[] { };
 
                     globalSettings.ProjectSearchPaths = new List<string>(projectSearchPaths);
-                    globalSettings.PackagesPath = jobject.Value<string>("packages");
+                    globalSettings.PackagesPath = jobject.ValueAsString("packages");
                     globalSettings.FilePath = globalJsonPath;
                 }
             }
@@ -75,7 +75,7 @@ namespace Microsoft.Extensions.ProjectModel
 
         public static bool HasGlobalFile(string path)
         {
-            string projectPath = Path.Combine(path, GlobalFileName);
+            string projectPath = Path.Combine(path, FileName);
 
             return File.Exists(projectPath);
         }

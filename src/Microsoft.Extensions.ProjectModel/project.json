@@ -13,9 +13,8 @@
 
         "NuGet.Packaging": "3.2.0",
 
-        "Newtonsoft.Json": "7.0.1",
-
         "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-*",
+        "Microsoft.Extensions.JsonParser.Sources": { "type": "build", "version": "1.0.0-*" },
         "Microsoft.Extensions.HashCodeCombiner.Sources": { "type": "build", "version": "1.0.0-*" }
     },
 

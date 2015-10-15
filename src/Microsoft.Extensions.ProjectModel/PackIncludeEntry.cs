@@ -1,6 +1,5 @@
 ﻿using System.Linq;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.JsonParser.Sources;
 
 namespace Microsoft.Extensions.ProjectModel
 {
@@ -11,8 +10,8 @@ namespace Microsoft.Extensions.ProjectModel
         public int Line { get; }
         public int Column { get; }
 
-        internal PackIncludeEntry(string target, JToken json)
-            : this(target, ExtractValues(json), ((IJsonLineInfo)json).LineNumber, ((IJsonLineInfo)json).LinePosition)
+        internal PackIncludeEntry(string target, JsonValue json)
+            : this(target, ExtractValues(json), json.Line, json.Column)
         {
         }
 
@@ -24,16 +23,18 @@ namespace Microsoft.Extensions.ProjectModel
             Column = column;
         }
 
-        private static string[] ExtractValues(JToken json)
+        private static string[] ExtractValues(JsonValue json)
         {
-            if (json.Type == JTokenType.String)
+            var valueAsString = json as JsonString;
+            if (valueAsString != null)
             {
-                return new string[] { json.Value<string>() };
+                return new string[] { valueAsString.Value };
             }
 
-            if(json.Type == JTokenType.Array)
+            var valueAsArray = json as JsonArray;
+            if(valueAsArray != null)
             {
-                return json.Value<JArray>().Select(v => v.ToString()).ToArray();
+                return valueAsArray.Values.Select(v => v.ToString()).ToArray();
             }
             return new string[0];
         }

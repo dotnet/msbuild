@@ -2,8 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.JsonParser.Sources;
 
 namespace Microsoft.Extensions.ProjectModel
 {
@@ -30,11 +29,11 @@ namespace Microsoft.Extensions.ProjectModel
 
         internal static FileFormatException Create(Exception exception, string filePath)
         {
-            if (exception is JsonReaderException)
+            if (exception is JsonDeserializerException)
             {
                 return new FileFormatException(exception.Message, exception)
                    .WithFilePath(filePath)
-                   .WithLineInfo((JsonReaderException)exception);
+                   .WithLineInfo((JsonDeserializerException)exception);
             }
             else
             {
@@ -43,7 +42,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
         }
 
-        internal static FileFormatException Create(Exception exception, JToken jsonValue, string filePath)
+        internal static FileFormatException Create(Exception exception, JsonValue jsonValue, string filePath)
         {
             var result = Create(exception, jsonValue)
                 .WithFilePath(filePath);
@@ -51,7 +50,7 @@ namespace Microsoft.Extensions.ProjectModel
             return result;
         }
 
-        internal static FileFormatException Create(Exception exception, IJsonLineInfo jsonValue)
+        internal static FileFormatException Create(Exception exception, JsonValue jsonValue)
         {
             var result = new FileFormatException(exception.Message, exception)
                 .WithLineInfo(jsonValue);
@@ -59,7 +58,7 @@ namespace Microsoft.Extensions.ProjectModel
             return result;
         }
 
-        internal static FileFormatException Create(string message, IJsonLineInfo jsonValue, string filePath)
+        internal static FileFormatException Create(string message, JsonValue jsonValue, string filePath)
         {
             var result = Create(message, jsonValue)
                 .WithFilePath(filePath);
@@ -75,7 +74,7 @@ namespace Microsoft.Extensions.ProjectModel
             return result;
         }
 
-        internal static FileFormatException Create(string message, IJsonLineInfo jsonValue)
+        internal static FileFormatException Create(string message, JsonValue jsonValue)
         {
             var result = new FileFormatException(message)
                 .WithLineInfo(jsonValue);
@@ -95,28 +94,28 @@ namespace Microsoft.Extensions.ProjectModel
             return this;
         }
 
-        private FileFormatException WithLineInfo(IJsonLineInfo value)
+        private FileFormatException WithLineInfo(JsonValue value)
         {
             if (value == null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
 
-            Line = value.LineNumber;
-            Column = value.LinePosition;
+            Line = value.Line;
+            Column = value.Column;
 
             return this;
         }
 
-        private FileFormatException WithLineInfo(JsonReaderException exception)
+        private FileFormatException WithLineInfo(JsonDeserializerException exception)
         {
             if (exception == null)
             {
                 throw new ArgumentNullException(nameof(exception));
             }
 
-            Line = exception.LineNumber;
-            Column = exception.LinePosition;
+            Line = exception.Line;
+            Column = exception.Column;
 
             return this;
         }

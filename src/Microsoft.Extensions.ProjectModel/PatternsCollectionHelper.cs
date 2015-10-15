@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.JsonParser.Sources;
 
 namespace Microsoft.Extensions.ProjectModel
 {
@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.ProjectModel
     {
         private static readonly char[] PatternSeparator = new[] { ';' };
 
-        public static IEnumerable<string> GetPatternsCollection(JObject rawProject,
+        public static IEnumerable<string> GetPatternsCollection(JsonObject rawProject,
                                                                 string projectDirectory,
                                                                 string projectFilePath,
                                                                 string propertyName,
@@ -22,21 +22,20 @@ namespace Microsoft.Extensions.ProjectModel
         {
             defaultPatterns = defaultPatterns ?? Enumerable.Empty<string>();
 
-            var prop = rawProject.Property(propertyName);
-            if (prop == null)
-            {
-                return CreateCollection(projectDirectory, propertyName, defaultPatterns, literalPath);
-            }
-
             try
             {
-                var valueInString = prop.Value.Value<string>();
+                if (!rawProject.Keys.Contains(propertyName))
+                {
+                    return CreateCollection(projectDirectory, propertyName, defaultPatterns, literalPath);
+                }
+
+                var valueInString = rawProject.ValueAsString(propertyName);
                 if (valueInString != null)
                 {
                     return CreateCollection(projectDirectory, propertyName, new string[] { valueInString }, literalPath);
                 }
 
-                var valuesInArray = prop.Value.Value<string[]>();
+                var valuesInArray = rawProject.ValueAsStringArray(propertyName);
                 if (valuesInArray != null)
                 {
                     return CreateCollection(projectDirectory, propertyName, valuesInArray.Select(s => s.ToString()), literalPath);
@@ -44,10 +43,10 @@ namespace Microsoft.Extensions.ProjectModel
             }
             catch (Exception ex)
             {
-                throw FileFormatException.Create(ex, prop.Value, projectFilePath);
+                throw FileFormatException.Create(ex, rawProject.Value(propertyName), projectFilePath);
             }
 
-            throw FileFormatException.Create("Value must be either string or array.", prop.Value, projectFilePath);
+            throw FileFormatException.Create("Value must be either string or array.", rawProject.Value(propertyName), projectFilePath);
         }
 
         private static IEnumerable<string> CreateCollection(string projectDirectory, string propertyName, IEnumerable<string> patternsStrings, bool literalPath)

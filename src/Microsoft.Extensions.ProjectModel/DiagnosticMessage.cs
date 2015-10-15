@@ -1,7 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Newtonsoft.Json;
+using Microsoft.Extensions.JsonParser.Sources;
 
 namespace Microsoft.Extensions.ProjectModel
 {
@@ -12,20 +12,6 @@ namespace Microsoft.Extensions.ProjectModel
     {
         public DiagnosticMessage(string errorCode, string message, string filePath, DiagnosticMessageSeverity severity)
             : this(errorCode, message, filePath, severity, startLine: 1, startColumn: 0)
-        { }
-
-        public DiagnosticMessage(string errorCode, string message, string filePath, DiagnosticMessageSeverity severity, IJsonLineInfo token)
-                : this(
-                    errorCode,
-                    message,
-                    $"{filePath}({token.LineNumber},{token.LinePosition}): {severity.ToString().ToLowerInvariant()} {errorCode}: {message}",
-                    filePath,
-                    severity,
-                    token.LineNumber,
-                    token.LinePosition,
-                    endLine: token.LineNumber,
-                    endColumn: token.LinePosition,
-                    source: null)
         { }
 
         public DiagnosticMessage(string errorCode, string message, string filePath, DiagnosticMessageSeverity severity, int startLine, int startColumn)
