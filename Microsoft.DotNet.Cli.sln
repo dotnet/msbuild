@@ -26,12 +26,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{13F8
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.ProjectModel", "src\Microsoft.Extensions.ProjectModel\Microsoft.Extensions.ProjectModel.xproj", "{303677D5-7312-4C3F-BAEE-BEB1A9BD9FE6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bootstrap", "bootstrap", "{07731125-77D7-4B83-B7B2-C865C6B8A6E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dnxhost", "dnxhost", "{07731125-77D7-4B83-B7B2-C865C6B8A6E8}"
 	ProjectSection(SolutionItems) = preProject
-		scripts\bootstrap\dotnet-compile = scripts\bootstrap\dotnet-compile
-		scripts\bootstrap\dotnet-compile.cmd = scripts\bootstrap\dotnet-compile.cmd
-		scripts\bootstrap\dotnet-publish = scripts\bootstrap\dotnet-publish
-		scripts\bootstrap\dotnet-publish.cmd = scripts\bootstrap\dotnet-publish.cmd
+		scripts\dnxhost\dotnet-compile = scripts\dnxhost\dotnet-compile
+		scripts\dnxhost\dotnet-compile.cmd = scripts\dnxhost\dotnet-compile.cmd
+		scripts\dnxhost\dotnet-publish = scripts\dnxhost\dotnet-publish
+		scripts\dnxhost\dotnet-publish.cmd = scripts\dnxhost\dotnet-publish.cmd
 	EndProjectSection
 EndProject
 Global
