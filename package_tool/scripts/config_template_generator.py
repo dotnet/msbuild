@@ -30,14 +30,14 @@ class UTC(datetime.tzinfo):
 
 # Generation Functions
 def generate_and_write_all(config_data, template_dir, output_dir):
-    # try:
-    changelog_contents = generate_changelog(config_data, template_dir)
-    control_contents = generate_control(config_data, template_dir)
-    copyright_contents = generate_copyright(config_data, template_dir)
-    symlink_contents = generate_symlinks(config_data)
-    # except Exception as exc:
-    #   print exc
-    #   help_and_exit("Error: Generation Failed, check your config file.")
+    try:
+        changelog_contents = generate_changelog(config_data, template_dir)
+        control_contents = generate_control(config_data, template_dir)
+        copyright_contents = generate_copyright(config_data, template_dir)
+        symlink_contents = generate_symlinks(config_data)
+    except Exception as exc:
+      print exc
+      help_and_exit("Error: Generation Failed, check your config file.")
 
     write_file(changelog_contents, output_dir, FILE_CHANGELOG)
     write_file(control_contents, output_dir, FILE_CONTROL)
