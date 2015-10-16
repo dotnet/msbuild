@@ -19,7 +19,8 @@ To get started on **Visual Studio 2015**:
   - _Universal Windows App Development Tools_
     - _Tools and Windows SDK 10.0.10240_
 2. Clone the source code (see above).
-3. Open src/MSBuild.sln solution in Visual Studio 2015.
+3. Restore NuGet packages: `msbuild /t:BulkRestoreNugetPackages build.proj`
+4. Open src/MSBuild.sln solution in Visual Studio 2015.
 
 ## How to Engage, Contribute and Provide Feedback
 Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we will or won't accept.

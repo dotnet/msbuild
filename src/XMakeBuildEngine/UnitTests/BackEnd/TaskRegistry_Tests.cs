@@ -19,17 +19,13 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Tasks;
-
 using Microsoft.Build.Utilities;
 
-
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Microsoft.Build.UnitTests;
 using Microsoft.CodeAnalysis.BuildTasks;
 using Xunit;
 
+#if FEATURE_COMPILE_IN_TESTS
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class TaskAssemblyFixture : IDisposable
@@ -2298,3 +2294,4 @@ namespace TestTask
         #endregion
     }
 }
+#endif

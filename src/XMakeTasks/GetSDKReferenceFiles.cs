@@ -195,7 +195,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The targetted SDK version.
+        /// The targeted SDK version.
         /// </summary>
         public string TargetSDKVersion
         {
@@ -690,7 +690,8 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (KeyValuePair<string, List<string>> directoryToFileList in info.DirectoryToFileList)
                 {
-                    if (directoryToFileList.Key.StartsWith(FileUtilities.EnsureNoTrailingSlash(redistFilePath), StringComparison.OrdinalIgnoreCase))
+                    // Add a trailing slash to ensure we don't match the start of a platform (e.g. ...\ARM matching ...\ARM64)
+                    if (FileUtilities.EnsureTrailingSlash(directoryToFileList.Key).StartsWith(FileUtilities.EnsureTrailingSlash(redistFilePath), StringComparison.OrdinalIgnoreCase))
                     {
                         List<string> redistFiles = directoryToFileList.Value;
                         string targetPathRoot = sdkReference.GetMetadata("CopyRedistToSubDirectory");
@@ -979,7 +980,7 @@ namespace Microsoft.Build.Tasks
         private class SDKFilesCache
         {
             /// <summary>
-            ///  Threadsafe queue which contains exceptions throws during cache file reading and writing.
+            ///  Thread-safe queue which contains exceptions throws during cache file reading and writing.
             /// </summary>
             private ConcurrentQueue<string> _exceptionMessages;
 

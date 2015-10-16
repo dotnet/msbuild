@@ -88,6 +88,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("bar", wrappedParameter2[1]);
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Verifies that construction and serialization with a value type (integer) parameter is OK. 
         /// </summary>
@@ -133,6 +134,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(2, wrappedParameter2[0]);
             Assert.Equal(15, wrappedParameter2[1]);
         }
+#endif
 
         /// <summary>
         /// Verifies that construction and serialization with an ITaskItem parameter is OK. 

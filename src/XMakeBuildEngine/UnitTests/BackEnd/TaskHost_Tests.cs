@@ -492,6 +492,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(_taskHost.IsRunningMultipleNodes); // "Expect IsRunningMultipleNodes to be true with 4 nodes"
         }
 
+#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Task logging after it's done should not crash us.
         /// </summary>
@@ -635,6 +636,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             mockLogger.AssertLogContains("[1]");
             mockLogger.AssertLogContains("[3]"); // [2] may or may not appear.
         }
+#endif
 
         #region Helper Classes
 

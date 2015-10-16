@@ -33,7 +33,12 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Path to the common targets
         /// </summary>
-        private string _pathToCommonTargets = Path.Combine(FrameworkLocationHelper.PathToDotNetFrameworkV45, "Microsoft.Common.targets");
+        private string _pathToCommonTargets =
+#if FEATURE_INSTALLED_MSBUILD
+            Path.Combine(FrameworkLocationHelper.PathToDotNetFrameworkV45, "Microsoft.Common.targets");
+#else
+            Path.Combine(AppContext.BaseDirectory, "Microsoft.Common.targets");
+#endif
 
         /// <summary>
         /// Tests constructor specifying only file.
@@ -98,7 +103,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Check it will use large element location when it should.
         /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/270")]
         public void TestLargeElementLocationUsedLargeColumn()
         {
             string file = null;
@@ -126,7 +131,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Check it will use large element location when it should.
         /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/270")]
         public void TestLargeElementLocationUsedLargeLine()
         {
             string file = null;
@@ -350,35 +355,32 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void SaveReadOnly2()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
 #if FEATURE_XML_LOADPATH
-                doc.Load(_pathToCommonTargets);
+            doc.Load(_pathToCommonTargets);
 #else
             using (
                 XmlReader xmlReader = XmlReader.Create(
                     _pathToCommonTargets,
-                    new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
+                    new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore}))
             {
                 doc.Load(xmlReader);
             }
 #endif
+            Assert.Throws<InvalidOperationException>(() => {
                 doc.Save(new MemoryStream());
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Save read only fails
         /// </summary>
         [Fact]
         public void SaveReadOnly3()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
 #if FEATURE_XML_LOADPATH
-                doc.Load(_pathToCommonTargets);
+            doc.Load(_pathToCommonTargets);
 #else
             using (
                 XmlReader xmlReader = XmlReader.Create(
@@ -388,22 +390,22 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(xmlReader);
             }
 #endif
+            Assert.Throws<InvalidOperationException>(() =>
+            {
                 doc.Save(new StringWriter());
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Save read only fails
         /// </summary>
         [Fact]
         public void SaveReadOnly4()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
+            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
 #if FEATURE_XML_LOADPATH
-                doc.Load(_pathToCommonTargets);
-                doc.Save(XmlWriter.Create(FileUtilities.GetTemporaryFile()));
+            doc.Load(_pathToCommonTargets);
+            doc.Save(XmlWriter.Create(FileUtilities.GetTemporaryFile()));
 #else
             using (
                 XmlReader xmlReader = XmlReader.Create(
@@ -412,15 +414,17 @@ namespace Microsoft.Build.UnitTests.Construction
             {
                 doc.Load(xmlReader);
             }
+#endif
 
             using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFile(), FileMode.Create)))
             {
-                doc.Save(wr);
+                Assert.Throws<InvalidOperationException>(() =>
+                {
+                    doc.Save(wr);
+                });
             }
-#endif
-            }
-           );
         }
+
         /// <summary>
         /// Get location strings for the content, loading as readonly if specified
         /// </summary>

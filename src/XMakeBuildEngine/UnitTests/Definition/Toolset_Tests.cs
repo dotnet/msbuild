@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("VisualStudioVersion", null);
 
                 ProjectCollection projectCollection = new ProjectCollection();
-                Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildAssemblyVersion);
+                Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = new Toolset("Fake", parentToolset.ToolsPath, null, projectCollection, null, parentToolset.OverrideTasksPath);
 

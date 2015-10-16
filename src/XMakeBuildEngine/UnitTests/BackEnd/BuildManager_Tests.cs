@@ -140,6 +140,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
         }
 
+#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Verify that the environment between two msbuild calls to the same project are stored
         /// so that on the next call we get access to them
@@ -194,6 +195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Verify if idle nodes are shutdown when BuildManager.ShutdownAllNodes is evoked.
@@ -940,13 +942,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
            );
         }
+
         [Fact]
         public void DisposeAfterUse()
         {
-            string project = FrameworkLocationHelper.PathToDotNetFrameworkV45 + "\\Microsoft.Common.targets";
+            string contents = ObjectModelHelpers.CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+</Project>
+");
+
+            Project project = CreateProject(contents, null, _projectCollection, false);
+
             var globalProperties = new Dictionary<string, string>();
             var targets = new string[0];
-            var brd = new BuildRequestData(project, globalProperties, null, targets, new HostServices());
+            var brd = new BuildRequestData(project.FullPath, globalProperties, null, targets, new HostServices());
             using (var bm = new BuildManager())
             {
                 bm.Build(new BuildParameters(), brd);

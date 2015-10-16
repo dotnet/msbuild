@@ -344,6 +344,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(logger.FullLog.Contains(error));
         }
 
+#if FEATURE_COMPILE_IN_TESTS
         /// <summary>
         /// Regression test for bug 533369.  Calling the MSBuild task, passing in a property
         /// in the Properties parameter that has a special character in its value, such as semicolon.
@@ -444,6 +445,7 @@ namespace Microsoft.Build.UnitTests
 
             ObjectModelHelpers.AssertFileExistsInTempProjectDirectory(@"bug'533'369\Sub;Dir\binaries\ConsoleApplication1.exe");
         }
+#endif
 
         /// <summary>
         /// Check if passing different global properites via metadata works
@@ -1142,6 +1144,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Verify stopOnFirstFailure with BuildInParallel override message are correctly logged when there are multiple nodes
         /// </summary>
@@ -1264,6 +1267,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(project2);
             }
         }
+#endif
 
         /// <summary>
         /// Test the skipping of the remaining projects. Verify the skip message is only displayed when there are projects to skip.

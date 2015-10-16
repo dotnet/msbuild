@@ -137,6 +137,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
            );
         }
+
+#if FEATURE_ASSEMBLY_LOADFROM
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is empty
         /// </summary>
@@ -164,15 +166,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
                     "TaskName",
-#if FEATURE_ASSEMBLY_LOADFROM
                     String.Empty,
-#else
-                    new AssemblyName(String.Empty),
-#endif
                     null);
             }
            );
         }
+#endif
+
         /// <summary>
         /// Test the valid constructors.  
         /// </summary>
@@ -379,6 +379,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
         }
 
+#if FEATURE_BINARY_SERIALIZATION
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains just value types. 
         /// </summary>
@@ -428,6 +429,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(config.TaskParameters["Text"].WrappedParameter, deserializedConfig.TaskParameters["Text"].WrappedParameter);
             Assert.Equal(config.TaskParameters["BoolValue"].WrappedParameter, deserializedConfig.TaskParameters["BoolValue"].WrappedParameter);
         }
+#endif
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem. 

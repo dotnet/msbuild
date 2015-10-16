@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(foundBar);
         }
 
-
+#if FEATURE_BINARY_SERIALIZATION
         [Fact]
         public void TestTranslation()
         {
@@ -363,6 +363,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception));
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
         }
+#endif
 
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
         {

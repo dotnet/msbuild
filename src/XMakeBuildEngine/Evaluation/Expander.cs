@@ -3201,7 +3201,17 @@ namespace Microsoft.Build.Evaluation
                 Assembly candidateAssembly = Assembly.LoadWithPartialName(candidateAssemblyName);
 #pragma warning restore 618
 #else
-                Assembly candidateAssembly = Assembly.Load(new AssemblyName(candidateAssemblyName));
+                Assembly candidateAssembly = null;
+                try
+                {
+                    candidateAssembly = Assembly.Load(new AssemblyName(candidateAssemblyName));
+                }
+                catch (FileNotFoundException)
+                {
+                    // Swallow the error; LoadWithPartialName returned null when the partial name
+                    // was not found but Load throws.  Either way we'll provide a nice "couldn't
+                    // resolve this" error later.
+                }
 #endif
 
                 if (candidateAssembly != null)

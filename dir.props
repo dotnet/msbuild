@@ -180,6 +180,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
@@ -225,6 +226,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_MULTIPLE_TOOLSETS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_INVOKEMEMBER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETINTERFACE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_VARIOUS_EXCEPTIONS</DefineConstants>
@@ -241,10 +243,6 @@
     <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.
          If not, then the corresponding properties on Thread (which aren't in .NET Core) need to be used. -->
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_SETTERS</DefineConstants>
-
-    <!-- This means that msbuild should (as much as possible) be xcopy deployable and not depend on anything
-         installed in the program files directory or other machine state. -->
-    <DefineConstants>$(DefineConstants);FEATURE_APPLOCAL_MSBUILD</DefineConstants>
 
     <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
   </PropertyGroup>
@@ -279,5 +277,5 @@
   </PropertyGroup>
 
 
-  <Import Condition="'$(IsTraversalBuild)'!='true' and Exists('$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props')" Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props"/> 
+  <Import Condition="'$(IsTraversalBuild)'!='true' and Exists('$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props')" Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props"/>
 </Project>

@@ -906,10 +906,10 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         }
     }
 
+#if FEATURE_COMPILE_IN_TESTS
     public class FullProjectsUsingMicrosoftCommonTargets
     {
         private const string SolutionFileContentsWithUnusualCharacters = @"Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2005
                 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Cons.ole;!@(foo)'^(Application1`, `Console;!@(foo)'^(Application1\Cons.ole;!@(foo)'^(Application1.csproj`, `{770F2381-8C39-49E9-8C96-0538FA4349A7}`
                 EndProject
                 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `Class;!@(foo)'^(Library1`, `Class;!@(foo)'^(Library1\Class;!@(foo)'^(Library1.csproj`, `{0B4B78CC-C752-43C2-BE9A-319D20216129}`
@@ -1755,6 +1755,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         }
 #endif
     }
+#endif
 
     internal class EscapingInProjectsHelper
     {

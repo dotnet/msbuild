@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tests that a strong reference is held to a single item
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/282")]
         public void AddEntryStrongReference()
         {
             if (NativeMethodsShared.IsMono)

@@ -725,6 +725,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public class TaskToTestFactories
 #if FEATURE_APPDOMAIN
             : AppDomainIsolatedTask
+#else
+            : Task
 #endif
         {
             /// <summary>
@@ -748,11 +750,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Execute the test
             /// </summary>
-#if FEATURE_APPDOMAIN
             public override bool Execute()
-#else
-            public bool Execute()
-#endif
             {
                 return true;
             }
