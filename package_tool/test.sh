@@ -1,9 +1,11 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-run_setup(){
-	bash $DIR/setup/test_setup.sh
-}
+current_user=$(whoami)
+if [ $current_user != "root" ]; then
+	echo "test.sh requires superuser privileges to run"
+	exit 1
+fi
 
 run_unit_tests(){
 	bats $DIR/test/unit_tests/test_debian_build_lib.bats
@@ -18,7 +20,7 @@ run_integration_tests(){
 	mkdir -p $output_dir
 
 	# Build the actual package
-	sudo $DIR/package_tool $input_dir $output_dir
+	$DIR/package_tool $input_dir $output_dir
 
 	# Integration Test Entrypoint placed by package_tool
 	bats $output_dir/test_package.bats
@@ -28,7 +30,6 @@ run_integration_tests(){
 }
 
 run_all(){
-	#run_setup
 	run_unit_tests
 	run_integration_tests
 }
