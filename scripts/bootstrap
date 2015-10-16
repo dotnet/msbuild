@@ -11,15 +11,17 @@ REPOROOT="$( cd -P "$DIR/.." && pwd )"
 
 echo "Bootstrapping dotnet.exe using DNX"
 
-UNAME=$(uname)
-if [ "$UNAME" == "Darwin" ]; then
-    RID=osx.10.10-x64
-elif [ "$UNAME" == "Linux" ]; then
-    # Detect Distro?
-    RID=ubuntu.14.04-x64
-else
-    echo "Unknown OS: $UNAME" 1>&2
-    exit 1
+if [ -z "$RID" ]; then
+    UNAME=$(uname)
+    if [ "$UNAME" == "Darwin" ]; then
+        RID=osx.10.10-x64
+    elif [ "$UNAME" == "Linux" ]; then
+        # Detect Distro?
+        RID=ubuntu.14.04-x64
+    else
+        echo "Unknown OS: $UNAME" 1>&2
+        exit 1
+    fi
 fi
 
 OUTPUT_ROOT=$REPOROOT/artifacts/$RID
@@ -39,7 +41,7 @@ fi
 
 echo "Running 'dnu restore' to restore packages for DNX-hosted projects"
 
-dnu restore "$REPOROOT" --runtime osx.10.10-x64 --runtime osx.10.11-x64
+dnu restore "$REPOROOT" --runtime osx.10.10-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.11-x64
 
 # Clean up stage1
 [ -d "$STAGE1_DIR" ] && rm -Rf "$STAGE1_DIR"
