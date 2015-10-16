@@ -172,11 +172,10 @@ namespace Microsoft.Build.UnitTests
                 // "cmd.exe" croaks big-time when given a very long command-line.  It pops up a message box on
                 // Windows XP.  We can't have that!  So use "attrib.exe" for this exercise instead.
 #if FEATURE_SPECIAL_FOLDERS
-                t.FullToolName = NativeMethodsShared.IsWindows ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "attrib.exe") :
+                t.FullToolName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), NativeMethodsShared.IsWindows ? "attrib.exe" : "ps");
 #else
-                t.FullToolName = NativeMethodsShared.IsWindows ? Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "attrib.exe") :
+                t.FullToolName = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), NativeMethodsShared.IsWindows ? "attrib.exe" : "ps");
 #endif
-                    "/bin/ps";
 
                 t.MockCommandLineCommands = new String('x', 32001);
 
