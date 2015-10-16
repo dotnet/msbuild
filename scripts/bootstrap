@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+REPOROOT="$( cd -P "$DIR/.." && pwd )"
+
+echo "Bootstrapping dotnet.exe using DNX"
+
+UNAME=$(uname)
+if [ "$UNAME" == "Darwin" ]; then
+    RID=osx.10.10-x64
+elif [ "$UNAME" == "Linux" ]; then
+    # Detect Distro?
+    RID=ubuntu.14.04-x64
+else
+    echo "Unknown OS: $UNAME" 1>&2
+    exit 1
+fi
+
+OUTPUT_ROOT=$REPOROOT/artifacts/$RID
+STAGE1_DIR=$OUTPUT_ROOT/stage1
+STAGE2_DIR=$OUTPUT_ROOT/stage2
+
+STAGE0_PUBLISH=$REPOROOT/scripts/stage0/dotnet-publish
+
+export DOTNET_CLR_HOSTS_PATH=$REPOROOT/ext/CLRHost/$RID
+export DOTNET_CSC_PATH=$REPOROOT/src/cscthingy/bin/Debug/dnxcore50/publish
+
+type -p dnx >/dev/null
+if [ ! $? ]; then
+    echo "DNX is required to bootstrap stage1" 1>&2
+    exit 1
+fi
+
+echo "Running 'dnu restore' to restore packages for DNX-hosted projects"
+
+dnu restore "$REPOROOT" --runtime osx.10.10-x64 --runtime osx.10.11-x64
+
+# Clean up stage1
+[ -d "$STAGE1_DIR" ] && rm -Rf "$STAGE1_DIR"
+
+echo "Building basic dotnet tools using Stage 0 (DNX hosted)"
+$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
+$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
+$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
+
+# Add stage1 to the path and use it to build stage2
+export PATH=$STAGE1_DIR:$PATH
+
+echo "Building stage2 dotnet using stage1 ..."
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"

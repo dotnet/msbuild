@@ -152,16 +152,16 @@ namespace Microsoft.DotNet.Tools.Compiler
         private static Command RunCsc(string cscArgs)
         {
             // Locate CoreRun
-            string hostRoot = Environment.GetEnvironmentVariable(Constants.HostsPathEnvironmentVariable);
+            string hostRoot = Environment.GetEnvironmentVariable("DOTNET_CSC_PATH");
             if(string.IsNullOrEmpty(hostRoot))
             {
                 hostRoot = AppContext.BaseDirectory;
             }
-            var corerun = Path.Combine(hostRoot, "CoreRun.exe");
-            var cscExe = Path.Combine(AppContext.BaseDirectory, "csc.exe");
+            var corerun = Path.Combine(hostRoot, Constants.CoreRunName);
+            var cscExe = Path.Combine(hostRoot, "csc.exe");
             return File.Exists(corerun) && File.Exists(cscExe)
                 ? Command.Create(corerun, $@"""{cscExe}"" {cscArgs}")
-                : Command.Create("csc.exe", cscArgs);
+                : Command.Create("csc", cscArgs);
         }
 
         private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs)

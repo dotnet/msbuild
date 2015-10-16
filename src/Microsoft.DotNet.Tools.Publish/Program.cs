@@ -115,8 +115,23 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Publishing for windows, TODO(anurse): Publish for Mac/Linux/etc.
+            int exitCode;
+            if(context.RuntimeIdentifier.Equals("win7-x64"))
+            {
+                exitCode = PublishForWindows(context, outputPath);
+            }
+            else
+            {
+                exitCode = PublishForUnix(context, outputPath);
+            }
 
-            // Locate CoreConsole
+            Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
+            return exitCode;
+        }
+
+        private static int PublishForUnix(ProjectContext context, string outputPath)
+        {
+            // Locate Hosts
             string hostsPath = Environment.GetEnvironmentVariable(Constants.HostsPathEnvironmentVariable);
             if(string.IsNullOrEmpty(hostsPath))
             {
@@ -125,15 +140,78 @@ namespace Microsoft.DotNet.Tools.Publish
             var coreConsole = Path.Combine(hostsPath, Constants.CoreConsoleName);
             if(!File.Exists(coreConsole))
             {
-                Reporter.Error.WriteLine($"Unable to locate CoreConsole.exe in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
+                Reporter.Error.WriteLine($"Unable to locate {Constants.CoreConsoleName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
+                return 1;
+            }
+            var coreRun = Path.Combine(hostsPath, Constants.CoreRunName);
+            if(!File.Exists(coreRun))
+            {
+                Reporter.Error.WriteLine($"Unable to locate {Constants.CoreRunName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
                 return 1;
             }
 
-            // TEMPORARILY bring CoreConsole along for the ride on it's own (without renaming)
+            // TEMPORARILY bring CoreConsole and CoreRun along for the ride on it's own (without renaming)
             File.Copy(coreConsole, Path.Combine(outputPath, Constants.CoreConsoleName), overwrite: true);
+            File.Copy(coreRun, Path.Combine(outputPath, Constants.CoreRunName), overwrite: true);
 
             // Use the 'command' field to generate the name
-            var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + ".exe");
+            var outputExe = Path.Combine(outputPath, context.ProjectFile.Name);
+            var outputDll = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
+
+            // Check if the a command name is specified, and rename the necessary files
+            if(context.ProjectFile.Commands.Count == 1)
+            {
+                // Write a script that can be used to launch with CoreRun
+                var script = $@"#!/usr/bin/env bash
+SOURCE=""${{BASH_SOURCE[0]}}""
+while [ -h ""$SOURCE"" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
+  SOURCE=""$(readlink ""$SOURCE"")""
+  [[ $SOURCE != /* ]] && SOURCE=""$DIR/$SOURCE"" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
+exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
+                outputExe = Path.Combine(outputPath, context.ProjectFile.Commands.Single().Key);
+                File.WriteAllText(outputExe, script);
+                Command.Create("chmod", $"a+x {outputExe}")
+                    .ForwardStdOut()
+                    .ForwardStdErr()
+                    .RunAsync()
+                    .Wait();
+                File.Copy(outputDll, Path.ChangeExtension(outputDll, ".exe"));
+                File.Delete(outputDll);
+            }
+            return 0;
+        }
+
+        private static int PublishForWindows(ProjectContext context, string outputPath)
+        {
+            // Locate Hosts
+            string hostsPath = Environment.GetEnvironmentVariable(Constants.HostsPathEnvironmentVariable);
+            if(string.IsNullOrEmpty(hostsPath))
+            {
+                hostsPath = AppContext.BaseDirectory;
+            }
+            var coreConsole = Path.Combine(hostsPath, Constants.CoreConsoleName);
+            if(!File.Exists(coreConsole))
+            {
+                Reporter.Error.WriteLine($"Unable to locate {Constants.CoreConsoleName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
+                return 1;
+            }
+            var coreRun = Path.Combine(hostsPath, Constants.CoreRunName);
+            if(!File.Exists(coreRun))
+            {
+                Reporter.Error.WriteLine($"Unable to locate {Constants.CoreRunName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
+                return 1;
+            }
+
+            // TEMPORARILY bring CoreConsole and CoreRun along for the ride on it's own (without renaming)
+            File.Copy(coreConsole, Path.Combine(outputPath, Constants.CoreConsoleName), overwrite: true);
+            File.Copy(coreRun, Path.Combine(outputPath, Constants.CoreRunName), overwrite: true);
+
+            // Use the 'command' field to generate the name
+            var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
+            var outputDll = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
             File.Copy(coreConsole, outputExe, overwrite: true);
 
             // Check if the a command name is specified, and rename the necessary files
@@ -149,11 +227,9 @@ namespace Microsoft.DotNet.Tools.Publish
                     File.Delete(renamedExe);
                 }
                 File.Move(outputExe, renamedExe);
-                File.Move(Path.ChangeExtension(outputExe, ".dll"), renamedDll);
+                File.Move(outputDll, renamedDll);
                 outputExe = Path.Combine(outputPath, commandName + ".exe");
             }
-
-            Reporter.Output.WriteLine($"Published to {outputExe}".Green().Bold());
             return 0;
         }
 
