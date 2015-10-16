@@ -10,4 +10,4 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # This is how tools should be called
-exec bash $DIR/test_called.sh
+exec bash $DIR/../test_called.sh
