@@ -14,14 +14,6 @@ set STAGE1_DIR=%REPOROOT%\artifacts\stage1
 set STAGE2_DIR=%REPOROOT%\artifacts\stage2
 set DOTNET_PUBLISH=%REPOROOT%\scripts\dnxhost\dotnet-publish.cmd
 
-REM TEMPORARY!
-if not defined DOTNET_CORE_CONSOLE_PATH (
-    if exist "%REPOROOT%\..\coreclr" (
-        set DOTNET_CORE_CONSOLE_PATH=%REPOROOT%\..\coreclr\bin\Product\Windows_NT.x64.Debug\CoreConsole.exe
-    )
-)
-if not exist "%DOTNET_CORE_CONSOLE_PATH%" goto missing_coreconsole
-
 where dnvm >nul 2>nul
 if %errorlevel% == 0 goto have_dnvm
 
@@ -69,6 +61,13 @@ set PATH=%STAGE1_DIR%;%PATH%
 
 if exist %STAGE2_DIR% rd /s /q %STAGE2_DIR%
 
+REM This works around the coreconsole bug where the path to the exe can't be found
+pushd
+cd %STAGE1_DIR%
+
+REM Work around for not having the latest CSC yet
+set PATH=%ProgramFiles(x86)%\MSBuild\14.0\Bin;%PATH%
+
 echo Building stage2 dotnet.exe ...
 dotnet publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
 if errorlevel 1 goto fail
@@ -82,19 +81,12 @@ dotnet publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE2_DIR%" 
 if errorlevel 1 goto fail
 
 echo Bootstrapped dotnet to %STAGE2_DIR%
+popd
 
 goto end
 
 :fail
 echo Bootstrapping failed...
-exit /B 1
-
-:missing_coreconsole
-echo Bootstrapping temporarily requires a patched CoreConsole to workaround
-echo this issue: https://github.com/dotnet/coreclr/issues/1771
-echo Either clone dotnet/coreclr to a sibling directory of this repo called
-echo "coreclr" and build it, or put the path to the patched version of 
-echo CoreConsole in the DOTNET_CORE_CONSOLE_PATH environment variable
 exit /B 1
 
 :end

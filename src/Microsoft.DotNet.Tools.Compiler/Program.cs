@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var projectDependency = dependency.Library as ProjectDescription;
                 if (projectDependency != null && !string.Equals(projectDependency.Identity.Name, context.RootProject.Identity.Name, StringComparison.Ordinal))
                 {
-                    var compileResult = Command.Create("dotnet-compile", $"--framework \"{projectDependency.Framework}\" --configuration \"{configuration}\" {projectDependency.Project.ProjectDirectory}")
+                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} {projectDependency.Project.ProjectDirectory}")
                         .ForwardStdOut()
                         .ForwardStdErr()
                         .RunAsync()

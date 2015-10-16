@@ -77,9 +77,9 @@ namespace Microsoft.DotNet.Cli.Utils
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var extension = Path.GetExtension(executable);
-                if (!string.IsNullOrEmpty(executable))
+                if (!string.IsNullOrEmpty(extension))
                 {
-                    return string.Equals(executable, ".exe", StringComparison.Ordinal);
+                    return !string.Equals(extension, ".exe", StringComparison.Ordinal);
                 }
                 else if (executable.Contains(Path.DirectorySeparatorChar))
                 {
