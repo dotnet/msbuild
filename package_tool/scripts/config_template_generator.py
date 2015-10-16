@@ -14,7 +14,7 @@ FILE_CONTROL = 'control'
 FILE_COPYRIGHT = 'copyright'
 FILE_SYMLINK_FORMAT = '{package_name}.links'
 
-PACKAGE_ROOT_FORMAT = "/usr/share/{package_name}"
+PACKAGE_ROOT_FORMAT = "usr/share/{package_name}"
 CHANGELOG_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S %z"
 
 # UTC Timezone for Changelog date
@@ -206,7 +206,6 @@ def parse_and_validate_args():
         help_and_exit("Error: Invalid template directory path")
 
     if not os.path.isdir(output_dir):
-        print output_dir #TODO debug
         help_and_exit("Error: Invalid output directory path")
 
     return (config_path, template_dir, output_dir)

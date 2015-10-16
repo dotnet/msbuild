@@ -59,6 +59,6 @@ Note: remove all comments before using this
         }, 
 
         "symlinks": {                                               // (optional no defaults)
-            "path_relative_to_package_root/test_exe.sh" : "/usr/bin/test_exe.sh" 
+            "path_relative_to_package_root/test_exe.sh" : "usr/bin/test_exe.sh" 
         }
     }

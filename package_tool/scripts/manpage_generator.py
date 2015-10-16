@@ -105,7 +105,6 @@ def generate_synopsis_section(tool_name, tool_data):#
     roff_text_builder = []
     roff_text_builder.append(".SH SYNOPSIS")
 
-    #TODO: append ellipsis conditionally if argument_list_name is added
     synopsis_format = '.B {program_name} {command_name} \n.RI {options} " "\n.I "{argument_list_name}"'
 
     tool_commands = tool_data.get("commands", [])
