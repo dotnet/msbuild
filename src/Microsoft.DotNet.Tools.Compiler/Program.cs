@@ -154,9 +154,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Hack -- if we find csc + corerun in the app directory we should
             // use that, otherwise just try to find csc on the PATH
             var corerun = Path.Combine(AppContext.BaseDirectory, "CoreRun.exe");
-            var csc_exe = Path.Combine(AppContext.BaseDirectory, "csc.exe");
-            return File.Exists(corerun) && File.Exists(csc_exe)
-                ? Command.Create(corerun, $@"""{csc_exe}"" {cscArgs}")
+            var cscExe = Path.Combine(AppContext.BaseDirectory, "csc.exe");
+            return File.Exists(corerun) && File.Exists(cscExe)
+                ? Command.Create(corerun, $@"""{cscExe}"" {cscArgs}")
                 : Command.Create("csc.exe", cscArgs);
         }
 
