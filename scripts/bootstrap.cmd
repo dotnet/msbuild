@@ -10,9 +10,10 @@ pushd %~dp0..
 set REPOROOT=%CD%
 popd
 
-set STAGE0_DIR=%REPOROOT%\artifacts\stage0
-set STAGE1_DIR=%REPOROOT%\artifacts\stage1
-set STAGE2_DIR=%REPOROOT%\artifacts\stage2
+set RID=win7-x64
+set STAGE0_DIR=%REPOROOT%\artifacts\%RID%\stage0
+set STAGE1_DIR=%REPOROOT%\artifacts\%RID%\stage1
+set STAGE2_DIR=%REPOROOT%\artifacts\%RID%\stage2
 
 where dnvm >nul 2>nul
 if %errorlevel% == 0 goto have_dnvm
@@ -32,13 +33,7 @@ if errorlevel 1 goto fail
 if exist %STAGE1_DIR% rd /s /q %STAGE1_DIR%
 
 echo Running 'dnu restore' to restore packages for DNX-hosted projects
-call dnu restore "%REPOROOT%\src\Microsoft.DotNet.Cli"
-if errorlevel 1 goto fail
-
-call dnu restore "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
-if errorlevel 1 goto fail
-
-call dnu restore "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
+call dnu restore "%REPOROOT%"
 if errorlevel 1 goto fail
 
 echo Building basic dotnet tools using older dotnet SDK version
@@ -49,15 +44,15 @@ call %~dp0dnvm2 upgrade
 if errorlevel 1 goto fail
 
 echo Building stage1 dotnet.exe ...
-dotnet-publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
+dotnet-publish --framework dnxcore50 --runtime %RID% --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
 if errorlevel 1 goto fail
 
 echo Building stage1 dotnet-compile.exe ...
-dotnet-publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
+dotnet-publish --framework dnxcore50 --runtime %RID% --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
 if errorlevel 1 goto fail
 
 echo Building stage1 dotnet-publish.exe ...
-dotnet-publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
+dotnet-publish --framework dnxcore50 --runtime %RID% --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
 
 echo Re-building dotnet tools with the bootstrapped version
@@ -71,15 +66,15 @@ pushd
 cd %STAGE1_DIR%
 
 echo Building stage2 dotnet.exe ...
-dotnet publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
+dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
 if errorlevel 1 goto fail
 
 echo Building stage2 dotnet-compile.exe ...
-dotnet publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
+dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
 if errorlevel 1 goto fail
 
 echo Building stage2 dotnet-publish.exe ...
-dotnet publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
+dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
 
 echo Bootstrapped dotnet to %STAGE2_DIR%
