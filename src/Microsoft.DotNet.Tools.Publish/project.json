@@ -7,9 +7,7 @@
         "dotnet-publish": "Microsoft.DotNet.Tools.Publish"
     },
     "dependencies": {
-        "Microsoft.NETCore.ConsoleHost": "1.0.0-*",
         "Microsoft.NETCore.Runtime": "1.0.1-*",
-
         "System.Console": "4.0.0-*",
         "System.Collections": "4.0.11-*",
         "System.Linq": "4.0.1-*",
@@ -23,7 +21,8 @@
         "Microsoft.Extensions.CommandLineUtils.Sources": {
             "type": "build",
             "version": "1.0.0-*"
-        }
+        },
+        "System.AppContext": "4.0.1-*"
     },
     "frameworks": {
         "dnxcore50": { }

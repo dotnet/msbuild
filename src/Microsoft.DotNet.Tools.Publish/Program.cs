@@ -116,29 +116,25 @@ namespace Microsoft.DotNet.Tools.Publish
 
             // Publishing for windows, TODO(anurse): Publish for Mac/Linux/etc.
 
-            // CoreConsole should be there...
-            var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
-            if (!File.Exists(coreConsole))
+            // Locate CoreConsole
+            string hostsPath = Environment.GetEnvironmentVariable(Constants.HostsPathEnvironmentVariable);
+            if(string.IsNullOrEmpty(hostsPath))
             {
-                Reporter.Error.WriteLine($"Unable to find {Constants.CoreConsoleName} at {coreConsole}. You must have an explicit dependency on Microsoft.NETCore.ConsoleHost (for now ;))".Red().Bold());
+                hostsPath = AppContext.BaseDirectory;
+            }
+            var coreConsole = Path.Combine(hostsPath, Constants.CoreConsoleName);
+            if(!File.Exists(coreConsole))
+            {
+                Reporter.Error.WriteLine($"Unable to locate CoreConsole.exe in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
                 return 1;
             }
 
-            // Allow CoreConsole to be replaced
-            string overrideCoreConsole = Environment.GetEnvironmentVariable("DOTNET_CORE_CONSOLE_PATH");
-            if(!string.IsNullOrEmpty(overrideCoreConsole) && File.Exists(overrideCoreConsole))
-            {
-                Reporter.Output.WriteLine($"Using CoreConsole override: {overrideCoreConsole}");
-                File.Copy(overrideCoreConsole, coreConsole, overwrite: true);
-            }
+            // TEMPORARILY bring CoreConsole along for the ride on it's own (without renaming)
+            File.Copy(coreConsole, Path.Combine(outputPath, Constants.CoreConsoleName), overwrite: true);
 
             // Use the 'command' field to generate the name
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + ".exe");
             File.Copy(coreConsole, outputExe, overwrite: true);
-            if (File.Exists(coreConsole))
-            {
-                File.Delete(coreConsole);
-            }
 
             // Check if the a command name is specified, and rename the necessary files
             if(context.ProjectFile.Commands.Count == 1)

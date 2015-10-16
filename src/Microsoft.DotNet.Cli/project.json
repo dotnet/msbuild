@@ -7,7 +7,6 @@
         "dotnet": "Microsoft.DotNet.Cli"
     },
     "dependencies": {
-        "Microsoft.NETCore.ConsoleHost": "1.0.0-*",
         "Microsoft.NETCore.Runtime": "1.0.1-*",
 
         "System.Console": "4.0.0-*",
