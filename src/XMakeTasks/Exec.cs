@@ -220,12 +220,9 @@ namespace Microsoft.Build.Tasks
                     sw.WriteLine("set errorlevel=dummy");
                     sw.WriteLine("set errorlevel=");
 
-                    // We probably have to change the code page to UTF8 (65001) for non-ansi characters to work.
-                    if (EncodingUtilities.CurrentSystemOemEncoding.CodePage != sw.Encoding.CodePage)
-                    {
-                        // Output to nul so we don't change output and logs.
-                        sw.WriteLine(string.Format(@"%SystemRoot%\System32\chcp.com {0}>nul", sw.Encoding.CodePage));
-                    }
+                    // set the console to use the stream writer's encoding
+                    // Output to nul so we don't change output and logs.
+                    sw.WriteLine(string.Format(@"%SystemRoot%\System32\chcp.com {0}>nul", sw.Encoding.CodePage));
 
                     // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
                     // automatically maps the network path to a drive letter, and then popd disconnects it
@@ -265,6 +262,7 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
+
                 sw.WriteLine(Command);
 
                 if (!isUnix)
@@ -553,21 +551,40 @@ namespace Microsoft.Build.Tasks
 
             string batchFileForCommandLine = _batchFile;
 
-            if (NativeMethodsShared.IsWindows)
+            // Unix consoles cannot have their encodings changed in place (like chcp on windows).
+            // Instead, unix scripts receive encoding information via environment variables before invocation.
+            // In consequence, encoding setup has to be performed outside the script, not inside it.
+            if (NativeMethodsShared.IsUnixLike)
             {
-                commandLine.AppendSwitch("/Q");      // echo off
-                commandLine.AppendSwitch("/C");      // run then terminate
-
-                // If for some crazy reason the path has a & character and a space in it
-                // then get the short path of the temp path, which should not have spaces in it
-                // and then escape the &
-                if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
-                {
-                    batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                    batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
-                }
+                commandLine.AppendSwitch("-c");
+                commandLine.AppendTextUnquoted(" '");
+                commandLine.AppendTextUnquoted("(");
+                commandLine.AppendTextUnquoted("export $LANG=en_US.UTF-8 export LC_ALL=$LANG");
+                commandLine.AppendTextUnquoted(";");
+                commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
+                commandLine.AppendTextUnquoted(")");
+                commandLine.AppendTextUnquoted("'");
             }
-            commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
+            else
+            {
+                if (NativeMethodsShared.IsWindows)
+                {
+                    commandLine.AppendSwitch("/Q"); // echo off
+                    commandLine.AppendSwitch("/C"); // run then terminate
+
+                    // If for some crazy reason the path has a & character and a space in it
+                    // then get the short path of the temp path, which should not have spaces in it
+                    // and then escape the &
+                    if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                    {
+                        batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
+                        batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
+                    }
+                }
+
+                commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
+            }
+            
         }
 
         #endregion
@@ -616,11 +633,6 @@ namespace Microsoft.Build.Tasks
         /// <returns>Encoding to use</returns>
         private Encoding GetEncodingWithOsFallback()
         {
-            if (Path.DirectorySeparatorChar == '/')
-            {
-                return Encoding.ASCII;
-            }
-
 #if FEATURE_OSVERSION
             // Windows 7 (6.1) or greater
             var windows7 = new Version(6, 1);
