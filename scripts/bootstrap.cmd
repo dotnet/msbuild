@@ -65,9 +65,6 @@ REM This works around the coreconsole bug where the path to the exe can't be fou
 pushd
 cd %STAGE1_DIR%
 
-REM Work around for not having the latest CSC yet
-set PATH=%ProgramFiles(x86)%\MSBuild\14.0\Bin;%PATH%
-
 echo Building stage2 dotnet.exe ...
 dotnet publish --framework dnxcore50 --runtime win7-x64 --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
 if errorlevel 1 goto fail
