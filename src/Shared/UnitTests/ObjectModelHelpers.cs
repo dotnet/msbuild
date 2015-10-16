@@ -675,10 +675,10 @@ namespace Microsoft.Build.UnitTests
                     }
                     else
                     {
-                        // All the retries have failed. We will now fail with the 
-                        // actual problem now instead of with some more difficult-to-understand 
-                        // issue later. 
-                        throw ex;
+                        // All the retries have failed. We will now fail with the
+                        // actual problem now instead of with some more difficult-to-understand
+                        // issue later.
+                        throw;
                     }
                 }
             }
@@ -713,10 +713,10 @@ namespace Microsoft.Build.UnitTests
                     }
                     else
                     {
-                        // All the retries have failed. We will now fail with the 
-                        // actual problem now instead of with some more difficult-to-understand 
-                        // issue later. 
-                        throw ex;
+                        // All the retries have failed. We will now fail with the
+                        // actual problem now instead of with some more difficult-to-understand
+                        // issue later.
+                        throw;
                     }
                 }
             }
