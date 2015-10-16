@@ -1,39 +1,39 @@
 {
-    "maintainer_name":"Microsoft",                              // [required]
-    "maintainer_email": "optimus@service.microsoft.com",        // [required]
+    "maintainer_name":"Microsoft",
+    "maintainer_email": "optimus@service.microsoft.com",
 
-    "package_name": "Packagify_Test",                           // [required]
+    "package_name": "Packagify_Test",
 
-    "short_description": "This is a test package",               // [required] Max. 60 chars
-    "long_description": "This is a longer description of the test package", // [required]
-    "homepage": "http://testpackage.com",                        // (optional no default)
+    "short_description": "This is a test package",
+    "long_description": "This is a longer description of the test package",
+    "homepage": "http://testpackage.com",
 
     "release":{
-        "package_version":"0.1",                                // [required]
-        "package_revision":"1",                                 // [required]
-        "urgency" : "low",                                      // (optional default="low") https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Urgency
-        "changelog_message" : "some stuff here"                 // [required]
+        "package_version":"0.1",
+        "package_revision":"1",
+        "urgency" : "low",
+        "changelog_message" : "some stuff here"
     },
 
-    "control": {                                                // (optional)
-        "priority":"standard",                                  // (optional default="standard") https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
-        "section":"devel",                                      // (optional default="misc") https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
-        "architecture":"all"                                    // (optional default="all" ) 
+    "control": {
+        "priority":"standard",
+        "section":"devel",
+        "architecture":"all"
     },
 
-    "copyright": "2015 Microsoft",                              // [required]
-    "license": {                                                // [required]
-        "type": "some_license",                                 // [required]
-        "full_text": "full license text here"                   // [required]
+    "copyright": "2015 Microsoft",
+    "license": {
+        "type": "some_license",
+        "full_text": "full license text here"
     },
 
-    "debian_dependencies" : {                                   // (optional no default)
+    "debian_dependencies" : {
         "package_name": {
-            "package_version" : "1.0.0"                         // (optional within package_name no default)
+            "package_version" : "1.0.0"
         }
-    }, 
+    },
 
-    "symlinks": {                                               // (optional no defaults)
-        "path_relative_to_package_root/test_exe.sh" : "usr/bin/test_exe.sh" 
+    "symlinks": {
+        "path_relative_to_package_root/test_exe.sh" : "usr/bin/test_exe.sh"
     }
 }

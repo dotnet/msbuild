@@ -1,6 +1,5 @@
 [Oo]bj/
 # Top level bin ignore only, so package_tool test_assets are added correctly
-/[Bb]in/
 .nuget/
 _ReSharper.*/
 packages/
