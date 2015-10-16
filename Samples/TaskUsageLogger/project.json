@@ -1,9 +1,5 @@
 ﻿{
-  "runtimes": {
-    "win7-x86": { }
-  },
   "dependencies": {
-    
   },
   "frameworks": {
     "net451": { },

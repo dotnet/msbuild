@@ -848,7 +848,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #pragma warning disable 618 //The test below tests a deprecated API. We disable the warning for obsolete methods for this particular test
-
+#if FEATURE_WIN32_REGISTRY
         [Fact]
         public void GetPathToWindowsSdk()
         {
@@ -884,6 +884,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(ToolLocationHelper.GetPathToWindowsSdk(TargetDotNetFrameworkVersion.Version46, vsVersion), pathToWindowsSdkV81);
             }
         }
+#endif
 
 #pragma warning restore 618
 
@@ -2303,6 +2304,7 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Verify we can an argument exception if we try and pass a empty registry root
         /// </summary>
@@ -2425,6 +2427,7 @@ namespace Microsoft.Build.UnitTests
             {
             }
         }
+#endif
 
         /*
         * Method:   GetDirectories
@@ -2460,6 +2463,7 @@ namespace Microsoft.Build.UnitTests
             return path.Contains("{runtime-base}") || Directory.Exists(path);
         }
 
+#if FEATURE_WIN32_REGISTRY
         private static string GetRegistryValueHelper(RegistryHive hive, RegistryView view, string subKeyPath, string name)
         {
             using (var key = RegistryHelper.OpenBaseKey(hive, view))
@@ -2473,7 +2477,7 @@ namespace Microsoft.Build.UnitTests
 
             return null;
         }
-
+#endif
         private static IEnumerable<VisualStudioVersion> EnumVisualStudioVersions()
         {
             for (VisualStudioVersion vsVersion = VisualStudioVersion.Version100; vsVersion <= VisualStudioVersion.VersionLatest; ++vsVersion)
@@ -2700,10 +2704,12 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public class GetPlatformExtensionSDKLocationsTestFixture : IDisposable
     {
+#if FEATURE_WIN32_REGISTRY
         // Create delegates to mock the registry for the registry portion of the test.
         private Microsoft.Build.Shared.OpenBaseKey _openBaseKey = new Microsoft.Build.Shared.OpenBaseKey(GetBaseKey);
         internal Microsoft.Build.Shared.GetRegistrySubKeyNames getRegistrySubKeyNames = new Microsoft.Build.Shared.GetRegistrySubKeyNames(GetRegistrySubKeyNames);
         internal Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue;
+#endif
 
         // Path to the fake SDk directory structure created under the temp directory.
         private string _fakeStructureRoot = null;
@@ -2711,7 +2717,9 @@ namespace Microsoft.Build.UnitTests
 
         public GetPlatformExtensionSDKLocationsTestFixture()
         {
+#if FEATURE_WIN32_REGISTRY
             getRegistrySubKeyDefaultValue = new Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
+#endif
 
             _fakeStructureRoot = MakeFakeSDKStructure();
             _fakeStructureRoot2 = MakeFakeSDKStructure2();
@@ -4581,6 +4589,7 @@ namespace Microsoft.Build.UnitTests
 
 #region HelperMethods
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Simplified registry access delegate. Given a baseKey and a subKey, get all of the subkey
         /// names.
@@ -4765,7 +4774,7 @@ namespace Microsoft.Build.UnitTests
 
             return null;
         }
-
+#endif
 #endregion
     }
 }

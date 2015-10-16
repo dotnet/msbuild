@@ -87,8 +87,10 @@ namespace Microsoft.Build.Tasks
         private GetAssemblyMetadata _getAssemblyMetadata;
         /// <summary>Delegate used to get the image runtime version of a file</summary>
         private GetAssemblyRuntimeVersion _getRuntimeVersion;
+#if FEATURE_WIN32_REGISTRY
         /// <summary> Delegate to get the base registry key for AssemblyFoldersEx</summary>
         private OpenBaseKey _openBaseKey;
+#endif
         /// <summary>Version of the runtime we are targeting</summary>
         private Version _targetedRuntimeVersion = null;
 
@@ -193,7 +195,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getRegistrySubKeyDefaultValue">Used to get registry default values.</param>
         internal ReferenceTable
         (
-                      IBuildEngine buildEngine,
+            IBuildEngine buildEngine,
             bool findDependencies,
             bool findSatellites,
             bool findSerializationAssemblies,
@@ -211,9 +213,11 @@ namespace Microsoft.Build.Tasks
             GetDirectories getDirectories,
             GetAssemblyName getAssemblyName,
             GetAssemblyMetadata getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
             GetRegistrySubKeyNames getRegistrySubKeyNames,
             GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue,
             OpenBaseKey openBaseKey,
+#endif
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion,
             Version projectTargetFramework,
@@ -250,7 +254,9 @@ namespace Microsoft.Build.Tasks
             _getRuntimeVersion = getRuntimeVersion;
             _projectTargetFramework = projectTargetFramework;
             _targetedRuntimeVersion = targetedRuntimeVersion;
+#if FEATURE_WIN32_REGISTRY
             _openBaseKey = openBaseKey;
+#endif
             _targetFrameworkMoniker = targetFrameworkMoniker;
             _latestTargetFrameworkDirectories = latestTargetFrameworkDirectories;
             _copyLocalDependenciesWhenParentReferenceInGac = copyLocalDependenciesWhenParentReferenceInGac;
@@ -299,9 +305,11 @@ namespace Microsoft.Build.Tasks
                     frameworkPaths,
                     fileExists,
                     getAssemblyName,
+#if FEATURE_WIN32_REGISTRY
                     getRegistrySubKeyNames,
                     getRegistrySubKeyDefaultValue,
                     openBaseKey,
+#endif
                     installedAssemblies,
                     getRuntimeVersion,
                     targetedRuntimeVersion,

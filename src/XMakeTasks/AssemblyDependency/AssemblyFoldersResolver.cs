@@ -57,6 +57,7 @@ namespace Microsoft.Build.Tasks
             foundPath = null;
             userRequestedSpecificFile = false;
 
+#if FEATURE_WIN32_REGISTRY
             if (assemblyName != null)
             {
                 // {AssemblyFolders} was passed in.
@@ -75,7 +76,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-
+#endif
             return false;
         }
     }

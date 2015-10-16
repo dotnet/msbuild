@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
-// </copyright>
-// <summary>Object which reads toolset information from the registry.</summary>
+// Object which reads toolset information from the registry.
 //-----------------------------------------------------------------------
+#if FEATURE_WIN32_REGISTRY
 
 using Microsoft.Win32;
 using System;
@@ -352,3 +352,4 @@ namespace Microsoft.Build.Evaluation
         }
     }
 }
+#endif

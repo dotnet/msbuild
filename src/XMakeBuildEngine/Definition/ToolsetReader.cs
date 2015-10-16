@@ -86,14 +86,19 @@ namespace Microsoft.Build.Evaluation
         /// allows you to specify which of the registry and configuration file to
         /// read from by providing ToolsetInitialization
         /// </summary>
+#if FEATURE_WIN32_REGISTRY || FEATURE_SYSTEM_CONFIGURATION
         internal static string ReadAllToolsets(Dictionary<string, Toolset> toolsets, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations locations)
         {
-            return ReadAllToolsets(toolsets, null,
+            return ReadAllToolsets(toolsets,
+#if FEATURE_WIN32_REGISTRY
+                null,
+#endif
 #if FEATURE_SYSTEM_CONFIGURATION
                 null,
 #endif
                 environmentProperties, globalProperties, locations);
         }
+#endif
 
         /// <summary>
         /// Gathers toolset data from the registry and configuration file, if any.
@@ -102,7 +107,9 @@ namespace Microsoft.Build.Evaluation
         internal static string ReadAllToolsets
             (
             Dictionary<string, Toolset> toolsets,
+#if FEATURE_WIN32_REGISTRY
             ToolsetRegistryReader registryReader,
+#endif
 #if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReader configurationReader,
 #endif
@@ -154,6 +161,7 @@ namespace Microsoft.Build.Evaluation
 
             if ((locations & ToolsetDefinitionLocations.Registry) == ToolsetDefinitionLocations.Registry)
             {
+#if FEATURE_WIN32_REGISTRY
                 if (NativeMethodsShared.IsWindows || registryReader != null)
                 {
                     var registryReaderToUse = registryReader
@@ -171,6 +179,7 @@ namespace Microsoft.Build.Evaluation
                         out defaultOverrideToolsVersionFromRegistry);
                 }
                 else
+#endif
                 {
                     var currentDir = FileUtilities.CurrentExecutableDirectory.TrimEnd(Path.DirectorySeparatorChar);
                     var props = new PropertyDictionary<ProjectPropertyInstance>();

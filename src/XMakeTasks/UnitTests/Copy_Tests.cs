@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
+#endif
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;

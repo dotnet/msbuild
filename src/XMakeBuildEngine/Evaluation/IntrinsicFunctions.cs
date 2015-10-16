@@ -155,6 +155,7 @@ namespace Microsoft.Build.Evaluation
             return ~first;
         }
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Get the value of the registry key and value, default value is null
         /// </summary>
@@ -248,6 +249,7 @@ namespace Microsoft.Build.Evaluation
             // We will have either found a result or defaultValue if one wasn't found at this point
             return result;
         }
+#endif
 
         /// <summary>
         /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location. 
@@ -385,6 +387,7 @@ namespace Microsoft.Build.Evaluation
         /// The return value shouldn't be null.
         /// Taken from: \ndp\clr\src\BCL\Microsoft\Win32\Registry.cs
         /// </summary>
+#if FEATURE_WIN32_REGISTRY
         private static RegistryKey GetBaseKeyFromKeyName(string keyName, RegistryView view, out string subKeyName)
         {
             if (keyName == null)
@@ -446,5 +449,6 @@ namespace Microsoft.Build.Evaluation
 
             return basekey;
         }
+#endif
     }
 }

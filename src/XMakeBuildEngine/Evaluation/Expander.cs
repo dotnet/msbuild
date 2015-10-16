@@ -190,7 +190,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// If a property is expanded but evaluates to null then it is consisered to be un-initialized. 
+        /// If a property is expanded but evaluates to null then it is considered to be un-initialized.
         /// We want to keep track of these properties so that we can warn if the property gets set later on.
         /// </summary>
         internal UsedUninitializedProperties UsedUninitializedProperties
@@ -970,6 +970,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             propertyValue = String.Empty;
                         }
+#if FEATURE_WIN32_REGISTRY
                         else if ((expression.Length - (propertyStartIndex + 2)) > 9 && tryExtractRegistryFunction && s_invariantCompareInfo.IndexOf(expression, "Registry:", propertyStartIndex + 2, 9, CompareOptions.OrdinalIgnoreCase) == propertyStartIndex + 2)
                         {
                             propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
@@ -978,6 +979,7 @@ namespace Microsoft.Build.Evaluation
                             // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
                             propertyValue = ExpandRegistryValue(propertyBody, elementLocation);
                         }
+#endif
 
                         // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return String.Empty
                         // In this case, tryExtractRegistryFunction will be false. Note that very few properties are exactly 77 chars, so this check should be fast.
@@ -1354,6 +1356,7 @@ namespace Microsoft.Build.Evaluation
                 return value;
             }
 
+#if FEATURE_WIN32_REGISTRY
             /// <summary>
             /// Given a string like "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation", return the value at that location
             /// in the registry. If the value isn't found, returns String.Empty.
@@ -1442,6 +1445,7 @@ namespace Microsoft.Build.Evaluation
 
                 return result;
             }
+#endif
         }
 
         /// <summary>

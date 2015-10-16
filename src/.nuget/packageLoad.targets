@@ -28,7 +28,7 @@
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$([System.IO.Path]::Combine($(NuGetDir), "NuGet.exe"))</NuGetToolPath>
     <NuGetConfigFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"NuGet.Config"))</NuGetConfigFile>
     <NuGetPackagesFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.config"))</NuGetPackagesFile>
-    <NuGetPackagesFileOSSpecific>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.$(OsEnvironment).config"))</NuGetPackagesFileOSSpecific>
+    <NuGetPackagesFileTargetSpecific>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.$(TargetPlatformIdentifier).config"))</NuGetPackagesFileTargetSpecific>
     <NuGetProjectJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.json"))</NuGetProjectJsonFile>
     <NuGetProjectLockJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.lock.json"))</NuGetProjectLockJsonFile>
     <NuGetCommonOptions>-Verbosity detailed</NuGetCommonOptions>
@@ -71,7 +71,7 @@
 
     <!-- Restore build tools using packages.config if it exists -->
     <Exec Condition="Exists('$(NuGetPackagesFile)')" Command="$(NugetInstallCommand) $(NuGetPackageInstallOptions) &quot;$(NuGetPackagesFile)&quot;" />
-    <Exec Condition="Exists('$(NuGetPackagesFileOSSpecific)')" Command="$(NugetInstallCommand) $(NuGetPackageInstallOptions) &quot;$(NuGetPackagesFileOSSpecific)&quot;" />
+    <Exec Condition="Exists('$(NuGetPackagesFileTargetSpecific)')" Command="$(NugetInstallCommand) $(NuGetPackageInstallOptions) &quot;$(NuGetPackagesFileTargetSpecific)&quot;" />
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
 
@@ -94,7 +94,7 @@
           Command="$(DnuRestoreCommand) &quot;$(NuGetConfigDir)&quot; --packages &quot;$(PackagesDir.TrimEnd('\').TrimEnd('\'))&quot; --quiet" />
     
     <!-- Copy the the runner app to the binary directory -->
-    <Copy Condition="'$(OsEnvironment)'=='Unix' and Exists('$(HostRuntimeDir)')" SourceFiles="$(HostRuntimeDir)" DestinationFiles="$(OutputPath)/CoreRun" SkipUnchangedFiles="true" />
+    <Copy Condition="'$(TargetPlatformIdentifier)'=='Unix' and Exists('$(HostRuntimeDir)')" SourceFiles="$(HostRuntimeDir)" DestinationFiles="$(OutputPath)/CoreRun" SkipUnchangedFiles="true" />
 
   </Target>
 
@@ -135,7 +135,7 @@
           Inputs="@(ProjectJsonFile)"
           Outputs="%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)project.lock.json"
           AfterTargets="_RestoreGlobalReferences"
-          Condition="('$(SolutionFile)'=='' or !Exists('$(SolutionFile)')) and '$(OsEnvironment)'=='Unix'"  >
+          Condition="('$(SolutionFile)'=='' or !Exists('$(SolutionFile)')) and '$(TargetPlatformIdentifier)'=='Unix'"  >
     <PropertyGroup>
       <ProjectDirectory>%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)</ProjectDirectory>
     </PropertyGroup>

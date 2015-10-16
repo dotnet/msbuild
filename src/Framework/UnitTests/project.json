@@ -15,8 +15,8 @@
         "System.Net.NetworkInformation": "4.1.0-beta-23225",
         "Microsoft.NETCore": "5.0.1-beta-23225",
         "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23225",
-        "System.Console": "4.0.0-beta-23225",
-        "Microsoft.NETCore.Runtime": "1.0.1-beta-23405",
+        "System.Console": "4.0.0-beta-23406",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23406",
         "Microsoft.NETCore.TestHost": "1.0.0-beta-23318",
         "xunit.console.netcore": "1.0.2-prerelease-00096"
       },

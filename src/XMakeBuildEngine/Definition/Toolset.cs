@@ -490,6 +490,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
+#if FEATURE_WIN32_REGISTRY
                 if (!NativeMethodsShared.IsWindows)
                 {
                     return false;
@@ -543,6 +544,9 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return s_dev10IsInstalled.Value;
+#else
+                return false;
+#endif
             }
         }
 
