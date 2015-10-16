@@ -661,19 +661,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             if (NativeMethodsShared.IsWindows)
             {
                 Assert.Equal(
-                    Path.Combine(Environment.CurrentDirectory, @"obj\i386\foo.dll"),
+                    Path.Combine(Directory.GetCurrentDirectory(), @"obj\i386\foo.dll"),
                     project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
                 Assert.Equal(
-                    Path.Combine(Environment.CurrentDirectory, @"obj\i386\foo.dll"),
+                    Path.Combine(Directory.GetCurrentDirectory(), @"obj\i386\foo.dll"),
                     projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
             }
             else
             {
                 Assert.Equal(
-                    Path.Combine(Environment.CurrentDirectory, @"obj/i386/foo.dll"),
+                    Path.Combine(Directory.GetCurrentDirectory(), @"obj/i386/foo.dll"),
                     project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
                 Assert.Equal(
-                   Path.Combine(Environment.CurrentDirectory, @"obj/i386/foo.dll"),
+                   Path.Combine(Directory.GetCurrentDirectory(), @"obj/i386/foo.dll"),
                     projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
             }
         }

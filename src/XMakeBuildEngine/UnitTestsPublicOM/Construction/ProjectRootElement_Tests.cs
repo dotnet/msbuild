@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create();
             project.FullPath = "X";
 
-            Assert.Equal(project.FullPath, Path.Combine(Environment.CurrentDirectory, "X"));
+            Assert.Equal(project.FullPath, Path.Combine(Directory.GetCurrentDirectory(), "X"));
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
 
-            projectXml1.FullPath = Path.Combine(Environment.CurrentDirectory, @"xyz\abc");
+            projectXml1.FullPath = Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc");
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             projectXml1.FullPath = @"xyz\abc";
 
-            ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Environment.CurrentDirectory, @"xyz\abc"));
+            ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
             Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
         }
@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             projectXml1.FullPath = @"xyz\abc";
 
-            ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Environment.CurrentDirectory, @"xyz\abc"));
+            ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
             Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
         }
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml1 = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-            projectXml1.FullPath = Path.Combine(Environment.CurrentDirectory, @"xyz\abc");
+            projectXml1.FullPath = Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc");
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
@@ -602,9 +602,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                Environment.CurrentDirectory = Path.GetTempPath(); // should be used for project.DirectoryPath; it must exist
+                Directory.SetCurrentDirectory(Path.GetTempPath()); // should be used for project.DirectoryPath; it must exist
                 // Use the *real* current directory for constructing the path
-                var curDir = Environment.CurrentDirectory;
+                var curDir = Directory.GetCurrentDirectory();
 
                 string file = "bar" + Path.DirectorySeparatorChar + "foo.proj";
                 string path = Path.Combine(curDir, file);
