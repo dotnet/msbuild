@@ -73,6 +73,7 @@ parse_config_and_set_env_vars(){
     PACKAGE_VERSION=$($extract_base_cmd $CONFIG "release.package_version")
 
     PACKAGE_SOURCE_DIR="${OUTPUT_DIR}/${PACKAGE_NAME}-${PACKAGE_VERSION}"
+    INSTALL_ROOT="/usr/share/${PACKAGE_NAME}"
 
     DEBIAN_DIR="${PACKAGE_SOURCE_DIR}/debian"
     DOCS_DIR="${PACKAGE_SOURCE_DIR}/docs"
