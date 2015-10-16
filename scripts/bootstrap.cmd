@@ -10,15 +10,15 @@ pushd %~dp0..
 set REPOROOT=%CD%
 popd
 
+set STAGE0_DIR=%REPOROOT%\artifacts\stage0
 set STAGE1_DIR=%REPOROOT%\artifacts\stage1
 set STAGE2_DIR=%REPOROOT%\artifacts\stage2
-set DOTNET_PUBLISH=%REPOROOT%\scripts\dnxhost\dotnet-publish.cmd
 
 where dnvm >nul 2>nul
 if %errorlevel% == 0 goto have_dnvm
 
 REM download dnvm
-echo Installing dnvm (DNX is needed to bootstrap currently) ...
+echo Installing dnvm (DNU is needed to bootstrap currently for package restore) ...
 powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&{$Branch='dev';$wc=New-Object System.Net.WebClient;$wc.Proxy=[System.Net.WebRequest]::DefaultWebProxy;$wc.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;Invoke-Expression ($wc.DownloadString('https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.ps1'))}"
 
 :have_dnvm
@@ -41,18 +41,23 @@ if errorlevel 1 goto fail
 call dnu restore "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
 
-echo Building basic dotnet tools using DNX-hosted version
+echo Building basic dotnet tools using older dotnet SDK version
+
+set DOTNET_HOME=%STAGE0_DIR%
+
+call %~dp0dnvm2 upgrade
+if errorlevel 1 goto fail
 
 echo Building stage1 dotnet.exe ...
-call "%DOTNET_PUBLISH%" --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
+dotnet --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
 if errorlevel 1 goto fail
 
 echo Building stage1 dotnet-compile.exe ...
-call "%DOTNET_PUBLISH%" --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
+dotnet --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
 if errorlevel 1 goto fail
 
 echo Building stage1 dotnet-publish.exe ...
-call "%DOTNET_PUBLISH%" --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
+dotnet --framework dnxcore50 --runtime win7-x64 --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
 
 echo Re-building dotnet tools with the bootstrapped version
