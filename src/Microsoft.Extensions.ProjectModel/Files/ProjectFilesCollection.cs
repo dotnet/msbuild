@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.ProjectModel.Files
     public class ProjectFilesCollection
     {
         public static readonly string[] DefaultCompileBuiltInPatterns = new[] { @"**/*.cs" };
-        public static readonly string[] DefaultPublishExcludePatterns = new[] { @"obj/**/*.*", @"bin/**/*.*", @"**/.*/**", @"**/global.json" };
+        public static readonly string[] DefaultPublishExcludePatterns = new[] { @"obj/**/*.*", @"bin/**/*.*", @"**/.*/**", @"**/global.json", @"**/project.json", @"**/project.lock.json" };
         public static readonly string[] DefaultPreprocessPatterns = new[] { @"compiler/preprocess/**/*.cs" };
         public static readonly string[] DefaultSharedPatterns = new[] { @"compiler/shared/**/*.cs" };
         public static readonly string[] DefaultResourcesBuiltInPatterns = new[] { @"compiler/resources/**/*", "**/*.resx" };
@@ -138,17 +138,15 @@ namespace Microsoft.Extensions.ProjectModel.Files
             get { return SharedPatternsGroup.SearchFiles(_projectDirectory).Distinct(); }
         }
 
-        public IEnumerable<string> GetFilesForBundling(bool includeSource, IEnumerable<string> additionalExcludePatterns)
+        public IEnumerable<string> GetFilesForBundling(IEnumerable<string> additionalExcludePatterns = null)
         {
             var patternGroup = new PatternGroup(ContentPatternsGroup.IncludePatterns,
-                                                ContentPatternsGroup.ExcludePatterns.Concat(additionalExcludePatterns),
+                                                ContentPatternsGroup.ExcludePatterns.Concat(additionalExcludePatterns ?? new List<string>()),
                                                 ContentPatternsGroup.IncludeLiterals);
-            if (!includeSource)
+
+            foreach (var excludedGroup in ContentPatternsGroup.ExcludePatternsGroup)
             {
-                foreach (var excludedGroup in ContentPatternsGroup.ExcludePatternsGroup)
-                {
-                    patternGroup.ExcludeGroup(excludedGroup);
-                }
+                patternGroup.ExcludeGroup(excludedGroup);
             }
 
             return patternGroup.SearchFiles(_projectDirectory);
