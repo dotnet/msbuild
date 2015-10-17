@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.JsonParser.Sources;
 
-namespace Microsoft.Extensions.ProjectModel.Utilities
+namespace Microsoft.Extensions.ProjectModel.Files
 {
     internal static class NamedResourceReader
     {

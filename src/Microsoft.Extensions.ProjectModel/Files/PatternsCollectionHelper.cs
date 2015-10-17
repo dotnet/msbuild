@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Extensions.JsonParser.Sources;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.Extensions.ProjectModel.Files
 {
     internal static class PatternsCollectionHelper
     {

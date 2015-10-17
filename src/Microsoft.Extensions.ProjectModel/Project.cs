@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Extensions.ProjectModel.Files;
 using Microsoft.Extensions.ProjectModel.Graph;
 using Microsoft.Extensions.ProjectModel.Utilities;
 using NuGet.Frameworks;

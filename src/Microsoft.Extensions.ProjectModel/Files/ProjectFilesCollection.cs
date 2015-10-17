@@ -6,9 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.JsonParser.Sources;
-using Microsoft.Extensions.ProjectModel.Utilities;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.Extensions.ProjectModel.Files
 {
     public class ProjectFilesCollection
     {

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.Extensions.JsonParser.Sources;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.Extensions.ProjectModel.Files
 {
     public class PackIncludeEntry
     {
