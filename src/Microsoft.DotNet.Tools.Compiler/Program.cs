@@ -171,24 +171,45 @@ namespace Microsoft.DotNet.Tools.Compiler
         private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs)
         {
             var targetType = compilationOptions.EmitEntryPoint.GetValueOrDefault() ? "exe" : "library";
+
             cscArgs.Add($"-target:{targetType}");
+
             if (compilationOptions.AllowUnsafe.GetValueOrDefault())
             {
                 cscArgs.Add("-unsafe+");
             }
+
             cscArgs.AddRange(compilationOptions.Defines.Select(d => $"-d:{d}"));
+
             if (compilationOptions.Optimize.GetValueOrDefault())
             {
                 cscArgs.Add("-optimize");
             }
+
             if (!string.IsNullOrEmpty(compilationOptions.Platform))
             {
                 cscArgs.Add($"-platform:{compilationOptions.Platform}");
             }
+
             if (compilationOptions.WarningsAsErrors.GetValueOrDefault())
             {
                 cscArgs.Add("-warnaserror");
             }
+
+            if (compilationOptions.DelaySign.GetValueOrDefault())
+            {
+                cscArgs.Add("-delaysign+");
+            }
+
+            if (!string.IsNullOrEmpty(compilationOptions.KeyFile))
+            {
+                cscArgs.Add($"-keyFile:\"{compilationOptions.KeyFile}\"");
+            }
+
+            // TODO: Support debug portable
+            cscArgs.Add("-debug:full");
+
+            // TODO: OSS signing
         }
 
         private static void ShowDependencyInfo(IEnumerable<LibraryExport> dependencies)
