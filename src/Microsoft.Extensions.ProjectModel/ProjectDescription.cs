@@ -25,7 +25,6 @@ namespace Microsoft.Extensions.ProjectModel
             LibraryRange libraryRange,
             Project project,
             IEnumerable<LibraryRange> dependencies,
-            IEnumerable<string> assemblies,
             TargetFrameworkInformation targetFrameworkInfo,
             bool resolved) :
                 base(

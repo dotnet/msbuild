@@ -102,8 +102,8 @@ namespace Microsoft.Extensions.ProjectModel
             project.ReleaseNotes = rawProject.ValueAsString("releaseNotes");
 
             project.RequireLicenseAcceptance = rawProject.ValueAsBoolean("requireLicenseAcceptance", defaultValue: false);
-            project.IsLoadable = rawProject.ValueAsBoolean("loadable", defaultValue: true);
-            // TODO: Move this to the dependencies node
+            
+            // REVIEW: Move this to the dependencies node?
             project.EmbedInteropTypes = rawProject.ValueAsBoolean("embedInteropTypes", defaultValue: false);
 
             project.Dependencies = new List<LibraryRange>();

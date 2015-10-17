@@ -51,13 +51,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 
             var dependencies = project.Dependencies.Concat(targetFrameworkDependencies).ToList();
 
-            var loadableAssemblies = new List<string>();
-
-            if (project.IsLoadable)
-            {
-                loadableAssemblies.Add(project.Name);
-            }
-
             // Mark the library as unresolved if there were specified frameworks
             // and none of them resolved
             bool unresolved = targetFrameworkInfo.FrameworkName == null;
@@ -66,7 +59,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                 new LibraryRange(project.Name, LibraryType.Unspecified),
                 project,
                 dependencies,
-                loadableAssemblies,
                 targetFrameworkInfo,
                 !unresolved);
         }

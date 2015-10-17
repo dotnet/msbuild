@@ -77,8 +77,6 @@ namespace Microsoft.Extensions.ProjectModel
 
         public string[] Tags { get; set; }
 
-        public bool IsLoadable { get; set; }
-
         public ProjectFilesCollection Files { get; set; }
 
         public IDictionary<string, string> Commands { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
