@@ -24,7 +24,7 @@ powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&{$Branch='dev';$w
 
 :have_dnvm
 echo Installing and use-ing the latest CoreCLR x64 DNX ...
-call dnvm install -u latest -r coreclr -arch x64 -alias dotnet_bootstrap
+call dnvm install -nonative -u latest -r coreclr -arch x64 -alias dotnet_bootstrap
 if errorlevel 1 goto fail
 
 call dnvm use dotnet_bootstrap -r coreclr -arch x64
