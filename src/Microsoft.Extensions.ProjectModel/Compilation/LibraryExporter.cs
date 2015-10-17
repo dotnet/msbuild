@@ -51,12 +51,11 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
         private IEnumerable<LibraryExport> ExportLibraries(Func<LibraryDescription, bool> condition)
         {
             var seenMetadataReferences = new HashSet<string>();
-            var seenRuntimeReferences = new HashSet<string>();
 
             // Iterate over libraries in the library manager
             foreach (var library in LibraryManager.GetLibraries())
             {
-                if(!condition(library))
+                if (!condition(library))
                 {
                     continue;
                 }
@@ -78,7 +77,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                         }
                     }
 
-                    if (library.Parent != null && Equals(library.Parent.Identity, _rootProject.Identity))
+                    if (library.Parents.Contains(_rootProject))
                     {
                         // Only process source references for direct dependencies
                         foreach (var sourceReference in libraryExport.SourceReferences)
@@ -153,12 +152,12 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                 {
                     compileAssemblies.Add(outputPath);
                 }
+            }
 
-                // Add shared sources
-                foreach (var sharedFile in project.Project.Files.SharedFiles)
-                {
-                    sourceReferences.Add(sharedFile);
-                }
+            // Add shared sources
+            foreach (var sharedFile in project.Project.Files.SharedFiles)
+            {
+                sourceReferences.Add(sharedFile);
             }
 
             // No support for ref or native in projects, so runtimeAssemblies is just the same as compileAssemblies and nativeLibraries are empty

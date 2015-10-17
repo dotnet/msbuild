@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.ProjectModel
 
         public LibraryRange RequestedRange { get; }
         public LibraryIdentity Identity { get; }
-        public LibraryDescription Parent { get; set; }
+        public List<LibraryDescription> Parents { get; set; } = new List<LibraryDescription>();
         public string Path { get; }
         public IEnumerable<LibraryRange> Dependencies { get; }
         public bool Compatible { get; }

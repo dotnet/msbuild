@@ -157,7 +157,7 @@ namespace Microsoft.Extensions.ProjectModel
                         }
                     }
 
-                    dep.Parent = library;
+                    dep.Parents.Add(library);
                 }
             }
         }
