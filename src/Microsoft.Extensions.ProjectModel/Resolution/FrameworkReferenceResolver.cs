@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Xml.Linq;
 using Microsoft.Extensions.ProjectModel.Utilities;
 using NuGet.Frameworks;
@@ -119,16 +120,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                 return null;
             }
 
-            FrameworkInformation frameworkInfo;
-
-            // Skip this on mono since it has a slightly different set of reference assemblies at a different
-            // location
-            // Also, if the framework we're targetting has a profile (Client profile, basically), don't use the
-            // fast path because it will be wrong.
-            if (FrameworkDefinitions.TryPopulateFrameworkFastPath(targetFramework, referenceAssembliesPath, out frameworkInfo))
-            {
-                return frameworkInfo;
-            }
 
             NuGetFramework[] candidates;
             if (_aliases.TryGetValue(targetFramework, out candidates))
@@ -161,7 +152,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 
             var basePath = Path.Combine(referenceAssembliesPath,
                                         targetFramework.Framework,
-                                        "v" + targetFramework.Version);
+                                        "v" + GetDisplayVersion(targetFramework));
 
             if (!string.IsNullOrEmpty(targetFramework.Profile))
             {
@@ -256,7 +247,8 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             {
                 string versionString = targetFramework.Version.Minor == 0 ?
                     targetFramework.Version.Major.ToString() :
-                    targetFramework.Version.ToString();
+                    GetDisplayVersion(targetFramework).ToString();
+
                 string profileString = string.IsNullOrEmpty(targetFramework.Profile) ?
                     string.Empty :
                     $" {targetFramework.Profile} Profile";
@@ -364,6 +356,13 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             }
 
             return null;
+        }
+
+        private static Version GetDisplayVersion(NuGetFramework framework)
+        {
+            // Fix the target framework version due to https://github.com/NuGet/Home/issues/1600, this is relevant
+            // when looking up in the reference assembly folder
+            return new FrameworkName(framework.DotNetFrameworkName).Version;
         }
     }
 }
