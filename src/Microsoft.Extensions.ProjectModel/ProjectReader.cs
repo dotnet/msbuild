@@ -417,7 +417,8 @@ namespace Microsoft.Extensions.ProjectModel
             var targetFrameworkInformation = new TargetFrameworkInformation
             {
                 FrameworkName = frameworkName,
-                Dependencies = new List<LibraryRange>()
+                Dependencies = new List<LibraryRange>(),
+                CompilerOptions = compilerOptions
             };
 
             var frameworkDependencies = new List<LibraryRange>();
@@ -449,7 +450,6 @@ namespace Microsoft.Extensions.ProjectModel
                 targetFrameworkInformation.PdbPath = binNode.ValueAsString("pdb");
             }
 
-            project._compilerOptionsByFramework[frameworkName] = compilerOptions;
             project._targetFrameworks[frameworkName] = targetFrameworkInformation;
 
             return true;

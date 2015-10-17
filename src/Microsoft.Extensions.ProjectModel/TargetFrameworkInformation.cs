@@ -7,24 +7,19 @@ using NuGet.Frameworks;
 
 namespace Microsoft.Extensions.ProjectModel
 {
-    public class TargetFrameworkInformation : IFrameworkTargetable
+    public class TargetFrameworkInformation
     {
         public NuGetFramework FrameworkName { get; set; }
 
         public IReadOnlyList<LibraryRange> Dependencies { get; set; }
 
+        public CompilerOptions CompilerOptions { get; set; }
+
+        // REVIEW: Wrapping, we might do this differntly
         public string WrappedProject { get; set; }
 
         public string AssemblyPath { get; set; }
 
         public string PdbPath { get; set; }
-
-        public IEnumerable<NuGetFramework> SupportedFrameworks
-        {
-            get
-            {
-                return new[] { FrameworkName };
-            }
-        }
     }
 }

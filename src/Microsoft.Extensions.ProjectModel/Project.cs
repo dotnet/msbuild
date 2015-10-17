@@ -17,7 +17,6 @@ namespace Microsoft.Extensions.ProjectModel
 
         // REVIEW: It's kinda hacky making these internal but the reader needs to set them
         internal Dictionary<NuGetFramework, TargetFrameworkInformation> _targetFrameworks = new Dictionary<NuGetFramework, TargetFrameworkInformation>();
-        internal Dictionary<NuGetFramework, CompilerOptions> _compilerOptionsByFramework = new Dictionary<NuGetFramework, CompilerOptions>();
         internal Dictionary<string, CompilerOptions> _compilerOptionsByConfiguration = new Dictionary<string, CompilerOptions>(StringComparer.OrdinalIgnoreCase);
 
         internal CompilerOptions _defaultCompilerOptions;
@@ -186,13 +185,7 @@ namespace Microsoft.Extensions.ProjectModel
 
         private CompilerOptions GetCompilerOptions(NuGetFramework frameworkName)
         {
-            CompilerOptions options;
-            if (_compilerOptionsByFramework.TryGetValue(frameworkName, out options))
-            {
-                return options;
-            }
-
-            return null;
+            return GetTargetFramework(frameworkName)?.CompilerOptions;
         }
     }
 }
