@@ -121,27 +121,6 @@ namespace Microsoft.Extensions.ProjectModel
                 libraryManager);
         }
 
-        private void AddLockFileDiagnostics(List<DiagnosticMessage> diagnostics, bool lockFileExists, bool validLockFile, string lockFileValidationMessage)
-        {
-            if (!lockFileExists)
-            {
-                diagnostics.Add(new DiagnosticMessage(
-                    ErrorCodes.NU1009,
-                    $"The expected lock file doesn't exist. Please run \"dnu restore\" to generate a new lock file.",
-                    Path.Combine(Project.ProjectDirectory, LockFile.FileName),
-                    DiagnosticMessageSeverity.Error));
-            }
-
-            if (!validLockFile)
-            {
-                diagnostics.Add(new DiagnosticMessage(
-                    ErrorCodes.NU1006,
-                    $"{lockFileValidationMessage}. Please run \"dnu restore\" to generate a new lock file.",
-                    Path.Combine(Project.ProjectDirectory, LockFile.FileName),
-                    DiagnosticMessageSeverity.Warning));
-            }
-        }
-
         private void ResolveDependencies(Dictionary<string, LibraryDescription> libraries, ReferenceAssemblyDependencyResolver referenceAssemblyDependencyResolver)
         {
             foreach (var library in libraries.Values.ToList())
