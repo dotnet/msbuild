@@ -121,7 +121,7 @@ namespace Microsoft.Extensions.ProjectModel
                     ErrorCodes.NU1006,
                     $"{lockFileValidationMessage}. Please run \"dnu restore\" to generate a new lock file.",
                     Path.Combine(Project.ProjectDirectory, LockFile.FileName),
-                    DiagnosticMessageSeverity.Error));
+                    DiagnosticMessageSeverity.Warning));
             }
         }
 

@@ -73,6 +73,21 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Create the library exporter
             var exporter = context.CreateExporter(configuration);
 
+            bool success = true;
+
+            // Print out dependency diagnostics
+            foreach (var diag in context.LibraryManager.GetAllDiagnostics())
+            {
+                success &= diag.Severity != DiagnosticMessageSeverity.Error;
+                Console.WriteLine(diag.FormattedMessage);
+            }
+
+            // If there were dependency errors don't bother compiling
+            if (!success)
+            {
+                return false;
+            }
+
             // Gather exports for the project
             var dependencies = exporter.GetCompilationDependencies().ToList();
 
@@ -96,7 +111,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Dump dependency data
-            ShowDependencyInfo(dependencies);
+            // TODO: Turn on only if verbose, we can look at the response
+            // file anyways
+            // ShowDependencyInfo(dependencies);
 
             // Hackily generate the output path
             if (string.IsNullOrEmpty(outputPath))
