@@ -84,15 +84,33 @@ namespace Microsoft.Extensions.ProjectModel
 
             var frameworkReferenceResolver = new FrameworkReferenceResolver();
             var referenceAssemblyDependencyResolver = new ReferenceAssemblyDependencyResolver(frameworkReferenceResolver);
-            var unresolvedDependencyProvider = new UnresolvedDependencyProvider();
 
             // Resolve the dependencies
-            ResolveDependencies(libraries, referenceAssemblyDependencyResolver, unresolvedDependencyProvider);
+            ResolveDependencies(libraries, referenceAssemblyDependencyResolver);
+
+            var diagnostics = new List<DiagnosticMessage>();
+
+            // REVIEW: Should this be in NuGet (possibly stored in the lock file?)
+            if (LockFile == null)
+            {
+                diagnostics.Add(new DiagnosticMessage(
+                    ErrorCodes.NU1009,
+                    $"The expected lock file doesn't exist. Please run \"dnu restore\" to generate a new lock file.",
+                    Path.Combine(Project.ProjectDirectory, LockFile.FileName),
+                    DiagnosticMessageSeverity.Error));
+            }
+
+            if (!validLockFile)
+            {
+                diagnostics.Add(new DiagnosticMessage(
+                    ErrorCodes.NU1006,
+                    $"{lockFileValidationMessage}. Please run \"dnu restore\" to generate a new lock file.",
+                    Path.Combine(Project.ProjectDirectory, LockFile.FileName),
+                    DiagnosticMessageSeverity.Warning));
+            }
 
             // Create a library manager
-            var libraryManager = new LibraryManager(Project.ProjectFilePath, TargetFramework, libraries.Values.ToList());
-
-            AddLockFileDiagnostics(libraryManager, LockFile != null, validLockFile, lockFileValidationMessage);
+            var libraryManager = new LibraryManager(Project.ProjectFilePath, TargetFramework, libraries.Values.ToList(), diagnostics);
 
             return new ProjectContext(
                 GlobalSettings,
@@ -103,11 +121,11 @@ namespace Microsoft.Extensions.ProjectModel
                 libraryManager);
         }
 
-        private void AddLockFileDiagnostics(LibraryManager libraryManager, bool lockFileExists, bool validLockFile, string lockFileValidationMessage)
+        private void AddLockFileDiagnostics(List<DiagnosticMessage> diagnostics, bool lockFileExists, bool validLockFile, string lockFileValidationMessage)
         {
             if (!lockFileExists)
             {
-                libraryManager.AddGlobalDiagnostics(new DiagnosticMessage(
+                diagnostics.Add(new DiagnosticMessage(
                     ErrorCodes.NU1009,
                     $"The expected lock file doesn't exist. Please run \"dnu restore\" to generate a new lock file.",
                     Path.Combine(Project.ProjectDirectory, LockFile.FileName),
@@ -116,7 +134,7 @@ namespace Microsoft.Extensions.ProjectModel
 
             if (!validLockFile)
             {
-                libraryManager.AddGlobalDiagnostics(new DiagnosticMessage(
+                diagnostics.Add(new DiagnosticMessage(
                     ErrorCodes.NU1006,
                     $"{lockFileValidationMessage}. Please run \"dnu restore\" to generate a new lock file.",
                     Path.Combine(Project.ProjectDirectory, LockFile.FileName),
@@ -124,7 +142,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
         }
 
-        private void ResolveDependencies(Dictionary<string, LibraryDescription> libraries, ReferenceAssemblyDependencyResolver referenceAssemblyDependencyResolver, UnresolvedDependencyProvider unresolvedDependencyProvider)
+        private void ResolveDependencies(Dictionary<string, LibraryDescription> libraries, ReferenceAssemblyDependencyResolver referenceAssemblyDependencyResolver)
         {
             foreach (var library in libraries.Values.ToList())
             {
@@ -144,14 +162,14 @@ namespace Microsoft.Extensions.ProjectModel
                         if (Equals(LibraryType.ReferenceAssembly, dependency.Target))
                         {
                             dep = referenceAssemblyDependencyResolver.GetDescription(dependency, TargetFramework) ??
-                                  unresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
+                                  UnresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
 
                             dep.Framework = TargetFramework;
                             libraries[dependency.Name] = dep;
                         }
                         else
                         {
-                            dep = unresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
+                            dep = UnresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
                             libraries[dependency.Name] = dep;
                         }
                     }

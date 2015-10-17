@@ -7,9 +7,9 @@ using NuGet.Frameworks;
 
 namespace Microsoft.Extensions.ProjectModel.Resolution
 {
-    public class UnresolvedDependencyProvider
+    public static class UnresolvedDependencyProvider
     {
-        public LibraryDescription GetDescription(LibraryRange libraryRange, NuGetFramework targetFramework)
+        public static LibraryDescription GetDescription(LibraryRange libraryRange, NuGetFramework targetFramework)
         {
             return new LibraryDescription(
                 libraryRange,
