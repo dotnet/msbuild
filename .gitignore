@@ -24,5 +24,14 @@ debugSettings.json
 project.lock.json
 TestResults/
 
+# Debian and python stuff
+*.dsc
+*.tar.gz
+*.build
+*.changes
+*.deb
+*.pyc
+*.pyo
+
 # Profiler result files, just in case they are left lying around :)
 .vs/
