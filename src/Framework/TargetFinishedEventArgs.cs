@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework
     public class TargetFinishedEventArgs : BuildStatusEventArgs
     {
         /// <summary>
-        /// Default constructor 
+        /// Default constructor
         /// </summary>
         protected TargetFinishedEventArgs()
             : base()
@@ -225,7 +225,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Project file associated with event.   
+        /// Project file associated with event.
         /// </summary>
         public string ProjectFile
         {

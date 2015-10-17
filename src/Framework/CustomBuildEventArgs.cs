@@ -20,7 +20,7 @@ namespace Microsoft.Build.Framework
     public abstract class CustomBuildEventArgs : LazyFormattedBuildEventArgs
     {
         /// <summary>
-        /// Default constructor 
+        /// Default constructor
         /// </summary>
         protected CustomBuildEventArgs()
             : base()

@@ -22,7 +22,7 @@ namespace Microsoft.Build.Evaluation
         {
             ToolsetConfigurationSection configurationSection = null;
 
-            // This will be null if the application config file does not have the following section 
+            // This will be null if the application config file does not have the following section
             // definition for the msbuildToolsets section as the first child element.
             //   <configSections>
             //     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -79,9 +79,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Creating a ToolsetConfigurationReader, and also reading toolsets from the 
-        /// configuration file, are a little expensive. To try to avoid this cost if it's 
-        /// not necessary, we'll check if the file exists first. If it exists, we'll scan for 
+        /// Creating a ToolsetConfigurationReader, and also reading toolsets from the
+        /// configuration file, are a little expensive. To try to avoid this cost if it's
+        /// not necessary, we'll check if the file exists first. If it exists, we'll scan for
         /// the string "toolsVersion" to see if it might actually have any tools versions
         /// defined in it.
         /// </summary>
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Property element collection 
+        /// Property element collection
         /// </summary>
         [ConfigurationProperty("", IsDefaultCollection = true)]
         public PropertyElementCollection PropertyElements
@@ -169,7 +169,7 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Collection type
-            /// This has to be public as cannot change access modifier when overriding  
+            /// This has to be public as cannot change access modifier when overriding
             /// </summary>
             public override ConfigurationElementCollectionType CollectionType
             {
@@ -458,7 +458,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// This class is used to programmatically read msbuildToolsets section
     /// in from the configuration file.  An example of application config file:
-    /// 
+    ///
     /// &lt;configuration&gt;
     ///     &lt;msbuildToolsets default="2.0"&gt;
     ///         &lt;toolset toolsVersion="2.0"&gt;
@@ -470,7 +470,7 @@ namespace Microsoft.Build.Evaluation
     ///         &lt;/toolset&gt;
     ///     &lt;/msbuildToolsets&gt;
     /// &lt;/configuration&gt;
-    /// 
+    ///
     /// </summary>
     /// <remarks>
     /// Internal for unit testing only
@@ -478,7 +478,7 @@ namespace Microsoft.Build.Evaluation
     internal sealed class ToolsetConfigurationSection : ConfigurationSection
     {
         /// <summary>
-        /// toolsVersion element collection 
+        /// toolsVersion element collection
         /// </summary>
         [ConfigurationProperty("", IsDefaultCollection = true)]
         public ToolsetElementCollection Toolsets
@@ -536,7 +536,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// DefaultOverrideToolsVersion attribute on msbuildToolsets element, specifying the toolsversion that should be used by 
+        /// DefaultOverrideToolsVersion attribute on msbuildToolsets element, specifying the toolsversion that should be used by
         /// default to build projects with this version of MSBuild.
         /// </summary>
         [ConfigurationProperty("DefaultOverrideToolsVersion")]

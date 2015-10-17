@@ -33,7 +33,7 @@ namespace Microsoft.Build.Collections
         private static MSBuildNameIgnoreCaseComparer s_immutableComparer = new MSBuildNameIgnoreCaseComparer(true /* immutable */);
 
         /// <summary>
-        /// The default mutable comparer instance that will ideally be shared by all users who need a mutable comparer. 
+        /// The default mutable comparer instance that will ideally be shared by all users who need a mutable comparer.
         /// </summary>
         private static MSBuildNameIgnoreCaseComparer s_mutableComparer = new MSBuildNameIgnoreCaseComparer(false /* mutable */);
 
@@ -44,14 +44,14 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Object used to lock the internal state s.t. we know that only one person is modifying
-        /// it at any one time.  
-        /// This is necessary to prevent, e.g., someone from reading the comparer (through GetHashCode when setting 
-        /// a property, for example) at the same time that someone else is writing to it. 
+        /// it at any one time.
+        /// This is necessary to prevent, e.g., someone from reading the comparer (through GetHashCode when setting
+        /// a property, for example) at the same time that someone else is writing to it.
         /// </summary>
         private Object lockObject = new Object();
 
         /// <summary>
-        /// String to be constrained. 
+        /// String to be constrained.
         /// If null, comparer is unconstrained.
         /// If empty string, comparer is unconstrained and immutable.
         /// </summary>
@@ -169,8 +169,8 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Given a set of constraints and a dictionary for which we are the comparer, return the value for the given key. 
-        /// The key is also used as the string for the constraint. 
+        /// Given a set of constraints and a dictionary for which we are the comparer, return the value for the given key.
+        /// The key is also used as the string for the constraint.
         /// </summary>
         /// <typeparam name="T">The value type of the dictionary being looked up</typeparam>
         public T GetValueWithConstraints<T>(IDictionary<string, T> dictionary, string key, int startIndex, int endIndex)
@@ -184,9 +184,9 @@ namespace Microsoft.Build.Collections
             ErrorUtilities.VerifyThrowInternalNull(dictionary, "dictionary");
 
 #if DEBUG
-            // doing this rather than checking the strong type because otherwise, I would have to define T to be several other things 
-            // (IKeyed, IValued, IImmutable, IEquatable<T>), some of which are not compiled into Microsoft.Build.Utilities, which also 
-            // uses the MSBuildNameIgnoreCaseComparer. 
+            // doing this rather than checking the strong type because otherwise, I would have to define T to be several other things
+            // (IKeyed, IValued, IImmutable, IEquatable<T>), some of which are not compiled into Microsoft.Build.Utilities, which also
+            // uses the MSBuildNameIgnoreCaseComparer.
             ErrorUtilities.VerifyThrow(dictionary.GetType().Name.Contains("PropertyDictionary"), "Needs to be PropertyDictionary or CopyOnWritePropertyDictionary");
 #endif
             if (startIndex < 0)
@@ -435,7 +435,7 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Companion to SetConstraintsForUnitTestingOnly -- makes the comparer unconstrained again. 
+        /// Companion to SetConstraintsForUnitTestingOnly -- makes the comparer unconstrained again.
         /// </summary>
         internal void RemoveConstraintsForUnitTestingOnly()
         {

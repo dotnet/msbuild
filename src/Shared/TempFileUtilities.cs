@@ -26,8 +26,8 @@ namespace Microsoft.Build.Shared
     static internal partial class FileUtilities
     {
         /// <summary>
-        /// Generates a unique directory name in the temporary folder.  
-        /// Caller must delete when finished. 
+        /// Generates a unique directory name in the temporary folder.
+        /// Caller must delete when finished.
         /// </summary>
         internal static string GetTemporaryDirectory()
         {

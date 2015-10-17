@@ -208,7 +208,7 @@ namespace Microsoft.Build.Execution
         private ActionBlock<Action> _workQueue;
 
         /// <summary>
-        /// Flag indicating we have disposed. 
+        /// Flag indicating we have disposed.
         /// </summary>
         private bool _disposed = false;
 
@@ -604,8 +604,8 @@ namespace Microsoft.Build.Execution
                 ShutdownConnectedNodesAsync(false /* normal termination */);
                 _noNodesActiveEvent.WaitOne();
 
-                // Wait for all of the actions in the work queue to drain.  Wait() could throw here if there was an unhandled exception 
-                // in the work queue, but the top level exception handler there should catch everything and have forwarded it to the 
+                // Wait for all of the actions in the work queue to drain.  Wait() could throw here if there was an unhandled exception
+                // in the work queue, but the top level exception handler there should catch everything and have forwarded it to the
                 // OnThreadException method in this class already.
                 _workQueue.Complete();
 
@@ -626,11 +626,11 @@ namespace Microsoft.Build.Execution
                     {
                         BuildResult result = _resultsCache.GetResultsForConfiguration(projectStartedEvent.Value.BuildEventContext.ProjectInstanceId);
 
-                        // It's valid to have a mismatched project started event IFF that particular 
-                        // project had some sort of unhandled exception.  If there is no result, we 
-                        // can't tell for sure one way or the other, so err on the side of throwing 
-                        // the assert, but if there is a result, make sure that it actually has an 
-                        // exception attached. 
+                        // It's valid to have a mismatched project started event IFF that particular
+                        // project had some sort of unhandled exception.  If there is no result, we
+                        // can't tell for sure one way or the other, so err on the side of throwing
+                        // the assert, but if there is a result, make sure that it actually has an
+                        // exception attached.
                         if (result == null || result.Exception == null)
                         {
                             allMismatchedProjectStartedEventsDueToLoggerErrors = false;
@@ -640,7 +640,7 @@ namespace Microsoft.Build.Execution
 
                     Debug.Assert(allMismatchedProjectStartedEventsDueToLoggerErrors, "There was a mismatched project started event not caused by an exception result");
                 }
-#endif 
+#endif
             }
             finally
             {
@@ -711,7 +711,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Dispose of the build manager. 
+        /// Dispose of the build manager.
         /// </summary>
         public void Dispose()
         {
@@ -968,7 +968,7 @@ namespace Microsoft.Build.Execution
                 }
                 catch (Exception ex)
                 {
-                    // These need to go to the main thread exception handler.  We can't rethrow here because that will just silently stop the 
+                    // These need to go to the main thread exception handler.  We can't rethrow here because that will just silently stop the
                     // action block.  Instead, send them over to the main handler for the BuildManager.
                     this.OnThreadException(ex);
                 }
@@ -1025,7 +1025,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case NodePacketType.NodeShutdown:
-                        // Remove the node from the list of active nodes.  When they are all done, we have shut down fully                                        
+                        // Remove the node from the list of active nodes.  When they are all done, we have shut down fully
                         NodeShutdown shutdownPacket = ExpectPacketType<NodeShutdown>(packet, NodePacketType.NodeShutdown);
                         HandleNodeShutdown(node, shutdownPacket);
                         break;
@@ -1143,9 +1143,9 @@ namespace Microsoft.Build.Execution
             // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
             _nodeManager.ShutdownConnectedNodes(abort ? false : _buildParameters.EnableNodeReuse);
 
-            // if we are aborting, the task host will hear about it in time through the task building infrastructure; 
+            // if we are aborting, the task host will hear about it in time through the task building infrastructure;
             // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
-            // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).  
+            // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).
             if (!abort)
             {
                 _taskHostNodeManager.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
@@ -1290,7 +1290,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleNewRequest(int node, BuildRequestBlocker blocker)
         {
-            // If we received any solution files, populate their configurations now.          
+            // If we received any solution files, populate their configurations now.
             if (blocker.BuildRequests != null)
             {
                 foreach (BuildRequest request in blocker.BuildRequests)
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.Execution
             {
                 // If the result has Default and Initial targets, we populate the configuration cache with them if it
                 // doesn't already have entries.  This can happen if we created a configuration based on a request from
-                // an external node, but hadn't yet received a result since we may not have loaded the Project locally 
+                // an external node, but hadn't yet received a result since we may not have loaded the Project locally
                 // and thus wouldn't know what the default and initial targets were.
                 if (configuration.ProjectDefaultTargets == null)
                 {
@@ -1602,7 +1602,7 @@ namespace Microsoft.Build.Execution
         {
             if (null == _nodeConfiguration)
             {
-                // Get the remote loggers                
+                // Get the remote loggers
                 ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent(BuildComponentType.LoggingService) as ILoggingService;
                 List<LoggerDescription> remoteLoggers = new List<LoggerDescription>(loggingService.LoggerDescriptions);
 
@@ -1800,8 +1800,8 @@ namespace Microsoft.Build.Execution
             }
             finally
             {
-                // Even if an exception is thrown, we want to make sure we null out the logging service so that 
-                // we don't try to shut it down again in some other cleanup code. 
+                // Even if an exception is thrown, we want to make sure we null out the logging service so that
+                // we don't try to shut it down again in some other cleanup code.
                 _componentFactories.ReplaceFactory(BuildComponentType.LoggingService, (IBuildComponent)null);
             }
         }

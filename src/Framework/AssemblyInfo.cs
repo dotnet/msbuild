@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Windows.Markup;
 
-// A combination of RequestMinimum and RequestOptional causes the permissions granted to 
+// A combination of RequestMinimum and RequestOptional causes the permissions granted to
 // the assembly to only be the permission requested (like a PermitOnly). More generally
 // the equation for the PermissionSet granted at load time is:
 //
@@ -23,7 +23,7 @@ using System.Windows.Markup;
 //        ReqOpt -- the permissions that RequestOptional is specified for.
 //        ReqRefuse -- the permissions that Request refuse is specified for.
 //
-// Note that if ReqOpt is the empty set, then it is consider to be "FullTrust" and this 
+// Note that if ReqOpt is the empty set, then it is consider to be "FullTrust" and this
 // equation becomes:
 //
 //        Granted = MaxGrant - ReqRefuse
@@ -41,12 +41,12 @@ using System.Windows.Markup;
 #endif
 
 // This is the assembly-level GUID, and the GUID for the TypeLib associated with
-// this assembly.  We should specify this explicitly, as opposed to letting 
+// this assembly.  We should specify this explicitly, as opposed to letting
 // tlbexp just pick whatever it wants.
 [assembly: GuidAttribute("D8A9BA71-4724-481d-9CA7-0DA23A1D615C")]
 
 [assembly: XmlnsDefinition("http://schemas.microsoft.com/build/2009/properties", "Microsoft.Build.Framework.XamlTypes")]
 
-// This will enable passing the SafeDirectories flag to any P/Invoke calls/implementations within the assembly, 
-// so that we don't run into known security issues with loading libraries from unsafe locations 
+// This will enable passing the SafeDirectories flag to any P/Invoke calls/implementations within the assembly,
+// so that we don't run into known security issues with loading libraries from unsafe locations
 [assembly: DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

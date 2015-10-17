@@ -25,7 +25,7 @@ namespace Microsoft.Build.Collections
     /// <remarks>
     /// This dictionary works by having a backing dictionary which is ref-counted for each
     /// COWDictionary which references it.  When a write operation is performed on any
-    /// COWDictionary, we check the reference count on the backing dictionary.  If it is 
+    /// COWDictionary, we check the reference count on the backing dictionary.  If it is
     /// greater than 1, it means any changes we make to it would be visible to other readers.
     /// Therefore, we clone the backing dictionary and decrement the reference count on the
     /// original.  From there on we use the cloned dictionary, which now has a reference count
@@ -550,13 +550,13 @@ namespace Microsoft.Build.Collections
         private class CopyOnWriteBackingDictionary<K1, V1> : HybridDictionary<K1, V1> where V1 : class
         {
             /// <summary>
-            /// An empty dictionary 
+            /// An empty dictionary
             /// </summary>
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields", Justification = "Error in code analysis.")]
             private static readonly CopyOnWriteBackingDictionary<K1, V1> s_readOnlyEmptyDictionary = new CopyOnWriteBackingDictionary<K1, V1>();
 
             /// <summary>
-            /// The reference count. 
+            /// The reference count.
             /// </summary>
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields", Justification = "Error in code analysis.")]
             [NonSerialized]

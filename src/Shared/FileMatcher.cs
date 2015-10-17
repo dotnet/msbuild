@@ -16,7 +16,7 @@ using System.Globalization;
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-    /// Functions for matching file names with patterns. 
+    /// Functions for matching file names with patterns.
     /// </summary>
     internal static class FileMatcher
     {
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Same as Directory.GetFiles(...) except that files that
         /// aren't accessible are skipped instead of throwing an exception.
-        /// 
+        ///
         /// Other exceptions are passed through.
         /// </summary>
         /// <param name="path">The path.</param>
@@ -206,7 +206,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Same as Directory.GetDirectories(...) except that files that
         /// aren't accessible are skipped instead of throwing an exception.
-        /// 
+        ///
         /// Other exceptions are passed through.
         /// </summary>
         /// <param name="path">The path.</param>
@@ -399,7 +399,7 @@ namespace Microsoft.Build.Shared
                 out filenamePart
             );
 
-            /* 
+            /*
              * Handle the special case in which filenamePart is '**'.
              * In this case, filenamePart becomes '*.*' and the '**' is appended
              * to the end of the wildcardDirectory part.
@@ -439,12 +439,12 @@ namespace Microsoft.Build.Shared
             {
                 /*
                  * No dir separator found. This is either this form,
-                 * 
+                 *
                  *      Source.cs
                  *      *.cs
-                 * 
+                 *
                  *  or this form,
-                 * 
+                 *
                  *     **
                  */
                 fixedDirectoryPart = String.Empty;
@@ -465,14 +465,14 @@ namespace Microsoft.Build.Shared
                  * wildcard is after the dir separator.
                  *
                  * The form is one of these:
-                 * 
+                 *
                  *      dir1\Source.cs
                  *      dir1\*.cs
-                 * 
+                 *
                  * Where the trailing spec is meant to be a filename. Or,
-                 * 
+                 *
                  *      dir1\**
-                 * 
+                 *
                  * Where the trailing spec is meant to be any file recursively.
                  */
 
@@ -492,11 +492,11 @@ namespace Microsoft.Build.Shared
             {
                 /*
                  * There is no separator before the wildcard, so the form is like this:
-                 * 
+                 *
                  *      dir?\Source.cs
-                 * 
+                 *
                  * or this,
-                 * 
+                 *
                  *      dir?\**
                  */
                 fixedDirectoryPart = String.Empty;
@@ -514,7 +514,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Removes the leading ".\" from all of the paths in the array. 
+        /// Removes the leading ".\" from all of the paths in the array.
         /// </summary>
         /// <param name="paths">Paths to remove .\ from.</param>
         private static void RemoveInitialDotSlash
@@ -542,7 +542,7 @@ namespace Microsoft.Build.Shared
             return (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar);
         }
         /// <summary>
-        /// Removes the current directory converting the file back to relative path 
+        /// Removes the current directory converting the file back to relative path
         /// </summary>
         /// <param name="paths">Paths to remove current directory from.</param>
         /// <param name="projectDirectory"></param>
@@ -576,7 +576,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Get all files that match either the file-spec or the regular expression. 
+        /// Get all files that match either the file-spec or the regular expression.
         /// </summary>
         /// <param name="listOfFiles">List of files that gets populated.</param>
         /// <param name="baseDirectory">The path to enumerate</param>
@@ -672,7 +672,7 @@ namespace Microsoft.Build.Shared
                     //        foo\**\bar
                     //
                     // back into remainingWildcardDirectory.
-                    // This is a performance optimization. We don't want to enumerate everything if we 
+                    // This is a performance optimization. We don't want to enumerate everything if we
                     // don't have to.
                     pattern = remainingWildcardDirectory.Substring(0, indexOfNextSlash);
                     remainingWildcardDirectory = remainingWildcardDirectory.Substring(indexOfNextSlash + 1);
@@ -685,7 +685,7 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
-                // We never want to strip the project directory from the leaves, because the current 
+                // We never want to strip the project directory from the leaves, because the current
                 // process directory maybe different
                 string[] subdirs = getFileSystemEntries(FileSystemEntity.Directories, baseDirectory, pattern, null, false);
                 foreach (string subdir in subdirs)
@@ -698,7 +698,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Given a file spec, create a regular expression that will match that
         /// file spec.
-        /// 
+        ///
         /// PERF WARNING: this method is called in performance-critical
         /// scenarios, so keep it fast and cheap
         /// </summary>
@@ -720,7 +720,7 @@ namespace Microsoft.Build.Shared
             /*
              * The code below uses tags in the form <:tag:> to encode special information
              * while building the regular expression.
-             * 
+             *
              * This format was chosen because it's not a legal form for filespecs. If the
              * filespec comes in with either "<:" or ":>", return isLegalFileSpec=false to
              * prevent intrusion into the special processing.
@@ -745,13 +745,13 @@ namespace Microsoft.Build.Shared
                 return String.Empty;
             }
 
-            /* 
+            /*
              * Trailing dots in file names have to be treated specially.
              * We want:
-             * 
+             *
              *     *. to match foo
-             * 
-             * but 'foo' doesn't have a trailing '.' so we need to handle this while still being careful 
+             *
+             * but 'foo' doesn't have a trailing '.' so we need to handle this while still being careful
              * not to match 'foo.txt'
              */
             if (filenamePart.EndsWith(".", StringComparison.Ordinal))
@@ -787,33 +787,33 @@ namespace Microsoft.Build.Shared
 
             /*
              * Iteratively reduce four cases involving directory separators
-             * 
+             *
              *  (1) <:dirseparator:>.<:dirseparator:> -> <:dirseparator:>
              *        This is an identity, so for example, these two are equivalent,
-             * 
+             *
              *            dir1\.\dir2 == dir1\dir2
-             * 
+             *
              *    (2) <:dirseparator:><:dirseparator:> -> <:dirseparator:>
              *      Double directory separators are treated as a single directory separator,
              *      so, for example, this is an identity:
-             * 
+             *
              *          f:\dir1\\dir2 == f:\dir1\dir2
-             * 
+             *
              *      The single exemption is for UNC path names, like this:
-             * 
+             *
              *          \\server\share != \server\share
-             * 
+             *
              *      This case is handled by the <:uncslashslash:> which was substituted in
              *      a prior step.
-             * 
+             *
              *  (3) <:fixeddir:>.<:dirseparator:>.<:dirseparator:> -> <:fixeddir:>.<:dirseparator:>
              *      A ".\" at the beginning of a line is equivalent to nothing, so:
-             * 
+             *
              *          .\.\dir1\file.txt == .\dir1\file.txt
-             * 
+             *
              *  (4) <:dirseparator:>.<:eol:> -> <:eol:>
              *      A "\." at the end of a line is equivalent to nothing, so:
-             * 
+             *
              *          dir1\dir2\. == dir1\dir2             *
              */
             int sizeBefore;
@@ -847,11 +847,11 @@ namespace Microsoft.Build.Shared
 
             /*
              * Call out legal recursion operators:
-             * 
+             *
              *        fixed-directory + **\
              *        \**\
              *        **\**
-             * 
+             *
              */
             do
             {
@@ -927,7 +927,7 @@ namespace Microsoft.Build.Shared
 
 
         /// <summary>
-        /// Given a filespec, get the information needed for file matching. 
+        /// Given a filespec, get the information needed for file matching.
         /// </summary>
         /// <param name="filespec">The filespec.</param>
         /// <param name="regexFileMatch">Receives the regular expression.</param>
@@ -1003,7 +1003,7 @@ namespace Microsoft.Build.Shared
 
             /*
              * Check for patterns in the filespec that are explicitly illegal.
-             * 
+             *
              * Any path with "..." in it is illegal.
              */
             if (-1 != filespec.IndexOf("...", StringComparison.Ordinal))
@@ -1015,9 +1015,9 @@ namespace Microsoft.Build.Shared
             /*
              * If there is a ':' anywhere but the second character, this is an illegal pattern.
              * Catches this case among others,
-             * 
+             *
              *        http://www.website.com
-             * 
+             *
              */
             int rightmostColon = filespec.LastIndexOf(":", StringComparison.Ordinal);
 
@@ -1120,7 +1120,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Given a filespec, find the files that match. 
+        /// Given a filespec, find the files that match.
         /// Will never throw IO exceptions: if there is no match, returns the input verbatim.
         /// </summary>
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
@@ -1137,7 +1137,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Given a filespec, find the files that match. 
+        /// Given a filespec, find the files that match.
         /// Will never throw IO exceptions: if there is no match, returns the input verbatim.
         /// </summary>
         /// <param name="projectDirectoryUnescaped">The project directory.</param>

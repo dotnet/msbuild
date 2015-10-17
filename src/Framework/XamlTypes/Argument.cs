@@ -12,10 +12,10 @@ using System.Windows.Markup;
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
-    /// Represents an argument to a <see cref="BaseProperty"/>. 
+    /// Represents an argument to a <see cref="BaseProperty"/>.
     /// </summary>
-    /// <remarks> 
-    /// Functionally, it is simply a reference to another <see cref="BaseProperty"/>. Those who manually 
+    /// <remarks>
+    /// Functionally, it is simply a reference to another <see cref="BaseProperty"/>. Those who manually
     /// instantiate this class should remember to call <see cref="BeginInit"/> before setting the first
     /// property and <see cref="EndInit"/> after setting the last property of the object.
     /// </remarks>
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// Name of the <see cref="BaseProperty"/> this argument refers to. 
+        /// Name of the <see cref="BaseProperty"/> this argument refers to.
         /// </summary>
         /// <remarks>
         /// Its value must point to a valid <see cref="BaseProperty"/>. This field is mandatory and culture invariant.
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// Tells if the <see cref="BaseProperty"/> pointed to by <see cref="Property"/> must be defined for the definition
         /// of the <see cref="BaseProperty"/> owning this argument to make sense.
         /// </summary>
-        /// <remarks> 
+        /// <remarks>
         /// This field is optional and is set to <c>false</c> by default.
         /// </remarks>
         public bool IsRequired

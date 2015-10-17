@@ -36,7 +36,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns true if this element is a "ContainedApiContracts" element. 
+        /// Returns true if this element is a "ContainedApiContracts" element.
         /// </summary>
         internal static bool IsContainedApiContractsElement(string elementName)
         {
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given an XML element containing API contracts, read out all contracts within that element. 
+        /// Given an XML element containing API contracts, read out all contracts within that element.
         /// </summary>
         internal static void ReadContractsElement(XmlElement element, ICollection<ApiContract> apiContracts)
         {

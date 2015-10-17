@@ -178,7 +178,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// The custom sub-type of the event.         
+        /// The custom sub-type of the event.
         /// </summary>
         public string Subcategory
         {
@@ -189,7 +189,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Code associated with event. 
+        /// Code associated with event.
         /// </summary>
         public string Code
         {
@@ -200,8 +200,8 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// File associated with event.   
-        /// </summary>  
+        /// File associated with event.
+        /// </summary>
         public string File
         {
             get
@@ -227,7 +227,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Line number of interest in associated file. 
+        /// Line number of interest in associated file.
         /// </summary>
         public int LineNumber
         {
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Column number of interest in associated file. 
+        /// Column number of interest in associated file.
         /// </summary>
         public int ColumnNumber
         {
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Ending line number of interest in associated file. 
+        /// Ending line number of interest in associated file.
         /// </summary>
         public int EndLineNumber
         {
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Ending column number of interest in associated file. 
+        /// Ending column number of interest in associated file.
         /// </summary>
         public int EndColumnNumber
         {
