@@ -142,7 +142,7 @@ namespace Microsoft.Extensions.ProjectModel
                     LibraryDescription dep;
                     if (!libraries.TryGetValue(dependency.Name, out dep))
                     {
-                        if (Equals(LibraryType.ReferenceAssembly, dependency.Type))
+                        if (Equals(LibraryType.ReferenceAssembly, dependency.Target))
                         {
                             dep = referenceAssemblyDependencyResolver.GetDescription(dependency, TargetFramework) ??
                                   unresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
