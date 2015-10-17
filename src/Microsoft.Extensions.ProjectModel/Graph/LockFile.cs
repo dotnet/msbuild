@@ -88,7 +88,6 @@ namespace Microsoft.Extensions.ProjectModel.Graph
             {
                 return range.MinVersion.ToString();
             }
-
             var sb = new StringBuilder();
             sb.Append(">= ");
             switch (range?.Float?.FloatBehavior)
@@ -98,22 +97,19 @@ namespace Microsoft.Extensions.ProjectModel.Graph
                     sb.Append(range.MinVersion);
                     break;
                 case NuGetVersionFloatBehavior.Prerelease:
-                    sb.AppendFormat("{0}-*", range.MinVersion);
+                    // 1.0.*
+                    // Work around nuget bug: https://github.com/NuGet/Home/issues/1598
+                    // sb.AppendFormat("{0}-*", range.MinVersion);
+                    sb.Append($"{range.MinVersion.Version.Major}.{range.MinVersion.Version.Minor}.{range.MinVersion.Version.Build}-*");
                     break;
                 case NuGetVersionFloatBehavior.Revision:
-                    sb.AppendFormat("{0}.{1}.{2}.*",
-                        range.MinVersion.Version.Major,
-                        range.MinVersion.Version.Minor,
-                        range.MinVersion.Version.Build);
+                    sb.Append($"{range.MinVersion.Version.Major}.{range.MinVersion.Version.Minor}.{range.MinVersion.Version.Build}.*");
                     break;
                 case NuGetVersionFloatBehavior.Patch:
-                    sb.AppendFormat("{0}.{1}.*",
-                        range.MinVersion.Version.Major,
-                        range.MinVersion.Version.Minor);
+                    sb.Append($"{range.MinVersion.Version.Major}.{range.MinVersion.Version.Minor}.*");
                     break;
                 case NuGetVersionFloatBehavior.Minor:
-                    sb.AppendFormat("{0}.{1}.*",
-                        range.MinVersion.Version.Major);
+                    sb.AppendFormat($"{range.MinVersion.Version.Major}.*");
                     break;
                 case NuGetVersionFloatBehavior.Major:
                     sb.AppendFormat("*");

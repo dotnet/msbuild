@@ -100,7 +100,6 @@ namespace Microsoft.Extensions.ProjectModel
                 TargetFramework,
                 target?.RuntimeIdentifier,
                 PackagesDirectory,
-                frameworkReferenceResolver,
                 libraryManager);
         }
 

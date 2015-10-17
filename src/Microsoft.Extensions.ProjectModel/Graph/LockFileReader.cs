@@ -173,7 +173,7 @@ namespace Microsoft.Extensions.ProjectModel.Graph
         private static ProjectFileDependencyGroup ReadProjectFileDependencyGroup(string property, JsonValue json)
         {
             return new ProjectFileDependencyGroup(
-                NuGetFramework.Parse(property),
+                string.IsNullOrEmpty(property) ? null : NuGetFramework.Parse(property),
                 ReadArray(json, ReadString));
         }
 

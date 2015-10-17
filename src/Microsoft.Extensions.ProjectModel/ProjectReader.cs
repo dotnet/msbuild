@@ -54,7 +54,7 @@ namespace Microsoft.Extensions.ProjectModel
             {
                 try
                 {
-                    var buildVersion = Environment.GetEnvironmentVariable("DNX_BUILD_VERSION");
+                    var buildVersion = Environment.GetEnvironmentVariable("DOETNET_BUILD_VERSION");
                     project.Version = SpecifySnapshot(version, buildVersion);
                 }
                 catch (Exception ex)
@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.ProjectModel
                 }
             }
 
-            var fileVersion = Environment.GetEnvironmentVariable("DNX_ASSEMBLY_FILE_VERSION");
+            var fileVersion = Environment.GetEnvironmentVariable("DOTNET_ASSEMBLY_FILE_VERSION");
             if (string.IsNullOrWhiteSpace(fileVersion))
             {
                 project.AssemblyFileVersion = project.Version.Version;
@@ -94,9 +94,9 @@ namespace Microsoft.Extensions.ProjectModel
             project.LicenseUrl = rawProject.ValueAsString("licenseUrl");
             project.IconUrl = rawProject.ValueAsString("iconUrl");
 
-            project.Authors = rawProject.ValueAsStringArray("authors") ?? new string[] { };
-            project.Owners = rawProject.ValueAsStringArray("owners") ?? new string[] { };
-            project.Tags = rawProject.ValueAsStringArray("tags") ?? new string[] { };
+            project.Authors = rawProject.ValueAsStringArray("authors") ?? Array.Empty<string>();
+            project.Owners = rawProject.ValueAsStringArray("owners") ?? Array.Empty<string>();
+            project.Tags = rawProject.ValueAsStringArray("tags") ?? Array.Empty<string>();
 
             project.Language = rawProject.ValueAsString("language");
             project.ReleaseNotes = rawProject.ValueAsString("releaseNotes");

@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Extensions.ProjectModel.Graph;
-using Microsoft.Extensions.ProjectModel.Utilities;
 using NuGet.Packaging;
 using NuGet.Versioning;
 
@@ -101,19 +99,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 
             // TODO(anurse): This should migrate to the NuGet packages directory
             return Path.Combine(profileDirectory, ".dnx", "packages");
-        }
-
-        private static IEnumerable<VersionFolderPathResolver> GetCacheResolvers()
-        {
-            var packageCachePathValue = Environment.GetEnvironmentVariable(EnvironmentNames.PackagesCache);
-
-            if (string.IsNullOrEmpty(packageCachePathValue))
-            {
-                return Enumerable.Empty<VersionFolderPathResolver>();
-            }
-
-            return packageCachePathValue.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(path => new VersionFolderPathResolver(path));
         }
     }
 }

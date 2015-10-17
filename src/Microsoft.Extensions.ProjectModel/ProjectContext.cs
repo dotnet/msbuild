@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Versioning;
 using Microsoft.Extensions.ProjectModel.Compilation;
-using Microsoft.Extensions.ProjectModel.Graph;
 using Microsoft.Extensions.ProjectModel.Resolution;
 using NuGet.Frameworks;
 
@@ -16,7 +14,6 @@ namespace Microsoft.Extensions.ProjectModel
     // NOTE(anurse): Copied from ApplicationHostContext in DNX. This name seemed more appropriate for this :)
     public class ProjectContext
     {
-
         public GlobalSettings GlobalSettings { get; }
 
         public ProjectDescription RootProject { get; }
@@ -33,8 +30,6 @@ namespace Microsoft.Extensions.ProjectModel
 
         public string PackagesDirectory { get; }
 
-        public FrameworkReferenceResolver FrameworkResolver { get; }
-
         public LibraryManager LibraryManager { get; }
 
         internal ProjectContext(
@@ -43,7 +38,6 @@ namespace Microsoft.Extensions.ProjectModel
             NuGetFramework targetFramework,
             string runtimeIdentifier,
             string packagesDirectory,
-            FrameworkReferenceResolver frameworkResolver,
             LibraryManager libraryManager)
         {
             GlobalSettings = globalSettings;
@@ -51,7 +45,6 @@ namespace Microsoft.Extensions.ProjectModel
             TargetFramework = targetFramework;
             RuntimeIdentifier = runtimeIdentifier;
             PackagesDirectory = packagesDirectory;
-            FrameworkResolver = frameworkResolver;
             LibraryManager = libraryManager;
         }
 
