@@ -119,6 +119,10 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Assemble csc args
             var cscArgs = new List<string>()
             {
+                // Default suppressions
+                "-nowarn:CS1701",
+                "-nowarn:CS1702",
+                "-nowarn:CS1705",
                 "-nostdlib",
                 "-nologo",
                 $"-out:\"{outputName}\""
@@ -153,7 +157,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         {
             // Locate CoreRun
             string hostRoot = Environment.GetEnvironmentVariable("DOTNET_CSC_PATH");
-            if(string.IsNullOrEmpty(hostRoot))
+            if (string.IsNullOrEmpty(hostRoot))
             {
                 hostRoot = AppContext.BaseDirectory;
             }
