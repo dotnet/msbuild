@@ -180,7 +180,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Project file associated with event.   
+        /// Project file associated with event.
         /// </summary>
         public string ProjectFile
         {
@@ -191,7 +191,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// MSBuild file where this task was defined.   
+        /// MSBuild file where this task was defined.
         /// </summary>
         public string TaskFile
         {

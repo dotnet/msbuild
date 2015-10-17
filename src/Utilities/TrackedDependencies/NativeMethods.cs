@@ -18,7 +18,7 @@ namespace Microsoft.Build.Utilities
         internal static extern bool GetFileAttributesEx(String name, int fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
 
         /// <summary>
-        /// Get the last write time in utc of the fullpath to the file. 
+        /// Get the last write time in utc of the fullpath to the file.
         /// If the file does not exist, then DateTime.MinValue is returned
         /// </summary>
         /// <param name="fullPath">Full path to the file in the filesystem</param>

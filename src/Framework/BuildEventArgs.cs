@@ -13,7 +13,7 @@ using System.IO;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This class encapsulates the default data associated with build events. 
+    /// This class encapsulates the default data associated with build events.
     /// It is intended to be extended/sub-classed.
     /// </summary>
     /// <remarks>
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// The thread that raised event.  
+        /// The thread that raised event.
         /// </summary>
         public int ThreadId
         {
@@ -124,7 +124,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Text of event. 
+        /// Text of event.
         /// </summary>
         public virtual string Message
         {
@@ -326,7 +326,7 @@ namespace Microsoft.Build.Framework
         [OnDeserializing]
         private void SetBuildEventContextDefaultBeforeSerialization(StreamingContext sc)
         {
-            // Don't want to create a new one here as default all the time as that would be a lot of 
+            // Don't want to create a new one here as default all the time as that would be a lot of
             // possibly useless allocations
             buildEventContext = null;
         }

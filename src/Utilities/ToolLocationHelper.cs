@@ -78,7 +78,7 @@ namespace Microsoft.Build.Utilities
     }
 
     /// <summary>
-    /// Used to specify the version of Visual Studio from which to select associated 
+    /// Used to specify the version of Visual Studio from which to select associated
     /// tools for some methods of ToolLocationHelper
     /// </summary>
     public enum VisualStudioVersion
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Utilities
     public enum DotNetFrameworkArchitecture
     {
         /// <summary>
-        /// Indicates the .NET Framework that is currently being run under.  
+        /// Indicates the .NET Framework that is currently being run under.
         /// </summary>
         Current = 0,
 
@@ -156,7 +156,7 @@ namespace Microsoft.Build.Utilities
         private static Dictionary<string, IList<string>> s_cachedReferenceAssemblyPaths;
 
         /// <summary>
-        /// Cache the frameworkName of the highest version of a framework given its root path and identifier. 
+        /// Cache the frameworkName of the highest version of a framework given its root path and identifier.
         /// This is to optimize calls to GetHighestVersionOfTargetFramework
         /// </summary>
         private static Dictionary<string, FrameworkNameVersioning> s_cachedHighestFrameworkNameForTargetFrameworkIdentifier;
@@ -179,7 +179,7 @@ namespace Microsoft.Build.Utilities
         private static Dictionary<string, string> s_cachedTargetFrameworkDisplayNames;
 
         /// <summary>
-        /// Cache the set of target platform references for a particular combination of inputs.  For legacy 
+        /// Cache the set of target platform references for a particular combination of inputs.  For legacy
         /// target platforms, this is just grabbing all winmds from the References\CommonConfiguration\Neutral
         /// folder; for OneCore-based platforms, this involves reading the list from Platform.xml and synthesizing
         /// the locations.
@@ -216,7 +216,7 @@ namespace Microsoft.Build.Utilities
         #region Public methods
 
         /// <summary>
-        /// The current ToolsVersion. 
+        /// The current ToolsVersion.
         /// </summary>
         public static string CurrentToolsVersion
         {
@@ -228,8 +228,8 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Get a sorted list of AssemblyFoldersExInfo which contain information about what directories the 3rd party assemblies are registered under for use during build and design time.
-        /// 
-        /// This method will enumerate the AssemblyFoldersEx regisry location and return a list of AssemblyFoldersExInfo in the same order in which 
+        ///
+        /// This method will enumerate the AssemblyFoldersEx regisry location and return a list of AssemblyFoldersExInfo in the same order in which
         /// they will be searched during both design and build time for reference assemblies.
         /// </summary>
         /// <param name="registryRoot">The root registry location for the targeted framework. For .NET this is SOFTWARE\MICROSOFT\.NETFramework</param>
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="registryKeySuffix">The name of the folder (AssemblyFoldersEx) could also be PocketPC\AssemblyFoldersEx, or others</param>
         /// <param name="osVersion">Components may declare Min and Max OSVersions in the registry this value can be used filter directories returned based on whether or not the osversion is bounded by the Min  and Max versions declared by the component. If this value is blank or null no filtering is done</param>
         /// <param name="platform">Components may declare platform guids in the registry this can be used to return only directories which have a certain platform guid. If this value is blank or null no filtering is done</param>
-        /// <param name="targetProcessorArchitecture">What processor architecture is being targetd. This determines which registry hives are searched in what order. 
+        /// <param name="targetProcessorArchitecture">What processor architecture is being targetd. This determines which registry hives are searched in what order.
         /// On a 64 bit operating system we do the following
         ///         If you are targeting 64 bit (target x64 or ia64)
         ///             Add in the 64 bit hive first
@@ -760,7 +760,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetPlatformMinVersion">The min version of the targeted platform</param>
         /// <param name="targetPlatformVersion">The version of the targeted platform</param>
         /// <param name="diskRoots">List of disk roots to search for sdks within</param>
-        /// <param name="registryRoot">Registry root to look for sdks within</param> 
+        /// <param name="registryRoot">Registry root to look for sdks within</param>
         /// <returns>Location of the target platform SDK props file without .props filename</returns>
         public static string GetPlatformSDKPropsFileLocation
             (
@@ -948,7 +948,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Gathers the set of platform winmds based on the assumption that they come from 
+        /// Gathers the set of platform winmds based on the assumption that they come from
         /// an SDK that is specified solely by TPI / TPV.
         /// </summary>
         private static string[] GetLegacyTargetPlatformReferences
@@ -964,7 +964,7 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                // TODO: Add caching so that we only have to read all this stuff in once. 
+                // TODO: Add caching so that we only have to read all this stuff in once.
                 string sdkRoot = ToolLocationHelper.GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
                 string winmdLocation = null;
 
@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Gathers the set of platform winmds for a particular {SDKI, SDKV, TPI, TPMinV, TPV} combination, 
+        /// Gathers the set of platform winmds for a particular {SDKI, SDKV, TPI, TPMinV, TPV} combination,
         /// based on the assumption that it is an SDK that has both {SDKI, SDKV} and TP* specifiers.
         /// </summary>
         private static string[] GetTargetPlatformReferencesFromManifest
@@ -1031,7 +1031,7 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                // TODO: Add caching so that we only have to read all this stuff in once. 
+                // TODO: Add caching so that we only have to read all this stuff in once.
                 TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
                 string platformManifestLocation = null;
 
@@ -1187,7 +1187,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a target platform identifier and version, get the display name for that platform SDK. 
+        /// Given a target platform identifier and version, get the display name for that platform SDK.
         /// </summary>
         public static string GetPlatformSDKDisplayName(string targetPlatformIdentifier, string targetPlatformVersion)
         {
@@ -1195,7 +1195,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a target platform identifier and version, get the display name for that platform SDK. 
+        /// Given a target platform identifier and version, get the display name for that platform SDK.
         /// </summary>
         public static string GetPlatformSDKDisplayName(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string registryRoot)
         {
@@ -1289,7 +1289,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Tries to parse the "version" out of a platformMoniker. 
+        /// Tries to parse the "version" out of a platformMoniker.
         /// </summary>
         /// <param name="platformMoniker">PlatformMoniker, in the form "PlatformName, Version=version"</param>
         /// <param name="platformVersion">The version of the platform, if the parse was successful - Else set to null</param>
@@ -1322,8 +1322,8 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a target platform identifier and version and locations in which to search, find the TargetPlatformSDK 
-        /// object that matches.  
+        /// Given a target platform identifier and version and locations in which to search, find the TargetPlatformSDK
+        /// object that matches.
         /// </summary>
         private static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string multiPlatformDiskRoots, string registryRoot)
         {
@@ -1345,7 +1345,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a target platform identifier and version and locations in which to search, find the TargetPlatformSDK 
+        /// Given a target platform identifier and version and locations in which to search, find the TargetPlatformSDK
         /// object that matches.
         /// </summary>
         private static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string registryRoot)
@@ -1375,7 +1375,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a target platform identifier and version, generate a reasonable default display name. 
+        /// Given a target platform identifier and version, generate a reasonable default display name.
         /// </summary>
         /// <param name="targetPlatformIdentifier"></param>
         /// <param name="targetPlatformVersion"></param>
@@ -1418,9 +1418,9 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Returns the full name of the .NET Framework SDK root registry key.  When targeting .NET 3.5 or
-        /// above, looks in the locations associated with Visual Studio 2010.  If you wish to target the 
-        /// .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override that 
-        /// specifies a VisualStudioVersion. 
+        /// above, looks in the locations associated with Visual Studio 2010.  If you wish to target the
+        /// .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override that
+        /// specifies a VisualStudioVersion.
         /// </summary>
         /// <param name="version">Version of the targeted .NET Framework</param>
         public static string GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion version)
@@ -1441,10 +1441,10 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Name of the value of GetDotNetFrameworkRootRegistryKey that contains the SDK install root path. When 
-        /// targeting .NET 3.5 or above, looks in the locations associated with Visual Studio 2010.  If you wish 
-        /// to target the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override 
-        /// that specifies a VisualStudioVersion. 
+        /// Name of the value of GetDotNetFrameworkRootRegistryKey that contains the SDK install root path. When
+        /// targeting .NET 3.5 or above, looks in the locations associated with Visual Studio 2010.  If you wish
+        /// to target the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override
+        /// that specifies a VisualStudioVersion.
         /// </summary>
         /// <param name="version">Version of the targeted .NET Framework</param>
         public static string GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion version)
@@ -1475,7 +1475,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Get a fully qualified path to the framework's root directory. 
+        /// Get a fully qualified path to the framework's root directory.
         /// </summary>
         /// <param name="version">Version of the targeted .NET Framework</param>
         /// <param name="architecture">Desired architecture, or DotNetFrameworkArchitecture.Current for the architecture this process is currently running under.</param>
@@ -1488,10 +1488,10 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns the path to the "bin" directory of the latest .NET Framework SDK. When targeting .NET 3.5 
-        /// or above, looks in the locations associated with Visual Studio 2010.  If you wish to target 
-        /// the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override 
-        /// that specifies a VisualStudioVersion. 
+        /// Returns the path to the "bin" directory of the latest .NET Framework SDK. When targeting .NET 3.5
+        /// or above, looks in the locations associated with Visual Studio 2010.  If you wish to target
+        /// the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override
+        /// that specifies a VisualStudioVersion.
         /// </summary>
         /// <returns>Path string.</returns>
         public static string GetPathToDotNetFrameworkSdk()
@@ -1500,10 +1500,10 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns the path to the "bin" directory of the .NET Framework SDK. When targeting .NET 3.5 
-        /// or above, looks in the locations associated with Visual Studio 2010.  If you wish to target 
-        /// the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override 
-        /// that specifies a VisualStudioVersion. 
+        /// Returns the path to the "bin" directory of the .NET Framework SDK. When targeting .NET 3.5
+        /// or above, looks in the locations associated with Visual Studio 2010.  If you wish to target
+        /// the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override
+        /// that specifies a VisualStudioVersion.
         /// </summary>
         /// <param name="version">Version of the targeted .NET Framework</param>
         /// <returns>Path string.</returns>
@@ -1603,7 +1603,7 @@ namespace Microsoft.Build.Utilities
                     return FileUtilities.EnsureNoTrailingSlash(legacyMsCorlib20Path);
                 }
 
-                // If for some reason the 2.0 framework is not installed in its default location then maybe someone is using the ".net 4.0" reference assembly 
+                // If for some reason the 2.0 framework is not installed in its default location then maybe someone is using the ".net 4.0" reference assembly
                 // location, if so then we can just use what ever version they passed in becaues it should be MSIL now and not bit specific.
             }
 
@@ -1919,7 +1919,7 @@ namespace Microsoft.Build.Utilities
                 if (String.IsNullOrEmpty(frameworkName.Profile)) // profiles are always in new locations
                 {
                     // If the identifier is ".NET Framework" and the version is a well know legacy version. Manually generate the list of reference assembly paths
-                    // based on the known chaining order. Pass null in for the two delegates so we call the static methods rather than require the creation and calling 
+                    // based on the known chaining order. Pass null in for the two delegates so we call the static methods rather than require the creation and calling
                     // of two delegates
                     dotNetFrameworkReferenceAssemblies = HandleLegacyDotNetFrameworkReferenceAssemblyPaths(null, null, frameworkName);
                 }
@@ -1942,7 +1942,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Figures out a display name given the target framework details. 
+        /// Figures out a display name given the target framework details.
         /// This is the equivalent of the target framework moniker, but for display.
         /// If one cannot be found from the redist list file, a synthesized one is returned, so there is always a display name.
         /// </summary>
@@ -1968,7 +1968,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            // Still don't have one. 
+            // Still don't have one.
             // Probably it's 3.5 or earlier: make something reasonable.
             // VS uses the same algorithm to find something to display
             StringBuilder displayNameBuilder = new StringBuilder();
@@ -2262,7 +2262,7 @@ namespace Microsoft.Build.Utilities
                     ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", "Parsed sdk version folder '{0}' under '{1}'", sdkVersionDirectory.Name, sdkVersionDirectory.FullName);
                     if (Version.TryParse(sdkVersionDirectory.Name, out tempVersion))
                     {
-                        // Create SDK name based on the folder structure. We could open the manifest here and read the display name, but that would 
+                        // Create SDK name based on the folder structure. We could open the manifest here and read the display name, but that would
                         // add complexity and since things are supposed to be in a certain structure I don't think that is needed at this point.
                         string SDKKey = TargetPlatformSDK.GetSdkKey(sdkNameFolders.Name, sdkVersionDirectory.Name);
 
@@ -2361,7 +2361,7 @@ namespace Microsoft.Build.Utilities
                                 targetPlatformSDK.Path = platformSDKDirectory;
                             }
 
-                            // Gather the set of platforms supported by this SDK if it's a valid one. 
+                            // Gather the set of platforms supported by this SDK if it's a valid one.
                             if (!String.IsNullOrEmpty(targetPlatformSDK.Path))
                             {
                                 GatherPlatformsForSdk(targetPlatformSDK);
@@ -2402,7 +2402,7 @@ namespace Microsoft.Build.Utilities
             {
                 ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", "Gathering SDKS from registryRoot '{0}', Hive '{1}', View '{2}'", registryKeyRoot, registryHive, registryView);
 
-                // Attach the target platform to the registry root. This should give us something like 
+                // Attach the target platform to the registry root. This should give us something like
                 // SOFTWARE\MICROSOFT\Microsoft SDKs\Windows
 
                 // Get all of the platform identifiers
@@ -2480,7 +2480,7 @@ namespace Microsoft.Build.Utilities
                                 targetPlatformSDK.Path = platformSDKDirectory;
                             }
 
-                            // Gather the set of platforms supported by this SDK if it's a valid one. 
+                            // Gather the set of platforms supported by this SDK if it's a valid one.
                             if (!String.IsNullOrEmpty(targetPlatformSDK.Path))
                             {
                                 GatherPlatformsForSdk(targetPlatformSDK);
@@ -2592,7 +2592,7 @@ namespace Microsoft.Build.Utilities
             // Under WOW64 the HKEY_CURRENT_USER\SOFTWARE key is shared. This means the values are the same in the 64 bit and 32 bit views. This means we only need to get one view of this key.
             GatherSDKsFromRegistryImpl(platformMonikers, registryRoot, RegistryView.Default, RegistryHive.CurrentUser, getSubkeyNames, getRegistrySubKeyDefaultValue, openBaseKey, fileExists);
 
-            // Since SDKS can contain multiple architecture it makes sense to register both 32 bit and 64 bit in one location, but if for some reason that 
+            // Since SDKS can contain multiple architecture it makes sense to register both 32 bit and 64 bit in one location, but if for some reason that
             // is not possible then we need to look at both hives. Choosing the 32 bit one first because is where we expect to find them usually.
             if (is64bitOS)
             {
@@ -2647,7 +2647,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Get the disk roots to search for both platform and extension sdks in. The environment variable can 
+        /// Get the disk roots to search for both platform and extension sdks in. The environment variable can
         /// override the defaults.
         /// </summary>
         /// <returns></returns>
@@ -2675,7 +2675,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Get the disk roots to search for multi platform extension sdks in. The environment variable can 
+        /// Get the disk roots to search for multi platform extension sdks in. The environment variable can
         /// override the defaults.
         /// </summary>
         private static List<string> GetExtensionSdkDiskRoots(string[] diskRoots)
@@ -2727,7 +2727,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a platform SDK object, populate its supported platforms. 
+        /// Given a platform SDK object, populate its supported platforms.
         /// </summary>
         private static void GatherPlatformsForSdk(TargetPlatformSDK sdk)
         {
@@ -2743,7 +2743,7 @@ namespace Microsoft.Build.Utilities
                     DirectoryInfo[] platformIdentifiers = platformsRootInfo.GetDirectories();
                     ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", "Found '{0}' platform identifier directories under '{1}'", platformIdentifiers.Length, platformsRoot);
 
-                    // Iterate through all identifiers 
+                    // Iterate through all identifiers
                     foreach (DirectoryInfo platformIdentifier in platformIdentifiers)
                     {
                         DirectoryInfo[] platformVersions = platformIdentifier.GetDirectories();
@@ -2798,7 +2798,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Take the path to a reference assembly directory which contains a RedistList folder which then contains a FrameworkList.xml file. 
+        /// Take the path to a reference assembly directory which contains a RedistList folder which then contains a FrameworkList.xml file.
         /// We will read in the xml file and determine if it has an IncludedFramework element in the redist list. If it does it will calculate
         /// the path where the next link in the chain should be and return that path.
         /// Also, when reading the redist list, if any display name is found it will be cached, keyed off the path passed in.
@@ -2821,7 +2821,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            // Read in the redist list at the specified path, and return 
+            // Read in the redist list at the specified path, and return
             // the display name and the "include framework" value for chaining.
             // If display name is not available, returns empty string.
             // If include framework is not available, returns null.
@@ -2913,7 +2913,7 @@ namespace Microsoft.Build.Utilities
                 if (!String.IsNullOrEmpty(includeFramework))
                 {
                     // Take the path which should point to something like  c:\ProgramFiles\ReferenceAssemblies\Framework\.NETFramework\v4.1
-                    // We will take the path, to "up" a directory then append the name found in the redist. For example if the redist list had v4.0 
+                    // We will take the path, to "up" a directory then append the name found in the redist. For example if the redist list had v4.0
                     // the path which would be expected would be c:\ProgramFiles\ReferenceAssemblies\Framework\.NETFramework\v4.0
                     pathToReturn = path;
                     pathToReturn = Directory.GetParent(pathToReturn).FullName;
@@ -2947,9 +2947,9 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Get a fully qualified path to a file in the latest .NET Framework SDK. Error if the .NET Framework SDK can't be found.
-        /// When targeting .NET 3.5 or above, looks in the locations associated with Visual Studio 2010.  If you wish to 
-        /// target the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override that 
-        /// specifies a VisualStudioVersion. 
+        /// When targeting .NET 3.5 or above, looks in the locations associated with Visual Studio 2010.  If you wish to
+        /// target the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override that
+        /// specifies a VisualStudioVersion.
         /// </summary>
         /// <param name="fileName">File name to locate in the .NET Framework SDK directory</param>
         /// <returns>Path string.</returns>
@@ -2960,9 +2960,9 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Get a fully qualified path to a file in the .NET Framework SDK. Error if the .NET Framework SDK can't be found.
-        /// When targeting .NET 3.5 or above, looks in the locations associated with Visual Studio 2010.  If you wish to 
-        /// target the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override that 
-        /// specifies a VisualStudioVersion. 
+        /// When targeting .NET 3.5 or above, looks in the locations associated with Visual Studio 2010.  If you wish to
+        /// target the .NET Framework SDK that ships with Visual Studio Dev11 or later, please use the override that
+        /// specifies a VisualStudioVersion.
         /// </summary>
         /// <param name="fileName">File name to locate in the .NET Framework SDK directory</param>
         /// <param name="version">Version of the targeted .NET Framework</param>
@@ -3028,8 +3028,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="fileName">File name to locate in the .NET Framework SDK directory</param>
         /// <param name="version">Version of the targeted .NET Framework</param>
         /// <param name="architecture">The required architecture of the requested file.</param>
-        /// <param name="canFallBackIfNecessary">If true, will follow the fallback pattern -- from requested architecture, to 
-        /// current architecture, to x86.  Otherwise, if the requested architecture path doesn't exist, that's it -- no path 
+        /// <param name="canFallBackIfNecessary">If true, will follow the fallback pattern -- from requested architecture, to
+        /// current architecture, to x86.  Otherwise, if the requested architecture path doesn't exist, that's it -- no path
         /// will be returned.</param>
         /// <returns></returns>
         internal static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, UtilitiesDotNetFrameworkArchitecture architecture, bool canFallBackIfNecessary)
@@ -3064,7 +3064,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Gets the path to a sdk exe based on the processor architecture and the provided bin directory path. 
+        /// Gets the path to a sdk exe based on the processor architecture and the provided bin directory path.
         /// If the fileName cannot be found in the pathToSDK after the processor architecture has been taken into account a null is returned.
         /// </summary>
         internal static string GetPathToDotNetFrameworkSdkFile(string fileName, string pathToSdk, string processorArchitecture)
@@ -3128,8 +3128,8 @@ namespace Microsoft.Build.Utilities
                             return ProcessorArchitecture.AMD64;
                         case NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64:
                             return ProcessorArchitecture.IA64;
-                        // Errr, OK, we're trying to get the 64-bit path on a 32-bit machine.  
-                        // That ... doesn't make sense. 
+                        // Errr, OK, we're trying to get the 64-bit path on a 32-bit machine.
+                        // That ... doesn't make sense.
                         case NativeMethodsShared.PROCESSOR_ARCHITECTURE_INTEL:
                             return null;
                         case NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM:
@@ -3147,8 +3147,8 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns the path to the Windows SDK for the desired .NET Framework and Visual Studio version.  Note that 
-        /// this is only supported for a targeted .NET Framework version of 4.5 and above. 
+        /// Returns the path to the Windows SDK for the desired .NET Framework and Visual Studio version.  Note that
+        /// this is only supported for a targeted .NET Framework version of 4.5 and above.
         /// </summary>
         /// <param name="version">Target .NET Framework version</param>
         /// <param name="visualStudioVersion">Version of Visual Studio associated with the SDK.</param>
@@ -3160,8 +3160,8 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns the path to a file in the Windows SDK for the desired .NET Framework and Visual Studio version.  Note that 
-        /// this is only supported for a targeted .NET Framework version of 4.5 and above. 
+        /// Returns the path to a file in the Windows SDK for the desired .NET Framework and Visual Studio version.  Note that
+        /// this is only supported for a targeted .NET Framework version of 4.5 and above.
         /// </summary>
         /// <param name="fileName">The name of the file being requested.</param>
         /// <param name="version">Target .NET Framework version.</param>
@@ -3181,8 +3181,8 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns the path to a file in the Windows SDK for the desired .NET Framework and Visual Studio version and the desired 
-        /// architecture.  Note that this is only supported for a targeted .NET Framework version of 4.5 and above. 
+        /// Returns the path to a file in the Windows SDK for the desired .NET Framework and Visual Studio version and the desired
+        /// architecture.  Note that this is only supported for a targeted .NET Framework version of 4.5 and above.
         /// </summary>
         /// <param name="fileName">The name of the file being requested.</param>
         /// <param name="version">Target .NET Framework version.</param>
@@ -3203,8 +3203,8 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns the path to a file in the Windows SDK for the desired .NET Framework and Visual Studio version and the desired 
-        /// architecture.  Note that this is only supported for a targeted .NET Framework version of 4.5 and above. 
+        /// Returns the path to a file in the Windows SDK for the desired .NET Framework and Visual Studio version and the desired
+        /// architecture.  Note that this is only supported for a targeted .NET Framework version of 4.5 and above.
         /// </summary>
         /// <param name="fileName">The name of the file being requested.</param>
         /// <param name="version">Target .NET Framework version.</param>
@@ -3246,7 +3246,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Gets the path to a sdk exe based on the processor architecture and the provided bin directory path. 
+        /// Gets the path to a sdk exe based on the processor architecture and the provided bin directory path.
         /// If the fileName cannot be found in the pathToSDK after the processor architecture has been taken into account a null is returned.
         /// </summary>
         [Obsolete("Consider using GetPlatformSDKLocationFile instead")]
@@ -3319,12 +3319,12 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given the name of a file and a ToolsVersion, return the path to that file in the MSBuild 
+        /// Given the name of a file and a ToolsVersion, return the path to that file in the MSBuild
         /// tools path for that ToolsVersion
         /// </summary>
         /// <param name="fileName">The file to find the path to</param>
         /// <param name="toolsVersion">The ToolsVersion in which to find the file</param>
-        /// <returns>The path to the file in the tools path folder of the appropriate ToolsVersion if it 
+        /// <returns>The path to the file in the tools path folder of the appropriate ToolsVersion if it
         /// exists, otherwise null.</returns>
         public static string GetPathToBuildToolsFile(string fileName, string toolsVersion)
         {
@@ -3333,13 +3333,13 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given the name of a file and a ToolsVersion, return the path to that file in the MSBuild 
+        /// Given the name of a file and a ToolsVersion, return the path to that file in the MSBuild
         /// tools path for that ToolsVersion
         /// </summary>
         /// <param name="fileName">The file to find the path to</param>
         /// <param name="toolsVersion">The ToolsVersion in which to find the file</param>
         /// <param name="architecture">The architecture of the build tools file to get</param>
-        /// <returns>The path to the file in the tools path folder of the appropriate ToolsVersion if it 
+        /// <returns>The path to the file in the tools path folder of the appropriate ToolsVersion if it
         /// exists, otherwise null.</returns>
         public static string GetPathToBuildToolsFile(string fileName, string toolsVersion, UtilitiesDotNetFrameworkArchitecture architecture)
         {
@@ -3437,7 +3437,7 @@ namespace Microsoft.Build.Utilities
 
 
         /// <summary>
-        /// This method will return the highest version of a target framework moniker based on the identifier. This method will only 
+        /// This method will return the highest version of a target framework moniker based on the identifier. This method will only
         /// find full frameworks, this means no profiles will be returned.
         /// </summary>
         public static FrameworkNameVersioning HighestVersionOfTargetFrameworkIdentifier(string targetFrameworkRootDirectory, string frameworkIdentifier)
@@ -3489,8 +3489,8 @@ namespace Microsoft.Build.Utilities
         #region private methods
 
         /// <summary>
-        /// Converts a member of the Microsoft.Build.Utilities.DotNetFrameworkArchitecture enum to the equivalent member of the 
-        /// Microsoft.Build.Shared.DotNetFrameworkArchitecture enum. 
+        /// Converts a member of the Microsoft.Build.Utilities.DotNetFrameworkArchitecture enum to the equivalent member of the
+        /// Microsoft.Build.Shared.DotNetFrameworkArchitecture enum.
         /// </summary>
         private static SharedDotNetFrameworkArchitecture ConvertToSharedDotNetFrameworkArchitecture(UtilitiesDotNetFrameworkArchitecture architecture)
         {
@@ -3507,7 +3507,7 @@ namespace Microsoft.Build.Utilities
                     sharedArchitecture = SharedDotNetFrameworkArchitecture.Bitness64;
                     break;
                 default:
-                    // Should never reach here -- If any new values are added to the DotNetFrameworkArchitecture enum, they should be added here as well.  
+                    // Should never reach here -- If any new values are added to the DotNetFrameworkArchitecture enum, they should be added here as well.
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
             }
@@ -3656,7 +3656,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            //sort in ascending order of the version numbers, this is important as later when we search for assemblies in other methods 
+            //sort in ascending order of the version numbers, this is important as later when we search for assemblies in other methods
             //we should be looking in ascending order of the framework version folders on disk
             frameworkVersions.Sort(new VersionComparer());
 
@@ -3729,7 +3729,7 @@ namespace Microsoft.Build.Utilities
 
             if (dotNetFx35Path != null)
             {
-                // .NetFx35 is installed  
+                // .NetFx35 is installed
 
                 // check v20
                 string dotNetFx20Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);

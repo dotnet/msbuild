@@ -31,8 +31,8 @@ namespace Microsoft.Build.Framework.XamlTypes
     /// <summary>
     /// Represents the location and grouping for a <see cref="BaseProperty"/>.
     /// </summary>
-    /// <remarks> 
-    /// Those who manually 
+    /// <remarks>
+    /// Those who manually
     /// instantiate this class should remember to call <see cref="BeginInit"/> before setting the first
     /// property and <see cref="EndInit"/> after setting the last property of the object.
     /// </remarks>
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// The storage location for this data source. 
+        /// The storage location for this data source.
         /// </summary>
         /// <remarks>
         /// This field is mandatory and is culture invariant. Current accepted values are <c>ProjectFile</c>
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// Among other things this governs how the data is treated during build.
         /// </summary>
         /// <example>
-        /// A value of <c>Item</c> for this property indicates that this property is actually 
+        /// A value of <c>Item</c> for this property indicates that this property is actually
         /// an item array - the list of all items with the item type specified by <see cref="ItemType"/>.
         /// </example>
         public string SourceType

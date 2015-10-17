@@ -33,7 +33,7 @@ namespace Microsoft.Build.Shared
                     s_currentOemEncoding = Encoding.GetEncoding(NativeMethodsShared.GetOEMCP());
                 }
                 // theoretically, GetEncoding may throw an ArgumentException or a NotSupportedException. This should never
-                // really happen, since the code page we pass in has just been returned from the "underlying platform", 
+                // really happen, since the code page we pass in has just been returned from the "underlying platform",
                 // so it really should support it. If it ever happens, we'll just fall back to the default encoding.
                 // No point in showing any errors to the users, since they most likely wouldn't be actionable.
                 catch (ArgumentException ex)

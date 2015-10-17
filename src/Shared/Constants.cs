@@ -7,17 +7,17 @@ using System.Reflection;
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-    /// Constants that we want to be shareable across all our assemblies. 
+    /// Constants that we want to be shareable across all our assemblies.
     /// </summary>
     internal static class MSBuildConstants
     {
         /// <summary>
-        /// The name of the property that indicates the tools path 
+        /// The name of the property that indicates the tools path
         /// </summary>
         internal const string ToolsPath = "MSBuildToolsPath";
 
         /// <summary>
-        /// The most current Visual Studio Version known to this version of MSBuild. 
+        /// The most current Visual Studio Version known to this version of MSBuild.
         /// </summary>
 #if STANDALONEBUILD
         internal const string CurrentVisualStudioVersion = "14.1";
@@ -26,17 +26,17 @@ namespace Microsoft.Build.Shared
 #endif
 
         /// <summary>
-        /// The most current ToolsVersion known to this version of MSBuild. 
+        /// The most current ToolsVersion known to this version of MSBuild.
         /// </summary>
         internal const string CurrentToolsVersion = CurrentVisualStudioVersion;
 
         /// <summary>
-        /// The most current ToolsVersion known to this version of MSBuild as a Version object. 
+        /// The most current ToolsVersion known to this version of MSBuild as a Version object.
         /// </summary>
         internal static Version CurrentToolsVersionAsVersion = new Version(CurrentToolsVersion);
 
         /// <summary>
-        /// The most current VSGeneralAssemblyVersion known to this version of MSBuild. 
+        /// The most current VSGeneralAssemblyVersion known to this version of MSBuild.
         /// </summary>
 #if STANDALONEBUILD
         internal const string CurrentAssemblyVersion = "14.1.0.0";

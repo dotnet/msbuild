@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// file extension 
+        /// file extension
         /// </summary>
         public string Name
         {

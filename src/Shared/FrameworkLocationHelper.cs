@@ -24,7 +24,7 @@ namespace Microsoft.Build.Shared
     internal enum DotNetFrameworkArchitecture
     {
         /// <summary>
-        /// Indicates the .NET Framework that is currently being run under.  
+        /// Indicates the .NET Framework that is currently being run under.
         /// </summary>
         Current = 0,
 
@@ -118,7 +118,7 @@ namespace Microsoft.Build.Shared
         #region Delegates
 
         // This way, the methods that take these as parameters can also be overridden to do different things
-        // in unit tests. 
+        // in unit tests.
         private static readonly GetDirectories s_getDirectories = new GetDirectories(Directory.GetDirectories);
         private static readonly DirectoryExists s_directoryExists = new DirectoryExists(Directory.Exists);
 
@@ -351,13 +351,13 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
-        /// versions, if we're unable to locate the desired SDK version, we will try to 
+        /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
         ///
-        /// This isn't ideal, but it will allow our tasks to function on any of several 
+        /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        /// 
+        ///
         /// NOTE:  This returns the path to the root of the fallback SDK
         /// </summary>
         private static string FallbackDotNetFrameworkSdkInstallPath
@@ -370,8 +370,8 @@ namespace Microsoft.Build.Shared
 
                     if (Environment.Is64BitProcess && s_fallbackDotNetFrameworkSdkInstallPath == null)
                     {
-                        // Since we're 64-bit, what we just checked was the 64-bit fallback key -- so now let's 
-                        // check the 32-bit one too, just in case. 
+                        // Since we're 64-bit, what we just checked was the 64-bit fallback key -- so now let's
+                        // check the 32-bit one too, just in case.
                         s_fallbackDotNetFrameworkSdkInstallPath = FindRegistryValueUnderKey(fallbackDotNetFrameworkSdkRegistryInstallPath, fallbackDotNetFrameworkSdkInstallKeyValue, RegistryView.Registry32);
                     }
                 }
@@ -382,15 +382,15 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
-        /// versions, if we're unable to locate the desired SDK version, we will try to 
+        /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
         ///
-        /// This isn't ideal, but it will allow our tasks to function on any of several 
+        /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        /// 
+        ///
         /// NOTE:  This explicitly returns the path to the 3.5 tools (bin) under the fallback
-        /// SDK, to match the data we're pulling from the registry now.  
+        /// SDK, to match the data we're pulling from the registry now.
         /// </summary>
         private static string PathToV35ToolsInFallbackDotNetFrameworkSdk
         {
@@ -423,15 +423,15 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
-        /// versions, if we're unable to locate the desired SDK version, we will try to 
+        /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
         ///
-        /// This isn't ideal, but it will allow our tasks to function on any of several 
+        /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        /// 
-        /// NOTE:  This explicitly returns the path to the 4.X tools (bin\NetFX 4.0 Tools) 
-        /// under the fallback SDK, to match the data we're pulling from the registry now.  
+        ///
+        /// NOTE:  This explicitly returns the path to the 4.X tools (bin\NetFX 4.0 Tools)
+        /// under the fallback SDK, to match the data we're pulling from the registry now.
         /// </summary>
         private static string PathToV4ToolsInFallbackDotNetFrameworkSdk
         {
@@ -603,7 +603,7 @@ namespace Microsoft.Build.Shared
             DotNetFrameworkArchitecture architecture
         )
         {
-            // If the COMPLUS variables are set, they override everything -- that's the directory we want.  
+            // If the COMPLUS variables are set, they override everything -- that's the directory we want.
             string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
             string complusVersion = Environment.GetEnvironmentVariable("COMPLUS_VERSION");
 
@@ -613,7 +613,7 @@ namespace Microsoft.Build.Shared
             }
 
             // If the current runtime starts with correct prefix, then this is the runtime we want to use.
-            // However, only if we're requesting current architecture -- otherwise, the base path may be different, so we'll need to look it up. 
+            // However, only if we're requesting current architecture -- otherwise, the base path may be different, so we'll need to look it up.
             string leaf = Path.GetFileName(currentRuntimePath);
             if (leaf.StartsWith(prefix, StringComparison.Ordinal) && architecture == DotNetFrameworkArchitecture.Current)
             {
@@ -629,19 +629,19 @@ namespace Microsoft.Build.Shared
 
             if (indexOfFramework64 != -1 && architecture == DotNetFrameworkArchitecture.Bitness32)
             {
-                // need to get rid of just the 64, but want to look up 'Framework64' rather than '64' to avoid the case where 
-                // the path is something like 'C:\MyPath\64\Framework64'.  9 = length of 'Framework', to make the index match 
-                // the location of the '64'. 
+                // need to get rid of just the 64, but want to look up 'Framework64' rather than '64' to avoid the case where
+                // the path is something like 'C:\MyPath\64\Framework64'.  9 = length of 'Framework', to make the index match
+                // the location of the '64'.
                 int indexOf64 = indexOfFramework64 + 9;
                 string tempLocation = baseLocation;
                 baseLocation = tempLocation.Substring(0, indexOf64) + tempLocation.Substring(indexOf64 + 2, tempLocation.Length - indexOf64 - 2);
             }
             else if (indexOfFramework64 == -1 && architecture == DotNetFrameworkArchitecture.Bitness64)
             {
-                // need to add 64 -- since this is a heuristic, we assume that we just need to append.  
+                // need to add 64 -- since this is a heuristic, we assume that we just need to append.
                 baseLocation = baseLocation + "64";
             }
-            // we don't need to do anything if it's DotNetFrameworkArchitecture.Current.  
+            // we don't need to do anything if it's DotNetFrameworkArchitecture.Current.
 
             string[] directories;
 
@@ -651,7 +651,7 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                // If we can't even find the base path, might as well give up now. 
+                // If we can't even find the base path, might as well give up now.
                 return null;
             }
 
@@ -665,7 +665,7 @@ namespace Microsoft.Build.Shared
             // The intention here is to choose the alphabetical maximum.
             string max = directories[0];
 
-            // the max.EndsWith condition: pre beta 2 versions of v3.5 have build number like v3.5.20111.  
+            // the max.EndsWith condition: pre beta 2 versions of v3.5 have build number like v3.5.20111.
             // This was removed in beta2
             // We should favor \v3.5 over \v3.5.xxxxx
             // versions previous to 2.0 have .xxxx version numbers.  3.0 and 3.5 do not.
@@ -714,15 +714,15 @@ namespace Microsoft.Build.Shared
             string programFilesX64 = null;
             if (string.Equals(programFiles, programFiles32))
             {
-                // either we're in a 32-bit window, or we're on a 32-bit machine.  
+                // either we're in a 32-bit window, or we're on a 32-bit machine.
                 // if we're on a 32-bit machine, ProgramW6432 won't exist
-                // if we're on a 64-bit machine, ProgramW6432 will point to the correct Program Files. 
+                // if we're on a 64-bit machine, ProgramW6432 will point to the correct Program Files.
                 programFilesX64 = Environment.GetEnvironmentVariable("ProgramW6432");
             }
             else
             {
-                // 64-bit window on a 64-bit machine; %ProgramFiles% points to the 64-bit 
-                // Program Files already. 
+                // 64-bit window on a 64-bit machine; %ProgramFiles% points to the 64-bit
+                // Program Files already.
                 programFilesX64 = programFiles;
             }
 
@@ -730,7 +730,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Generate the path to the program files reference assembly location by taking in the program files special folder and then 
+        /// Generate the path to the program files reference assembly location by taking in the program files special folder and then
         /// using that path to generate the path to the reference assemblies location.
         /// </summary>
         internal static string GenerateProgramFilesReferenceAssemblyRoot()
@@ -740,10 +740,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Given a ToolsVersion, find the path to the build tools folder for that ToolsVersion. 
+        /// Given a ToolsVersion, find the path to the build tools folder for that ToolsVersion.
         /// </summary>
         /// <param name="toolsVersion">The ToolsVersion to look up</param>
-        /// <returns>The path to the build tools folder for that ToolsVersion, if it exists, or 
+        /// <returns>The path to the build tools folder for that ToolsVersion, if it exists, or
         /// null otherwise</returns>
         internal static string GeneratePathToBuildToolsForToolsVersion(string toolsVersion, DotNetFrameworkArchitecture architecture)
         {
@@ -850,7 +850,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Look up the path to the build tools directory for the requested ToolsVersion in the .exe.config file of this executable 
+        /// Look up the path to the build tools directory for the requested ToolsVersion in the .exe.config file of this executable
         /// </summary>
         private static string GetPathToBuildToolsFromConfig(string toolsVersion)
         {
@@ -890,11 +890,11 @@ namespace Microsoft.Build.Shared
                 }
                 catch (ConfigurationException)
                 {
-                    // may happen if the .exe.config contains bad data.  Shouldn't ever happen in 
-                    // practice since we'll long since have loaded all toolsets in the toolset loading 
-                    // code and thrown errors to the user at that point if anything was invalid, but just 
+                    // may happen if the .exe.config contains bad data.  Shouldn't ever happen in
+                    // practice since we'll long since have loaded all toolsets in the toolset loading
+                    // code and thrown errors to the user at that point if anything was invalid, but just
                     // in case, just eat the exception here, so that we can go on to look in the registry
-                    // to see if there is any valid data there.  
+                    // to see if there is any valid data there.
                 }
             }
 
@@ -902,7 +902,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Look up the path to the build tools directory in the registry for the requested ToolsVersion and requested architecture  
+        /// Look up the path to the build tools directory in the registry for the requested ToolsVersion and requested architecture
         /// </summary>
         private static string GetPathToBuildToolsFromRegistry(string toolsVersion, DotNetFrameworkArchitecture architecture)
         {
@@ -1041,8 +1041,8 @@ namespace Microsoft.Build.Shared
 
             if (dotNetFrameworkVersion == dotNetFrameworkVersion35 && visualStudioVersion > visualStudioVersion110)
             {
-                // Fall back to Dev11 location -- 3.5 tools MSI was reshipped unchanged, so there 
-                // essentially are no 12-specific 3.5 tools. 
+                // Fall back to Dev11 location -- 3.5 tools MSI was reshipped unchanged, so there
+                // essentially are no 12-specific 3.5 tools.
                 visualStudioVersion = visualStudioVersion110;
                 return;
             }
@@ -1132,7 +1132,7 @@ namespace Microsoft.Build.Shared
             {
                 string sdkVersionFolder = "4.6"; // Default for back-compat
 
-                // Framework 4.6.1 
+                // Framework 4.6.1
                 if (dotNetSdkVersion == dotNetFrameworkVersion461)
                 {
                     sdkVersionFolder = "4.6.1";
@@ -1282,8 +1282,8 @@ namespace Microsoft.Build.Shared
                     return cachedPath;
                 }
 
-                // Otherwise, check to see if we're even installed.  If not, return null -- no point in setting the static 
-                // variables to null when that's what they are already.  
+                // Otherwise, check to see if we're even installed.  If not, return null -- no point in setting the static
+                // variables to null when that's what they are already.
                 if (!CheckForFrameworkInstallation(this.dotNetFrameworkRegistryKey, this.dotNetFrameworkSetupRegistryInstalledName))
                 {
                     return null;
@@ -1330,7 +1330,7 @@ namespace Microsoft.Build.Shared
 
                 // For the Dev10 SDK, we check the registry that corresponds to the current process' bitness, rather than
                 // always the 32-bit one the way we do for Dev11 and onward, since that's what we did in Dev10 as well.
-                // As of Dev11, the SDK reg keys are installed in the 32-bit registry. 
+                // As of Dev11, the SDK reg keys are installed in the 32-bit registry.
                 RegistryView registryView = visualStudioSpec.Version == visualStudioVersion100 ? RegistryView.Default : RegistryView.Registry32;
 
                 string generatedPathToDotNetFrameworkSdkTools = FindRegistryValueUnderKey(
@@ -1435,7 +1435,7 @@ namespace Microsoft.Build.Shared
 
                     string registryPath = string.Join(@"\", MicrosoftSDKsRegistryKey, "Windows", visualStudioSpec.WindowsSdkRegistryKey);
 
-                    // As of Dev11, the SDK reg keys are installed in the 32-bit registry. 
+                    // As of Dev11, the SDK reg keys are installed in the 32-bit registry.
                     this.pathToWindowsSdk = FindRegistryValueUnderKey(
                         registryPath,
                         visualStudioSpec.WindowsSdkRegistryInstallationFolderName,

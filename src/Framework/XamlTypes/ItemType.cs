@@ -13,7 +13,7 @@ using System.Windows.Markup;
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
-    /// Used to deserialize the item type information 
+    /// Used to deserialize the item type information
     /// </summary>
     public sealed class ItemType : ISupportInitialize, IProjectSchemaNode
     {

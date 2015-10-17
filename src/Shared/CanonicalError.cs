@@ -66,7 +66,7 @@ namespace Microsoft.Build.Shared
                 + "(?<SUBCATEGORY>(()|([^:]*? )))"
                 // Match 'error' or 'warning'.
                 + @"(?<CATEGORY>(error|warning))"
-                // Match anything starting with a space that's not a colon/space, followed by a colon. 
+                // Match anything starting with a space that's not a colon/space, followed by a colon.
                 // Error code is optional in which case "error"/"warning" can be followed immediately by a colon.
                 + @"( \s*(?<CODE>[^: ]*))?\s*:"
                 // Whatever's left on this line, including colons.
@@ -266,7 +266,7 @@ namespace Microsoft.Build.Shared
         internal static Parts Parse(string message)
         {
             // An unusually long string causes pathologically slow Regex back-tracking.
-            // To avoid that, only scan the first 400 characters. That's enough for 
+            // To avoid that, only scan the first 400 characters. That's enough for
             // the longest possible prefix: MAX_PATH, plus a huge subcategory string, and an error location.
             // After the regex is done, we can append the overflow.
             string messageOverflow = String.Empty;
@@ -277,7 +277,7 @@ namespace Microsoft.Build.Shared
             }
 
             // If a tool has a large amount of output that isn't an error or warning (eg., "dir /s %hugetree%")
-            // the regex below is slow. It's faster to pre-scan for "warning" and "error" 
+            // the regex below is slow. It's faster to pre-scan for "warning" and "error"
             // and bail out if neither are present.
             if (message.IndexOf("warning", StringComparison.OrdinalIgnoreCase) == -1 &&
                 message.IndexOf("error", StringComparison.OrdinalIgnoreCase) == -1)
@@ -292,7 +292,7 @@ namespace Microsoft.Build.Shared
             //      Main.cs(17,20):Command line warning CS0168: The variable 'foo' is declared but never used
             //      -------------- ------------ ------- ------  ----------------------------------------------
             //      Origin         SubCategory  Cat.    Code    Text
-            // 
+            //
             // To accommodate absolute filenames in Origin, tolerate a colon in the second position
             // as long as its preceded by a letter.
             //

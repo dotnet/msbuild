@@ -14,12 +14,12 @@ using System.Windows.Markup;
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
-    /// This is a simple container for <see cref="Rule"/> instances. 
+    /// This is a simple container for <see cref="Rule"/> instances.
     /// </summary>
     /// <remarks>
     /// Note that we only deal in terms of <see cref="Rule"/>s
-    /// as far as property pages are concerned. The <see cref="RuleBag"/> is only used as a 
-    /// container for more than one <see cref="Rule"/>. The containing <see cref="Rule"/>s are 
+    /// as far as property pages are concerned. The <see cref="RuleBag"/> is only used as a
+    /// container for more than one <see cref="Rule"/>. The containing <see cref="Rule"/>s are
     /// immediately stripped off after loading of the xaml file.
     /// </remarks>
     [ContentProperty("Rules")]
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Framework.XamlTypes
             set;
         }
 
-        #endregion 
+        #endregion
 
         #region ISupportInitialize Members
 

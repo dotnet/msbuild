@@ -18,7 +18,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    /// HybridDictionary is a dictionary which is implemented to efficiently store both small and large numbers of items.  When only a single item is stored, we use no 
+    /// HybridDictionary is a dictionary which is implemented to efficiently store both small and large numbers of items.  When only a single item is stored, we use no
     /// collections at all.  When 1 &lt; n &lt;= MaxListSize is stored, we use a list.  For any larger number of elements, we use a dictionary.
     /// </summary>
     /// <typeparam name="TKey">The key type</typeparam>
@@ -254,7 +254,7 @@ namespace Microsoft.Build.Collections
         /// <remarks>
         /// NOTE: Returns "this", which is not normally recommended as a caller
         /// could implement its own locking scheme on "this" and deadlock. However, a
-        /// sync object would be significant wasted space as there are a lot of these, 
+        /// sync object would be significant wasted space as there are a lot of these,
         /// and the caller is not foolish.
         /// </remarks>
         public object SyncRoot
@@ -778,7 +778,7 @@ namespace Microsoft.Build.Collections
         /// An enumerator for when the dictionary has only a single entry in it.
         /// Cannot find a way to make the SingleEntryEnumerator serve both purposes, as foreach preferentially
         /// casts to IEnumerable that returns the generic enumerator instead of an IDictionaryEnumerator.
-        /// 
+        ///
         /// Don't want to use the List enumerator below as a throwaway one-entry list would need to be allocated.
         /// </summary>
         private struct SingleDictionaryEntryEnumerator : IDictionaryEnumerator

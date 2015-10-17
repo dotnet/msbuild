@@ -184,7 +184,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
@@ -214,10 +214,10 @@ namespace Microsoft.Build.Framework
                 // String.Format() will throw a FormatException if args does
                 // not have enough elements to match each format parameter.
                 // However, it provides no feedback in the case when args contains
-                // more elements than necessary to replace each format 
+                // more elements than necessary to replace each format
                 // parameter.  We'd like to know if we're providing too much
                 // data in cases like these, so we'll fail if this code runs.
-                                                
+
                 // We create an array with one fewer element
                 object[] trimmedArgs = new object[args.Length - 1];
                 Array.Copy(args, 0, trimmedArgs, 0, args.Length - 1);
@@ -241,12 +241,12 @@ namespace Microsoft.Build.Framework
                     String.Format("The provided format string '{0}' had fewer format parameters than the number of format args, '{1}'.", unformatted, args.Length)
                 );
 #endif
-                // If you accidentally pass some random type in that can't be converted to a string, 
+                // If you accidentally pass some random type in that can't be converted to a string,
                 // FormatResourceString calls ToString() which returns the full name of the type!
                 foreach (object param in args)
                 {
                     // Check against a list of types that we know have
-                    // overridden ToString() usefully. If you want to pass 
+                    // overridden ToString() usefully. If you want to pass
                     // another one, add it here.
                     if (param != null && param.ToString() == param.GetType().FullName)
                     {
@@ -266,7 +266,7 @@ namespace Microsoft.Build.Framework
                     // We don't have resources in this assembly, and we generally log stack for task failures so they can be fixed by the owner
                     // However, we don't want to crash the logger and stop the build.
                     // Error will look like this (it's OK to not localize subcategory). It's not too bad, although there's no file.
-                    // 
+                    //
                     //       Task "Crash"
                     //          (16,14):  error : "This message logged from a task {1} has too few formatting parameters."
                     //             at System.Text.StringBuilder.AppendFormat(IFormatProvider provider, String format, Object[] args)
