@@ -4,9 +4,6 @@
   "compilationOptions": {
     "emitEntryPoint": true
   },
-  "commands": {
-    "dotnet-compile": "Microsoft.DotNet.Tools.Compiler"
-  },
   "dependencies": {
     "Microsoft.NETCore.TestHost": "1.0.0-*",
     "Microsoft.NETCore.Runtime": "1.0.1-*",

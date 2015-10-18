@@ -4,9 +4,6 @@
   "compilationOptions": {
     "emitEntryPoint": true
   },
-  "commands": {
-    "dotnet": "Microsoft.DotNet.Cli"
-  },
   "dependencies": {
     "Microsoft.NETCore.Runtime": "1.0.1-*",
 
