@@ -188,7 +188,7 @@ namespace Microsoft.Extensions.ProjectModel
             if (Project == null)
             {
                 Project project;
-                if (Project.TryGetProject(ProjectDirectory, out project))
+                if (ProjectReader.TryGetProject(ProjectDirectory, out project))
                 {
                     Project = project;
                 }

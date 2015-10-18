@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Extensions.JsonParser.Sources;
 using Microsoft.Extensions.ProjectModel.Files;
 using Microsoft.Extensions.ProjectModel.Graph;
+using Microsoft.Extensions.ProjectModel.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -15,6 +16,51 @@ namespace Microsoft.Extensions.ProjectModel
 {
     public class ProjectReader
     {
+        public static bool TryGetProject(string path, out Project project, ICollection<DiagnosticMessage> diagnostics = null)
+        {
+            project = null;
+
+            string projectPath = null;
+
+            if (string.Equals(Path.GetFileName(path), Project.FileName, StringComparison.OrdinalIgnoreCase))
+            {
+                projectPath = path;
+                path = Path.GetDirectoryName(path);
+            }
+            else if (!HasProjectFile(path))
+            {
+                return false;
+            }
+            else
+            {
+                projectPath = Path.Combine(path, Project.FileName);
+            }
+
+            // Assume the directory name is the project name if none was specified
+            var projectName = PathUtility.GetDirectoryName(Path.GetFullPath(path));
+            projectPath = Path.GetFullPath(projectPath);
+
+            if (!File.Exists(projectPath))
+            {
+                return false;
+            }
+
+            try
+            {
+                using (var stream = File.OpenRead(projectPath))
+                {
+                    var reader = new ProjectReader();
+                    project = reader.ReadProject(stream, projectName, projectPath, diagnostics);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw FileFormatException.Create(ex, projectPath);
+            }
+
+            return true;
+        }
+
         public static Project GetProject(string projectFile)
         {
             return GetProject(projectFile, new List<DiagnosticMessage>());
@@ -89,7 +135,6 @@ namespace Microsoft.Extensions.ProjectModel
             project.Summary = rawProject.ValueAsString("summary");
             project.Copyright = rawProject.ValueAsString("copyright");
             project.Title = rawProject.ValueAsString("title");
-            project.WebRoot = rawProject.ValueAsString("webroot");
             project.EntryPoint = rawProject.ValueAsString("entryPoint");
             project.ProjectUrl = rawProject.ValueAsString("projectUrl");
             project.LicenseUrl = rawProject.ValueAsString("licenseUrl");
@@ -103,7 +148,7 @@ namespace Microsoft.Extensions.ProjectModel
             project.ReleaseNotes = rawProject.ValueAsString("releaseNotes");
 
             project.RequireLicenseAcceptance = rawProject.ValueAsBoolean("requireLicenseAcceptance", defaultValue: false);
-            
+
             // REVIEW: Move this to the dependencies node?
             project.EmbedInteropTypes = rawProject.ValueAsBoolean("embedInteropTypes", defaultValue: false);
 
@@ -505,6 +550,13 @@ namespace Microsoft.Extensions.ProjectModel
             }
 
             return null;
+        }
+
+        private static bool HasProjectFile(string path)
+        {
+            string projectPath = Path.Combine(path, Project.FileName);
+
+            return File.Exists(projectPath);
         }
     }
 }

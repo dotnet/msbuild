@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             Project project;
 
             // Can't find a project file with the name so bail
-            if (!Project.TryGetProject(path, out project))
+            if (!ProjectReader.TryGetProject(path, out project))
             {
                 return new ProjectDescription(name, path);
             }

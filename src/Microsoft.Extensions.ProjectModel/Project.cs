@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.ProjectModel.Files;
 using Microsoft.Extensions.ProjectModel.Graph;
-using Microsoft.Extensions.ProjectModel.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -63,8 +62,6 @@ namespace Microsoft.Extensions.ProjectModel
 
         public IList<LibraryRange> Dependencies { get; set; }
 
-        public string WebRoot { get; set; }
-
         public string EntryPoint { get; set; }
 
         public string ProjectUrl { get; set; }
@@ -91,58 +88,6 @@ namespace Microsoft.Extensions.ProjectModel
         public IEnumerable<string> GetConfigurations()
         {
             return _compilerOptionsByConfiguration.Keys;
-        }
-
-        public static bool HasProjectFile(string path)
-        {
-            string projectPath = Path.Combine(path, FileName);
-
-            return File.Exists(projectPath);
-        }
-
-        public static bool TryGetProject(string path, out Project project, ICollection<DiagnosticMessage> diagnostics = null)
-        {
-            project = null;
-
-            string projectPath = null;
-
-            if (string.Equals(Path.GetFileName(path), FileName, StringComparison.OrdinalIgnoreCase))
-            {
-                projectPath = path;
-                path = Path.GetDirectoryName(path);
-            }
-            else if (!HasProjectFile(path))
-            {
-                return false;
-            }
-            else
-            {
-                projectPath = Path.Combine(path, FileName);
-            }
-
-            // Assume the directory name is the project name if none was specified
-            var projectName = PathUtility.GetDirectoryName(Path.GetFullPath(path));
-            projectPath = Path.GetFullPath(projectPath);
-
-            if (!File.Exists(projectPath))
-            {
-                return false;
-            }
-
-            try
-            {
-                using (var stream = File.OpenRead(projectPath))
-                {
-                    var reader = new ProjectReader();
-                    project = reader.ReadProject(stream, projectName, projectPath, diagnostics);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw FileFormatException.Create(ex, projectPath);
-            }
-
-            return true;
         }
 
         public CompilerOptions GetCompilerOptions(NuGetFramework targetFramework,
