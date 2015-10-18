@@ -10,13 +10,10 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 {
     public class PackageDependencyProvider
     {
-        private readonly string _packagesPath;
-
         private readonly VersionFolderPathResolver _packagePathResolver;
 
         public PackageDependencyProvider(string packagesPath)
         {
-            _packagesPath = packagesPath;
             _packagePathResolver = new VersionFolderPathResolver(packagesPath);
         }
 
@@ -33,7 +30,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                 targetLibrary.RuntimeAssemblies.Any() ||
                 !containsAssembly;
 
-            var resolved = compatible;
             var dependencies = new List<LibraryRange>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
             PopulateDependencies(dependencies, targetLibrary);
 

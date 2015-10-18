@@ -13,7 +13,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
         private readonly IList<LibraryDescription> _libraries;
         private readonly IList<DiagnosticMessage> _diagnostics;
         private readonly string _projectPath;
-        private readonly NuGetFramework _targetFramework;
 
         public LibraryManager(string projectPath, 
                               NuGetFramework targetFramework, 
@@ -21,7 +20,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                               IList<DiagnosticMessage> diagnostics)
         {
             _projectPath = projectPath;
-            _targetFramework = targetFramework;
             _libraries = libraries;
             _diagnostics = diagnostics;
         }

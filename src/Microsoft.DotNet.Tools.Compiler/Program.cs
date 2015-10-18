@@ -156,7 +156,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                 // Default suppressions
                 "-nowarn:CS1701",
                 "-nowarn:CS1702",
-                "-nowarn:CS1705",
                 "-nostdlib",
                 "-nologo",
                 $"-out:\"{outputName}\""
