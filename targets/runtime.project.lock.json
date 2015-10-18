@@ -1287,7 +1287,7 @@
           "lib/DNXCore50/System.Threading.Thread.dll": {}
         }
       },
-      "System.Threading.ThreadPool/4.0.10-beta-23225": {
+      "System.Threading.ThreadPool/4.0.10-beta-23409": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )",
           "System.Runtime.InteropServices": "[4.0.0, )"
@@ -3028,7 +3028,7 @@
           "lib/DNXCore50/System.Threading.Thread.dll": {}
         }
       },
-      "System.Threading.ThreadPool/4.0.10-beta-23406": {
+      "System.Threading.ThreadPool/4.0.10-beta-23409": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )",
           "System.Runtime.InteropServices": "[4.0.0, )"
@@ -4915,7 +4915,7 @@
           "lib/DNXCore50/System.Threading.Thread.dll": {}
         }
       },
-      "System.Threading.ThreadPool/4.0.10-beta-23406": {
+      "System.Threading.ThreadPool/4.0.10-beta-23409": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )",
           "System.Runtime.InteropServices": "[4.0.0, )"
@@ -6802,7 +6802,7 @@
           "lib/DNXCore50/System.Threading.Thread.dll": {}
         }
       },
-      "System.Threading.ThreadPool/4.0.10-beta-23406": {
+      "System.Threading.ThreadPool/4.0.10-beta-23409": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )",
           "System.Runtime.InteropServices": "[4.0.0, )"
@@ -10294,8 +10294,8 @@
         "System.Threading.Thread.nuspec"
       ]
     },
-    "System.Threading.ThreadPool/4.0.10-beta-23225": {
-      "sha512": "QX+0t6MbaSJ+NedX9HhT8inVFkuaCM3OQioPw6+Ma6SVS9kJoWY4K8H280wssZSjVB7+tv5qUqTYtJ/wodvSTg==",
+    "System.Threading.ThreadPool/4.0.10-beta-23409": {
+      "sha512": "XeD7mDWCdLEWPGmX9zJ2XP/D9qe7g2JDxOcjPz9iOarHm/RriQWEAVLtOkQj/6WhosfYt2E8Q4okTB+mPNUhCA==",
       "type": "Package",
       "files": [
         "[Content_Types].xml",
@@ -10306,29 +10306,7 @@
         "lib/net46/System.Threading.ThreadPool.dll",
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
-        "package/services/metadata/core-properties/695bff32a368442591a4fc898390a650.psmdcp",
-        "ref/dotnet/System.Threading.ThreadPool.dll",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net46/System.Threading.ThreadPool.dll",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "System.Threading.ThreadPool.nuspec"
-      ]
-    },
-    "System.Threading.ThreadPool/4.0.10-beta-23406": {
-      "sha512": "RecPtfLTq0bnlrrJCZmiFsK28zEg6b30rbqFlPRlA8MaiyQ1u1L2jRcl7k/IGlg03odR2LJ5UUn0qOplHEon9w==",
-      "type": "Package",
-      "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "lib/DNXCore50/System.Threading.ThreadPool.dll",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net46/System.Threading.ThreadPool.dll",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "package/services/metadata/core-properties/e49ffcc53eb94ed7ab79c8796ac0763d.psmdcp",
+        "package/services/metadata/core-properties/3d0d96fbe4ca49c99f5efa2e5791cbfc.psmdcp",
         "ref/dotnet/System.Threading.ThreadPool.dll",
         "ref/MonoAndroid10/_._",
         "ref/MonoTouch10/_._",
@@ -10656,6 +10634,7 @@
       "System.Resources.ReaderWriter >= 4.0.0-beta-23406",
       "System.Runtime.InteropServices.RuntimeInformation >= 4.0.0-beta-23406",
       "System.Threading.Thread >= 4.0.0-beta-23406",
+      "System.Threading.ThreadPool >= 4.0.10-beta-23409",
       "System.Xml.ReaderWriter >= 4.0.11-beta-23225",
       "System.Xml.XmlDocument >= 4.0.1-beta-23225",
       "System.Xml.XPath.XmlDocument >= 4.0.1-beta-23225",
