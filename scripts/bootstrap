@@ -25,6 +25,7 @@ if [ -z "$RID" ]; then
 fi
 
 OUTPUT_ROOT=$REPOROOT/artifacts/$RID
+STAGE0_DIR=$OUTPUT_ROOT/stage0
 STAGE1_DIR=$OUTPUT_ROOT/stage1
 STAGE2_DIR=$OUTPUT_ROOT/stage2
 
@@ -42,6 +43,11 @@ fi
 echo "Running 'dnu restore' to restore packages for DNX-hosted projects"
 
 dnu restore "$REPOROOT" --runtime osx.10.10-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.11-x64
+
+# symlink mcs to csc for bootstrapping (requires mono :()
+mkdir -p $STAGE0_DIR
+ln -s `(which mcs)` $STAGE0_DIR/csc
+export PATH=$PATH:$STAGE0_DIR
 
 # Clean up stage1
 [ -d "$STAGE1_DIR" ] && rm -Rf "$STAGE1_DIR"
