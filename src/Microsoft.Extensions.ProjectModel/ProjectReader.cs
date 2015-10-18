@@ -89,7 +89,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
 
             // Meta-data properties
-            project.Name = projectName;
+            project.Name = rawProject.ValueAsString("name") ?? projectName;
             project.ProjectFilePath = Path.GetFullPath(projectPath);
 
             var version = rawProject.Value("version") as JsonString;

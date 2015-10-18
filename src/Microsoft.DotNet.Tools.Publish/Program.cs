@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier}");
 
-            // Hackily generate the output path
+            // Generate the output path
             if (string.IsNullOrEmpty(outputPath))
             {
                 outputPath = Path.Combine(
@@ -87,6 +87,7 @@ namespace Microsoft.DotNet.Tools.Publish
                     context.TargetFramework.GetTwoDigitShortFolderName(),
                     "publish");
             }
+
             if (!Directory.Exists(outputPath))
             {
                 Directory.CreateDirectory(outputPath);
@@ -98,6 +99,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 .ForwardStdOut()
                 .RunAsync()
                 .Result;
+
             if (result.ExitCode != 0)
             {
                 Reporter.Error.WriteLine("Compilation failed!".Red().Bold());
@@ -106,6 +108,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             // Use a library exporter to collect publish assets
             var exporter = context.CreateExporter(configuration);
+
             foreach (var export in exporter.GetAllExports())
             {
                 Reporter.Output.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
@@ -137,12 +140,14 @@ namespace Microsoft.DotNet.Tools.Publish
             {
                 hostsPath = AppContext.BaseDirectory;
             }
+
             var coreConsole = Path.Combine(hostsPath, Constants.CoreConsoleName);
             if (!File.Exists(coreConsole))
             {
                 Reporter.Error.WriteLine($"Unable to locate {Constants.CoreConsoleName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
                 return 1;
             }
+
             var coreRun = Path.Combine(hostsPath, Constants.CoreRunName);
             if (!File.Exists(coreRun))
             {
@@ -158,11 +163,8 @@ namespace Microsoft.DotNet.Tools.Publish
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name);
             var outputDll = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
 
-            // Check if the a command name is specified, and rename the necessary files
-            if (context.ProjectFile.Commands.Count == 1)
-            {
-                // Write a script that can be used to launch with CoreRun
-                var script = $@"#!/usr/bin/env bash
+            // Write a script that can be used to launch with CoreRun
+            var script = $@"#!/usr/bin/env bash
 SOURCE=""${{BASH_SOURCE[0]}}""
 while [ -h ""$SOURCE"" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
@@ -171,16 +173,19 @@ while [ -h ""$SOURCE"" ]; do # resolve $SOURCE until the file is no longer a sym
 done
 DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
 exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
-                outputExe = Path.Combine(outputPath, context.ProjectFile.Commands.Single().Key);
-                File.WriteAllText(outputExe, script);
-                Command.Create("chmod", $"a+x {outputExe}")
-                    .ForwardStdOut()
-                    .ForwardStdErr()
-                    .RunAsync()
-                    .Wait();
-                File.Copy(outputDll, Path.ChangeExtension(outputDll, ".exe"));
-                File.Delete(outputDll);
-            }
+
+            File.WriteAllText(outputExe, script);
+
+            Command.Create("chmod", $"a+x {outputExe}")
+                .ForwardStdOut()
+                .ForwardStdErr()
+                .RunAsync()
+                .GetAwaiter()
+                .GetResult();
+
+            File.Copy(outputDll, Path.ChangeExtension(outputDll, ".exe"));
+            File.Delete(outputDll);
+
             return 0;
         }
 
@@ -192,12 +197,14 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
             {
                 hostsPath = AppContext.BaseDirectory;
             }
+
             var coreConsole = Path.Combine(hostsPath, Constants.CoreConsoleName);
             if (!File.Exists(coreConsole))
             {
                 Reporter.Error.WriteLine($"Unable to locate {Constants.CoreConsoleName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
                 return 1;
             }
+
             var coreRun = Path.Combine(hostsPath, Constants.CoreRunName);
             if (!File.Exists(coreRun))
             {
@@ -214,22 +221,6 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
             var outputDll = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
             File.Copy(coreConsole, outputExe, overwrite: true);
 
-            // Check if the a command name is specified, and rename the necessary files
-            if (context.ProjectFile.Commands.Count == 1)
-            {
-                var commandName = context.ProjectFile.Commands.Single().Key;
-
-                // Move coreconsole and the matching dll
-                var renamedExe = Path.Combine(outputPath, commandName + ".exe");
-                var renamedDll = Path.ChangeExtension(renamedExe, ".dll");
-                if (File.Exists(renamedExe))
-                {
-                    File.Delete(renamedExe);
-                }
-                File.Move(outputExe, renamedExe);
-                File.Move(outputDll, renamedDll);
-                outputExe = Path.Combine(outputPath, commandName + ".exe");
-            }
             return 0;
         }
 
