@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.ProjectModel;
@@ -256,9 +257,15 @@ namespace Microsoft.DotNet.Tools.Compiler
                 cscArgs.Add($"-keyFile:\"{compilationOptions.KeyFile}\"");
             }
 
-            // TODO: Support debug portable
-            cscArgs.Add("-debug:full");
-
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                cscArgs.Add("-debug:full");
+            }
+            else
+            {
+                cscArgs.Add("-debug:portable");
+            }
+            
             // TODO: OSS signing
         }
 
