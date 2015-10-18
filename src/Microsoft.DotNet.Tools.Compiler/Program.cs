@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     path = Directory.GetCurrentDirectory();
                 }
 
-                var skipBuildingProjectReferences = noProjectDependencies.HasValue();
+                var buildProjectReferences = !noProjectDependencies.HasValue();
 
                 // Load project contexts for each framework and compile them
                 bool success = true;
@@ -46,14 +46,14 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     foreach (var context in framework.Values.Select(f => ProjectContext.Create(path, NuGetFramework.Parse(f))))
                     {
-                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), skipBuildingProjectReferences);
+                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
                     }
                 }
                 else
                 {
                     foreach (var context in ProjectContext.CreateContextForEachFramework(path))
                     {
-                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), skipBuildingProjectReferences);
+                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
                     }
                 }
                 return success ? 0 : 1;
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool Compile(ProjectContext context, string configuration, string outputPath, bool skipBuildingProjectReferences)
+        private static bool Compile(ProjectContext context, string configuration, string outputPath, bool buildProjectReferences)
         {
             Reporter.Output.WriteLine($"Building {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
 
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Gather exports for the project
             var dependencies = exporter.GetCompilationDependencies().ToList();
 
-            if (!skipBuildingProjectReferences)
+            if (buildProjectReferences)
             {
                 var projects = new Dictionary<string, ProjectDescription>();
 
@@ -125,6 +125,8 @@ namespace Microsoft.DotNet.Tools.Compiler
                         return false;
                     }
                 }
+
+                projects.Clear();
             }
 
             // Dump dependency data
