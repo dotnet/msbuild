@@ -218,7 +218,6 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
 
             // Use the 'command' field to generate the name
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
-            var outputDll = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
             File.Copy(coreConsole, outputExe, overwrite: true);
 
             return 0;

@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                     if (compileResult.ExitCode != 0)
                     {
-                        Console.Error.WriteLine($"Failed to compile dependency: {projectDependency.Identity.Name}");
+                        Console.Error.WriteLine($"Failed to compile dependency: {projectDependency.Identity.Name.Red().Bold()}");
                         return false;
                     }
                 }
@@ -151,19 +151,26 @@ namespace Microsoft.DotNet.Tools.Compiler
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             var outputName = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
 
+            var bootstrappingWithMono = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("BOOTSTRAPPING_WITH_MONO"));
+
             // Assemble args
             var compilerArgs = new List<string>()
             {
-                // Default suppressions
-                "-nowarn:CS1701",
-                "-nowarn:CS1702",
                 "-nostdlib",
                 "-nologo",
                 $"-out:\"{outputName}\""
             };
+            
+            if (!bootstrappingWithMono)
+            {
+                // Default suppressions, some versions of mono don't support these
+                compilerArgs.Add("-nowarn:CS1701");
+                compilerArgs.Add("-nowarn:CS1702");
+                compilerArgs.Add("-nowarn:CS1705");
+            }
 
             // Add compilation options to the args
-            ApplyCompilationOptions(compilationOptions, compilerArgs);
+            ApplyCompilationOptions(compilationOptions, compilerArgs, bootstrappingWithMono);
 
             foreach (var dependency in dependencies)
             {
@@ -181,14 +188,19 @@ namespace Microsoft.DotNet.Tools.Compiler
             var rsp = Path.Combine(outputPath, $"dotnet-compile.{compiler}.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
-            var result = Command.Create("dotnet-compile-csc", $"\"{rsp}\"")
+            var result = Command.Create($"dotnet-compile-{compiler}", $"\"{rsp}\"")
                                  .ForwardStdErr()
                                  .ForwardStdOut()
                                  .RunAsync()
                                  .GetAwaiter()
                                  .GetResult();
 
-            return result.ExitCode == 0;
+            if (result.ExitCode == 0)
+            {
+                Reporter.Output.WriteLine($"Compiled to {outputPath} successfully!".Green().Bold());
+            }
+
+            return false;
         }
 
         private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)
@@ -218,7 +230,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             outputs.Add(project);
         }
 
-        private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs)
+        private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs, bool bootstrappingWithMono)
         {
             // TODO: Move compilation arguments into the compiler itself
             var targetType = compilationOptions.EmitEntryPoint.GetValueOrDefault() ? "exe" : "library";
@@ -257,7 +269,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 cscArgs.Add($"-keyFile:\"{compilationOptions.KeyFile}\"");
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (bootstrappingWithMono || RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 cscArgs.Add("-debug:full");
             }

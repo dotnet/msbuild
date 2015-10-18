@@ -14,4 +14,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # Makes development easier
 export PATH=$PATH:$DIR
 
+# Assume bootstrapping with mono if this script still exists
+export BOOTSTRAPPING_WITH_MONO=true
+
 exec "dnx" -p "$DIR/../../src/Microsoft.DotNet.Tools.Compiler" run "$@"
