@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Publish
             {
                 return app.Execute(args);
             }
-            catch (OperationCanceledException ex)
+            catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.Message);
                 return 1;

@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 return app.Execute(args);
             }
-            catch (OperationCanceledException ex)
+            catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.Message);
                 return 1;
