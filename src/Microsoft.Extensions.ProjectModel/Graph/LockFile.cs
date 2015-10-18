@@ -78,12 +78,24 @@ namespace Microsoft.Extensions.ProjectModel.Graph
 
         private string RenderDependency(LibraryRange arg)
         {
-            return $"{arg.Name} {RenderVersion(arg.VersionRange)}";
+            var name = arg.Name;
+
+            if (arg.Target == LibraryType.ReferenceAssembly)
+            {
+                name = $"fx/{name}";
+            }
+
+            return $"{name} {RenderVersion(arg.VersionRange)}";
         }
 
         private string RenderVersion(VersionRange range)
         {
-            if (range.MinVersion == range.MaxVersion && 
+            if (range == null)
+            {
+                return null;
+            }
+
+            if (range.MinVersion == range.MaxVersion &&
                 (range.Float == null || range.Float.FloatBehavior == NuGetVersionFloatBehavior.None))
             {
                 return range.MinVersion.ToString();
@@ -97,10 +109,18 @@ namespace Microsoft.Extensions.ProjectModel.Graph
                     sb.Append(range.MinVersion);
                     break;
                 case NuGetVersionFloatBehavior.Prerelease:
-                    // 1.0.*
                     // Work around nuget bug: https://github.com/NuGet/Home/issues/1598
                     // sb.AppendFormat("{0}-*", range.MinVersion);
-                    sb.Append($"{range.MinVersion.Version.Major}.{range.MinVersion.Version.Minor}.{range.MinVersion.Version.Build}-*");
+                    sb.Append($"{range.MinVersion.Version.Major}.{range.MinVersion.Version.Minor}.{range.MinVersion.Version.Build}");
+                    if (string.IsNullOrEmpty(range.MinVersion.Release) || 
+                        string.Equals("-", range.MinVersion.Release))
+                    {
+                        sb.Append($"-*");
+                    }
+                    else
+                    {
+                        sb.Append($"-{range.MinVersion.Release}*");
+                    }
                     break;
                 case NuGetVersionFloatBehavior.Revision:
                     sb.Append($"{range.MinVersion.Version.Major}.{range.MinVersion.Version.Minor}.{range.MinVersion.Version.Build}.*");
