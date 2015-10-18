@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                 dependencies: Enumerable.Empty<LibraryRange>(),
                 framework: targetFramework,
                 resolved: false,
-                compatible: false);
+                compatible: true);
         }
     }
 }
