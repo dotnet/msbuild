@@ -207,8 +207,6 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
 
         private IEnumerable<string> GetSharedSources(PackageDescription package)
         {
-            var directory = Path.Combine(package.Path, "shared");
-
             return package
                 .Library
                 .Files
