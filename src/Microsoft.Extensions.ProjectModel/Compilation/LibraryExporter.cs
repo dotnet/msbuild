@@ -41,7 +41,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
         public IEnumerable<LibraryExport> GetCompilationDependencies()
         {
             // Export all but the main project
-            return ExportLibraries(l => !string.Equals(l.Identity.Name, _rootProject.Identity.Name, StringComparison.OrdinalIgnoreCase));
+            return ExportLibraries(library => library != _rootProject);
         }
 
         /// <summary>

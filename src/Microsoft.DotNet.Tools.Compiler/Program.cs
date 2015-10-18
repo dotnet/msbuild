@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
+            var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             app.OnExecute(() =>
@@ -36,20 +37,22 @@ namespace Microsoft.DotNet.Tools.Compiler
                     path = Directory.GetCurrentDirectory();
                 }
 
+                var skipBuildingProjectReferences = noProjectDependencies.HasValue();
+
                 // Load project contexts for each framework and compile them
                 bool success = true;
                 if (framework.HasValue())
                 {
                     foreach (var context in framework.Values.Select(f => ProjectContext.Create(path, NuGetFramework.Parse(f))))
                     {
-                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value());
+                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), skipBuildingProjectReferences);
                     }
                 }
                 else
                 {
                     foreach (var context in ProjectContext.CreateContextForEachFramework(path))
                     {
-                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value());
+                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), skipBuildingProjectReferences);
                     }
                 }
                 return success ? 0 : 1;
@@ -66,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool Compile(ProjectContext context, string configuration, string outputPath)
+        private static bool Compile(ProjectContext context, string configuration, string outputPath, bool skipBuildingProjectReferences)
         {
             Reporter.Output.WriteLine($"Building {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
 
@@ -91,17 +94,30 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Gather exports for the project
             var dependencies = exporter.GetCompilationDependencies().ToList();
 
-            // Hackily trigger builds of the dependent projects
-            foreach (var dependency in dependencies.Where(d => d.CompilationAssemblies.Any()))
+            if (!skipBuildingProjectReferences)
             {
-                var projectDependency = dependency.Library as ProjectDescription;
-                if (projectDependency != null && !string.Equals(projectDependency.Identity.Name, context.RootProject.Identity.Name, StringComparison.Ordinal))
+                var projects = new Dictionary<string, ProjectDescription>();
+
+                // Build project references
+                foreach (var dependency in dependencies.Where(d => d.CompilationAssemblies.Any()))
                 {
-                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} {projectDependency.Project.ProjectDirectory}")
-                        .ForwardStdOut()
-                        .ForwardStdErr()
-                        .RunAsync()
-                        .Result;
+                    var projectDependency = dependency.Library as ProjectDescription;
+
+                    if (projectDependency != null)
+                    {
+                        projects[projectDependency.Identity.Name] = projectDependency;
+                    }
+                }
+
+                foreach (var projectDependency in Sort(projects))
+                {
+                    // Skip compiling project dependencies since we've already figured out the build order
+                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --no-project-dependencies {projectDependency.Project.ProjectDirectory}")
+                            .ForwardStdOut()
+                            .ForwardStdErr()
+                            .RunAsync()
+                            .Result;
+
                     if (compileResult.ExitCode != 0)
                     {
                         Console.Error.WriteLine($"Failed to compile dependency: {projectDependency.Identity.Name}");
@@ -124,6 +140,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     configuration,
                     context.TargetFramework.GetTwoDigitShortFolderName());
             }
+
             if (!Directory.Exists(outputPath))
             {
                 Directory.CreateDirectory(outputPath);
@@ -168,6 +185,33 @@ namespace Microsoft.DotNet.Tools.Compiler
                 .RunAsync()
                 .Result;
             return result.ExitCode == 0;
+        }
+
+        private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)
+        {
+            var outputs = new HashSet<ProjectDescription>();
+
+            foreach (var pair in projects)
+            {
+                Sort(pair.Value, projects, outputs);
+            }
+
+            return outputs;
+        }
+
+        private static void Sort(ProjectDescription project, Dictionary<string, ProjectDescription> projects, ISet<ProjectDescription> outputs)
+        {
+            // Sorts projects in dependency order so that we only build them once per chain
+            foreach (var dependency in project.Dependencies)
+            {
+                ProjectDescription projectDependency;
+                if (projects.TryGetValue(dependency.Name, out projectDependency))
+                {
+                    Sort(projectDependency, projects, outputs);
+                }
+            }
+
+            outputs.Add(project);
         }
 
         private static Command RunCsc(string cscArgs)
