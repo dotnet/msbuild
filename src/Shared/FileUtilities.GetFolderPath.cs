@@ -2,17 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Globalization;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Text;
-using System.Threading;
 
 #if !FEATURE_SPECIAL_FOLDERS
 
@@ -25,6 +16,11 @@ namespace Microsoft.Build.Shared
 
         public static string GetFolderPath(SpecialFolder folder)
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                return UnixNative.GetFolder(folder);
+            }
+
             if (!NativeMethodsShared.IsWindows)
             {
                 throw new PlatformNotSupportedException();
@@ -112,6 +108,53 @@ namespace Microsoft.Build.Shared
 
             internal const int CSIDL_FLAG_CREATE = 0x8000; // force folder creation in SHGetFolderPath
             internal const int CSIDL_FLAG_DONT_VERIFY = 0x4000; // return an unverified folder path
+        }
+
+        private static class UnixNative
+        {
+            //     char *getenv(const char *NAME);
+            [DllImport("libc", SetLastError = true)]
+            internal static extern IntPtr getenv([MarshalAs(UnmanagedType.LPStr)] string name);
+
+            internal static string GetFolder(SpecialFolder folder)
+            {
+                switch (folder)
+                {
+                    case SpecialFolder.System:
+                        return "/bin";
+                    case SpecialFolder.ProgramFiles:
+                        return "/user/bin";
+                    case SpecialFolder.UserProfile:
+                    case SpecialFolder.LocalApplicationData:
+                    case SpecialFolder.ApplicationData:
+                        unsafe
+                        {
+                            IntPtr value = getenv("HOME");
+
+                            if (value == IntPtr.Zero)
+                            {
+                                return null;
+                            }
+
+                            int size = 0;
+                            while (Marshal.ReadByte(value, size) != 0)
+                            {
+                                size++;
+                            }
+
+                            if (size == 0)
+                            {
+                                return string.Empty;
+                            }
+
+                            byte[] buffer = new byte[size];
+                            Marshal.Copy(value, buffer, 0, size);
+                            return Encoding.UTF8.GetString(buffer);
+                        }
+                    default:
+                        return null;
+                }
+            }
         }
 
         [ComVisible(true)]

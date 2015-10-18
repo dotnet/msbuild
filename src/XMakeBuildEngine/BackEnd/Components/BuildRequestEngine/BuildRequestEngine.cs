@@ -828,60 +828,67 @@ namespace Microsoft.Build.BackEnd
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "We're trying to get rid of memory because we're running low, so we need to collect NOW in order to free it up ASAP")]
         private void CheckMemoryUsage()
         {
-#if !MONO
-            // Jeffrey Richter suggests that when the memory load in the system exceeds 80% it is a good
-            // idea to start finding ways to unload unnecessary data to prevent memory starvation.  We use this metric in
-            // our calculations below.
-            NativeMethodsShared.MemoryStatus memoryStatus = NativeMethodsShared.GetMemoryStatus();
-            if (memoryStatus != null)
+            if (NativeMethodsShared.IsWindows)
             {
-                try
+                // Jeffrey Richter suggests that when the memory load in the system exceeds 80% it is a good
+                // idea to start finding ways to unload unnecessary data to prevent memory starvation.  We use this metric in
+                // our calculations below.
+                NativeMethodsShared.MemoryStatus memoryStatus = NativeMethodsShared.GetMemoryStatus();
+                if (memoryStatus != null)
                 {
-                    // The minimum limit must be no more than 80% of the virtual memory limit to reduce the chances of a single unfortunately
-                    // large project resulting in allocations which exceed available VM space between calls to this function.  This situation
-                    // is more likely on 32-bit machines where VM space is only 2 gigs.
-                    ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual * 0.8);
-
-                    // See how much memory we are using and compart that to our limit.
-                    ulong memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
-                    while ((memoryInUse > memoryUseLimit) || _debugForceCaching)
+                    try
                     {
-                        TraceEngine("Memory usage at {0}, limit is {1}.  Caching configurations and results cache and collecting.", memoryInUse, memoryUseLimit);
-                        IResultsCache resultsCache = _componentHost.GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
+                        // The minimum limit must be no more than 80% of the virtual memory limit to reduce the chances of a single unfortunately
+                        // large project resulting in allocations which exceed available VM space between calls to this function.  This situation
+                        // is more likely on 32-bit machines where VM space is only 2 gigs.
+                        ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual * 0.8);
 
-                        resultsCache.WriteResultsToDisk();
-                        if (_configCache.WriteConfigurationsToDisk())
+                        // See how much memory we are using and compart that to our limit.
+                        ulong memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
+                        while ((memoryInUse > memoryUseLimit) || _debugForceCaching)
                         {
-                            // We have to collect here because WriteConfigurationsToDisk only collects 10% of the configurations.  It is entirely possible
-                            // that those 10% don't constitute enough collected memory to reduce our usage below the threshold.  The only way to know is to 
-                            // force the collection then re-test the memory usage.  We repeat until we have reduced our use below the threshold or
-                            // we failed to write any more configurations to disk.
-                            GC.Collect();
+                            TraceEngine(
+                                "Memory usage at {0}, limit is {1}.  Caching configurations and results cache and collecting.",
+                                memoryInUse,
+                                memoryUseLimit);
+                            IResultsCache resultsCache =
+                                _componentHost.GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
+
+                            resultsCache.WriteResultsToDisk();
+                            if (_configCache.WriteConfigurationsToDisk())
+                            {
+                                // We have to collect here because WriteConfigurationsToDisk only collects 10% of the configurations.  It is entirely possible
+                                // that those 10% don't constitute enough collected memory to reduce our usage below the threshold.  The only way to know is to 
+                                // force the collection then re-test the memory usage.  We repeat until we have reduced our use below the threshold or
+                                // we failed to write any more configurations to disk.
+                                GC.Collect();
+                            }
+                            else
+                            {
+                                break;
+                            }
+
+                            memoryStatus = NativeMethodsShared.GetMemoryStatus();
+                            memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
+                            TraceEngine("Memory usage now at {0}", memoryInUse);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (ExceptionHandling.NotExpectedException(e))
+                        {
+                            throw;
                         }
                         else
                         {
-                            break;
+                            _nodeLoggingContext.LogFatalBuildError(
+                                new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation),
+                                e);
+                            throw new BuildAbortedException(e.Message, e);
                         }
-
-                        memoryStatus = NativeMethodsShared.GetMemoryStatus();
-                        memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
-                        TraceEngine("Memory usage now at {0}", memoryInUse);
-                    }
-                }
-                catch (Exception e)
-                {
-                    if (ExceptionHandling.NotExpectedException(e))
-                    {
-                        throw;
-                    }
-                    else
-                    {
-                        _nodeLoggingContext.LogFatalBuildError(new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation), e);
-                        throw new BuildAbortedException(e.Message, e);
                     }
                 }
             }
-#endif
         }
 
         /// <summary>

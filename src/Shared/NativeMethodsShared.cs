@@ -684,22 +684,27 @@ namespace Microsoft.Build.Shared
 
             return path;
         }
-#if !MONO
+
         /// <summary>
         /// Retrieves the current global memory status.
         /// </summary>
         internal static MemoryStatus GetMemoryStatus()
         {
-            MemoryStatus status = new MemoryStatus();
-            bool returnValue = NativeMethodsShared.GlobalMemoryStatusEx(status);
-            if (!returnValue)
+            if (NativeMethodsShared.IsWindows)
             {
-                return null;
+                MemoryStatus status = new MemoryStatus();
+                bool returnValue = NativeMethodsShared.GlobalMemoryStatusEx(status);
+                if (!returnValue)
+                {
+                    return null;
+                }
+
+                return status;
             }
 
-            return status;
+            return null;
         }
-#endif
+
         /// <summary>
         /// Get the last write time of the fullpath to the file. 
         /// If the file does not exist, then DateTime.MinValue is returned

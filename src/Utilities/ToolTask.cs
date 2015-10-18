@@ -750,8 +750,13 @@ namespace Microsoft.Build.Utilities
             startInfo.StandardErrorEncoding = StandardErrorEncoding;
             startInfo.StandardOutputEncoding = StandardOutputEncoding;
 
-            // Some applications such as xcopy.exe fail without error if there's no stdin stream.
-            startInfo.RedirectStandardInput = true;
+            if (NativeMethodsShared.IsWindows)
+            {
+                // Some applications such as xcopy.exe fail without error if there's no stdin stream.
+                // We only do it under Windows, we get Pipe Broken IO exception on other systems if
+                // the program terminates very fast.
+                startInfo.RedirectStandardInput = true;
+            }
 
             // Generally we won't set a working directory, and it will use the current directory
             string workingDirectory = GetWorkingDirectory();
@@ -855,7 +860,10 @@ namespace Microsoft.Build.Utilities
 
                 // Close the input stream. This is done to prevent commands from
                 // blocking the build waiting for input from the user.
-                proc.StandardInput.Dispose();
+                if (NativeMethodsShared.IsWindows)
+                {
+                    proc.StandardInput.Dispose();
+                }
 
                 // sign up for stderr callbacks
                 proc.BeginErrorReadLine();

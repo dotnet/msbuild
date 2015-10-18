@@ -486,7 +486,7 @@ namespace Microsoft.Build.Logging
             try
             {
                 Console.ForegroundColor =
-                            TransformColor(c, Console.BackgroundColor);
+                            TransformColor(c, BaseConsoleLogger.BackgroundColor);
             }
             catch (IOException)
             {

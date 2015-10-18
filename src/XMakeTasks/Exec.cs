@@ -579,7 +579,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected override string ToolName
         {
-            get { return "cmd.exe"; }
+            get { return NativeMethodsShared.IsWindows ? "cmd.exe" : "sh"; }
         }
 
         /// <summary>

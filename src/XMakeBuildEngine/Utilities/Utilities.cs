@@ -539,6 +539,12 @@ namespace Microsoft.Build.Internal
 #endif
             }
 
+            if (String.IsNullOrEmpty(localAppData))
+            {
+                localAppData = FileUtilities.CurrentExecutableDirectory;
+            }
+
+
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.localAppData, localAppData));
 
             // Add MSBuildUserExtensionsPath at $(LocalAppData)\Microsoft\MSBuild

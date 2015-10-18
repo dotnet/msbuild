@@ -209,74 +209,78 @@ namespace Microsoft.Build.Internal
         {
             Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
-#if !MONO
-            char[] block = GetEnvironmentCharArray();
-
-            // Copy strings out, parsing into pairs and inserting into the table.
-            // The first few environment variable entries start with an '='!
-            // The current working directory of every drive (except for those drives
-            // you haven't cd'ed into in your DOS window) are stored in the 
-            // environment block (as =C:=pwd) and the program's exit code is 
-            // as well (=ExitCode=00000000)  Skip all that start with =.
-            // Read docs about Environment Blocks on MSDN's CreateProcess page.
-
-            // Format for GetEnvironmentStrings is:
-            // (=HiddenVar=value\0 | Variable=value\0)* \0
-            // See the description of Environment Blocks in MSDN's
-            // CreateProcess page (null-terminated array of null-terminated strings).
-            // Note the =HiddenVar's aren't always at the beginning.
-            for (int i = 0; i < block.Length; i++)
+            if (NativeMethodsShared.IsWindows)
             {
-                int startKey = i;
+                char[] block = GetEnvironmentCharArray();
 
-                // Skip to key
-                // On some old OS, the environment block can be corrupted. 
-                // Someline will not have '=', so we need to check for '\0'. 
-                while (block[i] != '=' && block[i] != '\0')
-                {
-                    i++;
-                }
+                // Copy strings out, parsing into pairs and inserting into the table.
+                // The first few environment variable entries start with an '='!
+                // The current working directory of every drive (except for those drives
+                // you haven't cd'ed into in your DOS window) are stored in the 
+                // environment block (as =C:=pwd) and the program's exit code is 
+                // as well (=ExitCode=00000000)  Skip all that start with =.
+                // Read docs about Environment Blocks on MSDN's CreateProcess page.
 
-                if (block[i] == '\0')
+                // Format for GetEnvironmentStrings is:
+                // (=HiddenVar=value\0 | Variable=value\0)* \0
+                // See the description of Environment Blocks in MSDN's
+                // CreateProcess page (null-terminated array of null-terminated strings).
+                // Note the =HiddenVar's aren't always at the beginning.
+                for (int i = 0; i < block.Length; i++)
                 {
-                    continue;
-                }
+                    int startKey = i;
 
-                // Skip over environment variables starting with '='
-                if (i - startKey == 0)
-                {
-                    while (block[i] != 0)
+                    // Skip to key
+                    // On some old OS, the environment block can be corrupted. 
+                    // Some lines will not have '=', so we need to check for '\0'. 
+                    while (block[i] != '=' && block[i] != '\0')
                     {
                         i++;
                     }
 
-                    continue;
-                }
+                    if (block[i] == '\0')
+                    {
+                        continue;
+                    }
 
-                string key = new string(block, startKey, i - startKey);
-                i++;
+                    // Skip over environment variables starting with '='
+                    if (i - startKey == 0)
+                    {
+                        while (block[i] != 0)
+                        {
+                            i++;
+                        }
 
-                // skip over '='
-                int startValue = i;
+                        continue;
+                    }
 
-                while (block[i] != 0)
-                {
-                    // Read to end of this entry 
+                    string key = new string(block, startKey, i - startKey);
                     i++;
+
+                    // skip over '='
+                    int startValue = i;
+
+                    while (block[i] != 0)
+                    {
+                        // Read to end of this entry
+                        i++;
+                    }
+
+                    string value = new string(block, startValue, i - startValue);
+
+                    // skip over 0 handled by for loop's i++
+                    table[key] = value;
                 }
-
-                string value = new string(block, startValue, i - startValue);
-
-                // skip over 0 handled by for loop's i++
-                table[key] = value;
             }
-#else
-            var vars = Environment.GetEnvironmentVariables();
-            foreach (var key in vars.Keys)
+            else
             {
-                table[(string)key] = (string)vars[key];
+                var vars = Environment.GetEnvironmentVariables();
+                foreach (var key in vars.Keys)
+                {
+                    table[(string)key] = (string)vars[key];
+                }
             }
-#endif
+
             return table;
         }
 
