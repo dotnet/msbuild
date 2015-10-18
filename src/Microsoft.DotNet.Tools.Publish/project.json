@@ -4,6 +4,9 @@
   "compilationOptions": {
     "emitEntryPoint": true
   },
+  "commands": {
+    "dotnet-publish": "Microsoft.DotNet.Tools.Publish"
+  },
   "dependencies": {
     "Microsoft.NETCore.Runtime": "1.0.1-*",
     "System.Console": "4.0.0-*",

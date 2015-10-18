@@ -150,8 +150,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             var outputName = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
 
-            // Assemble csc args
-            var cscArgs = new List<string>()
+            // Assemble args
+            var compilerArgs = new List<string>()
             {
                 // Default suppressions
                 "-nowarn:CS1701",
@@ -163,27 +163,31 @@ namespace Microsoft.DotNet.Tools.Compiler
             };
 
             // Add compilation options to the args
-            ApplyCompilationOptions(compilationOptions, cscArgs);
+            ApplyCompilationOptions(compilationOptions, compilerArgs);
 
             foreach (var dependency in dependencies)
             {
-                cscArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r}\""));
-                cscArgs.AddRange(dependency.SourceReferences);
+                compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r}\""));
+                compilerArgs.AddRange(dependency.SourceReferences);
             }
 
             // Add project source files
-            cscArgs.AddRange(context.ProjectFile.Files.SourceFiles);
+            compilerArgs.AddRange(context.ProjectFile.Files.SourceFiles);
+
+            // TODO: Read this from the project
+            const string compiler = "csc";
 
             // Write RSP file
-            var rsp = Path.Combine(outputPath, "dotnet-compile.csc.rsp");
-            File.WriteAllLines(rsp, cscArgs);
+            var rsp = Path.Combine(outputPath, $"dotnet-compile.{compiler}.rsp");
+            File.WriteAllLines(rsp, compilerArgs);
 
-            // Execute CSC!
-            var result = RunCsc($"-noconfig @\"{rsp}\"")
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .RunAsync()
-                .Result;
+            var result = Command.Create("dotnet-compile-csc", $"\"{rsp}\"")
+                                 .ForwardStdErr()
+                                 .ForwardStdOut()
+                                 .RunAsync()
+                                 .GetAwaiter()
+                                 .GetResult();
+
             return result.ExitCode == 0;
         }
 
@@ -214,23 +218,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             outputs.Add(project);
         }
 
-        private static Command RunCsc(string cscArgs)
-        {
-            // Locate CoreRun
-            string hostRoot = Environment.GetEnvironmentVariable("DOTNET_CSC_PATH");
-            if (string.IsNullOrEmpty(hostRoot))
-            {
-                hostRoot = AppContext.BaseDirectory;
-            }
-            var corerun = Path.Combine(hostRoot, Constants.CoreRunName);
-            var cscExe = Path.Combine(hostRoot, "csc.exe");
-            return File.Exists(corerun) && File.Exists(cscExe)
-                ? Command.Create(corerun, $@"""{cscExe}"" {cscArgs}")
-                : Command.Create("csc", cscArgs);
-        }
-
         private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs)
         {
+            // TODO: Move compilation arguments into the compiler itself
             var targetType = compilationOptions.EmitEntryPoint.GetValueOrDefault() ? "exe" : "library";
 
             cscArgs.Add($"-target:{targetType}");

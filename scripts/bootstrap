@@ -49,6 +49,7 @@ dnu restore "$REPOROOT" --runtime osx.10.10-x64 --runtime ubuntu.14.04-x64 --run
 echo "Building basic dotnet tools using Stage 0 (DNX hosted)"
 $STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
 $STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
+$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
 $STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
 
 # Add stage1 to the path and use it to build stage2
@@ -57,4 +58,5 @@ export PATH=$STAGE1_DIR:$PATH
 echo "Building stage2 dotnet using stage1 ..."
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"

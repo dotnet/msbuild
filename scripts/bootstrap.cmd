@@ -51,6 +51,10 @@ echo Building stage1 dotnet-compile.exe ...
 dotnet-publish --framework dnxcore50 --runtime %RID% --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
 if errorlevel 1 goto fail
 
+echo Building stage1 dotnet-compile-csc.exe ...
+dotnet-publish --framework dnxcore50 --runtime %RID% --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler.Csc"
+if errorlevel 1 goto fail
+
 echo Building stage1 dotnet-publish.exe ...
 dotnet-publish --framework dnxcore50 --runtime %RID% --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
@@ -71,6 +75,10 @@ if errorlevel 1 goto fail
 
 echo Building stage2 dotnet-compile.exe ...
 dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler"
+if errorlevel 1 goto fail
+
+echo Building stage2 dotnet-compile-csc.exe ...
+dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler.Csc"
 if errorlevel 1 goto fail
 
 echo Building stage2 dotnet-publish.exe ...
