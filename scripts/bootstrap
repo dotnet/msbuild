@@ -60,6 +60,8 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 $STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 $STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
+rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
 
 # Add stage1 to the path and use it to build stage2
 export PATH=$STAGE1_DIR:$PATH
@@ -72,4 +74,6 @@ rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
+rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi

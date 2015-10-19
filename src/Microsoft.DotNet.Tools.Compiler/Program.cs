@@ -145,9 +145,20 @@ namespace Microsoft.DotNet.Tools.Compiler
                     context.TargetFramework.GetTwoDigitShortFolderName());
             }
 
+            string intermediateOutputPath = Path.Combine(
+                    context.ProjectFile.ProjectDirectory,
+                    Constants.ObjDirectoryName,
+                    configuration,
+                    context.TargetFramework.GetTwoDigitShortFolderName());
+
             if (!Directory.Exists(outputPath))
             {
                 Directory.CreateDirectory(outputPath);
+            }
+
+            if (!Directory.Exists(intermediateOutputPath))
+            {
+                Directory.CreateDirectory(intermediateOutputPath);
             }
 
             // Get compilation options
@@ -184,13 +195,16 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Add project source files
             compilerArgs.AddRange(context.ProjectFile.Files.SourceFiles);
 
-            AddResources(context.ProjectFile, compilerArgs);
+            if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
+            {
+                return false;
+            }
 
             // TODO: Read this from the project
             const string compiler = "csc";
 
             // Write RSP file
-            var rsp = Path.Combine(outputPath, $"dotnet-compile.{compiler}.rsp");
+            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compiler}.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
             var result = Command.Create($"dotnet-compile-{compiler}", $"\"{rsp}\"")
@@ -202,14 +216,14 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (result.ExitCode == 0)
             {
-                Reporter.Output.WriteLine($"Compiled to {outputPath} successfully!".Green().Bold());
+                Reporter.Output.WriteLine($"Compiled {context.ProjectFile.Name} successfully!".Green().Bold());
                 return true;
             }
 
             return false;
         }
 
-        private static void AddResources(Project project, List<string> compilerArgs)
+        private static bool AddResources(Project project, List<string> compilerArgs, string intermediateOutputPath)
         {
             string root = PathUtility.EnsureTrailingSlash(project.ProjectDirectory);
 
@@ -219,12 +233,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                 string rootNamespace = null;
 
                 var resourcePath = resourceFile.Key;
-
-                if (ResourcePathUtility.IsResxResourceFile(resourcePath))
-                {
-                    // TODO: Handle resource files
-                    continue;
-                }
 
                 if (string.IsNullOrEmpty(resourceFile.Value))
                 {
@@ -241,8 +249,36 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var name = CreateCSharpManifestResourceName.CreateManifestName(resourceName, rootNamespace);
                 var fileName = resourcePath;
 
+                if (ResourcePathUtility.IsResxResourceFile(fileName))
+                {
+                    var ext = Path.GetExtension(fileName);
+
+                    if (string.Equals(ext, ".resx", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // {file}.resx -> {file}.resources
+                        var resourcesFile = Path.Combine(intermediateOutputPath, name);
+
+                        var result = Command.Create("resgen", $"{fileName} {resourcesFile}")
+                                            .ForwardStdErr()
+                                            .ForwardStdOut()
+                                            .RunAsync()
+                                            .GetAwaiter()
+                                            .GetResult();
+
+                        if (result.ExitCode != 0)
+                        {
+                            return false;
+                        }
+
+                        // Use this as the resource name instead
+                        fileName = resourcesFile;
+                    }
+                }
+
                 compilerArgs.Add($"-resource:\"{fileName}\",{name}");
             }
+
+            return true;
         }
 
         private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)

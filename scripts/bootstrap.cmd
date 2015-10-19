@@ -59,6 +59,10 @@ echo Building stage1 dotnet-publish.exe ...
 dotnet-publish --framework dnxcore50 --runtime %RID% --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
 
+echo Building stage1 dotnet-publish.exe ...
+dotnet-publish --framework dnxcore50 --runtime %RID% --output "%STAGE1_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Resgen"
+if errorlevel 1 goto fail
+
 echo Re-building dotnet tools with the bootstrapped version
 REM This should move into a proper build script of some kind once we are bootstrapped
 set PATH=%STAGE1_DIR%;%PATH%
@@ -83,6 +87,10 @@ if errorlevel 1 goto fail
 
 echo Building stage2 dotnet-publish.exe ...
 dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
+if errorlevel 1 goto fail
+
+echo Building stage2 dotnet-publish.exe ...
+dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Resgen"
 if errorlevel 1 goto fail
 
 echo Bootstrapped dotnet to %STAGE2_DIR%
