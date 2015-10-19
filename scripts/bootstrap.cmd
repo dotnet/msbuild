@@ -18,10 +18,6 @@ set STAGE2_DIR=%REPOROOT%\artifacts\%RID%\stage2
 where dnvm >nul 2>nul
 if %errorlevel% == 0 goto have_dnvm
 
-REM download dnvm
-echo Installing dnvm (DNU is needed to bootstrap currently for package restore) ...
-powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&{$Branch='dev';$wc=New-Object System.Net.WebClient;$wc.Proxy=[System.Net.WebRequest]::DefaultWebProxy;$wc.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;Invoke-Expression ($wc.DownloadString('https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.ps1'))}"
-
 :have_dnvm
 echo Installing and use-ing the latest CoreCLR x64 DNX ...
 call dnvm install -nonative -u latest -r coreclr -arch x64 -alias dotnet_bootstrap
@@ -69,10 +65,6 @@ set PATH=%STAGE1_DIR%;%PATH%
 
 if exist %STAGE2_DIR% rd /s /q %STAGE2_DIR%
 
-REM This works around the coreconsole bug where the path to the exe can't be found
-pushd
-cd %STAGE1_DIR%
-
 echo Building stage2 dotnet.exe ...
 dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Cli"
 if errorlevel 1 goto fail
@@ -94,7 +86,6 @@ dotnet publish --framework dnxcore50 --runtime %RID% --output "%STAGE2_DIR%" "%R
 if errorlevel 1 goto fail
 
 echo Bootstrapped dotnet to %STAGE2_DIR%
-popd
 
 goto end
 
