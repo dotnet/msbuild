@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.ProjectModel;
 using Microsoft.Extensions.ProjectModel.Compilation;
 using NuGet.Frameworks;
@@ -162,7 +163,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 "-nologo",
                 $"-out:\"{outputName}\""
             };
-            
+
             if (!bootstrappingWithMono)
             {
                 // Default suppressions, some versions of mono don't support these
@@ -183,6 +184,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Add project source files
             compilerArgs.AddRange(context.ProjectFile.Files.SourceFiles);
 
+            AddResources(context.ProjectFile, compilerArgs);
+
             // TODO: Read this from the project
             const string compiler = "csc";
 
@@ -200,9 +203,46 @@ namespace Microsoft.DotNet.Tools.Compiler
             if (result.ExitCode == 0)
             {
                 Reporter.Output.WriteLine($"Compiled to {outputPath} successfully!".Green().Bold());
+                return true;
             }
 
             return false;
+        }
+
+        private static void AddResources(Project project, List<string> compilerArgs)
+        {
+            string root = PathUtility.EnsureTrailingSlash(project.ProjectDirectory);
+
+            foreach (var resourceFile in project.Files.ResourceFiles)
+            {
+                string resourceName = null;
+                string rootNamespace = null;
+
+                var resourcePath = resourceFile.Key;
+
+                if (ResourcePathUtility.IsResxResourceFile(resourcePath))
+                {
+                    // TODO: Handle resource files
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(resourceFile.Value))
+                {
+                    // No logical name, so use the file name
+                    resourceName = ResourcePathUtility.GetResourceName(root, resourcePath);
+                    rootNamespace = project.Name;
+                }
+                else
+                {
+                    resourceName = CreateCSharpManifestResourceName.EnsureResourceExtension(resourceFile.Value, resourcePath);
+                    rootNamespace = null;
+                }
+
+                var name = CreateCSharpManifestResourceName.CreateManifestName(resourceName, rootNamespace);
+                var fileName = resourcePath;
+
+                compilerArgs.Add($"-resource:\"{fileName}\",{name}");
+            }
         }
 
         private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)
@@ -279,7 +319,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 cscArgs.Add("-debug:portable");
             }
-            
+
             // TODO: OSS signing
         }
 

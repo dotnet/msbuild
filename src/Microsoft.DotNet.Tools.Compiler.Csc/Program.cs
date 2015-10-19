@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 return result.ExitCode;
             });
 
-            app.Execute(args);
+            return app.Execute(args);
         }
 
         private static Command RunCsc(string cscArgs)

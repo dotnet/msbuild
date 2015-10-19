@@ -137,6 +137,10 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var exitCode = await _processTcs.Task;
 
+#if DEBUG
+            Console.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments} exited with {exitCode}.");
+#endif
+
             return new CommandResult(
                 exitCode,
                 _stdOutCapture?.GetStringBuilder()?.ToString(),

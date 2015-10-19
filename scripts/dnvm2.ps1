@@ -1533,12 +1533,12 @@ function dnvm-use {
         _WriteOut "Removing all runtimes from process PATH"
         Set-Path (Change-Path $env:Path "" ($RuntimeDirs))
 
-        if ($Persistent) {
-            _WriteOut "Removing all runtimes from user PATH"
-            $userPath = [Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
-            $userPath = Change-Path $userPath "" ($RuntimeDirs)
-            [Environment]::SetEnvironmentVariable("Path", $userPath, [System.EnvironmentVariableTarget]::User)
-        }
+        #if ($Persistent) {
+        #    _WriteOut "Removing all runtimes from user PATH"
+        #    $userPath = [Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
+        #    $userPath = Change-Path $userPath "" ($RuntimeDirs)
+        #    [Environment]::SetEnvironmentVariable("Path", $userPath, [System.EnvironmentVariableTarget]::User)
+        #}
         return;
     }
     
@@ -1553,12 +1553,12 @@ function dnvm-use {
     _WriteOut "Adding $runtimeBin to process PATH"
     Set-Path (Change-Path $env:Path $runtimeBin ($RuntimeDirs))
 
-    if ($Persistent) {
-        _WriteOut "Adding $runtimeBin to user PATH"
-        $userPath = [Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
-        $userPath = Change-Path $userPath $runtimeBin ($RuntimeDirs)
-        [Environment]::SetEnvironmentVariable("Path", $userPath, [System.EnvironmentVariableTarget]::User)
-    }
+    #if ($Persistent) {
+    #    _WriteOut "Adding $runtimeBin to user PATH"
+    #    $userPath = [Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
+    #    $userPath = Change-Path $userPath $runtimeBin ($RuntimeDirs)
+    #    [Environment]::SetEnvironmentVariable("Path", $userPath, [System.EnvironmentVariableTarget]::User)
+    #}
 }
 
 <#
@@ -1682,10 +1682,10 @@ function dnvm-setup {
     Set-Path (Change-Path $env:PATH $Destination $PathsToRemove)
 
     if(!$SkipUserEnvironmentInstall) {
-        _WriteOut "Adding $Destination to User PATH"
-        $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-        $userPath = Change-Path $userPath $Destination $PathsToRemove
-        [Environment]::SetEnvironmentVariable("PATH", $userPath, "User")
+        #_WriteOut "Adding $Destination to User PATH"
+        #$userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+        #$userPath = Change-Path $userPath $Destination $PathsToRemove
+        #[Environment]::SetEnvironmentVariable("PATH", $userPath, "User")
     }
 
     # Now the HomeEnvVar
