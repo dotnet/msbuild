@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         /// that its running on. This is because 'Ã' is a high ANSI character which is interpretted differently
         /// for different codepages.
         /// </summary>
-        [Fact]
+        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/295")]
         public void Regress172107()
         {
             // Can't embed the 'Ã' directly because the string is Unicode already and the Unicode<-->ANSI transform
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         /// Test for a namespace that has UTF8 characters but there's no BOM at the start.
         ///
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/295")]
         public void Regress249540()
         {
             // Special character is 'Ä' in UTF8: 0xC3 84
