@@ -3592,13 +3592,11 @@ namespace Microsoft.Build.Evaluation
                 MethodBase memberInfo = null;
 
                 // First let's try for a method where all arguments are strings..
-#if FEATURE_TYPE_INVOKEMEMBER
                 Type[] types = new Type[_arguments.Length];
                 for (int n = 0; n < _arguments.Length; n++)
                 {
                     types[n] = typeof(string);
                 }
-#endif
 
                 if (isConstructor)
                 {
@@ -3612,15 +3610,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-#if FEATURE_TYPE_INVOKEMEMBER
                     memberInfo = _objectType.GetMethod(_name, bindingFlags, null, types, null);
-#else
-                    StringComparison nameComparison =
-                        ((_bindingFlags & BindingFlags.IgnoreCase) == BindingFlags.IgnoreCase) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-                    memberInfo = _objectType.GetMethods(bindingFlags)
-                        .Where(method => method.Name.Equals(_name, nameComparison) && ParametersBindToNStringArguments(method.GetParameters(), args.Length))
-                        .FirstOrDefault();
-#endif
                 }
 
                 // If we didn't get a match on all string arguments,

@@ -622,7 +622,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// /// Expand an item vector function that is an itemspec modifier
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void ExpandItemVectorFunctionsItemSpecModifier2()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -1912,7 +1912,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that returns an array
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionArrayReturn()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2223,14 +2223,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that is only available when MSBUILDENABLEALLPROPERTYFUNCTIONS=1
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyStaticFunctionAllEnabled()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "VB is only for Windows"
-            }
-
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
@@ -2240,10 +2235,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+                
+                string result = expander.ExpandIntoStringLeaveEscaped("$([System.Type]::GetType(`System.Type`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("$([Microsoft.VisualBasic.FileIO.FileSystem]::CurrentDirectory)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-
-                Assert.Equal(0, String.Compare(Directory.GetCurrentDirectory(), result, StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(0, String.Compare("System.Type", result, StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -2251,7 +2246,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 AvailableStaticMethods.Reset_ForUnitTestsOnly();
             }
         }
-
 
         /// <summary>
         /// Expand property function that is only available when MSBUILDENABLEALLPROPERTYFUNCTIONS=1, but cannot be found
@@ -2513,14 +2507,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function calls GetCultureInfo
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionStaticMethodGetCultureInfo()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
+#if FEATURE_CULTUREINFO_GETCULTURES
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Globalization.CultureInfo]::GetCultureInfo(`en-US`).ToString())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+#else
+            string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Globalization.CultureInfo]::new(`en-US`).ToString())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+#endif
 
             Assert.Equal(new CultureInfo("en-US").ToString(), result);
         }
@@ -2528,7 +2526,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function calls a static arithmetic method
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionStaticMethodArithmeticAddInt32()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2543,7 +2541,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function calls a static arithmetic method
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionStaticMethodArithmeticAddDouble()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2597,10 +2595,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("43", result);
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionDoesTaskHostExist()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2616,7 +2615,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionDoesTaskHostExist_Whitespace()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2628,6 +2627,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // This is the current, so it had better be true!
             Assert.True(String.Equals("true", result, StringComparison.OrdinalIgnoreCase));
         }
+#endif
 
         /// <summary>
         /// Expand property function that tests for existence of the task host
@@ -2649,10 +2649,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
            );
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Expand property function that tests for existence of the task host
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionDoesTaskHostExist_Evaluated()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2667,6 +2668,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // This is the current, so it had better be true!
             Assert.True(String.Equals("true", result, StringComparison.OrdinalIgnoreCase));
         }
+#endif
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -2701,7 +2703,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand property function calls a static bitwise method to retrieve file attribute
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionStaticMethodFileAttributes()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2727,7 +2729,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Expand intrinsic property function calls a static arithmetic method
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/281")]
+        [Fact]
         public void PropertyFunctionStaticMethodIntrinsicMaths()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();

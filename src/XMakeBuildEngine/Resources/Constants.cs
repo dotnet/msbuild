@@ -309,6 +309,7 @@ namespace Microsoft.Build.Internal
                     s_availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
 
                     s_availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(System.Globalization.CultureInfo))); // user request
+                    s_availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(System.Globalization.CultureInfo))); // user request
                     s_availableStaticMethods.TryAdd("System.Globalization.CultureInfo::CurrentUICulture", new Tuple<string, Type>(null, typeof(System.Globalization.CultureInfo))); // user request
 
                     // All static methods of the following are available (Assembly qualified type names are supported):

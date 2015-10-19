@@ -529,27 +529,28 @@ namespace System {
                 throw new AmbiguousMatchException(Environment.GetResourceString("Arg_AmbiguousMatchException"));
             return candidates[currentMin];
         }
-        
+#endif
+
         // Given a set of methods that match the base criteria, select a method based
         // upon an array of types.  This method should return null if no method matchs
         // the criteria.
         [System.Security.SecuritySafeCritical]  // auto-generated
-        public override MethodBase SelectMethod(BindingFlags bindingAttr,MethodBase[] match,Type[] types,ParameterModifier[] modifiers)
+        public static MethodBase SelectMethod(BindingFlags bindingAttr,MethodBase[] match,Type[] types,ParameterModifier[] modifiers)
         {
             int i;
             int j;
             
-            Type[] realTypes = new Type[types.Length];
-            for (i=0;i<types.Length;i++) {
-                realTypes[i] = types[i].UnderlyingSystemType;
-                if (!(realTypes[i] is RuntimeType))
-                    throw new ArgumentException(Environment.GetResourceString("Arg_MustBeType"),"types");
-            }
-            types = realTypes;
+            //Type[] realTypes = new Type[types.Length];
+            //for (i=0;i<types.Length;i++) {
+            //    realTypes[i] = types[i].UnderlyingSystemType;
+            //    if (!(realTypes[i] is RuntimeType))
+            //        throw new ArgumentException(Environment.GetResourceString("Arg_MustBeType"),"types");
+            //}
+            //types = realTypes;
             
             // We don't automatically jump out on exact match.
             if (match == null || match.Length == 0)
-                throw new ArgumentException(Environment.GetResourceString("Arg_EmptyArray"), "match");
+                throw new ArgumentException("Arg_EmptyArray", "match");
 
             MethodBase[] candidates = (MethodBase[]) match.Clone();
             
@@ -557,7 +558,7 @@ namespace System {
             //  Remove all of them that cannot.
             int CurIdx = 0;
             for (i=0;i<candidates.Length;i++) {
-                ParameterInfo[] par = candidates[i].GetParametersNoCopy();
+                ParameterInfo[] par = candidates[i].GetParameters();
                 if (par.Length != types.Length)
                     continue;
                 for (j=0;j<types.Length;j++) {
@@ -566,9 +567,10 @@ namespace System {
                         continue;
                     if (pCls == typeof(Object))
                         continue;
-                    if (pCls.IsPrimitive) {
-                        if (!(types[j].UnderlyingSystemType is RuntimeType) ||
-                            !CanConvertPrimitive((RuntimeType)types[j].UnderlyingSystemType,(RuntimeType)pCls.UnderlyingSystemType))
+                    if (pCls.GetTypeInfo().IsPrimitive) {
+                        //if (!(types[j].UnderlyingSystemType is RuntimeType) ||
+                        //    !CanConvertPrimitive((RuntimeType)types[j].UnderlyingSystemType,(RuntimeType)pCls.UnderlyingSystemType))
+                        if (!CanConvertPrimitive(types[j], pCls))
                             break;
                     }
                     else {
@@ -603,10 +605,11 @@ namespace System {
                 }
             }
             if (ambig)
-                throw new AmbiguousMatchException(Environment.GetResourceString("Arg_AmbiguousMatchException"));
+                throw new AmbiguousMatchException("Arg_AmbiguousMatchException");
             return candidates[currentMin];
         }
-        
+
+#if false
         // Given a set of properties that match the base criteria, select one.
         [System.Security.SecuritySafeCritical]  // auto-generated
         public override PropertyInfo SelectProperty(BindingFlags bindingAttr,PropertyInfo[] match,Type returnType,
@@ -1085,7 +1088,6 @@ namespace System {
             return depth;
         }
 
-#if false
         internal static MethodBase FindMostDerivedNewSlotMeth(MethodBase[] match, int cMatches)
         {
             int deepestHierarchy = 0;
@@ -1101,7 +1103,7 @@ namespace System {
                 // This can only happen if at least one is vararg or generic.
                 if (currentHierarchyDepth == deepestHierarchy)
                 {
-                    throw new AmbiguousMatchException(Environment.GetResourceString("Arg_AmbiguousMatchException"));
+                    throw new AmbiguousMatchException("Arg_AmbiguousMatchException");
                 }
 
                 // Check to see if this method is on the most derived class.
@@ -1115,6 +1117,7 @@ namespace System {
             return methWithDeepestHierarchy;
         }
 
+#if false
         // CanConvertPrimitive
         // This will determine if the source can be converted to the target type
         [System.Security.SecurityCritical]  // auto-generated
@@ -1132,16 +1135,146 @@ namespace System {
 #else
         static internal bool CanConvertPrimitiveObjectToType(Object source, Type type)
         {
-            try
+            return CanConvertPrimitive(source.GetType(), type);
+        }
+
+        //  Logic copied from https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/vm/invokeutil.h#L186
+        static internal bool CanConvertPrimitive(Type source, Type type)
+        {
+            CorElementType srcType = GetCorElementType(source);
+            CorElementType destType = GetCorElementType(type);
+
+            if (srcType == CorElementType.ELEMENT_TYPE_END || destType == CorElementType.ELEMENT_TYPE_END)
             {
-                Convert.ChangeType(source, type);
-                return true;
-            }
-            catch
-            {
+                if ((source.GetType() == typeof(IntPtr) && type == typeof(IntPtr)) ||
+                    (source.GetType() == typeof(UIntPtr) && type == typeof(UIntPtr)))
+                {
+                    return true;
+                }
                 return false;
             }
+
+            return ((1 << (int)destType) & PrimitiveAttributes[(int)srcType]) != 0;
         }
+
+        //  Copied from: https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/inc/cortypeinfo.h
+        //// TYPEINFO(type (CorElementType),  namespace, class,          size,           gcType,         isArray,isPrim, isFloat,isModifier,isGenVariable)
+
+        //TYPEINFO(ELEMENT_TYPE_END,          NULL, NULL,                NO_SIZE,        TYPE_GC_NONE,   false,  false,  false,  false,  false) // 0x00
+        //TYPEINFO(ELEMENT_TYPE_VOID,         "System", "Void",          0,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x01
+        //TYPEINFO(ELEMENT_TYPE_BOOLEAN,      "System", "Boolean",       1,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x02
+        //TYPEINFO(ELEMENT_TYPE_CHAR,         "System", "Char",          2,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x03
+        //TYPEINFO(ELEMENT_TYPE_I1,           "System", "SByte",         1,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x04
+        //TYPEINFO(ELEMENT_TYPE_U1,           "System", "Byte",          1,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x05
+        //TYPEINFO(ELEMENT_TYPE_I2,           "System", "Int16",         2,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x06
+        //TYPEINFO(ELEMENT_TYPE_U2,           "System", "UInt16",        2,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x07
+        //TYPEINFO(ELEMENT_TYPE_I4,           "System", "Int32",         4,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x08
+        //TYPEINFO(ELEMENT_TYPE_U4,           "System", "UInt32",        4,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x09
+        //TYPEINFO(ELEMENT_TYPE_I8,           "System", "Int64",         8,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x0a
+        //TYPEINFO(ELEMENT_TYPE_U8,           "System", "UInt64",        8,              TYPE_GC_NONE,   false,  true,   false,  false,  false) // 0x0b
+
+        enum CorElementType
+        {
+            ELEMENT_TYPE_END = 0,
+            ELEMENT_TYPE_VOID = 1,
+            ELEMENT_TYPE_BOOLEAN = 2,
+            ELEMENT_TYPE_CHAR = 3,
+            ELEMENT_TYPE_I1 = 4,
+            ELEMENT_TYPE_U1 = 5,
+            ELEMENT_TYPE_I2 = 6,
+            ELEMENT_TYPE_U2 = 7,
+            ELEMENT_TYPE_I4 = 8,
+            ELEMENT_TYPE_U4 = 9,
+            ELEMENT_TYPE_I8 = 10,
+            ELEMENT_TYPE_U8 = 11,
+        }
+
+        static private CorElementType GetCorElementType(Type type)
+        {
+            if (type == typeof(void))
+            {
+                return CorElementType.ELEMENT_TYPE_END;
+            }
+            else if (type == typeof(bool))
+            {
+                return CorElementType.ELEMENT_TYPE_BOOLEAN;
+            }
+            else if (type == typeof(char))
+            {
+                return CorElementType.ELEMENT_TYPE_CHAR;
+            }
+            else if (type == typeof(SByte))
+            {
+                return CorElementType.ELEMENT_TYPE_I1;
+            }
+            else if (type == typeof(Byte))
+            {
+                return CorElementType.ELEMENT_TYPE_U1;
+            }
+            else if (type == typeof(Int16))
+            {
+                return CorElementType.ELEMENT_TYPE_I2;
+            }
+            else if (type == typeof(UInt16))
+            {
+                return CorElementType.ELEMENT_TYPE_U2;
+            }
+            else if (type == typeof(Int32))
+            {
+                return CorElementType.ELEMENT_TYPE_I4;
+            }
+            else if (type == typeof(UInt32))
+            {
+                return CorElementType.ELEMENT_TYPE_U4;
+            }
+            else if (type == typeof(Int64))
+            {
+                return CorElementType.ELEMENT_TYPE_I8;
+            }
+            else if (type == typeof(UInt64))
+            {
+                return CorElementType.ELEMENT_TYPE_U8;
+            }
+            return CorElementType.ELEMENT_TYPE_END;
+        }
+
+        //  Copied from https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/vm/invokeutil.h#L37
+        //  #define PT_Primitive    0x01000000
+        const uint PT_Primitive = 0x01000000;
+
+        //  Copied from https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/vm/invokeutil.cpp#L37
+        //const DWORD InvokeUtil::PrimitiveAttributes[PRIMITIVE_TABLE_SIZE] = {
+        //    0x00,                     // ELEMENT_TYPE_END
+        //    0x00,                     // ELEMENT_TYPE_VOID
+        //    PT_Primitive | 0x0004,    // ELEMENT_TYPE_BOOLEAN
+        //    PT_Primitive | 0x3F88,    // ELEMENT_TYPE_CHAR (W = U2, CHAR, I4, U4, I8, U8, R4, R8) (U2 == Char)
+        //    PT_Primitive | 0x3550,    // ELEMENT_TYPE_I1   (W = I1, I2, I4, I8, R4, R8) 
+        //    PT_Primitive | 0x3FE8,    // ELEMENT_TYPE_U1   (W = CHAR, U1, I2, U2, I4, U4, I8, U8, R4, R8)
+        //    PT_Primitive | 0x3540,    // ELEMENT_TYPE_I2   (W = I2, I4, I8, R4, R8)
+        //    PT_Primitive | 0x3F88,    // ELEMENT_TYPE_U2   (W = U2, CHAR, I4, U4, I8, U8, R4, R8)
+        //    PT_Primitive | 0x3500,    // ELEMENT_TYPE_I4   (W = I4, I8, R4, R8)
+        //    PT_Primitive | 0x3E00,    // ELEMENT_TYPE_U4   (W = U4, I8, R4, R8)
+        //    PT_Primitive | 0x3400,    // ELEMENT_TYPE_I8   (W = I8, R4, R8)
+        //    PT_Primitive | 0x3800,    // ELEMENT_TYPE_U8   (W = U8, R4, R8)
+        //    PT_Primitive | 0x3000,    // ELEMENT_TYPE_R4   (W = R4, R8)
+        //    PT_Primitive | 0x2000,    // ELEMENT_TYPE_R8   (W = R8) 
+        //};
+        private static readonly uint[] PrimitiveAttributes = new uint [] {
+            0x00,                     // ELEMENT_TYPE_END
+            0x00,                     // ELEMENT_TYPE_VOID
+            PT_Primitive | 0x0004,    // ELEMENT_TYPE_BOOLEAN
+            PT_Primitive | 0x3F88,    // ELEMENT_TYPE_CHAR (W = U2, CHAR, I4, U4, I8, U8, R4, R8) (U2 == Char)
+            PT_Primitive | 0x3550,    // ELEMENT_TYPE_I1   (W = I1, I2, I4, I8, R4, R8) 
+            PT_Primitive | 0x3FE8,    // ELEMENT_TYPE_U1   (W = CHAR, U1, I2, U2, I4, U4, I8, U8, R4, R8)
+            PT_Primitive | 0x3540,    // ELEMENT_TYPE_I2   (W = I2, I4, I8, R4, R8)
+            PT_Primitive | 0x3F88,    // ELEMENT_TYPE_U2   (W = U2, CHAR, I4, U4, I8, U8, R4, R8)
+            PT_Primitive | 0x3500,    // ELEMENT_TYPE_I4   (W = I4, I8, R4, R8)
+            PT_Primitive | 0x3E00,    // ELEMENT_TYPE_U4   (W = U4, I8, R4, R8)
+            PT_Primitive | 0x3400,    // ELEMENT_TYPE_I8   (W = I8, R4, R8)
+            PT_Primitive | 0x3800,    // ELEMENT_TYPE_U8   (W = U8, R4, R8)
+            PT_Primitive | 0x3000,    // ELEMENT_TYPE_R4   (W = R4, R8)
+            PT_Primitive | 0x2000,    // ELEMENT_TYPE_R8   (W = R8) 
+        };
 #endif
 
         // This method will sort the vars array into the mapping order stored
