@@ -29,10 +29,13 @@ STAGE0_DIR=$OUTPUT_ROOT/stage0
 STAGE1_DIR=$OUTPUT_ROOT/stage1
 STAGE2_DIR=$OUTPUT_ROOT/stage2
 
+echo "Cleaning artifacts folder"
+rm -rf $OUTPUT_ROOT
+
+
 STAGE0_PUBLISH=$REPOROOT/scripts/stage0/dotnet-publish
 
 export DOTNET_CLR_HOSTS_PATH=$REPOROOT/ext/CLRHost/$RID
-export DOTNET_CSC_PATH=$REPOROOT/src/cscthingy/bin/Debug/dnxcore50/publish
 
 if ! type dnvm > /dev/null 2>&1; then
     curl -sSL https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.sh | DNX_BRANCH=dev sh && source ~/.dnx/dnvm/dnvm.sh
@@ -76,6 +79,7 @@ $STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$RE
 
 # Add stage1 to the path and use it to build stage2
 export PATH=$STAGE1_DIR:$PATH
+rm $STAGE0_DIR/csc
 
 echo "Building stage2 dotnet using stage1 ..."
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
