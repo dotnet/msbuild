@@ -14,8 +14,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
         private readonly IList<DiagnosticMessage> _diagnostics;
         private readonly string _projectPath;
 
-        public LibraryManager(string projectPath, 
-                              NuGetFramework targetFramework, 
+        public LibraryManager(string projectPath,
                               IList<LibraryDescription> libraries,
                               IList<DiagnosticMessage> diagnostics)
         {
