@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         /// Basic case of logging a message to a file
         /// Verify it logs and encoding is ANSI
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/pull/246")]
+        [Fact]
         public void BasicNoExistingFile()
         {
             string log = null;
@@ -65,9 +65,15 @@ namespace Microsoft.Build.UnitTests
                 SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
 
-                // Verify no BOM (ANSI encoding)
+                
                 byte[] content = ReadRawBytes(log);
+#if FEATURE_ENCODING_DEFAULT
+                // Verify no BOM (ANSI encoding)
                 Assert.Equal((byte)109, content[0]); // 'm'
+#else
+                // Verify BOM (UTF-8 encoding)
+                Assert.Equal((byte)109, content[3]); // 'm'
+#endif
             }
             finally
             {
