@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="DeployDependencies" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
+  <Import Project="..\src\.nuget\packageLoad.targets" />
 
   <Target Name="CopyPackageContent">
     <ItemGroup>
@@ -25,7 +26,7 @@
   <PropertyGroup>
     <RuntimeProjectJson>$(MSBuildThisFileDirectory)\runtime.project.json</RuntimeProjectJson>
     <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)\runtime.project.lock.json</RuntimeProjectLockJson>
-    <RestoreRuntimePackagesCommand>"$(NuGetToolPath)" restore $(RuntimeProjectJson)</RestoreRuntimePackagesCommand>
+    <RestoreRuntimePackagesCommand>$(NugetRestoreCommand) $(NuGetPackageInstallOptions) $(RuntimeProjectJson)</RestoreRuntimePackagesCommand>
     <RuntimeDirectory Condition="'$(RuntimeDirectory)' ==''">$(OutputPath)</RuntimeDirectory>
     <!-- Put $(RuntimeStamp) in $(RuntimeDir) to make deleting the directory
          do the right thing.
