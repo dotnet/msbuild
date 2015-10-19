@@ -34,11 +34,15 @@ STAGE0_PUBLISH=$REPOROOT/scripts/stage0/dotnet-publish
 export DOTNET_CLR_HOSTS_PATH=$REPOROOT/ext/CLRHost/$RID
 export DOTNET_CSC_PATH=$REPOROOT/src/cscthingy/bin/Debug/dnxcore50/publish
 
+if ! type dnvm > /dev/null 2>&1; then
+    curl -sSL https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.sh | DNX_BRANCH=dev sh && source ~/.dnx/dnvm/dnvm.sh
+fi
+
 echo "Installing and use-ing the latest CoreCLR x64 DNX ..."
-call dnvm install latest -u -r coreclr -alias dotnet_bootstrap
+dnvm install latest -u -r coreclr -alias dotnet_bootstrap
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
-call dnvm use dotnet_bootstrap -r coreclr -arch x64
+dnvm use dotnet_bootstrap -r coreclr -arch x64
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 type -p dnx >/dev/null
