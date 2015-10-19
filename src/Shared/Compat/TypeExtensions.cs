@@ -19,6 +19,16 @@ namespace System.Reflection
             return new InvokeMemberHelper(type).InvokeMember(name, bindingFlags, target, providedArgs, modifiers, culture, namedParams);
         }
 
+        public static MethodInfo GetMethod(this Type type,
+                                    String name,
+                                    BindingFlags bindingAttr,
+                                    object binder,
+                                    Type[] types,
+                                    ParameterModifier[] modifiers)
+        {
+            return new InvokeMemberHelper(type).GetMethodImpl(name, bindingAttr, binder, CallingConventions.Any, types, modifiers);
+        }
+
 
         class InvokeMemberHelper
         {
@@ -627,6 +637,158 @@ namespace System.Reflection
                     }
                 }
                 #endregion
+
+                return true;
+            }
+
+            //  GetMethodImpl code copied from: https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/mscorlib/src/System/RtType.cs#L3165
+            public MethodInfo GetMethodImpl(
+                    String name, BindingFlags bindingAttr, object binder, CallingConventions callConv,
+                    Type[] types, ParameterModifier[] modifiers)
+            {
+                List<MethodInfo> candidates = GetMethodCandidates(name, bindingAttr, callConv, types, false);
+
+                if (candidates.Count == 0)
+                    return null;
+
+                if (types == null || types.Length == 0)
+                {
+                    MethodInfo firstCandidate = candidates[0];
+
+                    if (candidates.Count == 1)
+                    {
+                        return firstCandidate;
+                    }
+                    else if (types == null)
+                    {
+                        for (int j = 1; j < candidates.Count; j++)
+                        {
+                            MethodInfo methodInfo = candidates[j];
+                            if (!System.DefaultBinder.CompareMethodSigAndName(methodInfo, firstCandidate))
+                            {
+                                throw new AmbiguousMatchException("Arg_AmbiguousMatchException");
+                            }
+                        }
+
+                        // All the methods have the exact same name and sig so return the most derived one.
+                        return System.DefaultBinder.FindMostDerivedNewSlotMeth(candidates.ToArray(), candidates.Count) as MethodInfo;
+                    }
+                }
+
+                //if (binder == null)
+                //    binder = DefaultBinder;
+
+                return DefaultBinder.SelectMethod(bindingAttr, candidates.ToArray(), types, modifiers) as MethodInfo;
+            }
+
+            //  MemberListType code copied from: https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/mscorlib/src/System/RtType.cs#L87
+            internal enum MemberListType
+            {
+                All,
+                CaseSensitive,
+                CaseInsensitive,
+                HandleToInfo
+            }
+
+            //  FilterHelper code copied from: https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/mscorlib/src/System/RtType.cs#L87
+            // Calculate prefixLookup, ignoreCase, and listType for use by GetXXXCandidates
+            private static void FilterHelper(
+                BindingFlags bindingFlags, ref string name, bool allowPrefixLookup, out bool prefixLookup,
+                out bool ignoreCase, out MemberListType listType)
+            {
+                prefixLookup = false;
+                ignoreCase = false;
+
+                if (name != null)
+                {
+                    if ((bindingFlags & BindingFlags.IgnoreCase) != 0)
+                    {
+                        name = name.ToLowerInvariant();
+                        ignoreCase = true;
+                        listType = MemberListType.CaseInsensitive;
+                    }
+                    else
+                    {
+                        listType = MemberListType.CaseSensitive;
+                    }
+
+                    if (allowPrefixLookup && name.EndsWith("*", StringComparison.Ordinal))
+                    {
+                        // We set prefixLookup to true if name ends with a "*".
+                        // We will also set listType to All so that all members are included in 
+                        // the candidates which are later filtered by FilterApplyPrefixLookup.
+                        name = name.Substring(0, name.Length - 1);
+                        prefixLookup = true;
+                        listType = MemberListType.All;
+                    }
+                }
+                else
+                {
+                    listType = MemberListType.All;
+                }
+            }
+
+            //  GetMethodCondidates code copied from: https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/mscorlib/src/System/RtType.cs#L2792
+            private List<MethodInfo> GetMethodCandidates(
+                 String name, BindingFlags bindingAttr, CallingConventions callConv,
+                 Type[] types, bool allowPrefixLookup)
+            {
+                bool prefixLookup, ignoreCase;
+                MemberListType listType;
+                FilterHelper(bindingAttr, ref name, allowPrefixLookup, out prefixLookup, out ignoreCase, out listType);
+
+                //RuntimeMethodInfo[] cache = Cache.GetMethodList(listType, name);
+                MethodInfo[] cache;
+                if (listType == MemberListType.All)
+                {
+                    cache = TargetType.GetMethods(bindingAttr);
+                }
+                else
+                {
+                    cache = TargetType.GetMethods().Where(m =>
+                    {
+                        if (listType == MemberListType.CaseSensitive)
+                        {
+                            return m.Name == name;
+                        }
+                        else
+                        {
+                            return m.Name.Equals(name, StringComparison.OrdinalIgnoreCase);
+                        }
+                    }).ToArray();
+                }
+
+                List<MethodInfo> candidates = new List<MethodInfo>(cache.Length);
+                for (int i = 0; i < cache.Length; i++)
+                {
+                    MethodInfo methodInfo = cache[i];
+                    if (FilterApplyMethodBase(methodInfo, bindingAttr, bindingAttr, callConv, types) &&
+                        (!prefixLookup || FilterApplyPrefixLookup(methodInfo, name, ignoreCase)))
+                    {
+                        candidates.Add(methodInfo);
+                    }
+                }
+
+                return candidates;
+            }
+
+            //  FilterApplyPrefixLookup code copied from: https://github.com/dotnet/coreclr/blob/bc146608854d1db9cdbcc0b08029a87754e12b49/src/mscorlib/src/System/RtType.cs#L2367
+            // Only called by GetXXXCandidates, GetInterfaces, and GetNestedTypes when FilterHelper has set "prefixLookup" to true.
+            // Most of the plural GetXXX methods allow prefix lookups while the singular GetXXX methods mostly do not.
+            private static bool FilterApplyPrefixLookup(MemberInfo memberInfo, string name, bool ignoreCase)
+            {
+                Contract.Assert(name != null);
+
+                if (ignoreCase)
+                {
+                    if (!memberInfo.Name.StartsWith(name, StringComparison.OrdinalIgnoreCase))
+                        return false;
+                }
+                else
+                {
+                    if (!memberInfo.Name.StartsWith(name, StringComparison.Ordinal))
+                        return false;
+                }
 
                 return true;
             }
