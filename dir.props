@@ -136,7 +136,7 @@
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
     <RuntimeSystem>win7</RuntimeSystem>
-    <RuntimeArchitecture>x86</RuntimeArchitecture>
+    <RuntimeArchitecture>x64</RuntimeArchitecture>
     <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
     <TargetSystem>Windows_NetCore</TargetSystem>
   </PropertyGroup>
@@ -147,7 +147,7 @@
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
     <RuntimeSystem>win7</RuntimeSystem>
-    <RuntimeArchitecture>x86</RuntimeArchitecture>
+    <RuntimeArchitecture>x64</RuntimeArchitecture>
     <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
     <TargetSystem>Windows_NetCore</TargetSystem>
   </PropertyGroup>
