@@ -242,11 +242,17 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private bool _autoFlush = true;
 
+#if FEATURE_ENCODING_DEFAULT
         /// <summary>
         /// Encoding for the output. Defaults to ANSI.
         /// </summary>
-        private Encoding _encoding = Encoding.GetEncoding(0);
-
+        private Encoding _encoding = Encoding.Default;
+#else
+        /// <summary>
+        /// Encoding for the output. Defaults to UTF-8.
+        /// </summary>
+        private Encoding _encoding = Encoding.UTF8;
+#endif
         /// <summary>
         /// File logger parameters delimiters.
         /// </summary>
