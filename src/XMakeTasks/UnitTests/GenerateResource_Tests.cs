@@ -3150,7 +3150,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 // simulate this by lower-casing our file before writing it into the resx.
                 resgenFileContents.Append(
                     NativeMethodsShared.IsWindows
-                        ? linkedBitmap.ToUpper(System.Globalization.CultureInfo.InvariantCulture)
+                        ? linkedBitmap.ToUpperInvariant()
                         : linkedBitmap);
 
                 resgenFileContents.Append(
