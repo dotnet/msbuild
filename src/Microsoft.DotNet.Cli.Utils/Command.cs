@@ -129,6 +129,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 _processTcs.SetResult(_process.ExitCode);
 
 #if DEBUG
+            var sw = Stopwatch.StartNew();
             Console.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments}");
 #endif
             _process.Start();
@@ -138,7 +139,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var exitCode = await _processTcs.Task;
 
 #if DEBUG
-            Console.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments} exited with {exitCode}.");
+            Console.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.");
 #endif
 
             return new CommandResult(
