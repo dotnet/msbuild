@@ -73,8 +73,11 @@ namespace Microsoft.Build.UnitTests
             m.Write(new byte[] { 0x64, 0xc3, 0x61, 0x2e, 0x43, 0x6c, 0x61, 0x73, 0x73 }, 0, 9); // dÃa.Class in ANSI
             m.Flush();
             m.Seek(0, SeekOrigin.Begin);
-
+#if FEATURE_ENCODING_DEFAULT
             StreamReader r = new StreamReader(m, System.Text.Encoding.Default, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
+#else
+            StreamReader r = new StreamReader(m, System.Text.Encoding.ASCII, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
+#endif
             string className = r.ReadToEnd();
 
             Assert.Equal(className, result);
@@ -510,7 +513,7 @@ namespace ClassLibrary1
 namespace ClassLibrary2
 #else
 namespace ClassLibrary3
-#endif 
+#endif
 {
     class MyForm 
     {

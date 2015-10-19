@@ -2478,9 +2478,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             t.References = new ITaskItem[]
                 {
                     new TaskItem(p2pReference),
-
+#if FEATURE_ASSEMBLY_LOCATION
                     // Path to System.dll
                     new TaskItem(new Uri((typeof(string)).Assembly.EscapedCodeBase).LocalPath)
+#else
+                    // Path to System.dll
+                    new TaskItem(new Uri(Path.Combine(Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath), "System.dll")).LocalPath)
+#endif
                 };
 
             bool success = t.Execute();
