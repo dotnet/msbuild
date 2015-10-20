@@ -9,8 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
 using System.Security.AccessControl;
 using System.Security.Principal;
+#endif
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -825,6 +827,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("k4", items[5].Include);
         }
 
+#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
         /// <summary>
         /// Build a solution file that can't be accessed
         /// </summary>
@@ -879,6 +882,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
            );
         }
+
         /// <summary>
         /// Build a project file that can't be accessed
         /// </summary>
@@ -928,6 +932,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
            );
         }
+#endif
+
         /// <summary>
         /// Build a corrupt solution
         /// </summary>
