@@ -6,19 +6,17 @@ namespace Microsoft.Extensions.ProjectModel
     public class PackageDescription : LibraryDescription
     {
         public PackageDescription(
-            LibraryRange requestedRange, 
             string path,
             LockFilePackageLibrary package, 
             LockFileTargetLibrary lockFileLibrary, 
             IEnumerable<LibraryRange> dependencies,
             bool compatible)
             : base(
-                  requestedRange,
                   new LibraryIdentity(package.Name, package.Version, LibraryType.Package),
                   path,
                   dependencies: dependencies,
                   framework: null,
-                  resolved: true,
+                  resolved: compatible,
                   compatible: compatible)
         {
             Library = package;

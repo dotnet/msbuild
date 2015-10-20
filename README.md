@@ -3,7 +3,7 @@
 ## Building/Running
 
 1. Run `build.cmd` or `build.sh` from the root
-2. Use `artifacts/{os}-{arch}/state2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/state2` to the PATH if you want to run `dotnet` from anywhere.
+2. Use `artifacts/{os}-{arch}/stage2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2` to the PATH if you want to run `dotnet` from anywhere.
 
 ## Notes
 

@@ -66,7 +66,11 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
             catch (Exception ex)
             {
+#if DEBUG
+                Console.Error.WriteLine(ex);
+#else
                 Console.Error.WriteLine(ex.Message);
+#endif
                 return 1;
             }
         }
@@ -163,7 +167,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             // Get compilation options
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
-            var outputName = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
+            var outputName = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
 
             var bootstrappingWithMono = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("BOOTSTRAPPING_WITH_MONO"));
 

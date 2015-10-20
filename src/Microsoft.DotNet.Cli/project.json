@@ -17,6 +17,10 @@
     "Microsoft.DotNet.Cli.Utils": {
       "type": "build",
       "version": "1.0.0-*"
+    },
+    "Microsoft.Extensions.CommandLineUtils.Sources": {
+      "type": "build",
+      "version": "1.0.0-*"
     }
   },
   "frameworks": {
