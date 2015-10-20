@@ -113,6 +113,10 @@ namespace Microsoft.DotNet.Tools.Publish
             // Use a library exporter to collect publish assets
             var exporter = context.CreateExporter(configuration);
 
+            // Copy things marked as copy to output (which we don't have yet)
+            // so does copy too many things
+            CopyContents(context, outputPath);
+
             foreach (var export in exporter.GetAllExports())
             {
                 Reporter.Output.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
@@ -123,7 +127,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             // Publishing for windows, TODO(anurse): Publish for Mac/Linux/etc.
             int exitCode;
-            if (context.RuntimeIdentifier.Equals("win7-x64"))
+            if (context.RuntimeIdentifier.StartsWith("win"))
             {
                 exitCode = PublishForWindows(context, outputPath);
             }
@@ -131,8 +135,6 @@ namespace Microsoft.DotNet.Tools.Publish
             {
                 exitCode = PublishForUnix(context, outputPath);
             }
-            
-            CopyContents(context, outputPath);
 
             Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
             return exitCode;
@@ -167,7 +169,6 @@ namespace Microsoft.DotNet.Tools.Publish
 
             // Use the 'command' field to generate the name
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name);
-            var outputDll = Path.Combine(outputPath, context.ProjectFile.Name + ".dll");
 
             // Write a script that can be used to launch with CoreRun
             var script = $@"#!/usr/bin/env bash
@@ -189,14 +190,15 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
                 .GetAwaiter()
                 .GetResult();
 
-            File.Copy(outputDll, Path.ChangeExtension(outputDll, ".exe"), overwrite: true);
-            File.Delete(outputDll);
-
             return 0;
         }
 
         private static int PublishForWindows(ProjectContext context, string outputPath)
         {
+            if (context.TargetFramework.IsDesktop())
+            {
+                return 0;
+            }
             // Locate Hosts
             string hostsPath = Environment.GetEnvironmentVariable(Constants.HostsPathEnvironmentVariable);
             if (string.IsNullOrEmpty(hostsPath))
@@ -222,11 +224,13 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
             File.Copy(coreConsole, Path.Combine(outputPath, Constants.CoreConsoleName), overwrite: true);
             File.Copy(coreRun, Path.Combine(outputPath, Constants.CoreRunName), overwrite: true);
 
-            // Use the 'command' field to generate the name
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
-            File.Copy(coreConsole, outputExe, overwrite: true);
 
-            
+            // Rename the {app}.exe to {app}.dll
+            File.Copy(outputExe, Path.ChangeExtension(outputExe, ".dll"), overwrite: true);
+
+            // Change coreconsole.exe to the {app}.exe name
+            File.Copy(coreConsole, outputExe, overwrite: true);
             return 0;
         }
 
@@ -272,7 +276,7 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
                 }
             }
         }
-        
+
         private static string EnsureTrailingSlash(string path)
         {
             return EnsureTrailingCharacter(path, Path.DirectorySeparatorChar);

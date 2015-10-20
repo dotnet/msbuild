@@ -166,12 +166,13 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
 
         private string GetOutputPath(ProjectDescription project)
         {
+            var compilationOptions = project.Project.GetCompilerOptions(project.Framework, _configuration);
             return Path.Combine(
                 project.Project.ProjectDirectory,
                 "bin", // This can't access the Constant in Cli Utils. But the output path stuff is temporary right now anyway
                 _configuration,
                 project.Framework.GetTwoDigitShortFolderName(),
-                project.Project.Name + ".dll");
+                project.Project.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
         }
 
         private static string ResolvePath(Project project, string configuration, string path)
