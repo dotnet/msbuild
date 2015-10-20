@@ -1,0 +1,8 @@
+{
+ "dependencies": {
+    "dnx-coreclr-linux-x64": "1.0.0-*",
+   },
+  "frameworks": {
+    "dnxcore50": { }
+  }
+}
