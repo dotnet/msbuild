@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
      Tests only the public OM of Microsoft.Build.
 
@@ -25,6 +25,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\..\Shared\Constants.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
