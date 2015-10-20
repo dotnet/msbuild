@@ -9,10 +9,10 @@
     "homepage": "https://dotnet.github.io/core",                        
 
     "release":{
-        "package_version":"0.1",                               
+        "package_version":"0.2",                               
         "package_revision":"1",                                 
         "urgency" : "low",                                      
-        "changelog_message" : "Initial package"                
+        "changelog_message" : "Bootstrap loop package"                
     },
 
     "control": {                                               
@@ -28,8 +28,9 @@
     },
 
     "symlinks": {
-        "dotnet.sh" : "usr/bin/dotnet",
-        "dotnet-compile.sh" : "usr/bin/dotnet-compile",
-        "dotnet-publish.sh" : "usr/bin/dotnet-publish"
+        "dotnet" : "usr/bin/dotnet",
+        "dotnet-compile" : "usr/bin/dotnet-compile",
+        "dotnet-publish" : "usr/bin/dotnet-publish",
+		"dotnet-restore" : "usr/bin/dotnet-restore"
     }
 }
