@@ -22,12 +22,12 @@ namespace Microsoft.Extensions.ProjectModel.Graph
         public static bool TryParse(string value, out LibraryType type)
         {
             // We only support values we know about
-            if(string.Equals(Package.Value, value, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Package.Value, value, StringComparison.OrdinalIgnoreCase))
             {
                 type = Package;
                 return true;
             }
-            else if(string.Equals(Project.Value, value, StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(Project.Value, value, StringComparison.OrdinalIgnoreCase))
             {
                 type = Project;
                 return true;
@@ -80,6 +80,10 @@ namespace Microsoft.Extensions.ProjectModel.Graph
 
         public override int GetHashCode()
         {
+            if (string.IsNullOrEmpty(Value))
+            {
+                return 0;
+            }
             return StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
         }
     }

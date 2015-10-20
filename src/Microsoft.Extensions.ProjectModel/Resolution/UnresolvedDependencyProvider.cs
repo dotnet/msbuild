@@ -12,7 +12,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
         public static LibraryDescription GetDescription(LibraryRange libraryRange, NuGetFramework targetFramework)
         {
             return new LibraryDescription(
-                libraryRange,
                 new LibraryIdentity(libraryRange.Name, libraryRange.VersionRange?.MinVersion, libraryRange.Target),
                 path: null,
                 dependencies: Enumerable.Empty<LibraryRange>(),

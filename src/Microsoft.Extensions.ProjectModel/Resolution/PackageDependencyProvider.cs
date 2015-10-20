@@ -36,7 +36,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             var path = _packagePathResolver.GetInstallPath(package.Name, package.Version);
 
             var packageDescription = new PackageDescription(
-                new LibraryRange(package.Name, new VersionRange(package.Version), LibraryType.Package, LibraryDependencyType.Default),
                 path,
                 package,
                 targetLibrary,

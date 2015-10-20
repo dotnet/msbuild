@@ -110,7 +110,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
 
             // Create a library manager
-            var libraryManager = new LibraryManager(Project.ProjectFilePath, libraries.Values.ToList(), diagnostics);
+            var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics);
 
             return new ProjectContext(
                 GlobalSettings,
@@ -153,6 +153,7 @@ namespace Microsoft.Extensions.ProjectModel
                         }
                     }
 
+                    dep.RequestedRanges.Add(dependency);
                     dep.Parents.Add(library);
                 }
             }

@@ -41,7 +41,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             if (version == null || version.Version == assemblyVersion)
             {
                 return new LibraryDescription(
-                    libraryRange,
                     new LibraryIdentity(libraryRange.Name, new NuGetVersion(assemblyVersion), LibraryType.ReferenceAssembly),
                     path,
                     Enumerable.Empty<LibraryRange>(),

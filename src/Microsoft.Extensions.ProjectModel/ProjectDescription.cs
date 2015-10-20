@@ -12,7 +12,6 @@ namespace Microsoft.Extensions.ProjectModel
         // Create an unresolved project description
         public ProjectDescription(string name, string path)
             : base(
-                  new LibraryRange(name, LibraryType.Unspecified),
                   new LibraryIdentity(name, LibraryType.Project),
                   path,
                   Enumerable.Empty<LibraryRange>(),
@@ -28,7 +27,6 @@ namespace Microsoft.Extensions.ProjectModel
             TargetFrameworkInformation targetFrameworkInfo,
             bool resolved) :
                 base(
-                    libraryRange,
                     new LibraryIdentity(project.Name, project.Version, LibraryType.Project),
                     project.ProjectFilePath,
                     dependencies,

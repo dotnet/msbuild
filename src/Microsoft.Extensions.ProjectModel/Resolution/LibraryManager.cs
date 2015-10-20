@@ -1,9 +1,11 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using NuGet.Frameworks;
+using System.Linq;
+using Microsoft.Extensions.ProjectModel.Graph;
 using NuGet.Versioning;
 
 namespace Microsoft.Extensions.ProjectModel.Resolution
@@ -12,13 +14,10 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
     {
         private readonly IList<LibraryDescription> _libraries;
         private readonly IList<DiagnosticMessage> _diagnostics;
-        private readonly string _projectPath;
 
-        public LibraryManager(string projectPath,
-                              IList<LibraryDescription> libraries,
+        public LibraryManager(IList<LibraryDescription> libraries,
                               IList<DiagnosticMessage> diagnostics)
         {
-            _projectPath = projectPath;
             _libraries = libraries;
             _diagnostics = diagnostics;
         }
@@ -39,72 +38,110 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 
             foreach (var library in GetLibraries())
             {
-                string projectPath = library.RequestedRange.SourceFilePath ?? _projectPath;
-
                 if (!library.Resolved)
                 {
                     string message;
                     string errorCode;
                     if (library.Compatible)
                     {
-                        errorCode = ErrorCodes.NU1001;
-                        message = $"The dependency {library.RequestedRange.Name} {library.RequestedRange.VersionRange} could not be resolved.";
+                        foreach (var range in library.RequestedRanges)
+                        {
+                            errorCode = ErrorCodes.NU1001;
+                            message = $"The dependency {range.Name} {range.VersionRange} could not be resolved.";
+
+                            AddDiagnostics(messages, library, message, errorCode);
+                        }
                     }
                     else
                     {
                         errorCode = ErrorCodes.NU1002;
-                        var projectName = Directory.GetParent(_projectPath).Name;
-                        message = $"The dependency {library.Identity} in project {projectName} does not support framework {library.Framework}.";
-                    }
+                        message = $"The dependency {library.Identity} does not support framework {library.Framework}.";
 
-                    messages.Add(
-                        new DiagnosticMessage(
-                            errorCode,
-                            message,
-                            projectPath,
-                            DiagnosticMessageSeverity.Error,
-                            library.RequestedRange.SourceLine,
-                            library.RequestedRange.SourceColumn,
-                            library));
+                        AddDiagnostics(messages, library, message, errorCode);
+                    }
                 }
                 else
                 {
-                    // Skip libraries that aren't specified in a project.json
-                    if (string.IsNullOrEmpty(library.RequestedRange.SourceFilePath))
+                    foreach (var range in library.RequestedRanges)
                     {
-                        continue;
-                    }
+                        // Skip libraries that aren't specified in a project.json
+                        if (string.IsNullOrEmpty(range.SourceFilePath))
+                        {
+                            continue;
+                        }
 
-                    if (library.RequestedRange.VersionRange == null)
-                    {
-                        // TODO: Show errors/warnings for things without versions
-                        continue;
-                    }
+                        if (range.VersionRange == null)
+                        {
+                            // TODO: Show errors/warnings for things without versions
+                            continue;
+                        }
 
-                    // If we ended up with a declared version that isn't what was asked for directly
-                    // then report a warning
-                    // Case 1: Non floating version and the minimum doesn't match what was specified
-                    // Case 2: Floating version that fell outside of the range
-                    if ((!library.RequestedRange.VersionRange.IsFloating &&
-                         library.RequestedRange.VersionRange.MinVersion != library.Identity.Version) ||
-                        (library.RequestedRange.VersionRange.IsFloating &&
-                         !library.RequestedRange.VersionRange.EqualsFloating(library.Identity.Version)))
-                    {
-                        var message = string.Format("Dependency specified was {0} but ended up with {1}.", library.RequestedRange, library.Identity);
-                        messages.Add(
-                            new DiagnosticMessage(
-                                ErrorCodes.NU1007,
-                                message,
-                                projectPath,
-                                DiagnosticMessageSeverity.Warning,
-                                library.RequestedRange.SourceLine,
-                                library.RequestedRange.SourceColumn,
-                                library));
+                        // If we ended up with a declared version that isn't what was asked for directly
+                        // then report a warning
+                        // Case 1: Non floating version and the minimum doesn't match what was specified
+                        // Case 2: Floating version that fell outside of the range
+                        if ((!range.VersionRange.IsFloating &&
+                             range.VersionRange.MinVersion != library.Identity.Version) ||
+                            (range.VersionRange.IsFloating &&
+                             !range.VersionRange.Float.Satisfies(library.Identity.Version)))
+                        {
+                            var message = $"Dependency specified was {range} but ended up with {library.Identity}.";
+
+                            foreach (var source in GetRangesWithSourceLocations(library))
+                            {
+                                messages.Add(
+                                    new DiagnosticMessage(
+                                        ErrorCodes.NU1007,
+                                        message,
+                                        source.SourceFilePath,
+                                        DiagnosticMessageSeverity.Warning,
+                                        source.SourceLine,
+                                        source.SourceColumn,
+                                        library));
+                            }
+                        }
                     }
                 }
             }
 
             return messages;
+        }
+
+        private void AddDiagnostics(List<DiagnosticMessage> messages, LibraryDescription library, string message, string errorCode)
+        {
+            // A (in project.json) -> B (unresolved) (not in project.json)
+            foreach (var source in GetRangesWithSourceLocations(library).Distinct())
+            {
+                messages.Add(
+                    new DiagnosticMessage(
+                        errorCode,
+                        message,
+                        source.SourceFilePath,
+                        DiagnosticMessageSeverity.Error,
+                        source.SourceLine,
+                        source.SourceColumn,
+                        library));
+
+            }
+        }
+
+        private IEnumerable<LibraryRange> GetRangesWithSourceLocations(LibraryDescription library)
+        {
+            foreach (var range in library.RequestedRanges)
+            {
+                if (!string.IsNullOrEmpty(range.SourceFilePath))
+                {
+                    yield return range;
+                }
+            }
+
+            foreach (var parent in library.Parents)
+            {
+                foreach (var relevantPath in GetRangesWithSourceLocations(parent))
+                {
+                    yield return relevantPath;
+                }
+            }
         }
     }
 }
