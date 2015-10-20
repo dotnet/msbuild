@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         /// that its running on. This is because 'Ã' is a high ANSI character which is interpretted differently
         /// for different codepages.
         /// </summary>
-        [Fact]
+        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/295")]
         public void Regress172107()
         {
             // Can't embed the 'Ã' directly because the string is Unicode already and the Unicode<-->ANSI transform
@@ -73,8 +73,11 @@ namespace Microsoft.Build.UnitTests
             m.Write(new byte[] { 0x64, 0xc3, 0x61, 0x2e, 0x43, 0x6c, 0x61, 0x73, 0x73 }, 0, 9); // dÃa.Class in ANSI
             m.Flush();
             m.Seek(0, SeekOrigin.Begin);
-
+#if FEATURE_ENCODING_DEFAULT
             StreamReader r = new StreamReader(m, System.Text.Encoding.Default, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
+#else
+            StreamReader r = new StreamReader(m, System.Text.Encoding.ASCII, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
+#endif
             string className = r.ReadToEnd();
 
             Assert.Equal(className, result);
@@ -86,7 +89,7 @@ namespace Microsoft.Build.UnitTests
         /// Test for a namespace that has UTF8 characters but there's no BOM at the start.
         ///
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/295")]
         public void Regress249540()
         {
             // Special character is 'Ä' in UTF8: 0xC3 84
@@ -510,7 +513,7 @@ namespace ClassLibrary1
 namespace ClassLibrary2
 #else
 namespace ClassLibrary3
-#endif 
+#endif
 {
     class MyForm 
     {

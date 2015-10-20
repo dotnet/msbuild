@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks.Unittest
             XElement targetAppConfig = XElement.Parse(redirectResults.TargetAppConfigContent);
             Assert.Equal(1,
                 targetAppConfig.Descendants()
-                    .Count(e => e.Name.LocalName.Equals("assemblyBinding", StringComparison.InvariantCultureIgnoreCase)));
+                    .Count(e => e.Name.LocalName.Equals("assemblyBinding", StringComparison.OrdinalIgnoreCase)));
             // "Binding redirects should not add additional assemblyBinding sections into the target app.config: " + targetAppConfig
 
             // Log file should contains a warning when GenerateBindingRedirects updates existing app.config entries
