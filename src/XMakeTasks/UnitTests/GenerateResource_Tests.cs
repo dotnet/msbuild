@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  ResX to Resources, no references
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void BasicResX2Resources()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -45,7 +45,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
+
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", resxFile, resourcesFile);
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ReadResourceMessage", 1, resxFile);
             }
@@ -105,7 +108,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Text to Resources
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void BasicText2Resources()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -125,7 +128,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
+
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ReadResourceMessage", 4, textFile);
             }
@@ -147,7 +153,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  ResX to Resources with references that are used in the resx
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks> 
-        [Fact (Skip = "TODO")]
+        [Fact]
         public void ResX2ResourcesWithReferences()
         {
             string systemDll = Utilities.GetPathToCopiedSystemDLL();
@@ -261,7 +267,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the source only
         /// </summary>
-        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void ForceOutOfDate()
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
@@ -280,8 +286,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
-
+#endif
                 GenerateResource t2 = Utilities.CreateTask();
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -311,7 +318,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void ForceOutOfDateLinked()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -331,7 +338,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 GenerateResource t2 = Utilities.CreateTask();
                 t2.StateFile = new TaskItem(t.StateFile);
@@ -363,7 +372,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Force partially out-of-date: should build only the out of date inputs
         /// </summary>
-        [Fact (Skip = "TODO")]
+        [Fact]
         public void ForceSomeOutOfDate()
         {
             string resxFile = null;
@@ -399,7 +408,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 // Check only one output was updated
                 Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+
+#if FEATURE_BINARY_SERIALIZATION
                 Assert.Equal(0, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
+#else
+                Assert.Equal(1, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
+#endif
 
                 // Although only one file was updated, both should be in OutputResources and FilesWritten
                 Assert.Equal(t2.OutputResources[0].ItemSpec, t.OutputResources[0].ItemSpec);
@@ -1312,7 +1326,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Cause failures in ResXResourceReader
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void FailedResXReader()
         {
             string resxFile1 = null;
@@ -1338,7 +1352,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Task should have failed
                 Assert.False(success);
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
                 // Should not have created an output for the invalid resx
                 // Should have created the other file
                 Assert.False(File.Exists(resourcesFile1));
@@ -1362,7 +1378,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Cause failures in ResXResourceReader, different codepath
         /// </summary>
-        [Fact (Skip = "TODO")]
+        [Fact]
         public void FailedResXReaderWithAllOutputResourcesSpecified()
         {
             string resxFile1 = null;
@@ -1390,7 +1406,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Task should have failed
                 Assert.False(success);
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 // Should not have created an output for the invalid resx
                 // Should have created the other file
@@ -1709,7 +1727,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  FilesWritten contains OutputResources + StateFile
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void FilesWrittenSet()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1734,7 +1752,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.True(File.Exists(t.FilesWritten[i].ItemSpec));
             }
 
+#if FEATURE_BINARY_SERIALIZATION
             Utilities.AssertStateFileWasWritten(t);
+#endif
 
             // Done, so clean up.
             File.Delete(t.StateFile.ItemSpec);
@@ -1751,7 +1771,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Resource transformation fails on 3rd of 4 inputs, inputs 1 & 2 & 4 are in outputs and fileswritten.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void OutputFilesPartialInputs()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1794,7 +1814,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[0].ItemSpec, Path.ChangeExtension(t.Sources[0].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[1].ItemSpec, Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
+
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 // Make sure there was an error on the second resource
                 // "unsupported square bracket keyword"
@@ -3299,7 +3322,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         public static string GetPathToCopiedSystemDLL()
         {
             string tempSystemDLL = Utilities.GetTempFileName(".dll");
-            File.Copy(ToolLocationHelper.GetPathToDotNetFrameworkFile("system.dll", TargetDotNetFrameworkVersion.Version45), tempSystemDLL);
+
+            string pathToSystemDLL =
+#if FEATURE_INSTALLED_MSBUILD
+                ToolLocationHelper.GetPathToDotNetFrameworkFile("system.dll", TargetDotNetFrameworkVersion.Version45);
+#else
+                Path.Combine(FileUtilities.CurrentExecutableDirectory, "system.dll");
+#endif
+
+            File.Copy(pathToSystemDLL, tempSystemDLL);
             return tempSystemDLL;
         }
 
