@@ -256,6 +256,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
+
         /// <summary>
         /// Reading from an XMLReader that was closed should throw the correct
         /// exception
@@ -266,11 +267,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
-                reader.Close();
+                reader.Dispose();
                 Project project = new Project(reader);
             }
            );
         }
+
         /// <summary>
         /// Reading from an XMLReader that has TWO valid root elements should work
         /// if it's already read past the first one.

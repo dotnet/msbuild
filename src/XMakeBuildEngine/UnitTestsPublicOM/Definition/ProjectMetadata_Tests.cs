@@ -479,7 +479,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         </None>
     </ItemGroup>
 </Project>");
-            System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            System.Xml.XmlReader reader = XmlReader.Create(new StringReader(projectString));
             Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project(reader);
             Microsoft.Build.Evaluation.ProjectItem item = project.GetItems("None").Single();
 

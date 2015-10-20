@@ -404,19 +404,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 path = FileUtilities.GetTemporaryFile();
                 File.WriteAllText(path, content);
 
-                XmlTextReader reader1 = new XmlTextReader(path);
+                var reader1 = XmlReader.Create(path);
                 ProjectRootElement root1 = ProjectRootElement.Create(reader1);
                 root1.AddItem("type", "include");
 
                 // If it's in the cache, then the 2nd document won't see the add.
-                XmlTextReader reader2 = new XmlTextReader(path);
+                var reader2 = XmlReader.Create(path);
                 ProjectRootElement root2 = ProjectRootElement.Create(reader2);
 
                 Assert.Equal(1, root1.Items.Count);
                 Assert.Equal(0, root2.Items.Count);
 
-                reader1.Close();
-                reader2.Close();
+                reader1.Dispose();
+                reader2.Dispose();
             }
             finally
             {
@@ -1216,7 +1216,8 @@ Project(""{";
 
             // Try to verify that the xml declaration was emitted, and that the correct byte order marks
             // are also present.
-            using (var reader = new StreamReader(projectFullPath, encoding, true))
+
+            using (var reader = FileUtilities.OpenRead(projectFullPath, encoding, true))
             {
                 Assert.Equal(encoding, reader.CurrentEncoding);
                 string actual = reader.ReadLine();
@@ -1250,7 +1251,7 @@ Project(""{";
             const string EmptyProject = @"<Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
 </Project>";
 
-            using (StreamWriter writer = new StreamWriter(projectFullPath, false, encoding))
+            using (StreamWriter writer = FileUtilities.OpenWrite(projectFullPath, false, encoding))
             {
                 writer.Write(ObjectModelHelpers.CleanupFileContents(EmptyProject));
             }
