@@ -1,15 +1,15 @@
-MSBuild is under active development primarily in two different areas: CoreCLR MSBuild and Desktop MSBuild.
+MSBuild is under active development primarily in two different areas: .NET Core MSBuild and Desktop MSBuild.
 
-#CoreCLR MSBuild
-Our goal is the enable a subset of MSBuild to run cross-platform and build applications that target the CoreCLR framework. This version should be delivered via NuGet and have no required dependencies on the machine (no installer, no registry, no GAC). It is not intended to replace the version integrated with Visual Studio nor build projects targeting the full .NET Framework.
-* Fully support Linux, OSX, and Windows with all CoreCLR MSBuild features.
+#.NET Core MSBuild
+Our goal is the enable a subset of MSBuild to run cross-platform and build applications that target the .NET Core framework. This version should be delivered via NuGet and have no required dependencies on the machine (no installer, no registry, no GAC). It is not intended to replace the version integrated with Visual Studio nor build projects targeting the full .NET Framework.
+* Fully support Linux, OSX, and Windows with all .NET Core MSBuild features.
 * Eliminate dependency on the full .NET Framework (and mono).
 * Enable features over time to reduce feature gap.
 
-*Note that features like toolsets, registry, GAC, Frameworks, etc. that do not apply to CoreCLR will remain disabled.*
+*Note that features like toolsets, registry, GAC, Frameworks, etc. that do not apply to building .NET Core applications will remain disabled.*
 
 #Desktop MSBuild
-Our goal is to maintain a single codebase with a high degree of compatibility and stability between releases. As such, the bar for new features or behavior change should be very high.
+This version of MSBuild is the version we ship with Visual Studio (previously shipped as part of the .NET Framework) and runs on the full .NET Framework. Our goal is to maintain a single code base with a high degree of compatibility and stability between releases. As such, the bar for new features or behavior change should be very high.
 ##Quality
 * Performance-related fixes to improve the end-to-end experience for developers in Visual Studio. [ongoing]
 * Fix top-hitting issues gathered from feedback and Watson events (crash data). [ongoing]
