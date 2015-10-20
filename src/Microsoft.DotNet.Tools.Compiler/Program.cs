@@ -87,8 +87,19 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Print out dependency diagnostics
             foreach (var diag in context.LibraryManager.GetAllDiagnostics())
             {
-                success &= diag.Severity != DiagnosticMessageSeverity.Error;
-                Console.WriteLine(diag.FormattedMessage);
+                switch (diag.Severity)
+                {
+                    case DiagnosticMessageSeverity.Info:
+                        Reporter.Error.WriteLine(diag.FormattedMessage);
+                        break;
+                    case DiagnosticMessageSeverity.Warning:
+                        Reporter.Error.WriteLine(diag.FormattedMessage.Yellow().Bold());
+                        break;
+                    case DiagnosticMessageSeverity.Error:
+                        success = false;
+                        Reporter.Error.WriteLine(diag.FormattedMessage.Red().Bold());
+                        break;
+                }
             }
 
             // If there were dependency errors don't bother compiling
@@ -126,7 +137,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                     if (compileResult.ExitCode != 0)
                     {
-                        Console.Error.WriteLine($"Failed to compile dependency: {projectDependency.Identity.Name.Red().Bold()}");
+                        Console.Error.WriteLine($"Failed to compile dependency: {projectDependency.Identity.Name.Red()}");
                         return false;
                     }
                 }
@@ -220,7 +231,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (result.ExitCode == 0)
             {
-                Reporter.Output.WriteLine($"Compiled {context.ProjectFile.Name} successfully!".Green().Bold());
+                Reporter.Output.WriteLine($"Compiled {context.ProjectFile.Name} successfully!".Green());
                 return true;
             }
 
