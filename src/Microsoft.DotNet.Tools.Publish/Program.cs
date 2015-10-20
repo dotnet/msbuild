@@ -189,7 +189,7 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
                 .GetAwaiter()
                 .GetResult();
 
-            File.Copy(outputDll, Path.ChangeExtension(outputDll, ".exe"));
+            File.Copy(outputDll, Path.ChangeExtension(outputDll, ".exe"), overwrite: true);
             File.Delete(outputDll);
 
             return 0;

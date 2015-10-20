@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
 #if DEBUG
             var sw = Stopwatch.StartNew();
-            Reporter.Output.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments}".Green().Bold());
+            Reporter.Output.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments}".White());
 #endif
             _process.Start();
             _process.BeginOutputReadLine();
