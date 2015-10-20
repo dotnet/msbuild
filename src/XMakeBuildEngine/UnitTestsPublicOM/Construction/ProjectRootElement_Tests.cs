@@ -473,7 +473,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectCollection projectCollection = new ProjectCollection();
             string toolsPath = projectCollection.Toolsets.Where(toolset => (string.Compare(toolset.ToolsVersion, ObjectModelHelpers.MSBuildDefaultToolsVersion, StringComparison.OrdinalIgnoreCase) == 0)).First().ToolsPath;
 
-            string[] targets = new string[] { "Microsoft.Common.targets", "Microsoft.CSharp.targets", "Microsoft.VisualBasic.targets" };
+            string[] targets =
+            {
+                "Microsoft.Common.targets",
+                "Microsoft.CSharp.targets",
+                // BUG: restore this when https://github.com/Microsoft/msbuild/issues/306 is fixed
+                // "Microsoft.VisualBasic.targets",
+            };
 
             foreach (string target in targets)
             {
