@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.ProjectModel;
 using Microsoft.Extensions.ProjectModel.Compilation;
@@ -172,19 +173,13 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Assemble args
             var compilerArgs = new List<string>()
             {
-                "-nostdlib",
-                "-nologo",
-                $"-out:\"{outputName}\""
+                $"--temp-output:\"{intermediateOutputPath}\"",
+                $"--out:\"{outputName}\""
             };
-
-            // Default suppressions, some versions of mono don't support these
-            compilerArgs.Add("-nowarn:CS1701");
-            compilerArgs.Add("-nowarn:CS1702");
-            compilerArgs.Add("-nowarn:CS1705");
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             // Add compilation options to the args
-            ApplyCompilationOptions(compilationOptions, compilerArgs);
+            compilerArgs.AddRange(compilationOptions.SerializeToArgs());
 
             foreach (var dependency in dependencies)
             {
@@ -218,10 +213,10 @@ namespace Microsoft.DotNet.Tools.Compiler
             compilerName = compilerName ?? "csc";
 
             // Write RSP file
-            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compilerName}.{context.ProjectFile.Name}.rsp");
+            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{context.ProjectFile.Name}.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
-            var result = Command.Create($"dotnet-compile-{compilerName}", $"\"{rsp}\"")
+            var result = Command.Create($"dotnet-compile-{compilerName}", $"@\"{rsp}\"")
                                  .OnErrorLine(line =>
                                  {
                                      var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
@@ -574,56 +569,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                     Reporter.Error.WriteLine(diag.FormattedMessage.Red().Bold());
                     break;
             }
-        }
-
-        private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> compilerArgs)
-        {
-            var targetType = compilationOptions.EmitEntryPoint.GetValueOrDefault() ? "exe" : "library";
-
-            compilerArgs.Add($"-target:{targetType}");
-
-            if (compilationOptions.AllowUnsafe.GetValueOrDefault())
-            {
-                compilerArgs.Add("-unsafe+");
-            }
-
-            compilerArgs.AddRange(compilationOptions.Defines.Select(d => $"-d:{d}"));
-
-            if (compilationOptions.Optimize.GetValueOrDefault())
-            {
-                compilerArgs.Add("-optimize");
-            }
-
-            if (!string.IsNullOrEmpty(compilationOptions.Platform))
-            {
-                compilerArgs.Add($"-platform:{compilationOptions.Platform}");
-            }
-
-            if (compilationOptions.WarningsAsErrors.GetValueOrDefault())
-            {
-                compilerArgs.Add("-warnaserror");
-            }
-
-            if (compilationOptions.DelaySign.GetValueOrDefault())
-            {
-                compilerArgs.Add("-delaysign+");
-            }
-
-            if (!string.IsNullOrEmpty(compilationOptions.KeyFile))
-            {
-                compilerArgs.Add($"-keyFile:\"{compilationOptions.KeyFile}\"");
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                compilerArgs.Add("-debug:full");
-            }
-            else
-            {
-                compilerArgs.Add("-debug:portable");
-            }
-
-            // TODO: OSS signing
         }
 
         private static void ShowDependencyInfo(IEnumerable<LibraryExport> dependencies)

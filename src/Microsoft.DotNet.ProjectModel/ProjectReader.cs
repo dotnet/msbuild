@@ -344,7 +344,7 @@ namespace Microsoft.Extensions.ProjectModel
         private void BuildTargetFrameworksAndConfigurations(Project project, JsonObject projectJsonObject, ICollection<DiagnosticMessage> diagnostics)
         {
             // Get the shared compilationOptions
-            project._defaultCompilerOptions = GetCompilationOptions(projectJsonObject) ?? new CompilerOptions();
+            project._defaultCompilerOptions = GetCompilationOptions(projectJsonObject) ?? new CommonCompilerOptions();
 
             project._defaultTargetFrameworkConfiguration = new TargetFrameworkInformation
             {
@@ -352,13 +352,13 @@ namespace Microsoft.Extensions.ProjectModel
             };
 
             // Add default configurations
-            project._compilerOptionsByConfiguration["Debug"] = new CompilerOptions
+            project._compilerOptionsByConfiguration["Debug"] = new CommonCompilerOptions
             {
                 Defines = new[] { "DEBUG", "TRACE" },
                 Optimize = false
             };
 
-            project._compilerOptionsByConfiguration["Release"] = new CompilerOptions
+            project._compilerOptionsByConfiguration["Release"] = new CommonCompilerOptions
             {
                 Defines = new[] { "RELEASE", "TRACE" },
                 Optimize = true
@@ -439,7 +439,7 @@ namespace Microsoft.Extensions.ProjectModel
         {
             // If no compilation options are provided then figure them out from the node
             var compilerOptions = GetCompilationOptions(frameworkValue) ??
-                                  new CompilerOptions();
+                                  new CommonCompilerOptions();
 
             var frameworkName = NuGetFramework.Parse(frameworkKey);
 
@@ -504,7 +504,7 @@ namespace Microsoft.Extensions.ProjectModel
             return true;
         }
 
-        private static CompilerOptions GetCompilationOptions(JsonObject rawObject)
+        private static CommonCompilerOptions GetCompilationOptions(JsonObject rawObject)
         {
             var rawOptions = rawObject.ValueAsJsonObject("compilationOptions");
             if (rawOptions == null)
@@ -512,7 +512,7 @@ namespace Microsoft.Extensions.ProjectModel
                 return null;
             }
 
-            return new CompilerOptions
+            return new CommonCompilerOptions
             {
                 Defines = rawOptions.ValueAsStringArray("define"),
                 LanguageVersion = rawOptions.ValueAsString("languageVersion"),

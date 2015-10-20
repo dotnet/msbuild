@@ -1,12 +1,13 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Microsoft.Extensions.ProjectModel
 {
-    public class CompilerOptions
+    public class CommonCompilerOptions
     {
         public IEnumerable<string> Defines { get; set; }
 
@@ -28,9 +29,9 @@ namespace Microsoft.Extensions.ProjectModel
 
         public bool? EmitEntryPoint { get; set; }
 
-        public static CompilerOptions Combine(params CompilerOptions[] options)
+        public static CommonCompilerOptions Combine(params CommonCompilerOptions[] options)
         {
-            var result = new CompilerOptions();
+            var result = new CommonCompilerOptions();
             foreach (var option in options)
             {
                 // Skip null options
@@ -94,5 +95,6 @@ namespace Microsoft.Extensions.ProjectModel
 
             return result;
         }
+
     }
 }

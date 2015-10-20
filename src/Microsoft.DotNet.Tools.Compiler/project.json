@@ -14,6 +14,7 @@
     "System.IO.FileSystem": "4.0.1-beta-23502",
 
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": {
       "type": "build",
       "version": "1.0.0-*"
