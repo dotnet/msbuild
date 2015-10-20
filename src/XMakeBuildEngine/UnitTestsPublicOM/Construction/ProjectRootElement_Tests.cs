@@ -1220,9 +1220,7 @@ Project(""{";
 
             project = ProjectRootElement.Open(projectFullPath, new ProjectCollection());
 
-            // We compare body names instead of encoding instances directly because at times the instances can
-            // be (insignificantly) different.
-            Assert.Equal(encoding.BodyName, project.Encoding.BodyName); // "A re-opened project did not retain the previously saved Encoding."
+            Assert.Equal(encoding, project.Encoding);
         }
 
         /// <summary>
