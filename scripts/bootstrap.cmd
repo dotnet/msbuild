@@ -11,14 +11,22 @@ set REPOROOT=%CD%
 popd
 
 set RID=win7-x64
+set DNX_DIR=%REPOROOT%\artifacts\%RID%\dnx
 set STAGE0_DIR=%REPOROOT%\artifacts\%RID%\stage0
 set STAGE1_DIR=%REPOROOT%\artifacts\%RID%\stage1
 set STAGE2_DIR=%REPOROOT%\artifacts\%RID%\stage2
 
 where dnvm >nul 2>nul
 if %errorlevel% == 0 goto have_dnvm
+echo DNVM must be installed to bootstrap dotnet
+exit /B 1
 
 :have_dnvm
+if not exist %DNX_DIR% mkdir %DNX_DIR%
+set DNX_HOME=%DNX_DIR%
+set DNX_USER_HOME=%DNX_DIR%
+set DNX_GLOBAL_HOME=%DNX_DIR%
+
 echo Installing and use-ing the latest CoreCLR x64 DNX ...
 call dnvm install -nonative -u latest -r coreclr -arch x64 -alias dotnet_bootstrap
 if errorlevel 1 goto fail
@@ -35,6 +43,8 @@ if errorlevel 1 goto fail
 echo Building basic dotnet tools using older dotnet SDK version
 
 set DOTNET_HOME=%STAGE0_DIR%
+set DOTNET_USER_HOME=%STAGE0_DIR%
+set DOTNET_GLOBAL_HOME=%STAGE0_DIR%
 
 call %~dp0dnvm2 upgrade
 if errorlevel 1 goto fail

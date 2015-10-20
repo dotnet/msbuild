@@ -25,6 +25,7 @@ if [ -z "$RID" ]; then
 fi
 
 OUTPUT_ROOT=$REPOROOT/artifacts/$RID
+DNX_DIR=$OUTPUT_ROOT/dnx
 STAGE0_DIR=$OUTPUT_ROOT/stage0
 STAGE1_DIR=$OUTPUT_ROOT/stage1
 STAGE2_DIR=$OUTPUT_ROOT/stage2
@@ -32,54 +33,60 @@ STAGE2_DIR=$OUTPUT_ROOT/stage2
 echo "Cleaning artifacts folder"
 rm -rf $OUTPUT_ROOT
 
+echo "Installing stage0"
+# Use a sub-shell to ensure the DNVM gets cleaned up
+mkdir -p $STAGE0_DIR
+$DIR/install-stage0.sh $STAGE0_DIR $DIR/dnvm2.sh
+rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
-STAGE0_PUBLISH=$REPOROOT/scripts/stage0/dotnet-publish
+export PATH=$STAGE0_DIR/bin:$PATH
 
 export DOTNET_CLR_HOSTS_PATH=$REPOROOT/ext/CLRHost/$RID
 
-if ! type dnvm > /dev/null 2>&1; then
-    curl -sSL https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.sh | DNX_BRANCH=dev sh && source ~/.dnx/dnvm/dnvm.sh
+if ! type dnx > /dev/null 2>&1; then
+    echo "Installing and use-ing the latest CoreCLR x64 DNX ..."
+    mkdir -p $DNX_DIR
+
+    export DNX_HOME=$DNX_DIR
+    export DNX_USER_HOME=$DNX_DIR
+    export DNX_GLOBAL_HOME=$DNX_DIR
+
+    if ! type dnvm > /dev/null 2>&1; then
+        curl -o $DNX_DIR/dnvm.sh https://raw.githubusercontent.com/aspnet/Home/dev/dnvm.sh
+        source $DNX_DIR/dnvm.sh
+    fi
+
+    dnvm install latest -u -r coreclr
+    rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+
+    # Make sure we got a DNX
+    if ! type dnx > /dev/null 2>&1; then
+        echo "DNX is required to bootstrap stage1" 1>&2
+        exit 1
+    fi
 fi
 
-echo "Installing and use-ing the latest CoreCLR x64 DNX ..."
-dnvm install latest -u -r coreclr -alias dotnet_bootstrap
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-
-dnvm use dotnet_bootstrap -r coreclr -arch x64
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-
-type -p dnx >/dev/null
-if [ ! $? ]; then
-    echo "DNX is required to bootstrap stage1" 1>&2
-    exit 1
-fi
-
-echo "Running 'dnu restore' to restore packages for DNX-hosted projects"
+echo "Running 'dnu restore' to restore packages"
 
 dnu restore "$REPOROOT" --runtime osx.10.10-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.11-x64
-
-# symlink mcs to csc for bootstrapping (requires mono :()
-mkdir -p $STAGE0_DIR
-ln -s `(which mcs)` $STAGE0_DIR/csc
-export PATH=$PATH:$STAGE0_DIR
+rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # Clean up stage1
 [ -d "$STAGE1_DIR" ] && rm -Rf "$STAGE1_DIR"
 
-echo "Building basic dotnet tools using Stage 0 (DNX hosted)"
-$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
+echo "Building basic dotnet tools using Stage 0"
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-$STAGE0_PUBLISH --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
+dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
 
 # Add stage1 to the path and use it to build stage2
 export PATH=$STAGE1_DIR:$PATH
-rm $STAGE0_DIR/csc
 
 echo "Building stage2 dotnet using stage1 ..."
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"

@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-./scripts/bootstrap
+./scripts/bootstrap.sh
+
+./scripts/package.sh

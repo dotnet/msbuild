@@ -10,5 +10,8 @@ if %ERRORLEVEL% neq 0 (
 )
 
 :continue
-call %~dp0scripts/bootstrap
+call %~dp0scripts/bootstrap.cmd
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+call %~dp0scripts/package.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
