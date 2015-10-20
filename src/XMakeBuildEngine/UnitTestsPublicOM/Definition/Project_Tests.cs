@@ -1001,7 +1001,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Changing global properties with some preexisting from the project collection.
         /// Should not modify those on the project collection.
         /// </summary>
+#if FEATURE_INSTALLED_MSBUILD
         [Fact]
+#else
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/276")]
+#endif
         public void ChangeGlobalPropertiesInitiallyFromProjectCollection()
         {
             Dictionary<string, string> initial = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
