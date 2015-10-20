@@ -1,0 +1,31 @@
+MSBuild is under active development primarily in two different areas: CoreCLR MSBuild and Desktop MSBuild.
+
+#CoreCLR MSBuild
+Our goal is the enable a subset of MSBuild to run cross-platform and build applications that target the CoreCLR framework. This version should be delivered via NuGet and have no required dependencies on the machine (no installer, no registry, no GAC). It is not intended to replace the version integrated with Visual Studio nor build projects targeting the full .NET Framework.
+* Fully support Linux, OSX, and Windows with all CoreCLR MSBuild features.
+* Eliminate dependency on the full .NET Framework (and mono).
+* Enable features over time to reduce feature gap.
+
+*Note that features like toolsets, registry, GAC, Frameworks, etc. that do not apply to CoreCLR will remain disabled.*
+
+#Desktop MSBuild
+Our goal is to maintain a single codebase with a high degree of compatibility and stability between releases. As such, the bar for new features or behavior change should be very high.
+##Quality
+* Performance-related fixes to improve the end-to-end experience for developers in Visual Studio. [ongoing]
+* Fix top-hitting issues gathered from feedback and Watson events (crash data). [ongoing]
+
+##Performance
+* Address "low-hanging fruit" to improve build speed, particularly around C++. [post Update 1 time-frame]
+* Improved incremental build with help of fully deterministic Roslyn builds. [post Update 1 time-frame]
+
+##Technical Debt
+* Merge codebases (xplat, master, and internal branches). Introduce compiler constants for CoreCLR feature flags.
+* Ship MSBuild for Visual Studio out of GitHub sources. [Visual Studio vNext time-frame]
+
+##Telemetry
+* Gather additional data on usage and issues (hangs in Visual Studio, etc). [post Update 1 time-frame]
+
+#Branch Strategy
+* `xplat`: Work for cross-platform support, primarily focused on CoreCLR.  In the medium term, we should build both CoreCLR and Desktop MSBuild from the same branch and merge this branch into `master`.
+* `master`: Work for Desktop MSBuild, for now manually mirrored into internal source control.
+* Microsoft Internal: At the moment, the "official" location that produces builds that ship with Visual Studio and its updates.  Changes are manually mirrored from GitHub `master` as we go along.
