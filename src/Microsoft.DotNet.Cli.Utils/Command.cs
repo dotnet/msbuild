@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
 #if DEBUG
             var sw = Stopwatch.StartNew();
-            Console.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments}");
+            Reporter.Output.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments}".Green().Bold());
 #endif
             _process.Start();
             _process.BeginOutputReadLine();
@@ -139,7 +139,15 @@ namespace Microsoft.DotNet.Cli.Utils
             var exitCode = await _processTcs.Task;
 
 #if DEBUG
-            Console.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.");
+            var message = $"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.";
+            if (exitCode == 0)
+            {
+                Reporter.Output.WriteLine(message.Green().Bold());
+            }
+            else
+            {
+                Reporter.Output.WriteLine(message.Red().Bold());
+            }
 #endif
 
             return new CommandResult(
