@@ -4,7 +4,7 @@ MSBuild is under active development primarily in two different areas: .NET Core 
 Our goal is the enable a subset of MSBuild to run cross-platform and build applications that target the .NET Core framework. This version should be delivered via NuGet and have no required dependencies on the machine (no installer, no registry, no GAC). It is not intended to replace the version integrated with Visual Studio nor build projects targeting the full .NET Framework.
 * Fully support Linux, OSX, and Windows with all .NET Core MSBuild features.
 * Eliminate dependency on the full .NET Framework (and mono).
-* Enable features over time to reduce feature gap.
+* Enable features over time to reduce feature gap ([#303](/Microsoft/msbuild/issues/303), [#304](/Microsoft/msbuild/issues/304)).
 
 *Note that features like toolsets, registry, GAC, Frameworks, etc. that do not apply to building .NET Core applications will remain disabled.*
 
@@ -29,3 +29,4 @@ This version of MSBuild is the version we ship with Visual Studio (previously sh
 * `xplat`: Work for cross-platform support, primarily focused on CoreCLR.  In the medium term, we should build both CoreCLR and Desktop MSBuild from the same branch and merge this branch into `master`.
 * `master`: Work for Desktop MSBuild, for now manually mirrored into internal source control.
 * Microsoft Internal: At the moment, the "official" location that produces builds that ship with Visual Studio and its updates.  Changes are manually mirrored from GitHub `master` as we go along.
+* Mono support: Still TBD. See [#302](/Microsoft/msbuild/issues/302). LKG xplat [`@f9d8cc7`] (https://github.com/Microsoft/msbuild/commit/f9d8cc725ca2cd46d7e01015afba0defea95ce37)
