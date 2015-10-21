@@ -59,7 +59,7 @@
           >
     <ResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
                                IncludeFrameworkReferences="false"
-                               NuGetPackagesDirectory=""
+                               NuGetPackagesDirectory="$(NuGetDir)"
                                RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
                                ProjectLanguage=""
                                ProjectLockFile="$(RuntimeProjectLockJson)"
