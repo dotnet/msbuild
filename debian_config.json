@@ -4,12 +4,12 @@
 
     "package_name": "dotnet",                           
 
-    "short_description": "debian package for dotnet cli",              
-    "long_description": "This package restores, compiles, and publishes.", 
+    "short_description": "NOT FINAL debian package for dotnet cli",              
+    "long_description": "NOT FINAL This package restores, compiles, and publishes.", 
     "homepage": "https://dotnet.github.io/core",                        
 
     "release":{
-        "package_version":"0.2",                               
+        "package_version":"0.3",                               
         "package_revision":"1",                                 
         "urgency" : "low",                                      
         "changelog_message" : "Bootstrap loop package"                
@@ -34,7 +34,9 @@
     "symlinks": {
         "dotnet" : "usr/bin/dotnet",
         "dotnet-compile" : "usr/bin/dotnet-compile",
+        "dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
         "dotnet-publish" : "usr/bin/dotnet-publish",
-		"dotnet-restore" : "usr/bin/dotnet-restore"
+		"dotnet-restore" : "usr/bin/dotnet-restore",
+        "resgen" : "usr/bin/resgen"
     }
 }
