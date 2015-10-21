@@ -159,9 +159,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Get compilation options
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             var outputName = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
-
-            var bootstrappingWithMono = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("BOOTSTRAPPING_WITH_MONO"));
-
+            
             // Assemble args
             var compilerArgs = new List<string>()
             {
@@ -170,16 +168,13 @@ namespace Microsoft.DotNet.Tools.Compiler
                 $"-out:\"{outputName}\""
             };
 
-            if (!bootstrappingWithMono)
-            {
-                // Default suppressions, some versions of mono don't support these
-                compilerArgs.Add("-nowarn:CS1701");
-                compilerArgs.Add("-nowarn:CS1702");
-                compilerArgs.Add("-nowarn:CS1705");
-            }
-
+            // Default suppressions, some versions of mono don't support these
+            compilerArgs.Add("-nowarn:CS1701");
+            compilerArgs.Add("-nowarn:CS1702");
+            compilerArgs.Add("-nowarn:CS1705");
+            
             // Add compilation options to the args
-            ApplyCompilationOptions(compilationOptions, compilerArgs, bootstrappingWithMono);
+            ApplyCompilationOptions(compilationOptions, compilerArgs);
 
             foreach (var dependency in dependencies)
             {
@@ -393,52 +388,51 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs, bool bootstrappingWithMono)
+        private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> compilerArgs)
         {
-            // TODO: Move compilation arguments into the compiler itself
             var targetType = compilationOptions.EmitEntryPoint.GetValueOrDefault() ? "exe" : "library";
 
-            cscArgs.Add($"-target:{targetType}");
+            compilerArgs.Add($"-target:{targetType}");
 
             if (compilationOptions.AllowUnsafe.GetValueOrDefault())
             {
-                cscArgs.Add("-unsafe+");
+                compilerArgs.Add("-unsafe+");
             }
 
-            cscArgs.AddRange(compilationOptions.Defines.Select(d => $"-d:{d}"));
+            compilerArgs.AddRange(compilationOptions.Defines.Select(d => $"-d:{d}"));
 
             if (compilationOptions.Optimize.GetValueOrDefault())
             {
-                cscArgs.Add("-optimize");
+                compilerArgs.Add("-optimize");
             }
 
             if (!string.IsNullOrEmpty(compilationOptions.Platform))
             {
-                cscArgs.Add($"-platform:{compilationOptions.Platform}");
+                compilerArgs.Add($"-platform:{compilationOptions.Platform}");
             }
 
             if (compilationOptions.WarningsAsErrors.GetValueOrDefault())
             {
-                cscArgs.Add("-warnaserror");
+                compilerArgs.Add("-warnaserror");
             }
 
             if (compilationOptions.DelaySign.GetValueOrDefault())
             {
-                cscArgs.Add("-delaysign+");
+                compilerArgs.Add("-delaysign+");
             }
 
             if (!string.IsNullOrEmpty(compilationOptions.KeyFile))
             {
-                cscArgs.Add($"-keyFile:\"{compilationOptions.KeyFile}\"");
+                compilerArgs.Add($"-keyFile:\"{compilationOptions.KeyFile}\"");
             }
 
-            if (bootstrappingWithMono || RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                cscArgs.Add("-debug:full");
+                compilerArgs.Add("-debug:full");
             }
             else
             {
-                cscArgs.Add("-debug:portable");
+                compilerArgs.Add("-debug:portable");
             }
 
             // TODO: OSS signing
