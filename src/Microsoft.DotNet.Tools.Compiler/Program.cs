@@ -84,8 +84,6 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var diagnostics = new List<DiagnosticMessage>();
 
-            bool success = true;
-
             // Collect dependency diagnostics
             diagnostics.AddRange(context.LibraryManager.GetAllDiagnostics());
 
@@ -145,15 +143,18 @@ namespace Microsoft.DotNet.Tools.Compiler
                     configuration,
                     context.TargetFramework.GetTwoDigitShortFolderName());
 
-            if (!Directory.Exists(outputPath))
+            if (Directory.Exists(outputPath))
             {
-                Directory.CreateDirectory(outputPath);
+                Directory.Delete(outputPath, recursive: true);
             }
 
-            if (!Directory.Exists(intermediateOutputPath))
+            if (Directory.Exists(intermediateOutputPath))
             {
-                Directory.CreateDirectory(intermediateOutputPath);
+                Directory.Delete(intermediateOutputPath, recursive: true);
             }
+
+            Directory.CreateDirectory(outputPath);
+            Directory.CreateDirectory(intermediateOutputPath);
 
             // Get compilation options
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
@@ -227,18 +228,17 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             foreach (var diag in diagnostics)
             {
-                success &= diag.Severity != DiagnosticMessageSeverity.Error;
                 PrintDiagnostic(diag);
             }
-            
-            success &= result.ExitCode == 0;
 
-            PrintSummary(diagnostics);
+            var success = result.ExitCode == 0;
+
+            PrintSummary(success, diagnostics);
 
             return success;
         }
 
-        private static void PrintSummary(List<DiagnosticMessage> diagnostics)
+        private static void PrintSummary(bool success, List<DiagnosticMessage> diagnostics)
         {
             Reporter.Output.Writer.WriteLine();
 

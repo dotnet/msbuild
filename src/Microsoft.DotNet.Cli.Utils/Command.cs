@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var message = $"< {FormatProcessInfo(_process.StartInfo)} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.";
             if (exitCode == 0)
             {
-                Reporter.Output.WriteLine(message.Green().Bold());
+                Reporter.Output.WriteLine(message.Green());
             }
             else
             {

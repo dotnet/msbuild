@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string BinDirectoryName = "bin";
         public static readonly string ObjDirectoryName = "obj";
 
-        public static readonly string HostsPathEnvironmentVariable = "DOTNET_CLR_HOSTS_PATH";
-        public static readonly string CSCPathEnvironmentVariable = "DOTNET_CSC_PATH";
+        public static readonly string ClrPathEnvironmentVariable = "DOTNET_CLR_PATH";
     }
 }

@@ -5,9 +5,11 @@
     },
 
     "dependencies": {
-        "Microsoft.NETCore.ConsoleHost": "1.0.0-*",
-        "Microsoft.NETCore.Runtime": "1.0.0-*",
-        "System.Console": "4.0.0-beta-23109"
+        "Microsoft.NETCore.Runtime": "1.0.1-*",
+        "System.IO": "4.0.10-beta-23420",
+        "System.Console": "4.0.0-beta-23420",
+        "System.Runtime": "4.0.20-beta-23420",
+        "System.Diagnostics.Process": "4.1.0-beta-23420"
     },
 
     "frameworks": {

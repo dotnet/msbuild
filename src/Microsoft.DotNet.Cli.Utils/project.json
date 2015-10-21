@@ -4,10 +4,10 @@
     "shared": "**/*.cs",
 
     "dependencies": {
-        "System.Console": "4.0.0-beta-23419",
-        "System.IO.FileSystem": "4.0.1-beta-23419",
-        "System.Diagnostics.Process": "4.1.0-beta-23419",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23419"
+        "System.Console": "4.0.0-beta-23420",
+        "System.IO.FileSystem": "4.0.1-beta-23420",
+        "System.Diagnostics.Process": "4.1.0-beta-23420",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23420"
     },
     "frameworks": {
         "dnxcore50": { }

@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+set -e
+
+[ -z "$CONFIGURATION" ] && CONFIGURATION=Debug
+
+# TODO: Replace this with a dotnet generation
+TFM=dnxcore50
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -8,6 +15,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 REPOROOT="$( cd -P "$DIR/.." && pwd )"
+
+START_PATH=$PATH
 
 echo "Bootstrapping dotnet.exe using DNX"
 
@@ -37,71 +46,92 @@ echo "Installing stage0"
 # Use a sub-shell to ensure the DNVM gets cleaned up
 mkdir -p $STAGE0_DIR
 $DIR/install-stage0.sh $STAGE0_DIR $DIR/dnvm2.sh
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 export PATH=$STAGE0_DIR/bin:$PATH
 
-export DOTNET_CLR_HOSTS_PATH=$REPOROOT/ext/CLRHost/$RID
+echo "Installing and use-ing the latest CoreCLR x64 DNX ..."
+mkdir -p $DNX_DIR
 
-if ! type dnx > /dev/null 2>&1; then
-    echo "Installing and use-ing the latest CoreCLR x64 DNX ..."
-    mkdir -p $DNX_DIR
+export DNX_HOME=$DNX_DIR
+export DNX_USER_HOME=$DNX_DIR
+export DNX_GLOBAL_HOME=$DNX_DIR
 
-    export DNX_HOME=$DNX_DIR
-    export DNX_USER_HOME=$DNX_DIR
-    export DNX_GLOBAL_HOME=$DNX_DIR
-
-    if ! type dnvm > /dev/null 2>&1; then
-        curl -o $DNX_DIR/dnvm.sh https://raw.githubusercontent.com/aspnet/Home/dev/dnvm.sh
-        source $DNX_DIR/dnvm.sh
-    fi
-
-    dnvm install latest -u -r coreclr
-    rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-
-    # Make sure we got a DNX
-    if ! type dnx > /dev/null 2>&1; then
-        echo "DNX is required to bootstrap stage1" 1>&2
-        exit 1
-    fi
+if ! type dnvm > /dev/null 2>&1; then
+    curl -o $DNX_DIR/dnvm.sh https://raw.githubusercontent.com/aspnet/Home/dev/dnvm.sh
+    source $DNX_DIR/dnvm.sh
 fi
+
+dnvm install latest -u -r coreclr
+
+# Make sure we got a DNX
+if ! type dnx > /dev/null 2>&1; then
+    echo "DNX is required to bootstrap stage1" 1>&2
+    exit 1
+fi
+
+DNX_ROOT=$(dirname $(which dnx))
 
 echo "Running 'dnu restore' to restore packages"
 
 dnu restore "$REPOROOT" --runtime osx.10.10-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.11-x64
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # Clean up stage1
 [ -d "$STAGE1_DIR" ] && rm -Rf "$STAGE1_DIR"
 
 echo "Building basic dotnet tools using Stage 0"
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE1_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Cli"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE1_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE1_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE1_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE1_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
+
+# Update stage1 with the checked-in CoreCLR
+cp $REPOROOT/ext/CoreCLR/$RID/* $STAGE1_DIR
 
 # Add stage1 to the path and use it to build stage2
-export PATH=$STAGE1_DIR:$PATH
+export PATH=$STAGE1_DIR:$START_PATH
 
 # Make corerun explicitly executable
 chmod a+x $STAGE1_DIR/corerun
 
 echo "Building stage2 dotnet using stage1 ..."
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
-dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
-rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Cli"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Csc"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
+dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
 
 # Make Stage 2 Folder Accessible
 chmod -R a+r $REPOROOT
+
+# Copy DNX in to stage2
+cp -R $DNX_ROOT $STAGE2_DIR/dnx
+
+# Clean up some things we don't need
+rm -Rf $STAGE2_DIR/dnx/lib/Microsoft.Dnx.DesignTimeHost
+rm -Rf $STAGE2_DIR/dnx/lib/Microsoft.Dnx.Project
+rm $STAGE2_DIR/dnx/dnu
+
+# Copy and CHMOD the dotnet-restore script
+cp $DIR/dotnet-restore.sh $STAGE2_DIR/dotnet-restore
+chmod a+x $STAGE2_DIR/dotnet-restore
+
+# Smoke-test the output
+export PATH=$STAGE2_DIR:$START_PATH
+
+rm "$REPOROOT/test/TestApp/project.lock.json"
+dotnet restore "$REPOROOT/test/TestApp" --runtime "$RID"
+dotnet publish "$REPOROOT/test/TestApp" --framework "$TFM" --runtime "$RID" --output "$REPOROOT/artifacts/$RID/smoketest"
+
+OUTPUT=$($REPOROOT/artifacts/$RID/smoketest/TestApp)
+[ "$OUTPUT" == "This is a test app" ] || (echo "Smoke test failed!" && exit 1)
+
+# Check that a compiler error is reported
+set +e
+dotnet compile "$REPOROOT/test/compile/failing/SimpleCompilerError" --framework "$TFM"
+rc=$?
+if [ $rc == 0 ]; then
+    echo "Compiler failure test failed! The compiler did not fail to compile!"
+    exit 1
+fi
+set -e

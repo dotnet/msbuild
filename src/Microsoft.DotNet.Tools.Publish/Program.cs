@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.ProjectModel;
@@ -11,6 +12,8 @@ namespace Microsoft.DotNet.Tools.Publish
 {
     public class Program
     {
+        public static readonly IEnumerable<string> CoreCLRFileNames = GetCoreCLRFileNames();
+
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -113,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-compile", $"--framework {context.TargetFramework.DotNetFrameworkName} \"{context.ProjectFile.ProjectDirectory}\"")
+            var result = Command.Create("dotnet-compile", $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" --configuration \"{configuration}\" \"{context.ProjectFile.ProjectDirectory}\"")
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
@@ -138,7 +141,6 @@ namespace Microsoft.DotNet.Tools.Publish
                 PublishFiles(export.NativeLibraries, outputPath);
             }
 
-            // Publishing for windows, TODO(anurse): Publish for Mac/Linux/etc.
             int exitCode;
             if (context.RuntimeIdentifier.StartsWith("win"))
             {
@@ -155,30 +157,9 @@ namespace Microsoft.DotNet.Tools.Publish
 
         private static int PublishForUnix(ProjectContext context, string outputPath)
         {
-            // Locate Hosts
-            string hostsPath = Environment.GetEnvironmentVariable(Constants.HostsPathEnvironmentVariable);
-            if (string.IsNullOrEmpty(hostsPath))
-            {
-                hostsPath = AppContext.BaseDirectory;
-            }
-
-            var coreConsole = Path.Combine(hostsPath, Constants.CoreConsoleName);
-            if (!File.Exists(coreConsole))
-            {
-                Reporter.Error.WriteLine($"Unable to locate {Constants.CoreConsoleName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
-                return 1;
-            }
-
-            var coreRun = Path.Combine(hostsPath, Constants.CoreRunName);
-            if (!File.Exists(coreRun))
-            {
-                Reporter.Error.WriteLine($"Unable to locate {Constants.CoreRunName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
-                return 1;
-            }
-
-            // TEMPORARILY bring CoreConsole and CoreRun along for the ride on it's own (without renaming)
-            File.Copy(coreConsole, Path.Combine(outputPath, Constants.CoreConsoleName), overwrite: true);
-            File.Copy(coreRun, Path.Combine(outputPath, Constants.CoreRunName), overwrite: true);
+            CopyCoreCLR(outputPath);
+            var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
+            var coreRun = Path.Combine(outputPath, Constants.CoreRunName);
 
             // Use the 'command' field to generate the name
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name);
@@ -211,30 +192,10 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
             {
                 return 0;
             }
-            // Locate Hosts
-            string hostsPath = Environment.GetEnvironmentVariable(Constants.HostsPathEnvironmentVariable);
-            if (string.IsNullOrEmpty(hostsPath))
-            {
-                hostsPath = AppContext.BaseDirectory;
-            }
 
-            var coreConsole = Path.Combine(hostsPath, Constants.CoreConsoleName);
-            if (!File.Exists(coreConsole))
-            {
-                Reporter.Error.WriteLine($"Unable to locate {Constants.CoreConsoleName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
-                return 1;
-            }
-
-            var coreRun = Path.Combine(hostsPath, Constants.CoreRunName);
-            if (!File.Exists(coreRun))
-            {
-                Reporter.Error.WriteLine($"Unable to locate {Constants.CoreRunName} in {coreConsole}, use {Constants.HostsPathEnvironmentVariable} to set the path to it.".Red().Bold());
-                return 1;
-            }
-
-            // TEMPORARILY bring CoreConsole and CoreRun along for the ride on it's own (without renaming)
-            File.Copy(coreConsole, Path.Combine(outputPath, Constants.CoreConsoleName), overwrite: true);
-            File.Copy(coreRun, Path.Combine(outputPath, Constants.CoreRunName), overwrite: true);
+            CopyCoreCLR(outputPath);
+            var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
+            var coreRun = Path.Combine(outputPath, Constants.CoreRunName);
 
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
 
@@ -244,6 +205,17 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
             // Change coreconsole.exe to the {app}.exe name
             File.Copy(coreConsole, outputExe, overwrite: true);
             return 0;
+        }
+
+        private static void CopyCoreCLR(string outputPath)
+        {
+            // TEMPORARILY bring checked-in CoreCLR stuff along for the ride.
+            var clrPath = AppContext.BaseDirectory;
+
+            foreach(var file in CoreCLRFileNames)
+            {
+                File.Copy(Path.Combine(clrPath, file), Path.Combine(outputPath, file), overwrite: true);
+            }
         }
 
         private static void CopyContents(ProjectContext context, string outputPath)
@@ -315,6 +287,33 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
             foreach (var file in files)
             {
                 File.Copy(file, Path.Combine(outputPath, Path.GetFileName(file)), overwrite: true);
+            }
+        }
+
+        private static IEnumerable<string> GetCoreCLRFileNames()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                yield return "coreclr.dll";
+                yield return "CoreConsole.exe";
+                yield return "CoreRun.exe";
+                yield return "mscorlib.ni.dll";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                yield return "libcoreclr.dylib";
+                yield return "coreconsole";
+                yield return "corerun";
+                yield return "mscorlib.dll";
+                yield return "System.Globalization.Native.dylib";
+            }
+            else
+            {
+                yield return "libcoreclr.so";
+                yield return "coreconsole";
+                yield return "corerun";
+                yield return "mscorlib.dll";
+                yield return "System.Globalization.Native.so";
             }
         }
     }

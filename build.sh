@@ -2,6 +2,8 @@
 #
 # $1 is passed to package to enable deb or pkg packaging
 
+set -e
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -11,5 +13,4 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 $DIR/scripts/bootstrap.sh
-
 $DIR/scripts/package.sh $1

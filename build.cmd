@@ -1,4 +1,3 @@
-@echo off
 
 setlocal EnableDelayedExpansion
 where dnvm
@@ -10,8 +9,10 @@ if %ERRORLEVEL% neq 0 (
 )
 
 :continue
+echo *** Building dotnet ***
 call %~dp0scripts/bootstrap.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
+echo *** Packaging dotnet ***
 call %~dp0scripts/package.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
