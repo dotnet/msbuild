@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.ProjectModel.Graph;
 using Microsoft.Extensions.ProjectModel.Resolution;
 using NuGet.Frameworks;
@@ -32,8 +33,10 @@ namespace Microsoft.Extensions.ProjectModel
 
             if (GlobalSettings == null)
             {
+                RootDirectory = ProjectRootResolver.ResolveRootDirectory(ProjectDirectory);
+
                 GlobalSettings globalSettings;
-                if (GlobalSettings.TryGetGlobalSettings(ProjectDirectory, out globalSettings))
+                if (GlobalSettings.TryGetGlobalSettings(RootDirectory, out globalSettings))
                 {
                     GlobalSettings = globalSettings;
                 }
@@ -63,13 +66,13 @@ namespace Microsoft.Extensions.ProjectModel
                 lockFileLookup = new LockFileLookup(LockFile);
             }
 
-            var libraries = new Dictionary<string, LibraryDescription>();
+            var libraries = new Dictionary<LibraryKey, LibraryDescription>();
             var projectResolver = new ProjectDependencyProvider();
 
             var mainProject = projectResolver.GetDescription(TargetFramework, Project);
 
             // Add the main project
-            libraries.Add(mainProject.Identity.Name, mainProject);
+            libraries.Add(new LibraryKey(mainProject.Identity.Name), mainProject);
 
             LockFileTarget target = null;
             if (lockFileLookup != null)
@@ -121,7 +124,7 @@ namespace Microsoft.Extensions.ProjectModel
                 libraryManager);
         }
 
-        private void ResolveDependencies(Dictionary<string, LibraryDescription> libraries, ReferenceAssemblyDependencyResolver referenceAssemblyDependencyResolver)
+        private void ResolveDependencies(Dictionary<LibraryKey, LibraryDescription> libraries, ReferenceAssemblyDependencyResolver referenceAssemblyDependencyResolver)
         {
             foreach (var library in libraries.Values.ToList())
             {
@@ -135,8 +138,11 @@ namespace Microsoft.Extensions.ProjectModel
                 library.Framework = library.Framework ?? TargetFramework;
                 foreach (var dependency in library.Dependencies)
                 {
+                    var keyType = dependency.Target == LibraryType.ReferenceAssembly ? LibraryType.ReferenceAssembly : LibraryType.Unspecified;
+                    var key = new LibraryKey(dependency.Name, keyType);
+
                     LibraryDescription dep;
-                    if (!libraries.TryGetValue(dependency.Name, out dep))
+                    if (!libraries.TryGetValue(key, out dep))
                     {
                         if (Equals(LibraryType.ReferenceAssembly, dependency.Target))
                         {
@@ -144,12 +150,12 @@ namespace Microsoft.Extensions.ProjectModel
                                   UnresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
 
                             dep.Framework = TargetFramework;
-                            libraries[dependency.Name] = dep;
+                            libraries[key] = dep;
                         }
                         else
                         {
                             dep = UnresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
-                            libraries[dependency.Name] = dep;
+                            libraries[key] = dep;
                         }
                     }
 
@@ -159,7 +165,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
         }
 
-        private void ScanLibraries(LockFileTarget target, LockFileLookup lockFileLookup, Dictionary<string, LibraryDescription> libraries, PackageDependencyProvider packageResolver, ProjectDependencyProvider projectResolver)
+        private void ScanLibraries(LockFileTarget target, LockFileLookup lockFileLookup, Dictionary<LibraryKey, LibraryDescription> libraries, PackageDependencyProvider packageResolver, ProjectDependencyProvider projectResolver)
         {
             foreach (var library in target.Libraries)
             {
@@ -171,7 +177,7 @@ namespace Microsoft.Extensions.ProjectModel
 
                     var projectDescription = projectResolver.GetDescription(library.Name, path, library);
 
-                    libraries.Add(projectDescription.Identity.Name, projectDescription);
+                    libraries.Add(new LibraryKey(projectDescription.Identity.Name), projectDescription);
                 }
                 else
                 {
@@ -179,7 +185,7 @@ namespace Microsoft.Extensions.ProjectModel
 
                     var packageDescription = packageResolver.GetDescription(packageEntry, library);
 
-                    libraries.Add(packageDescription.Identity.Name, packageDescription);
+                    libraries.Add(new LibraryKey(packageDescription.Identity.Name), packageDescription);
                 }
             }
         }
@@ -222,6 +228,39 @@ namespace Microsoft.Extensions.ProjectModel
             }
 
             return null;
+        }
+
+        private struct LibraryKey
+        {
+            public LibraryKey(string name) : this(name, LibraryType.Unspecified)
+            {
+            }
+
+            public LibraryKey(string name, LibraryType libraryType)
+            {
+                Name = name;
+                LibraryType = libraryType;
+            }
+
+            public string Name { get; }
+            public LibraryType LibraryType { get; }
+
+            public override bool Equals(object obj)
+            {
+                var otherKey = (LibraryKey)obj;
+
+                return string.Equals(otherKey.Name, Name, StringComparison.Ordinal) &&
+                    otherKey.LibraryType.Equals(LibraryType);
+            }
+
+            public override int GetHashCode()
+            {
+                var combiner = new HashCodeCombiner();
+                combiner.Add(Name);
+                combiner.Add(LibraryType);
+
+                return combiner.CombinedHash;
+            }
         }
     }
 }
