@@ -36,7 +36,7 @@ def static getBuildJobName(def configuration, def os) {
         }
 
         // Create the new job
-        def newCommitJob = job(Utilities.getFullJobName(project, jobName, false)) {
+        def newCommitJob = job(InternalUtilities.getFullJobName(project, jobName, false)) {
             // Set the label.
             label(machineLabelMap[os])
             steps {
@@ -58,7 +58,7 @@ def static getBuildJobName(def configuration, def os) {
         Utilities.addGithubPushTrigger(newCommitJob)
 
 
-        def newPRJob = job(Utilities.getFullJobName(project, jobName, true)) {
+        def newPRJob = job(InternalUtilities.getFullJobName(project, jobName, true)) {
             // Set the label.
             label(machineLabelMap[os])
             steps {
