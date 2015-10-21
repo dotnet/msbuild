@@ -179,7 +179,8 @@ while [ -h ""$SOURCE"" ]; do # resolve $SOURCE until the file is no longer a sym
   [[ $SOURCE != /* ]] && SOURCE=""$DIR/$SOURCE"" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
-exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
+exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
+";
 
             File.WriteAllText(outputExe, script);
 
