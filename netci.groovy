@@ -25,8 +25,6 @@ def static getBuildJobName(def configuration, def os) {
         def jobName = getBuildJobName(configuration, os)
         def buildCommand = '';
 
-        def osGroup = osGroupMap[os]
-
         // Calculate the build command
         if (os == 'Windows_NT') {
             // On Windows we build the mscorlibs too.
