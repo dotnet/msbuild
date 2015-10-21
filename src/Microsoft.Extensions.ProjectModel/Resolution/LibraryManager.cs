@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                             errorCode = ErrorCodes.NU1001;
                             message = $"The dependency {FormatLibraryRange(range)} could not be resolved.";
 
-                            AddDiagnostics(messages, library, message, errorCode);
+                            AddDiagnostics(messages, library, message, DiagnosticMessageSeverity.Error, errorCode);
                         }
                     }
                     else
@@ -54,7 +54,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                         errorCode = ErrorCodes.NU1002;
                         message = $"The dependency {library.Identity} does not support framework {library.Framework}.";
 
-                        AddDiagnostics(messages, library, message, errorCode);
+                        AddDiagnostics(messages, library, message, DiagnosticMessageSeverity.Error, errorCode);
                     }
                 }
                 else
@@ -84,18 +84,11 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                         {
                             var message = $"Dependency specified was {range} but ended up with {library.Identity}.";
 
-                            foreach (var source in GetRangesWithSourceLocations(library))
-                            {
-                                messages.Add(
-                                    new DiagnosticMessage(
-                                        ErrorCodes.NU1007,
-                                        message,
-                                        source.SourceFilePath,
-                                        DiagnosticMessageSeverity.Warning,
-                                        source.SourceLine,
-                                        source.SourceColumn,
-                                        library));
-                            }
+                            AddDiagnostics(messages,
+                                           library, 
+                                           message,
+                                           DiagnosticMessageSeverity.Warning,
+                                           ErrorCodes.NU1007);
                         }
                     }
                 }
@@ -114,7 +107,11 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             return range.Name + " " + range.VersionRange;
         }
 
-        private void AddDiagnostics(List<DiagnosticMessage> messages, LibraryDescription library, string message, string errorCode)
+        private void AddDiagnostics(List<DiagnosticMessage> messages, 
+                                    LibraryDescription library, 
+                                    string message, 
+                                    DiagnosticMessageSeverity severity, 
+                                    string errorCode)
         {
             // A (in project.json) -> B (unresolved) (not in project.json)
             foreach (var source in GetRangesWithSourceLocations(library).Distinct())
@@ -124,7 +121,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                         errorCode,
                         message,
                         source.SourceFilePath,
-                        DiagnosticMessageSeverity.Error,
+                        severity,
                         source.SourceLine,
                         source.SourceColumn,
                         library));
