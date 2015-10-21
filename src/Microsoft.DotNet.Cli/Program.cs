@@ -24,8 +24,7 @@ namespace Microsoft.DotNet.Cli
                     return Command.Create("dotnet-" + args[1], "--help")
                         .ForwardStdErr()
                         .ForwardStdOut()
-                        .RunAsync()
-                        .Result
+                        .Execute()
                         .ExitCode;
                 }
                 else
@@ -39,8 +38,7 @@ namespace Microsoft.DotNet.Cli
                 return Command.Create("dotnet-" + args[0], args.Skip(1))
                     .ForwardStdErr()
                     .ForwardStdOut()
-                    .RunAsync()
-                    .Result
+                    .Execute()
                     .ExitCode;
             }
         }

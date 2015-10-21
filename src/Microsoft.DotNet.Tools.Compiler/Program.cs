@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -77,25 +77,17 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static bool Compile(ProjectContext context, string configuration, string outputPath, bool buildProjectReferences)
         {
-            Reporter.Output.WriteLine($"Building {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
+            Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
 
             // Create the library exporter
             var exporter = context.CreateExporter(configuration);
 
+            var diagnostics = new List<DiagnosticMessage>();
+
             bool success = true;
 
-            // Print out dependency diagnostics
-            foreach (var diag in context.LibraryManager.GetAllDiagnostics())
-            {
-                success &= diag.Severity != DiagnosticMessageSeverity.Error;
-                Console.WriteLine(diag.FormattedMessage);
-            }
-
-            // If there were dependency errors don't bother compiling
-            if (!success)
-            {
-                return false;
-            }
+            // Collect dependency diagnostics
+            diagnostics.AddRange(context.LibraryManager.GetAllDiagnostics());
 
             // Gather exports for the project
             var dependencies = exporter.GetCompilationDependencies().ToList();
@@ -121,12 +113,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                     var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --no-project-dependencies {projectDependency.Project.ProjectDirectory}")
                             .ForwardStdOut()
                             .ForwardStdErr()
-                            .RunAsync()
-                            .Result;
+                            .Execute();
 
                     if (compileResult.ExitCode != 0)
                     {
-                        Console.Error.WriteLine($"Failed to compile dependency: {projectDependency.Identity.Name.Red().Bold()}");
                         return false;
                     }
                 }
@@ -168,9 +158,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Get compilation options
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             var outputName = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
-
-            var bootstrappingWithMono = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("BOOTSTRAPPING_WITH_MONO"));
-
+            
             // Assemble args
             var compilerArgs = new List<string>()
             {
@@ -179,16 +167,13 @@ namespace Microsoft.DotNet.Tools.Compiler
                 $"-out:\"{outputName}\""
             };
 
-            if (!bootstrappingWithMono)
-            {
-                // Default suppressions, some versions of mono don't support these
-                compilerArgs.Add("-nowarn:CS1701");
-                compilerArgs.Add("-nowarn:CS1702");
-                compilerArgs.Add("-nowarn:CS1705");
-            }
-
+            // Default suppressions, some versions of mono don't support these
+            compilerArgs.Add("-nowarn:CS1701");
+            compilerArgs.Add("-nowarn:CS1702");
+            compilerArgs.Add("-nowarn:CS1705");
+            
             // Add compilation options to the args
-            ApplyCompilationOptions(compilationOptions, compilerArgs, bootstrappingWithMono);
+            ApplyCompilationOptions(compilationOptions, compilerArgs);
 
             foreach (var dependency in dependencies)
             {
@@ -212,19 +197,66 @@ namespace Microsoft.DotNet.Tools.Compiler
             File.WriteAllLines(rsp, compilerArgs);
 
             var result = Command.Create($"dotnet-compile-{compiler}", $"\"{rsp}\"")
-                                 .ForwardStdErr()
-                                 .ForwardStdOut()
-                                 .RunAsync()
-                                 .GetAwaiter()
-                                 .GetResult();
+                                 .OnErrorLine(line =>
+                                 {
+                                     var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
+                                     if (diagnostic != null)
+                                     {
+                                         diagnostics.Add(diagnostic);
+                                     }
+                                     else
+                                     {
+                                         Console.Error.WriteLine(line);
+                                     }
+                                 })
+                                 .OnOutputLine(line =>
+                                 {
+                                     var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
 
-            if (result.ExitCode == 0)
+                                     if (diagnostic != null)
+                                     {
+                                         diagnostics.Add(diagnostic);
+                                     }
+                                     else
+                                     {
+                                         Console.Out.WriteLine(line);
+                                     }
+                                 })
+                                 .Execute();
+
+            foreach (var diag in diagnostics)
             {
-                Reporter.Output.WriteLine($"Compiled {context.ProjectFile.Name} successfully!".Green().Bold());
-                return true;
+                success &= diag.Severity != DiagnosticMessageSeverity.Error;
+                PrintDiagnostic(diag);
+            }
+            
+            success &= result.ExitCode == 0;
+
+            PrintSummary(diagnostics);
+
+            return success;
+        }
+
+        private static void PrintSummary(List<DiagnosticMessage> diagnostics)
+        {
+            Reporter.Output.Writer.WriteLine();
+
+            var errorCount = diagnostics.Count(d => d.Severity == DiagnosticMessageSeverity.Error);
+            var warningCount = diagnostics.Count(d => d.Severity == DiagnosticMessageSeverity.Warning);
+
+            if (errorCount > 0)
+            {
+                Reporter.Output.WriteLine("Compilation failed.".Red());
+            }
+            else
+            {
+                Reporter.Output.WriteLine("Compilation succeeded.".Green());
             }
 
-            return false;
+            Reporter.Output.WriteLine($"    {warningCount} Warning(s)");
+            Reporter.Output.WriteLine($"    {errorCount} Error(s)");
+
+            Reporter.Output.Writer.WriteLine();
         }
 
         private static bool AddResources(Project project, List<string> compilerArgs, string intermediateOutputPath)
@@ -265,9 +297,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                         var result = Command.Create("resgen", $"{fileName} {resourcesFile}")
                                             .ForwardStdErr()
                                             .ForwardStdOut()
-                                            .RunAsync()
-                                            .GetAwaiter()
-                                            .GetResult();
+                                            .Execute();
 
                         if (result.ExitCode != 0)
                         {
@@ -312,52 +342,92 @@ namespace Microsoft.DotNet.Tools.Compiler
             outputs.Add(project);
         }
 
-        private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> cscArgs, bool bootstrappingWithMono)
+        private static DiagnosticMessage ParseDiagnostic(string projectRootPath, string line)
         {
-            // TODO: Move compilation arguments into the compiler itself
+            var error = CanonicalError.Parse(line);
+
+            if (error != null)
+            {
+                var severity = error.category == CanonicalError.Parts.Category.Error ?
+                DiagnosticMessageSeverity.Error : DiagnosticMessageSeverity.Warning;
+                
+                return new DiagnosticMessage(
+                    error.code,
+                    error.text,
+                    Path.IsPathRooted(error.origin) ? line : projectRootPath + Path.DirectorySeparatorChar + line,
+                    Path.Combine(projectRootPath, error.origin),
+                    severity,
+                    error.line,
+                    error.column,
+                    error.endColumn,
+                    error.endLine,
+                    source: null);
+            }
+
+            return null;
+        }
+        
+        private static void PrintDiagnostic(DiagnosticMessage diag)
+        {
+            switch (diag.Severity)
+            {
+                case DiagnosticMessageSeverity.Info:
+                    Reporter.Error.WriteLine(diag.FormattedMessage);
+                    break;
+                case DiagnosticMessageSeverity.Warning:
+                    Reporter.Error.WriteLine(diag.FormattedMessage.Yellow().Bold());
+                    break;
+                case DiagnosticMessageSeverity.Error:
+                    Reporter.Error.WriteLine(diag.FormattedMessage.Red().Bold());
+                    break;
+            }
+        }
+
+        private static void ApplyCompilationOptions(CompilerOptions compilationOptions, List<string> compilerArgs)
+        {
             var targetType = compilationOptions.EmitEntryPoint.GetValueOrDefault() ? "exe" : "library";
 
-            cscArgs.Add($"-target:{targetType}");
+            compilerArgs.Add($"-target:{targetType}");
 
             if (compilationOptions.AllowUnsafe.GetValueOrDefault())
             {
-                cscArgs.Add("-unsafe+");
+                compilerArgs.Add("-unsafe+");
             }
 
-            cscArgs.AddRange(compilationOptions.Defines.Select(d => $"-d:{d}"));
+            compilerArgs.AddRange(compilationOptions.Defines.Select(d => $"-d:{d}"));
 
             if (compilationOptions.Optimize.GetValueOrDefault())
             {
-                cscArgs.Add("-optimize");
+                compilerArgs.Add("-optimize");
             }
 
             if (!string.IsNullOrEmpty(compilationOptions.Platform))
             {
-                cscArgs.Add($"-platform:{compilationOptions.Platform}");
+                compilerArgs.Add($"-platform:{compilationOptions.Platform}");
             }
 
             if (compilationOptions.WarningsAsErrors.GetValueOrDefault())
             {
-                cscArgs.Add("-warnaserror");
+                compilerArgs.Add("-warnaserror");
             }
 
             if (compilationOptions.DelaySign.GetValueOrDefault())
             {
-                cscArgs.Add("-delaysign+");
+                compilerArgs.Add("-delaysign+");
             }
 
             if (!string.IsNullOrEmpty(compilationOptions.KeyFile))
             {
-                cscArgs.Add($"-keyFile:\"{compilationOptions.KeyFile}\"");
+                compilerArgs.Add($"-keyFile:\"{compilationOptions.KeyFile}\"");
             }
 
-            if (bootstrappingWithMono || RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                cscArgs.Add("-debug:full");
+                compilerArgs.Add("-debug:full");
             }
             else
             {
-                cscArgs.Add("-debug:portable");
+                compilerArgs.Add("-debug:portable");
             }
 
             // TODO: OSS signing

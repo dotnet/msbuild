@@ -101,8 +101,7 @@ namespace Microsoft.DotNet.Tools.Publish
             var result = Command.Create("dotnet-compile", $"--framework {context.TargetFramework.DotNetFrameworkName} {context.ProjectFile.ProjectDirectory}")
                 .ForwardStdErr()
                 .ForwardStdOut()
-                .RunAsync()
-                .Result;
+                .Execute();
 
             if (result.ExitCode != 0)
             {
@@ -179,16 +178,15 @@ while [ -h ""$SOURCE"" ]; do # resolve $SOURCE until the file is no longer a sym
   [[ $SOURCE != /* ]] && SOURCE=""$DIR/$SOURCE"" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
-exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*";
+exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
+";
 
             File.WriteAllText(outputExe, script);
 
             Command.Create("chmod", $"a+x {outputExe}")
                 .ForwardStdOut()
                 .ForwardStdErr()
-                .RunAsync()
-                .GetAwaiter()
-                .GetResult();
+                .Execute();
 
             return 0;
         }

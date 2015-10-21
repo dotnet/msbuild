@@ -8,10 +8,12 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# work around restore timeouts on Mono
-[ -z "$MONO_THREADS_PER_CPU" ] && export MONO_THREADS_PER_CPU=50
+cd $DIR/..
 
-# Makes development easier
-export PATH=$PATH:$DIR
+[ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
 
-exec "dnx" -p "$DIR/../../src/Microsoft.DotNet.Tools.Compiler.Csc" run "$@"
+# Build the docker container (will be fast if it is already built)
+docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
+
+# Run the build in the container
+docker run -it --rm -v $(pwd):/opt/code -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION $DOTNET_BUILD_CONTAINER_TAG /opt/code/build.sh
