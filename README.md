@@ -1,5 +1,15 @@
 # .NET Command Line Interface
 
+Build Status
+------------
+
+|         |Ubuntu 14.04 |Windows |Mac OS X |
+|---------|:------:|:------:|:------:|:------:|:-------:|:-------:|
+|**Debug**|[![Build Status](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_debug_ubuntu/badge/icon)](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_debug_ubuntu/)|[![Build Status](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_debug_windows_nt/badge/icon)](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_debug_windows_nt/)|[![Build Status](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_debug_osx/badge/icon)](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_debug_osx/) |
+|**Release**|[![Build Status](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_release_ubuntu/badge/icon)](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_release_ubuntu/)|[![Build Status](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_release_windows_nt/badge/icon)](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_release_windows_nt/)|[![Build Status](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_release_osx/badge/icon)](http://dotnet-ci.cloudapp.net/job/Private/job/dotnet_cli_release_osx/) |
+
+
+
 ## Building/Running
 
 1. Run `build.cmd` or `build.sh` from the root
