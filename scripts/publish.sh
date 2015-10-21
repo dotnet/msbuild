@@ -8,7 +8,6 @@
 #     $STORAGE_CONTAINER_NAME
 #     $STORAGE_ACCOUNT
 #     $STORAGE_KEY
-#     $STORAGE_SAS
 #     $REPO_ID
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -47,11 +46,6 @@ validate_inputs(){
         ret=1
     fi
 
-    if [[ -z "$STORAGE_SAS" ]]; then
-        echo "Error: STORAGE_SAS environment variable not set"
-        ret=1
-    fi
-
     return $ret
 }
 
@@ -59,7 +53,7 @@ upload_deb_to_blob_storage(){
     local deb_filename=$(basename $DEB_FILE)
     azure storage blob upload $DEB_FILE $STORAGE_CONTAINER $deb_filename -a $STORAGE_ACCOUNT -k $STORAGE_KEY
 
-    UPLOAD_URL="http://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$deb_filename$STORAGE_SAS"
+    UPLOAD_URL="http://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$deb_filename"
 }
 
 generate_repoclient_json(){
