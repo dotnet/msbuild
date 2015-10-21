@@ -499,8 +499,6 @@ namespace Microsoft.Build.UnitTests
             string originalDir = Directory.GetCurrentDirectory();
 #if FEATURE_SPECIAL_FOLDERS
             Directory.SetCurrentDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-#else
-            Directory.SetCurrentDirectory(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData));
 #endif
 
             XmlReaderSettings readerSettings = new XmlReaderSettings();

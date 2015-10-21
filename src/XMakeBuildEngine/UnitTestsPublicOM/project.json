@@ -1,10 +1,22 @@
 ﻿{
   "dependencies": {
     "xunit": "2.1.0",
-    "xunit.runner.visualstudio": "2.1.0-rc1-build1124"
   },
   "frameworks": {
-    "net451": {},
-    "net46": {}
+    "net451": {
+      "dependencies": {
+        "xunit.runner.visualstudio": "2.1.0"
+      }
+    },
+    "net46": {
+      "dependencies": {
+        "xunit.runner.visualstudio": "2.1.0"
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+      },
+      "imports": "portable-net451+win81"
+    }
   }
 }

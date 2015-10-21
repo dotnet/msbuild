@@ -9,8 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
 using System.Security.AccessControl;
 using System.Security.Principal;
+#endif
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -92,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create();
             project.FullPath = "X";
 
-            Assert.Equal(project.FullPath, Path.Combine(Environment.CurrentDirectory, "X"));
+            Assert.Equal(project.FullPath, Path.Combine(Directory.GetCurrentDirectory(), "X"));
         }
 
         /// <summary>
@@ -121,7 +123,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
 
-            projectXml1.FullPath = Path.Combine(Environment.CurrentDirectory, @"xyz\abc");
+            projectXml1.FullPath = Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc");
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
@@ -139,7 +141,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             projectXml1.FullPath = @"xyz\abc";
 
-            ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Environment.CurrentDirectory, @"xyz\abc"));
+            ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
             Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
         }
@@ -156,7 +158,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             projectXml1.FullPath = @"xyz\abc";
 
-            ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Environment.CurrentDirectory, @"xyz\abc"));
+            ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
             Assert.Equal(true, object.ReferenceEquals(projectXml1, projectXml2));
         }
@@ -171,7 +173,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml1 = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
 
-            projectXml1.FullPath = Path.Combine(Environment.CurrentDirectory, @"xyz\abc");
+            projectXml1.FullPath = Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc");
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
@@ -402,19 +404,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 path = FileUtilities.GetTemporaryFile();
                 File.WriteAllText(path, content);
 
-                XmlTextReader reader1 = new XmlTextReader(path);
+                var reader1 = XmlReader.Create(path);
                 ProjectRootElement root1 = ProjectRootElement.Create(reader1);
                 root1.AddItem("type", "include");
 
                 // If it's in the cache, then the 2nd document won't see the add.
-                XmlTextReader reader2 = new XmlTextReader(path);
+                var reader2 = XmlReader.Create(path);
                 ProjectRootElement root2 = ProjectRootElement.Create(reader2);
 
                 Assert.Equal(1, root1.Items.Count);
                 Assert.Equal(0, root2.Items.Count);
 
-                reader1.Close();
-                reader2.Close();
+                reader1.Dispose();
+                reader2.Dispose();
             }
             finally
             {
@@ -471,7 +473,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectCollection projectCollection = new ProjectCollection();
             string toolsPath = projectCollection.Toolsets.Where(toolset => (string.Compare(toolset.ToolsVersion, ObjectModelHelpers.MSBuildDefaultToolsVersion, StringComparison.OrdinalIgnoreCase) == 0)).First().ToolsPath;
 
-            string[] targets = new string[] { "Microsoft.Common.targets", "Microsoft.CSharp.targets", "Microsoft.VisualBasic.targets" };
+            string[] targets =
+            {
+                "Microsoft.Common.targets",
+                "Microsoft.CSharp.targets",
+                // BUG: restore this when https://github.com/Microsoft/msbuild/issues/306 is fixed
+                // "Microsoft.VisualBasic.targets",
+            };
 
             foreach (string target in targets)
             {
@@ -602,9 +610,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                Environment.CurrentDirectory = Path.GetTempPath(); // should be used for project.DirectoryPath; it must exist
+                Directory.SetCurrentDirectory(Path.GetTempPath()); // should be used for project.DirectoryPath; it must exist
                 // Use the *real* current directory for constructing the path
-                var curDir = Environment.CurrentDirectory;
+                var curDir = Directory.GetCurrentDirectory();
 
                 string file = "bar" + Path.DirectorySeparatorChar + "foo.proj";
                 string path = Path.Combine(curDir, file);
@@ -662,7 +670,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Verifies that ProjectRootElement.Encoding returns the correct value
         /// after reading a file off disk, even if no xml declaration is present.
         /// </summary>
+#if FEATURE_ENCODING_DEFAULT
         [Fact]
+#else
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/301")]
+#endif
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
             string projectFullPath = FileUtilities.GetTemporaryFile();
@@ -825,6 +837,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("k4", items[5].Include);
         }
 
+#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
         /// <summary>
         /// Build a solution file that can't be accessed
         /// </summary>
@@ -879,6 +892,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
            );
         }
+
         /// <summary>
         /// Build a project file that can't be accessed
         /// </summary>
@@ -928,6 +942,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
            );
         }
+#endif
+
         /// <summary>
         /// Build a corrupt solution
         /// </summary>
@@ -1210,7 +1226,8 @@ Project(""{";
 
             // Try to verify that the xml declaration was emitted, and that the correct byte order marks
             // are also present.
-            using (var reader = new StreamReader(projectFullPath, encoding, true))
+
+            using (var reader = FileUtilities.OpenRead(projectFullPath, encoding, true))
             {
                 Assert.Equal(encoding, reader.CurrentEncoding);
                 string actual = reader.ReadLine();
@@ -1220,9 +1237,7 @@ Project(""{";
 
             project = ProjectRootElement.Open(projectFullPath, new ProjectCollection());
 
-            // We compare body names instead of encoding instances directly because at times the instances can
-            // be (insignificantly) different.
-            Assert.Equal(encoding.BodyName, project.Encoding.BodyName); // "A re-opened project did not retain the previously saved Encoding."
+            Assert.Equal(encoding, project.Encoding);
         }
 
         /// <summary>
@@ -1246,7 +1261,7 @@ Project(""{";
             const string EmptyProject = @"<Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
 </Project>";
 
-            using (StreamWriter writer = new StreamWriter(projectFullPath, false, encoding))
+            using (StreamWriter writer = FileUtilities.OpenWrite(projectFullPath, false, encoding))
             {
                 writer.Write(ObjectModelHelpers.CleanupFileContents(EmptyProject));
             }

@@ -1137,7 +1137,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        internal static StreamReader OpenRead(string path, Encoding encoding = null)
+        internal static StreamReader OpenRead(string path, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true)
         {
             const int DefaultFileStreamBufferSize = 4096;
             Stream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
@@ -1147,7 +1147,7 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                return new StreamReader(fileStream, encoding);
+                return new StreamReader(fileStream, encoding, detectEncodingFromByteOrderMarks);
             }
         }
     }
