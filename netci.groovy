@@ -30,7 +30,7 @@ def static getBuildJobName(def configuration, def os) {
         // Calculate the build command
         if (os == 'Windows_NT') {
             // On Windows we build the mscorlibs too.
-            buildCommand = ".\scripts\ci_build.cmd ${lowerConfiguration}"
+            buildCommand = ".\\scripts\\ci_build.cmd ${lowerConfiguration}"
         }
         else {
             // On other OS's we skipmscorlib but run the pal tests
