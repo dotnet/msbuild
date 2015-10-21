@@ -19,12 +19,9 @@ if [ -z "$HOME" ]; then
     mkdir -p $HOME
 fi
 
-# Set the build number using CI build number
-BASE_VERSION=0.0.2-alpha1
-if [ ! -z "$BUILD_NUMBER" ]; then
-    export DOTNET_BUILD_VERSION="$BASE_VERSION-$(printf "%05d" $BUILD_NUMBER)"
-    info "Building version $DOTNET_BUILD_VERSION"
-fi
+# UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
+LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
+export DOTNET_BUILD_VERSION=0.0.1-alpha-$(date -ud @$LAST_COMMIT_TIMESTAMP "+%Y%m%d-%H%M%S")
 
 if [[ "$(uname)" == "Linux" ]]; then
     # Set Docker Container name to be unique

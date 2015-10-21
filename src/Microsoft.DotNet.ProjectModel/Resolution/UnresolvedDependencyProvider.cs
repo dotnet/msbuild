@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
         {
             return new LibraryDescription(
                 new LibraryIdentity(libraryRange.Name, libraryRange.VersionRange?.MinVersion, libraryRange.Target),
+                hash: null,
                 path: null,
                 dependencies: Enumerable.Empty<LibraryRange>(),
                 framework: targetFramework,

@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             {
                 hostRoot = AppContext.BaseDirectory;
             }
-            var corerun = Path.Combine(hostRoot, Constants.CoreRunName);
+            var corerun = Path.Combine(hostRoot, Constants.HostExecutableName);
             var cscExe = Path.Combine(hostRoot, "csc.exe");
             return File.Exists(corerun) && File.Exists(cscExe)
                 ? Command.Create(corerun, $@"""{cscExe}"" {cscArgs}")

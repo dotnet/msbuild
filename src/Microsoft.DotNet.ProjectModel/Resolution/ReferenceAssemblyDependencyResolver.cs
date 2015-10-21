@@ -42,6 +42,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             {
                 return new LibraryDescription(
                     new LibraryIdentity(libraryRange.Name, new NuGetVersion(assemblyVersion), LibraryType.ReferenceAssembly),
+                    string.Empty, // Framework assemblies don't have hashes
                     path,
                     Enumerable.Empty<LibraryRange>(),
                     targetFramework,

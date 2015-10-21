@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# dotnet-restore script to be copied across to the final package
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -9,7 +8,15 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# work around restore timeouts on Mono
-[ -z "$MONO_THREADS_PER_CPU" ] && export MONO_THREADS_PER_CPU=50
+source "$DIR/_common.sh"
 
-exec "$DIR/dnx/dnx" "$DIR/dnx/lib/Microsoft.Dnx.Tooling/Microsoft.Dnx.Tooling.dll" "restore" --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" "$@"
+cd $DIR/..
+
+[ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
+[ -z "$DOTNET_BUILD_CONTAINER_NAME" ] && DOTNET_BUILD_CONTAINER_NAME="dotnetcli-build-container"
+[ -z "$DOCKER_HOST_SHARE_DIR" ] && DOCKER_HOST_SHARE_DIR=$(pwd)
+
+# Enter the container
+docker run -it --rm --sig-proxy=true \
+    -v $DOCKER_HOST_SHARE_DIR:/opt/code \
+    $DOTNET_BUILD_CONTAINER_TAG

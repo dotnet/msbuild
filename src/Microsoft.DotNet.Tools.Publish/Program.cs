@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.ProjectModel;
+using Microsoft.Extensions.ProjectModel.Compilation;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Publish
@@ -139,80 +140,31 @@ namespace Microsoft.DotNet.Tools.Publish
                 PublishFiles(export.NativeLibraries, outputPath);
             }
 
-            int exitCode;
-            if (context.RuntimeIdentifier.StartsWith("win"))
-            {
-                exitCode = PublishForWindows(context, outputPath);
-            }
-            else
-            {
-                exitCode = PublishForUnix(context, outputPath);
-            }
+            // Publish the application itself
+            PublishHost(context, outputPath);
 
             Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
-            return exitCode;
-        }
-
-        private static int PublishForUnix(ProjectContext context, string outputPath)
-        {
-            if (context.TargetFramework.IsDesktop())
-            {
-                return 0;
-            }
-            
-            var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
-            if(!File.Exists(coreConsole))
-            {
-                Reporter.Error.WriteLine($"Cannot find {Constants.CoreConsoleName} in the output. You must have a direct dependency on Microsoft.NETCore.ConsoleHost (for now)");
-                return 1;
-            }
-            var coreRun = Path.Combine(outputPath, Constants.CoreRunName);
-            if(!File.Exists(coreRun))
-            {
-                Reporter.Error.WriteLine($"Cannot find {Constants.CoreRunName} in the output. You must have a direct dependency on Microsoft.NETCore.TestHost (for now)");
-                return 1;
-            }
-
-            var outputExe = Path.Combine(outputPath, context.ProjectFile.Name);
-
-            // Rename the {app}.exe to {app}.dll
-            File.Copy(outputExe + ".exe", outputExe + ".dll", overwrite: true);
-
-            // Change coreconsole.exe to the {app}.exe name
-            File.Copy(coreConsole, outputExe, overwrite: true);
-
-            // Delete the original managed .exe
-            File.Delete(outputExe + ".exe");
             return 0;
         }
 
-        private static int PublishForWindows(ProjectContext context, string outputPath)
+        private static int PublishHost(ProjectContext context, string outputPath)
         {
             if (context.TargetFramework.IsDesktop())
             {
                 return 0;
             }
 
-            var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
-            if(!File.Exists(coreConsole))
+            var hostPath = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
+            if(!File.Exists(hostPath))
             {
-                Reporter.Error.WriteLine($"Cannot find {Constants.CoreConsoleName} in the output. You must have a direct dependency on Microsoft.NETCore.ConsoleHost (for now)".Red());
-                return 1;
-            }
-            var coreRun = Path.Combine(outputPath, Constants.CoreRunName);
-            if(!File.Exists(coreRun))
-            {
-                Reporter.Error.WriteLine($"Cannot find {Constants.CoreRunName} in the output. You must have a direct dependency on Microsoft.NETCore.TestHost (for now)".Red());
+                Reporter.Error.WriteLine($"Cannot find {Constants.HostExecutableName} in the dotnet directory.".Red());
                 return 1;
             }
 
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
 
-            // Rename the {app}.exe to {app}.dll
-            File.Copy(outputExe, Path.ChangeExtension(outputExe, ".dll"), overwrite: true);
-
-            // Change coreconsole.exe to the {app}.exe name
-            File.Copy(coreConsole, outputExe, overwrite: true);
+            // Copy the host
+            File.Copy(hostPath, outputExe, overwrite: true);
             return 0;
         }
 
@@ -280,11 +232,11 @@ namespace Microsoft.DotNet.Tools.Publish
             return path + trailingCharacter;
         }
 
-        private static void PublishFiles(IEnumerable<string> files, string outputPath)
+        private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath)
         {
             foreach (var file in files)
             {
-                File.Copy(file, Path.Combine(outputPath, Path.GetFileName(file)), overwrite: true);
+                File.Copy(file.ResolvedPath, Path.Combine(outputPath, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
         }
     }

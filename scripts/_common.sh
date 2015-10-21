@@ -66,4 +66,3 @@ if [ -z "$RID" ]; then
         exit 1
     fi
 fi
-

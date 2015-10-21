@@ -60,7 +60,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                     continue;
                 }
 
-                var compilationAssemblies = new List<string>();
+                var compilationAssemblies = new List<LibraryAsset>();
                 var sourceReferences = new List<string>();
 
                 var libraryExport = GetExport(library);
@@ -71,7 +71,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                     //  so we rebuild the library export
                     foreach (var reference in libraryExport.CompilationAssemblies)
                     {
-                        if (seenMetadataReferences.Add(Path.GetFileNameWithoutExtension(reference)))
+                        if (seenMetadataReferences.Add(reference.Name))
                         {
                             compilationAssemblies.Add(reference);
                         }
@@ -115,13 +115,13 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
 
         private LibraryExport ExportPackage(PackageDescription package)
         {
-            var nativeLibraries = new List<string>();
+            var nativeLibraries = new List<LibraryAsset>();
             PopulateAssets(package, package.Target.NativeLibraries, nativeLibraries);
 
-            var runtimeAssemblies = new List<string>();
+            var runtimeAssemblies = new List<LibraryAsset>();
             PopulateAssets(package, package.Target.RuntimeAssemblies, runtimeAssemblies);
 
-            var compileAssemblies = new List<string>();
+            var compileAssemblies = new List<LibraryAsset>();
             PopulateAssets(package, package.Target.CompileTimeAssemblies, compileAssemblies);
 
             var sourceReferences = new List<string>();
@@ -135,14 +135,17 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
 
         private LibraryExport ExportProject(ProjectDescription project)
         {
-            var compileAssemblies = new List<string>();
+            var compileAssemblies = new List<LibraryAsset>();
             var sourceReferences = new List<string>();
 
             if (!string.IsNullOrEmpty(project.TargetFrameworkInfo?.AssemblyPath))
             {
                 // Project specifies a pre-compiled binary. We're done!
                 var assemblyPath = ResolvePath(project.Project, _configuration, project.TargetFrameworkInfo.AssemblyPath);
-                compileAssemblies.Add(assemblyPath);
+                compileAssemblies.Add(new LibraryAsset(
+                    project.Project.Name,
+                    assemblyPath,
+                    Path.Combine(project.Project.ProjectDirectory, assemblyPath)));
             }
             else
             {
@@ -150,7 +153,10 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                 var outputPath = GetOutputPath(project);
                 if (project.Project.Files.SourceFiles.Any())
                 {
-                    compileAssemblies.Add(outputPath);
+                    compileAssemblies.Add(new LibraryAsset(
+                        project.Project.Name,
+                        outputPath,
+                        Path.Combine(project.Project.ProjectDirectory, outputPath)));
                 }
             }
 
@@ -161,18 +167,17 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
             }
 
             // No support for ref or native in projects, so runtimeAssemblies is just the same as compileAssemblies and nativeLibraries are empty
-            return new LibraryExport(project, compileAssemblies, sourceReferences, compileAssemblies, Enumerable.Empty<string>());
+            return new LibraryExport(project, compileAssemblies, sourceReferences, compileAssemblies, Enumerable.Empty<LibraryAsset>());
         }
 
         private string GetOutputPath(ProjectDescription project)
         {
             var compilationOptions = project.Project.GetCompilerOptions(project.Framework, _configuration);
             return Path.Combine(
-                project.Project.ProjectDirectory,
                 "bin", // This can't access the Constant in Cli Utils. But the output path stuff is temporary right now anyway
                 _configuration,
                 project.Framework.GetTwoDigitShortFolderName(),
-                project.Project.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
+                project.Project.Name + ".dll");
         }
 
         private static string ResolvePath(Project project, string configuration, string path)
@@ -186,7 +191,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
 
             path = path.Replace("{configuration}", configuration);
 
-            return Path.Combine(project.ProjectDirectory, path);
+            return path;
         }
 
         private LibraryExport ExportFrameworkLibrary(LibraryDescription library)
@@ -200,10 +205,10 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
             // since they assume the runtime library is present already
             return new LibraryExport(
                 library,
-                new[] { library.Path },
+                new[] { new LibraryAsset(library.Identity.Name, library.Path, library.Path) },
                 Enumerable.Empty<string>(),
-                Enumerable.Empty<string>(),
-                Enumerable.Empty<string>());
+                Enumerable.Empty<LibraryAsset>(),
+                Enumerable.Empty<LibraryAsset>());
         }
 
         private IEnumerable<string> GetSharedSources(PackageDescription package)
@@ -216,7 +221,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
         }
 
 
-        private void PopulateAssets(PackageDescription package, IEnumerable<LockFileItem> section, IList<string> paths)
+        private void PopulateAssets(PackageDescription package, IEnumerable<LockFileItem> section, IList<LibraryAsset> assets)
         {
             foreach (var assemblyPath in section)
             {
@@ -225,8 +230,10 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                     continue;
                 }
 
-                var path = Path.Combine(package.Path, assemblyPath);
-                paths.Add(path);
+                assets.Add(new LibraryAsset(
+                    Path.GetFileNameWithoutExtension(assemblyPath),
+                    assemblyPath,
+                    Path.Combine(package.Path, assemblyPath)));
             }
         }
     }

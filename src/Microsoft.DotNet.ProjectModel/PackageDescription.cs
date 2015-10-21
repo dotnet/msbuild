@@ -7,12 +7,13 @@ namespace Microsoft.Extensions.ProjectModel
     {
         public PackageDescription(
             string path,
-            LockFilePackageLibrary package, 
-            LockFileTargetLibrary lockFileLibrary, 
+            LockFilePackageLibrary package,
+            LockFileTargetLibrary lockFileLibrary,
             IEnumerable<LibraryRange> dependencies,
             bool compatible)
             : base(
                   new LibraryIdentity(package.Name, package.Version, LibraryType.Package),
+                  "sha512-" + package.Sha512,
                   path,
                   dependencies: dependencies,
                   framework: null,

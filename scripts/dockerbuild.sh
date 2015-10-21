@@ -24,9 +24,8 @@ docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
 # Run the build in the container
 banner "Launching build in Docker Container"
 info "Using code from: $DOCKER_HOST_SHARE_DIR"
-docker run --rm --sig-proxy=true \
+docker run -t --rm --sig-proxy=true \
     --name $DOTNET_BUILD_CONTAINER_NAME \
     -v $DOCKER_HOST_SHARE_DIR:/opt/code \
     -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION \
-    -e DOTNET_CI_SKIP_STAGE0_INSTALL=$DOTNET_CI_SKIP_STAGE0_INSTALL \
     $DOTNET_BUILD_CONTAINER_TAG $BUILD_COMMAND $1

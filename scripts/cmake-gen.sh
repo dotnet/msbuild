@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# dotnet-restore script to be copied across to the final package
+
+set -e
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -9,7 +10,13 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# work around restore timeouts on Mono
-[ -z "$MONO_THREADS_PER_CPU" ] && export MONO_THREADS_PER_CPU=50
+source "$DIR/_common.sh"
 
-exec "$DIR/dnx/dnx" "$DIR/dnx/lib/Microsoft.Dnx.Tooling/Microsoft.Dnx.Tooling.dll" "restore" --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" "$@"
+# Generate make files for the coreclr host
+CMAKE_OUTPUT=$DIR/../src/corehost/cmake/$RID
+if [ ! -d $CMAKE_OUTPUT ]; then
+    mkdir -p $CMAKE_OUTPUT
+fi
+pushd $CMAKE_OUTPUT
+cmake ../.. -G "Unix Makefiles"
+popd
