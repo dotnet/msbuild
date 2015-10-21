@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class Command
     {
-        private TaskCompletionSource<int> _processTcs;
         private Process _process;
 
         private StringWriter _stdOutCapture;
@@ -35,8 +34,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
             };
-
-            _processTcs = new TaskCompletionSource<int>();
 
             _process = new Process()
             {
@@ -112,34 +109,37 @@ namespace Microsoft.DotNet.Cli.Utils
             return false;
         }
 
-        public async Task<CommandResult> RunAsync()
+        public CommandResult Execute()
         {
             ThrowIfRunning();
             _running = true;
 
             _process.OutputDataReceived += (sender, args) =>
+            {
                 ProcessData(args.Data, _stdOutCapture, _stdOutForward, _stdOutHandler);
+            };
 
             _process.ErrorDataReceived += (sender, args) =>
+            {
                 ProcessData(args.Data, _stdErrCapture, _stdErrForward, _stdErrHandler);
+            };
 
             _process.EnableRaisingEvents = true;
 
-            _process.Exited += (sender, _) =>
-                _processTcs.SetResult(_process.ExitCode);
-
 #if DEBUG
             var sw = Stopwatch.StartNew();
-            Reporter.Output.WriteLine($"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments}".White());
+            Reporter.Output.WriteLine($"> {FormatProcessInfo(_process.StartInfo)}".White());
 #endif
             _process.Start();
             _process.BeginOutputReadLine();
             _process.BeginErrorReadLine();
 
-            var exitCode = await _processTcs.Task;
+            _process.WaitForExit();
+
+            var exitCode = _process.ExitCode;
 
 #if DEBUG
-            var message = $"> {_process.StartInfo.FileName} {_process.StartInfo.Arguments} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.";
+            var message = $"> {FormatProcessInfo(_process.StartInfo)} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.";
             if (exitCode == 0)
             {
                 Reporter.Output.WriteLine(message.Green().Bold());
@@ -204,6 +204,16 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             _stdErrHandler = handler;
             return this;
+        }
+
+        private string FormatProcessInfo(ProcessStartInfo info)
+        {
+            if (string.IsNullOrWhiteSpace(info.Arguments))
+            {
+                return info.FileName;
+            }
+
+            return info.FileName + " " + info.Arguments;
         }
 
         private void ThrowIfRunning([CallerMemberName] string memberName = null)

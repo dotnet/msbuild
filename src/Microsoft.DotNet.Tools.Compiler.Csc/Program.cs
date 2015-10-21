@@ -25,8 +25,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 var result = RunCsc($"-noconfig @\"{responseFileArg.Value}\"")
                     .ForwardStdErr()
                     .ForwardStdOut()
-                    .RunAsync()
-                    .Result;
+                    .Execute();
 
                 return result.ExitCode;
             });

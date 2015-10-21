@@ -113,8 +113,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --no-project-dependencies {projectDependency.Project.ProjectDirectory}")
                             .ForwardStdOut()
                             .ForwardStdErr()
-                            .RunAsync()
-                            .Result;
+                            .Execute();
 
                     if (compileResult.ExitCode != 0)
                     {
@@ -198,7 +197,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             File.WriteAllLines(rsp, compilerArgs);
 
             var result = Command.Create($"dotnet-compile-{compiler}", $"\"{rsp}\"")
-                                 .OnErrorLine(line => 
+                                 .OnErrorLine(line =>
                                  {
                                      var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
                                      if (diagnostic != null)
@@ -223,9 +222,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                                          Console.Out.WriteLine(line);
                                      }
                                  })
-                                 .RunAsync()
-                                 .GetAwaiter()
-                                 .GetResult();
+                                 .Execute();
 
             foreach (var diag in diagnostics)
             {
@@ -300,9 +297,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                         var result = Command.Create("resgen", $"{fileName} {resourcesFile}")
                                             .ForwardStdErr()
                                             .ForwardStdOut()
-                                            .RunAsync()
-                                            .GetAwaiter()
-                                            .GetResult();
+                                            .Execute();
 
                         if (result.ExitCode != 0)
                         {

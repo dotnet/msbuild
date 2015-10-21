@@ -101,8 +101,7 @@ namespace Microsoft.DotNet.Tools.Publish
             var result = Command.Create("dotnet-compile", $"--framework {context.TargetFramework.DotNetFrameworkName} {context.ProjectFile.ProjectDirectory}")
                 .ForwardStdErr()
                 .ForwardStdOut()
-                .RunAsync()
-                .Result;
+                .Execute();
 
             if (result.ExitCode != 0)
             {
@@ -187,9 +186,7 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
             Command.Create("chmod", $"a+x {outputExe}")
                 .ForwardStdOut()
                 .ForwardStdErr()
-                .RunAsync()
-                .GetAwaiter()
-                .GetResult();
+                .Execute();
 
             return 0;
         }
