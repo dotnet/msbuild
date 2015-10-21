@@ -1,12 +1,9 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.Extensions.ProjectModel.Graph;
-using NuGet.Versioning;
 
 namespace Microsoft.Extensions.ProjectModel.Resolution
 {
@@ -47,7 +44,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                         foreach (var range in library.RequestedRanges)
                         {
                             errorCode = ErrorCodes.NU1001;
-                            message = $"The dependency {range.Name} {range.VersionRange} could not be resolved.";
+                            message = $"The dependency {FormatLibraryRange(range)} could not be resolved.";
 
                             AddDiagnostics(messages, library, message, errorCode);
                         }
@@ -105,6 +102,16 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             }
 
             return messages;
+        }
+
+        private static string FormatLibraryRange(LibraryRange range)
+        {
+            if (range.VersionRange == null)
+            {
+                return range.Name;
+            }
+
+            return range.Name + " " + range.VersionRange;
         }
 
         private void AddDiagnostics(List<DiagnosticMessage> messages, LibraryDescription library, string message, string errorCode)
