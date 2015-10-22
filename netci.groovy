@@ -7,7 +7,7 @@ def project = 'dotnet/cli'
 
 def osList = ['Ubuntu', 'OSX', 'Windows_NT']
 
-def machineLabelMap = ['Ubuntu':'ubuntu',
+def machineLabelMap = ['Ubuntu':'ubuntu-doc',
                        'OSX':'mac',
                        'Windows_NT':'windows']
 
