@@ -13,7 +13,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-
+# This function is necessary to bypass POSIX Path Conversion in Git Bash
+# http://www.mingw.org/wiki/Posix_path_conversion
 _convert_path(){
     local path=$1
     path=$( echo "$path" | sed -r 's/[\/]+/\\/g')
@@ -36,7 +37,7 @@ execute(){
     check_prereqs
 
     echo "Setting up VM..."
-    create_or_start_vm #>> /dev/null 2>&1
+    create_or_start_vm
 
     echo "Copying code from Host to VM"
     eval $(docker-machine env --shell bash $VM_NAME)
@@ -60,7 +61,6 @@ check_prereqs(){
         exit 1
     fi
 
-    #TODO: check virtualbox?
 }
 
 create_or_start_vm(){
@@ -95,7 +95,7 @@ copy_results_from_vm(){
 
     mkdir $T_RESULTS_DIR
     docker-machine ssh $VM_NAME "sudo chmod -R a+rx $VM_CODE_DIR"
-    docker-machine scp -r $VM_NAME:$VM_CODE_DIR/artifacts $REPO_ROOT #>> /dev/null 2>&1
+    docker-machine scp -r $VM_NAME:$VM_CODE_DIR/artifacts $REPO_ROOT >> /dev/null 2>&1
 }
 
 execute

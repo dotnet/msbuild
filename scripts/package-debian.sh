@@ -64,10 +64,6 @@ test_debian_package(){
     popd
 
     bats $PACKAGE_OUTPUT_DIR/test_package.bats
-
-    # if [[ -d "$PACKAGE_OUTPUT_DIR/integration_tests" ]]; then
-    #     bats 
-    # fi
 }
 
 execute
