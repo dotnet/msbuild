@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var exitCode = _process.ExitCode;
 
 #if DEBUG
-            var message = $"> {FormatProcessInfo(_process.StartInfo)} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.";
+            var message = $"< {FormatProcessInfo(_process.StartInfo)} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.";
             if (exitCode == 0)
             {
                 Reporter.Output.WriteLine(message.Green().Bold());
