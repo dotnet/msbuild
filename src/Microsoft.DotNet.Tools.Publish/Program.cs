@@ -98,14 +98,13 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-compile", $"--framework {context.TargetFramework.DotNetFrameworkName} {context.ProjectFile.ProjectDirectory}")
+            var result = Command.Create("dotnet-compile", $"--framework {context.TargetFramework.DotNetFrameworkName} \"{context.ProjectFile.ProjectDirectory}\"")
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
 
             if (result.ExitCode != 0)
             {
-                Reporter.Error.WriteLine("Compilation failed!".Red().Bold());
                 return result.ExitCode;
             }
 

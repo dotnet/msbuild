@@ -110,7 +110,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 foreach (var projectDependency in Sort(projects))
                 {
                     // Skip compiling project dependencies since we've already figured out the build order
-                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --no-project-dependencies {projectDependency.Project.ProjectDirectory}")
+                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --no-project-dependencies \"{projectDependency.Project.ProjectDirectory}\"")
                             .ForwardStdOut()
                             .ForwardStdErr()
                             .Execute();
@@ -178,11 +178,11 @@ namespace Microsoft.DotNet.Tools.Compiler
             foreach (var dependency in dependencies)
             {
                 compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r}\""));
-                compilerArgs.AddRange(dependency.SourceReferences);
+                compilerArgs.AddRange(dependency.SourceReferences.Select(s => $"\"{s}\""));
             }
 
             // Add project source files
-            compilerArgs.AddRange(context.ProjectFile.Files.SourceFiles);
+            compilerArgs.AddRange(context.ProjectFile.Files.SourceFiles.Select(s => $"\"{s}\""));
 
             if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
             {
@@ -294,7 +294,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                         // {file}.resx -> {file}.resources
                         var resourcesFile = Path.Combine(intermediateOutputPath, name);
 
-                        var result = Command.Create("resgen", $"{fileName} {resourcesFile}")
+                        var result = Command.Create("resgen", $"\"{fileName}\" \"{resourcesFile}\"")
                                             .ForwardStdErr()
                                             .ForwardStdOut()
                                             .Execute();
