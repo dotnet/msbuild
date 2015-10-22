@@ -13,7 +13,7 @@ cd $DIR/..
 [ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
 [ -z "$DOTNET_BUILD_CONTAINER_NAME" ] && DOTNET_BUILD_CONTAINER_NAME="dotnetcli-build-container"
 [ -z "$DOCKER_HOST_SHARE_DIR" ] && DOCKER_HOST_SHARE_DIR=$(pwd)
-[ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="//opt\\code\\build.sh"
+[ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="/opt/code/build.sh"
 
 echo $DOCKER_HOST_SHARE_DIR
 
