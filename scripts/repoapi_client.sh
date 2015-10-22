@@ -68,7 +68,7 @@ function AddPackage
     fi
     packageUrl=$(grep "sourceUrl" $packageFile  | head -n 1 | awk '{print $2}')
     echo "Adding package to $server [$packageUrl]"
-    curl -i -k "$baseurl/v1/packages" --data @./$packageFile -H "Content-Type: application/json"
+    curl -i -k "$baseurl/v1/packages" --data @$packageFile -H "Content-Type: application/json"
     BailIf $?
     echo ""
 }
