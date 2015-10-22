@@ -11,7 +11,10 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # Create Dnvm Package
 $DIR/package-dnvm.sh
 
-# Create Debian package
-$DIR/package-debian.sh
-
-# TODO: Create Pkg
+if [[ "$1" == "debian" ]]; then
+    # Create Debian package
+    $DIR/package-debian.sh
+elif [[ "$1" == "pkg" ]]; then
+    # Create Mac Pkg
+    $DIR/package-pkg.sh
+fi

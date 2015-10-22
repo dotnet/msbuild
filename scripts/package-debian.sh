@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 
-# Build Script
+# Debian Packaging Script
 # Currently Intended to build on ubuntu14.04
 
 SOURCE="${BASH_SOURCE[0]}"

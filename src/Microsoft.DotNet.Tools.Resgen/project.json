@@ -21,7 +21,7 @@
     },
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "type": "build",
-      "version": "1.0.0-*"
+      "version": "1.0.0-rc1-15838"
     },
     "System.Xml.XDocument": "4.0.11-beta-23419",
     "System.Resources.ReaderWriter": "4.0.0-beta-23419"
