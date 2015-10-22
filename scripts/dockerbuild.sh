@@ -10,20 +10,12 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 cd $DIR/..
 
-# Add an option to override the Docker Host
-HOST_CODE_DIR=$(pwd)
-if [[ "$1" != "" ]]; then
-    HOST_CODE_DIR=$1
-fi
-
-# Add an option to override the Script to Run
-BUILD_SCRIPT=/opt/code/build.sh
-if [[ "$2" != "" ]]; then
-    BUILD_SCRIPT=$2
-fi
-
 [ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
 [ -z "$DOTNET_BUILD_CONTAINER_NAME" ] && DOTNET_BUILD_CONTAINER_NAME="dotnetcli-build-container"
+[ -z "$DOCKER_HOST_SHARE_DIR" ] && DOCKER_HOST_SHARE_DIR=$(pwd)
+[ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="//opt\\code\\build.sh"
+
+echo $DOCKER_HOST_SHARE_DIR
 
 # Build the docker container (will be fast if it is already built)
 docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
@@ -31,7 +23,7 @@ docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
 # Run the build in the container
 docker rm -f $DOTNET_BUILD_CONTAINER_NAME
 docker run \
-    -v $HOST_CODE_DIR:/opt/code \
+    -v $DOCKER_HOST_SHARE_DIR:/opt/code \
     --name $DOTNET_BUILD_CONTAINER_NAME \
     -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION \
-    $DOTNET_BUILD_CONTAINER_TAG $BUILD_SCRIPT
+    $DOTNET_BUILD_CONTAINER_TAG $BUILD_COMMAND

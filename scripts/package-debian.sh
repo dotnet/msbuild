@@ -30,6 +30,7 @@ execute(){
     create_empty_debian_layout
     copy_files_to_debian_layout
     create_debian_package
+    test_debian_package
 }
 
 create_empty_debian_layout(){
@@ -54,6 +55,19 @@ create_debian_package(){
     mkdir -p $PACKAGE_OUTPUT_DIR
     
     $REPO_ROOT/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR
+}
+
+test_debian_package(){
+    git clone https://github.com/sstephenson/bats.git /tmp/bats
+    pushd /tmp/bats
+    ./install.sh /usr/local
+    popd
+
+    bats $PACKAGE_OUTPUT_DIR/test_package.bats
+
+    # if [[ -d "$PACKAGE_OUTPUT_DIR/integration_tests" ]]; then
+    #     bats 
+    # fi
 }
 
 execute

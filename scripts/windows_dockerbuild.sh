@@ -74,15 +74,17 @@ create_or_start_vm(){
 }
 
 copy_code_to_vm(){
-    echo "Copying Code to VM..."
     docker-machine ssh $VM_NAME "sudo rm -rf $VM_CODE_DIR"
     docker-machine scp -r $REPO_ROOT $VM_NAME:$VM_CODE_DIR >> /dev/null 2>&1
 }
 
 
 run_build(){
-    local host_code=$(_convert_path $VM_CODE_DIR)
-    $DIR/dockerbuild.sh $host_code //opt\\code\\build.sh
+    # These are env variables for dockerbuild.sh
+    export DOCKER_HOST_SHARE_DIR="$(_convert_path $VM_CODE_DIR)"
+    echo $DOCKER_HOST_SHARE_DIR
+
+    $DIR/dockerbuild.sh
 }
 
 # This will duplicate the entire repo + any side effects from
@@ -92,8 +94,8 @@ copy_results_from_vm(){
     T_RESULTS_DIR=${T_RESULTS_DIR#/}
 
     mkdir $T_RESULTS_DIR
-
-    docker-machine scp -r $VM_NAME:$VM_CODE_DIR/artifacts $REPO_ROOT >> /dev/null 2>&1
+    docker-machine ssh $VM_NAME "sudo chmod -R a+rx $VM_CODE_DIR"
+    docker-machine scp -r $VM_NAME:$VM_CODE_DIR/artifacts $REPO_ROOT #>> /dev/null 2>&1
 }
 
 execute
