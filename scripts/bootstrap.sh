@@ -88,6 +88,9 @@ dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE1_DIR" "$REP
 # Add stage1 to the path and use it to build stage2
 export PATH=$STAGE1_DIR:$PATH
 
+# Make corerun explicitly executable
+chmod a+x $STAGE1_DIR/corerun
+
 echo "Building stage2 dotnet using stage1 ..."
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Cli"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
@@ -99,3 +102,6 @@ dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REP
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+
+# Make Stage 2 Folder Accessible
+chmod -R a+r $STAGE2_DIR
