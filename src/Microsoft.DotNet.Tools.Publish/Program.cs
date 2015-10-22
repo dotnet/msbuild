@@ -81,6 +81,14 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier}");
 
+            var options = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+
+            if (!options.EmitEntryPoint.GetValueOrDefault())
+            {
+                Reporter.Output.WriteLine($"{context.RootProject.Identity} does not have an entry point defined.".Red());
+                return 1;
+            }
+
             // Generate the output path
             if (string.IsNullOrEmpty(outputPath))
             {
