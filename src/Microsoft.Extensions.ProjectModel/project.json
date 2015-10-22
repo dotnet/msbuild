@@ -17,11 +17,11 @@
     "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-beta-23419",
     "Microsoft.Extensions.JsonParser.Sources": {
       "type": "build",
-      "version": "1.0.0-*"
+      "version": "1.0.0-rc1-15792"
     },
     "Microsoft.Extensions.HashCodeCombiner.Sources": {
       "type": "build",
-      "version": "1.0.0-*"
+      "version": "1.0.0-rc1-15718 "
     }
   },
 
