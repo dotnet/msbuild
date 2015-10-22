@@ -8,12 +8,12 @@
     "dotnet": "Microsoft.DotNet.Cli"
   },
   "dependencies": {
-    "Microsoft.NETCore.Runtime": "1.0.1-beta-23413",
+    "Microsoft.NETCore.Runtime": "1.0.1-beta-23419",
 
-    "System.Console": "4.0.0-*",
-    "System.Collections": "4.0.11-*",
-    "System.Linq": "4.0.1-*",
-    "System.Diagnostics.Process": "4.1.0-*",
+    "System.Console": "4.0.0-beta-23419",
+    "System.Collections": "4.0.11-beta-23419",
+    "System.Linq": "4.0.1-beta-23419",
+    "System.Diagnostics.Process": "4.1.0-beta-23419",
     "Microsoft.DotNet.Cli.Utils": {
       "type": "build",
       "version": "1.0.0-*"

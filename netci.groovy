@@ -4,34 +4,78 @@ import jobs.generation.Utilities;
 import jobs.generation.InternalUtilities;
 
 def project = 'dotnet/cli'
-// Define build strings
-def debugBuildString = '''./build.sh'''
 
-// Generate the builds for debug 
+def osList = ['Ubuntu', 'OSX', 'Windows_NT']
 
-def linuxDebugJob = job(InternalUtilities.getFullJobName(project, 'linux_debug', false)) {
-  label('ubuntu')
-  steps {
-    shell(debugBuildString)    
-  }
+def machineLabelMap = ['Ubuntu':'ubuntu',
+                       'OSX':'mac',
+                       'Windows_NT':'windows']
+
+def static getBuildJobName(def configuration, def os) {
+    return configuration.toLowerCase() + '_' + os.toLowerCase()
 }
 
-InternalUtilities.addPrivatePermissions(linuxDebugJob)
-InternalUtilities.addPrivateScm(linuxDebugJob, project)
-Utilities.addStandardOptions(linuxDebugJob)
-Utilities.addStandardNonPRParameters(linuxDebugJob)
-Utilities.addGithubPushTrigger(linuxDebugJob)
+
+['Debug', 'Release'].each { configuration ->
+    osList.each { os ->
+        // Calculate names
+        def lowerConfiguration = configuration.toLowerCase()
+
+        // Calculate job name
+        def jobName = getBuildJobName(configuration, os)
+        def buildCommand = '';
+
+        // Calculate the build command
+        if (os == 'Windows_NT') {
+            buildCommand = ".\\scripts\\ci_build.cmd ${lowerConfiguration}"
+        }
+        else {
+            buildCommand = "./scripts/ci_build.sh ${lowerConfiguration}"
+        }
+
+        // Create the new job
+        def newCommitJob = job(InternalUtilities.getFullJobName(project, jobName, false)) {
+            // Set the label.
+            label(machineLabelMap[os])
+            steps {
+                if (os == 'Windows_NT') {
+                    // Batch
+                    batchFile(buildCommand)
+                }
+                else {
+                    // Shell
+                    shell(buildCommand)
+                }
+            }
+        }
+
+        InternalUtilities.addPrivatePermissions(newCommitJob)
+        InternalUtilities.addPrivateScm(newCommitJob, project)
+        Utilities.addStandardOptions(newCommitJob)
+        Utilities.addStandardNonPRParameters(newCommitJob)
+        Utilities.addGithubPushTrigger(newCommitJob)
 
 
-def linuxDebugPRJob = job(InternalUtilities.getFullJobName(project, 'linux_debug', true)) {
-  label('ubuntu')
-  steps {
-    shell(debugBuildString)    
-  }
+        def newPRJob = job(InternalUtilities.getFullJobName(project, jobName, true)) {
+            // Set the label.
+            label(machineLabelMap[os])
+            steps {
+                if (os == 'Windows_NT') {
+                    // Batch
+                    batchFile(buildCommand)
+                }
+                else {
+                    // Shell
+                    shell(buildCommand)
+                }
+            }
+        }
+
+
+        InternalUtilities.addPrivatePermissions(newPRJob)
+        InternalUtilities.addPrivatePRTestSCM(newPRJob, project)
+        Utilities.addStandardOptions(newPRJob)
+        Utilities.addStandardPRParameters(newPRJob, project)
+        Utilities.addGithubPRTrigger(newPRJob, "${os} ${configuration} Build")
+	}
 }
-
-InternalUtilities.addPrivatePermissions(linuxDebugPRJob)
-InternalUtilities.addPrivatePRTestSCM(linuxDebugPRJob, project)
-Utilities.addStandardOptions(linuxDebugPRJob)
-Utilities.addStandardPRParameters(linuxDebugPRJob, project)
-Utilities.addGithubPRTrigger(linuxDebugPRJob, 'Linux Debug Build')
