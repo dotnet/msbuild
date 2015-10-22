@@ -3173,12 +3173,6 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         internal static string ConvertDotNetFrameworkArchitectureToProcessorArchitecture(DotNetFrameworkArchitecture architecture)
         {
-            // TODO: Find real architecture on Unix
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return ProcessorArchitecture.X86;
-            }
-
             switch (architecture)
             {
                 case DotNetFrameworkArchitecture.Bitness32:
@@ -3189,20 +3183,17 @@ namespace Microsoft.Build.Utilities
                     return ProcessorArchitecture.X86;
                 case DotNetFrameworkArchitecture.Bitness64:
                     // We need to know which 64-bit architecture we're on.
-                    NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
-                    NativeMethodsShared.GetNativeSystemInfo(ref systemInfo);
-
-                    switch (systemInfo.wProcessorArchitecture)
+                    switch (NativeMethodsShared.ProcessorArchitectureNative)
                     {
-                        case NativeMethodsShared.PROCESSOR_ARCHITECTURE_AMD64:
+                        case NativeMethodsShared.ProcessorArchitectures.X64:
                             return ProcessorArchitecture.AMD64;
-                        case NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64:
+                        case NativeMethodsShared.ProcessorArchitectures.IA64:
                             return ProcessorArchitecture.IA64;
-                        // Errr, OK, we're trying to get the 64-bit path on a 32-bit machine.  
+                        // Error, OK, we're trying to get the 64-bit path on a 32-bit machine.
                         // That ... doesn't make sense. 
-                        case NativeMethodsShared.PROCESSOR_ARCHITECTURE_INTEL:
+                        case NativeMethodsShared.ProcessorArchitectures.X86:
                             return null;
-                        case NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM:
+                        case NativeMethodsShared.ProcessorArchitectures.ARM:
                             return null;
                         // unknown architecture? return null
                         default:

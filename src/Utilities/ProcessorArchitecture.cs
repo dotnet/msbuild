@@ -28,9 +28,6 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ARM", Justification = "This is the correct casing for ProcessorArchitecture")]
         public const string ARM = "ARM";
 
-        static private string s_currentProcessArchitecture = null;
-        static private bool s_currentProcessArchitectureInitialized = false;
-
         /// <summary>
         /// Lazy-initted property for getting the architecture of the currently running process
         /// </summary>
@@ -38,20 +35,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (!NativeMethodsShared.IsWindows)
-                {
-                    return String.Empty;
-                }
-
-                if (s_currentProcessArchitectureInitialized)
-                {
-                    return s_currentProcessArchitecture;
-                }
-
-                s_currentProcessArchitectureInitialized = true;
-                s_currentProcessArchitecture = ProcessorArchitecture.GetCurrentProcessArchitecture();
-
-                return s_currentProcessArchitecture;
+                return ProcessorArchitecture.GetCurrentProcessArchitecture();
             }
         }
 
@@ -64,27 +48,23 @@ namespace Microsoft.Build.Utilities
         /// <returns>null if unknown architecture or error, one of the known architectures otherwise</returns>
         static private string GetCurrentProcessArchitecture()
         {
-            string architecture = null;
+            string architecture;
 
-            NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
-
-            NativeMethodsShared.GetSystemInfo(ref systemInfo);
-
-            switch (systemInfo.wProcessorArchitecture)
+            switch (NativeMethodsShared.ProcessorArchitecture)
             {
-                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_INTEL:
+                case NativeMethodsShared.ProcessorArchitectures.X86:
                     architecture = ProcessorArchitecture.X86;
                     break;
 
-                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_AMD64:
+                case NativeMethodsShared.ProcessorArchitectures.X64:
                     architecture = ProcessorArchitecture.AMD64;
                     break;
 
-                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64:
+                case NativeMethodsShared.ProcessorArchitectures.IA64:
                     architecture = ProcessorArchitecture.IA64;
                     break;
 
-                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM:
+                case NativeMethodsShared.ProcessorArchitectures.ARM:
                     architecture = ProcessorArchitecture.ARM;
                     break;
 

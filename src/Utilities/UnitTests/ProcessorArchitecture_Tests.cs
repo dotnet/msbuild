@@ -16,20 +16,20 @@ namespace Microsoft.Build.UnitTests
 {
     public class ProcessorArchitectureTests
     {
-        internal static string ProcessorArchitectureIntToString(NativeMethodsShared.SYSTEM_INFO systemInfo)
+        internal static string ProcessorArchitectureIntToString()
         {
-            switch (systemInfo.wProcessorArchitecture)
+            switch (NativeMethodsShared.ProcessorArchitecture)
             {
-                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_INTEL:
+                case NativeMethodsShared.ProcessorArchitectures.X86:
                     return BuildUtilities.ProcessorArchitecture.X86;
 
-                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_AMD64:
+                case NativeMethodsShared.ProcessorArchitectures.X64:
                     return BuildUtilities.ProcessorArchitecture.AMD64;
 
-                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_IA64:
+                case NativeMethodsShared.ProcessorArchitectures.IA64:
                     return BuildUtilities.ProcessorArchitecture.IA64;
 
-                case NativeMethodsShared.PROCESSOR_ARCHITECTURE_ARM:
+                case NativeMethodsShared.ProcessorArchitectures.ARM:
                     return BuildUtilities.ProcessorArchitecture.ARM;
 
                 // unknown architecture? return null
@@ -52,9 +52,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ValidateCurrentProcessorArchitectureCall()
         {
-            NativeMethodsShared.SYSTEM_INFO systemInfo = new NativeMethodsShared.SYSTEM_INFO();
-            NativeMethodsShared.GetSystemInfo(ref systemInfo);
-            Assert.Equal(ProcessorArchitectureIntToString(systemInfo), BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture); // "BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture returned an invalid match"
+            Assert.Equal(ProcessorArchitectureIntToString(), BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture); // "BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture returned an invalid match"
         }
 
         [Fact]

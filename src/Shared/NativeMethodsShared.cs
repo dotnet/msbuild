@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -145,6 +146,27 @@ namespace Microsoft.Build.Shared
             COWAIT_ALERTABLE = 0x00000002
         }
 
+        /// <summary>
+        /// Processor architecture values
+        /// </summary>
+        internal enum ProcessorArchitectures
+        {
+            // Intel 32 bit
+            X86,
+
+            // AMD64 64 bit
+            X64,
+
+            // Itanium 64
+            IA64,
+
+            // ARM
+            ARM,
+
+            // Who knows
+            Unknown
+        }
+
         #endregion
 
         #region Structs
@@ -183,7 +205,6 @@ namespace Microsoft.Build.Shared
             private SafeProcessHandle() : base(true)
             {
             }
-
             protected override bool ReleaseHandle()
             {
                 return CloseHandle(handle);
@@ -308,6 +329,117 @@ namespace Microsoft.Build.Shared
             public IntPtr lpSecurityDescriptor;
 
             public bool bInheritHandle;
+        }
+
+        private class SystemInformationData
+        {
+            /// <summary>
+            /// Architecture as far as the current process is concerned.
+            /// It's x86 in wow64 (native architecture is x64 in that case).
+            /// Otherwise it's the same as the native architecture.
+            /// </summary>
+            public readonly ProcessorArchitectures ProcessorArchitectureType;
+
+            /// <summary>
+            /// Actual architecture of the the system.
+            /// </summary>
+            public readonly ProcessorArchitectures ProcessorArchitectureTypeNative;
+
+            /// <summary>
+            /// Convert SYSTEM_INFO architecture values to the internal enum
+            /// </summary>
+            /// <param name="arch"></param>
+            /// <returns></returns>
+            private static ProcessorArchitectures ConvertSystemArchitecture(ushort arch)
+            {
+                switch (arch)
+                {
+                    case PROCESSOR_ARCHITECTURE_INTEL:
+                        return ProcessorArchitectures.X86;
+                    case PROCESSOR_ARCHITECTURE_AMD64:
+                        return ProcessorArchitectures.X64;
+                    case PROCESSOR_ARCHITECTURE_ARM:
+                        return ProcessorArchitectures.ARM;
+                    case PROCESSOR_ARCHITECTURE_IA64:
+                        return ProcessorArchitectures.IA64;
+                    default:
+                        return ProcessorArchitectures.Unknown;
+                }
+            }
+
+            /// <summary>
+            /// Read system info values
+            /// </summary>
+            public SystemInformationData()
+            {
+                ProcessorArchitectureType = ProcessorArchitectures.Unknown;
+                ProcessorArchitectureTypeNative = ProcessorArchitectures.Unknown;
+
+                if (IsWindows)
+                {
+                    var systemInfo = new SYSTEM_INFO();
+
+                    GetSystemInfo(ref systemInfo);
+                    ProcessorArchitectureType = ConvertSystemArchitecture(systemInfo.wProcessorArchitecture);
+
+                    GetNativeSystemInfo(ref systemInfo);
+                    ProcessorArchitectureTypeNative = ConvertSystemArchitecture(systemInfo.wProcessorArchitecture);
+                }
+                else
+                {
+                    try
+                    {
+                        // On Unix run 'uname -m' to get the architecture. It's common for Linux and Mac
+                        using (
+                            var proc =
+                                Process.Start(
+                                    new ProcessStartInfo("uname")
+                                    {
+                                        Arguments = "-m",
+                                        UseShellExecute = false,
+                                        RedirectStandardOutput = true,
+                                        CreateNoWindow = true
+                                    }))
+                        {
+                            string arch = null;
+                            if (proc != null)
+                            {
+                                // Since uname -m simply returns kernel property, it should be quick.
+                                // 1 second is the best guess for a safe timeout.
+                                proc.WaitForExit(1000);
+                                arch = proc.StandardOutput.ReadLine();
+                            }
+
+                            if (!string.IsNullOrEmpty(arch))
+                            {
+                                if (arch.StartsWith("x86_64", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ProcessorArchitectureType = ProcessorArchitectures.X64;
+                                }
+                                else if (arch.StartsWith("ia64", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ProcessorArchitectureType = ProcessorArchitectures.IA64;
+                                }
+                                else if (arch.StartsWith("arm", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ProcessorArchitectureType = ProcessorArchitectures.ARM;
+                                }
+                                else if (arch.StartsWith("i", StringComparison.OrdinalIgnoreCase)
+                                         && arch.EndsWith("86", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    ProcessorArchitectureType = ProcessorArchitectures.X86;
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        ProcessorArchitectureType = ProcessorArchitectures.Unknown;
+                    }
+
+                    ProcessorArchitectureTypeNative = ProcessorArchitectureType;
+                }
+            }
         }
 
         #endregion
@@ -525,6 +657,21 @@ namespace Microsoft.Build.Shared
             string lastChar = path.EndsWith("/") ? "/" : "";
             return string.IsNullOrEmpty(m.Groups[3].Value) ? root + lastChar : Path.Combine(root, m.Groups[3].Value);
         }
+
+        /// <summary>
+        /// System information, initialized when required.
+        /// </summary>
+        private static readonly Lazy<SystemInformationData> SystemInformation = new Lazy<SystemInformationData>(true);
+
+        /// <summary>
+        /// Architecture getter
+        /// </summary>
+        internal static ProcessorArchitectures ProcessorArchitecture => SystemInformation.Value.ProcessorArchitectureType;
+
+        /// <summary>
+        /// Native architecture getter
+        /// </summary>
+        internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.Value.ProcessorArchitectureTypeNative;
 
         #endregion
 
