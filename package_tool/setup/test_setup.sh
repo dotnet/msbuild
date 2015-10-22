@@ -1,6 +1,6 @@
 install_dependencies(){
 	apt-get update
-	apt-get install -y debhelper build-essential devscripts git
+	apt-get install -y debhelper build-essential devscripts git liblttng-ust-dev clang-3.6
 }
 
 install_bats(){

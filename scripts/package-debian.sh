@@ -19,13 +19,12 @@ if [ "$UNAME" != "Linux" ]; then
     exit 1
 fi
 
+REPO_ROOT=$(readlink -f $DIR/..)
 
-REPO_ROOT=$DIR
-
-OUTPUT_DIR="$REPO_ROOT/bin"
-PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/package_layout"
-PACKAGE_OUTPUT_DIR="$OUTPUT_DIR/installers"
-REPO_BINARIES_DIR="$REPO_ROOT/bin/$UNAME"
+OUTPUT_DIR="$REPO_ROOT/artifacts"
+PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/deb_intermediate"
+PACKAGE_OUTPUT_DIR="$OUTPUT_DIR/packages/debian"
+REPO_BINARIES_DIR="$REPO_ROOT/artifacts/ubuntu.14.04-x64/stage2"
 
 execute(){
     create_empty_debian_layout
@@ -54,7 +53,7 @@ copy_files_to_debian_layout(){
 create_debian_package(){
     mkdir -p $PACKAGE_OUTPUT_DIR
     
-    $DIR/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR
+    $REPO_ROOT/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR
 }
 
 execute

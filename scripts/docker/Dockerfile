@@ -1,11 +1,14 @@
 # Dockerfile that creates a container suitable to build dotnet-cli
 FROM microsoft/aspnet:1.0.0-beta8-coreclr
 
-# Temporary: Install Mono, we use MCS to bootstrap
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF 2>&1 && \
-    echo "deb http://download.mono-project.com/repo/debian nightly main" > /etc/apt/sources.list.d/mono-nightly.list && \
-    apt-get -qqy update && \
-    apt-get -qqy install mono-complete
+RUN apt-get update
+RUN apt-get install -y wget
+
+# Install Package Build Prereqs
+RUN echo "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main" | tee /etc/apt/sources.list.d/llvm.list
+RUN wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | apt-key add -
+RUN apt-get update
+RUN apt-get install -y debhelper build-essential devscripts git liblttng-ust-dev lldb-3.6-dev
 
 # Set working directory
 WORKDIR /opt/code

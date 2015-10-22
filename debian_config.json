@@ -28,7 +28,7 @@
     },
 
     "debian_dependencies":{
-    	"libssl-dev" : {}
+        "libssl-dev" : {}
     },
 
     "symlinks": {
@@ -36,7 +36,7 @@
         "dotnet-compile" : "usr/bin/dotnet-compile",
         "dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
         "dotnet-publish" : "usr/bin/dotnet-publish",
-		"dotnet-restore" : "usr/bin/dotnet-restore",
+        "dotnet-restore" : "usr/bin/dotnet-restore",
         "resgen" : "usr/bin/resgen"
     }
 }
