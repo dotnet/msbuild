@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
         public void GetApiContractReferencesFindsWinMDs()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string referenceDirectory = Path.Combine(tempDirectory, @"References\Foo\Bar");
+            string referenceDirectory = Path.Combine(tempDirectory, Path.Combine("References", "Foo", "Bar"));
 
             try
             {
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
         public void GatherExtensionSDKsInvalidVersionDirectory()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string sdkDirectory = Path.Combine(tempDirectory, @"Foo\Bar");
+            string sdkDirectory = Path.Combine(tempDirectory, "Foo", "Bar");
 
             try
             {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
         public void GatherExtensionSDKsNoManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string sdkDirectory = Path.Combine(tempDirectory, @"Foo\1.0");
+            string sdkDirectory = Path.Combine(tempDirectory, "Foo", "1.0");
 
             try
             {
@@ -127,12 +127,12 @@ namespace Microsoft.Build.UnitTests
         public void GatherExtensionSDKsEmptyManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string sdkDirectory = Path.Combine(tempDirectory, @"Foo\1.0");
+            string sdkDirectory = Path.Combine(tempDirectory, "Foo", "1.0");
 
             try
             {
                 Directory.CreateDirectory(sdkDirectory);
-                File.WriteAllText(Path.Combine(sdkDirectory, "sdkManifest.xml"), "");
+                File.WriteAllText(Path.Combine(sdkDirectory, "SDKManifest.xml"), "");
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
                 TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
@@ -151,12 +151,12 @@ namespace Microsoft.Build.UnitTests
         public void GatherExtensionSDKsGarbageManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string sdkDirectory = Path.Combine(tempDirectory, @"Foo\1.0");
+            string sdkDirectory = Path.Combine(tempDirectory, "Foo", "1.0");
 
             try
             {
                 Directory.CreateDirectory(sdkDirectory);
-                File.WriteAllText(Path.Combine(sdkDirectory, "sdkManifest.xml"), "Garbaggggge");
+                File.WriteAllText(Path.Combine(sdkDirectory, "SDKManifest.xml"), "Garbaggggge");
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
                 TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
@@ -380,6 +380,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FindFrameworksPathRunningUnderWhidbey()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                // Useless on Linux & OSX
+                return;
+            }
+
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
                 (
                     @"{runtime-base}\v1.2.x86dbg",    // Simulate "Whidbey" as the current runtime.
@@ -554,29 +560,29 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestGetPathToBuildToolsFile()
         {
-            string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version20);
+            string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version20);
 
             if (net20Path != null)
             {
-                Assert.Equal(net20Path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "2.0"));
+                Assert.Equal(net20Path, ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "2.0"));
             }
 
-            string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version35);
+            string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version35);
 
             if (net35Path != null)
             {
-                Assert.Equal(net35Path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "3.5"));
+                Assert.Equal(net35Path, ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "3.5"));
             }
 
             Assert.Equal(
-                    ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version40),
-                    ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "4.0")
+                    ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version40),
+                    ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "4.0")
                 );
 
-            string tv12path = Path.Combine(ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).ToolsPath, "msbuild.exe");
+            string tv12path = Path.Combine(ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).ToolsPath, "MSBuild.exe");
 
-            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ObjectModelHelpers.MSBuildDefaultToolsVersion));
-            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ToolLocationHelper.CurrentToolsVersion));
+            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", ObjectModelHelpers.MSBuildDefaultToolsVersion));
+            Assert.Equal(tv12path, ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", ToolLocationHelper.CurrentToolsVersion));
         }
 
         [Fact(Skip = "Ignored in MSTest")]
@@ -1555,15 +1561,15 @@ namespace Microsoft.Build.UnitTests
 
             string tempDirectory = Path.Combine(Path.GetTempPath(), "GetPathToReferenceAssembliesWithRootGoodWithChain");
 
-            string framework41Directory = Path.Combine(tempDirectory, "MyFramework\\v4.1\\");
+            string framework41Directory = Path.Combine(tempDirectory, "MyFramework", "v4.1") + Path.DirectorySeparatorChar;
             string framework41redistDirectory = Path.Combine(framework41Directory, "RedistList");
             string framework41RedistList = Path.Combine(framework41redistDirectory, "FrameworkList.xml");
 
-            string framework40Directory = Path.Combine(tempDirectory, "MyFramework\\v4.0\\");
+            string framework40Directory = Path.Combine(tempDirectory, "MyFramework", "v4.0") + Path.DirectorySeparatorChar;
             string framework40redistDirectory = Path.Combine(framework40Directory, "RedistList");
             string framework40RedistList = Path.Combine(framework40redistDirectory, "FrameworkList.xml");
 
-            string framework39Directory = Path.Combine(tempDirectory, "MyFramework\\v3.9\\");
+            string framework39Directory = Path.Combine(tempDirectory, "MyFramework", "v3.9") + Path.DirectorySeparatorChar;
             string framework39redistDirectory = Path.Combine(framework39Directory, "RedistList");
             string framework39RedistList = Path.Combine(framework39redistDirectory, "FrameworkList.xml");
 
@@ -2979,8 +2985,8 @@ namespace Microsoft.Build.UnitTests
         public void VerifyFrameworkSdkWithOldManifest()
         {
             string tmpRootDirectory = Path.GetTempPath();
-            string frameworkPathPattern = @"Microsoft SDKs\Windows\v8.0\ExtensionSDKs\MyFramework";
-            string frameworkPathPattern2 = @"ExtensionSDKs\MyFramework";
+            string frameworkPathPattern = NativeMethodsShared.IsWindows ? @"Microsoft SDKs\Windows\v8.0\ExtensionSDKs\MyFramework" : "Microsoft SDKs/Windows/v8.0/ExtensionSDKs/MyFramework";
+            string frameworkPathPattern2 = NativeMethodsShared.IsWindows ? @"ExtensionSDKs\MyFramework" : "ExtensionSDKs/MyFramework";
 
             string frameworkPath = Path.Combine(tmpRootDirectory, frameworkPathPattern);
             string manifestFile = Path.Combine(frameworkPath, "SDKManifest.xml");

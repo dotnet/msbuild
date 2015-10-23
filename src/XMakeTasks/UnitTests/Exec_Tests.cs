@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests
         [Fact(Skip = "Timing issue found on RI candidate from ToolPlat to Main, disabling for RI only.")]
         public void Timeout()
         {
-            Exec exec = PrepareExec(":foo \n goto foo");
+            Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
             exec.Timeout = 5;
             bool result = exec.Execute();
 

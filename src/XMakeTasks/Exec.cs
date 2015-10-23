@@ -557,13 +557,10 @@ namespace Microsoft.Build.Tasks
             if (NativeMethodsShared.IsUnixLike)
             {
                 commandLine.AppendSwitch("-c");
-                commandLine.AppendTextUnquoted(" '");
-                commandLine.AppendTextUnquoted("(");
-                commandLine.AppendTextUnquoted("export $LANG=en_US.UTF-8 export LC_ALL=$LANG");
-                commandLine.AppendTextUnquoted(";");
+                commandLine.AppendTextUnquoted(" \"\"\"");
+                commandLine.AppendTextUnquoted("export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; ");
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
-                commandLine.AppendTextUnquoted(")");
-                commandLine.AppendTextUnquoted("'");
+                commandLine.AppendTextUnquoted("\"\"\"");
             }
             else
             {
