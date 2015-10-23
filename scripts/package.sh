@@ -8,6 +8,13 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+echo "Starting packaging"
+
+if [ -z "$DOTNET_BUILD_VERSION" ]; then
+    TIMESTAMP=$(date "+%Y%m%d%H%M%S")
+    export DOTNET_BUILD_VERSION=0.0.1-alpha-t$TIMESTAMP
+    echo "Version: $DOTNET_BUILD_VERSION"
+fi
 
 # Create Dnvm Package
 $DIR/package-dnvm.sh
@@ -16,3 +23,5 @@ if [[ "$1" == "debian" ]]; then
     # Create Debian package
     $DIR/package-debian.sh
 fi
+
+$DIR/../packaging/osx/package-osx.sh

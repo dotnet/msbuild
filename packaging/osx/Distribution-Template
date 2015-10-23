@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+    <title>.NET CLI {VERSION}</title>
+    <license file="eula.rtf" mime-type="application/rtf" />
+    <background file="dotnetbackground.png" mime-type="image/png"/>
+    <options customize="never" require-scripts="false" />
+    <welcome file="welcome.html" mime-type="text/html" />
+    <volume-check>
+        <allowed-os-version>
+                <os-version min="10.10" />
+        </allowed-os-version>
+    </volume-check>
+    <choices-outline>
+        <line choice="com.microsoft.dotnet.cli.pkg.dotnet-osx-x64"/>
+    </choices-outline>
+
+    <choice id="com.microsoft.dotnet.cli.pkg.dotnet-osx-x64" visible="true" title=".NET CLI (x64)" description=".NET CLI">
+        <pkg-ref id="com.microsoft.dotnet.cli.pkg.dotnet-osx-x64"/>
+    </choice>
+    <pkg-ref id="com.microsoft.dotnet.cli.pkg.dotnet-osx-x64" onConclusion="none">dotnet-osx-x64.{VERSION}.pkg</pkg-ref>
+</installer-gui-script>
