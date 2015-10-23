@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -182,21 +182,26 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Add project source files
-            compilerArgs.AddRange(context.ProjectFile.Files.SourceFiles.Select(s => $"\"{s}\""));
+            var sourceFiles = context.ProjectFile.Files.SourceFiles;
+            compilerArgs.AddRange(sourceFiles.Select(s => $"\"{s}\""));
 
             if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
             {
                 return false;
             }
 
-            // TODO: Read this from the project
-            const string compiler = "csc";
+            var compilerName = context.ProjectFile.CompilerName;
+            if (compilerName == null && !TryDetectCompilerName(sourceFiles, out compilerName))
+            {
+                Console.Error.WriteLine("Could not detect the compiler name. Please specify it in the project.json file.");
+                return false;
+            }
 
             // Write RSP file
-            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compiler}.rsp");
+            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compilerName}.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
-            var result = Command.Create($"dotnet-compile-{compiler}", $"\"{rsp}\"")
+            var result = Command.Create($"dotnet-compile-{compilerName}", $"\"{rsp}\"")
                                  .OnErrorLine(line =>
                                  {
                                      var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
@@ -235,6 +240,55 @@ namespace Microsoft.DotNet.Tools.Compiler
             PrintSummary(diagnostics);
 
             return success;
+        }
+
+        private static readonly KeyValuePair<string, string>[] s_compilerNameLookupTable =
+        {
+            new KeyValuePair<string, string>(".cs", "csc"),
+            new KeyValuePair<string, string>(".vb", "vbc"),
+            new KeyValuePair<string, string>(".fs", "fsc")
+        };
+
+        /// <summary>
+        /// Uses the extension on the source files to try to detect the
+        /// compiler. If the source files have different extensions or the
+        /// extension is not recognized, returns false.
+        /// </summary>
+        private static bool TryDetectCompilerName(IEnumerable<string> sourceFiles, out string compilerName)
+        {
+            compilerName = null;
+            string extension = null;
+            foreach (var file in sourceFiles)
+            {
+                if (!Path.HasExtension(file))
+                {
+                    return false;
+                }
+
+                var tmpExtension = Path.GetExtension(file);
+                extension = extension ?? tmpExtension;
+
+                if (extension != tmpExtension)
+                {
+                    return false;
+                }
+            }
+
+            if (extension == null)
+            {
+                return false;
+            }
+
+            foreach (var kvp in s_compilerNameLookupTable)
+            {
+                if (extension == kvp.Key)
+                {
+                    compilerName = kvp.Value;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void PrintSummary(List<DiagnosticMessage> diagnostics)
