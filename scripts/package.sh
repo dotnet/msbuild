@@ -14,7 +14,4 @@ $DIR/package-dnvm.sh
 if [[ "$1" == "debian" ]]; then
     # Create Debian package
     $DIR/package-debian.sh
-elif [[ "$1" == "pkg" ]]; then
-    # Create Mac Pkg
-    $DIR/package-pkg.sh
 fi
