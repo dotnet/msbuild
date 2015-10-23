@@ -905,7 +905,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(_pathToMSBuildExe));
 
                 var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag";
-                output = ExecMSBuild("msbuild.exe", msbuildParameters, false);
+                output = ExecMSBuild("MSBuild.exe", msbuildParameters, false);
             }
             finally
             {
@@ -924,7 +924,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "msbuild.rsp");
+            string rspPath = Path.Combine(directory, "MSBuild.rsp");
 
             string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -961,7 +961,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "msbuild.rsp");
+            string rspPath = Path.Combine(directory, "MSBuild.rsp");
 
             try
             {
@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "msbuild.rsp");
+            string rspPath = Path.Combine(directory, "MSBuild.rsp");
 
             try
             {
@@ -1059,11 +1059,11 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "msbuild.rsp");
+            string rspPath = Path.Combine(directory, "MSBuild.rsp");
 
             string exeDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string exePath = Path.Combine(exeDirectory, "msbuild.exe");
-            string mainRspPath = Path.Combine(exeDirectory, "msbuild.rsp");
+            string exePath = Path.Combine(exeDirectory, "MSBuild.exe");
+            string mainRspPath = Path.Combine(exeDirectory, "MSBuild.rsp");
 
             try
             {
@@ -1104,8 +1104,8 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "msbuild.rsp");
-            string exePath = Path.Combine(directory, "msbuild.exe");
+            string rspPath = Path.Combine(directory, "MSBuild.rsp");
+            string exePath = Path.Combine(directory, "MSBuild.exe");
 
             try
             {
@@ -1139,7 +1139,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "msbuild.rsp");
+            string rspPath = Path.Combine(directory, "MSBuild.rsp");
 
             try
             {
@@ -1171,7 +1171,7 @@ namespace Microsoft.Build.UnitTests
         {
             string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "msbuild.rsp");
+            string rspPath = Path.Combine(directory, "MSBuild.rsp");
 
             try
             {
