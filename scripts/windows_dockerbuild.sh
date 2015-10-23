@@ -82,9 +82,9 @@ copy_code_to_vm(){
 run_build(){
     # These are env variables for dockerbuild.sh
     export DOCKER_HOST_SHARE_DIR="$(_convert_path $VM_CODE_DIR)"
-    echo $DOCKER_HOST_SHARE_DIR
+    export BUILD_COMMAND="//opt\\code\\build.sh"
 
-    $DIR/dockerbuild.sh
+    $DIR/dockerbuild.sh debian
 }
 
 # This will duplicate the entire repo + any side effects from

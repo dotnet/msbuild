@@ -13,7 +13,7 @@ cd $DIR/..
 [ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
 [ -z "$DOTNET_BUILD_CONTAINER_NAME" ] && DOTNET_BUILD_CONTAINER_NAME="dotnetcli-build-container"
 [ -z "$DOCKER_HOST_SHARE_DIR" ] && DOCKER_HOST_SHARE_DIR=$(pwd)
-[ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="//opt\\code\\build.sh"
+[ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="/opt/code/build.sh"
 
 echo $DOCKER_HOST_SHARE_DIR
 
@@ -21,9 +21,13 @@ echo $DOCKER_HOST_SHARE_DIR
 docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
 
 # Run the build in the container
-docker rm -f $DOTNET_BUILD_CONTAINER_NAME
-docker run \
+docker run --rm \
     -v $DOCKER_HOST_SHARE_DIR:/opt/code \
-    --name $DOTNET_BUILD_CONTAINER_NAME \
     -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION \
-    $DOTNET_BUILD_CONTAINER_TAG $BUILD_COMMAND
+    $DOTNET_BUILD_CONTAINER_TAG $BUILD_COMMAND $1
+
+docker run --rm \
+    -v $DOCKER_HOST_SHARE_DIR:/opt/code \
+    -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION \
+    $DOTNET_BUILD_CONTAINER_TAG chmod a+rw /opt/code
+

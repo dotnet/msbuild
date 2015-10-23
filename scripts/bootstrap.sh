@@ -104,4 +104,4 @@ dotnet publish --framework dnxcore50 --runtime $RID --output "$STAGE2_DIR" "$REP
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 # Make Stage 2 Folder Accessible
-chmod -R a+r $STAGE2_DIR
+chmod -R a+r $REPOROOT
