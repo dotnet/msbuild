@@ -92,7 +92,7 @@ namespace Microsoft.Extensions.ProjectModel.Graph
 
                 var type = value.ValueAsString("type")?.Value;
 
-                if (type == null || type == "package")
+                if (type == null || string.Equals(type, "package", StringComparison.OrdinalIgnoreCase))
                 {
                     lockFile.PackageLibraries.Add(new LockFilePackageLibrary
                     {

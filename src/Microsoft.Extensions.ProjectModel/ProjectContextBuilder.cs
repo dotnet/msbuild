@@ -61,7 +61,7 @@ namespace Microsoft.Extensions.ProjectModel
 
             if (LockFile != null)
             {
-                validLockFile = (LockFile.Version == LockFile.CurrentVersion) && LockFile.IsValidForProject(Project, out lockFileValidationMessage);
+                validLockFile = LockFile.IsValidForProject(Project, out lockFileValidationMessage);
 
                 lockFileLookup = new LockFileLookup(LockFile);
             }
@@ -169,24 +169,37 @@ namespace Microsoft.Extensions.ProjectModel
         {
             foreach (var library in target.Libraries)
             {
+                LibraryDescription description = null;
+                var type = LibraryType.Unspecified;
+
                 if (string.Equals(library.Type, "project"))
                 {
                     var projectLibrary = lockFileLookup.GetProject(library.Name);
 
-                    var path = Path.GetFullPath(Path.Combine(ProjectDirectory, projectLibrary.Path));
+                    if (projectLibrary != null)
+                    {
+                        var path = Path.GetFullPath(Path.Combine(ProjectDirectory, projectLibrary.Path));
 
-                    var projectDescription = projectResolver.GetDescription(library.Name, path, library);
+                        description = projectResolver.GetDescription(library.Name, path, library);
+                    }
 
-                    libraries.Add(new LibraryKey(projectDescription.Identity.Name), projectDescription);
+                    type = LibraryType.Project;
                 }
                 else
                 {
                     var packageEntry = lockFileLookup.GetPackage(library.Name, library.Version);
 
-                    var packageDescription = packageResolver.GetDescription(packageEntry, library);
+                    if (packageEntry != null)
+                    {
+                        description = packageResolver.GetDescription(packageEntry, library);
+                    }
 
-                    libraries.Add(new LibraryKey(packageDescription.Identity.Name), packageDescription);
+                    type = LibraryType.Package;
                 }
+
+                description = description ?? UnresolvedDependencyProvider.GetDescription(new LibraryRange(library.Name, type), target.TargetFramework);
+
+                libraries.Add(new LibraryKey(library.Name), description);
             }
         }
 
