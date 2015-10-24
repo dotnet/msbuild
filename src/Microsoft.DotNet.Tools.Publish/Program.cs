@@ -49,6 +49,13 @@ namespace Microsoft.DotNet.Tools.Publish
                 var fx = NuGetFramework.Parse(framework.Value());
                 var rids = new[] { runtime.Value() };
                 var context = ProjectContext.Create(path, fx, rids);
+
+                if (string.IsNullOrEmpty(context.RuntimeIdentifier))
+                {
+                    Reporter.Output.WriteLine($"Unknown runtime identifier {runtime.Value()}.".Red());
+                    return 1;
+                }
+
                 return Publish(context, output.Value(), configuration.Value() ?? Constants.DefaultConfiguration);
             });
 
@@ -97,7 +104,7 @@ namespace Microsoft.DotNet.Tools.Publish
                     Constants.BinDirectoryName,
                     configuration,
                     context.TargetFramework.GetTwoDigitShortFolderName(),
-                    "publish");
+                    context.RuntimeIdentifier);
             }
 
             if (!Directory.Exists(outputPath))
