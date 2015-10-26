@@ -13,7 +13,7 @@
 
   <Target Name="_CopyCompilers"
           AfterTargets="_RestoreBuildToolsWrapper"
-          Condition="Exists($(BuildToolsSemaphore))">
+          Condition="Exists($(BuildToolsSemaphore)) and '$(NetCoreBuild)' != 'true'">
     <ItemGroup>
       <CompilerToolsFiles Include="$(CompilerToolsDir)\*" />
     </ItemGroup>
