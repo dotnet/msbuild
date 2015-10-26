@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -182,21 +182,22 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Add project source files
-            compilerArgs.AddRange(context.ProjectFile.Files.SourceFiles.Select(s => $"\"{s}\""));
+            var sourceFiles = context.ProjectFile.Files.SourceFiles;
+            compilerArgs.AddRange(sourceFiles.Select(s => $"\"{s}\""));
 
             if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
             {
                 return false;
             }
 
-            // TODO: Read this from the project
-            const string compiler = "csc";
+            var compilerName = context.ProjectFile.CompilerName;
+            compilerName = compilerName ?? "csc";
 
             // Write RSP file
-            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compiler}.rsp");
+            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compilerName}.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
-            var result = Command.Create($"dotnet-compile-{compiler}", $"\"{rsp}\"")
+            var result = Command.Create($"dotnet-compile-{compilerName}", $"\"{rsp}\"")
                                  .OnErrorLine(line =>
                                  {
                                      var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
