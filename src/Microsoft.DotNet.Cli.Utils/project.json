@@ -1,6 +1,5 @@
 ﻿{
     "version": "1.0.0-*",
-    "compilerName": "csc",
 
     "shared": "**/*.cs",
 

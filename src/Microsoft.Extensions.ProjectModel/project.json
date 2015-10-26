@@ -1,7 +1,6 @@
 ﻿{
   "version": "1.0.0-*",
   "description": "Types to model a .NET Project",
-  "compilerName": "csc",
   "dependencies": {
     "Microsoft.CSharp": "4.0.1-beta-23419",
     "System.Collections": "4.0.11-beta-23419",

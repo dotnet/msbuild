@@ -191,11 +191,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             var compilerName = context.ProjectFile.CompilerName;
-            if (compilerName == null)
-            {
-                Console.Error.WriteLine("Could not find the compiler name. Please specify it in the project.json file.");
-                return false;
-            }
+            compilerName = compilerName ?? "csc";
 
             // Write RSP file
             var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compilerName}.rsp");
