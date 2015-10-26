@@ -19,7 +19,8 @@ namespace Microsoft.Build.Tasks
     {
         // Current version for serialization. This should be changed when breaking changes
         // are made to this class.
-        private const byte CurrentSerializationVersion = 1;
+        // Note: Consider that changes can break VS2015 RTM which did not have a version check.
+        private const byte CurrentSerializationVersion = 2;
 
         // Version this instance is serialized with.
         private byte _serializedVersion = CurrentSerializationVersion;
