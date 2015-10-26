@@ -191,9 +191,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             var compilerName = context.ProjectFile.CompilerName;
-            if (compilerName == null && !TryDetectCompilerName(sourceFiles, out compilerName))
+            if (compilerName == null)
             {
-                Console.Error.WriteLine("Could not detect the compiler name. Please specify it in the project.json file.");
+                Console.Error.WriteLine("Could not find the compiler name. Please specify it in the project.json file.");
                 return false;
             }
 
@@ -240,55 +240,6 @@ namespace Microsoft.DotNet.Tools.Compiler
             PrintSummary(diagnostics);
 
             return success;
-        }
-
-        private static readonly KeyValuePair<string, string>[] s_compilerNameLookupTable =
-        {
-            new KeyValuePair<string, string>(".cs", "csc"),
-            new KeyValuePair<string, string>(".vb", "vbc"),
-            new KeyValuePair<string, string>(".fs", "fsc")
-        };
-
-        /// <summary>
-        /// Uses the extension on the source files to try to detect the
-        /// compiler. If the source files have different extensions or the
-        /// extension is not recognized, returns false.
-        /// </summary>
-        private static bool TryDetectCompilerName(IEnumerable<string> sourceFiles, out string compilerName)
-        {
-            compilerName = null;
-            string extension = null;
-            foreach (var file in sourceFiles)
-            {
-                if (!Path.HasExtension(file))
-                {
-                    return false;
-                }
-
-                var tmpExtension = Path.GetExtension(file);
-                extension = extension ?? tmpExtension;
-
-                if (extension != tmpExtension)
-                {
-                    return false;
-                }
-            }
-
-            if (extension == null)
-            {
-                return false;
-            }
-
-            foreach (var kvp in s_compilerNameLookupTable)
-            {
-                if (extension == kvp.Key)
-                {
-                    compilerName = kvp.Value;
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static void PrintSummary(List<DiagnosticMessage> diagnostics)

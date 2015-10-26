@@ -1,6 +1,7 @@
 ﻿{
   "name": "dotnet-compile-csc",
   "version": "1.0.0-*",
+  "compilerName": "csc",
   "compilationOptions": {
     "emitEntryPoint": true
   },
