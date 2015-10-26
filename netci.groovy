@@ -24,6 +24,7 @@ def static getBuildJobName(def configuration, def os) {
         // Calculate job name
         def jobName = getBuildJobName(configuration, os)
         def buildCommand = '';
+        def postBuildCommand = '';
 
         // Calculate the build command
         if (os == 'Windows_NT') {
@@ -31,6 +32,7 @@ def static getBuildJobName(def configuration, def os) {
         }
         else {
             buildCommand = "./scripts/ci_build.sh ${lowerConfiguration}"
+            postBuildCommand = "./scripts/ci_postbuild.sh ${lowerConfiguration}"
         }
 
         // Create the new job
@@ -45,6 +47,16 @@ def static getBuildJobName(def configuration, def os) {
                 else {
                     // Shell
                     shell(buildCommand)
+
+                    // Post Build Cleanup
+                    publishers {
+                        postBuildScripts {
+                            steps {
+                                shell(postBuildCommand)
+                            }
+                            onlyIfBuildSucceeds(false)
+                        }
+                    }
                 }
             }
         }
@@ -67,6 +79,17 @@ def static getBuildJobName(def configuration, def os) {
                 else {
                     // Shell
                     shell(buildCommand)
+
+                    // Post Build Cleanup
+                    publishers {
+                        postBuildScripts {
+                            steps {
+                                shell(postBuildCommand)
+                            }
+                            onlyIfBuildSucceeds(false)
+                        }
+                    }
+
                 }
             }
         }

@@ -13,18 +13,22 @@ cd $DIR/..
 [ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
 [ -z "$DOTNET_BUILD_CONTAINER_NAME" ] && DOTNET_BUILD_CONTAINER_NAME="dotnetcli-build-container"
 [ -z "$DOCKER_HOST_SHARE_DIR" ] && DOCKER_HOST_SHARE_DIR=$(pwd)
-[ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="/opt/code/build.sh"
-
-echo $DOCKER_HOST_SHARE_DIR
 
 # Build the docker container (will be fast if it is already built)
 docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
 
-# Run the build in the container
-docker run --rm --sig-proxy=true \
-	--name $DOTNET_BUILD_CONTAINER_NAME \
+# First thing make sure all of our build containers are stopped
+docker stop $DOTNET_BUILD_CONTAINER_NAME
+docker rm $DOTNET_BUILD_CONTAINER_NAME
+
+# Remove the sticky bit on directories created by docker so we can delete them
+docker run --rm \
     -v $DOCKER_HOST_SHARE_DIR:/opt/code \
     -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION \
-    $DOTNET_BUILD_CONTAINER_TAG $BUILD_COMMAND $1
+    $DOTNET_BUILD_CONTAINER_TAG chmod -R -t /opt/code
 
-
+# And Actually make those directories accessible to be deleted
+docker run --rm \
+    -v $DOCKER_HOST_SHARE_DIR:/opt/code \
+    -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION \
+    $DOTNET_BUILD_CONTAINER_TAG chmod -R a+rwx /opt/code
