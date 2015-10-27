@@ -64,3 +64,5 @@ find . -type f ! -name "*.*" | xargs chmod 755
 tar -czf $PACKAGE_NAME *
 
 echo "Packaged stage2 to $PACKAGE_NAME"
+
+$DIR/publish.sh $PACKAGE_NAME
