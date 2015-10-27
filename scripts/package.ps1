@@ -20,3 +20,9 @@ Add-Type -Assembly System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::CreateFromDirectory($Stage2Dir, $PackageName, "Optimal", $false)
 
 Write-Host "Packaged stage2 to $PackageName"
+
+
+$PublishScript = Join-Path $PSScriptRoot "publish.ps1"
+& $PublishScript -file $PackageName
+
+exit $LastExitCode
