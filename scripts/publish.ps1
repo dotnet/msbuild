@@ -4,14 +4,26 @@ param(
 
 function CheckRequiredVariables 
 {    
-    if([string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION)) 
+    if([string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION))
     {        
         return $false
-    }    
+    }
 
     # this variable is set by the CI system
     if([string]::IsNullOrEmpty($env:SASTOKEN)) 
     {        
+        return $false
+    }
+
+    # this variable is set by the CI system
+    if([string]::IsNullOrEmpty($env:STORAGE_ACCOUNT))
+    {
+        return $false
+    }
+
+    # this variable is set by the CI system
+    if([string]::IsNullOrEmpty($env:STORAGE_CONTAINER))
+    {
         return $false
     }
 
@@ -23,7 +35,7 @@ $Result = CheckRequiredVariables
 
 if(!$Result)
 {
-    # fail silently if the required variables are not available for publishing the file.    
+    # fail silently if the required variables are not available for publishing the file
     exit 0
 }
 
@@ -46,7 +58,9 @@ elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".msi")
 
 Write-Host "Uploading $fileName to dotnet feed.."
 
-Invoke-WebRequest -URI "https://dotnetcli.blob.core.windows.net/dotnet/$Folder/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $file
+$Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$Folder/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN"
+
+Invoke-WebRequest -URI $Upload_URI -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $file
 
 $ReturnCode = $LASTEXITCODE
 
