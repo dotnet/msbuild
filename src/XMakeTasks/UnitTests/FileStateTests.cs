@@ -44,6 +44,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BadChars()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                // On Unix there no invalid file name characters
+                return;
+            }
+
             Assert.Throws<ArgumentException>(() =>
             {
                 var state = new FileState("|");

@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidDirectoryPath()
         {
-            if (!NativeMethodsShared.IsUnixLike)
+            if (NativeMethodsShared.IsUnixLike)
             {
                 return; // "No invalid characters on Unix"
             }
