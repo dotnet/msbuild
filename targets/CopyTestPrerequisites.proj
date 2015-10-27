@@ -15,6 +15,17 @@
           />
   </Target>
 
+  <Target Name="CopyLanguageTargets">
+    <ItemGroup>
+      <CompilerToolsFiles Include="$(CompilerToolsDir)\Microsoft*Core.targets" />
+    </ItemGroup>
+    
+    <Copy SourceFiles="@(CompilerToolsFiles)"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"           
+          />
+  </Target>
+
   <Target Name="CopyXunitConfiguration">
     <Copy SourceFiles="$(MSBuildThisFileDirectory)xunit.runner.json"
           DestinationFolder="$(OutputPath)"
@@ -22,6 +33,6 @@
   </Target>
 
   <Target Name="CopyPrerequisites"
-          DependsOnTargets="CopyCompilerTools;CopyXunitConfiguration" />
+          DependsOnTargets="CopyLanguageTargets;CopyCompilerTools;CopyXunitConfiguration" />
 
 </Project>
