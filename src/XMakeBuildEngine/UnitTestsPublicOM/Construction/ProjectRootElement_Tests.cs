@@ -477,8 +477,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 "Microsoft.Common.targets",
                 "Microsoft.CSharp.targets",
-                // BUG: restore this when https://github.com/Microsoft/msbuild/issues/306 is fixed
-                // "Microsoft.VisualBasic.targets",
+                "Microsoft.VisualBasic.targets"
             };
 
             foreach (string target in targets)
