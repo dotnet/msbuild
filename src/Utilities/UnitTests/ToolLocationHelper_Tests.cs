@@ -771,7 +771,11 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version140), InstallationFolder);
         }
 
+#if FEATURE_REGISTRY_SDKS
         [Fact]
+#else
+        [Fact (Skip="Registry SDKs not supported")]
+#endif
         public void GetPathToDotNetFrameworkSdk()
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -1852,10 +1856,14 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(0, directories.Count); // "Expected the method to return no paths."
         }
 
+#if FEATURE_SPECIAL_FOLDERS
         /// <summary>
         /// Make sure we choose the correct path for program files based on the environment variables
         /// </summary>
         [Fact]
+#else
+        [Fact(Skip = "Special folders not supported")]
+#endif
         public void TestGenerateProgramFiles32()
         {
             if (NativeMethodsShared.IsUnixLike)
