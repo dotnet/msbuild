@@ -14,7 +14,13 @@ UPLOAD_FILE=$1
 UPLOAD_JSON_FILE="package_upload.json"
 
 execute(){
-    if ! validate_inputs; then
+    if ! validate_env_variables; then
+        # fail silently if the required variables are not available for publishing the file.
+        exit 0
+    fi
+
+    if [[ ! -f "$UPLOAD_FILE" ]]; then
+        echo "Error: \"$UPLOAD_FILE\" file does not exist"
         exit 1
     fi
 
@@ -30,24 +36,26 @@ execute(){
     fi
 }
 
-validate_inputs(){
+validate_env_variables(){
     local ret=0
-    if [[ ! -f "$UPLOAD_FILE" ]]; then
-        echo "Error: \"$UPLOAD_FILE\" file does not exist"
+
+    if [[ -z "$DOTNET_BUILD_VERSION" ]]; then
+        echo "DOTNET_BUILD_VERSION environment variable not set"
         ret=1
     fi
+
     if [[ -z "$SASTOKEN" ]]; then
-        echo "Error: SASTOKEN environment variable not set"
+        echo "SASTOKEN environment variable not set"
         ret=1
     fi
 
     if [[ -z "$STORAGE_ACCOUNT" ]]; then
-        echo "Error: STORAGE_ACCOUNT environment variable not set"
+        echo "STORAGE_ACCOUNT environment variable not set"
         ret=1
     fi
 
     if [[ -z "$STORAGE_CONTAINER" ]]; then
-        echo "Error: STORAGE_CONTAINER environment variable not set"
+        echo "STORAGE_CONTAINER environment variable not set"
         ret=1
     fi
 
