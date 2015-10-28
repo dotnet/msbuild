@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.ProjectModel.Files
         public static readonly string[] DefaultResourcesBuiltInPatterns = new[] { @"compiler/resources/**/*", "**/*.resx" };
         public static readonly string[] DefaultContentsBuiltInPatterns = new[] { @"**/*" };
 
-        public static readonly string[] DefaultBuiltInExcludePatterns = new[] { "bin/**", "obj/**", "**/*.xproj" };
+        public static readonly string[] DefaultBuiltInExcludePatterns = new[] { "bin/**", "obj/**", "**/*.xproj", "packages/**" };
 
         public static readonly string PackIncludePropertyName = "packInclude";
 
