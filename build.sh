@@ -15,7 +15,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
 LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
 
-if [ "$UNAME" == "Darwin" ]; then
+if [ "$(uname)" == "Darwin" ]; then
     export DOTNET_BUILD_VERSION=0.0.1-alpha-$(date -ur $LAST_COMMIT_TIMESTAMP "+%Y%m%d-%H%M%S")
 else
     export DOTNET_BUILD_VERSION=0.0.1-alpha-$(date -ud @$LAST_COMMIT_TIMESTAMP "+%Y%m%d-%H%M%S")
