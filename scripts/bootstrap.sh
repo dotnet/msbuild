@@ -39,13 +39,15 @@ STAGE0_DIR=$OUTPUT_ROOT/stage0
 STAGE1_DIR=$OUTPUT_ROOT/stage1
 STAGE2_DIR=$OUTPUT_ROOT/stage2
 
-echo "Cleaning artifacts folder"
-rm -rf $OUTPUT_ROOT
-
-echo "Installing stage0"
-# Use a sub-shell to ensure the DNVM gets cleaned up
-mkdir -p $STAGE0_DIR
-$DIR/install-stage0.sh $STAGE0_DIR $DIR/dnvm2.sh
+if [ "$DOTNET_CI_SKIP_STAGE0_INSTALL" != "1" ]; then
+    echo "Installing stage0"
+    # Use a sub-shell to ensure the DNVM gets cleaned up
+    rm -Rf $STAGE0_DIR
+    mkdir -p $STAGE0_DIR
+    $DIR/install-stage0.sh $STAGE0_DIR $DIR/dnvm2.sh
+else
+    echo "Skipping stage0 because DOTNET_CI_SKIP_STAGE0_INSTALL"
+fi
 
 export PATH=$STAGE0_DIR/bin:$PATH
 
@@ -85,14 +87,14 @@ dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE1_DIR" --config
 dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE1_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Publish"
 dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE1_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
 
-# Update stage1 with the checked-in CoreCLR
-cp $REPOROOT/ext/CoreCLR/$RID/* $STAGE1_DIR
-
 # Add stage1 to the path and use it to build stage2
 export PATH=$STAGE1_DIR:$START_PATH
 
 # Make corerun explicitly executable
 chmod a+x $STAGE1_DIR/corerun
+
+# Clean up stage2
+[ -d "$STAGE2_DIR" ] && rm -Rf "$STAGE2_DIR"
 
 echo "Building stage2 dotnet using stage1 ..."
 dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Cli"
@@ -128,7 +130,7 @@ OUTPUT=$($REPOROOT/artifacts/$RID/smoketest/TestApp)
 
 # Check that a compiler error is reported
 set +e
-dotnet compile "$REPOROOT/test/compile/failing/SimpleCompilerError" --framework "$TFM" 2>&1 >/dev/null
+dotnet compile "$REPOROOT/test/compile/failing/SimpleCompilerError" --framework "$TFM" 2>/dev/null >/dev/null
 rc=$?
 if [ $rc == 0 ]; then
     echo "Compiler failure test failed! The compiler did not fail to compile!"

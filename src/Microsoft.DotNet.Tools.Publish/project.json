@@ -8,12 +8,14 @@
     "dotnet-publish": "Microsoft.DotNet.Tools.Publish"
   },
   "dependencies": {
-    "Microsoft.NETCore.Runtime": "1.0.1-beta-23420",
-    "System.Console": "4.0.0-beta-23420",
-    "System.Collections": "4.0.11-beta-23420",
-    "System.Linq": "4.0.1-beta-23420",
-    "System.Diagnostics.Process": "4.1.0-beta-23420",
-    "System.IO.FileSystem": "4.0.1-beta-23420",
+    "Microsoft.NETCore.Runtime": "1.0.1-beta-*",
+
+    "System.Console": "4.0.0-beta-*",
+    "System.Collections": "4.0.11-beta-*",
+    "System.Linq": "4.0.1-beta-*",
+    "System.Diagnostics.Process": "4.1.0-beta-*",
+    "System.IO.FileSystem": "4.0.1-beta-*",
+    "System.AppContext": "4.0.1-beta-*",
     "Microsoft.Extensions.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": {
       "type": "build",
@@ -21,9 +23,8 @@
     },
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "type": "build",
-      "version": "1.0.0-rc1-15838"
-    },
-    "System.AppContext": "4.0.1-beta-23420"
+      "version": "1.0.0-*"
+    }
   },
   "frameworks": {
     "dnxcore50": { }
