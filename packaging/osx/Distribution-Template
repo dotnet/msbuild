@@ -17,5 +17,5 @@
     <choice id="com.microsoft.dotnet.cli.pkg.dotnet-osx-x64" visible="true" title=".NET CLI (x64)" description=".NET CLI">
         <pkg-ref id="com.microsoft.dotnet.cli.pkg.dotnet-osx-x64"/>
     </choice>
-    <pkg-ref id="com.microsoft.dotnet.cli.pkg.dotnet-osx-x64" onConclusion="none">dotnet-osx-x64.{VERSION}.pkg</pkg-ref>
+    <pkg-ref id="com.microsoft.dotnet.cli.pkg.dotnet-osx-x64">dotnet-osx-x64.{VERSION}.pkg</pkg-ref>
 </installer-gui-script>
