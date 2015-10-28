@@ -35,6 +35,10 @@
           Outputs="$(RuntimeProjectLockJson)"
           >
     <Exec Command="$(RestoreRuntimePackagesCommand)" StandardOutputImportance="Low" />
+    <!-- Work around https://github.com/Microsoft/msbuild/issues/262 by running restore
+         a second time to get the correct .lock.json file in place.  This is inefficient
+         but shouldn't take too long since the packages should all already be downloaded. -->
+    <Exec Command="$(RestoreRuntimePackagesCommand)" StandardOutputImportance="Low" />
 
     <!-- It appears that NuGet doesn't re-write the project.lock.json file if the contents would be the same. This can mess up incremental builds
         if you make a non-significant change to project.json.  To avoid that, update the timestamp of the lock file here. -->
