@@ -11,7 +11,7 @@ _DNVM_RUNTIME_FOLDER_NAME=".dotnet"
 _DNVM_COMMAND_NAME="dnvm"
 _DNVM_PACKAGE_MANAGER_NAME="dnu"
 _DNVM_VERSION_MANAGER_NAME=".NET Version Manager"
-_DNVM_DEFAULT_FEED="https://distaspnet.blob.core.windows.net/dotnet"
+_DNVM_DEFAULT_FEED="https://dotnetcli.blob.core.windows.net/dotnet"
 _DNVM_DEFAULT_CHANNEL="dev"
 _DNVM_DEFAULT_UNSTABLE_CHANNEL="dev"
 _DNVM_UPDATE_LOCATION="https://raw.githubusercontent.com/aspnet/Home/dev/dnvm.sh"
@@ -89,14 +89,13 @@ __dnvm_find_latest() {
     #dnx-coreclr-linux-x64
     local packageId="$_DNVM_RUNTIME_PACKAGE_NAME-$os-$arch"
 
-    local url="$DNX_ACTIVE_FEED/$DNX_ACTIVE_CHANNEL/dnvm/index"
+    local url="$DNX_ACTIVE_FEED/$DNX_ACTIVE_CHANNEL/dnvm/latest.$os"
     local index="$(curl $url 2>/dev/null)"
 
-    local version="$(export IFS=; echo $index | sed -n 's/Latest: \(.*\)/\1/p')"
+    local version="$(export IFS=; echo $index | sed -n 's/^.*dotnet-$os-$arch\.\(.*\)\.tar\.gz$/\1/p')"
     local fullPackageId="$packageId.$version"
-    local filename="$(export IFS=; echo $index | sed -n "s/Filename: \(.*$fullPackageId\)/\1/p")"
 
-    local downloadUrl="$DNX_ACTIVE_FEED/$DNX_ACTIVE_CHANNEL/$filename"
+    local downloadUrl="$DNX_ACTIVE_FEED/$DNX_ACTIVE_CHANNEL/$index"
     echo $version $downloadUrl
 }
 

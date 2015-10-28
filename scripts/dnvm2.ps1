@@ -540,7 +540,7 @@ function Find-Package {
     _WriteOut "Determining latest version"
     $RuntimeId = $runtimeInfo.RuntimeId
     _WriteDebug "Latest RuntimeId: $RuntimeId"
-    $url = Join-UrlFragments $Feed,$channel,"dnvm","index"
+    $url = Join-UrlFragments $Feed,$channel,"dnvm","latest.win"
     _WriteDebug "Index URL: $url"
 
     $wc = New-Object System.Net.WebClient
@@ -554,13 +554,14 @@ function Find-Package {
     }
 
     if($runtimeInfo.Version -eq "latest") {
-        $version = $index | ?{$_ -match "Latest: (?<version>.+)?"} | %{$matches["version"]}
+        #/Binaries/0.0.1-alpha-00003/dotnet-osx-x64.0.0.1-alpha-00003.tar.gz
+        $version = $index | ?{$_ -match "^.+/dotnet-$($runtimeInfo.OS)-$($runtimeInfo.Architecture).(?<version>.+)?.zip"} | %{$matches["version"]}
     } else {
         $version = $runtimeInfo.Version
     }
 
     if($version) {
-        $urlPart = $index | ?{$_ -match "Filename: (?<url>.+?$RuntimeId.$version.zip)"} | %{$matches["url"]}
+        $urlPart = $index
         _WriteDebug "Found Package Path: $urlPart"
         $downloadUrl = Join-UrlFragments $Feed,$channel,$urlPart
         _WriteDebug "Found $version at $downloadUrl"
