@@ -101,6 +101,9 @@ echo Building stage2 dotnet-publish.exe ...
 dotnet publish --framework %TFM% --runtime %RID% --output "%STAGE2_DIR%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Resgen"
 if errorlevel 1 goto fail
 
+echo Crossgening Roslyn compiler ...
+call %~dp0crossgen/crossgen_roslyn.cmd %STAGE2_DIR%
+
 REM Copy DNX in to stage2
 xcopy /s /q %DNX_ROOT% %STAGE2_DIR%\dnx\
 
