@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.ProjectModel.Graph;
 using Microsoft.Extensions.ProjectModel.Resolution;
@@ -26,6 +27,8 @@ namespace Microsoft.Extensions.ProjectModel
         public string ProjectDirectory { get; set; }
 
         public string PackagesDirectory { get; set; }
+        
+        public string ReferenceAssembliesPath { get; set; }
 
         public ProjectContext Build()
         {
@@ -44,6 +47,7 @@ namespace Microsoft.Extensions.ProjectModel
 
             RootDirectory = GlobalSettings?.DirectoryPath ?? RootDirectory;
             PackagesDirectory = PackagesDirectory ?? PackageDependencyProvider.ResolveRepositoryPath(RootDirectory, GlobalSettings);
+            ReferenceAssembliesPath = ReferenceAssembliesPath ?? GetDefaultReferenceAssembliesPath();
 
             LockFileLookup lockFileLookup = null;
 
@@ -85,11 +89,12 @@ namespace Microsoft.Extensions.ProjectModel
                 }
             }
 
-            var frameworkReferenceResolver = new FrameworkReferenceResolver();
+            var frameworkReferenceResolver = new FrameworkReferenceResolver(ReferenceAssembliesPath);
             var referenceAssemblyDependencyResolver = new ReferenceAssemblyDependencyResolver(frameworkReferenceResolver);
+            bool requiresFrameworkAssemblies;
 
             // Resolve the dependencies
-            ResolveDependencies(libraries, referenceAssemblyDependencyResolver);
+            ResolveDependencies(libraries, referenceAssemblyDependencyResolver, out requiresFrameworkAssemblies);
 
             var diagnostics = new List<DiagnosticMessage>();
 
@@ -112,6 +117,22 @@ namespace Microsoft.Extensions.ProjectModel
                     DiagnosticMessageSeverity.Warning));
             }
 
+            if (requiresFrameworkAssemblies && !frameworkReferenceResolver.IsInstalled(TargetFramework))
+            {
+                var frameworkInfo = Project.GetTargetFramework(TargetFramework);
+                
+                // If there was an attempt to use reference assemblies but they were not installed
+                // report an error
+                diagnostics.Add(new DiagnosticMessage(
+                    ErrorCodes.DOTNET1011,
+                    $"Framework not installed: {TargetFramework.DotNetFrameworkName}",
+                    filePath: Project.ProjectFilePath,
+                    severity: DiagnosticMessageSeverity.Error,
+                    startLine: frameworkInfo.Line,
+                    startColumn: frameworkInfo.Column
+                ));
+            }
+
             // Create a library manager
             var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics);
 
@@ -124,8 +145,12 @@ namespace Microsoft.Extensions.ProjectModel
                 libraryManager);
         }
 
-        private void ResolveDependencies(Dictionary<LibraryKey, LibraryDescription> libraries, ReferenceAssemblyDependencyResolver referenceAssemblyDependencyResolver)
+        private void ResolveDependencies(Dictionary<LibraryKey, LibraryDescription> libraries, 
+                                         ReferenceAssemblyDependencyResolver referenceAssemblyDependencyResolver,
+                                         out bool requiresFrameworkAssemblies)
         {
+            requiresFrameworkAssemblies = false;
+            
             foreach (var library in libraries.Values.ToList())
             {
                 if (Equals(library.Identity.Type, LibraryType.Package) &&
@@ -146,6 +171,8 @@ namespace Microsoft.Extensions.ProjectModel
                     {
                         if (Equals(LibraryType.ReferenceAssembly, dependency.Target))
                         {
+                            requiresFrameworkAssemblies = true;
+
                             dep = referenceAssemblyDependencyResolver.GetDescription(dependency, TargetFramework) ??
                                   UnresolvedDependencyProvider.GetDescription(dependency, TargetFramework);
 
@@ -203,6 +230,44 @@ namespace Microsoft.Extensions.ProjectModel
             }
         }
 
+        public static string GetDefaultReferenceAssembliesPath()
+        {
+            // Allow setting the reference assemblies path via an environment variable
+            var referenceAssembliesPath = Environment.GetEnvironmentVariable("DOTNET_REFERENCE_ASSEMBLIES_PATH");
+
+            if (!string.IsNullOrEmpty(referenceAssembliesPath))
+            {
+                return referenceAssembliesPath;
+            }
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // There is no reference assemblies path outside of windows
+                // The enviorment variable can be used to specify one
+                return null;
+            }
+
+            // References assemblies are in %ProgramFiles(x86)% on
+            // 64 bit machines
+            var programFiles = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+
+            if (string.IsNullOrEmpty(programFiles))
+            {
+                // On 32 bit machines they are in %ProgramFiles%
+                programFiles = Environment.GetEnvironmentVariable("ProgramFiles");
+            }
+
+            if (string.IsNullOrEmpty(programFiles))
+            {
+                // Reference assemblies aren't installed
+                return null;
+            }
+
+            return Path.Combine(
+                    programFiles,
+                    "Reference Assemblies", "Microsoft", "Framework");
+        }
+        
         private void EnsureProjectLoaded()
         {
             if (Project == null)

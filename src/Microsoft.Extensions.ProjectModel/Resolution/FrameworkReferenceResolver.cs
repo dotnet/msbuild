@@ -14,8 +14,6 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 {
     public class FrameworkReferenceResolver
     {
-        // TODO(anurse): Move the Mono stuff back in.
-
         // FrameworkConstants doesn't have dnx46 yet
         private static readonly NuGetFramework Dnx46 = new NuGetFramework(
             FrameworkConstants.FrameworkIdentifiers.Dnx,
@@ -28,6 +26,13 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             { FrameworkConstants.CommonFrameworks.Dnx451, new [] { FrameworkConstants.CommonFrameworks.Net451 } },
             { Dnx46, new [] { FrameworkConstants.CommonFrameworks.Net46 } }
         };
+        
+        public FrameworkReferenceResolver(string referenceAssembliesPath)
+        {
+            ReferenceAssembliesPath = referenceAssembliesPath;
+        }
+        
+        public string ReferenceAssembliesPath { get; }
 
         public bool TryGetAssembly(string name, NuGetFramework targetFramework, out string path, out Version version)
         {
@@ -65,15 +70,11 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             return !string.IsNullOrEmpty(path);
         }
 
-        public IEnumerable<string> GetAttemptedPaths(NuGetFramework targetFramework)
+        public bool IsInstalled(NuGetFramework targetFramework)
         {
             var information = _cache.GetOrAdd(targetFramework, GetFrameworkInformation);
 
-            if (information == null || !information.Exists)
-            {
-                return null;
-            }
-            return information.SearchPaths.Select(s => Path.Combine(s, "{name}.dll"));
+            return information?.Exists == true;
         }
 
         public string GetFrameworkRedistListPath(NuGetFramework targetFramework)
@@ -87,39 +88,14 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 
             return information.RedistListPath;
         }
-
-        public static string GetReferenceAssembliesPath()
+        private FrameworkInformation GetFrameworkInformation(NuGetFramework targetFramework)
         {
-            // References assemblies are in %ProgramFiles(x86)% on
-            // 64 bit machines
-            var programFiles = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-
-            if (string.IsNullOrEmpty(programFiles))
-            {
-                // On 32 bit machines they are in %ProgramFiles%
-                programFiles = Environment.GetEnvironmentVariable("ProgramFiles");
-            }
-
-            if (string.IsNullOrEmpty(programFiles))
-            {
-                // Reference assemblies aren't installed
-                return null;
-            }
-
-            return Path.Combine(
-                    programFiles,
-                    "Reference Assemblies", "Microsoft", "Framework");
-        }
-
-        private static FrameworkInformation GetFrameworkInformation(NuGetFramework targetFramework)
-        {
-            string referenceAssembliesPath = GetReferenceAssembliesPath();
+            string referenceAssembliesPath = ReferenceAssembliesPath;
 
             if (string.IsNullOrEmpty(referenceAssembliesPath))
             {
                 return null;
             }
-
 
             NuGetFramework[] candidates;
             if (_aliases.TryGetValue(targetFramework, out candidates))

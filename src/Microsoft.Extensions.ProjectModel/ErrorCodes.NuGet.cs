@@ -3,7 +3,7 @@
 
 namespace Microsoft.Extensions.ProjectModel
 {
-    public static class ErrorCodes
+    public static partial class ErrorCodes
     {
         // The dependency A could not be resolved.
         public static readonly string NU1001 = nameof(NU1001);

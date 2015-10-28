@@ -465,7 +465,9 @@ namespace Microsoft.Extensions.ProjectModel
             {
                 FrameworkName = frameworkName,
                 Dependencies = new List<LibraryRange>(),
-                CompilerOptions = compilerOptions
+                CompilerOptions = compilerOptions,
+                Line = frameworkValue.Line,
+                Column = frameworkValue.Column
             };
 
             var frameworkDependencies = new List<LibraryRange>();

@@ -15,6 +15,10 @@ namespace Microsoft.Extensions.ProjectModel
 
         public CompilerOptions CompilerOptions { get; set; }
 
+        public int Line { get; set; }
+
+        public int Column { get; set; }
+
         // REVIEW: Wrapping, we might do this differntly
         public string WrappedProject { get; set; }
 
