@@ -12,15 +12,9 @@ namespace Microsoft.Build.Shared
 
         //  Copied from .NET Framework source for Environment.Is64BitOperatingSystem (along with Win32Native APIs)
         public static bool Is64BitOperatingSystem
-        {
-            get
-            {
-                bool isWow64; // WinXP SP2+ and Win2k3 SP1+
-                return Win32Native.DoesWin32MethodExist(Win32Native.KERNEL32, "IsWow64Process")
-                    && Win32Native.IsWow64Process(Win32Native.GetCurrentProcess(), out isWow64)
-                    && isWow64;
-            }
-        }
+            => NativeMethodsShared.ProcessorArchitecture == NativeMethodsShared.ProcessorArchitectures.X64
+                || NativeMethodsShared.ProcessorArchitecture
+                == NativeMethodsShared.ProcessorArchitectures.IA64;
 
         private static class Win32Native
         {

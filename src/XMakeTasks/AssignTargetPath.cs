@@ -109,7 +109,7 @@ namespace Microsoft.Build.Tasks
                         if (// if the file path is relative
                             !Path.IsPathRooted(Files[i].ItemSpec) &&
                             // if the file path doesn't contain any relative specifiers
-                            !Files[i].ItemSpec.Contains(".\\") &&
+                            !Files[i].ItemSpec.Contains("." + Path.DirectorySeparatorChar) &&
                             // if the file path is already relative to the root folder
                             isRootFolderSameAsCurrentDirectory)
                         {

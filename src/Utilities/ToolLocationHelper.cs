@@ -10,7 +10,9 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Shared;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
@@ -2303,14 +2305,14 @@ namespace Microsoft.Build.Utilities
                         if (!targetPlatformSDK.ExtensionSDKs.ContainsKey(SDKKey))
                         {
                             ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", "SDKKey '{0}' was not already found.", SDKKey);
-                            string pathToSDKManifest = Path.Combine(sdkVersionDirectory.FullName, "sdkManifest.xml");
+                            string pathToSDKManifest = Path.Combine(sdkVersionDirectory.FullName, "SDKManifest.xml");
                             if (FileUtilities.FileExistsNoThrow(pathToSDKManifest))
                             {
                                 targetPlatformSDK.ExtensionSDKs.Add(SDKKey, FileUtilities.EnsureTrailingSlash(sdkVersionDirectory.FullName));
                             }
                             else
                             {
-                                ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", "No sdkManifest.xml files could be found at '{0}'. Not adding sdk", pathToSDKManifest);
+                                ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", "No SDKManifest.xml files could be found at '{0}'. Not adding sdk", pathToSDKManifest);
                             }
                         }
                         else
@@ -2742,7 +2744,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Get the registry root to find sdks under. The registry can be disabled if we are in a checked in sceario
+        /// Get the registry root to find sdks under. The registry can be disabled if we are in a checked in scenario
         /// </summary>
         /// <returns></returns>
         private static string GetTargetPlatformMonikerRegistryRoots(string registryRootLocation)
