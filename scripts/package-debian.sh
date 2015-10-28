@@ -67,3 +67,6 @@ test_debian_package(){
 }
 
 execute
+
+DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
+$DIR/publish.sh $DEBIAN_FILE

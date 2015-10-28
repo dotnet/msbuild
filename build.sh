@@ -12,5 +12,9 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+# UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
+LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
+export DOTNET_BUILD_VERSION=0.0.1-alpha-$(date -ud @$LAST_COMMIT_TIMESTAMP "+%Y%m%d-%H%M%S")
+
 $DIR/scripts/bootstrap.sh
 $DIR/scripts/package.sh $1
