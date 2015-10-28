@@ -128,7 +128,7 @@ OUTPUT=$($REPOROOT/artifacts/$RID/smoketest/TestApp)
 
 # Check that a compiler error is reported
 set +e
-dotnet compile "$REPOROOT/test/compile/failing/SimpleCompilerError" --framework "$TFM"
+dotnet compile "$REPOROOT/test/compile/failing/SimpleCompilerError" --framework "$TFM" 2>&1 >/dev/null
 rc=$?
 if [ $rc == 0 ]; then
     echo "Compiler failure test failed! The compiler did not fail to compile!"
