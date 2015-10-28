@@ -8,13 +8,14 @@
     "dotnet-compile": "Microsoft.DotNet.Tools.Compiler"
   },
   "dependencies": {
-    "Microsoft.NETCore.Runtime": "1.0.1-beta-*",
+    "Microsoft.NETCore.Runtime": "1.0.1-beta-23428",
 
-    "System.Console": "4.0.0-beta-*",
-    "System.Collections": "4.0.11-beta-*",
-    "System.Linq": "4.0.1-beta-*",
-    "System.Diagnostics.Process": "4.1.0-beta-*",
-    "System.IO.FileSystem": "4.0.1-beta-*",
+    "System.Console": "4.0.0-beta-23428",
+    "System.Collections": "4.0.11-beta-23428",
+    "System.Linq": "4.0.1-beta-23428",
+    "System.Diagnostics.Process": "4.1.0-beta-23428",
+    "System.IO.FileSystem": "4.0.1-beta-23428",
+
     "Microsoft.Extensions.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": {
       "type": "build",
