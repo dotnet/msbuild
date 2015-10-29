@@ -8,22 +8,9 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-REPOROOT="$( cd -P "$DIR/.." && pwd )"
+source "$DIR/_common.sh"
 
-if [ -z "$RID" ]; then
-    UNAME=$(uname)
-    if [ "$UNAME" == "Darwin" ]; then
-        OSNAME=osx
-        RID=osx.10.10-x64
-    elif [ "$UNAME" == "Linux" ]; then
-        # Detect Distro?
-        OSNAME=linux
-        RID=ubuntu.14.04-x64
-    else
-        echo "Unknown OS: $UNAME" 1>&2
-        exit 1
-    fi
-fi
+REPOROOT="$( cd -P "$DIR/.." && pwd )"
 
 if [ -z "$DOTNET_BUILD_VERSION" ]; then
     TIMESTAMP=$(date "+%Y%m%d%H%M%S")
@@ -33,18 +20,20 @@ fi
 STAGE2_DIR=$REPOROOT/artifacts/$RID/stage2
 
 if [ ! -d "$STAGE2_DIR" ]; then
-    echo "Missing stage2 output in $STAGE2_DIR" 1>&2
+    error "missing stage2 output in $STAGE2_DIR" 1>&2
     exit
 fi
 
 PACKAGE_DIR=$REPOROOT/artifacts/packages/dnvm
 [ -d "$PACKAGE_DIR" ] || mkdir -p $PACKAGE_DIR
 
-PACKAGE_NAME=$PACKAGE_DIR/dotnet-${OSNAME}-x64.${DOTNET_BUILD_VERSION}.tar.gz
+PACKAGE_SHORT_NAME=dotnet-${OSNAME}-x64.${DOTNET_BUILD_VERSION}
+PACKAGE_NAME=$PACKAGE_DIR/${PACKAGE_SHORT_NAME}.tar.gz
 
 cd $STAGE2_DIR
 
 # Correct all the mode flags
+banner "Packaging $PACKAGE_SHORT_NAME"
 
 # Managed code doesn't need 'x'
 find . -type f -name "*.dll" | xargs chmod 644
@@ -63,6 +52,6 @@ find . -type f ! -name "*.*" | xargs chmod 755
 # Tar up the stage2 artifacts
 tar -czf $PACKAGE_NAME *
 
-echo "Packaged stage2 to $PACKAGE_NAME"
+info "Packaged stage2 to $PACKAGE_NAME"
 
 $DIR/publish.sh $PACKAGE_NAME

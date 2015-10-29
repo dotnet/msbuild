@@ -11,11 +11,10 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-UNAME=$(uname)
+source "$DIR/_common.sh"
 
-  
 if [ "$UNAME" != "Linux" ]; then
-    echo "Error: Build only supported on Linux"
+    errro "Debian Package build only supported on Linux"
     exit 1
 fi
 
@@ -34,6 +33,8 @@ execute(){
 }
 
 create_empty_debian_layout(){
+    banner "Creating empty debian package layout"
+
     rm -rf $PACKAGE_LAYOUT_DIR
     mkdir -p $PACKAGE_LAYOUT_DIR
 
@@ -44,6 +45,8 @@ create_empty_debian_layout(){
 }
 
 copy_files_to_debian_layout(){
+    banner "Copying files to debian layout"
+
     # Copy Built Binaries
     cp -a "$REPO_BINARIES_DIR/." "$PACKAGE_LAYOUT_DIR/package_root"
 
@@ -52,12 +55,16 @@ copy_files_to_debian_layout(){
 }
 
 create_debian_package(){
+    banner "Packing .deb"
+
     mkdir -p $PACKAGE_OUTPUT_DIR
-    
+
     $REPO_ROOT/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR
 }
 
 test_debian_package(){
+    banner "Testing debian package"
+
     git clone https://github.com/sstephenson/bats.git /tmp/bats
     pushd /tmp/bats
     ./install.sh /usr/local

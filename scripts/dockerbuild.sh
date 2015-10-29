@@ -8,6 +8,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+source $DIR/_common.sh
+
 cd $DIR/..
 
 [ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
@@ -18,11 +20,14 @@ cd $DIR/..
 echo $DOCKER_HOST_SHARE_DIR
 
 # Build the docker container (will be fast if it is already built)
+banner "Building Docker Container"
 docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
 
 # Run the build in the container
+banner "Launching build in Docker Container"
+info "Using code from: $DOCKER_HOST_SHARE_DIR"
 docker run --rm --sig-proxy=true \
-	--name $DOTNET_BUILD_CONTAINER_NAME \
+    --name $DOTNET_BUILD_CONTAINER_NAME \
     -v $DOCKER_HOST_SHARE_DIR:/opt/code \
     -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION \
     -e DOTNET_CI_SKIP_STAGE0_INSTALL=$DOTNET_CI_SKIP_STAGE0_INSTALL \

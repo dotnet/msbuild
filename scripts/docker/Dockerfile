@@ -7,6 +7,8 @@ RUN apt-get update && \
     apt-get -qqy install unzip curl libicu-dev libunwind8 gettext libssl-dev libcurl3-gnutls zlib1g && \
     rm -rf /var/lib/apt/lists/*
 
+# No longer need to install DNX since it is embedded (and soon will be gone!)
+
 # Install Package Build Prereqs (and clean up APT cache after to save space in the image)
 RUN echo "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main" | tee /etc/apt/sources.list.d/llvm.list && \
     curl http://llvm.org/apt/llvm-snapshot.gpg.key | apt-key add - && \
