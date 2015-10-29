@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
-            var native = app.Argument("-n|--native <NATIVE_TYPE>", "Compiles source to native machine code.", CommandOptionType.SingleValue);
+            var native = app.Option("-n|--native <NATIVE_TYPE>", "Compiles source to native machine code.", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
@@ -43,7 +43,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var buildProjectReferences = !noProjectDependencies.HasValue();
                 var isNative = native.HasValue();
 
-                var outputPath = GetOutputPath(output.value());
 
                 // Load project contexts for each framework and compile them
                 bool success = true;
@@ -55,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     
                         if (isNative)
                         {
-                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences, native.value());
+                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences, native.Value());
                         }
                     }
                 }
@@ -67,7 +66,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                         
                         if (isNative)
                         {
-                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences, native.value());
+                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences, native.Value());
                         }
                     }
                 }
@@ -89,16 +88,18 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, string nativeOptionValue, bool buildProjectReferences){
+        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences, string nativeOptionValue){
             string outputPath = GetOutputPath(context, configuration, outputOptionValue);
-
+            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             var managedBinaryPath = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
             
             // Do Native Compilation
-            var result = Command.Create($"dotnet-compile-native", $"\"{managedBinaryPath}\"", $"\"{outputPath}\"")
+            var result = Command.Create($"dotnet-compile-native", $"\"{managedBinaryPath}\" \"{outputPath}\"")
                                 .ForwardStdErr()
                                 .ForwardStdOut()
                                 .Execute();
+                                
+            return result.ExitCode == 0;
             
         }
 
@@ -292,7 +293,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             return intermediateOutputPath;
         }
 
-        private static string GetDefaultRootOutputPath(ProjectContext context)
+        private static string GetDefaultRootOutputPath(ProjectContext context, string outputOptionValue)
         {
             string rootOutputPath = String.Empty;
 
@@ -311,7 +312,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 Directory.Delete(path, recursive: true);
             }
             
-            Directory.Create(path)
+            Directory.CreateDirectory(path);
         }
         
         private static void PrintSummary(bool success, List<DiagnosticMessage> diagnostics)
