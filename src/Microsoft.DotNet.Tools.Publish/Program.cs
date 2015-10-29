@@ -155,6 +155,11 @@ namespace Microsoft.DotNet.Tools.Publish
 
         private static int PublishForUnix(ProjectContext context, string outputPath)
         {
+            if (context.TargetFramework.IsDesktop())
+            {
+                return 0;
+            }
+            
             var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
             if(!File.Exists(coreConsole))
             {
