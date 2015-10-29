@@ -1,0 +1,5 @@
+{
+    "dnx": {
+        "projects": "src/*/project.json"
+    }
+}
