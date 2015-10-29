@@ -173,28 +173,16 @@ namespace Microsoft.DotNet.Tools.Publish
                 return 1;
             }
 
-            // Use the 'command' field to generate the name
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name);
 
-            // Write a script that can be used to launch with CoreRun
-            var script = $@"#!/usr/bin/env bash
-SOURCE=""${{BASH_SOURCE[0]}}""
-while [ -h ""$SOURCE"" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
-  SOURCE=""$(readlink ""$SOURCE"")""
-  [[ $SOURCE != /* ]] && SOURCE=""$DIR/$SOURCE"" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
-exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
-";
+            // Rename the {app}.exe to {app}.dll
+            File.Copy(outputExe + ".exe", outputExe + ".dll", overwrite: true);
 
-            File.WriteAllText(outputExe, script);
+            // Change coreconsole.exe to the {app}.exe name
+            File.Copy(coreConsole, outputExe, overwrite: true);
 
-            Command.Create("chmod", $"a+x {outputExe}")
-                .ForwardStdOut()
-                .ForwardStdErr()
-                .Execute();
-
+            // Delete the original managed .exe
+            File.Delete(outputExe + ".exe");
             return 0;
         }
 
