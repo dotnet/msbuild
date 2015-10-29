@@ -85,7 +85,7 @@ Set-Variable -Option Constant "DefaultUserDirectoryName" ".dotnet"
 Set-Variable -Option Constant "DefaultGlobalDirectoryName" "dotnet"
 Set-Variable -Option Constant "OldUserDirectoryNames" @(".kre", ".k")
 Set-Variable -Option Constant "RuntimePackageName" "dotnet"
-Set-Variable -Option Constant "DefaultFeed" "https://distaspnet.blob.core.windows.net/dotnet"
+Set-Variable -Option Constant "DefaultFeed" "https://dotnetcli.blob.core.windows.net/dotnet"
 Set-Variable -Option Constant "DefaultFeedKey" "DNX_FEED"
 Set-Variable -Option Constant "DefaultUnstableFeed" "https://aspdist.blob.core.windows.net/assets/dnvm/"
 Set-Variable -Option Constant "DefaultUnstableFeedKey" "DNX_UNSTABLE_FEED"
@@ -540,7 +540,7 @@ function Find-Package {
     _WriteOut "Determining latest version"
     $RuntimeId = $runtimeInfo.RuntimeId
     _WriteDebug "Latest RuntimeId: $RuntimeId"
-    $url = Join-UrlFragments $Feed,$channel,"dnvm","latest.win"
+    $url = Join-UrlFragments $Feed,$channel,"dnvm","latest.win.index"
     _WriteDebug "Index URL: $url"
 
     $wc = New-Object System.Net.WebClient

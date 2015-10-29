@@ -89,13 +89,13 @@ __dnvm_find_latest() {
     #dnx-coreclr-linux-x64
     local packageId="$_DNVM_RUNTIME_PACKAGE_NAME-$os-$arch"
 
-    local url="$DNX_ACTIVE_FEED/$DNX_ACTIVE_CHANNEL/dnvm/latest.$os"
+    local url="$DNX_ACTIVE_FEED/$DNX_ACTIVE_CHANNEL/dnvm/latest.$os.index"
     local index="$(curl $url 2>/dev/null)"
 
-    local version="$(export IFS=; echo $index | sed -n 's/^.*dotnet-$os-$arch\.\(.*\)\.tar\.gz$/\1/p')"
-    local fullPackageId="$packageId.$version"
+    local version="$(export IFS=; echo $index | sed -n "s/^.*$packageId\.\(.*\)\.tar\.gz$/\1/p")"
 
     local downloadUrl="$DNX_ACTIVE_FEED/$DNX_ACTIVE_CHANNEL/$index"
+
     echo $version $downloadUrl
 }
 
@@ -521,7 +521,7 @@ dnvm()
                 if [[ "$versionOrAlias" == "latest" ]]; then
                    echo "Determining latest version"
                    read versionOrAlias downloadUrl < <(__dnvm_find_latest "$arch" "$os")
-                   echo "DownoadURL: $downloadUrl"
+                   echo "DownloadURL: $downloadUrl"
                    [[ $? == 1 ]] && echo "Error: Could not find latest version from feed $DNX_ACTIVE_FEED" && return 1
                    printf "%b\n" "Latest version is ${Cya}$versionOrAlias located at $downloadUrl${RCol}"
                 else
