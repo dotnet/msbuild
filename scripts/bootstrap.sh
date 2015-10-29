@@ -35,47 +35,19 @@ fi
 
 OUTPUT_ROOT=$REPOROOT/artifacts/$RID
 DNX_DIR=$OUTPUT_ROOT/dnx
-STAGE0_DIR=$OUTPUT_ROOT/stage0
 STAGE1_DIR=$OUTPUT_ROOT/stage1
 STAGE2_DIR=$OUTPUT_ROOT/stage2
 
-if [ "$DOTNET_CI_SKIP_STAGE0_INSTALL" != "1" ]; then
-    echo "Installing stage0"
-    # Use a sub-shell to ensure the DNVM gets cleaned up
-    rm -Rf $STAGE0_DIR
-    mkdir -p $STAGE0_DIR
-    $DIR/install-stage0.sh $STAGE0_DIR $DIR/dnvm2.sh
-else
-    echo "Skipping stage0 because DOTNET_CI_SKIP_STAGE0_INSTALL"
-fi
+echo "Installing stage0"
 
-export PATH=$STAGE0_DIR/bin:$PATH
+source $DIR/dnvm2.sh
+dnvm upgrade -a dotnet_stage0
 
-echo "Installing and use-ing the latest CoreCLR x64 DNX ..."
-mkdir -p $DNX_DIR
+DNX_ROOT="$(dirname $(which dotnet))/dnx"
 
-export DNX_HOME=$DNX_DIR
-export DNX_USER_HOME=$DNX_DIR
-export DNX_GLOBAL_HOME=$DNX_DIR
+echo "Restoring packages"
 
-if ! type dnvm > /dev/null 2>&1; then
-    curl -o $DNX_DIR/dnvm.sh https://raw.githubusercontent.com/aspnet/Home/dev/dnvm.sh
-    source $DNX_DIR/dnvm.sh
-fi
-
-dnvm install latest -u -r coreclr
-
-# Make sure we got a DNX
-if ! type dnx > /dev/null 2>&1; then
-    echo "DNX is required to bootstrap stage1" 1>&2
-    exit 1
-fi
-
-DNX_ROOT=$(dirname $(which dnx))
-
-echo "Running 'dnu restore' to restore packages"
-
-dnu restore "$REPOROOT" --runtime osx.10.10-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.11-x64
+dotnet restore "$REPOROOT" --runtime osx.10.10-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.11-x64
 
 # Clean up stage1
 [ -d "$STAGE1_DIR" ] && rm -Rf "$STAGE1_DIR"
@@ -108,11 +80,6 @@ chmod -R a+r $REPOROOT
 
 # Copy DNX in to stage2
 cp -R $DNX_ROOT $STAGE2_DIR/dnx
-
-# Clean up some things we don't need
-rm -Rf $STAGE2_DIR/dnx/lib/Microsoft.Dnx.DesignTimeHost
-rm -Rf $STAGE2_DIR/dnx/lib/Microsoft.Dnx.Project
-rm $STAGE2_DIR/dnx/dnu
 
 # Copy and CHMOD the dotnet-restore script
 cp $DIR/dotnet-restore.sh $STAGE2_DIR/dotnet-restore
