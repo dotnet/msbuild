@@ -17,8 +17,6 @@ cd $DIR/..
 [ -z "$DOCKER_HOST_SHARE_DIR" ] && DOCKER_HOST_SHARE_DIR=$(pwd)
 [ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="/opt/code/build.sh"
 
-echo $DOCKER_HOST_SHARE_DIR
-
 # Build the docker container (will be fast if it is already built)
 banner "Building Docker Container"
 docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
