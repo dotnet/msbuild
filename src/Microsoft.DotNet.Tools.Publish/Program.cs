@@ -12,8 +12,6 @@ namespace Microsoft.DotNet.Tools.Publish
 {
     public class Program
     {
-        public static readonly IEnumerable<string> CoreCLRFileNames = GetCoreCLRFileNames();
-
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -157,32 +155,34 @@ namespace Microsoft.DotNet.Tools.Publish
 
         private static int PublishForUnix(ProjectContext context, string outputPath)
         {
-            CopyCoreCLR(outputPath);
+            if (context.TargetFramework.IsDesktop())
+            {
+                return 0;
+            }
+            
             var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
+            if(!File.Exists(coreConsole))
+            {
+                Reporter.Error.WriteLine($"Cannot find {Constants.CoreConsoleName} in the output. You must have a direct dependency on Microsoft.NETCore.ConsoleHost (for now)");
+                return 1;
+            }
             var coreRun = Path.Combine(outputPath, Constants.CoreRunName);
+            if(!File.Exists(coreRun))
+            {
+                Reporter.Error.WriteLine($"Cannot find {Constants.CoreRunName} in the output. You must have a direct dependency on Microsoft.NETCore.TestHost (for now)");
+                return 1;
+            }
 
-            // Use the 'command' field to generate the name
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name);
 
-            // Write a script that can be used to launch with CoreRun
-            var script = $@"#!/usr/bin/env bash
-SOURCE=""${{BASH_SOURCE[0]}}""
-while [ -h ""$SOURCE"" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
-  SOURCE=""$(readlink ""$SOURCE"")""
-  [[ $SOURCE != /* ]] && SOURCE=""$DIR/$SOURCE"" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-DIR=""$( cd -P ""$( dirname ""$SOURCE"" )"" && pwd )""
-exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
-";
+            // Rename the {app}.exe to {app}.dll
+            File.Copy(outputExe + ".exe", outputExe + ".dll", overwrite: true);
 
-            File.WriteAllText(outputExe, script);
+            // Change coreconsole.exe to the {app}.exe name
+            File.Copy(coreConsole, outputExe, overwrite: true);
 
-            Command.Create("chmod", $"a+x {outputExe}")
-                .ForwardStdOut()
-                .ForwardStdErr()
-                .Execute();
-
+            // Delete the original managed .exe
+            File.Delete(outputExe + ".exe");
             return 0;
         }
 
@@ -193,9 +193,18 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
                 return 0;
             }
 
-            CopyCoreCLR(outputPath);
             var coreConsole = Path.Combine(outputPath, Constants.CoreConsoleName);
+            if(!File.Exists(coreConsole))
+            {
+                Reporter.Error.WriteLine($"Cannot find {Constants.CoreConsoleName} in the output. You must have a direct dependency on Microsoft.NETCore.ConsoleHost (for now)".Red());
+                return 1;
+            }
             var coreRun = Path.Combine(outputPath, Constants.CoreRunName);
+            if(!File.Exists(coreRun))
+            {
+                Reporter.Error.WriteLine($"Cannot find {Constants.CoreRunName} in the output. You must have a direct dependency on Microsoft.NETCore.TestHost (for now)".Red());
+                return 1;
+            }
 
             var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
 
@@ -205,17 +214,6 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
             // Change coreconsole.exe to the {app}.exe name
             File.Copy(coreConsole, outputExe, overwrite: true);
             return 0;
-        }
-
-        private static void CopyCoreCLR(string outputPath)
-        {
-            // TEMPORARILY bring checked-in CoreCLR stuff along for the ride.
-            var clrPath = AppContext.BaseDirectory;
-
-            foreach(var file in CoreCLRFileNames)
-            {
-                File.Copy(Path.Combine(clrPath, file), Path.Combine(outputPath, file), overwrite: true);
-            }
         }
 
         private static void CopyContents(ProjectContext context, string outputPath)
@@ -287,33 +285,6 @@ exec ""$DIR/corerun"" ""$DIR/{context.ProjectFile.Name}.exe"" $*
             foreach (var file in files)
             {
                 File.Copy(file, Path.Combine(outputPath, Path.GetFileName(file)), overwrite: true);
-            }
-        }
-
-        private static IEnumerable<string> GetCoreCLRFileNames()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                yield return "coreclr.dll";
-                yield return "CoreConsole.exe";
-                yield return "CoreRun.exe";
-                yield return "mscorlib.ni.dll";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                yield return "libcoreclr.dylib";
-                yield return "coreconsole";
-                yield return "corerun";
-                yield return "mscorlib.dll";
-                yield return "System.Globalization.Native.dylib";
-            }
-            else
-            {
-                yield return "libcoreclr.so";
-                yield return "coreconsole";
-                yield return "corerun";
-                yield return "mscorlib.dll";
-                yield return "System.Globalization.Native.so";
             }
         }
     }

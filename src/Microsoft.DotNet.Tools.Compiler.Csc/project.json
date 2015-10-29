@@ -8,22 +8,22 @@
     "dotnet-compile-csc": "Microsoft.DotNet.Tools.Compiler.Csc"
   },
   "dependencies": {
-    "Microsoft.NETCore.TestHost": "1.0.0-beta-23420",
-    "Microsoft.NETCore.Runtime": "1.0.1-beta-23420",
+    "Microsoft.NETCore.TestHost": "1.0.0-beta-23428",
+    "Microsoft.NETCore.Runtime": "1.0.1-beta-23428",
 
-    "System.Console": "4.0.0-beta-23420",
-    "System.Collections": "4.0.11-beta-23420",
-    "System.Linq": "4.0.1-beta-23420",
-    "System.Diagnostics.Process": "4.1.0-beta-23420",
-    "System.IO.FileSystem": "4.0.1-beta-23420",
-    "Microsoft.Extensions.ProjectModel": "1.0.0-*",
+    "System.Console": "4.0.0-beta-23428",
+    "System.Collections": "4.0.11-beta-23428",
+    "System.Linq": "4.0.1-beta-23428",
+    "System.Diagnostics.Process": "4.1.0-beta-23428",
+    "System.IO.FileSystem": "4.0.1-beta-23428",
+
     "Microsoft.DotNet.Cli.Utils": {
       "type": "build",
       "version": "1.0.0-*"
     },
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "type": "build",
-      "version": "1.0.0-rc1-15838"
+      "version": "1.0.0-*"
     },
     "Microsoft.Net.Compilers.netcore": "1.1.0-*"
   },
