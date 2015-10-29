@@ -12,23 +12,77 @@ namespace Microsoft.Extensions.ProjectModel
 {
     public class ProjectContextBuilder
     {
-        public Project Project { get; set; }
+        private Project Project { get; set; }
 
-        public LockFile LockFile { get; set; }
+        private LockFile LockFile { get; set; }
 
-        public GlobalSettings GlobalSettings { get; set; }
+        private GlobalSettings GlobalSettings { get; set; }
 
-        public NuGetFramework TargetFramework { get; set; }
+        private NuGetFramework TargetFramework { get; set; }
 
-        public IEnumerable<string> RuntimeIdentifiers { get; set; } = Enumerable.Empty<string>();
+        private IEnumerable<string> RuntimeIdentifiers { get; set; } = Enumerable.Empty<string>();
 
-        public string RootDirectory { get; set; }
+        private string RootDirectory { get; set; }
 
-        public string ProjectDirectory { get; set; }
+        private string ProjectDirectory { get; set; }
 
-        public string PackagesDirectory { get; set; }
+        private string PackagesDirectory { get; set; }
         
-        public string ReferenceAssembliesPath { get; set; }
+        private string ReferenceAssembliesPath { get; set; }
+
+        public ProjectContextBuilder WithLockFile(LockFile lockFile)
+        {
+            LockFile = lockFile;
+            return this;
+        }
+        
+        public ProjectContextBuilder WithProject(Project project)
+        {
+            Project = project;
+            return this;
+        }
+        
+        public ProjectContextBuilder WithProjectDirectory(string projectDirectory)
+        {
+            ProjectDirectory = projectDirectory;
+            return this;
+        }
+        
+        public ProjectContextBuilder WithTargetFramework(NuGetFramework targetFramework)
+        {
+            TargetFramework = targetFramework;
+            return this;
+        }
+        
+        public ProjectContextBuilder WithTargetFramework(string targetFramework)
+        {
+            TargetFramework = NuGetFramework.Parse(targetFramework);
+            return this;
+        }
+
+        public ProjectContextBuilder WithRuntimeIdentifiers(IEnumerable<string> runtimeIdentifiers)
+        {
+            RuntimeIdentifiers = runtimeIdentifiers;
+            return this;
+        }
+
+        public ProjectContextBuilder WithReferenceAssembliesPath(string referenceAssembliesPath)
+        {
+            ReferenceAssembliesPath = referenceAssembliesPath;
+            return this;
+        }
+        
+        public ProjectContextBuilder WithPackagesDirectory(string packagesDirectory)
+        {
+            PackagesDirectory = packagesDirectory;
+            return this;
+        }
+        
+        public ProjectContextBuilder WithRootDirectory(string rootDirectory)
+        {
+            RootDirectory = rootDirectory;
+            return this;
+        }
 
         public ProjectContext Build()
         {
@@ -46,7 +100,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
 
             RootDirectory = GlobalSettings?.DirectoryPath ?? RootDirectory;
-            PackagesDirectory = PackagesDirectory ?? PackageDependencyProvider.ResolveRepositoryPath(RootDirectory, GlobalSettings);
+            PackagesDirectory = PackagesDirectory ?? PackageDependencyProvider.ResolvePackagesPath(RootDirectory, GlobalSettings);
             ReferenceAssembliesPath = ReferenceAssembliesPath ?? GetDefaultReferenceAssembliesPath();
 
             LockFileLookup lockFileLookup = null;

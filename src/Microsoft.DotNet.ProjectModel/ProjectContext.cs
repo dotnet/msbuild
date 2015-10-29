@@ -74,11 +74,10 @@ namespace Microsoft.Extensions.ProjectModel
                 projectPath = Path.GetDirectoryName(projectPath);
             }
             return new ProjectContextBuilder()
-            {
-                ProjectDirectory = projectPath,
-                TargetFramework = framework,
-                RuntimeIdentifiers = runtimeIdentifiers
-            }.Build();
+                        .WithProjectDirectory(projectPath)
+                        .WithTargetFramework(framework)
+                        .WithRuntimeIdentifiers(runtimeIdentifiers)
+                        .Build();
         }
 
         /// <summary>
@@ -95,10 +94,9 @@ namespace Microsoft.Extensions.ProjectModel
             foreach(var framework in project.GetTargetFrameworks())
             {
                 yield return new ProjectContextBuilder()
-                {
-                    Project = project,
-                    TargetFramework = framework.FrameworkName
-                }.Build();
+                                .WithProject(project)
+                                .WithTargetFramework(framework.FrameworkName)
+                                .Build();
             }
         }
     }

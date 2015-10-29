@@ -65,7 +65,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             }
         }
 
-        public static string ResolveRepositoryPath(string rootDirectory, GlobalSettings settings)
+        public static string ResolvePackagesPath(string rootDirectory, GlobalSettings settings)
         {
             // Order
             // 1. global.json { "packages": "..." }
