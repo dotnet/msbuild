@@ -15,6 +15,11 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string DefaultConfiguration = "Debug";
         public static readonly string BinDirectoryName = "bin";
         public static readonly string ObjDirectoryName = "obj";
+        
+        public static readonly string DynlibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : 
+                                                     RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? ".dylib" : ".so";
+
+        public static readonly string StaticlibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".lib" : ".a" ;
 
         public static readonly string ClrPathEnvironmentVariable = "DOTNET_CLR_PATH";
     }
