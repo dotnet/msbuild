@@ -59,6 +59,11 @@ validate_env_variables(){
         ret=1
     fi
 
+     if [[ -z "$CHANNEL" ]]; then
+        echo "CHANNEL environment variable not set"
+        ret=1
+    fi
+
     return $ret
 }
 
@@ -72,7 +77,7 @@ upload_file_to_blob_storage(){
         FOLDER="Binaries"
     fi
 
-    UPLOAD_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$FOLDER/$DOTNET_BUILD_VERSION/$filename$SASTOKEN"
+    UPLOAD_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/$FOLDER/$DOTNET_BUILD_VERSION/$filename$SASTOKEN"
 
     curl -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $UPLOAD_URL -T $UPLOAD_FILE
     result=$?
