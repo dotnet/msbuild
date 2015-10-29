@@ -103,6 +103,7 @@ if errorlevel 1 goto fail
 
 echo Crossgening Roslyn compiler ...
 call %~dp0crossgen/crossgen_roslyn.cmd %STAGE2_DIR%
+if errorlevel 1 goto fail
 
 REM Copy DNX in to stage2
 xcopy /s /q %DNX_ROOT% %STAGE2_DIR%\dnx\
