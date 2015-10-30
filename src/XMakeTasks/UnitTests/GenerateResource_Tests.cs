@@ -2810,7 +2810,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.AssertLogContains(
                     t,
-                    CommandLineBuilder.FixCommandLineSwitch("/compile ") + possiblyQuotedResxFile + ","
+                    "/compile " + possiblyQuotedResxFile + ","
                     + possiblyQuotedResourcesFile);
             }
             finally
@@ -2849,11 +2849,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.AssertLogContains(
                     t,
-                    CommandLineBuilder.FixCommandLineSwitch("/useSourcePath ")
-                    + CommandLineBuilder.FixCommandLineSwitch("/publicClass ")
-                    + CommandLineBuilder.FixCommandLineSwitch("/r:baz ")
-                    + CommandLineBuilder.FixCommandLineSwitch("/r:jazz ") + possiblyQuotedResxFile + " "
-                    + possiblyQuotedResourcesFile + " " + CommandLineBuilder.FixCommandLineSwitch("/str:\"C#\",,,"));
+                    "/useSourcePath "
+                    + "/publicClass "
+                    + "/r:baz "
+                    + "/r:jazz " + possiblyQuotedResxFile + " "
+                    + possiblyQuotedResourcesFile + " " +"/str:\"C#\",,,");
             }
             finally
             {
@@ -2893,11 +2893,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.AssertLogContains(
                     t,
-                    CommandLineBuilder.FixCommandLineSwitch("/useSourcePath ")
-                    + CommandLineBuilder.FixCommandLineSwitch("/r:baz ")
-                    + CommandLineBuilder.FixCommandLineSwitch("/r:jazz ") + possiblyQuotedResxFile + " "
+                    "/useSourcePath "
+                    + "/r:baz "
+                    + "/r:jazz " + possiblyQuotedResxFile + " "
                     + possiblyQuotedResourcesFile + " "
-                    + CommandLineBuilder.FixCommandLineSwitch("/str:\"C#\",,wagwag,boo"));
+                    + "/str:\"C#\",,wagwag,boo");
             }
             finally
             {
@@ -2950,7 +2950,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 }
 
                 Utilities.AssertLogContains(t,
-                    CommandLineBuilder.FixCommandLineSwitch("/compile ") +
+                    "/compile " +
                     possiblyQuotedResxFile +
                     "," +
                     possiblyQuotedResourcesFile +
