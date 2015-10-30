@@ -76,9 +76,9 @@ chmod a+x $STAGE2_DIR/dotnet-restore
 banner "Testing stage2 ..."
 export PATH=$STAGE2_DIR:$START_PATH
 
-# rm "$REPOROOT/test/TestApp/project.lock.json"
-# dotnet restore "$REPOROOT/test/TestApp" --runtime "$RID"
-# dotnet publish "$REPOROOT/test/TestApp" --framework "$TFM" --runtime "$RID" --output "$REPOROOT/artifacts/$RID/smoketest"
+rm "$REPOROOT/test/TestApp/project.lock.json"
+dotnet restore "$REPOROOT/test/TestApp" --runtime "$RID"
+dotnet publish "$REPOROOT/test/TestApp" --framework "$TFM" --runtime "$RID" --output "$REPOROOT/artifacts/$RID/smoketest"
 
 OUTPUT=$($REPOROOT/artifacts/$RID/smoketest/TestApp)
 [ "$OUTPUT" == "This is a test app" ] || (error "Smoke test failed!" && exit 1)
