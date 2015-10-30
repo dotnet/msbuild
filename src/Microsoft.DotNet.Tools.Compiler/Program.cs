@@ -90,7 +90,6 @@ namespace Microsoft.DotNet.Tools.Compiler
         private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences, string nativeOptionValue)
         {
             string outputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
-            string outputName = Path.Combine(outputPath, Constants.ExeSuffix);
             
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             var managedBinaryPath = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
@@ -306,8 +305,16 @@ namespace Microsoft.DotNet.Tools.Compiler
         private static void CleanOrCreateDirectory(string path)
         {
             if (Directory.Exists(path))
-            {
-                Directory.Delete(path, recursive: true);
+            {   
+                try
+                {
+                    Directory.Delete(path, recursive: true);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("Unable to remove directory: " + path);
+                    Console.WriteLine(e.Message);
+                }
             }
             
             Directory.CreateDirectory(path);
