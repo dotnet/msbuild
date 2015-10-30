@@ -4,9 +4,6 @@
   "compilationOptions": {
     "emitEntryPoint": true
   },
-  "commands": {
-    "dotnet-compile-csc": "Microsoft.DotNet.Tools.Compiler.Csc"
-  },
   "dependencies": {
     "Microsoft.NETCore.Runtime": "1.0.1-beta-23428",
 

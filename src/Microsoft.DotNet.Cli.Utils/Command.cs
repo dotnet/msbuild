@@ -156,6 +156,12 @@ namespace Microsoft.DotNet.Cli.Utils
                 _stdErrCapture?.GetStringBuilder()?.ToString());
         }
 
+        public Command EnvironmentVariable(string name, string value)
+        {
+            _process.StartInfo.Environment.Add(name, value);
+            return this;
+        }
+
         public Command CaptureStdOut()
         {
             ThrowIfRunning();
