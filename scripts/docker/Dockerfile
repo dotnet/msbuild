@@ -17,14 +17,10 @@ RUN echo "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main" | tee 
 # Install latest cmake
 RUN mkdir -p /opt/src/cmake && \
     cd /opt/src/cmake && \
-    curl -O https://cmake.org/files/v3.4/cmake-3.4.0-rc2.tar.gz && \
-    tar xzf cmake-3.4.0-rc2.tar.gz && \
-    cd cmake-3.4.0-rc2 && \
-    ./bootstrap && \
-    make && \
-    make install && \
-    cd /opt && \
-    rm -Rf /opt/src/cmake
+    curl -O https://cmake.org/files/v3.4/cmake-3.4.0-rc2-Linux-x86_64.tar.gz && \
+    tar xzf cmake-3.4.0-rc2-Linux-x86_64.tar.gz && \
+    cd cmake-3.4.0-rc2-Linux-x86_64 && \
+    ln -s /opt/src/cmake/cmake-3.4.0-rc2-Linux-x86_64/bin/cmake /usr/local/bin/cmake
 
 # Use clang as c++ compiler
 RUN update-alternatives --set c++ /usr/bin/clang++
