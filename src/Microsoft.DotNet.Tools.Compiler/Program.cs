@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
-            var native = app.Option("-n|--native <NATIVE_TYPE>", "Compiles source to native machine code.", CommandOptionType.SingleValue);
+            var native = app.Option("-n|--native <NATIVE_TYPE>", "Compiles source to native machine code.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -42,7 +42,6 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                 var buildProjectReferences = !noProjectDependencies.HasValue();
                 var isNative = native.HasValue();
-
 
                 // Load project contexts for each framework and compile them
                 bool success = true;
@@ -88,8 +87,11 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences, string nativeOptionValue){
-            string outputPath = GetOutputPath(context, configuration, outputOptionValue);
+        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences, string nativeOptionValue)
+        {
+            string outputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
+            string outputName = Path.Combine(outputPath, Constants.ExeSuffix);
+            
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             var managedBinaryPath = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
             
@@ -100,7 +102,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                                 .Execute();
                                 
             return result.ExitCode == 0;
-            
         }
 
         private static bool Compile(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences)
@@ -246,8 +247,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         
         private static string GetOutputPath(ProjectContext context, string configuration, string outputOptionValue)
         {
-
-            var outputPath = String.Empty;
+            var outputPath = string.Empty;
 
             if (string.IsNullOrEmpty(outputOptionValue))
             {
@@ -269,8 +269,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                     Constants.ObjDirectoryName,
                     configuration,
                     context.TargetFramework.GetTwoDigitShortFolderName());
-
-           
         }
 
         private static string GetIntermediateOutputPath(ProjectContext context, string configuration, string outputOptionValue)

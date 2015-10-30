@@ -119,21 +119,21 @@ cp $DIR/dotnet-restore.sh $STAGE2_DIR/dotnet-restore
 chmod a+x $STAGE2_DIR/dotnet-restore
 
 # Smoke-test the output
-# export PATH=$STAGE2_DIR:$START_PATH
+export PATH=$STAGE2_DIR:$START_PATH
 
-# rm "$REPOROOT/test/TestApp/project.lock.json"
-# dotnet restore "$REPOROOT/test/TestApp" --runtime "$RID"
-# dotnet publish "$REPOROOT/test/TestApp" --framework "$TFM" --runtime "$RID" --output "$REPOROOT/artifacts/$RID/smoketest"
+rm "$REPOROOT/test/TestApp/project.lock.json"
+dotnet restore "$REPOROOT/test/TestApp" --runtime "$RID"
+dotnet publish "$REPOROOT/test/TestApp" --framework "$TFM" --runtime "$RID" --output "$REPOROOT/artifacts/$RID/smoketest"
 
-# OUTPUT=$($REPOROOT/artifacts/$RID/smoketest/TestApp)
-# [ "$OUTPUT" == "This is a test app" ] || (echo "Smoke test failed!" && exit 1)
+OUTPUT=$($REPOROOT/artifacts/$RID/smoketest/TestApp)
+[ "$OUTPUT" == "This is a test app" ] || (echo "Smoke test failed!" && exit 1)
 
-# # Check that a compiler error is reported
-# set +e
-# dotnet compile "$REPOROOT/test/compile/failing/SimpleCompilerError" --framework "$TFM" 2>/dev/null >/dev/null
-# rc=$?
-# if [ $rc == 0 ]; then
-#     echo "Compiler failure test failed! The compiler did not fail to compile!"
-#     exit 1
-# fi
-# set -e
+# Check that a compiler error is reported
+set +e
+dotnet compile "$REPOROOT/test/compile/failing/SimpleCompilerError" --framework "$TFM" 2>/dev/null >/dev/null
+rc=$?
+if [ $rc == 0 ]; then
+    echo "Compiler failure test failed! The compiler did not fail to compile!"
+    exit 1
+fi
+set -e
