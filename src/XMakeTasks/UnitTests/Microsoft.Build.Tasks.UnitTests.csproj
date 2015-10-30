@@ -58,6 +58,7 @@
     <Compile Include="FindInList_Tests.cs" />
     <Compile Include="FindUnderPath_Tests.cs" />
     <Compile Include="GenerateBindingRedirects_Tests.cs" />
+    <Compile Include="GenerateResource_Tests.cs" />
     <Compile Include="GetReferencePaths_Tests.cs" />
     <Compile Include="ManifestWriter_Tests.cs" />
     <Compile Include="MakeDir_Tests.cs" />
@@ -110,7 +111,6 @@
     <Compile Include="ErrorWarningMessage_Tests.cs" />
     <Compile Include="FindInvalidProjectReferences_Tests.cs" />
     <Compile Include="GenerateResourceOutOfProc_Tests.cs" />
-    <Compile Include="GenerateResource_Tests.cs" />
     <Compile Include="GetInstalledSDKLocations_Tests.cs" />
     <Compile Include="GetSDKReference_Tests.cs" />
     <Compile Include="LC_Tests.cs" />

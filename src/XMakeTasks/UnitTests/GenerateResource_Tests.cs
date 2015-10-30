@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  ResX to Resources, no references
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void BasicResX2Resources()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -45,7 +45,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
+
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", resxFile, resourcesFile);
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ReadResourceMessage", 1, resxFile);
             }
@@ -105,7 +108,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Text to Resources
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void BasicText2Resources()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -125,7 +128,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
+
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ReadResourceMessage", 4, textFile);
             }
@@ -182,7 +188,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Resources to ResX
         /// </summary>
+#if FEATURE_RESX_RESOURCE_READER
         [Fact]
+#else
+        [Fact (Skip = "ResGen.exe not supported on .NET Core MSBuild")]
+#endif
         public void BasicResources2ResX()
         {
             string resourcesFile = Utilities.CreateBasicResourcesFile(false);
@@ -225,7 +235,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Resources to Text
         /// </summary>
+#if FEATURE_RESX_RESOURCE_READER
         [Fact]
+#else
+        [Fact(Skip = "ResGen.exe not supported on .NET Core MSBuild")]
+#endif
         public void BasicResources2Text()
         {
             string resourcesFile = Utilities.CreateBasicResourcesFile(false);
@@ -253,7 +267,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the source only
         /// </summary>
-        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void ForceOutOfDate()
         {
             string resxFile = Utilities.WriteTestResX(false, null, null);
@@ -272,8 +286,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
-
+#endif
                 GenerateResource t2 = Utilities.CreateTask();
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -303,7 +318,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void ForceOutOfDateLinked()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -323,7 +338,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 GenerateResource t2 = Utilities.CreateTask();
                 t2.StateFile = new TaskItem(t.StateFile);
@@ -391,7 +408,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 // Check only one output was updated
                 Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+
+#if FEATURE_BINARY_SERIALIZATION
                 Assert.Equal(0, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
+#else
+                Assert.Equal(1, DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[1].ItemSpec), time2));
+#endif
 
                 // Although only one file was updated, both should be in OutputResources and FilesWritten
                 Assert.Equal(t2.OutputResources[0].ItemSpec, t.OutputResources[0].ItemSpec);
@@ -412,7 +434,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Allow ShouldRebuildResgenOutputFile to return "false" since nothing's out of date, including linked file
         /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
+        [Fact]
+#else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#endif
         public void AllowLinkedNoGenerate()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -464,7 +490,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Allow the task to skip processing based on having nothing out of date
         /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
+        [Fact]
+#else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#endif
         public void NothingOutOfDate()
         {
             string resxFile = null;
@@ -528,7 +558,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// otherwise up to date
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
+#if FEATURE_BINARY_SERIALIZATION
         [Fact]
+#else
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#endif
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
@@ -577,7 +611,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// If an additional input is out of date, resources should be regenerated.
         /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
         [Fact]
+#else
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#endif
         public void NothingOutOfDateExceptAdditionalInput()
         {
             string resxFile = null;
@@ -634,7 +672,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Text to ResX
         /// </summary>
+#if FEATURE_RESX_RESOURCE_READER
         [Fact]
+#else
+        [Fact(Skip = "Writing to XML not supported on .net core")]
+#endif
         public void BasicText2ResX()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -711,7 +753,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Round trip from text to resources to text with the same blobs
         /// </summary>
+#if FEATURE_RESX_RESOURCE_READER
         [Fact]
+#else
+        [Fact(Skip = "ResGen.exe not supported on.NET Core MSBuild")]
+#endif
         public void Text2Text()
         {
             string textFile = Utilities.WriteTestText(null, null);
@@ -751,7 +797,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR without references yields proper output, message
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact (Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedResources()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -808,7 +858,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR without references yields proper output, message
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedResourcesUpToDate()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -889,7 +943,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// STR class file is out of date, but resources are up to date. Should still generate it.
         /// </summary>
+#if FEATURE_CODEDOM
         [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedResourcesOutOfDate()
         {
             string resxFile = null;
@@ -976,7 +1034,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// Verify STR generation with a specified specific filename
         /// </summary>
+#if FEATURE_CODEDOM
         [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedResourcesWithFilename()
         {
             string txtFile = null;
@@ -1031,7 +1093,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with VB
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedResourcesVB()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1087,7 +1153,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR namespace can be empty
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedResourcesWithoutNamespaceOrClassOrFilename()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1140,7 +1210,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with resource namespace yields proper output, message (CS)
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void STRWithResourcesNamespaceCS()
         {
             Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null);
@@ -1149,7 +1223,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with resource namespace yields proper output, message (VB)
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void STRWithResourcesNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", null);
@@ -1158,7 +1236,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with resource namespace and STR namespace yields proper output, message (CS)
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void STRWithResourcesNamespaceAndSTRNamespaceCS()
         {
             Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", "MySTClassNamespace");
@@ -1167,7 +1249,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR with resource namespace and STR namespace yields proper output, message (CS)
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void STRWithResourcesNamespaceAndSTRNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace");
@@ -1240,7 +1326,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Cause failures in ResXResourceReader
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void FailedResXReader()
         {
             string resxFile1 = null;
@@ -1266,7 +1352,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Task should have failed
                 Assert.False(success);
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
                 // Should not have created an output for the invalid resx
                 // Should have created the other file
                 Assert.False(File.Exists(resourcesFile1));
@@ -1318,7 +1406,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Task should have failed
                 Assert.False(success);
 
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 // Should not have created an output for the invalid resx
                 // Should have created the other file
@@ -1374,7 +1464,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Non-string resource with text output
         /// </summary>
-        [Fact]
+        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/308")]
         public void UnsupportedTextType()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1433,7 +1523,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Cause failures in ResourceReader
         /// </summary>
-        [Fact]
+        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/308")]
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1463,7 +1553,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Invalid STR Class name
         /// </summary>
+#if FEATURE_CODEDOM
         [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void FailedSTRProperty()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1497,7 +1591,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// Reference passed in that can't be loaded should error
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/308")]
         public void InvalidReference()
         {
             string txtFile = null;
@@ -1633,7 +1727,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  FilesWritten contains OutputResources + StateFile
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void FilesWrittenSet()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1658,7 +1752,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.True(File.Exists(t.FilesWritten[i].ItemSpec));
             }
 
+#if FEATURE_BINARY_SERIALIZATION
             Utilities.AssertStateFileWasWritten(t);
+#endif
 
             // Done, so clean up.
             File.Delete(t.StateFile.ItemSpec);
@@ -1675,7 +1771,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Resource transformation fails on 3rd of 4 inputs, inputs 1 & 2 & 4 are in outputs and fileswritten.
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+        [Fact]
         public void OutputFilesPartialInputs()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1718,7 +1814,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[0].ItemSpec, Path.ChangeExtension(t.Sources[0].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[1].ItemSpec, Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
+
+#if FEATURE_BINARY_SERIALIZATION
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 // Make sure there was an error on the second resource
                 // "unsupported square bracket keyword"
@@ -1745,7 +1844,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR class name derived from output file transformation
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedClassName()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1790,7 +1893,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR class file name derived from class name transformation
         /// </summary>
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#if FEATURE_CODEDOM
+        [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedFileName()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -1927,7 +2034,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Read-only StateFile yields message
         /// </summary>
+#if FEATURE_BINARY_SERIALIZATION
+        [Fact]
+#else
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/297")]
+#endif
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -2054,7 +2165,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  Invalid StronglyTypedLanguage yields CodeDOM exception
         /// </summary>
+#if FEATURE_CODEDOM
         [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void UnknownStronglyTypedLanguage()
         {
             GenerateResource t = Utilities.CreateTask();
@@ -2119,7 +2234,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         ///  STR class name derived from output file transformation
         /// </summary>
+#if FEATURE_CODEDOM
         [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void BadStronglyTypedFilename()
         {
             string txtFile = null;
@@ -2258,7 +2377,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <summary>
         /// Verify that passing a STR language with more than 1 sources errors
         /// </summary>
+#if FEATURE_CODEDOM
         [Fact]
+#else
+        [Fact(Skip = "Does not support strongly typed resources on netcore")]
+#endif
         public void StronglyTypedResourceFileIsExistingDirectory()
         {
             string dir = null;
@@ -2327,7 +2450,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
     public class References
     {
-        [Fact]
+        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/309")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2504,7 +2627,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// which fails (LoadFile requires an absolute path).  The fix was to use 
         /// Assembly.LoadFrom instead.
         /// </summary>
-        [Fact]
+        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/309")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3199,7 +3322,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         public static string GetPathToCopiedSystemDLL()
         {
             string tempSystemDLL = Utilities.GetTempFileName(".dll");
-            File.Copy(ToolLocationHelper.GetPathToDotNetFrameworkFile("system.dll", TargetDotNetFrameworkVersion.Version45), tempSystemDLL);
+
+            string pathToSystemDLL =
+#if FEATURE_INSTALLED_MSBUILD
+                ToolLocationHelper.GetPathToDotNetFrameworkFile("system.dll", TargetDotNetFrameworkVersion.Version45);
+#else
+                Path.Combine(FileUtilities.CurrentExecutableDirectory, "system.dll");
+#endif
+
+            File.Copy(pathToSystemDLL, tempSystemDLL);
             return tempSystemDLL;
         }
 
