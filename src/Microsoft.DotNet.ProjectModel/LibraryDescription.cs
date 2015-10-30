@@ -17,6 +17,7 @@ namespace Microsoft.Extensions.ProjectModel
     {
         public LibraryDescription(
             LibraryIdentity identity,
+            string hash,
             string path,
             IEnumerable<LibraryRange> dependencies,
             NuGetFramework framework,
@@ -25,6 +26,7 @@ namespace Microsoft.Extensions.ProjectModel
         {
             Path = path;
             Identity = identity;
+            Hash = hash;
             Dependencies = dependencies ?? Enumerable.Empty<LibraryRange>();
             Framework = framework;
             Resolved = resolved;
@@ -32,6 +34,7 @@ namespace Microsoft.Extensions.ProjectModel
         }
 
         public LibraryIdentity Identity { get; }
+        public string Hash { get; }
         public HashSet<LibraryRange> RequestedRanges { get; } = new HashSet<LibraryRange>(new LibraryRangeEqualityComparer());
         public List<LibraryDescription> Parents { get; } = new List<LibraryDescription>();
         public string Path { get; }

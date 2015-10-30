@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.ProjectModel
         public ProjectDescription(string name, string path)
             : base(
                   new LibraryIdentity(name, LibraryType.Project),
+                  string.Empty, // Projects don't have hashes
                   path,
                   Enumerable.Empty<LibraryRange>(),
                   framework: null,
@@ -28,6 +29,7 @@ namespace Microsoft.Extensions.ProjectModel
             bool resolved) :
                 base(
                     new LibraryIdentity(project.Name, project.Version, LibraryType.Project),
+                    string.Empty, // Projects don't have hashes
                     project.ProjectFilePath,
                     dependencies,
                     targetFrameworkInfo.FrameworkName,

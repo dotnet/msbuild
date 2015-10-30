@@ -8,10 +8,20 @@
 #     $SASTOKEN
 #     $REPO_ID
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+source "$SCRIPT_DIR/_common.sh"
 
 UPLOAD_FILE=$1
 UPLOAD_JSON_FILE="package_upload.json"
+
+banner "Publishing package"
 
 execute(){
     if ! validate_env_variables; then
@@ -40,22 +50,22 @@ validate_env_variables(){
     local ret=0
 
     if [[ -z "$DOTNET_BUILD_VERSION" ]]; then
-        echo "DOTNET_BUILD_VERSION environment variable not set"
+        warning "DOTNET_BUILD_VERSION environment variable not set"
         ret=1
     fi
 
     if [[ -z "$SASTOKEN" ]]; then
-        echo "SASTOKEN environment variable not set"
+        warning "SASTOKEN environment variable not set"
         ret=1
     fi
 
     if [[ -z "$STORAGE_ACCOUNT" ]]; then
-        echo "STORAGE_ACCOUNT environment variable not set"
+        warning "STORAGE_ACCOUNT environment variable not set"
         ret=1
     fi
 
     if [[ -z "$STORAGE_CONTAINER" ]]; then
-        echo "STORAGE_CONTAINER environment variable not set"
+        warning "STORAGE_CONTAINER environment variable not set"
         ret=1
     fi
 
@@ -68,8 +78,9 @@ validate_env_variables(){
 }
 
 upload_file_to_blob_storage(){
-
     local filename=$(basename $UPLOAD_FILE)
+
+    banner "Uploading $filename to blob storage"
 
     if [[ $filename == *.deb || $filename == *.pkg ]]; then
         FOLDER="Installers"
@@ -83,9 +94,9 @@ upload_file_to_blob_storage(){
     result=$?
 
     if [ "$result" -gt "0" ]; then
-        echo "Error: Uploading the $filename to blob storage - $result"
+        error "uploading the $filename to blob storage - $result"
     else
-        echo "Successfully uploaded $filename to blob storage."
+        info "successfully uploaded $filename to blob storage."
     fi
 
     return $result

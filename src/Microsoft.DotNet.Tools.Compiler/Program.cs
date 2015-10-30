@@ -164,8 +164,13 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             // Get compilation options
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
-            var outputName = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
-            
+            var outputExtension = ".dll";
+            if (context.TargetFramework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
+            {
+                outputExtension = ".exe";
+            }
+            var outputName = Path.Combine(outputPath, context.ProjectFile.Name + outputExtension);
+
             // Assemble args
             var compilerArgs = new List<string>()
             {
@@ -178,13 +183,13 @@ namespace Microsoft.DotNet.Tools.Compiler
             compilerArgs.Add("-nowarn:CS1701");
             compilerArgs.Add("-nowarn:CS1702");
             compilerArgs.Add("-nowarn:CS1705");
-            
+
             // Add compilation options to the args
             ApplyCompilationOptions(compilationOptions, compilerArgs);
 
             foreach (var dependency in dependencies)
             {
-                compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r}\""));
+                compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r.ResolvedPath}\""));
                 compilerArgs.AddRange(dependency.SourceReferences.Select(s => $"\"{s}\""));
             }
 
@@ -238,6 +243,12 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             var success = result.ExitCode == 0;
+
+            if (success && !context.TargetFramework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
+            {
+                var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new [] { RuntimeIdentifier.Current });
+                EmitHost(outputPath, context.ProjectFile.Name, runtimeContext.CreateExporter(configuration));
+            }
 
             PrintSummary(success, diagnostics);
 
@@ -320,6 +331,45 @@ namespace Microsoft.DotNet.Tools.Compiler
             Directory.CreateDirectory(path);
         }
         
+        private static void EmitHost(string outputPath, string projectName, LibraryExporter exporter)
+        {
+            // Write the Host information file (basically a simplified form of the lock file)
+            List<string> lines = new List<string>();
+            foreach(var export in exporter.GetAllExports())
+            {
+                lines.AddRange(GenerateLines(export, export.RuntimeAssemblies, "runtime"));
+                lines.AddRange(GenerateLines(export, export.NativeLibraries, "native"));
+            }
+
+            File.WriteAllLines(Path.Combine(outputPath, projectName + ".deps"), lines);
+
+            // Copy the host in
+            CopyHost(Path.Combine(outputPath, projectName + Constants.ExeSuffix));
+        }
+
+        private static void CopyHost(string target)
+        {
+            var hostPath = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
+            File.Copy(hostPath, target);
+        }
+
+        private static IEnumerable<string> GenerateLines(LibraryExport export, IEnumerable<LibraryAsset> items, string type)
+        {
+            return items.Select(item =>
+                EscapeCsv(export.Library.Identity.Type.Value) + "," +
+                EscapeCsv(export.Library.Identity.Name) + "," +
+                EscapeCsv(export.Library.Identity.Version.ToNormalizedString()) + "," +
+                EscapeCsv(export.Library.Hash) + "," +
+                EscapeCsv(type) + "," +
+                EscapeCsv(item.Name) + "," +
+                EscapeCsv(item.RelativePath) + ",");
+        }
+
+        private static string EscapeCsv(string input)
+        {
+            return "\"" + input.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+        }
+
         private static void PrintSummary(bool success, List<DiagnosticMessage> diagnostics)
         {
             Reporter.Output.Writer.WriteLine();
@@ -433,7 +483,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 var severity = error.category == CanonicalError.Parts.Category.Error ?
                 DiagnosticMessageSeverity.Error : DiagnosticMessageSeverity.Warning;
-                
+
                 return new DiagnosticMessage(
                     error.code,
                     error.text,
@@ -449,7 +499,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             return null;
         }
-        
+
         private static void PrintDiagnostic(DiagnosticMessage diag)
         {
             switch (diag.Severity)
