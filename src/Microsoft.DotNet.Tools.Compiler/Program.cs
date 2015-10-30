@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
-            var native = app.Option("-n|--native <NATIVE_TYPE>", "Compiles source to native machine code.", CommandOptionType.NoValue);
+            var native = app.Option("-n|--native", "Compiles source to native machine code.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     
                         if (isNative)
                         {
-                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences, native.Value());
+                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences;
                         }
                     }
                 }
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences, string nativeOptionValue)
+        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences)
         {
             string outputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
             
