@@ -42,6 +42,11 @@ add_system_dir_placement(){
     abs_installation_dir=$2
 
     dir_files=( $(_get_files_in_dir_tree $PACKAGE_SOURCE_DIR/$in_package_dir) )
+    
+    # If in_package_dir isn't empty include a slash
+    if [ ! -z "$in_package_dir" ]; then
+        in_package_dir="${in_package_dir}/"
+    fi
 
     for rel_filepath in ${dir_files[@]}
     do
@@ -49,9 +54,9 @@ add_system_dir_placement(){
 
         # If there is no parent, parent_path = "."
         if [[ "$parent_path" == "." ]]; then
-            add_system_file_placement "${in_package_dir}/${rel_filepath}" "${abs_installation_dir}"
+            add_system_file_placement "${in_package_dir}${rel_filepath}" "${abs_installation_dir}"
         else
-            add_system_file_placement "${in_package_dir}/${rel_filepath}" "${abs_installation_dir}/${parent_path}"
+            add_system_file_placement "${in_package_dir}${rel_filepath}" "${abs_installation_dir}/${parent_path}"
         fi
 
     done

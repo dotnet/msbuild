@@ -9,7 +9,7 @@
     "homepage": "https://dotnet.github.io/core",                        
 
     "release":{
-        "package_version":"0.3",                               
+        "package_version":"0.201",                               
         "package_revision":"1",                                 
         "urgency" : "low",                                      
         "changelog_message" : "Bootstrap loop package"                

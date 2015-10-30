@@ -68,7 +68,11 @@ create_or_start_vm(){
     if [[ $(docker-machine ls | grep $VM_NAME) == "" ]]; then
         docker-machine create -d virtualbox $VM_NAME
     else
-        docker-machine start $VM_NAME
+        # This fails sometimes
+        if ! docker-machine start $VM_NAME; then
+            docker-machine rm -f $VM_NAME
+            docker-machine create -d virtualbox $VM_NAME
+        fi
     fi
 
 }

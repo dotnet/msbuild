@@ -13,5 +13,10 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string DefaultConfiguration = "Debug";
         public static readonly string BinDirectoryName = "bin";
         public static readonly string ObjDirectoryName = "obj";
+        
+        public static readonly string DynamicLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll"   : 
+                                                         RuntimeInformation.IsOSPlatform(OSPlatform.OSX)     ? ".dylib" : ".so";
+
+        public static readonly string StaticLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".lib" : ".a" ;
     }
 }

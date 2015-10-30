@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
+            var native = app.Option("-n|--native", "Compiles source to native machine code.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -40,6 +41,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 }
 
                 var buildProjectReferences = !noProjectDependencies.HasValue();
+                var isNative = native.HasValue();
 
                 // Load project contexts for each framework and compile them
                 bool success = true;
@@ -48,6 +50,11 @@ namespace Microsoft.DotNet.Tools.Compiler
                     foreach (var context in framework.Values.Select(f => ProjectContext.Create(path, NuGetFramework.Parse(f))))
                     {
                         success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
+                    
+                        if (isNative)
+                        {
+                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
+                        }
                     }
                 }
                 else
@@ -55,6 +62,11 @@ namespace Microsoft.DotNet.Tools.Compiler
                     foreach (var context in ProjectContext.CreateContextForEachFramework(path))
                     {
                         success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
+                        
+                        if (isNative)
+                        {
+                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
+                        }
                     }
                 }
                 return success ? 0 : 1;
@@ -75,9 +87,32 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool Compile(ProjectContext context, string configuration, string outputPath, bool buildProjectReferences)
+        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences)
+        {
+            string outputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
+            
+            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+            var managedBinaryPath = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
+            
+            // Do Native Compilation
+            var result = Command.Create($"dotnet-compile-native", $"\"{managedBinaryPath}\" \"{outputPath}\"")
+                                .ForwardStdErr()
+                                .ForwardStdOut()
+                                .Execute();
+                                
+            return result.ExitCode == 0;
+        }
+
+        private static bool Compile(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences)
         {
             Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
+
+            //Set up Output Paths
+            string outputPath = GetOutputPath(context, configuration, outputOptionValue);
+            string intermediateOutputPath = GetIntermediateOutputPath(context, configuration, outputOptionValue);
+
+            CleanOrCreateDirectory(outputPath);
+            CleanOrCreateDirectory(intermediateOutputPath);
 
             // Create the library exporter
             var exporter = context.CreateExporter(configuration);
@@ -126,35 +161,6 @@ namespace Microsoft.DotNet.Tools.Compiler
             // TODO: Turn on only if verbose, we can look at the response
             // file anyways
             // ShowDependencyInfo(dependencies);
-
-            // Hackily generate the output path
-            if (string.IsNullOrEmpty(outputPath))
-            {
-                outputPath = Path.Combine(
-                    context.ProjectFile.ProjectDirectory,
-                    Constants.BinDirectoryName,
-                    configuration,
-                    context.TargetFramework.GetTwoDigitShortFolderName());
-            }
-
-            string intermediateOutputPath = Path.Combine(
-                    context.ProjectFile.ProjectDirectory,
-                    Constants.ObjDirectoryName,
-                    configuration,
-                    context.TargetFramework.GetTwoDigitShortFolderName());
-
-            if (Directory.Exists(outputPath))
-            {
-                Directory.Delete(outputPath, recursive: true);
-            }
-
-            if (Directory.Exists(intermediateOutputPath))
-            {
-                Directory.Delete(intermediateOutputPath, recursive: true);
-            }
-
-            Directory.CreateDirectory(outputPath);
-            Directory.CreateDirectory(intermediateOutputPath);
 
             // Get compilation options
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
@@ -248,7 +254,83 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             return success;
         }
+        
+        private static string GetOutputPath(ProjectContext context, string configuration, string outputOptionValue)
+        {
+            var outputPath = string.Empty;
 
+            if (string.IsNullOrEmpty(outputOptionValue))
+            {
+                outputPath = Path.Combine(
+                    GetDefaultRootOutputPath(context, outputOptionValue),
+                    Constants.BinDirectoryName,
+                    configuration,
+                    context.TargetFramework.GetTwoDigitShortFolderName());
+            }
+            else
+            {
+                outputPath = outputOptionValue;
+            }
+
+            return outputPath;
+
+            string intermediateOutputPath = Path.Combine(
+                    context.ProjectFile.ProjectDirectory,
+                    Constants.ObjDirectoryName,
+                    configuration,
+                    context.TargetFramework.GetTwoDigitShortFolderName());
+        }
+
+        private static string GetIntermediateOutputPath(ProjectContext context, string configuration, string outputOptionValue)
+        {
+            var intermediateOutputPath = String.Empty;
+
+            if (string.IsNullOrEmpty(outputOptionValue))
+            {
+                intermediateOutputPath = Path.Combine(
+                    GetDefaultRootOutputPath(context, outputOptionValue),
+                    Constants.ObjDirectoryName,
+                    configuration,
+                    context.TargetFramework.GetTwoDigitShortFolderName());
+            }
+            else
+            {
+                intermediateOutputPath = outputOptionValue;
+            }
+
+            return intermediateOutputPath;
+        }
+
+        private static string GetDefaultRootOutputPath(ProjectContext context, string outputOptionValue)
+        {
+            string rootOutputPath = String.Empty;
+
+            if (string.IsNullOrEmpty(outputOptionValue))
+            {
+                rootOutputPath =  context.ProjectFile.ProjectDirectory;
+            }
+
+            return rootOutputPath;
+        }
+
+        private static void CleanOrCreateDirectory(string path)
+        {
+            if (Directory.Exists(path))
+            {   
+                try
+                {
+                    Directory.Delete(path, recursive: true);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("Unable to remove directory: " + path);
+                    Console.WriteLine(e.Message);
+                }
+            }
+            
+            Directory.CreateDirectory(path);
+        }
+        
         private static void EmitHost(string outputPath, string projectName, LibraryExporter exporter)
         {
             // Write the Host information file (basically a simplified form of the lock file)
