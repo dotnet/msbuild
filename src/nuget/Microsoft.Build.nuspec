@@ -27,6 +27,7 @@
         <dependency id="Microsoft.Tpl.Dataflow" version="4.5.24" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.0" />
         <dependency id="Microsoft.Win32.Registry" version="4.0.0-beta-23406" />
+        <dependency id="System.AppContext" version="4.0.1-beta-23225" />
         <dependency id="System.Collections" version="4.0.11-beta-23406" />
         <dependency id="System.Collections.Concurrent" version="4.0.11-beta-23225" />
         <dependency id="System.Collections.NonGeneric" version="4.0.0" />
@@ -55,6 +56,7 @@
         <dependency id="System.Runtime.Handles" version="4.0.1-beta-23406" />
         <dependency id="System.Runtime.InteropServices" version="4.0.21-beta-23406" />
         <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0-beta-23406" />
+        <dependency id="System.Runtime.Loader" version="4.0.0-beta-23428" />
         <dependency id="System.Text.Encoding" version="4.0.11-beta-23406" />
         <dependency id="System.Text.Encoding.Extensions" version="4.0.11-beta-23406" />
         <dependency id="System.Text.RegularExpressions" version="4.0.11-beta-23225" />
