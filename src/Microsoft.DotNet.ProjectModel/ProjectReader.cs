@@ -101,7 +101,7 @@ namespace Microsoft.Extensions.ProjectModel
             {
                 try
                 {
-                    var buildVersion = Environment.GetEnvironmentVariable("DOETNET_BUILD_VERSION");
+                    var buildVersion = Environment.GetEnvironmentVariable("DOTNET_BUILD_VERSION");
                     project.Version = SpecifySnapshot(version, buildVersion);
                 }
                 catch (Exception ex)
