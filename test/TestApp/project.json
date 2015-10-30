@@ -5,7 +5,7 @@
     },
 
     "dependencies": {
-        "Microsoft.NETCore.Runtime": "1.0.1-23428",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23428",
         "System.IO": "4.0.10-beta-23420",
         "System.Console": "4.0.0-beta-23420",
         "System.Runtime": "4.0.20-beta-23420",
