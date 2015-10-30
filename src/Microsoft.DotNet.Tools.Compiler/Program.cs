@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     
                         if (isNative)
                         {
-                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences;
+                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
                         }
                     }
                 }
