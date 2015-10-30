@@ -9,6 +9,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Shared;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -94,10 +95,11 @@ namespace Microsoft.Build.UnitTests
                 new string[] { "Name", "HintPath", "Access" },
                 null
             );
+
             Assert.Equal(
-                CommandLineBuilder.FixCommandLineSwitch(@"/myswitch:MySoundEffect.wav,Kenny ")
-                + CommandLineBuilder.FixCommandLineSwitch(@"/myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public"),
-                c.ToString());
+               (NativeMethodsShared.IsWindows ? @"/myswitch:MySoundEffect.wav,Kenny " : @"-myswitch:MySoundEffect.wav,Kenny ")
+               + (NativeMethodsShared.IsWindows ? @"/myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public" : @"-myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public"),
+               c.ToString());
         }
     }
 }
