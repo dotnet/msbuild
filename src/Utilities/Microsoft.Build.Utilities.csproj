@@ -80,6 +80,10 @@
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>ExceptionHandling.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\RunnerUtilities.cs">
+      <Link>RunnerUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

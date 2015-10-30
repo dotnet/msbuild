@@ -611,6 +611,10 @@
       <Link>SharedUtilities\FileMatcher.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\RunnerUtilities.cs">
+      <Link>SharedUtilities\RunnerUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>SharedUtilities\FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

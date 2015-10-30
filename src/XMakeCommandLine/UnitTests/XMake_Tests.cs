@@ -14,6 +14,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.SharedUtilities;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -633,7 +634,10 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(pathToProjectFile, projectString);
 
                 var msbuildParameters = "\"" + pathToProjectFile + "\"";
-                output = ExecMSBuild(newPathToMSBuildExe, msbuildParameters, expectSuccess: false);
+
+                bool successfulExit;
+                output = RunnerUtilities.ExecMSBuild(newPathToMSBuildExe, msbuildParameters, out successfulExit);
+                Assert.False(successfulExit);
             }
             catch (Exception ex)
             {
@@ -696,85 +700,6 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Invoke msbuild.exe with the given parameters and return the stdout and stderr.
-        /// This method may invoke msbuild via other runtimes.
-        /// </summary>
-        private string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, bool expectSuccess = true)
-        {
-#if FEATURE_RUN_EXE_IN_TESTS
-            var pathToExecutable = pathToMsBuildExe;
-#else
-            var pathToExecutable = ResolveRuntimeExecutableName();
-            msbuildParameters = "\"" + pathToMsBuildExe + "\"" + " " + msbuildParameters;
-#endif
-
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, expectSuccess);
-        }
-
-#if !FEATURE_RUN_EXE_IN_TESTS
-        /// <summary>
-        /// Resolve the platform specific path to the runtime executable that msbuild.exe needs to be run in (unix-mono, {unix, windows}-corerun).
-        /// </summary>
-        private static string ResolveRuntimeExecutableName()
-        {
-            return NativeMethodsShared.IsMono ? "mono" : Path.Combine(FileUtilities.CurrentExecutableDirectory, "CoreRun");
-        }
-#endif
-
-        /// <summary>
-        /// Run the process and get stdout and stderr
-        /// </summary>
-        private string RunProcessAndGetOutput(string process, string parameters, bool expectSuccess = true)
-        {
-            ProcessStartInfo psi = new ProcessStartInfo(process);
-            psi.CreateNoWindow = true;
-            psi.RedirectStandardInput = true;
-            psi.RedirectStandardOutput = true;
-            psi.RedirectStandardError = true;
-            psi.UseShellExecute = false;
-            psi.Arguments = parameters;
-            string output = String.Empty;
-            int exitCode = 1;
-
-            using (Process p = new Process { EnableRaisingEvents = true, StartInfo = psi })
-            {
-                p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
-                    {
-                        if (args != null)
-                        {
-                            output += args.Data + "\r\n";
-                        }
-                    };
-
-                p.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
-                    {
-                        if (args != null)
-                        {
-                            output += args.Data + "\r\n";
-                        }
-                    };
-
-                Console.WriteLine("Executing [{0} {1}]", process, parameters);
-
-                p.Start();
-                p.BeginOutputReadLine();
-                p.BeginErrorReadLine();
-                p.StandardInput.Dispose();
-                p.WaitForExit();
-
-                exitCode = p.ExitCode;
-            }
-
-            Console.WriteLine("==== OUTPUT ====");
-            Console.WriteLine(output);
-            Console.WriteLine("==============");
-
-            Assert.Equal(expectSuccess, (exitCode == 0));
-
-            return output;
         }
 
         /// <summary>
@@ -870,7 +795,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private string _pathToMSBuildExe = FileUtilities.CurrentExecutablePath;
 #if FEATURE_SPECIAL_FOLDERS
         private string _pathToArbitraryBogusFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
 #else
@@ -886,9 +810,11 @@ namespace Microsoft.Build.UnitTests
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
             Assert.True(File.Exists(_pathToArbitraryBogusFile));
 
-            string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters, false);
+            bool successfulExit;
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+            Assert.False(successfulExit);
 
-            Assert.Contains(_pathToMSBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(RunnerUtilities.PathToMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -902,17 +828,20 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(_pathToMSBuildExe));
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(RunnerUtilities.PathToMsBuildExe));
 
                 var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
-                output = ExecMSBuild("MSBuild.exe", msbuildParameters, false);
+
+                bool successfulExit;
+                output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                Assert.False(successfulExit);
             }
             finally
             {
                 Directory.SetCurrentDirectory(current);
             }
 
-            Assert.Contains(_pathToMSBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(RunnerUtilities.PathToMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -940,7 +869,11 @@ namespace Microsoft.Build.UnitTests
 
                 // Find the project in the current directory
                 Directory.SetCurrentDirectory(directory);
-                string output = ExecMSBuild(_pathToMSBuildExe, String.Empty);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(String.Empty, out successfulExit);
+                Assert.True(successfulExit);
+
                 Assert.True(output.Contains("[A=1]"));
             }
             finally
@@ -974,7 +907,11 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(rspPath, rspContent);
 
                 var msbuildParameters = "\"" + projectPath + "\"";
-                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                Assert.True(successfulExit);
+
                 Assert.True(output.Contains("[A=1]"));
             }
             finally
@@ -1006,7 +943,11 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(rspPath, rspContent);
 
                 var msbuildParameters = "\"" + projectPath + "\"";
-                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                Assert.True(successfulExit);
+
                 Assert.True(output.Contains("[A=]"));
             }
             finally
@@ -1039,7 +980,11 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(rspPath, rspContent);
 
                 var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
-                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                Assert.True(successfulExit);
+
                 Assert.True(output.Contains("[A=2]"));
             }
             finally
@@ -1070,7 +1015,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(directory);
                 Directory.CreateDirectory(exeDirectory);
 
-                File.Copy(_pathToMSBuildExe, exePath);
+                File.Copy(RunnerUtilities.PathToMsBuildExe, exePath);
 
                 File.WriteAllText(mainRspPath, "/p:A=0");
 
@@ -1080,7 +1025,11 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(rspPath, "/p:A=1");
 
                 var msbuildParameters = "\"" + projectPath + "\"";
-                string output = ExecMSBuild(exePath, msbuildParameters);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(exePath, msbuildParameters, out successfulExit);
+                Assert.True(successfulExit);
+
                 Assert.True(output.Contains("[A=1]"));
             }
             finally
@@ -1111,7 +1060,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(directory);
 
-                File.Copy(_pathToMSBuildExe, exePath);
+                File.Copy(RunnerUtilities.PathToMsBuildExe, exePath);
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);
@@ -1119,7 +1068,11 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(rspPath, "/p:A=1");
 
                 var msbuildParameters = "\"" + projectPath + "\"";
-                string output = ExecMSBuild(exePath, msbuildParameters);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(exePath, msbuildParameters, out successfulExit);
+                Assert.True(successfulExit);
+
                 Assert.True(output.Contains("[A=1]"));
             }
             finally
@@ -1152,7 +1105,11 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(rspPath, rspContent);
 
                 var msbuildParameters = "\"" + projectPath + "\"";
-                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters, expectSuccess: false);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                Assert.False(successfulExit);
+
                 Assert.True(output.Contains("MSB1027")); // msbuild.rsp cannot have /noautoresponse in it
             }
             finally
@@ -1184,7 +1141,11 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(rspPath, rspContent);
 
                 var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
-                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters, expectSuccess: true);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                Assert.True(successfulExit);
+
                 Assert.True(output.Contains("[A=]"));
             }
             finally
@@ -1213,7 +1174,11 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(projectPath, content);
 
                 var msbuildParameters = "\"" + projectPath + "\"";
-                string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters);
+
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                Assert.True(successfulExit);
+
                 Assert.True(output.Contains("[A=]"));
             }
             finally
