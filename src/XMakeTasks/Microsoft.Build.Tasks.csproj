@@ -210,6 +210,15 @@
     <Compile Include="..\Shared\LanguageParser\CSharptokenizer.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\LanguageParser\VisualBasictokenCharReader.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\LanguageParser\VisualBasictokenEnumerator.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="AppConfig\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -337,6 +346,9 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="CreateCSharpManifestResourceName.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CreateVisualBasicManifestResourceName.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="CreateItem.cs">
@@ -473,6 +485,9 @@
     <Compile Include="Touch.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="VisualBasicParserUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Warning.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -532,9 +547,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ComReferenceWrapperInfo.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CreateVisualBasicManifestResourceName.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Dependencies.cs">
@@ -642,9 +654,6 @@
     <Compile Include="UpdateManifest.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="VisualBasicParserUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="WinMDExp.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(FeatureXamlTypes)' == 'true'">
@@ -667,15 +676,6 @@
     <Compile Include="XmlPeek.cs" />
     <Compile Include="XmlPoke.cs" />
     <Compile Include="XslTransformation.cs" />
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenCharReader.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenEnumerator.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Microsoft.Common.CurrentVersion.targets">
