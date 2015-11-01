@@ -244,10 +244,13 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var success = result.ExitCode == 0;
 
-            if (success && !context.TargetFramework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
+            if (success && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
-                var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new [] { RuntimeIdentifier.Current });
-                EmitHost(outputPath, context.ProjectFile.Name, runtimeContext.CreateExporter(configuration));
+                var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
+                MakeRunnable(runtimeContext, 
+                             outputPath, 
+                             context.ProjectFile.Name, 
+                             runtimeContext.CreateExporter(configuration));
             }
 
             PrintSummary(success, diagnostics);
@@ -324,11 +327,33 @@ namespace Microsoft.DotNet.Tools.Compiler
             
             Directory.CreateDirectory(path);
         }
+
+        private static void MakeRunnable(ProjectContext runtimeContext, string outputPath, string projectName, LibraryExporter exporter)
+        {
+            if (runtimeContext.TargetFramework.IsDesktop())
+            {
+                // On desktop we need to copy dependencies since we don't own the host
+                foreach (var export in exporter.GetAllExports())
+                {
+                    if (export.Library == runtimeContext.RootProject)
+                    {
+                        continue;
+                    }
+
+                    CopyFiles(export.RuntimeAssemblies, outputPath);
+                    CopyFiles(export.NativeLibraries, outputPath);
+                }
+            }
+            else
+            {
+                EmitHost(outputPath, projectName, exporter);
+            }
+        }
         
         private static void EmitHost(string outputPath, string projectName, LibraryExporter exporter)
         {
             // Write the Host information file (basically a simplified form of the lock file)
-            List<string> lines = new List<string>();
+            var lines = new List<string>();
             foreach(var export in exporter.GetAllExports())
             {
                 lines.AddRange(GenerateLines(export, export.RuntimeAssemblies, "runtime"));
@@ -585,6 +610,14 @@ namespace Microsoft.DotNet.Tools.Compiler
                     }
                     Reporter.Output.WriteLine("");
                 }
+            }
+        }
+
+        private static void CopyFiles(IEnumerable<LibraryAsset> files, string outputPath)
+        {
+            foreach (var file in files)
+            {
+                File.Copy(file.ResolvedPath, Path.Combine(outputPath, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
         }
     }
