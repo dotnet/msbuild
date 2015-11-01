@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.ProjectModel;
@@ -62,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static int Run(ProjectContext context, string configuration, IEnumerable<string> remainingArguments, bool preserveTemporaryOutput)
+        private static int Run(ProjectContext context, string configuration, List<string> remainingArguments, bool preserveTemporaryOutput)
         {
             // Create a temporary directory
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -80,6 +81,16 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             // Now launch the output and give it the results
             var outputName = Path.Combine(tempDir, context.ProjectFile.Name + Constants.ExeSuffix);
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (context.TargetFramework.IsDesktop())
+                {
+                    // Run mono if we're running a desktop target on non windows
+                    remainingArguments.Insert(0, outputName + ".exe");
+                    outputName = "mono";
+                }
+            }
+
             result = Command.Create(outputName, string.Join(" ", remainingArguments))
                 .ForwardStdOut()
                 .ForwardStdErr()
