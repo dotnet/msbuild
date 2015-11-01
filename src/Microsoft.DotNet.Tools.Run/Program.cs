@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.ProjectModel;
-using Microsoft.Extensions.ProjectModel.Compilation;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Compiler
@@ -26,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
-            var preserveTemporaryOutput = app.Option("-p|--preserve-temporary", "Configuration under which to build", CommandOptionType.NoValue);
+            var preserveTemporaryOutput = app.Option("-p|--preserve-temporary", "Keep the output's temporary directory around", CommandOptionType.NoValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             app.OnExecute(() =>
