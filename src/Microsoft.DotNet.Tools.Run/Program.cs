@@ -72,9 +72,9 @@ namespace Microsoft.DotNet.Tools.Compiler
                 .ForwardStdOut()
                 .ForwardStdErr()
                 .Execute();
+
             if (result.ExitCode != 0)
             {
-                Reporter.Error.WriteLine($"Failed to compile {context.RootProject.Identity.Name}".Red().Bold());
                 return result.ExitCode;
             }
 
