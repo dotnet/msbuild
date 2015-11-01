@@ -8,7 +8,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.ProjectModel;
 using NuGet.Frameworks;
 
-namespace Microsoft.DotNet.Tools.Compiler
+namespace Microsoft.DotNet.Tools.Run
 {
     public class Program
     {
