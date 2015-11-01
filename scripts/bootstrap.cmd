@@ -75,7 +75,10 @@ if errorlevel 1 goto fail
 
 REM deploy corehost.exe to the output
 copy "%HOST_DIR%\corehost.exe" "%STAGE1_DIR%"
+if errorlevel 1 goto fail
+
 if exist "%HOST_DIR%\corehost.pdb" copy "%HOST_DIR%\corehost.pdb" "%STAGE1_DIR%"
+if errorlevel 1 goto fail
 
 echo Re-building dotnet tools with the bootstrapped version
 REM This should move into a proper build script of some kind once we are bootstrapped
@@ -104,11 +107,14 @@ dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE2_DIR%" --c
 if errorlevel 1 goto fail
 
 REM deploy corehost.exe to the output
-copy "%HOST_DIR%/corehost.exe" "%STAGE2_DIR%"
-if exist "%HOST_DIR%/corehost.pdb" copy "%HOST_DIR/corehost.pdb" "%STAGE2_DIR%"
+copy "%HOST_DIR%\corehost.exe" "%STAGE2_DIR%"
+if errorlevel 1 goto fail
+
+if exist "%HOST_DIR%\corehost.pdb" copy "%HOST_DIR%\corehost.pdb" "%STAGE2_DIR%"
+if errorlevel 1 goto fail
 
 echo Crossgening Roslyn compiler ...
-call "%~dp0crossgen/crossgen_roslyn.cmd" "%STAGE2_DIR%"
+call "%~dp0crossgen\crossgen_roslyn.cmd" "%STAGE2_DIR%"
 if errorlevel 1 goto fail
 
 REM Copy DNX in to stage2
@@ -124,11 +130,11 @@ del "%REPOROOT%\test\TestApp\project.lock.json"
 dotnet restore "%REPOROOT%\test\TestApp" --runtime "%RID%" --quiet
 dotnet publish "%REPOROOT%\test\TestApp" --framework "%TFM%" --runtime "%RID%" --output "%REPOROOT%\artifacts\%RID%\smoketest"
 
-"%REPOROOT%/artifacts/%RID%/smoketest/TestApp"
+"%REPOROOT%/artifacts/%RID%/smoketest/TestApp" 2>nul >nul
 if errorlevel 1 goto fail
 
 REM Check that a compiler error is reported
-dotnet compile "%REPOROOT%\test\compile\failing\SimpleCompilerError" --framework "%TFM%" >nul
+dotnet compile "%REPOROOT%\test\compile\failing\SimpleCompilerError" --framework "%TFM%" >nul 2>nul
 if %errorlevel% == 0 goto fail
 
 echo Bootstrapped dotnet to %STAGE2_DIR%

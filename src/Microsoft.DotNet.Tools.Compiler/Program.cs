@@ -273,12 +273,6 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             return outputPath;
-
-            string intermediateOutputPath = Path.Combine(
-                    context.ProjectFile.ProjectDirectory,
-                    Constants.ObjDirectoryName,
-                    configuration,
-                    context.TargetFramework.GetTwoDigitShortFolderName());
         }
 
         private static string GetIntermediateOutputPath(ProjectContext context, string configuration, string outputOptionValue)
