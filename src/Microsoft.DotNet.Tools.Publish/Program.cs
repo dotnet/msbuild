@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-compile", $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" --configuration \"{configuration}\" \"{context.ProjectFile.ProjectDirectory}\"")
+            var result = Command.Create("dotnet-compile", $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" --output \"{outputPath}\" --configuration \"{configuration}\" \"{context.ProjectFile.ProjectDirectory}\"")
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
@@ -134,6 +134,12 @@ namespace Microsoft.DotNet.Tools.Publish
 
             foreach (var export in exporter.GetAllExports())
             {
+                // Skip copying project references
+                if (export.Library is ProjectDescription)
+                {
+                    continue;
+                }
+
                 Reporter.Output.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
                 PublishFiles(export.RuntimeAssemblies, outputPath);
@@ -155,7 +161,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             var hostPath = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
-            if(!File.Exists(hostPath))
+            if (!File.Exists(hostPath))
             {
                 Reporter.Error.WriteLine($"Cannot find {Constants.HostExecutableName} in the dotnet directory.".Red());
                 return 1;

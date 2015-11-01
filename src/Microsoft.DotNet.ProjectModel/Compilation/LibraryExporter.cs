@@ -147,18 +147,6 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                     assemblyPath,
                     Path.Combine(project.Project.ProjectDirectory, assemblyPath)));
             }
-            else
-            {
-                // Add the project output to the metadata references, if there is source code
-                var outputPath = GetOutputPath(project);
-                if (project.Project.Files.SourceFiles.Any())
-                {
-                    compileAssemblies.Add(new LibraryAsset(
-                        project.Project.Name,
-                        outputPath,
-                        Path.Combine(project.Project.ProjectDirectory, outputPath)));
-                }
-            }
 
             // Add shared sources
             foreach (var sharedFile in project.Project.Files.SharedFiles)
@@ -169,17 +157,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
             // No support for ref or native in projects, so runtimeAssemblies is just the same as compileAssemblies and nativeLibraries are empty
             return new LibraryExport(project, compileAssemblies, sourceReferences, compileAssemblies, Enumerable.Empty<LibraryAsset>());
         }
-
-        private string GetOutputPath(ProjectDescription project)
-        {
-            var compilationOptions = project.Project.GetCompilerOptions(project.Framework, _configuration);
-            return Path.Combine(
-                "bin", // This can't access the Constant in Cli Utils. But the output path stuff is temporary right now anyway
-                _configuration,
-                project.Framework.GetTwoDigitShortFolderName(),
-                project.Project.Name + ".dll");
-        }
-
+        
         private static string ResolvePath(Project project, string configuration, string path)
         {
             if (string.IsNullOrEmpty(path))

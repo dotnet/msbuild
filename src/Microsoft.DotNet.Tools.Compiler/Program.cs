@@ -107,12 +107,12 @@ namespace Microsoft.DotNet.Tools.Compiler
         {
             Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
 
-            //Set up Output Paths
+            // Set up Output Paths
             string outputPath = GetOutputPath(context, configuration, outputOptionValue);
             string intermediateOutputPath = GetIntermediateOutputPath(context, configuration, outputOptionValue);
 
-            CleanOrCreateDirectory(outputPath);
-            CleanOrCreateDirectory(intermediateOutputPath);
+            Directory.CreateDirectory(outputPath);
+            Directory.CreateDirectory(intermediateOutputPath);
 
             // Create the library exporter
             var exporter = context.CreateExporter(configuration);
@@ -130,11 +130,11 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var projects = new Dictionary<string, ProjectDescription>();
 
                 // Build project references
-                foreach (var dependency in dependencies.Where(d => d.CompilationAssemblies.Any()))
+                foreach (var dependency in dependencies)
                 {
                     var projectDependency = dependency.Library as ProjectDescription;
 
-                    if (projectDependency != null)
+                    if (projectDependency != null && projectDependency.Project.Files.SourceFiles.Any())
                     {
                         projects[projectDependency.Identity.Name] = projectDependency;
                     }
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 foreach (var projectDependency in Sort(projects))
                 {
                     // Skip compiling project dependencies since we've already figured out the build order
-                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --no-project-dependencies \"{projectDependency.Project.ProjectDirectory}\"")
+                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --output \"{outputPath}\" --no-project-dependencies \"{projectDependency.Project.ProjectDirectory}\"")
                             .ForwardStdOut()
                             .ForwardStdErr()
                             .Execute();
@@ -163,13 +163,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             // ShowDependencyInfo(dependencies);
 
             // Get compilation options
-            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
-            var outputExtension = ".dll";
-            if (context.TargetFramework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
-            {
-                outputExtension = ".exe";
-            }
-            var outputName = Path.Combine(outputPath, context.ProjectFile.Name + outputExtension);
+            var outputName = GetProjectOutput(context.ProjectFile, context.TargetFramework, configuration, outputPath);
 
             // Assemble args
             var compilerArgs = new List<string>()
@@ -184,12 +178,26 @@ namespace Microsoft.DotNet.Tools.Compiler
             compilerArgs.Add("-nowarn:CS1702");
             compilerArgs.Add("-nowarn:CS1705");
 
+            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             // Add compilation options to the args
             ApplyCompilationOptions(compilationOptions, compilerArgs);
 
             foreach (var dependency in dependencies)
             {
-                compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r.ResolvedPath}\""));
+                var projectDependency = dependency.Library as ProjectDescription;
+
+                if (projectDependency != null)
+                {
+                    if (projectDependency.Project.Files.SourceFiles.Any())
+                    {
+                        var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
+                        compilerArgs.Add($"-r:\"{projectOutputPath}\"");
+                    }
+                }
+                else
+                {
+                    compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r.ResolvedPath}\""));
+                }
                 compilerArgs.AddRange(dependency.SourceReferences.Select(s => $"\"{s}\""));
             }
 
@@ -206,7 +214,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             compilerName = compilerName ?? "csc";
 
             // Write RSP file
-            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compilerName}.rsp");
+            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{compilerName}.{context.ProjectFile.Name}.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
             var result = Command.Create($"dotnet-compile-{compilerName}", $"\"{rsp}\"")
@@ -256,7 +264,20 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             return success;
         }
-        
+
+        private static string GetProjectOutput(Project project, NuGetFramework framework, string configuration, string outputPath)
+        {
+            var compilationOptions = project.GetCompilerOptions(framework, configuration);
+            var outputExtension = ".dll";
+
+            if (framework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
+            {
+                outputExtension = ".exe";
+            }
+
+            return Path.Combine(outputPath, project.Name + outputExtension);
+        }
+
         private static string GetOutputPath(ProjectContext context, string configuration, string outputOptionValue)
         {
             var outputPath = string.Empty;
@@ -279,7 +300,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static string GetIntermediateOutputPath(ProjectContext context, string configuration, string outputOptionValue)
         {
-            var intermediateOutputPath = String.Empty;
+            var intermediateOutputPath = string.Empty;
 
             if (string.IsNullOrEmpty(outputOptionValue))
             {
@@ -299,7 +320,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static string GetDefaultRootOutputPath(ProjectContext context, string outputOptionValue)
         {
-            string rootOutputPath = String.Empty;
+            string rootOutputPath = string.Empty;
 
             if (string.IsNullOrEmpty(outputOptionValue))
             {
@@ -355,16 +376,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             var lines = new List<string>();
             foreach(var export in exporter.GetAllExports())
             {
-                if (export.Library == runtimeContext.RootProject)
-                {
-                    continue;
-                }
-
                 if (export.Library is ProjectDescription)
                 {
-                    // Copy project dependencies to the output folder
-                    CopyFiles(export.RuntimeAssemblies, outputPath);
-                    CopyFiles(export.NativeLibraries, outputPath);
+                    continue;
                 }
                 else
                 {
@@ -382,7 +396,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         private static void CopyHost(string target)
         {
             var hostPath = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
-            File.Copy(hostPath, target);
+            File.Copy(hostPath, target, overwrite: true);
         }
 
         private static IEnumerable<string> GenerateLines(LibraryExport export, IEnumerable<LibraryAsset> items, string type)
