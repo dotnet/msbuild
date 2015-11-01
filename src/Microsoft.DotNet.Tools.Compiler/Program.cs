@@ -248,8 +248,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
                 MakeRunnable(runtimeContext, 
-                             outputPath, 
-                             context.ProjectFile.Name, 
+                             outputPath,  
                              runtimeContext.CreateExporter(configuration));
             }
 
@@ -328,7 +327,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             Directory.CreateDirectory(path);
         }
 
-        private static void MakeRunnable(ProjectContext runtimeContext, string outputPath, string projectName, LibraryExporter exporter)
+        private static void MakeRunnable(ProjectContext runtimeContext, string outputPath, LibraryExporter exporter)
         {
             if (runtimeContext.TargetFramework.IsDesktop())
             {
@@ -346,24 +345,38 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
             else
             {
-                EmitHost(outputPath, projectName, exporter);
+                EmitHost(runtimeContext, outputPath, exporter);
             }
         }
         
-        private static void EmitHost(string outputPath, string projectName, LibraryExporter exporter)
+        private static void EmitHost(ProjectContext runtimeContext, string outputPath, LibraryExporter exporter)
         {
             // Write the Host information file (basically a simplified form of the lock file)
             var lines = new List<string>();
             foreach(var export in exporter.GetAllExports())
             {
-                lines.AddRange(GenerateLines(export, export.RuntimeAssemblies, "runtime"));
-                lines.AddRange(GenerateLines(export, export.NativeLibraries, "native"));
+                if (export.Library == runtimeContext.RootProject)
+                {
+                    continue;
+                }
+
+                if (export.Library is ProjectDescription)
+                {
+                    // Copy project dependencies to the output folder
+                    CopyFiles(export.RuntimeAssemblies, outputPath);
+                    CopyFiles(export.NativeLibraries, outputPath);
+                }
+                else
+                {
+                    lines.AddRange(GenerateLines(export, export.RuntimeAssemblies, "runtime"));
+                    lines.AddRange(GenerateLines(export, export.NativeLibraries, "native"));
+                }
             }
 
-            File.WriteAllLines(Path.Combine(outputPath, projectName + ".deps"), lines);
+            File.WriteAllLines(Path.Combine(outputPath, runtimeContext.ProjectFile.Name + ".deps"), lines);
 
             // Copy the host in
-            CopyHost(Path.Combine(outputPath, projectName + Constants.ExeSuffix));
+            CopyHost(Path.Combine(outputPath, runtimeContext.ProjectFile.Name + Constants.ExeSuffix));
         }
 
         private static void CopyHost(string target)
