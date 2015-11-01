@@ -2,9 +2,6 @@
 
 setlocal
 
-REM Build 'dotnet' using a version of itself hosted on the DNX
-REM The output of this is independent of DNX
-
 REM This trick gets the absolute path from a relative path
 pushd %~dp0..
 set REPOROOT=%CD%
@@ -37,7 +34,7 @@ if not exist "%CMAKE_OUTPUT%" mkdir "%CMAKE_OUTPUT%"
 pushd "%CMAKE_OUTPUT%"
 cmake .. -G "Visual Studio 14 2015 Win64"
 if %errorlevel% neq 0 exit /b %errorlevel%
-msbuild ALL_BUILD.vcxproj /p:Configuration="%CONFIGURATION%"
+"%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration="%CONFIGURATION%"
 
 if exist "%HOST_DIR%" rd /s /q "%HOST_DIR%"
 mkdir "%HOST_DIR%"
@@ -128,9 +125,10 @@ set PATH=%STAGE2_DIR%;%START_PATH%
 
 del "%REPOROOT%\test\TestApp\project.lock.json"
 dotnet restore "%REPOROOT%\test\TestApp" --runtime "%RID%" --quiet
-dotnet publish "%REPOROOT%\test\TestApp" --framework "%TFM%" --runtime "%RID%" --output "%REPOROOT%\artifacts\%RID%\smoketest"
+dotnet compile "%REPOROOT%\test\TestApp" --output "%REPOROOT%\artifacts\%RID%\smoketest"
 
-"%REPOROOT%/artifacts/%RID%/smoketest/TestApp" 2>nul >nul
+set CLRHOST_CLR_PATH=%STAGE2_DIR%
+"%REPOROOT%\artifacts\%RID%\smoketest\TestApp" 2>nul >nul
 if errorlevel 1 goto fail
 
 REM Check that a compiler error is reported

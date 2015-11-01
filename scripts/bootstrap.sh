@@ -43,7 +43,7 @@ DNX_ROOT="$(dirname $(which dotnet))/dnx"
 
 banner "Restoring packages"
 
-dotnet restore "$REPOROOT" --runtime osx.10.10-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.11-x64 --quiet
+dotnet restore "$REPOROOT" --quiet
 
 # Clean up stage1
 [ -d "$STAGE1_DIR" ] && rm -Rf "$STAGE1_DIR"
