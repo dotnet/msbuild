@@ -70,6 +70,10 @@ echo Building stage1 dotnet-publish.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE1_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Resgen"
 if errorlevel 1 goto fail
 
+echo Building stage1 dotnet-run.exe ...
+dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE1_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Run"
+if errorlevel 1 goto fail
+
 REM deploy corehost.exe to the output
 copy "%HOST_DIR%\corehost.exe" "%STAGE1_DIR%"
 if errorlevel 1 goto fail
@@ -101,6 +105,10 @@ if errorlevel 1 goto fail
 
 echo Building stage2 dotnet-publish.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE2_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Resgen"
+if errorlevel 1 goto fail
+
+echo Building stage2 dotnet-run.exe ...
+dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE2_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Run"
 if errorlevel 1 goto fail
 
 REM deploy corehost.exe to the output
