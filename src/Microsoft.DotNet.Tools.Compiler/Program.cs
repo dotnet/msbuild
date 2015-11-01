@@ -25,6 +25,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             app.HelpOption("-h|--help");
 
             var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
+            var intermediateOutput = app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
@@ -49,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     foreach (var context in framework.Values.Select(f => ProjectContext.Create(path, NuGetFramework.Parse(f))))
                     {
-                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
+                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), intermediateOutput.Value(), buildProjectReferences);
                     
                         if (isNative)
                         {
@@ -61,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     foreach (var context in ProjectContext.CreateContextForEachFramework(path))
                     {
-                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
+                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), intermediateOutput.Value(), buildProjectReferences);
                         
                         if (isNative)
                         {
@@ -103,13 +104,13 @@ namespace Microsoft.DotNet.Tools.Compiler
             return result.ExitCode == 0;
         }
 
-        private static bool Compile(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences)
+        private static bool Compile(ProjectContext context, string configuration, string outputOptionValue, string intermediateOutputValue, bool buildProjectReferences)
         {
             Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
 
             // Set up Output Paths
             string outputPath = GetOutputPath(context, configuration, outputOptionValue);
-            string intermediateOutputPath = GetIntermediateOutputPath(context, configuration, outputOptionValue);
+            string intermediateOutputPath = GetIntermediateOutputPath(context, configuration, intermediateOutputValue, outputOptionValue);
 
             Directory.CreateDirectory(outputPath);
             Directory.CreateDirectory(intermediateOutputPath);
@@ -143,7 +144,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 foreach (var projectDependency in Sort(projects))
                 {
                     // Skip compiling project dependencies since we've already figured out the build order
-                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --output \"{outputPath}\" --no-project-dependencies \"{projectDependency.Project.ProjectDirectory}\"")
+                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --output \"{outputPath}\" --temp-output \"{intermediateOutputPath}\" --no-project-dependencies \"{projectDependency.Project.ProjectDirectory}\"")
                             .ForwardStdOut()
                             .ForwardStdErr()
                             .Execute();
@@ -298,11 +299,11 @@ namespace Microsoft.DotNet.Tools.Compiler
             return outputPath;
         }
 
-        private static string GetIntermediateOutputPath(ProjectContext context, string configuration, string outputOptionValue)
+        private static string GetIntermediateOutputPath(ProjectContext context, string configuration, string intermediateOutputValue, string outputOptionValue)
         {
             var intermediateOutputPath = string.Empty;
 
-            if (string.IsNullOrEmpty(outputOptionValue))
+            if (string.IsNullOrEmpty(intermediateOutputValue))
             {
                 intermediateOutputPath = Path.Combine(
                     GetDefaultRootOutputPath(context, outputOptionValue),
@@ -312,7 +313,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
             else
             {
-                intermediateOutputPath = outputOptionValue;
+                intermediateOutputPath = intermediateOutputValue;
             }
 
             return intermediateOutputPath;
