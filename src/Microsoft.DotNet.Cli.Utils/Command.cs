@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public Command EnvironmentVariable(string name, string value)
         {
-            _process.StartInfo.Environment.Add(name, value);
+            _process.StartInfo.Environment[name] = value;
             return this;
         }
 
