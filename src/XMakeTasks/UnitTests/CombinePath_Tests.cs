@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
-
-
 
 namespace Microsoft.Build.UnitTests
 {
@@ -21,14 +22,15 @@ namespace Microsoft.Build.UnitTests
             CombinePath t = new CombinePath();
             t.BuildEngine = new MockEngine();
 
-            t.BasePath = @"abc\def";
-            t.Paths = new ITaskItem[] { new TaskItem(@"ghi.txt"), new TaskItem(@"jkl\mno.txt") };
+            t.BasePath = Path.Combine("abc", "def");
+            string path1 = "ghi.txt";
+            string fullPath1 = Path.Combine(t.BasePath, path1);
+            string path2 = Path.Combine("jkl", "mno.txt");
+            string fullPath2 = Path.Combine(t.BasePath, path2);
+            t.Paths = new ITaskItem[] { new TaskItem(path1), new TaskItem(path2) };
             Assert.True(t.Execute()); // "success"
 
-            ObjectModelHelpers.AssertItemsMatch(@"
-                abc\def\ghi.txt
-                abc\def\jkl\mno.txt
-                ", t.CombinedPaths, true);
+            ObjectModelHelpers.AssertItemsMatch(string.Format("{0}\r\n{1}", fullPath1, fullPath2), t.CombinedPaths, true);
         }
 
         /// <summary>
@@ -40,15 +42,25 @@ namespace Microsoft.Build.UnitTests
             CombinePath t = new CombinePath();
             t.BuildEngine = new MockEngine();
 
-            t.BasePath = @"abc\def";
-            t.Paths = new ITaskItem[] { new TaskItem(@"c:\ghi.txt"), new TaskItem(@"d:\jkl\mno.txt"), new TaskItem(@"\\myserver\myshare") };
+            t.BasePath = Path.Combine("abc", "def");
+            string path1 = NativeMethodsShared.IsWindows ? @"c:\ghi.txt" : "/ghi.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"d:\jkl\mno.txt" : "/jkl/mno.txt";
+            string path3 = @"\\myserver\myshare";
+            string pathsToMatch = string.Format(NativeMethodsShared.IsWindows ? @"
+                {0}
+                {1}
+                {2}
+                " : @"
+                {0}
+                {1}
+                ", path1, path2, path3);
+
+            t.Paths = NativeMethodsShared.IsWindows
+                          ? new ITaskItem[] { new TaskItem(path1), new TaskItem(path2), new TaskItem(path3) }
+                          : new ITaskItem[] { new TaskItem(path1), new TaskItem(path2) };
             Assert.True(t.Execute()); // "success"
 
-            ObjectModelHelpers.AssertItemsMatch(@"
-                c:\ghi.txt
-                d:\jkl\mno.txt
-                \\myserver\myshare
-                ", t.CombinedPaths, true);
+            ObjectModelHelpers.AssertItemsMatch(pathsToMatch, t.CombinedPaths, true);
         }
 
         /// <summary>
@@ -60,14 +72,15 @@ namespace Microsoft.Build.UnitTests
             CombinePath t = new CombinePath();
             t.BuildEngine = new MockEngine();
 
-            t.BasePath = @"c:\abc\def";
-            t.Paths = new ITaskItem[] { new TaskItem(@"\ghi\jkl.txt"), new TaskItem(@"mno\qrs.txt") };
+            t.BasePath = NativeMethodsShared.IsWindows ? @"c:\abc\def" : "/abc/def";
+            string path1 = Path.DirectorySeparatorChar + Path.Combine("ghi", "jkl.txt");
+            string path2 = Path.Combine("mno", "qrs.txt");
+            string fullPath2 = Path.Combine(t.BasePath, path2);
+
+            t.Paths = new ITaskItem[] { new TaskItem(path1), new TaskItem(path2) };
             Assert.True(t.Execute()); // "success"
 
-            ObjectModelHelpers.AssertItemsMatch(
-                @"\ghi\jkl.txt" + "\r\n" +      // I think this is a bug in Path.Combine.  It should have been "c:\ghi\jkl.txt".
-                @"c:\abc\def\mno\qrs.txt",
-                t.CombinedPaths, true);
+            ObjectModelHelpers.AssertItemsMatch(string.Format("{0}\r\n{1}", path1, fullPath2), t.CombinedPaths, true);
         }
 
         /// <summary>
@@ -79,15 +92,24 @@ namespace Microsoft.Build.UnitTests
             CombinePath t = new CombinePath();
             t.BuildEngine = new MockEngine();
 
-            t.BasePath = @"\\fileserver\public";
-            t.Paths = new ITaskItem[] { new TaskItem(@"c:\ghi.txt"), new TaskItem(@"d:\jkl\mno.txt"), new TaskItem(@"\\myserver\myshare") };
+            t.BasePath = NativeMethodsShared.IsWindows ? @"\\fileserver\public" : "/rootdir/public";
+            string path1 = NativeMethodsShared.IsWindows ? @"c:\ghi.txt" : "/ghi.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"d:\jkl\mno.txt" : "/jkl/mno.txt";
+            string path3 = @"\\myserver\myshare";
+            string pathsToMatch = string.Format(NativeMethodsShared.IsWindows ? @"
+                {0}
+                {1}
+                {2}
+                " : @"
+                {0}
+                {1}
+                ", path1, path2, path3);
+            t.Paths = NativeMethodsShared.IsWindows
+                          ? new ITaskItem[] { new TaskItem(path1), new TaskItem(path2), new TaskItem(path3) }
+                          : new ITaskItem[] { new TaskItem(path1), new TaskItem(path2) };
             Assert.True(t.Execute()); // "success"
 
-            ObjectModelHelpers.AssertItemsMatch(@"
-                c:\ghi.txt
-                d:\jkl\mno.txt
-                \\myserver\myshare
-                ", t.CombinedPaths, true);
+            ObjectModelHelpers.AssertItemsMatch(pathsToMatch, t.CombinedPaths, true);
         }
 
         /// <summary>
@@ -98,15 +120,28 @@ namespace Microsoft.Build.UnitTests
         {
             CombinePath t = new CombinePath();
             t.BuildEngine = new MockEngine();
+            string expected;
 
-            t.BasePath = @"c:\abc\def\";
-            t.Paths = new ITaskItem[] { new TaskItem(@"jkl\mno.txt") };
+            if (NativeMethodsShared.IsWindows)
+            {
+                t.BasePath = @"c:\abc\def\";
+                t.Paths = new ITaskItem[] { new TaskItem(@"jkl\mno.txt") };
+                expected = @"
+                c:\abc\def\jkl\mno.txt : Culture=english
+                ";
+            }
+            else
+            {
+                t.BasePath = "/abc/def/";
+                t.Paths = new ITaskItem[] { new TaskItem("jkl/mno.txt") };
+                expected = @"
+                /abc/def/jkl/mno.txt : Culture=english
+                ";
+            }
             t.Paths[0].SetMetadata("Culture", "english");
             Assert.True(t.Execute()); // "success"
 
-            ObjectModelHelpers.AssertItemsMatch(@"
-                c:\abc\def\jkl\mno.txt : Culture=english
-                ", t.CombinedPaths, true);
+            ObjectModelHelpers.AssertItemsMatch(expected, t.CombinedPaths, true);
         }
 
         /// <summary>
@@ -169,6 +204,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidPath()
         {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                // No invalid characters on Unix
+                return;
+            }
+
             CombinePath t = new CombinePath();
             t.BuildEngine = new MockEngine(true);
 

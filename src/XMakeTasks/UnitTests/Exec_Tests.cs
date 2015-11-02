@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ExitCodeCausesFailure()
         {
-            Exec exec = PrepareExec("xcopy thisisanonexistentfile");
+            Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? "xcopy thisisanonexistentfile" : "cp thisisanonexistentfile thatisanonexistentfile");
             bool result = exec.Execute();
 
             Assert.Equal(false, result);
@@ -98,8 +98,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoggedErrorsCauseFailureDespiteExitCode0()
         {
+            var cmdLine = NativeMethodsShared.IsWindows
+                              ? "echo myfile(88,37): error AB1234: thisisacanonicalerror"
+                              : "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\"";
+
             // This will return 0 exit code, but emitted a canonical error
-            Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror");
+            Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
 
             Assert.Equal(false, result);
@@ -111,7 +115,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void IgnoreExitCodeTrueMakesTaskSucceedDespiteLoggingErrors()
         {
-            Exec exec = PrepareExec("echo myfile(88,37): error AB1234: thisisacanonicalerror");
+            var cmdLine = NativeMethodsShared.IsWindows
+                              ? "echo myfile(88,37): error AB1234: thisisacanonicalerror"
+                              : "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\"";
+
+            Exec exec = PrepareExec(cmdLine);
             exec.IgnoreExitCode = true;
             bool result = exec.Execute();
 
@@ -412,11 +420,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ErrorsAndWarningsWithIgnoreStandardErrorWarningFormatTrue()
         {
-            string cmdLine;
-            if (NativeMethodsShared.IsWindows)
-                cmdLine = "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning";
-            else
-                cmdLine = "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning";
+            var cmdLine = NativeMethodsShared.IsWindows
+                              ? "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning"
+                              : "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning";
 
             Exec exec = PrepareExec(cmdLine);
             exec.IgnoreStandardErrorWarningFormat = true;
@@ -430,11 +436,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CustomAndStandardErrorsAndWarnings()
         {
-            string cmdLine;
-            if (NativeMethodsShared.IsWindows)
-                cmdLine = "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning & echo YOGI & echo BEAR & echo some content";
-            else
-                cmdLine = "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning ; echo YOGI ; echo BEAR ; echo some content";
+            var cmdLine = NativeMethodsShared.IsWindows
+                              ? "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning & echo YOGI & echo BEAR & echo some content"
+                              : "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning ; echo YOGI ; echo BEAR ; echo some content";
 
             Exec exec = PrepareExec(cmdLine);
             exec.CustomWarningRegularExpression = ".*BEAR.*";
@@ -482,11 +486,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoDuplicateMessagesWhenCustomRegexAndRegularRegexBothMatch()
         {
-            string cmdLine;
-            if (NativeMethodsShared.IsWindows)
-                cmdLine = "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning ";
-            else
-                cmdLine = "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning ";
+            var cmdLine = NativeMethodsShared.IsWindows
+                              ? "echo myfile(88,37): error AB1234: thisisacanonicalerror & echo foo: warning CDE1234: thisisacanonicalwarning "
+                              : "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\" ; echo foo: warning CDE1234: thisisacanonicalwarning ";
 
             Exec exec = PrepareExec(cmdLine);
             exec.CustomErrorRegularExpression = ".*canonicale.*";

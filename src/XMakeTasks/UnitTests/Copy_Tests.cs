@@ -524,6 +524,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DoNotRetryCopyNotSupportedException()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                // Colon is special only on Windows
+                return;
+            }
+
             string sourceFile = FileUtilities.GetTemporaryFile();
             string destinationFile = "foo:bar";
 
@@ -1116,14 +1122,24 @@ namespace Microsoft.Build.UnitTests
                 t.SkipUnchangedFiles = false;
                 bool success = t.Execute();
 
-                Assert.False(success);
+                // Since on Unix there are no invalid file names, the copy will succeed
+                Assert.False(NativeMethodsShared.IsUnixLike ? !success : success);
                 Assert.Equal(2, t.DestinationFiles.Length);
                 Assert.Equal(file, t.DestinationFiles[0].ItemSpec);
                 Assert.Equal(dest2, t.DestinationFiles[1].ItemSpec);
-                Assert.Equal(1, t.CopiedFiles.Length);
                 Assert.Equal(file, t.CopiedFiles[0].ItemSpec);
 
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries, no op then invalid
+                if (NativeMethodsShared.IsUnixLike)
+                {
+                    Assert.Equal(2, t.CopiedFiles.Length);
+                }
+                else
+                {
+                    Assert.Equal(1, t.CopiedFiles.Length);
+
+                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026");
+                        // Didn't do retries, no op then invalid
+                }
             }
             finally
             {

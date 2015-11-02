@@ -365,10 +365,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(new ILogger[] { logger });
                 Assert.True(result);
-                logger.AssertLogContains("PropertyOutsideTarget: ..\\test.txt");
+                logger.AssertLogContains("PropertyOutsideTarget: " + Path.Combine("..", "test.txt"));
                 logger.AssertLogContains("PropertyGroupOutsideTarget: test.txt");
-                logger.AssertLogContains("PropertyInsideTarget: ..\\test.txt");
-                logger.AssertLogContains("PropertyGroupInsideTarget: ..\\test.txt");
+                logger.AssertLogContains("PropertyInsideTarget: " + Path.Combine("..", "test.txt"));
+                logger.AssertLogContains("PropertyGroupInsideTarget: " + Path.Combine("..", "test.txt"));
                 logger.AssertLogContains("[TargetDirectoryTargetsImport]");
                 logger.AssertLogDoesntContain("[ProjectDirectoryTargetsImport]");
                 logger.AssertLogContains("[TargetDirectoryTargetsImportGroup]");

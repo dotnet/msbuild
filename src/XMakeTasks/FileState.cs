@@ -201,11 +201,11 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Throw non-IO-related exception. Return true if
-            /// exception exists, but was IO-related
+            /// Throw non-IO-related exception if occurred during creation.
+            /// Return true if exception did occur, but was IO-related
             /// </summary>
             /// <returns></returns>
-            public bool ThrowNonIoException()
+            public bool ThrowNonIoExceptionIfPending()
             {
                 if (_exceptionThrown != null)
                 {
@@ -266,14 +266,14 @@ namespace Microsoft.Build.Tasks
         /// Returns false if it is a directory, even if it exists.
         /// Returns false instead of IO related exceptions.
         /// </summary>
-        internal bool FileExists => !_data.Value.ThrowNonIoException() && (_data.Value.Exists && !_data.Value.IsDirectory);
+        internal bool FileExists => !_data.Value.ThrowNonIoExceptionIfPending() && (_data.Value.Exists && !_data.Value.IsDirectory);
 
         /// <summary>
         /// Whether the directory exists.
         /// Returns false for files.
         /// Returns false instead of IO related exceptions.
         /// </summary>
-        internal bool DirectoryExists => !_data.Value.ThrowNonIoException() && (_data.Value.Exists && _data.Value.IsDirectory);
+        internal bool DirectoryExists => !_data.Value.ThrowNonIoExceptionIfPending() && (_data.Value.Exists && _data.Value.IsDirectory);
 
         /// <summary>
         /// Last time the file was written.
@@ -304,11 +304,8 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                Console.WriteLine("Data {0} loaded", _data.IsValueCreated ? "was" : "was not");
                 _data.Value.ThrowException();
-                Console.WriteLine("Data {0} directory", _data.Value.IsDirectory ? "is" : "is not");
                 _data.Value.ThrowFileInfoException(!_data.Value.Exists || _data.Value.IsDirectory);
-                Console.WriteLine("Computing length: {0}", _data.Value.Length);
                 return _data.Value.Length;
             }
         }

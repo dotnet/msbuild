@@ -58,7 +58,11 @@ namespace Microsoft.Build.UnitTests
                               new TaskItem(
                                   NativeMethodsShared.IsWindows ? @"d:\f1\f2\f3\f4\file.txt" : "/f1/f2/f3/f4/file.txt")
                           };
-            t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\f1" : "/f1";
+            // Create a path that's outside of the cone create above. On Windows this is achieved by
+            // changing the drive letter from d:\ to c:\ to make sure the result is out of the cone.
+            // If not Windows, where there is no drive, this is dine by changes the root directory from
+            // /f1 to /x1
+            t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\f1" : "/x1";
 
             bool success = t.Execute();
 
