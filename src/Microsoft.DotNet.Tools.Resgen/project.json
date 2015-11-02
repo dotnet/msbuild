@@ -1,29 +1,29 @@
-﻿{
-  "name": "resgen",
-  "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
-  "dependencies": {
-    "Microsoft.NETCore.Runtime": "1.0.1-beta-23428",
-    "System.Console": "4.0.0-beta-23428",
-    "System.Collections": "4.0.11-beta-23428",
-    "System.Linq": "4.0.1-beta-23428",
-    "System.Diagnostics.Process": "4.1.0-beta-23428",
-    "System.IO.FileSystem": "4.0.1-beta-23428",
-    "System.Xml.XDocument": "4.0.11-beta-23428",
-    "System.Resources.ReaderWriter": "4.0.0-beta-23428",
-
-    "Microsoft.DotNet.Cli.Utils": {
-      "type": "build",
-      "version": "1.0.0-*"
+{
+    "name": "resgen",
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
     },
-    "Microsoft.Extensions.CommandLineUtils.Sources": {
-      "type": "build",
-      "version": "1.0.0-*"
+    "dependencies": {
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23502",
+        "System.Console": "4.0.0-beta-23428",
+        "System.Collections": "4.0.11-beta-23428",
+        "System.Linq": "4.0.1-beta-23428",
+        "System.Diagnostics.Process": "4.1.0-beta-23428",
+        "System.IO.FileSystem": "4.0.1-beta-23428",
+        "System.Xml.XDocument": "4.0.11-beta-23428",
+        "System.Resources.ReaderWriter": "4.0.0-beta-23428",
+
+        "Microsoft.DotNet.Cli.Utils": {
+            "type": "build",
+            "version": "1.0.0-*"
+        },
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        }
+    },
+    "frameworks": {
+        "dnxcore50": { }
     }
-  },
-  "frameworks": {
-    "dnxcore50": { }
-  }
 }

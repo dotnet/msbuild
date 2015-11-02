@@ -85,6 +85,9 @@ dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --config
 dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Resgen"
 dotnet publish --framework "$TFM" --runtime $RID --output "$STAGE2_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Tools.Run"
 
+echo "Crossgenning Roslyn compiler ..."
+$REPOROOT/scripts/crossgen/crossgen_roslyn.sh "$STAGE2_DIR"
+
 # Deploy CLR host to the output
 cp "$HOST_DIR/corehost" "$STAGE2_DIR"
 
