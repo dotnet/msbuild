@@ -87,6 +87,14 @@ namespace Microsoft.DotNet.Tools.Run
                 {
                     // Run mono if we're running a desktop target on non windows
                     remainingArguments.Insert(0, outputName + ".exe");
+
+                    if (string.Equals(configuration, "Debug", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // If we're compiling for the debug configuration then add the --debug flag
+                        // other options may be passed using the MONO_OPTIONS env var
+                        remainingArguments.Insert(0, "--debug");
+                    }
+
                     outputName = "mono";
                 }
             }
