@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.Dnx.Runtime.Common.CommandLine;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -16,8 +17,8 @@ namespace Microsoft.DotNet.Cli.Utils
         private StringWriter _stdOutCapture;
         private StringWriter _stdErrCapture;
 
-        private TextWriter _stdOutForward;
-        private TextWriter _stdErrForward;
+        private Action<string> _stdOutForward;
+        private Action<string> _stdErrForward;
 
         private Action<string> _stdOutHandler;
         private Action<string> _stdErrHandler;
@@ -128,7 +129,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
 #if DEBUG
             var sw = Stopwatch.StartNew();
-            Reporter.Output.WriteLine($"> {FormatProcessInfo(_process.StartInfo)}".White());
+            Reporter.Verbose.WriteLine($"> {FormatProcessInfo(_process.StartInfo)}".White());
 #endif
             _process.Start();
             _process.BeginOutputReadLine();
@@ -142,11 +143,11 @@ namespace Microsoft.DotNet.Cli.Utils
             var message = $"< {FormatProcessInfo(_process.StartInfo)} exited with {exitCode} in {sw.ElapsedMilliseconds} ms.";
             if (exitCode == 0)
             {
-                Reporter.Output.WriteLine(message.Green());
+                Reporter.Verbose.WriteLine(message.Green());
             }
             else
             {
-                Reporter.Output.WriteLine(message.Red().Bold());
+                Reporter.Verbose.WriteLine(message.Red().Bold());
             }
 #endif
 
@@ -176,17 +177,37 @@ namespace Microsoft.DotNet.Cli.Utils
             return this;
         }
 
-        public Command ForwardStdOut(TextWriter to = null)
+        public Command ForwardStdOut(TextWriter to = null, bool onlyIfVerbose = false)
         {
             ThrowIfRunning();
-            _stdOutForward = to ?? Console.Out;
+            if (!onlyIfVerbose || CommandContext.IsVerbose())
+            {
+                if (to == null)
+                {
+                    _stdOutForward = Reporter.Output.WriteLine;
+                }
+                else
+                {
+                    _stdOutForward = to.WriteLine;
+                }
+            }
             return this;
         }
 
-        public Command ForwardStdErr(TextWriter to = null)
+        public Command ForwardStdErr(TextWriter to = null, bool onlyIfVerbose = false)
         {
             ThrowIfRunning();
-            _stdErrForward = to ?? Console.Error;
+            if (!onlyIfVerbose || CommandContext.IsVerbose())
+            {
+                if (to == null)
+                {
+                    _stdErrForward = Reporter.Error.WriteLine;
+                }
+                else
+                {
+                    _stdErrForward = to.WriteLine;
+                }
+            }
             return this;
         }
 
@@ -230,7 +251,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
-        private void ProcessData(string data, StringWriter capture, TextWriter forward, Action<string> handler)
+        private void ProcessData(string data, StringWriter capture, Action<string> forward, Action<string> handler)
         {
             if (data == null)
             {
@@ -244,7 +265,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (forward != null)
             {
-                forward.WriteLine(data);
+                forward(data);
             }
 
             if (handler != null)

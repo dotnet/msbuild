@@ -32,16 +32,33 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
 
         public LibraryManager LibraryManager { get; }
 
+        /// <summary>
+        /// Gets all the exports specified by this project, including the root project itself
+        /// </summary>
         public IEnumerable<LibraryExport> GetAllExports()
         {
-            // Export all but the main project
             return ExportLibraries(_ => true);
         }
 
-        public IEnumerable<LibraryExport> GetCompilationDependencies()
+        /// <summary>
+        /// Gets all exports required by the project, NOT including the project itself
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<LibraryExport> GetDependencies()
+        {
+            return GetDependencies(LibraryType.Unspecified);
+        }
+
+        /// <summary>
+        /// Gets all exports required by the project, of the specified <see cref="LibraryType"/>, NOT including the project itself
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<LibraryExport> GetDependencies(LibraryType type)
         {
             // Export all but the main project
-            return ExportLibraries(library => library != _rootProject);
+            return ExportLibraries(library =>
+                library != _rootProject &&
+                LibraryIsOfType(type, library));
         }
 
         /// <summary>
@@ -157,7 +174,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
             // No support for ref or native in projects, so runtimeAssemblies is just the same as compileAssemblies and nativeLibraries are empty
             return new LibraryExport(project, compileAssemblies, sourceReferences, compileAssemblies, Enumerable.Empty<LibraryAsset>());
         }
-        
+
         private static string ResolvePath(Project project, string configuration, string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -213,6 +230,12 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                     assemblyPath,
                     Path.Combine(package.Path, assemblyPath)));
             }
+        }
+
+        private static bool LibraryIsOfType(LibraryType type, LibraryDescription library)
+        {
+            return type.Equals(LibraryType.Unspecified) || // No type filter was requested 
+                   library.Identity.Type.Equals(type);     // OR, library type matches requested type
         }
     }
 }

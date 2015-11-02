@@ -66,7 +66,7 @@ echo Building stage1 dotnet-publish.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE1_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
 
-echo Building stage1 dotnet-publish.exe ...
+echo Building stage1 resgen.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE1_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Resgen"
 if errorlevel 1 goto fail
 
@@ -103,7 +103,7 @@ echo Building stage2 dotnet-publish.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE2_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
 
-echo Building stage2 dotnet-publish.exe ...
+echo Building stage2 resgen.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE2_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Resgen"
 if errorlevel 1 goto fail
 
@@ -132,7 +132,7 @@ REM Smoke-test the output
 set PATH=%STAGE2_DIR%;%START_PATH%
 
 del "%REPOROOT%\test\TestApp\project.lock.json"
-dotnet restore "%REPOROOT%\test\TestApp" --runtime "%RID%" --quiet
+dotnet restore "%REPOROOT%\test\TestApp" --quiet
 dotnet compile "%REPOROOT%\test\TestApp" --output "%REPOROOT%\artifacts\%RID%\smoketest"
 
 set CLRHOST_CLR_PATH=%STAGE2_DIR%

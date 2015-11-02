@@ -16,11 +16,15 @@ if(![string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION)) {
 
 $PackageName = Join-Path $PackageDir "dotnet-win-x64.$PackageVersion.zip"
 
+if (Test-Path $PackageName)
+{
+    del $PackageName
+}
+
 Add-Type -Assembly System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::CreateFromDirectory($Stage2Dir, $PackageName, "Optimal", $false)
 
 Write-Host "Packaged stage2 to $PackageName"
-
 
 $PublishScript = Join-Path $PSScriptRoot "publish.ps1"
 & $PublishScript -file $PackageName

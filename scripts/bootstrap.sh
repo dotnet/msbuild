@@ -108,8 +108,8 @@ dotnet compile "$REPOROOT/test/TestApp" --output "$REPOROOT/artifacts/$RID/smoke
 
 export CLRHOST_CLR_PATH=$STAGE2_DIR
 
-OUTPUT=$($REPOROOT/artifacts/$RID/smoketest/TestApp)
-[ "$OUTPUT" == "This is a test app" ] || (error "Smoke test failed!" && exit 1)
+# set -e will abort if the exit code of this is non-zero
+$REPOROOT/artifacts/$RID/smoketest/TestApp
 
 # Check that a compiler error is reported
 set +e

@@ -1,54 +1,101 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
+        private const string HelpText = @".NET Command Line Interface
+Usage: dotnet [common-options] [command] [arguments]
+
+Arguments:
+  [command]     The command to execute
+  [arguments]   Arguments to pass to the command
+
+Common Options (passed before the command):
+  -v|--verbose  Enable verbose output
+
+Common Commands:
+  compile       Compiles a .NET project
+  publish       Publishes a .NET project for deployment
+  run           Compiles and immediately executes a .NET project";
+
         public static int Main(string[] args)
         {
-            if (args.Length < 1)
-            {
-                // Handle missing args
-                PrintCommandList();
-                return 1;
-            }
+            // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
+            var verbose = false;
+            var command = string.Empty;
+            var lastArg = 0;
 
-            if (args[0].Equals("help", StringComparison.OrdinalIgnoreCase))
+            for (; lastArg < args.Length; lastArg++)
             {
-                if (args.Length > 1)
+                if (IsArg(args[lastArg], "v", "verbose"))
                 {
-                    return Command.Create("dotnet-" + args[1], "--help")
-                        .ForwardStdErr()
-                        .ForwardStdOut()
-                        .Execute()
-                        .ExitCode;
+                    verbose = true;
+                }
+                else if (args[lastArg].StartsWith("-"))
+                {
+                    PrintHelp($"Unknown option: ${args[lastArg]}");
                 }
                 else
                 {
-                    PrintCommandList();
-                    return 0;
+                    // It's the command, and we're done!
+                    command = args[lastArg];
+                    break;
                 }
             }
-            else
+
+            var appArgs = (lastArg + 1) >= args.Length ? Enumerable.Empty<string>() : args.Skip(lastArg + 1).ToArray();
+
+            if (string.IsNullOrEmpty(command) || command.Equals("help", StringComparison.OrdinalIgnoreCase))
             {
-                return Command.Create("dotnet-" + args[0], args.Skip(1))
+                return RunHelpCommand(appArgs);
+            }
+
+            return Command.Create("dotnet-" + command, appArgs)
+                .EnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString())
+                .EnvironmentVariable(CommandContext.Variables.AnsiPassThru, bool.TrueString)
+                .ForwardStdErr()
+                .ForwardStdOut()
+                .Execute()
+                .ExitCode;
+        }
+
+        private static int RunHelpCommand(IEnumerable<string> appArgs)
+        {
+            if (appArgs.Any())
+            {
+                return Command.Create("dotnet-" + appArgs.First(), "--help")
                     .ForwardStdErr()
                     .ForwardStdOut()
                     .Execute()
                     .ExitCode;
             }
+            else
+            {
+                PrintHelp();
+                return 0;
+            }
         }
 
-        private static void PrintCommandList()
+        private static void PrintHelp(string errorMessage = null)
         {
-            Console.WriteLine("Some dotnet Commands (use 'dotnet help <command>' to get help):");
-            Console.WriteLine("* compile - Compiles code");
-            Console.WriteLine("* publish - Publishes a project to a self-contained application");
-            Console.WriteLine("* run - Publishes and immediately runs a project");
+            if(!string.IsNullOrEmpty(errorMessage))
+            {
+                Reporter.Error.WriteLine(errorMessage.Red());
+            }
+            Reporter.Output.WriteLine(HelpText);
+        }
+
+        private static bool IsArg(string candidate, string shortName, string longName)
+        {
+            return candidate.Equals("-" + shortName) || candidate.Equals("--" + longName);
         }
     }
 }

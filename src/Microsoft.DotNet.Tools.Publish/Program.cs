@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
         private static int Publish(ProjectContext context, string outputPath, string configuration)
         {
-            Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier}");
+            Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
 
             var options = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
 
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Tools.Publish
                     continue;
                 }
 
-                Reporter.Output.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
+                Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
                 PublishFiles(export.RuntimeAssemblies, outputPath);
                 PublishFiles(export.NativeLibraries, outputPath);

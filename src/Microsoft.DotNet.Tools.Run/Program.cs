@@ -24,16 +24,16 @@ namespace Microsoft.DotNet.Tools.Run
 
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
-            var preserveTemporaryOutput = app.Option("-p|--preserve-temporary", "Keep the output's temporary directory around", CommandOptionType.NoValue);
-            var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
+            var preserveTemporaryOutput = app.Option("-t|--preserve-temporary", "Keep the output's temporary directory around", CommandOptionType.NoValue);
+            var project = app.Option("-p|--project <PROJECT_PATH>", "The path to the project to run (defaults to the current directory)", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
                 // Locate the project and get the name and full path
-                var path = project.Value;
-                if (string.IsNullOrEmpty(path))
+                var path = Directory.GetCurrentDirectory();
+                if(project.HasValue())
                 {
-                    path = Directory.GetCurrentDirectory();
+                    path = project.Value();
                 }
 
                 var contexts = ProjectContext.CreateContextForEachFramework(path);
@@ -69,8 +69,8 @@ namespace Microsoft.DotNet.Tools.Run
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
             // Compile to that directory
-            var result = Command.Create($"dotnet-compile", $"--output \"{tempDir}\" --framework \"{context.TargetFramework}\" --configuration \"{configuration}\"")
-                .ForwardStdOut()
+            var result = Command.Create($"dotnet-compile", $"--output \"{tempDir}\" --framework \"{context.TargetFramework}\" --configuration \"{configuration}\" {context.ProjectFile.ProjectDirectory}")
+                .ForwardStdOut(onlyIfVerbose: true)
                 .ForwardStdErr()
                 .Execute();
 

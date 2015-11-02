@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Extensions.ProjectModel.Compilation
 {
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class LibraryExport
     {
         /// <summary>
@@ -38,6 +40,14 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
             SourceReferences = sourceReferences;
             RuntimeAssemblies = runtimeAssemblies;
             NativeLibraries = nativeLibraries;
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                return Library.Identity.ToString();
+            }
         }
     }
 }

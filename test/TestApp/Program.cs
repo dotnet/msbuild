@@ -7,7 +7,7 @@ namespace TestApp
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("This is a test app");
+            Console.WriteLine(TestLibrary.Helper.GetMessage());
         }
     }
 }
