@@ -13,7 +13,9 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
+#endif
 
 
 
@@ -1909,7 +1911,6 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(referenceAssemblyRoot.Equals(fullPath, StringComparison.OrdinalIgnoreCase), String.Format("Expected the path to be '{0}' but it was '{1}'", fullPath, referenceAssemblyRoot));
         }
-
 
         #endregion
 
@@ -4599,9 +4600,9 @@ namespace Microsoft.Build.UnitTests
 
             return tempPath;
         }
-#endregion
+        #endregion
 
-#region HelperMethods
+        #region HelperMethods
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
@@ -4789,6 +4790,6 @@ namespace Microsoft.Build.UnitTests
             return null;
         }
 #endif
-#endregion
+        #endregion
     }
 }

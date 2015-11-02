@@ -789,7 +789,7 @@ namespace Microsoft.Build.UnitTests
                     <Target Name=""t""><Error Text='Error' Condition=""'$(MyEnvVariable)' == ''""/></Target>
                     </Project>");
             string tempdir = Path.GetTempPath();
-            string projectFileName = tempdir + "\\msbEnvironmenttest.proj";
+            string projectFileName = Path.Combine(tempdir, "msbEnvironmenttest.proj");
             string quotedProjectFileName = "\"" + projectFileName + "\"";
 
             try
@@ -824,7 +824,7 @@ namespace Microsoft.Build.UnitTests
                     "<Target Name=\"t\"><Message Text=\"Hello\"/></Target>" +
                     "</Project>";
             string tempdir = Path.GetTempPath();
-            string projectFileName = tempdir + "\\msbLoggertest.proj";
+            string projectFileName = Path.Combine(tempdir, "msbLoggertest.proj");
             string quotedProjectFileName = "\"" + projectFileName + "\"";
 
             try
@@ -848,7 +848,7 @@ namespace Microsoft.Build.UnitTests
                     MSBuildApp.Execute(
                         new[]
                             {
-                                @"c:\bin\msbuild.exe",
+                                NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
                                 @"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""",
                                 quotedProjectFileName
                             }));
@@ -859,8 +859,8 @@ namespace Microsoft.Build.UnitTests
                     MSBuildApp.Execute(
                         new[]
                             {
-                                @"c:\bin\msbuild.exe", "/logger:FileLogger,Microsoft.Build,Version=11111",
-                                quotedProjectFileName
+                                NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
+                                "/logger:FileLogger,Microsoft.Build,Version=11111", quotedProjectFileName
                             }));
 #endif
             }
@@ -874,7 +874,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_SPECIAL_FOLDERS
         private string _pathToArbitraryBogusFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
 #else
-        private string _pathToArbitraryBogusFile = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "notepad.exe"); // OK on 64 bit as well
+        private string _pathToArbitraryBogusFile = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), NativeMethodsShared.IsWindows ? "notepad.exe" : "cat"); // OK on 64 bit as well
 #endif
 
         /// <summary>
@@ -883,12 +883,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetCommandLine()
         {
-            var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag";
+            var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
             Assert.True(File.Exists(_pathToArbitraryBogusFile));
 
             string output = ExecMSBuild(_pathToMSBuildExe, msbuildParameters, false);
 
-            Assert.Contains(_pathToMSBuildExe + " /v:diag " + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(_pathToMSBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -904,7 +904,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(_pathToMSBuildExe));
 
-                var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + " /v:diag";
+                var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
                 output = ExecMSBuild("MSBuild.exe", msbuildParameters, false);
             }
             finally
@@ -912,7 +912,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(current);
             }
 
-            Assert.Contains(_pathToMSBuildExe + " /v:diag " + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(_pathToMSBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, output, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -1764,7 +1764,7 @@ namespace Microsoft.Build.UnitTests
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
             loggers = new ArrayList();
-            fileLoggerParameters = new string[2] { "Parameter1", "verbosity=Normal;logfile=c:\\temp\\cat.log" };
+            fileLoggerParameters = new string[2] { "Parameter1", "verbosity=Normal;logfile=" + (NativeMethodsShared.IsWindows ? "c:\\temp\\cat.log" : "/tmp/cat.log") };
             MSBuildApp.ProcessDistributedFileLogger
                        (
                            distributedFileLogger,
@@ -1779,7 +1779,7 @@ namespace Microsoft.Build.UnitTests
 
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
             loggers = new ArrayList();
-            fileLoggerParameters = new string[2] { "Parameter1", "verbosity=Normal;logfile=..\\cat.log;Parameter1" };
+            fileLoggerParameters = new string[2] { "Parameter1", "verbosity=Normal;logfile=" + Path.Combine("..", "cat.log") + ";Parameter1" };
             MSBuildApp.ProcessDistributedFileLogger
                        (
                            distributedFileLogger,
@@ -1790,7 +1790,7 @@ namespace Microsoft.Build.UnitTests
                        );
             Assert.Equal(0, loggers.Count); // "Expected no central loggers to be attached"
             Assert.Equal(1, distributedLoggerRecords.Count); // "Expected a distributed logger to be attached"
-            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;verbosity=Normal;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "..\\cat.log;Parameter1"), StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
+            Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;verbosity=Normal;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "..", "cat.log") +";Parameter1", StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
 
             loggers = new ArrayList();
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
@@ -1803,7 +1803,6 @@ namespace Microsoft.Build.UnitTests
                            loggers,
                            2
                        );
-            Console.WriteLine(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters);
             Assert.Equal(0, string.Compare(((DistributedLoggerRecord)distributedLoggerRecords[0]).ForwardingLoggerDescription.LoggerSwitchParameters, "Parameter1;Parameter;;;Parameter;Parameter;logFile=" + Path.Combine(Directory.GetCurrentDirectory(), "msbuild.log"), StringComparison.OrdinalIgnoreCase)); // "Expected parameter in logger to match parameter passed in"
         }
 

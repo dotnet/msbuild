@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //-----------------------------------------------------------------------
-// </copyright>
-// <summary>Cache file state over file name.</summary>
+// Cache file state over file name.
 //-----------------------------------------------------------------------
 
 using System;
@@ -36,33 +35,213 @@ namespace Microsoft.Build.Tasks
     /// </remarks>
     internal class FileState
     {
+        private class FileDirInfo
+        {
+            /// <summary>
+            /// The name of the file.
+            /// </summary>
+            private readonly string _filename;
+
+            /// <summary>
+            /// Set to true if file or directory exists
+            /// </summary>
+            public readonly bool Exists;
+
+            /// <summary>
+            /// Set to true if the path referred to a directory.
+            /// </summary>
+            public readonly bool IsDirectory;
+
+            /// <summary>
+            /// File length
+            /// </summary>
+            public readonly long Length;
+
+            /// <summary>
+            /// Last time the file was updated
+            /// </summary>
+            public readonly DateTime LastWriteTimeUtc;
+
+            /// <summary>
+            /// True if the file is readonly
+            /// </summary>
+            public readonly bool IsReadOnly;
+
+            /// <summary>
+            /// Exception thrown on creation
+            /// </summary>
+            private readonly Exception _exceptionThrown;
+
+            /// <summary>
+            /// Constructor gets the data for the filename.
+            /// On Win32 it uses native means. Otherwise,
+            /// uses standard .NET FileInfo/DirInfo
+            /// </summary>
+            /// <param name="filename"></param>
+            public FileDirInfo(string filename)
+            {
+                Exists = false;
+
+                // If file/directory does not exist, return 12 midnight 1/1/1601.
+                LastWriteTimeUtc = new DateTime(1601, 1, 1);
+
+                _filename = FileUtilities.AttemptToShortenPath(filename); // This is no-op unless the path actually is too long
+
+                int oldMode = 0;
+
+                if (NativeMethodsShared.IsWindows)
+                {
+                    // THIS COPIED FROM THE BCL:
+                    //
+                    // For floppy drives, normally the OS will pop up a dialog saying
+                    // there is no disk in drive A:, please insert one.  We don't want that. 
+                    // SetErrorMode will let us disable this, but we should set the error
+                    // mode back, since this may have wide-ranging effects.
+                    oldMode = NativeMethodsShared.SetErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */);
+                }
+
+                try
+                {
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        var data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+                        bool success = NativeMethodsShared.GetFileAttributesEx(_filename, 0, ref data);
+
+                        if (!success)
+                        {
+                            int error = Marshal.GetLastWin32Error();
+                            Console.WriteLine("File not found ({0}): {1}", error, _filename);
+
+                            // File not found is the most common case, for example we're copying
+                            // somewhere without a file yet. Don't do something like FileInfo.Exists to
+                            // get a nice error, or we're doing IO again! Don't even format our own string:
+                            // that turns out to be unacceptably expensive here as well. Set a flag for this particular case.
+                            //
+                            // Also, when not under debugger (!) it will give error == 3 for path too long. Make that consistently throw instead.
+                            if ((error == 2 /* ERROR_FILE_NOT_FOUND */|| error == 3 /* ERROR_PATH_NOT_FOUND */)
+                                && _filename.Length <= NativeMethodsShared.MAX_PATH)
+                            {
+                                Exists = false;
+                                return;
+                            }
+
+                            // Throw nice message as far as we can. At this point IO is OK.
+                            Length = new FileInfo(_filename).Length;
+
+                            // Otherwise this will give at least something
+                            NativeMethodsShared.ThrowExceptionForErrorCode(error);
+                            ErrorUtilities.ThrowInternalErrorUnreachable();
+                        }
+
+                        Exists = true;
+                        IsDirectory = (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0;
+                        IsReadOnly = !IsDirectory
+                                      && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_READONLY) != 0;
+                        LastWriteTimeUtc =
+                            DateTime.FromFileTimeUtc(((long)data.ftLastWriteTimeHigh << 0x20) | data.ftLastWriteTimeLow);
+                        Length = IsDirectory ? 0 : (((long)data.fileSizeHigh << 0x20) | data.fileSizeLow);
+                    }
+                    else
+                    {
+                        // Check if we have a directory
+                        IsDirectory = Directory.Exists(_filename);
+                        Exists = IsDirectory;
+
+                        // If not exists, see if this is a file
+                        if (!Exists)
+                        {
+                            Exists = File.Exists(_filename);
+                        }
+
+                        if (IsDirectory)
+                        {
+                            // Use DirectoryInfo to get the last write date
+                            var directoryInfo = new DirectoryInfo(_filename);
+                            IsReadOnly = false;
+                            LastWriteTimeUtc = directoryInfo.LastWriteTimeUtc;
+                        }
+                        else if (Exists)
+                        {
+                            // Use FileInfo to get readonly and last write date
+                            var fileInfo = new FileInfo(_filename);
+                            IsReadOnly = fileInfo.IsReadOnly;
+                            LastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Save the exception thrown and assume the file does not exist
+                    _exceptionThrown = ex;
+                    Exists = false;
+                }
+                finally
+                {
+                    // Reset the error mode on Windows
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        NativeMethodsShared.SetErrorMode(oldMode);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Throw exception as if the FileInfo did it. We
+            /// know that getting the length of a file would
+            /// throw exception if there are IO problems
+            /// </summary>
+            /// <param name="doThrow"></param>
+            public void ThrowFileInfoException(bool doThrow)
+            {
+                if (doThrow)
+                {
+                    // Provoke exception
+                    var length = (new FileInfo(_filename)).Length;
+                }
+            }
+
+            /// <summary>
+            /// Throw non-IO-related exception if occurred during creation.
+            /// Return true if exception did occur, but was IO-related
+            /// </summary>
+            /// <returns></returns>
+            public bool ThrowNonIoExceptionIfPending()
+            {
+                if (_exceptionThrown != null)
+                {
+                    if (!ExceptionHandling.IsIoRelatedException(_exceptionThrown))
+                    {
+                        throw _exceptionThrown;
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Throw any exception collected during construction
+            /// </summary>
+            /// <returns></returns>
+            public void ThrowException()
+            {
+                if (_exceptionThrown != null)
+                {
+                    throw _exceptionThrown;
+                }
+            }
+        }
+
         /// <summary>
         /// The name of the file.
         /// </summary>
-        private string _filename;
+        private readonly string _filename;
 
         /// <summary>
-        /// The info about the file.
+        /// Actual file or directory information
         /// </summary>
-        private NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA _data;
-
-        /// <summary>
-        /// The data info for CLR file info.
-        /// </summary>
-        private FileInfo _dataInfo;
-
-        /// <summary>
-        /// Whether data is reliable.
-        /// False means that we tried to get it, but failed. Only Reset will get it again.
-        /// Null means we didn't try yet.
-        /// </summary>
-        private bool? _dataIsGood;
-
-        /// <summary>
-        /// Whether the file or directory exists.
-        /// Used instead of an exception, for perf.
-        /// </summary>
-        private bool _fileOrDirectoryExists;
+        Lazy<FileDirInfo> _data;
 
         /// <summary>
         /// Constructor.
@@ -72,6 +251,7 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentLength(filename, "filename");
             _filename = filename;
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
         }
 
         /// <summary>
@@ -79,96 +259,27 @@ namespace Microsoft.Build.Tasks
         /// Returns false for directories.
         /// Throws if file does not exist.
         /// </summary>
-        internal bool IsReadOnly
-        {
-            get
-            {
-                EnsurePopulated();
-
-                if (DirectoryExists)
-                {
-                    return false;
-                }
-
-                if (!FileExists)
-                {
-                    // Provoke exception
-                    var length = (new FileInfo(_filename)).Length;
-                }
-
-                return NativeMethodsShared.IsWindows
-                           ? ((_data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_READONLY) != 0)
-                           : ((_dataInfo.IsReadOnly));
-            }
-        }
+        internal bool IsReadOnly => !DirectoryExists && _data.Value.IsReadOnly;
 
         /// <summary>
         /// Whether the file exists.
         /// Returns false if it is a directory, even if it exists.
         /// Returns false instead of IO related exceptions.
         /// </summary>
-        internal bool FileExists
-        {
-            get
-            {
-                try
-                {
-                    EnsurePopulated();
-                }
-                catch (Exception ex)
-                {
-                    if (!ExceptionHandling.IsIoRelatedException(ex))
-                    {
-                        throw;
-                    }
-
-                    return false;
-                }
-
-                return _fileOrDirectoryExists && !IsDirectory;
-            }
-        }
+        internal bool FileExists => !_data.Value.ThrowNonIoExceptionIfPending() && (_data.Value.Exists && !_data.Value.IsDirectory);
 
         /// <summary>
         /// Whether the directory exists.
         /// Returns false for files.
         /// Returns false instead of IO related exceptions.
         /// </summary>
-        internal bool DirectoryExists
-        {
-            get
-            {
-                try
-                {
-                    EnsurePopulated();
-                }
-                catch (Exception ex)
-                {
-                    if (!ExceptionHandling.IsIoRelatedException(ex))
-                    {
-                        throw;
-                    }
-
-                    return false;
-                }
-
-                return _fileOrDirectoryExists && IsDirectory;
-            }
-        }
+        internal bool DirectoryExists => !_data.Value.ThrowNonIoExceptionIfPending() && (_data.Value.Exists && _data.Value.IsDirectory);
 
         /// <summary>
         /// Last time the file was written.
-        /// If file does not exist, returns 12 midnight 1/1/1601.
         /// Works for directories.
         /// </summary>
-        internal DateTime LastWriteTime
-        {
-            get
-            {
-                // Could cache this as conversion can be expensive
-                return NativeMethodsShared.IsWindows ? LastWriteTimeUtcFast.ToLocalTime() : _dataInfo.LastWriteTime;
-            }
-        }
+        internal DateTime LastWriteTime => LastWriteTimeUtcFast.ToLocalTime();
 
         /// <summary>
         /// Last time the file was written, in UTC. Avoids translation for daylight savings, time zone etc which isn't needed for just comparisons.
@@ -179,18 +290,8 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                EnsurePopulated();
-
-                if (!_fileOrDirectoryExists)
-                {
-                    // Same as the FileInfo class
-                    return new DateTime(1601, 1, 1);
-                }
-
-                return NativeMethodsShared.IsWindows
-                           ? DateTime.FromFileTimeUtc(
-                               ((long)_data.ftLastWriteTimeHigh << 0x20) | _data.ftLastWriteTimeLow)
-                           : _dataInfo.LastWriteTimeUtc;
+                _data.Value.ThrowException();
+                return _data.Value.Exists ? _data.Value.LastWriteTimeUtc : new DateTime(1601, 1, 1);
             }
         }
 
@@ -203,23 +304,9 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                EnsurePopulated();
-
-                if (DirectoryExists)
-                {
-                    // Produce a nice file not found exception message
-                    var info = new FileInfo(_filename).Length;
-                }
-
-                if (!FileExists)
-                {
-                    // Provoke exception
-                    var length = (new FileInfo(_filename)).Length;
-                }
-
-                return NativeMethodsShared.IsWindows
-                           ? (((long)_data.fileSizeHigh << 0x20) | _data.fileSizeLow)
-                           : _dataInfo.Length;
+                _data.Value.ThrowException();
+                _data.Value.ThrowFileInfoException(!_data.Value.Exists || _data.Value.IsDirectory);
+                return _data.Value.Length;
             }
         }
 
@@ -227,13 +314,7 @@ namespace Microsoft.Build.Tasks
         /// Name of the file as it was passed in.
         /// Not normalized.
         /// </summary>
-        internal string Name
-        {
-            get
-            {
-                return _filename;
-            }
-        }
+        internal string Name => _filename;
 
         /// <summary>
         /// Whether this is a directory.
@@ -243,17 +324,9 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                EnsurePopulated();
-
-                if (!_fileOrDirectoryExists)
-                {
-                    // Provoke exception
-                    var length = (new FileInfo(_filename)).Length;
-                }
-
-                return NativeMethodsShared.IsWindows
-                           ? ((_data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0)
-                           : ((_dataInfo.Attributes & FileAttributes.Directory) != 0);
+                _data.Value.ThrowException();
+                _data.Value.ThrowFileInfoException(!_data.Value.Exists);
+                return _data.Value.IsDirectory;
             }
         }
 
@@ -262,87 +335,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void Reset()
         {
-            _data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-            _dataInfo = null;
-            _dataIsGood = null;
-        }
-
-        /// <summary>
-        /// Ensure we have the data.
-        /// Does not throw for nonexistence.
-        /// </summary>
-        private void EnsurePopulated()
-        {
-            if (_dataIsGood == null)
-            {
-                _dataIsGood = false;
-                _filename = FileUtilities.AttemptToShortenPath(_filename); // This is no-op unless the path actually is too long
-
-                int oldMode = 0;
-
-                if (NativeMethodsShared.IsWindows)
-                {
-                    _data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-
-                    // THIS COPIED FROM THE BCL:
-                    //
-                    // For floppy drives, normally the OS will pop up a dialog saying
-                    // there is no disk in drive A:, please insert one.  We don't want that. 
-                    // SetErrorMode will let us disable this, but we should set the error
-                    // mode back, since this may have wide-ranging effects.
-                    oldMode = NativeMethodsShared.SetErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */);
-                }
-
-                bool success = false;
-                _fileOrDirectoryExists = true;
-
-                try
-                {
-                    if (NativeMethodsShared.IsWindows)
-                    {
-                        success = NativeMethodsShared.GetFileAttributesEx(_filename, 0, ref _data);
-
-                        if (!success)
-                        {
-                            int error = Marshal.GetLastWin32Error();
-
-                            // File not found is the most common case, for example we're copying
-                            // somewhere without a file yet. Don't do something like FileInfo.Exists to
-                            // get a nice error, or we're doing IO again! Don't even format our own string:
-                            // that turns out to be unacceptably expensive here as well. Set a flag for this particular case.
-                            //
-                            // Also, when not under debugger (!) it will give error == 3 for path too long. Make that consistently throw instead.
-                            if ((error == 2 /* ERROR_FILE_NOT_FOUND */|| error == 3 /* ERROR_PATH_NOT_FOUND */)
-                                && _filename.Length <= NativeMethodsShared.MAX_PATH)
-                            {
-                                _fileOrDirectoryExists = false;
-                                return;
-                            }
-
-                            // Throw nice message as far as we can. At this point IO is OK.
-                            var length = new FileInfo(_filename).Length;
-
-                            // Otherwise this will give at least something
-                            NativeMethodsShared.ThrowExceptionForErrorCode(error);
-                            ErrorUtilities.ThrowInternalErrorUnreachable();
-                        }
-                    }
-                    else
-                    {
-                        _dataInfo = new FileInfo(_filename);
-                        _fileOrDirectoryExists = _dataInfo.Exists;
-                    }
-                }
-                finally
-                {
-                    if (NativeMethodsShared.IsWindows)
-                    {
-                        NativeMethodsShared.SetErrorMode(oldMode);
-                    }
-                }
-
-                _dataIsGood = true;
-            }
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
         }
     }
 }

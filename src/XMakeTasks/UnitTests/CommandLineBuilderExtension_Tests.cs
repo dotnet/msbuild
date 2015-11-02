@@ -5,11 +5,13 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Collections;
+using System.Text.RegularExpressions;
+
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-using Microsoft.Build.Shared;
+
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -46,7 +48,7 @@ namespace Microsoft.Build.UnitTests
                         new string[] { "Name", "Private" },
                         new bool[] { false, true }
                     );
-                    Assert.Equal(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
+                    Assert.Equal(NativeMethodsShared.IsWindows ? @"/myswitch:MyResource.bmp,Kenny,Private" : "-myswitch:MyResource.bmp,Kenny,Private", c.ToString());
                 }
                 catch (ArgumentException e)
                 {

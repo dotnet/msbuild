@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         public void TestGeneralFrameworkMonikerGoodWithRoot()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithRoot");
-            string framework41Directory = Path.Combine(tempDirectory, "MyFramework\\v4.1\\");
+            string framework41Directory = Path.Combine(tempDirectory, Path.Combine("MyFramework", "v4.1") + Path.DirectorySeparatorChar);
             string redistListDirectory = Path.Combine(framework41Directory, "RedistList");
             string redistListFile = Path.Combine(redistListDirectory, "FrameworkList.xml");
             try
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests
         public void TestGeneralFrameworkMonikerGoodWithRootWithProfile()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithRootWithProfile");
-            string framework41Directory = Path.Combine(tempDirectory, "MyFramework\\v4.1\\Profile\\Client");
+            string framework41Directory = Path.Combine(tempDirectory, Path.Combine("MyFramework", "v4.1", "Profile", "Client"));
             string redistListDirectory = Path.Combine(framework41Directory, "RedistList");
             string redistListFile = Path.Combine(redistListDirectory, "FrameworkList.xml");
             try
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
                 string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
                 string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
                 Assert.Equal(1, returnedPaths.Length);
-                Assert.True(returnedPaths[0].Equals(framework41Directory + "\\", StringComparison.OrdinalIgnoreCase));
+                Assert.True(returnedPaths[0].Equals(framework41Directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
                 Assert.True(displayName.Equals(".NET Framework 4.1 Client", StringComparison.OrdinalIgnoreCase));
             }
             finally
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests
         public void TestGeneralFrameworkMonikerGoodWithInvalidIncludePath()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithInvalidIncludePath");
-            string framework41Directory = Path.Combine(tempDirectory, "MyFramework\\v4.1\\");
+            string framework41Directory = Path.Combine(tempDirectory, Path.Combine("MyFramework", "v4.1") + Path.DirectorySeparatorChar);
             string redistListDirectory = Path.Combine(framework41Directory, "RedistList");
             string redistListFile = Path.Combine(redistListDirectory, "FrameworkList.xml");
             try
@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests
         public void TestGeneralFrameworkMonikerGoodWithInvalidCharInIncludePath()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithInvalidCharInIncludePath");
-            string framework41Directory = Path.Combine(tempDirectory, "MyFramework\\v4.1\\");
+            string framework41Directory = Path.Combine(tempDirectory, Path.Combine("MyFramework", "v4.1") + Path.DirectorySeparatorChar);
             string redistListDirectory = Path.Combine(framework41Directory, "RedistList");
             string redistListFile = Path.Combine(redistListDirectory, "FrameworkList.xml");
             try
@@ -251,7 +251,20 @@ namespace Microsoft.Build.UnitTests
                 string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
                 Assert.Null(displayName);
                 FrameworkNameVersioning frameworkMoniker = new FrameworkNameVersioning(getReferencePaths.TargetFrameworkMoniker);
-                engine.AssertLogContains("MSB3643");
+                if (NativeMethodsShared.IsWindows)
+                {
+                    engine.AssertLogContains("MSB3643");
+                }
+                else
+                {
+                    // Since under Unix there are no invalid characters, we don't fail in the incorrect path
+                    // and go through to actually looking for the directory
+                    string message =
+                        ResourceUtilities.FormatResourceString(
+                            "GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound",
+                            frameworkMoniker.ToString());
+                    engine.AssertLogContains(message);
+                }
             }
             finally
             {

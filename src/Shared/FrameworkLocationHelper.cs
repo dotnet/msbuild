@@ -674,7 +674,8 @@ namespace Microsoft.Build.Shared
                     prefix = prefix.Substring(1);
                 }
 
-                return Path.Combine(NativeMethodsShared.FrameworkBasePath, prefix ?? string.Empty);
+                var frameworkPath = Path.Combine(NativeMethodsShared.FrameworkBasePath, prefix ?? string.Empty);
+                return directoryExists(frameworkPath) ? frameworkPath : null;
             }
 
             // If the COMPLUS variables are set, they override everything -- that's the directory we want.  
