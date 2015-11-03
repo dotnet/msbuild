@@ -101,6 +101,10 @@ cp -R $DNX_ROOT $STAGE2_DIR/dnx
 cp $DIR/dotnet-restore.sh $STAGE2_DIR/dotnet-restore
 chmod a+x $STAGE2_DIR/dotnet-restore
 
+# Stamp the output with the commit metadata
+COMMIT_ID=$(git rev-parse HEAD)
+echo $COMMIT_ID > $STAGE2_DIR/commit
+
 # Smoke-test the output
 banner "Testing stage2 ..."
 export PATH=$STAGE2_DIR:$START_PATH

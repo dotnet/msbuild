@@ -144,6 +144,10 @@ xcopy /s /q "%DNX_ROOT%" "%STAGE2_DIR%\dnx\"
 REM Copy the dotnet-restore script
 copy "%~dp0dotnet-restore.cmd" "%STAGE2_DIR%\dotnet-restore.cmd"
 
+REM Stamp the output with the commit metadata
+git rev-parse HEAD > %STAGE2_DIR%/commit
+
+
 REM Smoke-test the output
 set PATH=%STAGE2_DIR%;%START_PATH%
 
