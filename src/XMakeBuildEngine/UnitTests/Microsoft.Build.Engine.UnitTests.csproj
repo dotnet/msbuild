@@ -54,6 +54,9 @@
     <Compile Include="..\..\Shared\UnitTests\ResourceUtilities_Tests.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\..\Shared\UnitTests\RunnerUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\..\Shared\UnitTests\StreamHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
