@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Run
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
             // Compile to that directory
-            var result = Command.Create($"dotnet-compile", $"--output \"{tempDir}\" --framework \"{context.TargetFramework}\" --configuration \"{configuration}\" {context.ProjectFile.ProjectDirectory}")
+            var result = Command.Create($"dotnet-compile", $"--output \"{tempDir}\" --temp-output \"{tempDir}\" --framework \"{context.TargetFramework}\" --configuration \"{configuration}\" {context.ProjectFile.ProjectDirectory}")
                 .ForwardStdOut(onlyIfVerbose: true)
                 .ForwardStdErr()
                 .Execute();
