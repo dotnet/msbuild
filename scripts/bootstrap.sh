@@ -36,7 +36,7 @@ REPOROOT="$( cd -P "$DIR/.." && pwd )"
 START_PATH=$PATH
 
 banner "Installing stage0"
-[ -d "~/.dotnet" ] || mkdir -p "~/.dotnet"
+[ -d "$HOME/.dotnet" ] || mkdir -p "$HOME/.dotnet"
 source $DIR/dnvm2.sh
 dnvm upgrade -a dotnet_stage0
 DNX_ROOT="$(dirname $(which dotnet))/dnx"
