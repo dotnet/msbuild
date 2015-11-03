@@ -7,6 +7,7 @@
     "dependencies": {
         "Microsoft.NETCore.Runtime": "1.0.1-beta-23502",
 
+        "System.CommandLine": "0.1.0-*",
         "System.Console": "4.0.0-beta-23502",
         "System.Collections": "4.0.11-beta-23502",
         "System.Linq": "4.0.1-beta-23502",
@@ -21,6 +22,8 @@
             "type": "build",
             "version": "1.0.0-*"
         },
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "Microsoft.Net.Compilers.netcore": "1.1.0-*"
     },
     "frameworks": {

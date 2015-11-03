@@ -2,10 +2,10 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "System.CommandLine": "0.1-*",
-    "System.Linq": "4.0.1-beta-23428",
-    "System.Runtime": "4.0.21-beta-23428",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "System.CommandLine": "0.1.0-*",
+    "System.Linq": "4.0.1-beta-23502",
+    "System.Runtime": "4.0.21-beta-23502",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*"
   },
 
   "frameworks": {

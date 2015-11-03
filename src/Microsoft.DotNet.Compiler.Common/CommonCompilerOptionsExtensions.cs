@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.Linq;
 
-using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
