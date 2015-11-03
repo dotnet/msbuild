@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -158,6 +159,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
+            var sw = Stopwatch.StartNew();
 
             // Dump dependency data
             // TODO: Turn on only if verbose, we can look at the response
@@ -263,6 +265,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             PrintSummary(success, diagnostics);
+
+            Reporter.Output.WriteLine($"Time elapsed {sw.Elapsed}");
+            Reporter.Output.WriteLine();
 
             return success;
         }
