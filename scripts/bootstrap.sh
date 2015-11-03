@@ -43,7 +43,7 @@ DNX_ROOT="$(dirname $(which dotnet))/dnx"
 
 banner "Restoring packages"
 
-dotnet restore "$REPOROOT" --quiet
+dotnet restore "$REPOROOT" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
 
 # Clean up stage1
 [ -d "$STAGE1_DIR" ] && rm -Rf "$STAGE1_DIR"
@@ -103,7 +103,8 @@ banner "Testing stage2 ..."
 export PATH=$STAGE2_DIR:$START_PATH
 
 rm "$REPOROOT/test/TestApp/project.lock.json"
-dotnet restore "$REPOROOT/test/TestApp"
+dotnet restore "$REPOROOT/test/TestApp" --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
+
 dotnet compile "$REPOROOT/test/TestApp" --output "$REPOROOT/artifacts/$RID/smoketest"
 
 export CLRHOST_CLR_PATH=$STAGE2_DIR

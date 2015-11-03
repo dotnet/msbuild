@@ -45,7 +45,7 @@ popd
 if exist "%STAGE1_DIR%" rd /s /q "%STAGE1_DIR%"
 
 echo Running 'dotnet restore' to restore packages
-call dotnet restore "%REPOROOT%"
+call dotnet restore "%REPOROOT%" --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
 if errorlevel 1 goto fail
 
 echo Building basic dotnet tools using older dotnet SDK version
@@ -132,7 +132,7 @@ REM Smoke-test the output
 set PATH=%STAGE2_DIR%;%START_PATH%
 
 del "%REPOROOT%\test\TestApp\project.lock.json"
-dotnet restore "%REPOROOT%\test\TestApp" --quiet
+dotnet restore "%REPOROOT%\test\TestApp" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
 dotnet compile "%REPOROOT%\test\TestApp" --output "%REPOROOT%\artifacts\%RID%\smoketest"
 
 set CLRHOST_CLR_PATH=%STAGE2_DIR%
