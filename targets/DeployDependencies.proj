@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="DeployDependencies" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\dir.props" />
+  <Import Project="..\src\.nuget\packageLoad.targets" />
 
   <Target Name="CopyPackageContent">
     <ItemGroup>
@@ -25,24 +26,36 @@
   <PropertyGroup>
     <RuntimeProjectJson>$(MSBuildThisFileDirectory)\runtime.project.json</RuntimeProjectJson>
     <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)\runtime.project.lock.json</RuntimeProjectLockJson>
-    <RestoreRuntimePackagesCommand>"$(NuGetToolPath)" restore $(RuntimeProjectJson)</RestoreRuntimePackagesCommand>
+    <RestoreRuntimePackagesCommand>$(NugetRestoreCommand) $(NuGetPackageInstallOptions) $(RuntimeProjectJson)</RestoreRuntimePackagesCommand>
     <RuntimeDirectory Condition="'$(RuntimeDirectory)' ==''">$(OutputPath)</RuntimeDirectory>
+    <!-- Put $(RuntimeStamp) in $(RuntimeDir) to make deleting the directory
+         do the right thing.
+    -->
+    <RuntimeStamp>$(RuntimeDirectory)\runtime.stamp</RuntimeStamp>
     <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="RestoreRuntimePackages"
           Inputs="$(NuGetToolPath);$(RuntimeProjectJson)"
-          Outputs="$(RuntimeProjectLockJson)"
+          Outputs="$(RuntimeStamp)"
           >
+
+    <Message Importance="High" Text="Restoring NuGet packages..." />
     <Exec Command="$(RestoreRuntimePackagesCommand)" StandardOutputImportance="Low" />
     <!-- Work around https://github.com/Microsoft/msbuild/issues/262 by running restore
          a second time to get the correct .lock.json file in place.  This is inefficient
          but shouldn't take too long since the packages should all already be downloaded. -->
     <Exec Command="$(RestoreRuntimePackagesCommand)" StandardOutputImportance="Low" />
 
-    <!-- It appears that NuGet doesn't re-write the project.lock.json file if the contents would be the same. This can mess up incremental builds
-        if you make a non-significant change to project.json.  To avoid that, update the timestamp of the lock file here. -->
-    <Touch Files="$(RuntimeProjectLockJson)" />
+    <!-- This is just a "stamp" file, serving no purpose besides indicating
+         that the target has been run since $(RuntimeProjectJson) was last
+         updated.  The reason we can't use $(RuntimeProjectLockJson) for this
+         is that, since $(RuntimeProjectJson) and $(RuntimeProjectLockJson)
+         are both under version control, their timestamps are left in an
+         indeterminate order by various operations, such as "git clone",
+         "git pull", and "git checkout".
+    -->
+    <Touch Files="$(RuntimeStamp)" AlwaysCreate="true" />
   </Target>
 
   <Target Name="DeployRuntime"
@@ -50,7 +63,7 @@
           >
     <ResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
                                IncludeFrameworkReferences="false"
-                               NuGetPackagesDirectory=""
+                               NuGetPackagesDirectory="$(NuGetDir)"
                                RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
                                ProjectLanguage=""
                                ProjectLockFile="$(RuntimeProjectLockJson)"
