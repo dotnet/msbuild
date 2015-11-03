@@ -1,6 +1,7 @@
 ﻿{
   "dependencies": {
-    "xunit": "2.1.0"
+    "xunit": "2.1.0",
+    "xunit.netcore.extensions": "1.0.0-prerelease-00116"
   },
   "frameworks": {
     "net451": {
@@ -25,7 +26,7 @@
         "System.Threading.ThreadPool": "4.0.10-beta-23406",
         "System.Xml.XmlDocument": "4.0.1-beta-23225",
         "Microsoft.NETCore.Runtime": "1.0.1-beta-23406",
-        "Microsoft.NETCore.TestHost": "1.0.0-beta-23318",
+        "Microsoft.NETCore.TestHost": "1.0.0-beta-23318"
       },
       "imports": "portable-net451+win81"
     }
