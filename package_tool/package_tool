@@ -1,22 +1,22 @@
 #!/bin/bash
 #
 # Takes Parameters:
-#   $0 = Input Directory
-#   $1 = Output Directory
+#   $1 = Input Directory
+#   $2 = Output Directory
+#   $3 = Package Version
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 ## Load Functions ##
 source $SCRIPT_DIR/scripts/debian_build_lib.sh
 
-INPUT_DIR=$1
-OUTPUT_DIR=$2
+INPUT_DIR="$1"
+OUTPUT_DIR="$2"
+INPUT_PACKAGE_VERSION="$3"
 
 # Special Input Directories + Paths
 ABSOLUTE_PLACEMENT_DIR="${INPUT_DIR}/\$"
 PACKAGE_ROOT_PLACEMENT_DIR="${INPUT_DIR}/package_root"
-
-# Output Directories
 
 # Inputs
 INPUT_SAMPLES_DIR="$INPUT_DIR/samples"
@@ -70,7 +70,13 @@ parse_config_and_set_env_vars(){
     extract_base_cmd="python $SCRIPT_DIR/scripts/extract_json_value.py"
 
     PACKAGE_NAME=$($extract_base_cmd $CONFIG "package_name")
-    PACKAGE_VERSION=$($extract_base_cmd $CONFIG "release.package_version")
+    
+    # Override JSON Defined Version w/ Cmd Line ARG
+    if [ -z $INPUT_PACKAGE_VERSION ]; then
+        PACKAGE_VERSION=$($extract_base_cmd $CONFIG "release.package_version")
+    else
+        PACKAGE_VERSION=$INPUT_PACKAGE_VERSION
+    fi
 
     PACKAGE_SOURCE_DIR="${OUTPUT_DIR}/${PACKAGE_NAME}-${PACKAGE_VERSION}"
     INSTALL_ROOT="/usr/share/${PACKAGE_NAME}"

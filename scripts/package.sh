@@ -12,7 +12,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # Create Dnvm Package
 $DIR/package-dnvm.sh
 
-if [[ "$1" == "debian" ]]; then
+if [[ "$(uname)" == "Linux" ]]; then
     # Create Debian package
     $DIR/package-debian.sh
 fi
