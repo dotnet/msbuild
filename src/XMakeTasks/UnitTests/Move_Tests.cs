@@ -564,13 +564,9 @@ namespace Microsoft.Build.UnitTests
         /// Variation with different casing/relativeness.
         /// </summary>
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
         public void MoveFileOnItself2()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // "File names under Unix are case-sensitive and this test is not useful"
-            }
-
             string currdir = Directory.GetCurrentDirectory();
             string filename = "2A333ED756AF4dc392E728D0F864A396";
             string file = Path.Combine(currdir, filename);

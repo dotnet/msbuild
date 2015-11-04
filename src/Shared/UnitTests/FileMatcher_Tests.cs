@@ -563,13 +563,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // Nothing's too long for Unix
         public void IllegalTooLongPath()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                // Nothing's too long for Unix
-                return;
-            }
             string longString = new string('X', 500) + "*"; // need a wildcard to do anything
             string[] result = FileMatcher.GetFiles(@"c:\", longString);
 

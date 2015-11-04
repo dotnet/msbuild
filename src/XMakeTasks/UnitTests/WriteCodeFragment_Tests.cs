@@ -195,13 +195,9 @@ namespace Microsoft.Build.UnitTests
         /// Bad directory path
         /// </summary>
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // "No invalid characters on Unix"
         public void InvalidDirectoryPath()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // "No invalid characters on Unix"
-            }
-
             WriteCodeFragment task = new WriteCodeFragment();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;

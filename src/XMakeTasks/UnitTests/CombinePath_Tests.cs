@@ -202,14 +202,9 @@ namespace Microsoft.Build.UnitTests
         /// Specified paths contain invalid characters.  Task should continue processing remaining items.
         /// </summary>
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // No invalid characters on Unix
         public void InvalidPath()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                // No invalid characters on Unix
-                return;
-            }
-
             CombinePath t = new CombinePath();
             t.BuildEngine = new MockEngine(true);
 
