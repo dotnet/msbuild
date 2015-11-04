@@ -1,18 +1,27 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask Condition="'$(OsEnvironment)'!='Windows_NT'" TaskName="ResolveNuGetPackageAssets" AssemblyFile="$(NugetIntegrationDir)\Microsoft.NuGet.Build.Tasks.dll" />
+  <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll"/>
+
+  <PropertyGroup>
+    <NoStdLib>true</NoStdLib>
+    <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);ResolveNuGetPackageAssets</ResolveAssemblyReferencesDependsOn>
+    <ProjectLockFile Condition="'$(ProjectLockFile)' == ''">project.lock.json</ProjectLockFile>
+  </PropertyGroup>
 
   <Target Name="ResolveNuGetPackageAssets" Condition="Exists('$(ProjectLockFile)') and '$(OsEnvironment)'!='Windows_NT'">
-    <ResolveNuGetPackageAssets AllowFallbackOnRuntimeIdentifier="$(DesignTimeBuild)"
-                               BaseRuntimeIdentifier="$(RuntimeSystem)"
-                               Architecture="$(PlatformTarget)"
+    <PropertyGroup>
+      <_ExplicitReference/>
+    </PropertyGroup>
+    <PrereleaseResolveNuGetPackageAssets Condition="'$(ProjectLockFile)' != ''"
+                               AllowFallbackOnTargetSelection="false"
+                               IncludeFrameworkReferences="true"
                                ProjectLanguage="$(Language)"
                                ProjectLockFile="$(ProjectLockFile)"
-                               TargetFrameworkMoniker="$(NuGetTargetMoniker)"
-                               TargetPlatformMoniker="$(NuGetTargetMoniker)">
+                               TargetMonikers="$(NuGetTargetMoniker)"
+                               OmitTransitiveCompileReferences="false">
 
       <Output TaskParameter="ResolvedAnalyzers" ItemName="Analyzer" />
       <Output TaskParameter="ResolvedCopyLocalItems" ItemName="ReferenceCopyLocalPaths" />
       <Output TaskParameter="ResolvedReferences" ItemName="Reference" />
-    </ResolveNuGetPackageAssets>
+    </PrereleaseResolveNuGetPackageAssets>
   </Target>
 </Project>

@@ -1051,6 +1051,14 @@
           "lib/DNXCore50/System.Runtime.InteropServices.dll": {}
         }
       },
+      "System.Runtime.InteropServices.RuntimeInformation/4.0.0-beta-23406": {
+        "dependencies": {
+          "System.Runtime": "[4.0.0, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
+        }
+      },
       "System.Runtime.Numerics/4.0.1-beta-23225": {
         "dependencies": {
           "System.Globalization": "[4.0.10, )",
@@ -3154,6 +3162,26 @@
         "ref/xamarinmac20/_._",
         "runtimes/win8-aot/lib/netcore50/System.Runtime.InteropServices.dll",
         "System.Runtime.InteropServices.nuspec"
+      ]
+    },
+    "System.Runtime.InteropServices.RuntimeInformation/4.0.0-beta-23406": {
+      "sha512": "906Er2r3yfQPl/afl+8Ht7Xt8ohlNoMrNkYtwYIrQuPm+NtlFKb2A1mXIdf7SY5M9SiUEAh6zhgXP0768dLAlA==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "package/services/metadata/core-properties/6886437c1b65458bbba0661c2516c2f8.psmdcp",
+        "ref/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "runtime.json",
+        "System.Runtime.InteropServices.RuntimeInformation.nuspec"
       ]
     },
     "System.Runtime.Numerics/4.0.1-beta-23225": {

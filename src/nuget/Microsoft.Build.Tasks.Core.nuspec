@@ -36,7 +36,7 @@
         <dependency id="System.Diagnostics.TraceSource" version="4.0.0-beta-23225" />
         <dependency id="System.Globalization" version="4.0.11-beta-23406" />
         <dependency id="System.IO" version="4.0.11-beta-23406" />
-        <dependency id="System.IO.FileSystem" version="4.0.1-beta-23225" />
+        <dependency id="System.IO.FileSystem" version="4.0.1-beta-23406" />
         <dependency id="System.IO.FileSystem.Primitives" version="4.0.1-beta-23225" />
         <dependency id="System.Linq" version="4.0.1-beta-23225" />
         <dependency id="System.ObjectModel" version="4.0.11-beta-23406" />
@@ -49,7 +49,7 @@
         <dependency id="System.Runtime.Handles" version="4.0.1-beta-23406" />
         <dependency id="System.Runtime.InteropServices" version="4.0.21-beta-23406" />
         <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.0.0-beta-23406" />
-        <dependency id="System.Security.Cryptography.X509Certificates" version="4.0.0-beta-23225" />
+        <dependency id="System.Security.Cryptography.X509Certificates" version="4.0.0-beta-23406" />
         <dependency id="System.Text.Encoding" version="4.0.11-beta-23406" />
         <dependency id="System.Text.Encoding.Extensions" version="4.0.11-beta-23406" />
         <dependency id="System.Text.RegularExpressions" version="4.0.11-beta-23225" />

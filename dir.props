@@ -22,18 +22,17 @@
 
    <!-- Common repo directories -->
   <PropertyGroup>
-    <BuildToolsVersion>1.0.25-prerelease-00098</BuildToolsVersion>
+    <BuildToolsVersion>1.0.25-prerelease-00115</BuildToolsVersion>
     <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <SourceDir>$(RepoRoot)src$([System.IO.Path]::DirectorySeparatorChar)</SourceDir>
     <SamplesDir>$(RepoRoot)Samples$([System.IO.Path]::DirectorySeparatorChar)</SamplesDir>
-    <NugetIntegrationVersion>3.1.0-beta-001</NugetIntegrationVersion>
     <DnxDir Condition="'$(OsEnvironment)'=='Windows_NT'">dnx-coreclr-win-x86</DnxDir>
-    <DnxVersion Condition="'$(OsEnvironment)'=='Windows_NT'">1.0.0-beta6-12032</DnxVersion>
-    <DnxDir Condition="'$(OsEnvironment)'=='Unix'">dnx-mono</DnxDir>
-    <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-beta5-12101</DnxVersion>
+    <DnxVersion Condition="'$(OsEnvironment)'=='Windows_NT'">1.0.0-beta8</DnxVersion>
+    <DnxDir Condition="'$(OsEnvironment)'=='Unix'">dnx-coreclr-linux-x64</DnxDir>
+    <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-beta8</DnxVersion>
 
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
@@ -54,7 +53,6 @@
     <ToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion),"lib"))$([System.IO.Path]::DirectorySeparatorChar)</ToolsDir>
     <CompilerToolsDir>$([System.IO.Path]::Combine($(PackagesDir)Microsoft.Net.Compilers.$(CompilerToolsVersion),"tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
     <NuSpecReferenceGeneratorDir>$([System.IO.Path]::Combine($(PackagesDir)NuSpec.ReferenceGenerator.$(NuSpecReferenceGeneratorVersion),"build", "dotnet"))$([System.IO.Path]::DirectorySeparatorChar)</NuSpecReferenceGeneratorDir>
-    <NugetIntegrationDir>$([System.IO.Path]::Combine($(PackagesDir)NuGet.MsBuild.Integration.$(NugetIntegrationVersion),"build"))$([System.IO.Path]::DirectorySeparatorChar)</NugetIntegrationDir>
 
     <BootstrapDestination>$(BinDir)Bootstrap$([System.IO.Path]::DirectorySeparatorChar)</BootstrapDestination>
   </PropertyGroup>
@@ -176,6 +174,7 @@
 
   <PropertyGroup>
     <PlatformTarget>$(RuntimeArchitecture)</PlatformTarget>
+    <ImportGetNuGetPackageVersions Condition="'$(OS)' != 'Windows_NT'">false</ImportGetNuGetPackageVersions>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
@@ -321,7 +320,4 @@
     <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
     <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
   </PropertyGroup>
-
-
-  <Import Condition="'$(IsTraversalBuild)'!='true' and '$(NetCoreBuild)' != 'true' and Exists('$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props')" Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props"/>
 </Project>
