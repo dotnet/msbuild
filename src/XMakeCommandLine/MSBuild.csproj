@@ -170,6 +170,7 @@
     <Compile Include="CommandLineSwitchException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" />
     <Compile Include="DistributedLoggerRecord.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

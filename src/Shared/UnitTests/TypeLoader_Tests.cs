@@ -1,17 +1,25 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if FEATURE_ASSEMBLY_LOCATION
+
 using System;
 using System.Collections;
+using System.IO;
 using Microsoft.Build.Shared;
 using System.Reflection;
 using Xunit;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Framework;
+using Microsoft.Build.SharedUtilities;
 
 namespace Microsoft.Build.UnitTests
 {
     public class TypeLoader_Tests
     {
+        private static readonly string ProjectFilePath = Path.Combine(FileUtilities.CurrentExecutableDirectory, "portableTaskTest.proj");
+        private static readonly string DLLFileName = "PortableTask.dll";
+        private static readonly string OriginalDllPath = Path.Combine(FileUtilities.CurrentExecutableDirectory, DLLFileName);
+
         [Fact]
         public void Basic()
         {
@@ -38,8 +46,137 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.True(TypeLoader.IsPartialTypeNameMatch("Csc", "Microsoft.Build.Tasks.Csc"));
         }
+        
 
+        [Fact]
+        public void LoadNonExistingAssembly()
+        {
+            string dllName = "NonExistent.dll";
 
+            bool successfulExit;
+            string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag /p:AssemblyPath=" + dllName, out successfulExit);
+            Assert.False(successfulExit);
+
+            string dllPath = Path.Combine(FileUtilities.CurrentExecutableDirectory, dllName);
+            CheckIfCorrectAssemblyLoaded(output, dllPath, false);
+        }
+
+        [Fact]
+        public void LoadInsideAsssembly()
+        {
+            bool successfulExit;
+            string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag", out successfulExit);
+            Assert.True(successfulExit);
+
+            CheckIfCorrectAssemblyLoaded(output, OriginalDllPath);
+        }
+
+        [Fact]
+        public void LoadOutsideAssembly()
+        {
+            string movedDLLPath = MoveOrCopyDllToTempDir(copy : false);
+
+            try
+            {
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag /p:AssemblyPath=" + movedDLLPath, out successfulExit);
+                Assert.True(successfulExit);
+
+                CheckIfCorrectAssemblyLoaded(output, movedDLLPath);
+            }
+            finally
+            {
+                UndoDLLOperations(movedDLLPath, moveBack : true);
+            }
+        }
+
+        [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/325")]
+        public void LoadInsideAssemblyWhenGivenOutsideAssemblyWithSameName()
+        {
+            string copiedDllPath = MoveOrCopyDllToTempDir(copy : true);
+
+            try
+            {
+                bool successfulExit;
+                string output = RunnerUtilities.ExecMSBuild(ProjectFilePath + " /v:diag /p:AssemblyPath=" + copiedDllPath, out successfulExit);
+                Assert.True(successfulExit);
+
+                CheckIfCorrectAssemblyLoaded(output, OriginalDllPath);
+            }
+            finally
+            {
+                UndoDLLOperations(copiedDllPath, moveBack : false);
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="copy"></param>
+        /// <returns>Path to new DLL</returns>
+        private string MoveOrCopyDllToTempDir(bool copy)
+        {
+            var temporaryDirectory = FileUtilities.GetTemporaryDirectory();
+            var newDllPath = Path.Combine(temporaryDirectory, DLLFileName);
+
+            Assert.True(File.Exists(OriginalDllPath));
+
+            if (copy)
+            {
+                File.Copy(OriginalDllPath, newDllPath);
+
+                Assert.True(File.Exists(newDllPath));
+            }
+            else
+            {
+                File.Move(OriginalDllPath, newDllPath);
+
+                Assert.True(File.Exists(newDllPath));
+                Assert.False(File.Exists(OriginalDllPath));
+            }
+            return newDllPath;
+        }
+
+        /// <summary>
+        /// Move / Delete newDllPath and delete temp directory
+        /// </summary>
+        /// <param name="newDllPath"></param>
+        /// <param name="moveBack">If true, move newDllPath back to bin. If false, delete it</param>
+        private void UndoDLLOperations(string newDllPath, bool moveBack)
+        {
+            var tempDirectoryPath = Path.GetDirectoryName(newDllPath);
+
+            if (moveBack)
+            {
+                File.Move(newDllPath, OriginalDllPath);
+            }
+            else
+            {
+                File.Delete(newDllPath);
+            }
+
+            Assert.True(File.Exists(OriginalDllPath));
+            Assert.False(File.Exists(newDllPath));
+            Assert.Empty(Directory.EnumerateFiles(tempDirectoryPath));
+
+            Directory.Delete(tempDirectoryPath);
+            Assert.False(Directory.Exists(tempDirectoryPath));
+        }
+
+        private void CheckIfCorrectAssemblyLoaded(string scriptOutput, string expectedAssemblyPath, bool expectedSuccess = true)
+        {
+            var successfulMessage = @"Using ""ShowItems"" task from assembly """ + expectedAssemblyPath + @""".";
+
+            if (expectedSuccess)
+            {
+                Assert.Contains(successfulMessage, scriptOutput, StringComparison.OrdinalIgnoreCase);
+            }
+            else
+            {
+                Assert.DoesNotContain(successfulMessage, scriptOutput, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+#if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
         /// Make sure that when we load multiple types out of the same assembly with different typefilters that both the fullyqualified name matching and the 
         /// partial name matching still work.
@@ -147,6 +284,7 @@ namespace Microsoft.Build.UnitTests
                 !type.IsAbstract &&
                 (type.GetInterface("IForwardingLogger") != null));
         }
+#endif
     }
 }
-#endif
+

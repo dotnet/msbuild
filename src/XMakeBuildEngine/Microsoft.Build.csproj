@@ -662,6 +662,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
+    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" />
     <Compile Include="..\Shared\TypeLoader.cs">
       <Link>SharedUtilities\TypeLoader.cs</Link>
     </Compile>

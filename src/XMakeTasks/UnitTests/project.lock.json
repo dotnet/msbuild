@@ -165,6 +165,16 @@
           "lib/net45/_._": {}
         }
       },
+      "System.Runtime.Loader/4.0.0-beta-23428": {
+        "dependencies": {
+          "System.IO": "[4.0.0, )",
+          "System.Reflection": "[4.0.0, )",
+          "System.Runtime": "[4.0.0, )"
+        },
+        "compile": {
+          "ref/dotnet5.1/System.Runtime.Loader.dll": {}
+        }
+      },
       "System.Text.Encoding/4.0.0": {
         "compile": {
           "ref/net45/_._": {}
@@ -439,6 +449,16 @@
         },
         "compile": {
           "ref/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
+        }
+      },
+      "System.Runtime.Loader/4.0.0-beta-23428": {
+        "dependencies": {
+          "System.IO": "[4.0.0, )",
+          "System.Reflection": "[4.0.0, )",
+          "System.Runtime": "[4.0.0, )"
+        },
+        "compile": {
+          "ref/dotnet5.1/System.Runtime.Loader.dll": {}
         }
       },
       "System.Text.Encoding/4.0.0": {
@@ -1579,6 +1599,19 @@
         },
         "compile": {
           "ref/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
+        }
+      },
+      "System.Runtime.Loader/4.0.0-beta-23428": {
+        "dependencies": {
+          "System.IO": "[4.0.0, )",
+          "System.Reflection": "[4.0.0, )",
+          "System.Runtime": "[4.0.0, )"
+        },
+        "compile": {
+          "ref/dotnet5.1/System.Runtime.Loader.dll": {}
+        },
+        "runtime": {
+          "lib/DNXCore50/System.Runtime.Loader.dll": {}
         }
       },
       "System.Runtime.Numerics/4.0.1-beta-23225": {
@@ -4512,6 +4545,28 @@
         "ref/xamarinmac20/_._",
         "runtime.json",
         "System.Runtime.InteropServices.RuntimeInformation.nuspec"
+      ]
+    },
+    "System.Runtime.Loader/4.0.0-beta-23428": {
+      "sha512": "X4ukAHBzWGqURur1ya7jfWIS/e/2BCHN93XVnCnHZVBqYay1AKR5f/+ms6lbHGtmBA/D4lJHAcL5F8T39nw4FQ==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/DNXCore50/System.Runtime.Loader.dll",
+        "package/services/metadata/core-properties/de0c935aea5d40a2ab2fa33fa0286e6a.psmdcp",
+        "ref/dotnet5.1/de/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/es/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/fr/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/it/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/ja/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/ko/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/ru/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/System.Runtime.Loader.dll",
+        "ref/dotnet5.1/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/zh-hans/System.Runtime.Loader.xml",
+        "ref/dotnet5.1/zh-hant/System.Runtime.Loader.xml",
+        "System.Runtime.Loader.nuspec"
       ]
     },
     "System.Runtime.Numerics/4.0.1-beta-23225": {

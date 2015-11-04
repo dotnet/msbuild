@@ -5,14 +5,13 @@
 // <summary>Determines if a type is in a given assembly and loads that type.</summary>
 //-----------------------------------------------------------------------
 
+
 using System;
-using System.IO;
-using System.Reflection;
-using System.Collections;
-using System.Globalization;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Collections.Concurrent;
+using System.IO;
+using System.Reflection;
 
 namespace Microsoft.Build.Shared
 {
@@ -41,6 +40,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly Object s_reflectionOnlyloadInfoToTypeLock = new Object();
 
+#if !FEATURE_ASSEMBLY_LOADFROM
+        /// <summary>
+        /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
+        /// </summary>
+        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader;
+#endif
+
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given typeFilter.
         /// </summary>
@@ -55,6 +61,13 @@ namespace Microsoft.Build.Shared
         /// Typefilter for this typeloader
         /// </summary>
         private TypeFilter _isDesiredType;
+
+#if !FEATURE_ASSEMBLY_LOADFROM
+        static TypeLoader()
+        {
+            s_coreClrAssemblyLoader = CoreClrAssemblyLoader.CreateAndSetDefault();
+        }
+#endif
 
         /// <summary>
         /// Constructor.
@@ -145,6 +158,60 @@ namespace Microsoft.Build.Shared
             }
 
             return isPartialMatch;
+        }
+
+        /// <summary>
+        /// Load an assembly given its AssemblyLoadInfo
+        /// </summary>
+        /// <param name="assemblyLoadInfo"></param>
+        /// <returns></returns>
+        private static Assembly LoadAssembly(AssemblyLoadInfo assemblyLoadInfo)
+        {
+            Assembly loadedAssembly = null;
+
+            try
+            {
+                if (assemblyLoadInfo.AssemblyName != null)
+                {
+#if FEATURE_ASSEMBLY_LOADFROM
+                    loadedAssembly = Assembly.Load(assemblyLoadInfo.AssemblyName);
+#else
+                    loadedAssembly = Assembly.Load(new AssemblyName(assemblyLoadInfo.AssemblyName));
+#endif
+                }
+                else
+                {
+#if FEATURE_ASSEMBLY_LOADFROM
+                    loadedAssembly = Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
+#else
+                    // If the Assembly is provided via a file path, the following rules are used to load the assembly:
+                    // - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded, indifferent of the user specified path
+                    // - otherwise, the assembly from the user specified path is loaded, if it exists.
+                     
+                    var assemblyNameInExecutableDirectory = Path.Combine(FileUtilities.CurrentExecutableDirectory,
+                        Path.GetFileName(assemblyLoadInfo.AssemblyFile));
+
+                    if (File.Exists(assemblyNameInExecutableDirectory))
+                    {
+                        var simpleName = Path.GetFileNameWithoutExtension(assemblyLoadInfo.AssemblyFile);
+                        loadedAssembly = Assembly.Load(new AssemblyName(simpleName));
+                    }
+                    else
+                    {
+                        loadedAssembly = s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
+                    }
+#endif
+                }
+            }
+            catch (ArgumentException e)
+            {
+                // Assembly.Load() and Assembly.LoadFrom() will throw an ArgumentException if the assembly name is invalid
+                // convert to a FileNotFoundException because it's more meaningful
+                // NOTE: don't use ErrorUtilities.VerifyThrowFileExists() here because that will hit the disk again
+                throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation, e);
+            }
+
+            return loadedAssembly;
         }
 
         /// <summary>
@@ -359,33 +426,7 @@ namespace Microsoft.Build.Shared
             private void ScanAssemblyForPublicTypes()
             {
                 // we need to search the assembly for the type...
-                try
-                {
-                    if (_assemblyLoadInfo.AssemblyName != null)
-                    {
-#if FEATURE_ASSEMBLY_LOADFROM
-                        _loadedAssembly = Assembly.Load(_assemblyLoadInfo.AssemblyName);
-#else
-                        _loadedAssembly = Assembly.Load(new AssemblyName(_assemblyLoadInfo.AssemblyName));
-#endif
-                    }
-                    else
-                    {
-#if FEATURE_ASSEMBLY_LOADFROM
-                        _loadedAssembly = Assembly.UnsafeLoadFrom(_assemblyLoadInfo.AssemblyFile);
-#else
-                        string simpleName = Path.GetFileNameWithoutExtension(_assemblyLoadInfo.AssemblyFile);
-                        _loadedAssembly = Assembly.Load(new AssemblyName(simpleName));
-#endif
-                    }
-                }
-                catch (ArgumentException e)
-                {
-                    // Assembly.Load() and Assembly.LoadFrom() will throw an ArgumentException if the assembly name is invalid
-                    // convert to a FileNotFoundException because it's more meaningful
-                    // NOTE: don't use ErrorUtilities.VerifyThrowFileExists() here because that will hit the disk again
-                    throw new FileNotFoundException(null, _assemblyLoadInfo.AssemblyLocation, e);
-                }
+                _loadedAssembly = LoadAssembly(_assemblyLoadInfo);
 
                 // only look at public types
                 Type[] allPublicTypesInAssembly = _loadedAssembly.GetExportedTypes();
