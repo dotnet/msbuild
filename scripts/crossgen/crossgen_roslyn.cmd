@@ -6,7 +6,7 @@ set BIN_DIR=%CD%
 popd
 
 REM Replace with a robust method for finding the right crossgen.exe
-set CROSSGEN_UTIL=%UserProfile%\.dnx\packages\runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\1.0.1-beta-23428\tools\crossgen.exe
+set CROSSGEN_UTIL=%UserProfile%\.dnx\packages\runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\1.0.1-beta-23504\tools\crossgen.exe
 
 REM Crossgen currently requires itself to be next to mscorlib
 copy %CROSSGEN_UTIL% /Y %BIN_DIR% > nul

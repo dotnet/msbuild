@@ -5,12 +5,12 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "Microsoft.NETCore.Runtime": "1.0.1-beta-23502",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23504",
 
-        "System.Console": "4.0.0-beta-23502",
-        "System.Collections": "4.0.11-beta-23502",
-        "System.Linq": "4.0.1-beta-23502",
-        "System.Diagnostics.Process": "4.1.0-beta-23502",
+        "System.Console": "4.0.0-beta-23504",
+        "System.Collections": "4.0.11-beta-23504",
+        "System.Linq": "4.0.1-beta-23504",
+        "System.Diagnostics.Process": "4.1.0-beta-23504",
         "Microsoft.DotNet.Cli.Utils": {
             "type": "build",
             "version": "1.0.0-*"
