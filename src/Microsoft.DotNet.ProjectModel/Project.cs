@@ -17,9 +17,9 @@ namespace Microsoft.Extensions.ProjectModel
 
         // REVIEW: It's kinda hacky making these internal but the reader needs to set them
         internal Dictionary<NuGetFramework, TargetFrameworkInformation> _targetFrameworks = new Dictionary<NuGetFramework, TargetFrameworkInformation>();
-        internal Dictionary<string, CompilerOptions> _compilerOptionsByConfiguration = new Dictionary<string, CompilerOptions>(StringComparer.OrdinalIgnoreCase);
+        internal Dictionary<string, CommonCompilerOptions> _compilerOptionsByConfiguration = new Dictionary<string, CommonCompilerOptions>(StringComparer.OrdinalIgnoreCase);
 
-        internal CompilerOptions _defaultCompilerOptions;
+        internal CommonCompilerOptions _defaultCompilerOptions;
         internal TargetFrameworkInformation _defaultTargetFrameworkConfiguration;
 
         public Project()
@@ -92,7 +92,7 @@ namespace Microsoft.Extensions.ProjectModel
             return _compilerOptionsByConfiguration.Keys;
         }
 
-        public CompilerOptions GetCompilerOptions(NuGetFramework targetFramework,
+        public CommonCompilerOptions GetCompilerOptions(NuGetFramework targetFramework,
                                                    string configurationName)
         {
             // Get all project options and combine them
@@ -101,7 +101,7 @@ namespace Microsoft.Extensions.ProjectModel
             var targetFrameworkOptions = targetFramework != null ? GetCompilerOptions(targetFramework) : null;
 
             // Combine all of the options
-            return CompilerOptions.Combine(rootOptions, configurationOptions, targetFrameworkOptions);
+            return CommonCompilerOptions.Combine(rootOptions, configurationOptions, targetFrameworkOptions);
         }
 
         public TargetFrameworkInformation GetTargetFramework(NuGetFramework targetFramework)
@@ -115,14 +115,14 @@ namespace Microsoft.Extensions.ProjectModel
             return targetFrameworkInfo ?? _defaultTargetFrameworkConfiguration;
         }
 
-        private CompilerOptions GetCompilerOptions()
+        private CommonCompilerOptions GetCompilerOptions()
         {
             return _defaultCompilerOptions;
         }
 
-        private CompilerOptions GetCompilerOptions(string configurationName)
+        private CommonCompilerOptions GetCompilerOptions(string configurationName)
         {
-            CompilerOptions options;
+            CommonCompilerOptions options;
             if (_compilerOptionsByConfiguration.TryGetValue(configurationName, out options))
             {
                 return options;
@@ -131,7 +131,7 @@ namespace Microsoft.Extensions.ProjectModel
             return null;
         }
 
-        private CompilerOptions GetCompilerOptions(NuGetFramework frameworkName)
+        private CommonCompilerOptions GetCompilerOptions(NuGetFramework frameworkName)
         {
             return GetTargetFramework(frameworkName)?.CompilerOptions;
         }

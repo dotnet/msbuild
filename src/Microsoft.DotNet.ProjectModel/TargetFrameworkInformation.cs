@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.ProjectModel
 
         public IReadOnlyList<LibraryRange> Dependencies { get; set; }
 
-        public CompilerOptions CompilerOptions { get; set; }
+        public CommonCompilerOptions CompilerOptions { get; set; }
 
         public int Line { get; set; }
 
