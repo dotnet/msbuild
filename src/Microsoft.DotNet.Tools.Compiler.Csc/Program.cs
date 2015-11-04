@@ -62,14 +62,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
             if (outputName != null)
             {
-                allArgs.Add($"-out:{outputName}");
+                allArgs.Add($"-out:\"{outputName}\"");
             }
 
-            allArgs.AddRange(references.Select(r => $"-r:{r}"));
+            allArgs.AddRange(references.Select(r => $"-r:\"{r}\""));
             allArgs.AddRange(resources.Select(resource => $"-resource:{resource}"));
-            allArgs.AddRange(sources);
+            allArgs.AddRange(sources.Select(s => $"\"{s}\""));
 
-            var rsp = Path.Combine(tempOutDir.Trim('"'), "dotnet-compile-csc.rsp");
+            var rsp = Path.Combine(tempOutDir, "dotnet-compile-csc.rsp");
 
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
 

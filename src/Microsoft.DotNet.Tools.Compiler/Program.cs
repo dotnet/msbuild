@@ -173,8 +173,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Assemble args
             var compilerArgs = new List<string>()
             {
-                $"--temp-output:\"{intermediateOutputPath}\"",
-                $"--out:\"{outputName}\""
+                $"--temp-output:{intermediateOutputPath}",
+                $"--out:{outputName}"
             };
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
@@ -190,19 +190,19 @@ namespace Microsoft.DotNet.Tools.Compiler
                     if (projectDependency.Project.Files.SourceFiles.Any())
                     {
                         var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
-                        compilerArgs.Add($"-r:\"{projectOutputPath}\"");
+                        compilerArgs.Add($"-r:{projectOutputPath}");
                     }
                 }
                 else
                 {
-                    compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:\"{r.ResolvedPath}\""));
+                    compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:{r.ResolvedPath}"));
                 }
-                compilerArgs.AddRange(dependency.SourceReferences.Select(s => $"\"{s}\""));
+                compilerArgs.AddRange(dependency.SourceReferences);
             }
 
             // Add project source files
             var sourceFiles = context.ProjectFile.Files.SourceFiles;
-            compilerArgs.AddRange(sourceFiles.Select(s => $"\"{s}\""));
+            compilerArgs.AddRange(sourceFiles);
 
             if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
             {
