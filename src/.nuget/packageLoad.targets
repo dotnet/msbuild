@@ -25,6 +25,8 @@
 
   <!-- These properties are related to NuGet -->
   <PropertyGroup>
+    <PackagesCache Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(USERPROFILE), '.nuget', 'packages'))</PackagesCache>
+    <PackagesCache Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(HOME), '.nuget', 'packages'))</PackagesCache>
     <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$([System.IO.Path]::Combine($(NuGetDir), "NuGet.exe"))</NuGetToolPath>
     <NuGetConfigFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"NuGet.Config"))</NuGetConfigFile>
     <NuGetPackagesFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.config"))</NuGetPackagesFile>
@@ -32,11 +34,14 @@
     <NuGetProjectJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.json"))</NuGetProjectJsonFile>
     <NuGetProjectLockJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.lock.json"))</NuGetProjectLockJsonFile>
     <NuGetCommonOptions>-Verbosity detailed</NuGetCommonOptions>
-    <NuGetPackageInstallOptions>-OutputDirectory &quot;$(NuGetDir.TrimEnd('\').TrimEnd('\'))&quot;</NuGetPackageInstallOptions>
+    <NuGetPackageInstallOptions>-OutputDirectory &quot;$(NuGetDir.TrimEnd('\').TrimEnd('\'))&quot; -ConfigFile &quot;$(RepoRoot)/NuGet.Config&quot;</NuGetPackageInstallOptions>
+    <NuGetPackageRestoreOptions>-ConfigFile &quot;$(RepoRoot)/NuGet.Config&quot;</NuGetPackageRestoreOptions>
+    <!-- UNDO: When fixed https://github.com/NuGet/Home/issues/1517 -->
+    <NuGetPackageRestoreOptions Condition="'$(OsEnvironment)'!='Windows_NT'">$(NuGetPackageRestoreOptions) -PackagesDirectory "$(PackagesCache)"</NuGetPackageRestoreOptions>
     <NuGetRestoreCommand>$(NuGetToolPath) restore $(NuGetCommonOptions)</NuGetRestoreCommand>
     <NuGetInstallCommand>$(NuGetToolPath) install $(NuGetCommonOptions)</NuGetInstallCommand>
     <SolutionSemaphore>$(NuGetDir)Solution.semaphore</SolutionSemaphore>
-    <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/v3.2.0/nuget.exe</NugetDownloadURL>
+    <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/v3.2.1-rc/nuget.exe</NugetDownloadURL>
     <DownloadCommand Condition="'$(OsEnvironment)'=='Windows_NT'">powershell -noprofile -nologo -command "(new-object System.Net.WebClient).DownloadFile('$(NugetDownloadURL)', '$(NuGetToolPath)')"</DownloadCommand>
     <DownloadCommand Condition="'$(OsEnvironment)'!='Windows_NT'">curl -sSL --create-dirs -o $(NuGetToolPath) $(NugetDownloadURL)</DownloadCommand>
     <BuildToolsSemaphore>$(NuGetDir)BuildTools.semaphore</BuildToolsSemaphore>
@@ -44,23 +49,23 @@
 
   <!-- These are properties for the dnu -->
   <PropertyGroup>
-    <PackagesCache Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(USERPROFILE), '.nuget', 'packages'))</PackagesCache>
-    <PackagesCache Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(HOME), '.nuget', 'packages'))</PackagesCache>
     <SetDnxPackages Condition="'$(OsEnvironment)'=='Windows_NT'">set DNX_PACKAGES=$(PackagesCache) &amp;</SetDnxPackages>
     <SetDnxPackages Condition="'$(OsEnvironment)'!='Windows_NT'">export DNX_PACKAGES=$(PackagesCache) ;</SetDnxPackages>
-    <DnuRestoreCommand>$(SetDnxPackages) $(DnuToolPath) restore</DnuRestoreCommand>
+    <DnuRestoreCommand>$(SetDnxPackages) $(DnuToolPath) restore  --parallel </DnuRestoreCommand>
   </PropertyGroup>
 
   <ItemGroup>
      <ProjectJsonFile Include="$(SolutionRoot)**\project.json" Exclude="$(NuGetConfigDir)\project.json" />
+     <!--
      <ProjectJsonFile Include="$(SolutionRoot)**\project.json" />
+     -->
   </ItemGroup>
 
   <!-- Restore NuGet.exe and use it to process Nuget.config. -->
-  <Target Name="_RestoreBuildToolsNugetConfig"
-          Inputs="$(GlobalPropertiesFile);$(NuGetPackagesFile)"
+  <Target Name="_RestoreBuildToolsPackagesConfig"
+          Inputs="$(GlobalPropertiesFile);$(NuGetPackagesFile);$(NuGetPackagesFileTargetSpecific)"
           Outputs="$(BuildToolsSemaphore);$(NuGetToolPath)"
-          Condition="Exists('$(NuGetPackagesFile)')">
+          Condition="Exists('$(NuGetPackagesFile)') or Exists('$(NuGetPackagesFileTargetSpecific)')">
     <Message Importance="High" Text="Restoring build tools..." />
 
     <MakeDir Directories="$(NuGetDir)"
@@ -77,31 +82,8 @@
 
   </Target>
 
-  <Target Name="_RestoreGlobalProjectJsonReferences"
-          Inputs="$(NuGetProjectJsonFile);$(NuGetProjectLockJsonFile);$(GlobalPropertiesFile)"
-          Outputs="$(NuGetProjectLockJsonFile);$(BuildToolsSemaphore)"
-  >
-
-    <!-- Properties to restore the test host -->
-    <PropertyGroup>
-      <TestHostVersion>1.0.0-beta-23318</TestHostVersion>
-      <TestHostRuntime>Ubuntu.14.04-x64</TestHostRuntime>
-      <HostRuntimeDir>$(PackagesDir)/runtime.$(TestHostRuntime).Microsoft.NETCore.TestHost/$(TestHostVersion)/runtimes/$(TestHostRuntime)/native/CoreRun</HostRuntimeDir>
-    </PropertyGroup>
-    
-    <!-- Restore tools -->
-    <Exec Condition="Exists($(DnuRestoreCommand))"
-          Command="$(DnuRestoreCommand) &quot;$(NuGetConfigDir)&quot; --packages &quot;$(PackagesDir.TrimEnd('\').TrimEnd('\'))&quot; --quiet" />
-    
-    <!-- Copy the the runner app to the binary directory -->
-    <Copy Condition="'$(TargetPlatformIdentifier)'=='Unix' and Exists('$(HostRuntimeDir)')" SourceFiles="$(HostRuntimeDir)" DestinationFiles="$(OutputPath)/CoreRun" SkipUnchangedFiles="true" />
-
-  </Target>
-
-  <!--
-    All work is done in the dependent targets
-  -->
-  <Target Name="_RestoreGlobalReferences" DependsOnTargets="_RestoreBuildToolsNugetConfig; _RestoreGlobalProjectJsonReferences">
+  <!-- All work is done in the dependent targets -->
+  <Target Name="_RestoreGlobalReferences" DependsOnTargets="_RestoreBuildToolsPackagesConfig">
     <!--
       Touch our semaphore file to ensure Inputs/Outputs comparison for this target will show that we're up to date.
       Ignore failures in the unlikely, but possible, event that we hit this from two projects simultaneously.
@@ -113,13 +95,24 @@
 
   </Target>
 
+  <!-- Make all files readable and everything, except *.dll, *.xml, and *.nupkg, executable -->
+  <Target Name="_UpdateExecPermissions"
+          AfterTargets="_RestoreGlobalReferences"
+          BeforeTargets="_RestoreDnuProjectJsonReferences"
+          Condition="'$(OsEnvironment)'!='Windows_NT'">
+
+    <Exec Command="find &quot;$(DnuToolDir)&quot; -type f -a -name &quot;*&quot; -a \! -iname &quot;*.dll&quot; -a \! -iname &quot;*.xml&quot; -a \! -iname &quot;*.nupkg&quot; -a \! -iname &quot;*.so&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
+
+  </Target>
+
+
   <!-- Restore everything based on a solution file -->
   <Target Name="_RestoreSolution"
           Inputs="$(SolutionFile)"
           Outputs="$(SolutionSemaphore)"
           Condition="'$(SolutionFile)'!='' and Exists('$(SolutionFile)')" 
   >
-    <Exec Command="$(NugetRestoreCommand)  $(NuGetPackageInstallOptions) &quot;$(SolutionFile)&quot;" StandardOutputImportance="Low" />
+    <Exec Command="$(NugetRestoreCommand)  $(NuGetPackageRestoreOptions) &quot;$(SolutionFile)&quot;" StandardOutputImportance="Low" />
 
     <!--
       Touch our semaphore file to ensure Inputs/Outputs comparison for this target will show that we're up to date.
@@ -143,7 +136,10 @@
     <Message Importance="High" Text="Restoring in $(ProjectDirectory)" />
 
     <!-- Restore packages for this directory -->
-    <Exec Command="$(DnuRestoreCommand) &quot;$(ProjectDirectory.TrimEnd('\').TrimEnd('\'))&quot; --quiet" />
+    <!--
+    <Exec Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) -PackagesDirectory &quot;$(HOME)/.nuget/packages&quot; &quot;@(ProjectJsonFile)&quot;" />
+    -->
+    <Exec Command="$(DnuRestoreCommand) &quot;@(ProjectJsonFile)&quot;" />
   </Target>
 
   <!--

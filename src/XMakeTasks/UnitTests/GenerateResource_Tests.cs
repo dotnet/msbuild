@@ -2853,7 +2853,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                     + "/publicClass "
                     + "/r:baz "
                     + "/r:jazz " + possiblyQuotedResxFile + " "
-                    + possiblyQuotedResourcesFile + " " +"/str:\"C#\",,,");
+                    + possiblyQuotedResourcesFile + " " + "/str:\"C#\",,,");
             }
             finally
             {
