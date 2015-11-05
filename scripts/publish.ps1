@@ -35,14 +35,68 @@ function CheckRequiredVariables
 
     return $true
 }
- 
-$Result = CheckRequiredVariables
 
+function UploadFile($Upload_URI, $Uploadfile)
+{
+    Write-Host "Uploading $Uploadfile to dotnet feed to.."
 
-if(!$Result)
+    $statusCode = (Invoke-WebRequest -URI "$Upload_URI" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $Uploadfile).StatusCode 
+
+    if($statusCode -eq 201)
+    {
+        Write-Host "Successfully uploaded $Uploadfile to dotnet feed."
+        return $true
+    }
+    else
+    {
+        Write-Host "Failed to upload $Uploadfile to dotnet feed."
+        return $false
+    }
+}
+
+function UploadBinaries($zipFile)
+{
+    $result = -1
+    $fileName = [System.IO.Path]::GetFileName($zipFile)
+    $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Binaries/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN"
+
+    if(UploadFile $Upload_URI $zipFile)
+    {
+        # update the index file too
+        $indexContent = "Binaries/$env:DOTNET_BUILD_VERSION/$fileName"
+        $indexFile = "$env:TEMP\latest.win.index"
+        $indexContent | Out-File -FilePath $indexFile
+
+        # upload the index file
+        $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/dnvm/latest.win.index$env:SASTOKEN"
+
+        if(UploadFile $Upload_URI $indexFile)
+        {
+            $result = 0
+        }
+    }
+
+    return $result
+}
+
+function UploadInstallers($msiFile)
+{
+    $result = -1
+    $fileName = [System.IO.Path]::GetFileName($msiFile)
+    $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Installers/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN"
+
+    if(UploadFile $Upload_URI $msiFile)
+    {
+        $result = 0
+    }
+
+    return $result
+}
+
+if(!(CheckRequiredVariables))
 {
     # fail silently if the required variables are not available for publishing the file
-    exit 0
+   exit 0
 }
 
 if(![System.IO.File]::Exists($file))
@@ -50,33 +104,15 @@ if(![System.IO.File]::Exists($file))
     throw "$file not found"
 }
 
-$fileName = [System.IO.Path]::GetFileName($file)
+$result = $false
 
 if([System.IO.Path]::GetExtension($file).ToLower() -eq ".zip")
 {
-    $Folder = "Binaries"
+    $result = UploadBinaries $file
 }
 elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".msi")
 {
-    $Folder = "Installers"
+    $result = UploadInstallers $file
 }
 
-
-Write-Host "Uploading $fileName to dotnet feed.."
-
-$Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/$Folder/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN"
-
-Invoke-WebRequest -URI "$Upload_URI" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $file
-
-$ReturnCode = $LASTEXITCODE
-
-if($ReturnCode -eq 0)
-{
-    Write-Host "Successfully uploaded $file to dotnet feed."
-}
-{
-    Write-Host "Failed to upload $file to dotnet feed."
-}
-
-exit $ReturnCode
-
+exit $result
