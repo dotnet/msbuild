@@ -62,6 +62,14 @@ echo Building stage1 dotnet-compile-csc.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE1_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler.Csc"
 if errorlevel 1 goto fail
 
+echo Building stage1 dotnet-interactive.exe ...
+dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE1_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Interactive"
+if errorlevel 1 goto fail
+
+echo Building stage1 dotnet-interactive-csi.exe ...
+dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE1_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Interactive.Csi"
+if errorlevel 1 goto fail
+
 echo Building stage1 dotnet-publish.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE1_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Publish"
 if errorlevel 1 goto fail
@@ -97,6 +105,14 @@ if errorlevel 1 goto fail
 
 echo Building stage2 dotnet-compile-csc.exe ...
 dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE2_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Compiler.Csc"
+if errorlevel 1 goto fail
+
+echo Building stage2 dotnet-interactive.exe ...
+dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE2_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Interactive"
+if errorlevel 1 goto fail
+
+echo Building stage2 dotnet-interactive-csi.exe ...
+dotnet publish --framework "%TFM%" --runtime "%RID%" --output "%STAGE2_DIR%" --configuration "%CONFIGURATION%" "%REPOROOT%\src\Microsoft.DotNet.Tools.Interactive.Csi"
 if errorlevel 1 goto fail
 
 echo Building stage2 dotnet-publish.exe ...

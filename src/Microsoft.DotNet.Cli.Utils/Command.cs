@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static Command Create(string executable, IEnumerable<string> args)
         {
-            return Create(executable, args.Any() ? string.Join(" ", args) : string.Empty);
+            return Create(executable, string.Join(" ", args));
         }
 
         public static Command Create(string executable, string args)

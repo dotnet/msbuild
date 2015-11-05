@@ -25,27 +25,36 @@ namespace Microsoft.DotNet.Tools.Run
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var preserveTemporaryOutput = app.Option("-t|--preserve-temporary", "Keep the output's temporary directory around", CommandOptionType.NoValue);
-            var project = app.Option("-p|--project <PROJECT_PATH>", "The path to the project to run (defaults to the current directory)", CommandOptionType.SingleValue);
+            var project = app.Argument("<PROJECT>", "The project to run, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             app.OnExecute(() =>
             {
                 // Locate the project and get the name and full path
-                var path = Directory.GetCurrentDirectory();
-                if(project.HasValue())
+                var path = project.Value;
+                if (!string.IsNullOrEmpty(path))
                 {
-                    path = project.Value();
-                }
-
-                var contexts = ProjectContext.CreateContextForEachFramework(path);
-                if (!framework.HasValue())
-                {
-                    return Run(contexts.First(), configuration.Value() ?? Constants.DefaultConfiguration, app.RemainingArguments, preserveTemporaryOutput.HasValue());
+                    if (File.Exists(path) && (Path.GetExtension(path) == ".csx"))
+                    {
+                        return RunInteractive(path);
+                    }
                 }
                 else
                 {
-                    var context = contexts.FirstOrDefault(c => c.TargetFramework.Equals(NuGetFramework.Parse(framework.Value())));
-                    return Run(context, configuration.Value() ?? Constants.DefaultConfiguration, app.RemainingArguments, preserveTemporaryOutput.HasValue());
+                    path = Directory.GetCurrentDirectory();
                 }
+
+                var contexts = ProjectContext.CreateContextForEachFramework(path);
+                ProjectContext context;
+                if (!framework.HasValue())
+                {
+                    context = contexts.First();
+                }
+                else
+                {
+                    var fx = NuGetFramework.Parse(framework.Value());
+                    context = contexts.FirstOrDefault(c => c.TargetFramework.Equals(fx));
+                }
+                return Run(context, configuration.Value() ?? Constants.DefaultConfiguration, app.RemainingArguments, preserveTemporaryOutput.HasValue());
             });
 
             try
@@ -111,6 +120,15 @@ namespace Microsoft.DotNet.Tools.Run
                 Directory.Delete(tempDir, recursive: true);
             }
 
+            return result.ExitCode;
+        }
+
+        private static int RunInteractive(string scriptName)
+        {
+            var command = Command.Create($"dotnet-interactive-csi", scriptName)
+                .ForwardStdOut()
+                .ForwardStdErr();
+            var result = command.Execute();
             return result.ExitCode;
         }
     }

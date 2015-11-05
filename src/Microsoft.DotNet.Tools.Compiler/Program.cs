@@ -46,33 +46,23 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                 var buildProjectReferences = !noProjectDependencies.HasValue();
                 var isNative = native.HasValue();
+                var configValue = configuration.Value() ?? Constants.DefaultConfiguration;
+                var outputValue = output.Value();
 
                 // Load project contexts for each framework and compile them
                 bool success = true;
-                if (framework.HasValue())
+                var contexts = framework.HasValue() ?
+                    framework.Values.Select(f => ProjectContext.Create(path, NuGetFramework.Parse(f))) :
+                    ProjectContext.CreateContextForEachFramework(path);
+                foreach (var context in contexts)
                 {
-                    foreach (var context in framework.Values.Select(f => ProjectContext.Create(path, NuGetFramework.Parse(f))))
+                    success &= Compile(context, configValue, outputValue, intermediateOutput.Value(), buildProjectReferences);
+                    if (isNative)
                     {
-                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), intermediateOutput.Value(), buildProjectReferences);
-
-                        if (isNative)
-                        {
-                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
-                        }
+                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences);
                     }
                 }
-                else
-                {
-                    foreach (var context in ProjectContext.CreateContextForEachFramework(path))
-                    {
-                        success &= Compile(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), intermediateOutput.Value(), buildProjectReferences);
 
-                        if (isNative)
-                        {
-                            success &= CompileNative(context, configuration.Value() ?? Constants.DefaultConfiguration, output.Value(), buildProjectReferences);
-                        }
-                    }
-                }
                 return success ? 0 : 1;
             });
 
