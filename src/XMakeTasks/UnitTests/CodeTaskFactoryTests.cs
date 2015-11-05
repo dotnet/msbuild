@@ -1038,6 +1038,57 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+        /// <summary>
+        /// Code factory test where the TMP directory does not exist.
+        /// See https://github.com/Microsoft/msbuild/issues/328 for details.
+        /// </summary>
+        [Fact]
+        public void BuildTaskSimpleCodeFactoryTempDirectoryDoesntExist()
+        {
+            string projectFileContents = @"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                         <ParameterGroup>     
+                             <Text/>
+                          </ParameterGroup>
+                            <Task>
+                                <Code>
+                                     Log.LogMessage(MessageImportance.High, Text);
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                        <Target Name=`Build`>
+                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
+                        </Target>
+                    </Project>";
+
+            var oldTempPath = Environment.GetEnvironmentVariable("TMP");
+            var newTempPath = Path.Combine(Path.GetFullPath(oldTempPath), Path.GetRandomFileName());
+
+            try
+            {
+                // Ensure we're getting the right temp path (%TMP% == GetTempPath())
+                Assert.Equal(
+                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
+                    FileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
+                Assert.False(Directory.Exists(newTempPath));
+
+                Environment.SetEnvironmentVariable("TMP", newTempPath);
+
+                Assert.Equal(
+                    FileUtilities.EnsureTrailingSlash(newTempPath),
+                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Hello, World!");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("TMP", oldTempPath);
+                FileUtilities.DeleteDirectoryNoThrow(newTempPath, true);
+            }
+        }
     }
 }
 
