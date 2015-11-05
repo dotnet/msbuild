@@ -26,14 +26,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.False(t.DelaySign); // "DelaySign should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/delaysign"),
+                @"/delaysign",
                 false /* no response file */);
 
             t.DelaySign = true;
             Assert.True(t.DelaySign); // "DelaySign should be true"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/delaysign"),
+                @"/delaysign",
                 false /* no response file */);
         }
 
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 Assert.Null(t.KeyContainer); // "KeyContainer should be null by default");
                 CommandLine.ValidateNoParameterStartsWith(
                     t,
-                    CommandLineBuilder.FixCommandLineSwitch(@"/keycontainer:"),
+                    @"/keycontainer:",
                     false /* no response file */);
 
                 t.KeyContainer = badParameterValue;
@@ -113,14 +113,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.Null(t.KeyContainer); // "KeyContainer should be null by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/keycontainer:"),
+                @"/keycontainer:",
                 false /* no response file */);
 
             t.KeyContainer = testParameterValue;
             Assert.Equal(testParameterValue, t.KeyContainer); // "New KeyContainer value should be set"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/keycontainer:") + testParameterValue,
+                @"/keycontainer:" + testParameterValue,
                 false /* no response file */);
         }
 
@@ -143,14 +143,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 Assert.Null(t.KeyFile); // "KeyFile should be null by default"
                 CommandLine.ValidateNoParameterStartsWith(
                     t,
-                    CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:"),
+                    @"/keyfile:",
                     false /* no response file */);
 
                 t.KeyFile = badParameterValue;
                 Assert.Equal(badParameterValue, t.KeyFile); // "New KeyFile value should be set"
                 CommandLine.ValidateHasParameter(
                     t,
-                    CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:") + badParameterValue,
+                    @"/keyfile:" + badParameterValue,
                     false /* no response file */);
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.InvalidKeyFileSpecified", t.KeyFile);
 
@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 Assert.Equal(goodParameterValue, t.KeyFile); // "New KeyFile value should be set"
                 CommandLine.ValidateHasParameter(
                     t,
-                    CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:") + goodParameterValue,
+                    @"/keyfile:" + goodParameterValue,
                     false /* no response file */);
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile", t.KeyFile);
             }
@@ -184,14 +184,14 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.Null(t.KeyFile); // "KeyFile should be null by default"
             CommandLine.ValidateNoParameterStartsWith(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:"),
+                @"/keyfile:",
                 false /* no response file */);
 
             t.KeyFile = testParameterValue;
             Assert.Equal(testParameterValue, t.KeyFile); // "New KeyFile value should be set"
             CommandLine.ValidateHasParameter(
                 t,
-                CommandLineBuilder.FixCommandLineSwitch(@"/keyfile:") + testParameterValue,
+                @"/keyfile:" + testParameterValue,
                 false /* no response file */);
         }
 

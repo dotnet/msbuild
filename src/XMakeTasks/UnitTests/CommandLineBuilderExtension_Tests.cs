@@ -99,8 +99,8 @@ namespace Microsoft.Build.UnitTests
             );
 
             Assert.Equal(
-               (NativeMethodsShared.IsWindows ? @"/myswitch:MySoundEffect.wav,Kenny " : @"-myswitch:MySoundEffect.wav,Kenny ")
-               + (NativeMethodsShared.IsWindows ? @"/myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public" : @"-myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public"),
+               @"/myswitch:MySoundEffect.wav,Kenny "
+               + @"/myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public",
                c.ToString());
         }
     }
