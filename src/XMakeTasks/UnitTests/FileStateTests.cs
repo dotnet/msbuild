@@ -42,21 +42,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // On Unix there no invalid file name characters
         public void BadChars()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                // On Unix there no invalid file name characters
-                return;
-            }
-
-            Assert.Throws<ArgumentException>(() =>
-            {
-                var state = new FileState("|");
-                var time = state.LastWriteTime;
-            }
-           );
+            var state = new FileState("|");
+            Assert.Throws<ArgumentException>(() => { var time = state.LastWriteTime; });
         }
+
         [Fact]
         public void BadTooLongLastWriteTime()
         {

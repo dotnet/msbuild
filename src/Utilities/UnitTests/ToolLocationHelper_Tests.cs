@@ -380,14 +380,9 @@ namespace Microsoft.Build.UnitTests
          * Search for a whidbey when whidbey is the current version.
          */
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
         public void FindFrameworksPathRunningUnderWhidbey()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                // Useless on Linux & OSX
-                return;
-            }
-
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
                 (
                     @"{runtime-base}\v1.2.x86dbg",    // Simulate "Whidbey" as the current runtime.
@@ -778,13 +773,9 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact (Skip="Registry SDKs not supported")]
 #endif
+        [PlatformSpecific(PlatformID.Windows)]
         public void GetPathToDotNetFrameworkSdk()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // "Program Files is not supported under Unix"
-            }
-
             // Test out of range .net version.
             foreach (var vsVersion in EnumVisualStudioVersions())
             {
@@ -862,13 +853,9 @@ namespace Microsoft.Build.UnitTests
 #pragma warning disable 618 //The test below tests a deprecated API. We disable the warning for obsolete methods for this particular test
 #if FEATURE_WIN32_REGISTRY
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
         public void GetPathToWindowsSdk()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // "Registry access is not supported under Unix"
-            }
-
             // Test out of range .net version.
             foreach (var vsVersion in EnumVisualStudioVersions())
             {
@@ -1866,13 +1853,9 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact(Skip = "Special folders not supported")]
 #endif
+        [PlatformSpecific(PlatformID.Windows)]
         public void TestGenerateProgramFiles32()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // "Program Files is not supported under Unix"
-            }
-
             string programFilesX86Original = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
             string programFiles = Environment.GetEnvironmentVariable("ProgramFiles");
             try
@@ -1896,13 +1879,9 @@ namespace Microsoft.Build.UnitTests
         /// Verify we get the correct reference assembly path out of the framework location helper
         /// </summary>
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // "No ProgramFiles known location outside Windows"
         public void TestGeneratedReferenceAssemblyPath()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "No ProgramFiles known location outside Windows"
-            }
-
             string programFiles32 = FrameworkLocationHelper.GenerateProgramFiles32();
             string referenceAssemblyRoot = FrameworkLocationHelper.GenerateProgramFilesReferenceAssemblyRoot();
             string pathToCombineWith = "Reference Assemblies\\Microsoft\\Framework";
@@ -2396,13 +2375,9 @@ namespace Microsoft.Build.UnitTests
         /// Verify we can get a list of directories out of the public API.
         /// </summary>
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
         public void GetAssemblyFoldersExInfoTest()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // "No Registry access if not under Windows"
-            }
-
             SetupAssemblyFoldersExTestConditionRegistryKey();
             IList<AssemblyFoldersExInfo> directories = null;
             try
@@ -2917,29 +2892,24 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+
         /// <summary>
         /// Verify we get no resolved paths when we pass in a root with invalid chars
         /// </summary>
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // No invalid characters on Unix
         public void ResolveFromDirectoryInvalidChar()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // "No invalid characters on Unix"
-            }
+            Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform =
+                new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
-            Assert.Throws<ArgumentException>(() =>
-            {
-                Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
-
-                // Try a path with invalid chars which does not exist
-                string directoryWithInvalidChars = "c:\\<>?";
-                List<string> paths = new List<string>() { directoryWithInvalidChars };
-                ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform);
-                Assert.Equal(0, targetPlatform.Count);
-            }
-           );
+            // Try a path with invalid chars which does not exist
+            string directoryWithInvalidChars = "c:\\<>?";
+            List<string> paths = new List<string>() {directoryWithInvalidChars};
+            Assert.Throws<ArgumentException>(
+                () => { ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform); });
         }
+
         /// <summary>
         /// Verify we get no resolved paths when we pass in a path which does not exist.
         /// 

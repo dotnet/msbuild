@@ -1,7 +1,8 @@
 ﻿{
   "dependencies": {
+    "Microsoft.Tpl.Dataflow": "4.5.24",
     "xunit": "2.1.0",
-    "Microsoft.Tpl.Dataflow": "4.5.24"
+    "xunit.netcore.extensions": "1.0.0-prerelease-00116"
   },
   "frameworks": {
     "net451": {

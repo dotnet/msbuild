@@ -570,13 +570,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [PlatformSpecific(PlatformID.Windows)] // "Cannot fail on path too long with Unix"
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // "Cannot fail on path too long with Unix"
-            }
-
             string content = @"
  <Project DefaultTargets=`t` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
  
