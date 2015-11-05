@@ -27,5 +27,13 @@ info "Using code from: $DOCKER_HOST_SHARE_DIR"
 docker run -t --rm --sig-proxy=true \
     --name $DOTNET_BUILD_CONTAINER_NAME \
     -v $DOCKER_HOST_SHARE_DIR:/opt/code \
-    -e DOTNET_BUILD_VERSION=$DOTNET_BUILD_VERSION \
+    -e DOTNET_BUILD_VERSION \
+    -e SASTOKEN \
+    -e STORAGE_ACCOUNT \
+    -e STORAGE_CONTAINER \
+    -e CHANNEL \
+    -e REPO_ID \
+    -e REPO_USER \
+    -e REPO_PASS \
+    -e REPO_SERVER \
     $DOTNET_BUILD_CONTAINER_TAG $BUILD_COMMAND $1
