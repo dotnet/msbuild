@@ -120,7 +120,7 @@ upload_binaries_to_blob_storage(){
         # update the index file
         local indexContent="Binaries/$DOTNET_BUILD_VERSION/$filename"
         local indexfile="latest.$OSNAME.index"
-        local update_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/test/$indexfile$SASTOKEN"
+        local update_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$indexfile$SASTOKEN"
         update_file_in_blob_storage $update_URL $indexfile $indexContent
         return $?
     fi
