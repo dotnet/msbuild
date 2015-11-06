@@ -1,0 +1,11 @@
+#!/bin/sh
+
+ln -s $2/dotnet /usr/local/bin/
+ln -s $2/dotnet-compile /usr/local/bin/
+ln -s $2/dotnet-compile-csc /usr/local/bin/
+ln -s $2/dotnet-publish /usr/local/bin/
+ln -s $2/dotnet-restore /usr/local/bin/
+ln -s $2/dotnet-restore /usr/local/bin/
+ln -s $2/resgen /usr/local/bin/
+
+exit 0
