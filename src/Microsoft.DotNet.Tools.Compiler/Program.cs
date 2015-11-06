@@ -168,6 +168,13 @@ namespace Microsoft.DotNet.Tools.Compiler
             };
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+
+            if (!string.IsNullOrEmpty(compilationOptions.KeyFile))
+            {
+                // Resolve full path to key file
+                compilationOptions.KeyFile = Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
+            }
+            
             // Add compilation options to the args
             compilerArgs.AddRange(compilationOptions.SerializeToArgs());
 
