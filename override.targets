@@ -2,7 +2,7 @@
   <UsingTask TaskName="PrereleaseResolveNuGetPackageAssets" AssemblyFile="$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
   <PropertyGroup>
-    <NoStdLib>true</NoStdLib>
+    <NoStdLib Condition="'$(NetCoreBuild)'=='true'">true</NoStdLib>
     <ResolveAssemblyReferencesDependsOn>$(ResolveAssemblyReferencesDependsOn);ResolveNuGetPackageAssets</ResolveAssemblyReferencesDependsOn>
     <ProjectLockFile Condition="'$(ProjectLockFile)' == ''">project.lock.json</ProjectLockFile>
   </PropertyGroup>

@@ -157,7 +157,7 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
-#if FEATURE_ASSEMBLY_LOADFROM
+#if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
             _lineNumberOfTask = lineNumberOfTask;
@@ -345,7 +345,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
-#if FEATURE_BINARY_SERIALIZATION
+#if FEATURE_APPDOMAIN
             translator.TranslateDotNet(ref _appDomainSetup);
 #endif
             translator.Translate(ref _lineNumberOfTask);

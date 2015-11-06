@@ -16,17 +16,18 @@
     },
     "dnxcore50": {
       "dependencies": {
-        "System.Net.NetworkInformation": "4.1.0-beta-23225",
-        "Microsoft.NETCore": "5.0.1-beta-23225",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23225",
+        "System.Net.NetworkInformation": "4.1.0-beta-23413",
+        "Microsoft.NETCore": "5.0.1-beta-23406",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23406",
         "System.Console": "4.0.0-beta-23406",
-        "System.Diagnostics.TraceSource": "4.0.0-beta-23225",
+        "System.Diagnostics.TraceSource": "4.0.0-beta-23406",
         "System.Diagnostics.Process": "4.1.0-beta-23406",
         "System.Threading.Thread": "4.0.0-beta-23406",
-        "System.Threading.ThreadPool": "4.0.10-beta-23406",
-        "System.Xml.XmlDocument": "4.0.1-beta-23225",
+        "System.Threading.ThreadPool": "4.0.10-beta-23413",
+        "System.Xml.XmlDocument": "4.0.1-beta-23406",
         "Microsoft.NETCore.Runtime": "1.0.1-beta-23406",
-        "Microsoft.NETCore.TestHost": "1.0.0-beta-23318"
+        "Microsoft.NETCore.TestHost": "1.0.0-beta-23406",
+        "System.Reflection.Metadata": "1.1.0",
       },
       "imports": "portable-net451+win81"
     }
