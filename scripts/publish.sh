@@ -68,23 +68,31 @@ validate_env_variables(){
         ret=1
     fi
 
-     if [[ -z "$CHANNEL" ]]; then
+    if [[ -z "$CHANNEL" ]]; then
         warning "CHANNEL environment variable not set"
+        ret=1
+    fi
+
+    if [[ -z "$CONNECTION_STRING" ]]; then
+        warning "CONNECTION_STRING environment variable not set"
         ret=1
     fi
 
     return $ret
 }
 
-upload_file_to_blob_storage(){
-    local upload_URL=$1
+upload_file_to_blob_storage_azure_cli(){
+    local blob=$1
     local file=$2
 
     banner "Uploading $file to blob storage"
 
-    statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $upload_URL -T $file)
+    # use azure cli to upload to blob storage. We cannot use curl to do this becuase azure has a max limit of 64mb that can be uploaded using REST
+    # statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $upload_URL -T $file)
+    azure storage blob upload --quiet --container $STORAGE_CONTAINER --blob $blob --blobtype block --connection-string "$CONNECTION_STRING" --file $file
+    result=$?
 
-    if [ "$statusCode" -eq "201" ]; then
+    if [ "$result" -eq "0" ]; then
         info "successfully uploaded $filename to blob storage."
         return 0
     else
@@ -114,9 +122,9 @@ update_file_in_blob_storage(){
 upload_binaries_to_blob_storage(){
     local tarfile=$1
     local filename=$(basename $tarfile)
-    local upload_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/Binaries/$DOTNET_BUILD_VERSION/$filename$SASTOKEN"
+    local blob="$CHANNEL/Binaries/$DOTNET_BUILD_VERSION/$filename"
 
-    if upload_file_to_blob_storage $upload_URL $tarfile; then
+    if upload_file_to_blob_storage_azure_cli $blob $tarfile; then
         # update the index file
         local indexContent="Binaries/$DOTNET_BUILD_VERSION/$filename"
         local indexfile="latest.$OSNAME.index"
@@ -131,9 +139,9 @@ upload_binaries_to_blob_storage(){
 upload_installers_to_blob_storage(){
     local installfile=$1
     local filename=$(basename $installfile)
-    local upload_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/Installers/$DOTNET_BUILD_VERSION/$filename$SASTOKEN"
+    local blob="$CHANNEL/Installers/$DOTNET_BUILD_VERSION/$filename"
 
-    if ! upload_file_to_blob_storage $upload_URL $installfile; then
+    if ! upload_file_to_blob_storage_azure_cli $blob $installfile; then
         return 1
     fi
 
