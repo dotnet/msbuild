@@ -25,12 +25,12 @@ namespace Microsoft.DotNet.Tools.Run
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var preserveTemporaryOutput = app.Option("-t|--preserve-temporary", "Keep the output's temporary directory around", CommandOptionType.NoValue);
-            var project = app.Argument("<PROJECT>", "The project to run, defaults to the current directory. Can be a path to a project.json or a project directory");
+            var project = app.Option("-p|--project <PROJECT_PATH>", "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory.", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
                 // Locate the project and get the name and full path
-                var path = project.Value;
+                var path = project.Value();
                 if (!string.IsNullOrEmpty(path))
                 {
                     if (File.Exists(path) && (Path.GetExtension(path) == ".csx"))
