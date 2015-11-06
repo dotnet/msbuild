@@ -2,9 +2,11 @@
 
   <!--
     $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
+    Possible Values: Windows_NT / Unix / OSX
   -->
   <PropertyGroup>
     <OsEnvironment Condition="'$(OsEnvironment)'==''">$(OS)</OsEnvironment>
+    <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OS)</TargetPlatformIdentifier>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -92,20 +94,12 @@
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
-    <RuntimeSystem>win7</RuntimeSystem>
-    <RuntimeArchitecture>x86</RuntimeArchitecture>
-    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
-    <TargetSystem>Windows</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD;MONO</DefineConstants>
-    <RuntimeSystem>win7</RuntimeSystem>
-    <RuntimeArchitecture>x86</RuntimeArchitecture>
-    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
-    <TargetSystem>Mono</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -113,19 +107,12 @@
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
-    <RuntimeSystem>win7</RuntimeSystem>
-    <RuntimeArchitecture>x86</RuntimeArchitecture>
-    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
-    <TargetSystem>Windows</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD;MONO</DefineConstants>
-    <RuntimeSystem>win7</RuntimeSystem>
-    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
-    <TargetSystem>Mono</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -133,10 +120,6 @@
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
-    <RuntimeSystem>win7</RuntimeSystem>
-    <RuntimeArchitecture>x64</RuntimeArchitecture>
-    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
-    <TargetSystem>Windows_NetCore</TargetSystem>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
@@ -144,32 +127,23 @@
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
-    <RuntimeSystem>win7</RuntimeSystem>
-    <RuntimeArchitecture>x64</RuntimeArchitecture>
-    <TargetPlatformIdentifier>Windows_NT</TargetPlatformIdentifier>
-    <TargetSystem>Windows_NetCore</TargetSystem>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore-Ubuntu'">
-    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
-    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
-    <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
-    <NetCoreBuild>true</NetCoreBuild>
-    <RuntimeSystem>ubuntu.14.04</RuntimeSystem>
+
+  <!-- Set the host specific OS and Architecture variables -->
+  <PropertyGroup>
+    <!-- Possible Values: win7 / ubuntu14.04 / osx.10.10 -->
+    <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT'">win7</RuntimeSystem>
+    <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'Unix'">ubuntu.14.04</RuntimeSystem>
+    <RuntimeSystem Condition="'$(TargetPlatformIdentifier)' == 'OSX'">osx.10.10</RuntimeSystem>
+
+    <!-- Possible Values: Windows, Ubuntu, OSX, MONO. Append _NetCore if Configuration is net core -->
+    <TargetSystem Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT'">Windows</TargetSystem>
+    <TargetSystem Condition="'$(TargetPlatformIdentifier)' == 'Unix'">Ubuntu</TargetSystem>
+    <TargetSystem Condition="'$(TargetPlatformIdentifier)' == 'OSX'">OSX</TargetSystem>
+    <TargetSystem Condition="$([System.String]::Copy($(Configuration)).Contains('MONO'))">MONO</TargetSystem>
+    <TargetSystem Condition="'$(NetCoreBuild)' == 'true'">$(TargetSystem)_NetCore</TargetSystem>
+
     <RuntimeArchitecture>x64</RuntimeArchitecture>
-    <TargetPlatformIdentifier>Unix</TargetPlatformIdentifier>
-    <TargetSystem>Ubuntu_NetCore</TargetSystem>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release-NetCore-Ubuntu'">
-    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
-    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
-    <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
-    <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
-    <NetCoreBuild>true</NetCoreBuild>
-    <RuntimeSystem>ubuntu.14.04</RuntimeSystem>
-    <RuntimeArchitecture>x64</RuntimeArchitecture>
-    <TargetPlatformIdentifier>Unix</TargetPlatformIdentifier>
-    <TargetSystem>Ubuntu_NetCore</TargetSystem>
   </PropertyGroup>
 
   <PropertyGroup>
