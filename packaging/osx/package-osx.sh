@@ -52,3 +52,5 @@ productbuild --version $DOTNET_BUILD_VERSION --identifier com.microsoft.dotnet.c
 #Clean temp files
 rm $DIR/dotnet-osx-x64.$DOTNET_BUILD_VERSION.pkg
 rm $DIR/Dist
+
+$REPOROOT/scripts/publish.sh $PACKAGE_NAME
