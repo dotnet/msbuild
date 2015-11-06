@@ -10,7 +10,6 @@ using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.Extensions.ProjectModel;
 using Microsoft.Extensions.ProjectModel.Compilation;
-using Microsoft.Extensions.ProjectModel.Graph;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Compiler
@@ -349,6 +348,8 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static void MakeRunnable(ProjectContext runtimeContext, string outputPath, LibraryExporter exporter)
         {
+            CopyContents(runtimeContext, outputPath);
+
             if (runtimeContext.TargetFramework.IsDesktop())
             {
                 // On desktop we need to copy dependencies since we don't own the host
@@ -602,6 +603,70 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 File.Copy(file.ResolvedPath, Path.Combine(outputPath, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
+        }
+
+        private static void CopyContents(ProjectContext context, string outputPath)
+        {
+            var sourceFiles = context.ProjectFile.Files.GetCopyToOutputFiles();
+            Copy(sourceFiles, context.ProjectDirectory, outputPath);
+        }
+
+        private static void Copy(IEnumerable<string> sourceFiles, string sourceDirectory, string targetDirectory)
+        {
+            if (sourceFiles == null)
+            {
+                throw new ArgumentNullException(nameof(sourceFiles));
+            }
+
+            sourceDirectory = EnsureTrailingSlash(sourceDirectory);
+            targetDirectory = EnsureTrailingSlash(targetDirectory);
+
+            foreach (var sourceFilePath in sourceFiles)
+            {
+                var fileName = Path.GetFileName(sourceFilePath);
+
+                var targetFilePath = sourceFilePath.Replace(sourceDirectory, targetDirectory);
+                var targetFileParentFolder = Path.GetDirectoryName(targetFilePath);
+
+                // Create directory before copying a file
+                if (!Directory.Exists(targetFileParentFolder))
+                {
+                    Directory.CreateDirectory(targetFileParentFolder);
+                }
+
+                File.Copy(
+                    sourceFilePath,
+                    targetFilePath,
+                    overwrite: true);
+
+                // clear read-only bit if set
+                var fileAttributes = File.GetAttributes(targetFilePath);
+                if ((fileAttributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                {
+                    File.SetAttributes(targetFilePath, fileAttributes & ~FileAttributes.ReadOnly);
+                }
+            }
+        }
+
+        private static string EnsureTrailingSlash(string path)
+        {
+            return EnsureTrailingCharacter(path, Path.DirectorySeparatorChar);
+        }
+
+        private static string EnsureTrailingCharacter(string path, char trailingCharacter)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            // if the path is empty, we want to return the original string instead of a single trailing character.
+            if (path.Length == 0 || path[path.Length - 1] == trailingCharacter)
+            {
+                return path;
+            }
+
+            return path + trailingCharacter;
         }
     }
 }
