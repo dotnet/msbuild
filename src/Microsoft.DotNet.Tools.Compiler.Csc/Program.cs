@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
             if (options.LanguageVersion != null)
             {
-                commonArgs.Add($"-langversion:{options.LanguageVersion}");
+                commonArgs.Add($"-langversion:{GetLanguageVersion(options.LanguageVersion)}");
             }
 
             if (options.Platform != null)
@@ -157,6 +157,17 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             }
 
             return commonArgs;
+        }
+
+        private static string GetLanguageVersion(string languageVersion)
+        {
+            // project.json supports the enum that the roslyn APIs expose
+            if (languageVersion?.StartsWith("csharp", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                // We'll be left with the number csharp6 = 6
+                return languageVersion.Substring("csharp".Length);
+            }
+            return languageVersion;
         }
 
         private static Command RunCsc(string cscArgs)
