@@ -32,6 +32,7 @@ docker run -t --rm --sig-proxy=true \
     -e STORAGE_ACCOUNT \
     -e STORAGE_CONTAINER \
     -e CHANNEL \
+    -e CONNECTION_STRING \
     -e REPO_ID \
     -e REPO_USER \
     -e REPO_PASS \
