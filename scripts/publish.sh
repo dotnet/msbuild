@@ -26,24 +26,23 @@ banner "Publishing package"
 execute(){
     if ! validate_env_variables; then
         # fail silently if the required variables are not available for publishing the file.
-        exit 0
+       exit 0
     fi
 
     if [[ ! -f "$UPLOAD_FILE" ]]; then
-        echo "Error: \"$UPLOAD_FILE\" file does not exist"
+        error "\"$UPLOAD_FILE\" file does not exist"
         exit 1
     fi
 
-    if ! upload_file_to_blob_storage; then
-        exit 1
+    if [[ $UPLOAD_FILE == *.deb || $UPLOAD_FILE == *.pkg ]]; then
+        upload_installers_to_blob_storage $UPLOAD_FILE
+        result=$?
+    elif [[ $UPLOAD_FILE == *.tar.gz ]]; then
+        upload_binaries_to_blob_storage $UPLOAD_FILE
+        result=$?
     fi
 
-    # debain packages need to be uploaded to the PPA feed too
-    if [[ $UPLOAD_FILE == *.deb ]]; then
-        DEB_FILE=$UPLOAD_FILE
-        generate_repoclient_json
-        call_repo_client
-    fi
+    exit $result
 }
 
 validate_env_variables(){
@@ -70,7 +69,7 @@ validate_env_variables(){
     fi
 
      if [[ -z "$CHANNEL" ]]; then
-        echo "CHANNEL environment variable not set"
+        warning "CHANNEL environment variable not set"
         ret=1
     fi
 
@@ -78,28 +77,74 @@ validate_env_variables(){
 }
 
 upload_file_to_blob_storage(){
-    local filename=$(basename $UPLOAD_FILE)
+    local upload_URL=$1
+    local file=$2
 
-    banner "Uploading $filename to blob storage"
+    banner "Uploading $file to blob storage"
 
-    if [[ $filename == *.deb || $filename == *.pkg ]]; then
-        FOLDER="Installers"
-    elif [[ $filename == *.tar.gz ]]; then
-        FOLDER="Binaries"
-    fi
+    statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $upload_URL -T $file)
 
-    UPLOAD_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/$FOLDER/$DOTNET_BUILD_VERSION/$filename$SASTOKEN"
-
-    curl -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $UPLOAD_URL -T $UPLOAD_FILE
-    result=$?
-
-    if [ "$result" -gt "0" ]; then
-        error "uploading the $filename to blob storage - $result"
-    else
+    if [ "$statusCode" -eq "201" ]; then
         info "successfully uploaded $filename to blob storage."
+        return 0
+    else
+        error "uploading the $filename to blob storage - $statusCode"
+        return 1
+    fi
+}
+
+update_file_in_blob_storage(){
+    local update_URL=$1
+    local file=$2
+    local filecontent=$3
+
+    banner "Updating $file in blob storage"
+
+    statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $update_URL --data $filecontent --request PUT )
+
+    if [ "$statusCode" -eq "201" ]; then
+        info "successfully updated $file in blob storage."
+        return 0
+    else
+        error "updating the $file in blob storage - $statusCode"
+        return 1
+    fi
+}
+
+upload_binaries_to_blob_storage(){
+    local tarfile=$1
+    local filename=$(basename $tarfile)
+    local upload_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/Binaries/$DOTNET_BUILD_VERSION/$filename$SASTOKEN"
+
+    if upload_file_to_blob_storage $upload_URL $tarfile; then
+        # update the index file
+        local indexContent="Binaries/$DOTNET_BUILD_VERSION/$filename"
+        local indexfile="latest.$OSNAME.index"
+        local update_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$indexfile$SASTOKEN"
+        update_file_in_blob_storage $update_URL $indexfile $indexContent
+        return $?
     fi
 
-    return $result
+    return 1
+}
+
+upload_installers_to_blob_storage(){
+    local installfile=$1
+    local filename=$(basename $installfile)
+    local upload_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/Installers/$DOTNET_BUILD_VERSION/$filename$SASTOKEN"
+
+    if ! upload_file_to_blob_storage $upload_URL $installfile; then
+        return 1
+    fi
+
+    # debain packages need to be uploaded to the PPA feed too
+    if [[ $installfile == *.deb ]]; then
+        DEB_FILE=$installfile
+        generate_repoclient_json
+        call_repo_client
+    fi
+
+    return 0
 }
 
 generate_repoclient_json(){
