@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 foreach (var context in contexts)
                 {
                     success &= Compile(context, configValue, outputValue, intermediateOutput.Value(), buildProjectReferences);
-                    if (isNative & success)
+                    if (isNative && success)
                     {
                         success &= CompileNative(context, configValue, outputValue, buildProjectReferences);
                     }
