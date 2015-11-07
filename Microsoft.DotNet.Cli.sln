@@ -34,9 +34,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dnxhost", "dnxhost", "{0773
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Compiler.Csc", "src\Microsoft.DotNet.Tools.Compiler.Csc\Microsoft.DotNet.Tools.Compiler.Csc.xproj", "{B559378C-FC03-45FA-893C-71784F28E0A2}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Interactive", "src\Microsoft.DotNet.Tools.Interactive\Microsoft.DotNet.Tools.Interactive.xproj", "{B317356C-99DE-499E-8B4D-D6BEC5DA57D5}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Repl", "src\Microsoft.DotNet.Tools.Repl\Microsoft.DotNet.Tools.Repl.xproj", "{B317356C-99DE-499E-8B4D-D6BEC5DA57D5}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Interactive.Csi", "src\Microsoft.DotNet.Tools.Interactive.Csi\Microsoft.DotNet.Tools.Interactive.Csi.xproj", "{717A4ED9-8897-492F-BD0C-230FCAEA9237}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Repl.Csi", "src\Microsoft.DotNet.Tools.Repl.Csi\Microsoft.DotNet.Tools.Repl.Csi.xproj", "{717A4ED9-8897-492F-BD0C-230FCAEA9237}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Resgen", "src\Microsoft.DotNet.Tools.Resgen\Microsoft.DotNet.Tools.Resgen.xproj", "{585FC6F6-48E0-4EA5-8015-0264614E97C0}"
 EndProject

@@ -2,7 +2,7 @@
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.Tools.Interactive
+namespace Microsoft.DotNet.Tools.Repl
 {
     public sealed class Program
     {
@@ -11,9 +11,9 @@ namespace Microsoft.DotNet.Tools.Interactive
             DebugHelper.HandleDebugSwitch(ref args);
 
             var app = new CommandLineApplication();
-            app.Name = "dotnet interactive";
-            app.FullName = ".NET interactive";
-            app.Description = "Interactive for the .NET platform";
+            app.Name = "dotnet repl";
+            app.FullName = ".NET interactive REPL";
+            app.Description = "Interactive REPL for the .NET platform";
             app.HelpOption("-h|--help");
             var language = app.Argument("<LANGUAGE>", "The interactive programming language, defaults to csharp");
 
@@ -23,17 +23,17 @@ namespace Microsoft.DotNet.Tools.Interactive
 
         private static int Run(string languageOpt)
         {
-            string interactiveName;
+            string replName;
             if ((languageOpt == null) || (languageOpt == "csharp"))
             {
-                interactiveName = "csi";
+                replName = "csi";
             }
             else
             {
                 Reporter.Error.WriteLine($"Unrecognized language: {languageOpt}".Red());
                 return -1;
             }
-            var command = Command.Create($"dotnet-interactive-{interactiveName}", string.Empty)
+            var command = Command.Create($"dotnet-repl-{replName}", string.Empty)
                 .ForwardStdOut()
                 .ForwardStdErr();
             var result = command.Execute();

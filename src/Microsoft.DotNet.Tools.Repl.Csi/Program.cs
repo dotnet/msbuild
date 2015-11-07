@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.Tools.Interactive.Csi
+namespace Microsoft.DotNet.Tools.Repl.Csi
 {
     public sealed class Program
     {
@@ -12,9 +12,9 @@ namespace Microsoft.DotNet.Tools.Interactive.Csi
             DebugHelper.HandleDebugSwitch(ref args);
 
             var app = new CommandLineApplication();
-            app.Name = "dotnet interactive csi";
-            app.FullName = "CSharp Interactive";
-            app.Description = "CSharp Interactive for the .NET platform";
+            app.Name = "dotnet repl csi";
+            app.FullName = "C# REPL";
+            app.Description = "C# REPL for the .NET platform";
             app.HelpOption("-h|--help");
             var script = app.Argument("<SCRIPT>", "The .csx file to run. Defaults to interactive mode.");
 
