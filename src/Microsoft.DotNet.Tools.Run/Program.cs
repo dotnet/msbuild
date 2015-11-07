@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         private static int RunInteractive(string scriptName)
         {
-            var command = Command.Create($"dotnet-interactive-csi", scriptName)
+            var command = Command.Create($"dotnet-repl-csi", scriptName)
                 .ForwardStdOut()
                 .ForwardStdErr();
             var result = command.Execute();
