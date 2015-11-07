@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
                     syntax.DefineOption("out", ref outputName, "Name of the output assembly");
 
-                    syntax.DefineOptionList("r|reference", ref references, "Path to a compiler metadata reference");
+                    syntax.DefineOptionList("reference", ref references, "Path to a compiler metadata reference");
 
                     syntax.DefineOptionList("resource", ref resources, "Resources to embed");
 
@@ -95,7 +95,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 ? "-debug:full"
                 : "-debug:portable");
 
-            // TODO: Move mono args to mcs compiler
             args.Add("-nowarn:CS1701");
             args.Add("-nowarn:CS1702");
             args.Add("-nowarn:CS1705");

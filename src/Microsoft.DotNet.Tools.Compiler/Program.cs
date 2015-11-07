@@ -186,24 +186,24 @@ namespace Microsoft.DotNet.Tools.Compiler
                     if (projectDependency.Project.Files.SourceFiles.Any())
                     {
                         var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
-                        compilerArgs.Add($"-r:{projectOutputPath}");
+                        compilerArgs.Add($"--reference:{projectOutputPath}");
                     }
                 }
                 else
                 {
-                    compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"-r:{r.ResolvedPath}"));
+                    compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"--reference:{r.ResolvedPath}"));
                 }
                 compilerArgs.AddRange(dependency.SourceReferences);
             }
-
-            // Add project source files
-            var sourceFiles = context.ProjectFile.Files.SourceFiles;
-            compilerArgs.AddRange(sourceFiles);
 
             if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
             {
                 return false;
             }
+
+            // Add project source files
+            var sourceFiles = context.ProjectFile.Files.SourceFiles;
+            compilerArgs.AddRange(sourceFiles);
 
             var compilerName = context.ProjectFile.CompilerName;
             compilerName = compilerName ?? "csc";
@@ -495,7 +495,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     }
                 }
 
-                compilerArgs.Add($"-resource:\"{fileName}\",{name}");
+                compilerArgs.Add($"--resource:\"{fileName}\",{name}");
             }
 
             return true;
