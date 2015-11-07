@@ -124,16 +124,24 @@ upload_binaries_to_blob_storage(){
     local filename=$(basename $tarfile)
     local blob="$CHANNEL/Binaries/$DOTNET_BUILD_VERSION/$filename"
 
-    if upload_file_to_blob_storage_azure_cli $blob $tarfile; then
-        # update the index file
-        local indexContent="Binaries/$DOTNET_BUILD_VERSION/$filename"
-        local indexfile="latest.$OSNAME.index"
-        local update_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$indexfile$SASTOKEN"
-        update_file_in_blob_storage $update_URL $indexfile $indexContent
-        return $?
+    if ! upload_file_to_blob_storage_azure_cli $blob $tarfile; then
+        return 1
     fi
 
-    return 1
+    # create the latest blob
+    echo "Updating the latest dotnet binaries.."
+    local latestblob="$CHANNEL/Binaries/Latest/dotnet-$OSNAME-x64.latest.tar.gz"
+
+    if ! upload_file_to_blob_storage_azure_cli $latestblob $tarfile; then
+        return 1
+    fi
+
+    # update the index file
+    local indexContent="Binaries/$DOTNET_BUILD_VERSION/$filename"
+    local indexfile="latest.$OSNAME.index"
+    local update_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$indexfile$SASTOKEN"
+    update_file_in_blob_storage $update_URL $indexfile $indexContent
+    return $?
 }
 
 upload_installers_to_blob_storage(){
@@ -142,6 +150,15 @@ upload_installers_to_blob_storage(){
     local blob="$CHANNEL/Installers/$DOTNET_BUILD_VERSION/$filename"
 
     if ! upload_file_to_blob_storage_azure_cli $blob $installfile; then
+        return 1
+    fi
+
+    # create the latest blob
+    echo "Updating the latest dotnet installer.."
+    local extension="${filename##*.}"
+    local latestblob="$CHANNEL/Installers/Latest/dotnet-$OSNAME-x64.latest.$extension"
+
+    if ! upload_file_to_blob_storage_azure_cli $latestblob $installfile; then
         return 1
     fi
 
