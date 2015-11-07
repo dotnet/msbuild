@@ -157,7 +157,7 @@ namespace Microsoft.Extensions.ProjectModel
             {
                 diagnostics.Add(new DiagnosticMessage(
                     ErrorCodes.NU1009,
-                    $"The expected lock file doesn't exist. Please run \"dnu restore\" to generate a new lock file.",
+                    $"The expected lock file doesn't exist. Please run \"dotnet restore\" to generate a new lock file.",
                     Path.Combine(Project.ProjectDirectory, LockFile.FileName),
                     DiagnosticMessageSeverity.Error));
             }
@@ -166,7 +166,7 @@ namespace Microsoft.Extensions.ProjectModel
             {
                 diagnostics.Add(new DiagnosticMessage(
                     ErrorCodes.NU1006,
-                    $"{lockFileValidationMessage}. Please run \"dnu restore\" to generate a new lock file.",
+                    $"{lockFileValidationMessage}. Please run \"dotnet restore\" to generate a new lock file.",
                     Path.Combine(Project.ProjectDirectory, LockFile.FileName),
                     DiagnosticMessageSeverity.Warning));
             }

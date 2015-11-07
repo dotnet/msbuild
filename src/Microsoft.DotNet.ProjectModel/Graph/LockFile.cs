@@ -98,7 +98,7 @@ namespace Microsoft.Extensions.ProjectModel.Graph
             if (range.MinVersion == range.MaxVersion &&
                 (range.Float == null || range.Float.FloatBehavior == NuGetVersionFloatBehavior.None))
             {
-                return range.MinVersion.ToString();
+                return range.MinVersion.ToNormalizedString();
             }
             var sb = new StringBuilder();
             sb.Append(">= ");
@@ -106,7 +106,7 @@ namespace Microsoft.Extensions.ProjectModel.Graph
             {
                 case null:
                 case NuGetVersionFloatBehavior.None:
-                    sb.Append(range.MinVersion);
+                    sb.Append(range.MinVersion.ToNormalizedString());
                     break;
                 case NuGetVersionFloatBehavior.Prerelease:
                     // Work around nuget bug: https://github.com/NuGet/Home/issues/1598
