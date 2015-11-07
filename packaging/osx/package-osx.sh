@@ -36,10 +36,9 @@ PACKAGE_DIR=$REPOROOT/artifacts/packages/pkg
 [ -d "$PACKAGE_DIR" ] || mkdir -p $PACKAGE_DIR
 
 PACKAGE_NAME=$PACKAGE_DIR/dotnet-cli-x64.${DOTNET_BUILD_VERSION}.pkg
-
+chmod -R 755 $STAGE2_DIR
 pkgbuild --root $STAGE2_DIR \
          --version $DOTNET_BUILD_VERSION \
-         --ownership preserve \
          --scripts $DIR/scripts \
          --identifier com.microsoft.dotnet.cli.pkg.dotnet-osx-x64 \
          --install-location /usr/local/share/dotnet/cli \
