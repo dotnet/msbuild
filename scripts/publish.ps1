@@ -60,37 +60,55 @@ function UploadBinaries($zipFile)
     $fileName = [System.IO.Path]::GetFileName($zipFile)
     $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Binaries/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN"
 
-    if(UploadFile $Upload_URI $zipFile)
+    if(-Not (UploadFile $Upload_URI $zipFile))
     {
-        # update the index file too
-        $indexContent = "Binaries/$env:DOTNET_BUILD_VERSION/$fileName"
-        $indexFile = "$env:TEMP\latest.win.index"
-        $indexContent | Out-File -FilePath $indexFile
-
-        # upload the index file
-        $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/dnvm/latest.win.index$env:SASTOKEN"
-
-        if(UploadFile $Upload_URI $indexFile)
-        {
-            $result = 0
-        }
+        return -1
     }
 
-    return $result
+    Write-Host "Updating the latest dotnet binaries for windows.."
+    $Upload_URI_Latest = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Binaries/Latest/dotnet-win-x64.latest.zip$env:SASTOKEN"
+
+    if(-Not (UploadFile $Upload_URI_Latest $zipFile))
+    {
+        return -1
+    }
+
+
+    # update the index file too
+    $indexContent = "Binaries/$env:DOTNET_BUILD_VERSION/$fileName"
+    $indexFile = "$env:TEMP\latest.win.index"
+    $indexContent | Out-File -FilePath $indexFile
+
+    # upload the index file
+    $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/dnvm/latest.win.index$env:SASTOKEN"
+
+    if(-Not (UploadFile $Upload_URI $indexFile))
+    {
+        return -1
+    }
+
+    return 0
 }
 
 function UploadInstallers($msiFile)
 {
-    $result = -1
     $fileName = [System.IO.Path]::GetFileName($msiFile)
     $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Installers/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN"
 
-    if(UploadFile $Upload_URI $msiFile)
+    if(-Not (UploadFile $Upload_URI $msiFile))
     {
-        $result = 0
+        return -1
     }
 
-    return $result
+    Write-Host "Updating the latest dotnet installer for windows.."
+    $Upload_URI_Latest = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Installers/Latest/dotnet-win-x64.latest.msi$env:SASTOKEN"
+
+    if(-Not (UploadFile $Upload_URI_Latest $msiFile))
+    {
+        return -1
+    }
+
+    return 0
 }
 
 if(!(CheckRequiredVariables))
