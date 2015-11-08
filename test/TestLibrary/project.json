@@ -1,7 +1,7 @@
 ﻿{
     "version": "1.0.0-*",
     "dependencies": {
-        "System.Runtime": "4.0.21-beta-23420",
+        "System.Runtime": "4.0.21-beta-23428",
         "Microsoft.NETCore.Runtime": "1.0.1-beta-23428"
     },
 
