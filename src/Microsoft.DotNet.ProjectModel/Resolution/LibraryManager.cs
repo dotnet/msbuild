@@ -147,7 +147,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
         }
 
         private IEnumerable<LibraryRange> GetRangesWithSourceLocations(LibraryDescription library)
-        { 
+        {
             foreach (var range in library.RequestedRanges)
             {
                 if (!string.IsNullOrEmpty(range.SourceFilePath))
