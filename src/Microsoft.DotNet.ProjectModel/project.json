@@ -13,7 +13,7 @@
 
     "NuGet.Packaging": "3.2.0",
 
-    "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-*",
+    "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15791",
     "Microsoft.Extensions.JsonParser.Sources": {
       "type": "build",
       "version": "1.0.0-*"

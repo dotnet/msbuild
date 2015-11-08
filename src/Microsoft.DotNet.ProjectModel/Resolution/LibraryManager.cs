@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.ProjectModel.Graph;
+using Microsoft.Extensions.ProjectModel.Utilities;
+using NuGet.Versioning;
 
 namespace Microsoft.Extensions.ProjectModel.Resolution
 {
@@ -36,6 +38,9 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                 messages.AddRange(_diagnostics);
             }
 
+            var dependencies = new Dictionary<string, List<DependencyItem>>();
+            var topLevel = new List<LibraryDescription>();
+
             foreach (var library in GetLibraries())
             {
                 if (!library.Resolved)
@@ -62,6 +67,19 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                 }
                 else
                 {
+                    // Store dependency -> library for later
+                    // J.N -> [(R1, P1), (R2, P2)]
+                    foreach (var dependency in library.Dependencies)
+                    {
+                        List<DependencyItem> items;
+                        if (!dependencies.TryGetValue(dependency.Name, out items))
+                        {
+                            items = new List<DependencyItem>();
+                            dependencies[dependency.Name] = items;
+                        }
+                        items.Add(new DependencyItem(dependency, library));
+                    }
+
                     foreach (var range in library.RequestedRanges)
                     {
                         // Skip libraries that aren't specified in a project.json
@@ -77,12 +95,13 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                             continue;
                         }
 
-
                         if (range.VersionRange == null)
                         {
                             // TODO: Show errors/warnings for things without versions
                             continue;
                         }
+
+                        topLevel.Add(library);
 
                         // If we ended up with a declared version that isn't what was asked for directly
                         // then report a warning
@@ -93,13 +112,48 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                             (range.VersionRange.IsFloating &&
                              !range.VersionRange.Float.Satisfies(library.Identity.Version)))
                         {
-                            var message = $"Dependency specified was {range} but ended up with {library.Identity}.";
+                            var message = $"Dependency specified was {FormatLibraryRange(range)} but ended up with {library.Identity}.";
 
-                            AddDiagnostics(messages,
-                                           library, 
-                                           message,
-                                           DiagnosticMessageSeverity.Warning,
-                                           ErrorCodes.NU1007);
+                            messages.Add(
+                            new DiagnosticMessage(
+                                ErrorCodes.NU1007,
+                                message,
+                                range.SourceFilePath,
+                                DiagnosticMessageSeverity.Warning,
+                                range.SourceLine,
+                                range.SourceColumn,
+                                library));
+                        }
+                    }
+                }
+            }
+
+            // Version conflicts
+            foreach (var library in topLevel)
+            {
+                List<DependencyItem> items;
+                if (dependencies.TryGetValue(library.Identity.Name, out items))
+                {
+                    foreach (var item in items)
+                    {
+                        var versionRange = item.Dependency.VersionRange;
+
+                        if (versionRange == null || item.Dependency.Target != LibraryType.Package)
+                        {
+                            continue;
+                        }
+
+                        if (library.Identity.Version.IsPrerelease && !versionRange.IncludePrerelease)
+                        {
+                            versionRange = VersionRange.SetIncludePrerelease(versionRange, includePrerelease: true);
+                        }
+
+                        if (item.Library != library && !versionRange.Satisfies(library.Identity.Version))
+                        {
+                            var errorCode = ErrorCodes.NU1012;
+                            var message = $"Dependency conflict. {item.Library.Identity} expected {FormatLibraryRange(item.Dependency)} but got {library.Identity.Version}";
+
+                            AddDiagnostics(messages, item.Library, message, DiagnosticMessageSeverity.Warning, errorCode);
                         }
                     }
                 }
@@ -115,7 +169,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                 return range.Name;
             }
 
-            return range.Name + " " + range.VersionRange;
+            return range.Name + " " + VersionUtility.RenderVersion(range.VersionRange);
         }
 
         private void AddDiagnostics(List<DiagnosticMessage> messages, 
@@ -162,6 +216,18 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                 {
                     yield return relevantPath;
                 }
+            }
+        }
+
+        private struct DependencyItem
+        {
+            public LibraryRange Dependency { get; private set; }
+            public LibraryDescription Library { get; private set; }
+
+            public DependencyItem(LibraryRange dependency, LibraryDescription library)
+            {
+                Dependency = dependency;
+                Library = library;
             }
         }
     }

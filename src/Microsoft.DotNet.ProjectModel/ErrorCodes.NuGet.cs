@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.ProjectModel
         // Invalid A section. The target B refers to a single file, but the pattern C produces multiple files. To mark the target as a directory, suffix it with '/'.
         public static readonly string NU1005 = nameof(NU1005);
 
-        // A. Please run \"dnu restore\" to generate a new lock file.
+        // A. Please run \"dotnet restore\" to generate a new lock file.
         public static readonly string NU1006 = nameof(NU1006);
 
         // Dependency specified was A but ended up with B.
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.ProjectModel
         // A is an unsupported framework.
         public static readonly string NU1008 = nameof(NU1008);
 
-        // The expected lock file doesn't exist. Please run \"dnu restore\" to generate a new lock file.
+        // The expected lock file doesn't exist. Please run \"dotnet restore\" to generate a new lock file.
         public static readonly string NU1009 = nameof(NU1009);
 
         // The dependency type was changed
@@ -37,5 +37,8 @@ namespace Microsoft.Extensions.ProjectModel
 
         // The dependency target '{0}' is unsupported.
         public static readonly string NU1011 = nameof(NU1011);
+
+        // Dependency conflict.
+        public static readonly string NU1012 = nameof(NU1012);
     }
 }
