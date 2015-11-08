@@ -204,7 +204,7 @@ namespace Microsoft.Extensions.ProjectModel
             }
 
             // Create a library manager
-            var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics);
+            var libraryManager = new LibraryManager(libraries.Values.ToList(), diagnostics, Project.ProjectFilePath);
 
             return new ProjectContext(
                 GlobalSettings,

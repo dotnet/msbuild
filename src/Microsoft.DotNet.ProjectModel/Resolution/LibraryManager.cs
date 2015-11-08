@@ -11,12 +11,15 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
     {
         private readonly IList<LibraryDescription> _libraries;
         private readonly IList<DiagnosticMessage> _diagnostics;
+        private readonly string _projectPath;
 
         public LibraryManager(IList<LibraryDescription> libraries,
-                              IList<DiagnosticMessage> diagnostics)
+                              IList<DiagnosticMessage> diagnostics,
+                              string projectPath)
         {
             _libraries = libraries;
             _diagnostics = diagnostics;
+            _projectPath = projectPath;
         }
 
         public IList<LibraryDescription> GetLibraries()
@@ -62,10 +65,18 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                     foreach (var range in library.RequestedRanges)
                     {
                         // Skip libraries that aren't specified in a project.json
+                        // Only report problems for this project
                         if (string.IsNullOrEmpty(range.SourceFilePath))
                         {
                             continue;
                         }
+
+                        // We only care about things requested in this project
+                        if (!string.Equals(_projectPath, range.SourceFilePath))
+                        {
+                            continue;
+                        }
+
 
                         if (range.VersionRange == null)
                         {
@@ -116,6 +127,12 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             // A (in project.json) -> B (unresolved) (not in project.json)
             foreach (var source in GetRangesWithSourceLocations(library).Distinct())
             {
+                // We only care about things requested in this project
+                if (!string.Equals(_projectPath, source.SourceFilePath))
+                {
+                    continue;
+                }
+
                 messages.Add(
                     new DiagnosticMessage(
                         errorCode,
@@ -130,7 +147,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
         }
 
         private IEnumerable<LibraryRange> GetRangesWithSourceLocations(LibraryDescription library)
-        {
+        { 
             foreach (var range in library.RequestedRanges)
             {
                 if (!string.IsNullOrEmpty(range.SourceFilePath))
