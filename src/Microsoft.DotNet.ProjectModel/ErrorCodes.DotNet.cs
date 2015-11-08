@@ -7,5 +7,8 @@ namespace Microsoft.Extensions.ProjectModel
     {
         // Target framework not installed
         public static readonly string DOTNET1011 = nameof(DOTNET1011);
+
+        // Reference assemblies location not specified
+        public static readonly string DOTNET1012 = nameof(DOTNET1012);
     }
 }

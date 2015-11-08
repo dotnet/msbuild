@@ -108,11 +108,6 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Create the library exporter
             var exporter = context.CreateExporter(configuration);
 
-            var diagnostics = new List<DiagnosticMessage>();
-
-            // Collect dependency diagnostics
-            diagnostics.AddRange(context.LibraryManager.GetAllDiagnostics());
-
             // Gather exports for the project
             var dependencies = exporter.GetDependencies().ToList();
 
@@ -150,6 +145,29 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
             var sw = Stopwatch.StartNew();
+
+            var diagnostics = new List<DiagnosticMessage>();
+            var missingFrameworkDiagnostics = new List<DiagnosticMessage>();
+
+            // Collect dependency diagnostics
+            foreach (var diag in context.LibraryManager.GetAllDiagnostics())
+            {
+                if (diag.ErrorCode == ErrorCodes.DOTNET1011 ||
+                    diag.ErrorCode == ErrorCodes.DOTNET1012)
+                {
+                    missingFrameworkDiagnostics.Add(diag);
+                }
+
+                diagnostics.Add(diag);
+            }
+
+            if (missingFrameworkDiagnostics.Count > 0)
+            {
+                // The framework isn't installed so we should short circuit the rest of the compilation
+                // so we don't get flooded with errors
+                PrintSummary(missingFrameworkDiagnostics, sw);
+                return false;
+            }
 
             // Dump dependency data
             // TODO: Turn on only if verbose, we can look at the response
@@ -240,11 +258,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                                  })
                                  .Execute();
 
-            foreach (var diag in diagnostics)
-            {
-                PrintDiagnostic(diag);
-            }
-
             var success = result.ExitCode == 0;
 
             if (success && compilationOptions.EmitEntryPoint.GetValueOrDefault())
@@ -255,10 +268,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                              runtimeContext.CreateExporter(configuration));
             }
 
-            PrintSummary(success, diagnostics);
-
-            Reporter.Output.WriteLine($"Time elapsed {sw.Elapsed}");
-            Reporter.Output.WriteLine();
+            PrintSummary(diagnostics, sw, success);
 
             return success;
         }
@@ -423,14 +433,16 @@ namespace Microsoft.DotNet.Tools.Compiler
             return "\"" + input.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
         }
 
-        private static void PrintSummary(bool success, List<DiagnosticMessage> diagnostics)
+        private static void PrintSummary(List<DiagnosticMessage> diagnostics, Stopwatch sw, bool success = true)
         {
+            PrintDiagnostics(diagnostics);
+
             Reporter.Output.WriteLine();
 
             var errorCount = diagnostics.Count(d => d.Severity == DiagnosticMessageSeverity.Error);
             var warningCount = diagnostics.Count(d => d.Severity == DiagnosticMessageSeverity.Warning);
 
-            if (errorCount > 0)
+            if (errorCount > 0 || !success)
             {
                 Reporter.Output.WriteLine("Compilation failed.".Red());
             }
@@ -442,6 +454,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             Reporter.Output.WriteLine($"    {warningCount} Warning(s)");
             Reporter.Output.WriteLine($"    {errorCount} Error(s)");
 
+            Reporter.Output.WriteLine();
+
+            Reporter.Output.WriteLine($"Time elapsed {sw.Elapsed}");
             Reporter.Output.WriteLine();
         }
 
@@ -553,6 +568,14 @@ namespace Microsoft.DotNet.Tools.Compiler
             return null;
         }
 
+        private static void PrintDiagnostics(List<DiagnosticMessage> diagnostics)
+        {
+            foreach (var diag in diagnostics)
+            {
+                PrintDiagnostic(diag);
+            }
+        }
+        
         private static void PrintDiagnostic(DiagnosticMessage diag)
         {
             switch (diag.Severity)

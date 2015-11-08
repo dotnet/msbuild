@@ -171,20 +171,36 @@ namespace Microsoft.Extensions.ProjectModel
                     DiagnosticMessageSeverity.Warning));
             }
 
-            if (requiresFrameworkAssemblies && !frameworkReferenceResolver.IsInstalled(TargetFramework))
+            if (requiresFrameworkAssemblies)
             {
                 var frameworkInfo = Project.GetTargetFramework(TargetFramework);
-                
-                // If there was an attempt to use reference assemblies but they were not installed
-                // report an error
-                diagnostics.Add(new DiagnosticMessage(
-                    ErrorCodes.DOTNET1011,
-                    $"Framework not installed: {TargetFramework.DotNetFrameworkName}",
-                    filePath: Project.ProjectFilePath,
-                    severity: DiagnosticMessageSeverity.Error,
-                    startLine: frameworkInfo.Line,
-                    startColumn: frameworkInfo.Column
-                ));
+
+                if (string.IsNullOrEmpty(ReferenceAssembliesPath))
+                {
+                    // If there was an attempt to use reference assemblies but they were not installed
+                    // report an error
+                    diagnostics.Add(new DiagnosticMessage(
+                        ErrorCodes.DOTNET1012,
+                        $"The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.",
+                        filePath: Project.ProjectFilePath,
+                        severity: DiagnosticMessageSeverity.Error,
+                        startLine: frameworkInfo.Line,
+                        startColumn: frameworkInfo.Column
+                    ));
+                }
+                else if (!frameworkReferenceResolver.IsInstalled(TargetFramework))
+                {
+                    // If there was an attempt to use reference assemblies but they were not installed
+                    // report an error
+                    diagnostics.Add(new DiagnosticMessage(
+                        ErrorCodes.DOTNET1011,
+                        $"Framework not installed: {TargetFramework.DotNetFrameworkName} in {ReferenceAssembliesPath}",
+                        filePath: Project.ProjectFilePath,
+                        severity: DiagnosticMessageSeverity.Error,
+                        startLine: frameworkInfo.Line,
+                        startColumn: frameworkInfo.Column
+                    ));
+                }
             }
 
             // Create a library manager
