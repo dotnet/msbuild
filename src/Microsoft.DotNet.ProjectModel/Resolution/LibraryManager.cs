@@ -39,7 +39,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             }
 
             var dependencies = new Dictionary<string, List<DependencyItem>>();
-            var topLevel = new List<LibraryDescription>();
+            var topLevel = new List<LibraryItem>();
 
             foreach (var library in GetLibraries())
             {
@@ -101,7 +101,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                             continue;
                         }
 
-                        topLevel.Add(library);
+                        topLevel.Add(new LibraryItem(range, library));
 
                         // If we ended up with a declared version that isn't what was asked for directly
                         // then report a warning
@@ -129,8 +129,15 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             }
 
             // Version conflicts
-            foreach (var library in topLevel)
+            foreach (var libraryItem in topLevel)
             {
+                var library = libraryItem.Library;
+
+                if (library.Identity.Type != LibraryType.Package)
+                {
+                    continue;
+                }
+
                 List<DependencyItem> items;
                 if (dependencies.TryGetValue(library.Identity.Name, out items))
                 {
@@ -138,7 +145,7 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
                     {
                         var versionRange = item.Dependency.VersionRange;
 
-                        if (versionRange == null || item.Dependency.Target != LibraryType.Package)
+                        if (versionRange == null)
                         {
                             continue;
                         }
@@ -150,10 +157,17 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
 
                         if (item.Library != library && !versionRange.Satisfies(library.Identity.Version))
                         {
-                            var errorCode = ErrorCodes.NU1012;
                             var message = $"Dependency conflict. {item.Library.Identity} expected {FormatLibraryRange(item.Dependency)} but got {library.Identity.Version}";
 
-                            AddDiagnostics(messages, item.Library, message, DiagnosticMessageSeverity.Warning, errorCode);
+                            messages.Add(
+                            new DiagnosticMessage(
+                                ErrorCodes.NU1012,
+                                message,
+                                libraryItem.RequestedRange.SourceFilePath,
+                                DiagnosticMessageSeverity.Warning,
+                                libraryItem.RequestedRange.SourceLine,
+                                libraryItem.RequestedRange.SourceColumn,
+                                library));
                         }
                     }
                 }
@@ -227,6 +241,18 @@ namespace Microsoft.Extensions.ProjectModel.Resolution
             public DependencyItem(LibraryRange dependency, LibraryDescription library)
             {
                 Dependency = dependency;
+                Library = library;
+            }
+        }
+
+        private struct LibraryItem
+        {
+            public LibraryRange RequestedRange { get; private set; }
+            public LibraryDescription Library { get; private set; }
+
+            public LibraryItem(LibraryRange requestedRange, LibraryDescription library)
+            {
+                RequestedRange = requestedRange;
                 Library = library;
             }
         }
