@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         internal static readonly OptionTemplate s_delaySignTemplate = new OptionTemplate("delay-sign");
 
-        internal static readonly OptionTemplate s_strongNameTemplate = new OptionTemplate("strong-name");
+        internal static readonly OptionTemplate s_ossSignTemplate = new OptionTemplate("oss-sign");
 
         internal static readonly OptionTemplate s_emitEntryPointTemplate = new OptionTemplate("emit-entry-point");
 
@@ -67,8 +67,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             syntax.DefineOption(s_delaySignTemplate.LongName, ref delaySign,
                     nullableBoolConverter, "Delay-sign the output assembly");
 
-            syntax.DefineOption(s_strongNameTemplate.LongName, ref strongName,
-                    nullableBoolConverter, "Strong-name sign the output assembly");
+            syntax.DefineOption(s_ossSignTemplate.LongName, ref strongName,
+                    nullableBoolConverter, "OSS sign the output assembly");
 
             syntax.DefineOption(s_emitEntryPointTemplate.LongName, ref emitEntryPoint,
                     nullableBoolConverter, "Output an executable console program");
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 Optimize = optimize,
                 KeyFile = keyFile,
                 DelaySign = delaySign,
-                StrongName = strongName,
+                UseOssSigning = strongName,
                 EmitEntryPoint = emitEntryPoint
             };
         }
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             var optimize = options.Optimize;
             var keyFile = options.KeyFile;
             var delaySign = options.DelaySign;
-            var strongName = options.StrongName;
+            var ossSign = options.UseOssSigning;
             var emitEntryPoint = options.EmitEntryPoint;
 
             var args = new List<string>();
@@ -143,9 +143,9 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 args.Add(s_delaySignTemplate.ToLongArg(delaySign));
             }
 
-            if (strongName != null)
+            if (ossSign != null)
             {
-                args.Add(s_strongNameTemplate.ToLongArg(strongName));
+                args.Add(s_ossSignTemplate.ToLongArg(ossSign));
             }
 
             if (emitEntryPoint != null)

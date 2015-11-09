@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.ProjectModel
 
         public bool? DelaySign { get; set; }
 
-        public bool? StrongName { get; set; }
+        public bool? UseOssSigning { get; set; }
 
         public bool? EmitEntryPoint { get; set; }
 
@@ -82,9 +82,9 @@ namespace Microsoft.Extensions.ProjectModel
                     result.DelaySign = option.DelaySign;
                 }
 
-                if (option.StrongName != null)
+                if (option.UseOssSigning != null)
                 {
-                    result.StrongName = option.StrongName;
+                    result.UseOssSigning = option.UseOssSigning;
                 }
 
                 if (option.EmitEntryPoint != null)
