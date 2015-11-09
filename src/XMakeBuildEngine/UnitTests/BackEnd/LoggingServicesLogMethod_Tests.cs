@@ -878,16 +878,38 @@ namespace Microsoft.Build.UnitTests.Logging
         [Fact]
         public void LogBuildStarted()
         {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogBuildStarted();
-            BuildStartedEventArgs buildEvent = new BuildStartedEventArgs(ResourceUtilities.FormatResourceString("BuildStarted"), null /* no help keyword */, service.ProcessedBuildEvent.Timestamp);
-            Assert.True(((BuildStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper) ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
 
-            service.ResetProcessedBuildEvent();
+            service.LogBuildStarted();
+
+            BuildStartedEventArgs buildEvent =
+                new BuildStartedEventArgs(
+                    ResourceUtilities.FormatResourceString("BuildStarted"), 
+                    null /* no help keyword */,
+                    service.ProcessedBuildEvent.Timestamp);
+
+            Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
+            Assert.Equal(buildEvent, (BuildStartedEventArgs) service.ProcessedBuildEvent,
+                new EventArgsEqualityComparer<BuildStartedEventArgs>());
+        }
+
+        [Fact]
+        public void LogBuildStartedCriticalOnly()
+        {
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper) ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.OnlyLogCriticalEvents = true;
             service.LogBuildStarted();
-            buildEvent = new BuildStartedEventArgs(string.Empty, null /* no help keyword */);
-            Assert.True(((BuildStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+
+            BuildStartedEventArgs buildEvent =
+                new BuildStartedEventArgs(
+                    string.Empty,
+                    null /* no help keyword */);
+
+            Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
+            Assert.Equal(buildEvent, (BuildStartedEventArgs) service.ProcessedBuildEvent,
+                new EventArgsEqualityComparer<BuildStartedEventArgs>());
         }
 
         /// <summary>
@@ -1710,6 +1732,19 @@ namespace Microsoft.Build.UnitTests.Logging
                 _processedBuildEvent = null;
             }
             #endregion
+        }
+
+        private class EventArgsEqualityComparer<T> : IEqualityComparer<T> where T : BuildEventArgs
+        {
+            public bool Equals(T x, T y)
+            {
+                return x.IsEquivalent(y);
+            }
+
+            public int GetHashCode(T obj)
+            {
+                throw new NotImplementedException();
+            }
         }
         #endregion
     }
