@@ -7,7 +7,6 @@
   <Import Project="..\dir.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="('$(NetCoreBuild)' != 'true' or '$(OsEnvironment)'!='Windows_NT') and Exists('$(MSBuildToolsPath)\Microsoft.CSharp.targets')"/>  
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" Condition="'$(NetCoreBuild)' == 'true' and '$(OsEnvironment)'=='Windows_NT'"/>
-  <Import Condition="'$(IsTraversalBuild)'!='true' and Exists('$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props')" Project="$(CompilerToolsDir)\..\build\Microsoft.Net.Compilers.props"/>
 
   <Import Condition="'$(OsEnvironment)'!='Windows_NT' and Exists('../override.targets')" Project="../override.targets" />
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
