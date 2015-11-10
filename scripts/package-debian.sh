@@ -14,7 +14,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/_common.sh"
 
 if [ "$UNAME" != "Linux" ]; then
-    errro "Debian Package build only supported on Linux"
+    error "Debian Package build only supported on Linux"
     exit 1
 fi
 
@@ -59,7 +59,7 @@ create_debian_package(){
 
     mkdir -p $PACKAGE_OUTPUT_DIR
 
-    $REPO_ROOT/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR
+    $REPO_ROOT/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR $DOTNET_BUILD_VERSION
 }
 
 test_debian_package(){
@@ -76,4 +76,4 @@ test_debian_package(){
 execute
 
 DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
-$DIR/publish.sh $DEBIAN_FILE
+$DIR/publish.sh $DEBIAN_FILE 

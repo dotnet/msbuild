@@ -3,7 +3,6 @@
 #
 # Relies on these environment variables:
 # PACKAGE_SOURCE_DIR :: Package Source Staging Directory
-# PACKAGE_DIR :: Package Build Directory
 # INSTALL_ROOT :: Absolute path of package installation root
 
 # write_debian_install_file

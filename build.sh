@@ -23,4 +23,4 @@ fi
 echo Building dotnet tools verison - $DOTNET_BUILD_VERSION
 
 $DIR/scripts/bootstrap.sh
-$DIR/scripts/package.sh $1
+$DIR/scripts/package.sh
