@@ -160,7 +160,7 @@ package_docs(){
 
 ## Generation Functions ##
 generate_config_templates(){
-    python ${SCRIPT_DIR}/scripts/config_template_generator.py $CONFIG $SCRIPT_DIR/templates/debian $DEBIAN_DIR
+    python ${SCRIPT_DIR}/scripts/config_template_generator.py $CONFIG $SCRIPT_DIR/templates/debian $DEBIAN_DIR $PACKAGE_VERSION
 }
 
 generate_manpages(){
