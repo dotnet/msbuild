@@ -71,37 +71,31 @@ namespace Microsoft.Build.BackEnd
         /// Magic number sent by the host to the client during the handshake.
         /// Derived from the binary timestamp to avoid mixing binary versions.
         /// </summary>
-        internal static long HostHandshake
+        internal static long GetHostHandshake()
         {
-            get
+            long baseHandshake = Constants.AssemblyTimestamp;
+            if (Environment.Is64BitProcess)
             {
-                long baseHandshake = Constants.AssemblyTimestamp;
-                if (Environment.Is64BitProcess)
+                unchecked
                 {
-                    unchecked
-                    {
-                        baseHandshake = baseHandshake ^ (long)0x8b8b8b8b8b8b8b8b;
-                    }
+                    baseHandshake = baseHandshake ^ (long) 0x8b8b8b8b8b8b8b8b;
                 }
-
-                baseHandshake = CommunicationsUtilities.GenerateHostHandshakeFromBase(baseHandshake, ClientHandshake);
-                return baseHandshake;
             }
+
+            baseHandshake = CommunicationsUtilities.GenerateHostHandshakeFromBase(baseHandshake, GetClientHandshake());
+            return baseHandshake;
         }
 
         /// <summary>
         /// Magic number sent by the client to the host during the handshake.
         /// Munged version of the host handshake.
         /// </summary>
-        internal static long ClientHandshake
+        internal static long GetClientHandshake()
         {
-            get
-            {
-                // Mask out the first byte. That's because old
-                // builds used a single, non zero initial byte,
-                // and we don't want to risk communicating with them
-                return (Constants.AssemblyTimestamp ^ Int64.MaxValue) & 0x00FFFFFFFFFFFFFF;
-            }
+            // Mask out the first byte. That's because old
+            // builds used a single, non zero initial byte,
+            // and we don't want to risk communicating with them
+            return (Constants.AssemblyTimestamp ^ Int64.MaxValue) & 0x00FFFFFFFFFFFFFF;
         }
 
         /// <summary>
@@ -129,7 +123,7 @@ namespace Microsoft.Build.BackEnd
 
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
-            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, NodeProviderOutOfProc.HostHandshake, NodeProviderOutOfProc.ClientHandshake, NodeContextTerminated);
+            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, NodeProviderOutOfProc.GetHostHandshake(), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
 
             if (null != context)
             {
@@ -181,7 +175,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            ShutdownAllNodes(NodeProviderOutOfProc.HostHandshake, NodeProviderOutOfProc.ClientHandshake, NodeContextTerminated);
+            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
         }
 
         #endregion

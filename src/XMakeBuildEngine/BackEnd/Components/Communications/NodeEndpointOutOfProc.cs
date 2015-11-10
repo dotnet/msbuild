@@ -61,7 +61,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetHostHandshake()
         {
-            return NodeProviderOutOfProc.HostHandshake;
+            return NodeProviderOutOfProc.GetHostHandshake();
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetClientHandshake()
         {
-            return NodeProviderOutOfProc.ClientHandshake;
+            return NodeProviderOutOfProc.GetClientHandshake();
         }
 
         #region Structs
