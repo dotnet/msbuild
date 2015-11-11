@@ -1,9 +1,13 @@
 {
   "dependencies": {
-      "Microsoft.Tpl.Dataflow": "4.5.24"
+    "Microsoft.Tpl.Dataflow": "4.5.24"
   },
   "frameworks": {
     "net451": { },
     "net46": { }
+  },
+  "runtimes": {
+    "win-": { },
+    "win": { }
   }
 }
