@@ -46,7 +46,7 @@ __check_pre_reqs() {
         [ -z "$(ldconfig -p | grep libssl)" ] && say_err "Unable to locate libssl. Install libssl to continue" && _failing=true
         [ -z "$(ldconfig -p | grep libcurl)" ] && say_err "Unable to locate libcurl. Install libcurl to continue" && _failing=true
         [ -z "$(ldconfig -p | grep libicu)" ] && say_err "Unable to locate libicu. Install libicu to continue" && _failing=true
-        [ -z "$(ldconfig -p | grep gettext)" ] && say_err "Unable to locate gettext. Install libicu to gettext" && _failing=true
+        [ -z "$(ldconfig -p | grep gettext)" ] && say_err "Unable to locate gettext. Install gettext to continue" && _failing=true
     fi
     
     if [ "$_failing" = true ]; then
@@ -68,9 +68,9 @@ _install_dotnet()
         printf "%b\n" "${red}curl is required to download dotnet. Install curl to proceed. ${normal}" >&2;
         return 1
     fi
-    
+
     if [ -e "/usr/local/share/dotnet/cli/dotnet" ] && [ ! -w "/usr/local/share/dotnet/cli/dotnet" ]; then
-        say_err "It looks like you already have the dotnet cli and it isn't writeable. If you are sure that you want to install the cli over the top of the currently installed version then run this command again with sudo."
+        say_err "dotnet cli is already installed and not writeable. Use 'curl -sSL <url> | sudo sh' to force install."
         say_err "If you have previously installed the cli using a pkg then that is why it is write protected, and you need to run sudo to install the new version."
         say_err "Alternatively, removing the '/usr/local/share/dotnet' directory completely before running the script will also resolve the issue."
         return 1
@@ -121,7 +121,7 @@ _install_dotnet()
             ln -s $f /usr/local/bin/
         fi
     done
-    
+
     say "Cleaning $dotnet_filename"
     rm "$installLocation/$dotnet_filename"
     [ $? != 0 ] && say_err "Failed to delete tar after extracting." && return 1
