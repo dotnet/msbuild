@@ -14,6 +14,14 @@ if(![string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION)) {
     $PackageVersion = "0.0.1-alpha-t$Timestamp"
 }
 
+# Stamp the output with the commit metadata and version number
+$Commit = git rev-parse HEAD
+
+@"
+$Commit
+$PackageVersion
+"@.Trim() > "$Stage2Dir/.version"
+
 $PackageName = Join-Path $PackageDir "dotnet-win-x64.$PackageVersion.zip"
 
 if (Test-Path $PackageName)

@@ -87,6 +87,15 @@ function UploadBinaries($zipFile)
         return -1
     }
 
+    # update the version file
+    $versionFile = Convert-Path (Join-Path $PSScriptRoot\..\artifacts\win7-x64\stage2\.version)
+    $Version_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/dnvm/latest.win.version$env:SASTOKEN"
+
+    if(-Not (UploadFile $Version_URI $versionFile))
+    {
+        return -1
+    }
+
     return 0
 }
 

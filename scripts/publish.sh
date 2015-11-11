@@ -15,6 +15,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+REPOROOT="$( cd -P "$SCRIPT_DIR/.." && pwd )"
 
 source "$SCRIPT_DIR/_common.sh"
 
@@ -139,8 +140,15 @@ upload_binaries_to_blob_storage(){
     # update the index file
     local indexContent="Binaries/$DOTNET_BUILD_VERSION/$filename"
     local indexfile="latest.$OSNAME.index"
-    local update_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$indexfile$SASTOKEN"
-    update_file_in_blob_storage $update_URL $indexfile $indexContent
+    local index_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$indexfile$SASTOKEN"
+    update_file_in_blob_storage $index_URL $indexfile $indexContent
+
+    # update the version file
+    local versionContent = $(cat $REPOROOT/artifacts/$RID/stage2/.version)
+    local versionfile="latest.$OSNAME.version"
+    local version_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$versionfile$SASTOKEN"
+    update_file_in_blob_storage $version_URL $versionfile $versionContent
+
     return $?
 }
 
