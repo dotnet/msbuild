@@ -17,5 +17,10 @@ RUN echo "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main" | tee 
 # Use clang as c++ compiler
 RUN update-alternatives --set c++ /usr/bin/clang++
 
+# Install azure cli. We need this to publish atrifacts.
+RUN apt-get install nodejs-legacy \
+    apt-get install npm \
+    npm install -g azure-cli
+
 # Set working directory
 WORKDIR /opt/code
