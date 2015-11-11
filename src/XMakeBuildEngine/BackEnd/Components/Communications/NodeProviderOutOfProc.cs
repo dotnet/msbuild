@@ -69,21 +69,21 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Magic number sent by the host to the client during the handshake.
-        /// Derived from the binary timestamp to avoid mixing binary versions.
+        /// Derived from the binary timestamp to avoid mixing binary versions,
+        /// Is64BitProcess to avoid mixing bitness, and enableNodeReuse to
+        /// ensure that a /nr:false build doesn't reuse clients left over from
+        /// a prior /nr:true build.
         /// </summary>
-        internal static long GetHostHandshake()
+        /// <param name="enableNodeReuse">Is reuse of build nodes allowed?</param>
+        internal static long GetHostHandshake(bool enableNodeReuse)
         {
             long baseHandshake = Constants.AssemblyTimestamp;
-            if (Environment.Is64BitProcess)
-            {
-                unchecked
-                {
-                    baseHandshake = baseHandshake ^ (long) 0x8b8b8b8b8b8b8b8b;
-                }
-            }
 
-            baseHandshake = CommunicationsUtilities.GenerateHostHandshakeFromBase(baseHandshake, GetClientHandshake());
-            return baseHandshake;
+            baseHandshake = baseHandshake*17 + Environment.Is64BitProcess.GetHashCode();
+
+            baseHandshake = baseHandshake*17 + enableNodeReuse.GetHashCode();
+
+            return CommunicationsUtilities.GenerateHostHandshakeFromBase(baseHandshake, GetClientHandshake());
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Microsoft.Build.BackEnd
 
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
-            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, NodeProviderOutOfProc.GetHostHandshake(), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
+            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
 
             if (null != context)
             {
@@ -175,7 +175,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
+            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
         }
 
         #endregion

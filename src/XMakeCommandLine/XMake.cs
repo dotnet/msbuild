@@ -1953,7 +1953,7 @@ namespace Microsoft.Build.CommandLine
                     if (nodeModeNumber == 1)
                     {
                         OutOfProcNode node = new OutOfProcNode();
-                        shutdownReason = node.Run(out nodeException);
+                        shutdownReason = node.Run(ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]), out nodeException);
                         FileUtilities.ClearCacheDirectory();
                     }
                     else if (nodeModeNumber == 2)
