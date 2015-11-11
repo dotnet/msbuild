@@ -115,10 +115,10 @@ namespace Microsoft.Build.BackEnd
             // want to start up just a standard MSBuild out-of-proc node. 
             string commandLineArgs = " /nologo /nodemode:1 ";
 
-            // Enable node re-use if it is set.
-            if (ComponentHost.BuildParameters.EnableNodeReuse)
+            // Disable node re-use if it is not requested (because no argument means enable reuse).
+            if (!ComponentHost.BuildParameters.EnableNodeReuse)
             {
-                commandLineArgs += "/nr";
+                commandLineArgs += "/nodeReuse:false";
             }
 
             // Make it here.
