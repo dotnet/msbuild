@@ -63,6 +63,67 @@
       },
       "xunit.runner.visualstudio/2.1.0-rc1-build1124": {}
     },
+    ".NETFramework,Version=v4.5.1/win": {
+      "Microsoft.Tpl.Dataflow/4.5.24": {
+        "compile": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        }
+      },
+      "xunit/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "xunit.assert": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]",
+          "xunit.core": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]"
+        }
+      },
+      "xunit.abstractions/2.0.0": {
+        "compile": {
+          "lib/net35/xunit.abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/net35/xunit.abstractions.dll": {}
+        }
+      },
+      "xunit.assert/2.1.0-rc1-build3168": {
+        "compile": {
+          "lib/dotnet/xunit.assert.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/xunit.assert.dll": {}
+        }
+      },
+      "xunit.core/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "xunit.extensibility.core": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]",
+          "xunit.extensibility.execution": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]"
+        }
+      },
+      "xunit.extensibility.core/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "xunit.abstractions": "[2.0.0, 2.0.0]"
+        },
+        "compile": {
+          "lib/dotnet/xunit.core.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/xunit.core.dll": {}
+        }
+      },
+      "xunit.extensibility.execution/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "xunit.extensibility.core": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]"
+        },
+        "compile": {
+          "lib/net35/xunit.execution.desktop.dll": {}
+        },
+        "runtime": {
+          "lib/net35/xunit.execution.desktop.dll": {}
+        }
+      },
+      "xunit.runner.visualstudio/2.1.0-rc1-build1124": {}
+    },
     ".NETFramework,Version=v4.5.1/win-": {
       "Microsoft.Tpl.Dataflow/4.5.24": {
         "compile": {
@@ -125,6 +186,67 @@
       "xunit.runner.visualstudio/2.1.0-rc1-build1124": {}
     },
     ".NETFramework,Version=v4.6": {
+      "Microsoft.Tpl.Dataflow/4.5.24": {
+        "compile": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
+        }
+      },
+      "xunit/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "xunit.assert": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]",
+          "xunit.core": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]"
+        }
+      },
+      "xunit.abstractions/2.0.0": {
+        "compile": {
+          "lib/net35/xunit.abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/net35/xunit.abstractions.dll": {}
+        }
+      },
+      "xunit.assert/2.1.0-rc1-build3168": {
+        "compile": {
+          "lib/dotnet/xunit.assert.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/xunit.assert.dll": {}
+        }
+      },
+      "xunit.core/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "xunit.extensibility.core": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]",
+          "xunit.extensibility.execution": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]"
+        }
+      },
+      "xunit.extensibility.core/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "xunit.abstractions": "[2.0.0, 2.0.0]"
+        },
+        "compile": {
+          "lib/dotnet/xunit.core.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/xunit.core.dll": {}
+        }
+      },
+      "xunit.extensibility.execution/2.1.0-rc1-build3168": {
+        "dependencies": {
+          "xunit.extensibility.core": "[2.1.0-rc1-build3168, 2.1.0-rc1-build3168]"
+        },
+        "compile": {
+          "lib/net35/xunit.execution.desktop.dll": {}
+        },
+        "runtime": {
+          "lib/net35/xunit.execution.desktop.dll": {}
+        }
+      },
+      "xunit.runner.visualstudio/2.1.0-rc1-build1124": {}
+    },
+    ".NETFramework,Version=v4.6/win": {
       "Microsoft.Tpl.Dataflow/4.5.24": {
         "compile": {
           "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
