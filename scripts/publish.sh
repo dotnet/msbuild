@@ -165,6 +165,7 @@ upload_installers_to_blob_storage(){
     # debain packages need to be uploaded to the PPA feed too
     if [[ $installfile == *.deb ]]; then
         DEB_FILE=$installfile
+        UPLOAD_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$blob"
         generate_repoclient_json
         call_repo_client
     fi
