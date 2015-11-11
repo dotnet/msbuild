@@ -33,8 +33,9 @@ if [[ "$(uname)" == "Linux" ]]; then
     [ ! -z "$BUILD_BUILDID" ] && container_name="$BUILD_BUILDID"
 
     export DOTNET_BUILD_CONTAINER_NAME="$container_name"
-
-    $SCRIPT_DIR/dockerbuild.sh debian $@
+    export PACKAGE_IN_DOCKER="true"
+    
+    $SCRIPT_DIR/../build.sh $@
 else
     $SCRIPT_DIR/../build.sh $@
 fi

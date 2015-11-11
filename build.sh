@@ -22,5 +22,16 @@ fi
 
 echo Building dotnet tools verison - $DOTNET_BUILD_VERSION
 
-$DIR/scripts/bootstrap.sh
-$DIR/scripts/package.sh
+if [ ! -z "$BUILD_IN_DOCKER" ]; then
+    export BUILD_COMMAND="/opt/code/scripts/bootstrap.sh"
+    $DIR/scripts/dockerbuild.sh
+else
+    $DIR/scripts/bootstrap.sh
+fi
+
+if [ ! -z "$PACKAGE_IN_DOCKER" ]; then
+    export BUILD_COMMAND="/opt/code/scripts/package.sh"
+    $DIR/scripts/dockerbuild.sh
+else
+    $DIR/scripts/package.sh
+fi    
