@@ -23,7 +23,8 @@ if [ -z "$DOTNET_BUILD_VERSION" ]; then
 fi
 
 COMMIT=$(git rev-parse HEAD)
-printf "$COMMIT\n$DOTNET_BUILD_VERSION\n" > $STAGE2_DIR/.version
+echo $COMMIT > $STAGE2_DIR/.version
+echo $DOTNET_BUILD_VERSION >> $STAGE2_DIR/.version
 
 # Create Dnvm Package
 $DIR/package-dnvm.sh
