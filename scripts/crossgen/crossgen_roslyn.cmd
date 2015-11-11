@@ -2,7 +2,7 @@
 
 REM Get absolute path
 pushd %1
-set BIN_DIR=%CD%
+set BIN_DIR=%CD%\bin
 popd
 
 REM Replace with a robust method for finding the right crossgen.exe

@@ -27,7 +27,7 @@ cecho()
     printf "%b\n" "$text"
 }
 
-banner()
+header()
 {
     local text=$1
     cecho "${BGre}*** $text ***${RCol}"
@@ -51,18 +51,34 @@ error()
     cecho "${Red}error:${RCol} $text" 1>&2
 }
 
-UNAME=$(uname)
+die()
+{
+    local text=$1
+    error "$text"
+    exit 1
+}
+
+export UNAME=$(uname)
 
 if [ -z "$RID" ]; then
     if [ "$UNAME" == "Darwin" ]; then
-        OSNAME=osx
-        RID=osx.10.10-x64
+        export OSNAME=osx
+        export RID=osx.10.10-x64
     elif [ "$UNAME" == "Linux" ]; then
         # Detect Distro?
-        OSNAME=linux
-        RID=ubuntu.14.04-x64
+        export OSNAME=linux
+        export RID=ubuntu.14.04-x64
     else
         error "unknown OS: $UNAME" 1>&2
         exit 1
     fi
 fi
+
+export OUTPUT_ROOT=$REPOROOT/artifacts/$RID
+export DNX_DIR=$OUTPUT_ROOT/dnx
+export STAGE1_DIR=$OUTPUT_ROOT/stage1
+export STAGE2_DIR=$OUTPUT_ROOT/stage2
+export HOST_DIR=$OUTPUT_ROOT/corehost
+
+# TODO: Replace this with a dotnet generation
+export TFM=dnxcore50

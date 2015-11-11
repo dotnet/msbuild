@@ -15,14 +15,14 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-REPOROOT="$( cd -P "$SCRIPT_DIR/.." && pwd )"
+REPOROOT="$( cd -P "$SCRIPT_DIR/../.." && pwd )"
 
-source "$SCRIPT_DIR/_common.sh"
+source "$SCRIPT_DIR/../_common.sh"
 
 UPLOAD_FILE=$1
 UPLOAD_JSON_FILE="package_upload.json"
 
-banner "Publishing package"
+header "Publishing package"
 
 execute(){
     if ! validate_env_variables; then
@@ -86,7 +86,7 @@ upload_file_to_blob_storage_azure_cli(){
     local blob=$1
     local file=$2
 
-    banner "Uploading $file to blob storage"
+    header "Uploading $file to blob storage"
 
     # use azure cli to upload to blob storage. We cannot use curl to do this becuase azure has a max limit of 64mb that can be uploaded using REST
     # statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $upload_URL -T $file)
@@ -107,7 +107,7 @@ update_file_in_blob_storage(){
     local file=$2
     local filecontent=$3
 
-    banner "Updating $file in blob storage"
+    header "Updating $file in blob storage"
 
     statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" -H "Content-Type: text/plain" $update_URL --data-binary $filecontent --request PUT )
 

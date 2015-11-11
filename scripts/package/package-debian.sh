@@ -11,14 +11,14 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/_common.sh"
+source "$DIR/../_common.sh"
 
 if [ "$UNAME" != "Linux" ]; then
     error "Debian Package build only supported on Linux"
     exit 1
 fi
 
-REPO_ROOT=$(readlink -f $DIR/..)
+REPO_ROOT=$(readlink -f $DIR/../..)
 
 OUTPUT_DIR="$REPO_ROOT/artifacts"
 PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/deb_intermediate"
@@ -33,7 +33,7 @@ execute(){
 }
 
 create_empty_debian_layout(){
-    banner "Creating empty debian package layout"
+    header "Creating empty debian package layout"
 
     rm -rf $PACKAGE_LAYOUT_DIR
     mkdir -p $PACKAGE_LAYOUT_DIR
@@ -45,7 +45,7 @@ create_empty_debian_layout(){
 }
 
 copy_files_to_debian_layout(){
-    banner "Copying files to debian layout"
+    header "Copying files to debian layout"
 
     # Copy Built Binaries
     cp -a "$REPO_BINARIES_DIR/." "$PACKAGE_LAYOUT_DIR/package_root"
@@ -55,7 +55,7 @@ copy_files_to_debian_layout(){
 }
 
 create_debian_package(){
-    banner "Packing .deb"
+    header "Packing .deb"
 
     mkdir -p $PACKAGE_OUTPUT_DIR
 
@@ -63,7 +63,7 @@ create_debian_package(){
 }
 
 test_debian_package(){
-    banner "Testing debian package"
+    header "Testing debian package"
 
     git clone https://github.com/sstephenson/bats.git /tmp/bats
     pushd /tmp/bats
@@ -76,4 +76,4 @@ test_debian_package(){
 execute
 
 DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
-$DIR/publish.sh $DEBIAN_FILE 
+$DIR/../publish/publish.sh $DEBIAN_FILE 

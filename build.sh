@@ -27,6 +27,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+source "$DIR/scripts/_common.sh"
+
 # UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
 LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
 
@@ -36,18 +38,18 @@ else
     export DOTNET_BUILD_VERSION=0.0.1-alpha-$(date -ud @$LAST_COMMIT_TIMESTAMP "+%Y%m%d-%H%M%S")
 fi
 
-echo Building dotnet tools verison - $DOTNET_BUILD_VERSION - $CONFIGURATION
+header "Building dotnet tools version $DOTNET_BUILD_VERSION - $CONFIGURATION"
 
 if [ ! -z "$BUILD_IN_DOCKER" ]; then
-    export BUILD_COMMAND="/opt/code/scripts/bootstrap.sh"
-    $DIR/scripts/dockerbuild.sh
+    export BUILD_COMMAND="/opt/code/scripts/compile.sh"
+    $DIR/scripts/docker/dockerbuild.sh
 else
-    $DIR/scripts/bootstrap.sh
+    $DIR/scripts/compile.sh
 fi
 
 if [ ! -z "$PACKAGE_IN_DOCKER" ]; then
-    export BUILD_COMMAND="/opt/code/scripts/package.sh"
-    $DIR/scripts/dockerbuild.sh
+    export BUILD_COMMAND="/opt/code/scripts/package/package.sh"
+    $DIR/scripts/docker/dockerbuild.sh
 else
-    $DIR/scripts/package.sh
+    $DIR/scripts/package/package.sh
 fi

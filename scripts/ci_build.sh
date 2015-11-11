@@ -11,6 +11,11 @@ SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$SCRIPT_DIR/_common.sh"
 
+# Tell install scripts to skip pre-req check since the CI has the pre-reqs but not ldconfig it seems
+# Also, install to a directory under the repo root since we don't have permission to work elsewhere
+export DOTNET_INSTALL_SKIP_PREREQS=1
+export DOTNET_INSTALL_DIR=$SCRIPT_DIR/../artifacts/$RID/stage0
+
 # Some things depend on HOME and it may not be set. We should fix those things, but until then, we just patch a value in
 if [ -z "$HOME" ]; then
     export HOME=$SCRIPT_DIR/../artifacts/home
@@ -34,7 +39,7 @@ if [[ "$(uname)" == "Linux" ]]; then
 
     export DOTNET_BUILD_CONTAINER_NAME="$container_name"
     export PACKAGE_IN_DOCKER="true"
-    
+
     $SCRIPT_DIR/../build.sh $@
 else
     $SCRIPT_DIR/../build.sh $@

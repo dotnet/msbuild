@@ -1,7 +1,4 @@
-$Rid = "win7-x64"
-$RepoRoot = Convert-Path (Split-Path -Parent $PSScriptRoot)
-$Stage2Dir = Join-Path $RepoRoot "artifacts\$RID\stage2"
-$PackageDir = Join-Path $RepoRoot "artifacts\packages\dnvm"
+. "$PSScriptRoot\..\_common.ps1"
 
 if(!(Test-Path $PackageDir)) {
     mkdir $PackageDir | Out-Null
@@ -17,10 +14,12 @@ if(![string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION)) {
 # Stamp the output with the commit metadata and version number
 $Commit = git rev-parse HEAD
 
-@"
+$VersionContent = @"
 $Commit
 $PackageVersion
-"@.Trim() | Out-File -Encoding UTF8 "$Stage2Dir/.version"
+"@
+
+$VersionContent | Out-File -Encoding UTF8 "$Stage2Dir\.version"
 
 $PackageName = Join-Path $PackageDir "dotnet-win-x64.$PackageVersion.zip"
 
@@ -34,7 +33,7 @@ Add-Type -Assembly System.IO.Compression.FileSystem
 
 Write-Host "Packaged stage2 to $PackageName"
 
-$PublishScript = Join-Path $PSScriptRoot "publish.ps1"
+$PublishScript = Join-Path $PSScriptRoot "..\publish\publish.ps1"
 & $PublishScript -file $PackageName
 
 exit $LastExitCode

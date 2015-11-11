@@ -8,9 +8,9 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/_common.sh"
+source "$DIR/../_common.sh"
 
-REPOROOT="$( cd -P "$DIR/.." && pwd )"
+REPOROOT="$( cd -P "$DIR/../.." && pwd )"
 
 if [ -z "$DOTNET_BUILD_VERSION" ]; then
     TIMESTAMP=$(date "+%Y%m%d%H%M%S")
@@ -32,22 +32,7 @@ PACKAGE_NAME=$PACKAGE_DIR/${PACKAGE_SHORT_NAME}.tar.gz
 
 cd $STAGE2_DIR
 
-# Correct all the mode flags
-banner "Packaging $PACKAGE_SHORT_NAME"
-
-# Managed code doesn't need 'x'
-find . -type f -name "*.dll" | xargs chmod 644
-find . -type f -name "*.exe" | xargs chmod 644
-
-# Generally, dylibs and sos have 'x' (no idea if it's required ;))
-if [ "$OSNAME" == "osx" ]; then
-    find . -type f -name "*.dylib" | xargs chmod 744
-else
-    find . -type f -name "*.so" | xargs chmod 744
-fi
-
-# Executables (those without dots) are executable :)
-find . -type f ! -name "*.*" | xargs chmod 755
+header "Packaging $PACKAGE_SHORT_NAME"
 
 # Tar up the stage2 artifacts
 # We need both "*" and ".version" to ensure we pick up that file
@@ -55,4 +40,4 @@ tar -czf $PACKAGE_NAME * .version
 
 info "Packaged stage2 to $PACKAGE_NAME"
 
-$DIR/publish.sh $PACKAGE_NAME
+$DIR/../publish/publish.sh $PACKAGE_NAME

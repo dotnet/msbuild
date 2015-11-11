@@ -20,25 +20,26 @@ fi
 # Replace with a robust method for finding the right crossgen.exe
 CROSSGEN_UTIL=~/.dnx/packages/runtime.$RID.Microsoft.NETCore.Runtime.CoreCLR/1.0.1-beta-23504/tools/crossgen
 
-pushd $BIN_DIR
+cd $BIN_DIR
 
 # Crossgen currently requires itself to be next to mscorlib
 cp $CROSSGEN_UTIL $BIN_DIR
 chmod +x crossgen
 
-./crossgen -nologo -platform_assemblies_paths $BIN_DIR mscorlib.dll 
+./crossgen -nologo -platform_assemblies_paths $BIN_DIR mscorlib.dll
 
-./crossgen -nologo -platform_assemblies_paths $BIN_DIR System.Collections.Immutable.dll 
+./crossgen -nologo -platform_assemblies_paths $BIN_DIR System.Collections.Immutable.dll
 
-./crossgen -nologo -platform_assemblies_paths $BIN_DIR System.Reflection.Metadata.dll 
+./crossgen -nologo -platform_assemblies_paths $BIN_DIR System.Reflection.Metadata.dll
 
-./crossgen -nologo -platform_assemblies_paths $BIN_DIR Microsoft.CodeAnalysis.dll 
+./crossgen -nologo -platform_assemblies_paths $BIN_DIR Microsoft.CodeAnalysis.dll
 
-./crossgen -nologo -platform_assemblies_paths $BIN_DIR Microsoft.CodeAnalysis.CSharp.dll 
+./crossgen -nologo -platform_assemblies_paths $BIN_DIR Microsoft.CodeAnalysis.CSharp.dll
 
-./crossgen -nologo -platform_assemblies_paths $BIN_DIR Microsoft.CodeAnalysis.VisualBasic.dll 
+./crossgen -nologo -platform_assemblies_paths $BIN_DIR Microsoft.CodeAnalysis.VisualBasic.dll
 
-./crossgen -MissingDependenciesOK -nologo -platform_assemblies_paths $BIN_DIR csc.exe
+./crossgen -MissingDependenciesOK -nologo -platform_assemblies_paths $BIN_DIR csc.dll
+[ -e csc.ni.exe ] && [ ! -e csc.ni.dll ] && mv csc.ni.exe csc.ni.dll
 
-./crossgen -MissingDependenciesOK -nologo -platform_assemblies_paths $BIN_DIR vbc.exe
-
+./crossgen -MissingDependenciesOK -nologo -platform_assemblies_paths $BIN_DIR vbc.dll
+[ -e vbc.ni.exe ] && [ ! -e vbc.ni.dll ] && mv vbc.ni.exe vbc.ni.dll

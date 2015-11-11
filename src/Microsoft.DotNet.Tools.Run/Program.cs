@@ -25,6 +25,8 @@ namespace Microsoft.DotNet.Tools.Run
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var preserveTemporaryOutput = app.Option("-t|--preserve-temporary", "Keep the output's temporary directory around", CommandOptionType.NoValue);
+
+            // This is required to be an option because otherwise we can't tell if the first argument is a project or the first argument to pass to an application
             var project = app.Option("-p|--project <PROJECT_PATH>", "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory.", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
@@ -108,10 +110,22 @@ namespace Microsoft.DotNet.Tools.Run
                 }
             }
 
+            // Locate the runtime
+            string runtime = Environment.GetEnvironmentVariable("DOTNET_HOME");
+            if (string.IsNullOrEmpty(runtime))
+            {
+                // Use the runtime deployed with the tools, if present
+                var candidate = Path.Combine(AppContext.BaseDirectory, "..", "runtime");
+                if (File.Exists(Path.Combine(candidate, Constants.LibCoreClrName)))
+                {
+                    runtime = Path.GetFullPath(candidate);
+                }
+            }
+
             result = Command.Create(outputName, string.Join(" ", remainingArguments))
                 .ForwardStdOut()
                 .ForwardStdErr()
-                .EnvironmentVariable("CLRHOST_CLR_PATH", AppContext.BaseDirectory)
+                .EnvironmentVariable("DOTNET_HOME", runtime)
                 .Execute();
 
             // Clean up

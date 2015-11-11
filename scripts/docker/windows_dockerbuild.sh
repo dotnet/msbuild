@@ -25,7 +25,7 @@ _convert_path(){
 }
 
 # Bypass Msys path conversion
-REPO_ROOT=$(readlink -f $DIR/..)
+REPO_ROOT=$(readlink -f $DIR/../..)
 REPO_ROOT=$(_convert_path $REPO_ROOT)
 
 VM_NAME="dotnet"
@@ -88,7 +88,7 @@ run_build(){
     export DOCKER_HOST_SHARE_DIR="$(_convert_path $VM_CODE_DIR)"
     export BUILD_COMMAND="//opt\\code\\build.sh"
 
-    $DIR/dockerbuild.sh debian
+    $DIR/../dockerbuild.sh debian
 }
 
 # This will duplicate the entire repo + any side effects from

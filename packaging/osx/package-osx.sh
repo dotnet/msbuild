@@ -14,15 +14,12 @@ if [ -z "$DOTNET_BUILD_VERSION" ]; then
     echo "Provide a version number (DOTNET_BUILD_VERSION) $DOTNET_BUILD_VERSION" && exit 1
 fi
 
-if [ -z "$RID" ]; then
-    UNAME=$(uname)
-    if [ "$UNAME" == "Darwin" ]; then
-        OSNAME=osx
-        RID=osx.10.10-x64
-    else
-        echo "Package (OSX) only runs on Darwin"
-        exit 0
-    fi
+if [ "$(uname)" == "Darwin" ]; then
+    OSNAME=osx
+    RID=osx.10.10-x64
+else
+    echo "Package (OSX) only runs on Darwin"
+    exit 0
 fi
 
 STAGE2_DIR=$REPOROOT/artifacts/$RID/stage2
@@ -36,7 +33,7 @@ PACKAGE_DIR=$REPOROOT/artifacts/packages/pkg
 [ -d "$PACKAGE_DIR" ] || mkdir -p $PACKAGE_DIR
 
 PACKAGE_NAME=$PACKAGE_DIR/dotnet-cli-x64.${DOTNET_BUILD_VERSION}.pkg
-chmod -R 755 $STAGE2_DIR
+#chmod -R 755 $STAGE2_DIR
 pkgbuild --root $STAGE2_DIR \
          --version $DOTNET_BUILD_VERSION \
          --scripts $DIR/scripts \
@@ -52,4 +49,4 @@ productbuild --version $DOTNET_BUILD_VERSION --identifier com.microsoft.dotnet.c
 rm $DIR/dotnet-osx-x64.$DOTNET_BUILD_VERSION.pkg
 rm $DIR/Dist
 
-$REPOROOT/scripts/publish.sh $PACKAGE_NAME
+$REPOROOT/scripts/publish/publish.sh $PACKAGE_NAME

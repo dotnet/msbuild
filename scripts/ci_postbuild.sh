@@ -12,7 +12,7 @@ if [[ "$(uname)" == "Linux" ]]; then
 
     export DOTNET_BUILD_CONTAINER_NAME="$container_name"
 
-    $SCRIPT_DIR/dockerpostbuild.sh $@
+    $SCRIPT_DIR/docker/dockerpostbuild.sh $@
 fi
 
 ret_code=$?

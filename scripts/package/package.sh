@@ -7,12 +7,9 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-REPOROOT="$( cd -P "$DIR/.." && pwd )"
+REPOROOT="$( cd -P "$DIR/../.." && pwd )"
 
-source "$DIR/_common.sh"
-
-OUTPUT_ROOT=$REPOROOT/artifacts/$RID
-STAGE2_DIR=$OUTPUT_ROOT/stage2
+source "$DIR/../_common.sh"
 
 echo "Starting packaging"
 
@@ -29,9 +26,11 @@ echo $DOTNET_BUILD_VERSION >> $STAGE2_DIR/.version
 # Create Dnvm Package
 $DIR/package-dnvm.sh
 
-if [[ "$(uname)" == "Linux" ]]; then
+if [[ "$UNAME" == "Linux" ]]; then
     # Create Debian package
     $DIR/package-debian.sh
+elif [[ "$UNAME" == "Darwin" ]]; then
+    # Create OSX PKG
+    $DIR/../../packaging/osx/package-osx.sh
 fi
 
-$DIR/../packaging/osx/package-osx.sh

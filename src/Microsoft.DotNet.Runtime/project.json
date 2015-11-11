@@ -1,0 +1,13 @@
+{
+  "compilationOptions": {
+      "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "Microsoft.NETCore.Runtime": "1.0.1-beta-23504"
+  },
+
+  "frameworks": {
+    "dnxcore50": { }
+  }
+}

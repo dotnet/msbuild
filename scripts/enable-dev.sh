@@ -1,6 +1,14 @@
-#!/usr/bin/env bash
+# This script is NOT executable. It MUST be sourced!
 
-SOURCE="${BASH_SOURCE[0]}"
+if [ ! -z "$BASH_SOURCE" ]; then
+    SOURCE="${BASH_SOURCE}"
+elif [ ! -z "$ZSH_VERSION" ]; then
+    SOURCE="$0"
+else
+    echo "Unsupported shell, this requires bash or zsh" 1>&2
+    exit 1
+fi
+
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
@@ -9,10 +17,9 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 REPOROOT="$( cd -P "$DIR/.." && pwd )"
 
-source "$DIR/_common.sh"
+UNAME=$(uname)
 
 if [ -z "$RID" ]; then
-    UNAME=$(uname)
     if [ "$UNAME" == "Darwin" ]; then
         OSNAME=osx
         RID=osx.10.10-x64
@@ -21,19 +28,9 @@ if [ -z "$RID" ]; then
         OSNAME=linux
         RID=ubuntu.14.04-x64
     else
-        echo "Unknown OS: $UNAME" 1>&2
+        error "unknown OS: $UNAME" 1>&2
         exit 1
     fi
 fi
 
-OUTPUT_ROOT=$REPOROOT/artifacts/$RID
-DNX_DIR=$OUTPUT_ROOT/dnx
-HOST_DIR=$OUTPUT_ROOT/clrhost
-STAGE1_DIR=$OUTPUT_ROOT/stage1
-STAGE2_DIR=$OUTPUT_ROOT/stage2
-
-DESTINATION=$(eval echo "~/.dotnet/sdks/dotnet-${OSNAME}-x64.0.0.1-dev")
-
-info "Symlinking $STAGE2_DIR to $DESTINATION"
-rm -f $DESTINATION
-ln -s $STAGE2_DIR $DESTINATION
+export DOTNET_TOOLS=$REPOROOT/artifacts/$RID/stage2
