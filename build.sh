@@ -3,6 +3,22 @@
 # $1 is passed to package to enable deb or pkg packaging
 set -e
 
+for i in "$@"
+    do
+        lowerI="$(echo $i | awk '{print tolower($0)}')"
+        case $lowerI in
+        release)
+            export CONFIGURATION=Release
+            ;;
+        debug)
+            export CONFIGURATION=Debug
+            ;;
+        *)
+        esac
+    done
+
+[ -z "$CONFIGURATION" ] && CONFIGURATION=Debug
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -20,7 +36,7 @@ else
     export DOTNET_BUILD_VERSION=0.0.1-alpha-$(date -ud @$LAST_COMMIT_TIMESTAMP "+%Y%m%d-%H%M%S")
 fi
 
-echo Building dotnet tools verison - $DOTNET_BUILD_VERSION
+echo Building dotnet tools verison - $DOTNET_BUILD_VERSION - $CONFIGURATION
 
 if [ ! -z "$BUILD_IN_DOCKER" ]; then
     export BUILD_COMMAND="/opt/code/scripts/bootstrap.sh"
@@ -34,4 +50,4 @@ if [ ! -z "$PACKAGE_IN_DOCKER" ]; then
     $DIR/scripts/dockerbuild.sh
 else
     $DIR/scripts/package.sh
-fi    
+fi

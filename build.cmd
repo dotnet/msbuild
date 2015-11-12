@@ -2,6 +2,13 @@
 
 setlocal EnableDelayedExpansion
 
+for %%a IN (%*) DO (
+  if /I "%%a"=="release" set CONFIGURATION=Release
+  if /I "%%a"=="debug" set CONFIGURATION=Debug
+)
+
+if "%CONFIGURATION%" equ "" set CONFIGURATION=Debug
+
 REM UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
 REM Using powershell is way easier to retrive and format the timestamp in any way we want.
 set LAST_COMMIT_TIMESTAMP=powershell -Command "& { $timestamp = git log -1 --format=%%ct ; $origin = New-Object -Type DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0; $commitTime = $origin.AddSeconds($timestamp); echo $commitTime.ToString(\"yyyyMMdd-HHmmss\");}"
@@ -17,7 +24,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 :continue
-echo *** Building dotnet ***
+echo *** Building dotnet - %CONFIGURATION% ***
 call %~dp0scripts/bootstrap.cmd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
