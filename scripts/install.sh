@@ -65,7 +65,7 @@ say() {
 _install_dotnet()
 {
     if ! __machine_has "curl"; then
-        printf "%b\n" "${red}curl is required to download dotnet. Install curl to proceed. ${normal}" >&2;
+        printf "%b\n" "${red}curl is required to download dotnet. Install curl to proceed. ${normal}" >&2
         return 1
     fi
 
@@ -81,10 +81,25 @@ _install_dotnet()
         say_err "Ending install due to missing pre-reqs"
         return 1;
     fi
-
+    local os=$(__current_os)
     local installLocation="/usr/local/share/dotnet"
     local dotnet_url="https://dotnetcli.blob.core.windows.net/dotnet/dev/Binaries/Latest"
-    local dotnet_filename="dotnet-$(__current_os)-x64.latest.tar.gz"
+    local dotnet_filename="dotnet-$os-x64.latest.tar.gz"
+
+    local remoteData="$(curl -s https://dotnetcli.blob.core.windows.net/dotnet/dev/dnvm/latest.$os.version)"
+    [ $? != 0 ] && say_err "Unable to determine latest version." && return 1
+
+    local remoteVersion=$(IFS="\n" && echo $remoteData | tail -n 1)
+    local remoteHash=$(IFS="\n" && echo $remoteData | head -n 1)
+
+    local localVersion=$(tail -n 1 "$installLocation/cli/.version" 2>/dev/null)
+    [ -z $localVersion ] && localVersion='<none>'
+    local localHash=$(head -n 1 "$installLocation/cli/.version" 2>/dev/null)
+
+    say "Latest Version: $remoteVersion"
+    say "Local Version: $localVersion"
+    
+    [ "$remoteHash" = "$localHash" ] && say "${green}You already have the latest version.${normal}" && return 0
 
     #This should noop if the directory already exists.
     mkdir -p $installLocation
@@ -114,10 +129,17 @@ _install_dotnet()
     for f in $(find "$installLocation/cli" -regex ".*/dotnet[a-z\-]*$")
     do
         local baseFile=$(basename $f)
-        if [ -e "/usr/local/bin/$baseFile" ]; then
-            say "${yellow}$baseFile already exists in /usr/local/bin. Skipping symlink...${normal}"
+        local symlinkFile="/usr/local/bin/$baseFile"
+        say "Linking $symlinkFile -> $f"
+        if [ -e $symlinkFile ]; then
+            if [ -h $symlinkFile ]; then
+                ln -sf $f /usr/local/bin/
+            else
+                say "${yellow}$symlinkFile is a file rather than a symlink. We are overwriting it with a symlink.${normal}"
+                rm $symlinkFile
+                ln -s $f /usr/local/bin/
+            fi
         else
-            say "linking $baseFile"
             ln -s $f /usr/local/bin/
         fi
     done
@@ -126,5 +148,4 @@ _install_dotnet()
     rm "$installLocation/$dotnet_filename"
     [ $? != 0 ] && say_err "Failed to delete tar after extracting." && return 1
 }
-
 _install_dotnet
