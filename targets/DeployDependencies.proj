@@ -25,7 +25,8 @@
   <PropertyGroup>
     <RuntimeProjectJson>$(MSBuildThisFileDirectory)\runtime.project.json</RuntimeProjectJson>
     <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)\runtime.project.lock.json</RuntimeProjectLockJson>
-    <RestoreRuntimePackagesCommand>"$(NuGetToolPath)" restore $(RuntimeProjectJson)</RestoreRuntimePackagesCommand>
+    <RestoreRuntimePackagesCommand>"$(NuGetToolPath)" restore $(RuntimeProjectJson) -Verbosity detailed</RestoreRuntimePackagesCommand>
+    <RestoreRuntimePackagesCommand Condition="'$(OsEnvironment)'!='Windows_NT' and '$(MonoBuild)' == 'true'">export MONO_THREADS_PER_CPU=2000; mono $(RestoreRuntimePackagesCommand)</RestoreRuntimePackagesCommand>
     <RuntimeDirectory Condition="'$(RuntimeDirectory)' ==''">$(OutputPath)</RuntimeDirectory>
     <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
   </PropertyGroup>
@@ -38,8 +39,7 @@
     <!-- Work around https://github.com/Microsoft/msbuild/issues/262 by running restore
          a second time to get the correct .lock.json file in place.  This is inefficient
          but shouldn't take too long since the packages should all already be downloaded. -->
-    <Exec Condition="'$(OsEnvironment)'=='Windows_NT'" Command="$(RestoreRuntimePackagesCommand)" StandardOutputImportance="Low" />
-    <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;@(ProjectJsonFile)&quot;" />
+    <Exec Command="$(RestoreRuntimePackagesCommand)" StandardOutputImportance="Low" />
 
     <!-- It appears that NuGet doesn't re-write the project.lock.json file if the contents would be the same. This can mess up incremental builds
         if you make a non-significant change to project.json.  To avoid that, update the timestamp of the lock file here. -->
@@ -55,7 +55,7 @@
                                RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
                                ProjectLanguage=""
                                ProjectLockFile="$(RuntimeProjectLockJson)"
-                               TargetMonikers="DNXCore,Version=v5.0">
+                               TargetMonikers="$(NuGetTargetMoniker)">
 
       <!--<Output TaskParameter="ResolvedAnalyzers" ItemName="Analyzer" />-->
       <Output TaskParameter="ResolvedCopyLocalItems" ItemName="ResolvedRuntimeFiles" />

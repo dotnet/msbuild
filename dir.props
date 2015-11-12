@@ -25,7 +25,7 @@
    <!-- Common repo directories -->
   <PropertyGroup>
     <BuildToolsVersion>1.0.25-prerelease-00115</BuildToolsVersion>
-    <CompilerToolsVersion>1.0.0</CompilerToolsVersion>
+    <CompilerToolsVersion>1.1.0-rc1</CompilerToolsVersion>
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
@@ -83,8 +83,13 @@
 
   <!-- Set default Configuration and Platform -->
   <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' ==''">Debug</Configuration>
     <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
+    <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' ==''">
+    <Configuration Condition="'$(OS)' == 'Windows_NT'">Debug</Configuration>
+    <Configuration Condition="'$(OS)' != 'Windows_NT'">Debug-MONO</Configuration>
   </PropertyGroup>
 
   <!-- Setup Default symbol and optimization for Configuration -->
@@ -93,39 +98,38 @@
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
-    <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
-    <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD;MONO</DefineConstants>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+    <MonoBuild>true</MonoBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
     <MsbuildDebugger>true</MsbuildDebugger>
-    <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
-    <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD;MONO</DefineConstants>
+    <MonoBuild>true</MonoBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">full</DebugType>
-    <DefineConstants>$(DefineConstants);DEBUG;TRACE;STANDALONEBUILD</DefineConstants>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release-NetCore'">
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">pdbonly</DebugType>
-    <DefineConstants>$(DefineConstants);TRACE;STANDALONEBUILD</DefineConstants>
     <NetCoreBuild>true</NetCoreBuild>
   </PropertyGroup>
 
@@ -140,7 +144,7 @@
     <TargetSystem Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT'">Windows</TargetSystem>
     <TargetSystem Condition="'$(TargetPlatformIdentifier)' == 'Unix'">Ubuntu</TargetSystem>
     <TargetSystem Condition="'$(TargetPlatformIdentifier)' == 'OSX'">OSX</TargetSystem>
-    <TargetSystem Condition="$([System.String]::Copy($(Configuration)).Contains('MONO'))">MONO</TargetSystem>
+    <TargetSystem Condition="'$(MonoBuild)' == 'true'">MONO</TargetSystem>
     <TargetSystem Condition="'$(NetCoreBuild)' == 'true'">$(TargetSystem)_NetCore</TargetSystem>
 
     <RuntimeArchitecture>x64</RuntimeArchitecture>
@@ -149,6 +153,9 @@
   <PropertyGroup>
     <PlatformTarget>$(RuntimeArchitecture)</PlatformTarget>
     <ImportGetNuGetPackageVersions Condition="'$(OS)' != 'Windows_NT'">false</ImportGetNuGetPackageVersions>
+    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' == 'true'">DNXCore,Version=v5.0</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(MonoBuild)' == 'true'">.NETFramework,Version=v4.5.1</NuGetTargetMoniker>
+    <NuGetTargetMoniker Condition="'$(NetCoreBuild)' != 'true' and '$(MonoBuild)' != 'true'">.NETFramework,Version=v4.6</NuGetTargetMoniker>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
@@ -175,7 +182,6 @@
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
     <TargetFrameworkIdentifier>DNXCore</TargetFrameworkIdentifier>
-    <NuGetTargetMoniker>DNXCore,Version=v5.0</NuGetTargetMoniker>
     <NetCoreSurface>true</NetCoreSurface>
 
     <!-- Setting this to false stops the AppX targets, which aren't supported on .NET Core, from beeing imported -->
@@ -186,16 +192,16 @@
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
-    <FeatureAppDomain>true</FeatureAppDomain>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
+    <FeatureAppDomain Condition="'$(MonoBuild)' != 'true'">true</FeatureAppDomain>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOADFROM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOCATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CULTUREINFO</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_BINARY_SERIALIZATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
@@ -204,9 +210,9 @@
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_CONSOLE_FALLBACK</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_GETCULTURES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DOTNETVERSION</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_FUSION_COMPAREASSEMBLYIDENTITY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GAC</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
@@ -228,14 +234,14 @@
     <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RESX_RESOURCE_READER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RUN_EXE_IN_TESTS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PRINCIPAL_WINDOWS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SPECIAL_FOLDERS</DefineConstants>
     <FeatureSpecialFolders>true</FeatureSpecialFolders>
     <DefineConstants>$(DefineConstants);FEATURE_STRING_INTERN</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_STRONG_NAMES</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_SYSTEM_CONFIGURATION</DefineConstants>
-    <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_SYSTEM_CONFIGURATION</DefineConstants>
+    <FeatureSystemConfiguration Condition="'$(MonoBuild)' != 'true'">true</FeatureSystemConfiguration>
     <DefineConstants>$(DefineConstants);FEATURE_TASK_GENERATERESOURCES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_TASKHOST</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
@@ -249,10 +255,16 @@
     <FeatureXamlTypes>true</FeatureXamlTypes>
     <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XML_LOADPATH</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XMLTEXTREADER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition="'$(MonoBuild)'=='true'">$(DefineConstants);MONO</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(NetCoreSurface)' == 'true'">
 
     <!-- Indicates whether CultureInfo has setters for the CurrentCulture and CurrentUICulture properties.
@@ -263,11 +275,11 @@
   </PropertyGroup>
 
   <!-- Change define constants as needed -->
-  <PropertyGroup Condition="'$(MsbuildDebugger)' == 'true'">
+  <PropertyGroup Condition="'$(MsbuildDebugger)' == 'true' AND '$(MonoBuild)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT'">
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT' or '$(MonoBuild)' == 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
   </PropertyGroup>
 

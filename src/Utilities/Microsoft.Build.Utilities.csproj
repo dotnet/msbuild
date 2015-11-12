@@ -23,12 +23,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' OR '$(OS)' != 'Windows_NT'">
-    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+  <ItemGroup >
+    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <!-- Source Files -->
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>EnvironmentUtilities.cs</Link>

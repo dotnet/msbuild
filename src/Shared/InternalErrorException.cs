@@ -111,7 +111,7 @@ namespace Microsoft.Build.Shared
 
             if (Environment.GetEnvironmentVariable("MSBUILDLAUNCHDEBUGGER") != null)
             {
-#if !MONO
+#if FEATURE_DEBUG_LAUNCH
                 Debug.Fail(message, innerMessage);
                 Debugger.Launch();
 #endif
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Shared
             if (!FileUtilities.RunningTests && Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
                 && Environment.GetEnvironmentVariable("_NTROOT") == null)
             {
-#if !MONO
+#if FEATURE_DEBUG_LAUNCH
                 Debug.Fail(message, innerMessage);
                 Debugger.Launch();
 #endif

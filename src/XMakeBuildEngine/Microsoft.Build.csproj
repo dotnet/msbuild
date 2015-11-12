@@ -36,9 +36,6 @@
     <Compile Include="..\Shared\Compat\BinHexEncoder.cs">
       <Link>SharedUtilities\Compat\BinHexEncoder.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
-      <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\Compat\SecureStringHasher.cs">
       <Link>SharedUtilities\Compat\SecureStringHasher.cs</Link>
     </Compile>
@@ -66,10 +63,13 @@
     <Compile Include="..\Shared\Compat\SerializableAttribute.cs">
       <Link>SharedUtilities\Compat\SerializableAttribute.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\Shared\Compat\defaultbinder.cs">
       <Link>SharedUtilities\Compat\defaultbinder.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+      <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Compat\parametermodifier.cs">
       <Link>SharedUtilities\Compat\parametermodifier.cs</Link>
@@ -662,7 +662,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" />
+    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(NetCoreBuild)'=='true'"/>
     <Compile Include="..\Shared\TypeLoader.cs">
       <Link>SharedUtilities\TypeLoader.cs</Link>
     </Compile>

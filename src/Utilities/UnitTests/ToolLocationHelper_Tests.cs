@@ -380,7 +380,7 @@ namespace Microsoft.Build.UnitTests
          * Search for a whidbey when whidbey is the current version.
          */
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void FindFrameworksPathRunningUnderWhidbey()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
@@ -773,7 +773,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact (Skip="Registry SDKs not supported")]
 #endif
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void GetPathToDotNetFrameworkSdk()
         {
             // Test out of range .net version.
@@ -853,7 +853,7 @@ namespace Microsoft.Build.UnitTests
 #pragma warning disable 618 //The test below tests a deprecated API. We disable the warning for obsolete methods for this particular test
 #if FEATURE_WIN32_REGISTRY
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void GetPathToWindowsSdk()
         {
             // Test out of range .net version.
@@ -1853,7 +1853,7 @@ namespace Microsoft.Build.UnitTests
 #else
         [Fact(Skip = "Special folders not supported")]
 #endif
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void TestGenerateProgramFiles32()
         {
             string programFilesX86Original = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
@@ -1879,7 +1879,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we get the correct reference assembly path out of the framework location helper
         /// </summary>
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // "No ProgramFiles known location outside Windows"
+        [PlatformSpecific(Xunit.PlatformID.Windows)] // "No ProgramFiles known location outside Windows"
         public void TestGeneratedReferenceAssemblyPath()
         {
             string programFiles32 = FrameworkLocationHelper.GenerateProgramFiles32();
@@ -2375,7 +2375,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we can get a list of directories out of the public API.
         /// </summary>
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void GetAssemblyFoldersExInfoTest()
         {
             SetupAssemblyFoldersExTestConditionRegistryKey();
@@ -2897,7 +2897,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we get no resolved paths when we pass in a root with invalid chars
         /// </summary>
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // No invalid characters on Unix
+        [PlatformSpecific(Xunit.PlatformID.Windows)] // No invalid characters on Unix
         public void ResolveFromDirectoryInvalidChar()
         {
             Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform =

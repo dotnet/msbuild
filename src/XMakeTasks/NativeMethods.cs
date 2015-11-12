@@ -975,13 +975,12 @@ namespace Microsoft.Build.Tasks
             const uint AllDriveMask = 0x0cffffff;
             if (NativeMethodsShared.IsWindows)
             {
-                // No limit to drive mount points
-                return false;
+                var driveMask = GetLogicalDrives();
+                // All drives are taken if the value has all 26 bits set
+                return driveMask >= AllDriveMask;
             }
 
-            var driveMask = GetLogicalDrives();
-            // All drives are taken if the value has all 26 bits set
-            return driveMask >= AllDriveMask;
+            return false;
         }
 
 #if FEATURE_COM_INTEROP

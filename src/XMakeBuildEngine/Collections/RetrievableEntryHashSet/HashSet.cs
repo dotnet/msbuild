@@ -90,7 +90,7 @@ namespace Microsoft.Build.Collections
     public class HashSet<T> : ICollection<T>, ISet<T>
 #else
     [Serializable()]
-#if !MONO && FEATURE_SECURITY_PERMISSIONS
+#if FEATURE_SECURITY_PERMISSIONS
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
     internal class RetrievableEntryHashSet<T> : ICollection<T>,
@@ -1736,7 +1736,7 @@ namespace Microsoft.Build.Collections
 
 #if !SILVERLIGHT
         [Serializable()]
-#if !MONO && FEATURE_SECURITY_PERMISSIONS
+#if FEATURE_SECURITY_PERMISSIONS
         [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
 #endif

@@ -280,7 +280,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(unquoteParameters);
         }
 
-#if !MONO
+#if FEATURE_APPDOMAIN
         [Fact]
         public void NodeReuseParametersIdentificationTests()
         {
@@ -600,7 +600,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Null(duplicateSwitchErrorMessage);
         }
 
-#if !MONO && FEATURE_APPDOMAIN
+#if FEATURE_APPDOMAIN
         [Fact]
         public void MaxCPUCountSwitchIdentificationTests()
         {

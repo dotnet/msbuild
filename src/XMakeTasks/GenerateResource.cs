@@ -3293,11 +3293,13 @@ namespace Microsoft.Build.Tasks
             {
                 provider = CodeDomProvider.CreateProvider(stronglyTypedLanguage);
             }
+#if FEATURE_SYSTEM_CONFIGURATION
             catch (ConfigurationException e)
             {
                 logger.LogErrorWithCodeFromResources("GenerateResource.STRCodeDomProviderFailed", stronglyTypedLanguage, e.Message);
                 return false;
             }
+#endif
             catch (SecurityException e)
             {
                 logger.LogErrorWithCodeFromResources("GenerateResource.STRCodeDomProviderFailed", stronglyTypedLanguage, e.Message);

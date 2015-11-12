@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             // blank out the path so that we know we're not inadvertently depending on it.
             s_oldPath = Environment.GetEnvironmentVariable("PATH");
 
-            if (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix)
+            if (Environment.OSVersion.Platform == System.PlatformID.MacOSX || Environment.OSVersion.Platform == System.PlatformID.Unix)
             {
                 Environment.SetEnvironmentVariable("PATH", "/sbin:/bin");
             }

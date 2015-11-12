@@ -563,7 +563,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)] // Nothing's too long for Unix
+        [PlatformSpecific(Xunit.PlatformID.Windows)] // Nothing's too long for Unix
         public void IllegalTooLongPath()
         {
             string longString = new string('X', 500) + "*"; // need a wildcard to do anything

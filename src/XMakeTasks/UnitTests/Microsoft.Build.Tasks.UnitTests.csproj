@@ -113,7 +113,7 @@
     <Compile Include="GenerateResourceOutOfProc_Tests.cs" />
     <Compile Include="GetInstalledSDKLocations_Tests.cs" />
     <Compile Include="GetSDKReference_Tests.cs" />
-    <Compile Include="LC_Tests.cs" />
+    <Compile Include="LC_Tests.cs" Condition="'$(MonoBuild)' != 'true'" />
     <Compile Include="MockTypeInfo.cs" />
     <Compile Include="MockTypeLib.cs" />
     <Compile Include="ResGen_Tests.cs" />
