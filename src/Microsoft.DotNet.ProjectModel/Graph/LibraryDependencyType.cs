@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.ProjectModel.Graph
     {
         private readonly LibraryDependencyTypeFlag _flags;
 
-        public static LibraryDependencyType Default = new LibraryDependencyType();
+        public static LibraryDependencyType Default = LibraryDependencyType.Parse("default");
 
         private LibraryDependencyType(LibraryDependencyTypeFlag flags)
         {

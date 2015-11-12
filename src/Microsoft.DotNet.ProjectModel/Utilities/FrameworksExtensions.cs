@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.Versioning;
 
 namespace NuGet.Frameworks
 {
@@ -8,13 +9,45 @@ namespace NuGet.Frameworks
         public static string GetTwoDigitShortFolderName(this NuGetFramework self)
         {
             var original = self.GetShortFolderName();
-
-            var digits = original.SkipWhile(c => !char.IsDigit(c)).ToArray();
-            if(digits.Length == 1)
+            var index = 0;
+            for (; index < original.Length; index++)
             {
-                return original + "0";
+                if (char.IsDigit(original[index]))
+                {
+                    break;
+                }
             }
-            return original;
+
+            var versionPart = original.Substring(index);
+
+            // Assume if the version part was preserved then leave it alone
+            if (versionPart.IndexOf('.') != -1)
+            {
+                return original;
+            }
+
+            var name = original.Substring(0, index);
+            var version = self.Version.ToString(2);
+
+            if (self.Framework.Equals(FrameworkConstants.FrameworkIdentifiers.NetPlatform))
+            {
+                return name + version;
+            }
+
+            return name + version.Replace(".", string.Empty);
+        }
+
+        // NuGet.Frameworks doesn't have the equivalent of the old VersionUtility.GetFrameworkString
+        // which is relevant for building packages
+        public static string GetFrameworkString(this NuGetFramework self)
+        {
+            var frameworkName = new FrameworkName(self.DotNetFrameworkName);
+            string name = frameworkName.Identifier + frameworkName.Version;
+            if (string.IsNullOrEmpty(frameworkName.Profile))
+            {
+                return name;
+            }
+            return name + "-" + frameworkName.Profile;
         }
     }
 }

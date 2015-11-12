@@ -5,9 +5,9 @@ using NuGet.Versioning;
 
 namespace Microsoft.Extensions.ProjectModel.Utilities
 {
-    internal static class VersionUtility
+    public static class VersionUtility
     {
-        public static NuGetVersion GetAssemblyVersion(string path)
+        internal static NuGetVersion GetAssemblyVersion(string path)
         {
             return new NuGetVersion(AssemblyLoadContext.GetAssemblyName(path).Version);
         }

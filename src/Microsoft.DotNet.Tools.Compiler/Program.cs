@@ -268,9 +268,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                              runtimeContext.CreateExporter(configuration));
             }
 
-            PrintSummary(diagnostics, sw, success);
-
-            return success;
+            return PrintSummary(diagnostics, sw, success);
         }
 
         private static string GetProjectOutput(Project project, NuGetFramework framework, string configuration, string outputPath)
@@ -433,7 +431,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             return "\"" + input.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
         }
 
-        private static void PrintSummary(List<DiagnosticMessage> diagnostics, Stopwatch sw, bool success = true)
+        private static bool PrintSummary(List<DiagnosticMessage> diagnostics, Stopwatch sw, bool success = true)
         {
             PrintDiagnostics(diagnostics);
 
@@ -445,6 +443,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             if (errorCount > 0 || !success)
             {
                 Reporter.Output.WriteLine("Compilation failed.".Red());
+                success = false;
             }
             else
             {
@@ -458,6 +457,8 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             Reporter.Output.WriteLine($"Time elapsed {sw.Elapsed}");
             Reporter.Output.WriteLine();
+
+            return success;
         }
 
         private static bool AddResources(Project project, List<string> compilerArgs, string intermediateOutputPath)

@@ -9,11 +9,6 @@ namespace Microsoft.Extensions.ProjectModel.Utilities
 {
     internal static class PathUtility
     {
-        public static bool IsPlaceholderFile(string path)
-        {
-            return string.Equals(Path.GetFileName(path), "_._", StringComparison.Ordinal);
-        }
-
         public static bool IsChildOfDirectory(string dir, string candidate)
         {
             if (dir == null)

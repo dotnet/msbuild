@@ -220,7 +220,7 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
         {
             foreach (var assemblyPath in section)
             {
-                if (PathUtility.IsPlaceholderFile(assemblyPath))
+                if (IsPlaceholderFile(assemblyPath))
                 {
                     continue;
                 }
@@ -230,6 +230,11 @@ namespace Microsoft.Extensions.ProjectModel.Compilation
                     assemblyPath,
                     Path.Combine(package.Path, assemblyPath)));
             }
+        }
+
+        private static bool IsPlaceholderFile(string path)
+        {
+            return string.Equals(Path.GetFileName(path), "_._", StringComparison.Ordinal);
         }
 
         private static bool LibraryIsOfType(LibraryType type, LibraryDescription library)
