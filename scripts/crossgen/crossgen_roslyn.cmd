@@ -33,10 +33,10 @@ if not %errorlevel% EQU 0 goto fail
 crossgen /nologo /ReadyToRun /Platform_Assemblies_Paths %BIN_DIR% Microsoft.CodeAnalysis.VisualBasic.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
-crossgen /nologo /ReadyToRun /Platform_Assemblies_Paths %BIN_DIR% csc.exe >nul 2>nul
+crossgen /MissingDependenciesOK /nologo /ReadyToRun /Platform_Assemblies_Paths %BIN_DIR% csc.exe >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
-crossgen /nologo /ReadyToRun /Platform_Assemblies_Paths %BIN_DIR% vbc.exe >nul 2>nul
+crossgen /MissingDependenciesOK /nologo /ReadyToRun /Platform_Assemblies_Paths %BIN_DIR% vbc.exe >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
 popd
