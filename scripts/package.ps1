@@ -20,7 +20,7 @@ $Commit = git rev-parse HEAD
 @"
 $Commit
 $PackageVersion
-"@.Trim() > "$Stage2Dir/.version"
+"@.Trim() | Out-File -Encoding UTF8 "$Stage2Dir/.version"
 
 $PackageName = Join-Path $PackageDir "dotnet-win-x64.$PackageVersion.zip"
 
