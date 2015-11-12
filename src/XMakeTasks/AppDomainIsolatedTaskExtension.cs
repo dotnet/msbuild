@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if FEATURE_APPDOMAIN
+
 using System;
 using System.IO;
 using System.Resources;
@@ -53,3 +55,4 @@ namespace Microsoft.Build.Tasks
         #endregion
     }
 }
+#endif

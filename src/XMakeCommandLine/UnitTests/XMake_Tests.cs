@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("c=d", parameters[1]);
         }
 
-#if !MONO && FEATURE_APPDOMAIN
+#if FEATURE_APPDOMAIN
         [Fact]
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {

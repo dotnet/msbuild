@@ -296,21 +296,21 @@ namespace Microsoft.Build.Shared
             }
             catch (ArgumentException e)
             {
-#if !MONO
+#if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
 #endif
                 ErrorUtilities.ThrowInternalError(e.Message);
             }
             catch (InvalidOperationException e)
             {
-#if !MONO
+#if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
 #endif
                 ErrorUtilities.ThrowInternalError(e.Message);
             }
             catch (MissingManifestResourceException e)
             {
-#if !MONO
+#if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
 #endif
                 ErrorUtilities.ThrowInternalError(e.Message);

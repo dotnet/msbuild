@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="ProcessJsonFiles" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="DeployDependencies.proj" />
+  <Import Project="$(NuGetConfigDir)/packageLoad.targets" />
+  <Import Project="../override.targets" />
+
+  <PropertyGroup>
+    <NuGetRuntimeIdentifier Condition="'$(NetCoreBuild)' == 'true'">ubuntu.14.04-x64</NuGetRuntimeIdentifier>
+    <NuGetRuntimeIdentifier Condition="'$(NetCoreBuild)' != 'true'">win7-x64</NuGetRuntimeIdentifier>
+  </PropertyGroup>
+
+  <ItemGroup>
+     <RuntimeProjectJsonFile Condition="'$(NetCoreBuild)' == 'true'" Include="$(MSBuildThisFileDirectory)\runtime.project.json"/>
+     <RuntimeProjectJsonFile Condition="'$(NetCoreBuild)' != 'true'" Include="$(MSBuildThisFileDirectory)\runtime.project.json"/>
+  </ItemGroup>
+
+  <ItemGroup>
+     <RuntimeProjectJsonLockFile Include="@(RuntimeProjectJsonFile->'%(Directory)%(Filename).lock.json')"/>
+     <IntermediateRuntimeProjectJsonFile Include="@(RuntimeProjectJsonFile->'$(IntermediateOutputPath)%(Filename)\project.json')" />
+     <IntermediateRuntimeProjectJsonLockFile Include="@(RuntimeProjectJsonFile->'$(IntermediateOutputPath)%(Filename)\project.lock.json')" />
+  </ItemGroup>
+
+  <Target Name="_CopyIntermediateProjectJson"
+          Inputs="@(RuntimeProjectJsonFile)"
+          Outputs="@(IntermediateRuntimeProjectJsonFile)"
+          BeforeTargets="RestoreRuntimePackagesDnu"
+  >
+    <Copy SourceFiles="@(RuntimeProjectJsonFile)"
+          DestinationFiles="@(IntermediateRuntimeProjectJsonFile)"
+          SkipUnchangedFiles="true"
+    />
+  </Target>     
+
+  <Target Name="_CopyIntermediateProjectLockJson"
+          BeforeTargets="RestoreRuntimePackagesDnu"
+          Inputs="@(RuntimeProjectJsonLockFile)"
+          Outputs="@(IntermediateRuntimeProjectJsonLockFile)"
+  >
+    <Copy SourceFiles="@(RuntimeProjectJsonLockFile)"
+          DestinationFiles="@(IntermediateRuntimeProjectJsonLockFile)"
+          SkipUnchangedFiles="true"
+          ContinueOnError="true"
+    />
+  </Target>     
+
+  <Target Name="_CopyProjectLockJson"
+          Inputs="@(IntermediateRuntimeProjectJsonLockFile)"
+          Outputs="@(RuntimeProjectJsonLockFile)"
+          AfterTargets="RestoreRuntimePackagesDnu"
+  >
+    <Copy SourceFiles="@(IntermediateRuntimeProjectJsonLockFile)"
+          DestinationFiles="@(RuntimeProjectJsonLockFile)"
+          SkipUnchangedFiles="true"
+    />
+    
+    <!-- It appears that NuGet doesn't re-write the project.lock.json file if the contents would be the same. This can mess up incremental builds
+        if you make a non-significant change to project.json.  To avoid that, update the timestamp of the lock file here. -->
+    <Touch Files="@(RuntimeProjectJsonLockFile)" />
+  </Target>
+
+  <Target Name="RestoreRuntimePackagesDnu"
+          Inputs="@(RuntimeProjectJsonFile);$(NuGetToolPath)"
+          Outputs="@(RuntimeProjectJsonFile->'%(Directory)%(Filename).lock.json')"
+          >
+
+    <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;%(IntermediateRuntimeProjectJsonFile.FullPath)&quot; --parallel " />
+    
+  </Target>
+
+  <Target Name="RestoreRuntimePackagesNuget"
+          Inputs="@(RuntimeProjectJsonFile);$(NuGetToolPath)"
+          Outputs="@(RuntimeProjectJsonFile->'%(Directory)%(Filename).lock.json')"
+          >
+
+    <Exec Command="$(RestoreRuntimePackagesCommand) -Verbosity detailed -PackagesDirectory &quot;$(HOME)/.nuget/packages&quot;" StandardOutputImportance="Low" />
+    <!--
+    <Exec Command="$(DnuToolPath) restore
+    &quot;$(IntermediateOutputPath)%(RuntimeProjectJsonFile.Filename)\project.json&quot;
+    $(NuGetPackageRestoreOptions)" StandardOutputImportance="Low" />
+    -->
+    
+  </Target>
+
+  <Target Name="RestoreRuntimePackages"
+          DependsOnTargets="RestoreRuntimePackagesDnu"
+  />
+
+  <Target Name="DeployRuntime"
+          DependsOnTargets="RestoreRuntimePackages"
+          >
+
+    <PropertyGroup>
+      <_OmitTransitiveReferences Condition="'$(NetCoreBuild)'=='true'">false</_OmitTransitiveReferences>
+      <_OmitTransitiveReferences Condition="'$(NetCoreBuild)'!='true'">true</_OmitTransitiveReferences>
+    </PropertyGroup>
+
+    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
+                                         IncludeFrameworkReferences="false"
+                                         RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
+                                         NuGetPackagesDirectory="$(PackagesCache)"
+                                         ProjectLanguage="$(Language)"
+                                         ProjectLockFile="%(RuntimeProjectJsonLockFile.FullPath)"
+                                         TargetMonikers="$(NuGetTargetMoniker)"
+                                         OmitTransitiveCompileReferences="$(_OmitTransitiveReferences)">
+      <Output TaskParameter="ResolvedCopyLocalItems" ItemName="ResolvedRuntimeFiles" />
+
+    </PrereleaseResolveNuGetPackageAssets>
+
+    <Copy SourceFiles="@(ResolvedRuntimeFiles)"
+          DestinationFolder="$(RuntimeDirectory)"
+          SkipUnchangedFiles="true"
+          />
+
+  </Target>
+
+  <Target Name="DeployDependencies"
+          DependsOnTargets="CopyPackageContent;DeployRuntime" />
+
+</Project>

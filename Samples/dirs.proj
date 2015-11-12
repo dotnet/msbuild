@@ -3,7 +3,7 @@
 
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Project Include="TaskUsageLogger\TaskUsageLogger.csproj" />
-    <Project Include="XmlFileLogger\XmlFileLogger.csproj" />
+    <Project Condition="'$(MonoBuild)' != 'true'" Include="XmlFileLogger\XmlFileLogger.csproj" />
   </ItemGroup>
 
   <ItemGroup>    

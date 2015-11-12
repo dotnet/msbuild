@@ -30,7 +30,7 @@ namespace Microsoft.Build.Shared
 #else
                 s_currentOemEncoding = Encoding.UTF8;
 #endif
-#if !MONO && FEATURE_ENCODING_DEFAULT
+#if FEATURE_ENCODING_DEFAULT
                 try
                 {
                     // get the current OEM code page

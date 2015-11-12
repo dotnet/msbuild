@@ -25,7 +25,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'">
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\..\Shared\Constants.cs">

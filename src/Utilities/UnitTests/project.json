@@ -1,18 +1,17 @@
 ﻿{
   "dependencies": {
     "xunit": "2.1.0",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00116"
+    "xunit.netcore.extensions": "1.0.0-prerelease-00116",
+    "xunit.core": "2.1.0",
+    "xunit.extensibility.core": "2.1.0",
+    "xunit.assert": "2.1.0"
   },
   "frameworks": {
     "net451": {
-      "dependencies": {
-        "xunit.runner.visualstudio": "2.1.0-rc1-build1124"
-      }
+      "dependencies": {}
     },
     "net46": {
-      "dependencies": {
-        "xunit.runner.visualstudio": "2.1.0-rc1-build1124"
-      }
+      "dependencies": {}
     },
     "dnxcore50": {
       "dependencies": {

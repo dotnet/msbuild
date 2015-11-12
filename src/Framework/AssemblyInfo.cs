@@ -52,8 +52,6 @@ using System.Windows.Markup;
 #if FEATURE_XAML_TYPES
 [assembly: XmlnsDefinition("http://schemas.microsoft.com/build/2009/properties", "Microsoft.Build.Framework.XamlTypes")]
 #endif
-#if !MONO
 // This will enable passing the SafeDirectories flag to any P/Invoke calls/implementations within the assembly, 
 // so that we don't run into known security issues with loading libraries from unsafe locations 
 [assembly: DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-#endif

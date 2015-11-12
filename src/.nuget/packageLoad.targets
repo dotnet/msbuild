@@ -33,13 +33,14 @@
     <NuGetPackagesFileTargetSpecific>$([System.IO.Path]::Combine($(NuGetConfigDir),"packages.$(OS).config"))</NuGetPackagesFileTargetSpecific>
     <NuGetProjectJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.json"))</NuGetProjectJsonFile>
     <NuGetProjectLockJsonFile>$([System.IO.Path]::Combine($(NuGetConfigDir),"project.lock.json"))</NuGetProjectLockJsonFile>
-    <NuGetCommonOptions>-Verbosity detailed</NuGetCommonOptions>
+    <NuGetCommonOptions></NuGetCommonOptions>
     <NuGetPackageInstallOptions>-OutputDirectory &quot;$(NuGetDir.TrimEnd('\').TrimEnd('\'))&quot; -ConfigFile &quot;$(RepoRoot)/NuGet.Config&quot;</NuGetPackageInstallOptions>
     <NuGetPackageRestoreOptions>-ConfigFile &quot;$(RepoRoot)/NuGet.Config&quot;</NuGetPackageRestoreOptions>
     <!-- UNDO: When fixed https://github.com/NuGet/Home/issues/1517 -->
     <NuGetPackageRestoreOptions Condition="'$(OsEnvironment)'!='Windows_NT'">$(NuGetPackageRestoreOptions) -PackagesDirectory "$(PackagesCache)"</NuGetPackageRestoreOptions>
     <NuGetRestoreCommand>$(NuGetToolPath) restore $(NuGetCommonOptions)</NuGetRestoreCommand>
     <NuGetInstallCommand>$(NuGetToolPath) install $(NuGetCommonOptions)</NuGetInstallCommand>
+    <NuGetInstallCommand Condition="'$(OsEnvironment)'!='Windows_NT' and '$(MonoBuild)' == 'true'">export MONO_THREADS_PER_CPU=2000; mono $(NuGetInstallCommand)</NuGetInstallCommand>
     <SolutionSemaphore>$(NuGetDir)Solution.semaphore</SolutionSemaphore>
     <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/v3.2.1-rc/nuget.exe</NugetDownloadURL>
     <DownloadCommand Condition="'$(OsEnvironment)'=='Windows_NT'">powershell -noprofile -nologo -command "(new-object System.Net.WebClient).DownloadFile('$(NugetDownloadURL)', '$(NuGetToolPath)')"</DownloadCommand>
@@ -136,10 +137,7 @@
     <Message Importance="High" Text="Restoring in $(ProjectDirectory)" />
 
     <!-- Restore packages for this directory -->
-    <!--
     <Exec Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) -PackagesDirectory &quot;$(HOME)/.nuget/packages&quot; &quot;@(ProjectJsonFile)&quot;" />
-    -->
-    <Exec Command="$(DnuRestoreCommand) &quot;@(ProjectJsonFile)&quot;" />
   </Target>
 
   <!--

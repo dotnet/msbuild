@@ -46,13 +46,13 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
-    <Compile Include="..\Shared\Compat\SerializableAttribute.cs">
+    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SerializableAttribute.cs">
       <Link>SharedUtilities\Compat\SerializableAttribute.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
+    <Compile Condition="'$(NetCoreBuild)' == 'true'" Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs">
       <Link>SharedUtilities\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
@@ -544,22 +544,22 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FindInvalidProjectReferences.cs" />
-    <Compile Include="FormatUrl.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateApplicationManifest.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="GenerateApplicationManifest.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GenerateBootstrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateDeploymentManifest.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="GenerateDeploymentManifest.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateManifestBase.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="GenerateManifestBase.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="GenerateTrustInfo.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="GenerateTrustInfo.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GetAssemblyIdentity.cs">
@@ -574,10 +574,10 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="RCWForCurrentContext.cs" />
-    <Compile Include="LC.cs">
+    <Compile Include="LC.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ManifestUtil\*.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="ManifestUtil\*.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="PiaReference.cs">
@@ -596,10 +596,10 @@
     <Compile Include="ResolveComReferenceCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ResolveManifestFiles.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="ResolveManifestFiles.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="ResolveNativeReference.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveNonMSBuildProjectOutput.cs">
@@ -607,13 +607,13 @@
     </Compile>
     <Compile Include="ResolveSDKReference.cs" />
     <Compile Include="SdkToolsPathUtility.cs" />
-    <Compile Include="RequiresFramework35SP1Assembly.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="RequiresFramework35SP1Assembly.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="SGen.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="SignFile.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="SignFile.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="StateFileBase.cs">
@@ -639,7 +639,7 @@
     <Compile Include="UnregisterAssembly.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="UpdateManifest.cs" Condition="!$(Configuration.EndsWith('MONO'))">
+    <Compile Include="UpdateManifest.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="VisualBasicParserUtilities.cs">
@@ -907,6 +907,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Reflection" />
     <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Security" />

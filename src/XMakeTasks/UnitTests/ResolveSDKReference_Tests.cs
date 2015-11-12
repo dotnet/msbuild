@@ -3714,6 +3714,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
     public class GatherSDKOutputGroupsTestFixture
     {
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]     // No GetResolvedSDKReferences target in Unix
         public void GatherSDKOutputGroupsTargetArchitectureExists()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GatherSDKOutputGroupsWithFramework");
@@ -3857,6 +3858,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]     // No GetResolvedSDKReferences target in Unix
         public void GatherSDKOutputGroupsTargetArchitectureExists2()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GatherSDKOutputGroupsWithFramework");
@@ -4001,6 +4003,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]     // No GetResolvedSDKReferences target in Unix
         public void GatherSDKOutputGroupsTargetArchitectureDoesNotExists()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "GatherSDKOutputGroupsTargetArchitectureDoesNotExists");
@@ -4110,6 +4113,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]     // No GetResolvedSDKReferences target in Unix
         public void CheckDefaultingOfTargetConfigAndArchitecture()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "CheckDefaultingOfTargetConfigAndArchitecture");
@@ -4207,6 +4211,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]     // No GetResolvedSDKReferences target in Unix
         public void CheckAttributesFromManifestArePassedToResolvedAssemblies()
         {
             /* \Microsoft SDKs\Windows\v8.0\ExtensionSDKs */

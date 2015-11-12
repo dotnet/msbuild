@@ -627,7 +627,7 @@ namespace Microsoft.Build.Debugging
                     // the first time we are entered from an island
                     if (_breakOnStartup)
                     {
-#if !MONO
+#if FEATURE_DEBUG_LAUNCH
                         Debugger.Launch();
 #endif
                         _breakOnStartup = false;

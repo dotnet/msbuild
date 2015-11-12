@@ -5,19 +5,14 @@
     "ubuntu.14.04-x64": { }
   },
   "dependencies": {
-    "xunit": "2.1.0"
+    "xunit": "2.1.0",
+    "xunit.netcore.extensions": "1.0.0-prerelease-00116"
   },
   "frameworks": {
-    "net451": {
-      "dependencies": {
-         "xunit.runner.visualstudio": "2.1.0",
-         "System.Threading.Tasks.Dataflow": "4.5.26-beta-23406",
-      }
-    },
     "net46": {
       "dependencies": {
          "xunit.runner.visualstudio": "2.1.0",
-         "System.Threading.Tasks.Dataflow": "4.5.26-beta-23406",
+         "System.Threading.Tasks.Dataflow": "4.5.26-beta-23406"
       }
     },
     "dnxcore50": {

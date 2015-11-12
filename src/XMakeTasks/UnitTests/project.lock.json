@@ -5919,6 +5919,9 @@
   "projectFileDependencyGroups": {
     "": [
       "xunit >= 2.1.0",
+      "xunit.assert >= 2.1.0",
+      "xunit.core >= 2.1.0",
+      "xunit.extensibility.core >= 2.1.0",
       "xunit.netcore.extensions >= 1.0.0-prerelease-00116"
     ],
     ".NETFramework,Version=v4.5.1": [

@@ -129,7 +129,7 @@ namespace Microsoft.Build.CommandLine
             catch (TypeInitializationException ex)
             {
                 if (ex.InnerException == null
-#if MONO || !FEATURE_SYSTEM_CONFIGURATION
+#if !FEATURE_SYSTEM_CONFIGURATION
                 )
 #else
                     || ex.InnerException.GetType() != typeof(ConfigurationErrorsException))
@@ -482,7 +482,7 @@ namespace Microsoft.Build.CommandLine
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
-#if !MONO
+#if FEATURE_DEBUG_LAUNCH
             string debugFlag = Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART");
             if (debugFlag == "1")
             {
@@ -568,7 +568,7 @@ namespace Microsoft.Build.CommandLine
                         recursing: false
                         ))
                 {
-#if !MONO
+#if FEATURE_APPDOMAIN
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
                     // However we want to give a hint to anyone who is building single proc without realizing it that there
                     // is a better way.
@@ -1805,7 +1805,7 @@ namespace Microsoft.Build.CommandLine
             {
                 ShowHelpMessage();
             }
-#if !MONO && FEATURE_APPDOMAIN
+#if FEATURE_APPDOMAIN
             else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
                 StartLocalNode(commandLineSwitches);
@@ -1879,7 +1879,7 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out which properties have been set on the command line
                     globalProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property]);
-#if !MONO && FEATURE_APPDOMAIN
+#if FEATURE_APPDOMAIN
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
@@ -2005,7 +2005,7 @@ namespace Microsoft.Build.CommandLine
 
             return writer;
         }
-#if !MONO && FEATURE_APPDOMAIN
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Uses the input from thinNodeMode switch to start a local node server
         /// </summary>
@@ -3067,7 +3067,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_3_SwitchesHeader"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_9_TargetSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_10_PropertySwitch"));
-#if !MONO
+#if FEATURE_APPDOMAIN
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_17_MaximumCPUSwitch"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_23_ToolsVersionSwitch"));
@@ -3081,13 +3081,13 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
-#if !MONO
+#if FEATURE_APPDOMAIN
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
 #endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
 
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));
-#if !MONO
+#if FEATURE_MSBUILD_DEBUGGER
             if (CommandLineSwitches.IsParameterlessSwitch("debug"))
             {
                 Console.WriteLine(AssemblyResources.GetString("HelpMessage_27_DebuggerSwitch"));

@@ -3,14 +3,6 @@
   "version": 1,
   "targets": {
     ".NETFramework,Version=v4.5.1": {
-      "Microsoft.Tpl.Dataflow/4.5.24": {
-        "compile": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        }
-      },
       "System.Collections/4.0.0": {
         "compile": {
           "ref/net45/_._": {}
@@ -334,18 +326,9 @@
         "runtime": {
           "lib/dotnet/Xunit.NetCore.Extensions.dll": {}
         }
-      },
-      "xunit.runner.visualstudio/2.1.0": {}
+      }
     },
     ".NETFramework,Version=v4.6": {
-      "Microsoft.Tpl.Dataflow/4.5.24": {
-        "compile": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        }
-      },
       "System.Collections/4.0.0": {
         "compile": {
           "ref/net45/_._": {}
@@ -660,8 +643,7 @@
         "runtime": {
           "lib/dotnet/Xunit.NetCore.Extensions.dll": {}
         }
-      },
-      "xunit.runner.visualstudio/2.1.0": {}
+      }
     },
     "DNXCore,Version=v5.0": {
       "Microsoft.CSharp/4.0.1-beta-23406": {
@@ -856,14 +838,6 @@
       "Microsoft.NETCore.Targets.DNXCore/5.0.0-beta-23406": {},
       "Microsoft.NETCore.TestHost/1.0.0-beta-23406": {},
       "Microsoft.NETCore.Windows.ApiSets/1.0.1-beta-23406": {},
-      "Microsoft.Tpl.Dataflow/4.5.24": {
-        "compile": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll": {}
-        }
-      },
       "Microsoft.VisualBasic/10.0.1-beta-23406": {
         "dependencies": {
           "System.Collections": "[4.0.10, )",
@@ -2366,21 +2340,6 @@
         "Microsoft.NETCore.Windows.ApiSets.nuspec",
         "package/services/metadata/core-properties/0d315ec6098840528a5ecb7d16510231.psmdcp",
         "runtime.json"
-      ]
-    },
-    "Microsoft.Tpl.Dataflow/4.5.24": {
-      "sha512": "6BE4Vu74+dkv5AkJd+UxW1sFMepMZOVlUoMZDUKqhc4Bf7pe7yySzCj6QrowUZbCqcDPwOiQsAgz3nXiLQSyMw==",
-      "type": "Package",
-      "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "lib/portable-net45+win8+wp8+wpa81/System.Threading.Tasks.Dataflow.dll",
-        "lib/portable-net45+win8+wp8+wpa81/system.threading.tasks.dataflow.xml",
-        "lib/portable-net45+win8+wpa81/System.Threading.Tasks.Dataflow.dll",
-        "lib/portable-net45+win8+wpa81/system.threading.tasks.dataflow.xml",
-        "License-Stable.rtf",
-        "Microsoft.Tpl.Dataflow.nuspec",
-        "package/services/metadata/core-properties/3dd86853af3a4ae392f3331459714ce0.psmdcp"
       ]
     },
     "Microsoft.VisualBasic/10.0.1-beta-23406": {
@@ -5920,53 +5879,19 @@
         "package/services/metadata/core-properties/e5bab2fa37a742bb94fbb97a9ebf8da3.psmdcp",
         "xunit.netcore.extensions.nuspec"
       ]
-    },
-    "xunit.runner.visualstudio/2.1.0": {
-      "sha512": "44vJFEQopk8SHfPMjgzn4QevRNfITO7zRZBo9lb+OPhID7v/q2gFaOgyEUomKilq2rwWUQ0m9yquBOzJL4L4aA==",
-      "type": "Package",
-      "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "build/_common/xunit.abstractions.dll",
-        "build/_common/xunit.runner.utility.desktop.dll",
-        "build/_common/xunit.runner.utility.dotnet.dll",
-        "build/_common/xunit.runner.visualstudio.testadapter.dll",
-        "build/monoandroid/_._",
-        "build/monotouch/_._",
-        "build/net20/xunit.runner.visualstudio.props",
-        "build/portable-net45+win8+wp8+wpa81/xunit.runner.visualstudio.props",
-        "build/uap10.0/xunit.runner.visualstudio.props",
-        "build/uap10.0/xunit.runner.visualstudio.targets",
-        "build/uap10.0/xunit.runner.visualstudio.uwp.dll",
-        "build/uap10.0/xunit.runner.visualstudio.uwp.pri",
-        "build/win8/_._",
-        "build/win81/xunit.runner.visualstudio.props",
-        "build/win81/xunit.runner.visualstudio.targets",
-        "build/win81/xunit.runner.visualstudio.win81.dll",
-        "build/win81/xunit.runner.visualstudio.win81.pri",
-        "build/wp8/_._",
-        "build/wpa81/xunit.runner.visualstudio.props",
-        "build/wpa81/xunit.runner.visualstudio.targets",
-        "build/wpa81/xunit.runner.visualstudio.wpa81.dll",
-        "build/wpa81/xunit.runner.visualstudio.wpa81.pri",
-        "build/xamarinios/_._",
-        "package/services/metadata/core-properties/75d77ac04d244734b920caf67c66919b.psmdcp",
-        "xunit.runner.visualstudio.nuspec"
-      ]
     }
   },
   "projectFileDependencyGroups": {
     "": [
-      "Microsoft.Tpl.Dataflow >= 4.5.24",
+      "System.Threading.Tasks.Dataflow >= 4.5.26-beta-23406",
       "xunit >= 2.1.0",
+      "xunit.assert >= 2.1.0",
+      "xunit.core >= 2.1.0",
+      "xunit.extensibility.core >= 2.1.0",
       "xunit.netcore.extensions >= 1.0.0-prerelease-00116"
     ],
-    ".NETFramework,Version=v4.5.1": [
-      "xunit.runner.visualstudio >= 2.1.0"
-    ],
-    ".NETFramework,Version=v4.6": [
-      "xunit.runner.visualstudio >= 2.1.0"
-    ],
+    ".NETFramework,Version=v4.5.1": [],
+    ".NETFramework,Version=v4.6": [],
     "DNXCore,Version=v5.0": [
       "Microsoft.NETCore >= 5.0.1-beta-23406",
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.1-beta-23406",

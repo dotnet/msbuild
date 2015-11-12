@@ -88,11 +88,13 @@ namespace Microsoft.Build.CommandLine
         /// </returns>
         internal static ExitType Execute()
         {
+#if FEATURE_DEBUG_LAUNCH
             // Provide Hook for debugger
             if (Environment.GetEnvironmentVariable("MSBUILDDEBUGONSTART") == "1")
             {
                 Debugger.Launch();
             }
+#endif
 
             bool restart = false;
             do

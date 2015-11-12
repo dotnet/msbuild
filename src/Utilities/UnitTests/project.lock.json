@@ -326,8 +326,7 @@
         "runtime": {
           "lib/dotnet/Xunit.NetCore.Extensions.dll": {}
         }
-      },
-      "xunit.runner.visualstudio/2.1.0-rc1-build1124": {}
+      }
     },
     ".NETFramework,Version=v4.6": {
       "System.Collections/4.0.0": {
@@ -644,8 +643,7 @@
         "runtime": {
           "lib/dotnet/Xunit.NetCore.Extensions.dll": {}
         }
-      },
-      "xunit.runner.visualstudio/2.1.0-rc1-build1124": {}
+      }
     },
     "DNXCore,Version=v5.0": {
       "Microsoft.CSharp/4.0.1-beta-23406": {
@@ -5881,52 +5879,18 @@
         "package/services/metadata/core-properties/e5bab2fa37a742bb94fbb97a9ebf8da3.psmdcp",
         "xunit.netcore.extensions.nuspec"
       ]
-    },
-    "xunit.runner.visualstudio/2.1.0-rc1-build1124": {
-      "sha512": "4m6iGj99F92STIfhg/h+t3sWL42JE29UfCAQShdxQxSz7CpTxZScoxlDpanmroYaMD0riTFTZ7fr9Brsd0ABig==",
-      "type": "Package",
-      "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
-        "build/_common/xunit.abstractions.dll",
-        "build/_common/xunit.runner.utility.desktop.dll",
-        "build/_common/xunit.runner.utility.dotnet.dll",
-        "build/_common/xunit.runner.visualstudio.testadapter.dll",
-        "build/monoandroid/_._",
-        "build/monotouch/_._",
-        "build/net20/xunit.runner.visualstudio.props",
-        "build/portable-net45+win8+wp8+wpa81/xunit.runner.visualstudio.props",
-        "build/uap10.0/xunit.runner.visualstudio.props",
-        "build/uap10.0/xunit.runner.visualstudio.targets",
-        "build/uap10.0/xunit.runner.visualstudio.uwp.dll",
-        "build/uap10.0/xunit.runner.visualstudio.uwp.pri",
-        "build/win8/_._",
-        "build/win81/xunit.runner.visualstudio.props",
-        "build/win81/xunit.runner.visualstudio.targets",
-        "build/win81/xunit.runner.visualstudio.win81.dll",
-        "build/win81/xunit.runner.visualstudio.win81.pri",
-        "build/wp8/_._",
-        "build/wpa81/xunit.runner.visualstudio.props",
-        "build/wpa81/xunit.runner.visualstudio.targets",
-        "build/wpa81/xunit.runner.visualstudio.wpa81.dll",
-        "build/wpa81/xunit.runner.visualstudio.wpa81.pri",
-        "build/xamarinios/_._",
-        "package/services/metadata/core-properties/b0a423d21f7f45688579fd6544753269.psmdcp",
-        "xunit.runner.visualstudio.nuspec"
-      ]
     }
   },
   "projectFileDependencyGroups": {
     "": [
       "xunit >= 2.1.0",
+      "xunit.assert >= 2.1.0",
+      "xunit.core >= 2.1.0",
+      "xunit.extensibility.core >= 2.1.0",
       "xunit.netcore.extensions >= 1.0.0-prerelease-00116"
     ],
-    ".NETFramework,Version=v4.5.1": [
-      "xunit.runner.visualstudio >= 2.1.0-rc1-build1124"
-    ],
-    ".NETFramework,Version=v4.6": [
-      "xunit.runner.visualstudio >= 2.1.0-rc1-build1124"
-    ],
+    ".NETFramework,Version=v4.5.1": [],
+    ".NETFramework,Version=v4.6": [],
     "DNXCore,Version=v5.0": [
       "Microsoft.NETCore >= 5.0.1-beta-23406",
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.1-beta-23406",
