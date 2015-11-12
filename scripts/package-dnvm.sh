@@ -50,7 +50,8 @@ fi
 find . -type f ! -name "*.*" | xargs chmod 755
 
 # Tar up the stage2 artifacts
-tar -czf $PACKAGE_NAME *
+# We need both "*" and ".version" to ensure we pick up that file
+tar -czf $PACKAGE_NAME * .version
 
 info "Packaged stage2 to $PACKAGE_NAME"
 
