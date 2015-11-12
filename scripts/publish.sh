@@ -109,7 +109,7 @@ update_file_in_blob_storage(){
 
     banner "Updating $file in blob storage"
 
-    statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" $update_URL --data $filecontent --request PUT )
+    statusCode=$(curl -s -w "%{http_code}" -L -H "x-ms-blob-type: BlockBlob" -H "x-ms-date: 2015-10-21" -H "x-ms-version: 2013-08-15" -H "Content-Type: text/plain" $update_URL --data-binary $filecontent --request PUT )
 
     if [ "$statusCode" -eq "201" ]; then
         info "successfully updated $file in blob storage."
