@@ -3,15 +3,15 @@ param(
 )
 
 function CheckRequiredVariables 
-{    
+{
     if([string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION))
-    {        
+    {
         return $false
     }
 
     # this variable is set by the CI system
     if([string]::IsNullOrEmpty($env:SASTOKEN)) 
-    {        
+    {
         return $false
     }
 
@@ -40,7 +40,7 @@ function UploadFile($Upload_URI, $Uploadfile)
 {
     Write-Host "Uploading $Uploadfile to dotnet feed to.."
 
-    $statusCode = (Invoke-WebRequest -URI "$Upload_URI" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $Uploadfile).StatusCode 
+    $statusCode = (Invoke-WebRequest -URI "$Upload_URI" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $Uploadfile).StatusCode
 
     if($statusCode -eq 201)
     {
@@ -88,7 +88,7 @@ function UploadBinaries($zipFile)
     }
 
     # update the version file
-    $versionFile = Convert-Path (Join-Path $PSScriptRoot\..\artifacts\win7-x64\stage2\.version)
+    $versionFile = Convert-Path $PSScriptRoot\..\artifacts\win7-x64\stage2\.version
     $Version_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/dnvm/latest.win.version$env:SASTOKEN"
 
     if(-Not (UploadFile $Version_URI $versionFile))

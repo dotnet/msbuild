@@ -144,7 +144,8 @@ upload_binaries_to_blob_storage(){
     update_file_in_blob_storage $index_URL $indexfile $indexContent
 
     # update the version file
-    local versionContent=$(cat $REPOROOT/artifacts/$RID/stage2/.version)
+    # the "@" prefix tells curl to upload the content of the file
+    local versionContent="@$REPOROOT/artifacts/$RID/stage2/.version"
     local versionfile="latest.$OSNAME.version"
     local version_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$versionfile$SASTOKEN"
     update_file_in_blob_storage $version_URL $versionfile $versionContent
