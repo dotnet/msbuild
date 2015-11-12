@@ -68,8 +68,12 @@ namespace Microsoft.Build.UnitTests
             bool result = exec.Execute();
 
             Assert.Equal(false, result);
-            Assert.Equal(4, exec.ExitCode);
+            Assert.Equal(NativeMethodsShared.IsWindows ? 4 : 1, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
+            if (!NativeMethodsShared.IsWindows)
+            {
+                ((MockEngine)exec.BuildEngine).AssertLogContains("cp: cannot stat");
+            }
         }
 
         [Fact(Skip = "Timing issue found on RI candidate from ToolPlat to Main, disabling for RI only.")]
@@ -89,10 +93,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ExitCodeGetter()
         {
-            Exec exec = PrepareExec("exit 666");
+            Exec exec = PrepareExec("exit 120");
             bool result = exec.Execute();
 
-            Assert.Equal(666, exec.ExitCode);
+            Assert.Equal(120, exec.ExitCode);
         }
 
         [Fact]
@@ -151,6 +155,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]   // UNC is Windows-Only
         public void UNCWorkingDirectoryUsed()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -309,6 +314,11 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(folder);
                 File.WriteAllText(command, "echo [hello]");
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    command = ". " + command;
+                }
+
                 Exec exec = PrepareExec(command);
 
                 Assert.True(exec.Execute()); // "Task should have succeeded"

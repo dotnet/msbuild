@@ -558,7 +558,7 @@ namespace Microsoft.Build.Tasks
             {
                 commandLine.AppendSwitch("-c");
                 commandLine.AppendTextUnquoted(" \"\"\"");
-                commandLine.AppendTextUnquoted("export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; ");
+                commandLine.AppendTextUnquoted("export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; . ");
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
                 commandLine.AppendTextUnquoted("\"\"\"");
             }
@@ -631,6 +631,11 @@ namespace Microsoft.Build.Tasks
         private Encoding GetEncodingWithOsFallback()
         {
 #if FEATURE_OSVERSION
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return s_utf8WithoutBom;
+            }
+
             // Windows 7 (6.1) or greater
             var windows7 = new Version(6, 1);
 
