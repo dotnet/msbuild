@@ -75,8 +75,8 @@ Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
 [System.IO.Compression.ZipFile]::ExtractToDirectory("$InstallDir\$DotNetFileName", "$InstallDir\cli_new")
 
 # Replace the old installation (if any)
-if (Test-Path "$InstallPath\cli") {
-    del -rec -for "$InstallPath\cli"
+if (Test-Path "$InstallDir\cli") {
+    del -rec -for "$InstallDir\cli"
 }
 mv "$InstallDir\cli_new" "$InstallDir\cli"
 

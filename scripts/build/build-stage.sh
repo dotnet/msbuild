@@ -29,11 +29,14 @@ PROJECTS=( \
     Microsoft.DotNet.Tools.Compiler.Csc \
     Microsoft.DotNet.Tools.Publish \
     Microsoft.DotNet.Tools.Pack \
+    Microsoft.DotNet.Tools.Repl \
+    Microsoft.DotNet.Tools.Repl.Csi \
     Microsoft.DotNet.Tools.Resgen \
     Microsoft.DotNet.Tools.Run \
 )
 
 BINARIES_FOR_COREHOST=( \
+    csi \
     csc \
     vbc \
 )
