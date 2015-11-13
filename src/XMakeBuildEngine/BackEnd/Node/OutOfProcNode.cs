@@ -234,15 +234,28 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Starts up the node and processes messages until the node is requested to shut down.
+        /// Assumes no node reuse.
         /// </summary>
         /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception shutdownException)
         {
+            return Run(false, out shutdownException);
+        }
+
+
+        /// <summary>
+        /// Starts up the node and processes messages until the node is requested to shut down.
+        /// </summary>
+        /// <param name="enableReuse">Whether this node is eligible for reuse later.</param>
+        /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
+        /// <returns>The reason for shutting down.</returns>
+        public NodeEngineShutdownReason Run(bool enableReuse, out Exception shutdownException)
+        {
             // Console.WriteLine("Run called at {0}", DateTime.Now);
             string pipeName = "MSBuild" + Process.GetCurrentProcess().Id;
 
-            _nodeEndpoint = new NodeEndpointOutOfProc(pipeName, this);
+            _nodeEndpoint = new NodeEndpointOutOfProc(pipeName, this, enableReuse);
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 

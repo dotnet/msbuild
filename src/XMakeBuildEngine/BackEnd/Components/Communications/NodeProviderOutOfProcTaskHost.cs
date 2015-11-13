@@ -217,7 +217,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            ShutdownAllNodes(NodeProviderOutOfProc.HostHandshake, NodeProviderOutOfProc.ClientHandshake, NodeContextTerminated);
+            ShutdownAllNodes(NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse), NodeProviderOutOfProc.GetClientHandshake(), NodeContextTerminated);
         }
 
         #endregion

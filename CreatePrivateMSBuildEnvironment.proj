@@ -21,6 +21,7 @@
 
     <FreshlyBuiltBinaries Include="$(OutputPath)*.dll" />
     <FreshlyBuiltBinaries Include="$(OutputPath)*.exe" />
+    <FreshlyBuiltBinaries Include="$(OutputPath)*.pdb" />
     <FreshlyBuiltBinaries Include="$(OutputPath)*.exe.config" />
 
     <FreshlyBuiltProjects Include="$(OutputPath)*props" />
