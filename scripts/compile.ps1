@@ -23,14 +23,20 @@ Download it from https://www.cmake.org
     & "$PSScriptRoot\install.ps1"
 
     # Put stage 0 on the path
-    $DotNetTools = "$($env:LOCALAPPDATA)\Microsoft\dotnet\cli"
-    if (Test-Path "$DotNetTools\dotnet.exe") {
+    $DotNetTools = $env:DOTNET_INSTALL_DIR
+    if (!$DotNetTools) {
+        $DotNetTools = "$($env:LOCALAPPDATA)\Microsoft\dotnet"
+    }
+
+    if (Test-Path "$DotNetTools\cli\dotnet.exe") {
         Write-Warning "Your stage0 is using the old layout"
-        $DnxDir = "$DotNetTools\dnx"
-        $env:PATH = "$DotNetTools;$StartPath"
-    } elseif (Test-Path "$DotNetTools\bin\dotnet.exe") {
-        $DnxDir = "$DotNetTools\bin\dnx"
-        $env:PATH = "$DotNetTools\bin;$StartPath"
+        $DnxDir = "$DotNetTools\cli\dnx"
+        $env:PATH = "$DotNetTools\cli;$StartPath"
+    } elseif (Test-Path "$DotNetTools\cli\bin\dotnet.exe") {
+        $DnxDir = "$DotNetTools\cli\bin\dnx"
+        $env:PATH = "$DotNetTools\cli\bin;$StartPath"
+    } else {
+        throw "Couldn't find stage0 dotnet tools!"
     }
 
     # Restore packages
