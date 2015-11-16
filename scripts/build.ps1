@@ -3,6 +3,14 @@ param(
 
 $ErrorActionPreference="Stop"
 
+# Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
+$env:DOTNET_INSTALL_DIR="$PSScriptRoot\.dotnet_stage0\win7-x64"
+if (!(Test-Path $env:DOTNET_INSTALL_DIR))
+{
+    mkdir $env:DOTNET_INSTALL_DIR | Out-Null
+}
+$env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$env:PATH"
+
 if (!$env:DOTNET_BUILD_VERSION) {
     # Get the timestamp of the most recent commit
     $timestamp = git log -1 --format=%ct

@@ -41,3 +41,6 @@ TestResults/
 
 # CMake generated files
 cmake/
+
+# stage0 install directory
+.dotnet_stage0

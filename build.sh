@@ -3,22 +3,6 @@
 # $1 is passed to package to enable deb or pkg packaging
 set -e
 
-for i in "$@"
-    do
-        lowerI="$(echo $i | awk '{print tolower($0)}')"
-        case $lowerI in
-        release)
-            export CONFIGURATION=Release
-            ;;
-        debug)
-            export CONFIGURATION=Debug
-            ;;
-        *)
-        esac
-    done
-
-[ -z "$CONFIGURATION" ] && CONFIGURATION=Debug
-
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -28,6 +12,27 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/scripts/_common.sh"
+
+for i in "$@"
+do
+    lowerI="$(echo $i | awk '{print tolower($0)}')"
+    case $lowerI in
+    release)
+        export CONFIGURATION=Release
+        ;;
+    debug)
+        export CONFIGURATION=Debug
+        ;;
+    *)
+    esac
+done
+
+[ -z "$CONFIGURATION" ] && CONFIGURATION=Debug
+
+# Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
+export DOTNET_INSTALL_DIR=$DIR/.dotnet_stage0/$RID
+[ -d $DOTNET_INSTALL_DIR ] || mkdir -p $DOTNET_INSTALL_DIR
+export PATH=$DOTNET_INSTALL_DIR/bin:$PATH
 
 # UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
 LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)

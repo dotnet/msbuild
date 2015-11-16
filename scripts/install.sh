@@ -37,13 +37,8 @@ MY_NAME=$(basename ${BASH_SOURCE[0]})
 MY_TARGET=$DOTNET_TOOLS/bin/$MY_NAME
 
 if [ ! -e "$MY_TARGET" ]; then
-    # try the old layout
-    MY_TARGET=$DOTNET_TOOLS/$MY_NAME
-    if [ ! -e "$MY_TARGET" ]; then
-        echo "error: the tool $MY_TARGET cannot be found" 1>&2
-        exit 1
-    fi
-    echo "warning: this version of the dotnet tools is using the old layout!" 1>&2
+    echo "error: the tool $MY_TARGET cannot be found" 1>&2
+    exit 1
 fi
 
 if [ ! -x "$MY_TARGET" ]; then

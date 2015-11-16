@@ -80,13 +80,7 @@ if (Test-Path "$InstallDir\$DotNetFileName") {
     del -for "$InstallDir\$DotNetFileName"
 }
 
-say "The .NET Tools have been installed to $InstallDir!"
+say "The .NET Tools have been installed to $InstallDir\cli!"
 
-$binPath = "$InstallDir\bin"
-if (Test-Path $binPath) {
-    # New layout
-    say "Add '$InstallDir\bin' to your PATH to use dotnet"
-} else {
-    # Old layout (temporary)
-    say "Add '$InstallDir' to your PATH to use dotnet"
-}
+# New layout
+say "Add '$InstallDir\cli\bin' to your PATH to use dotnet"
