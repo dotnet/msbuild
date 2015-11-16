@@ -1,3 +1,8 @@
+#
+# Copyright (c) .NET Foundation and contributors. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#
+
 # Source this to add some fancy stuff to your scripts
 
 # Detect build servers

@@ -1,5 +1,9 @@
 #!/bin/bash
 #
+# Copyright (c) .NET Foundation and contributors. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#
+
 # Takes Parameters:
 #   $1 = Input Directory
 #   $2 = Output Directory
