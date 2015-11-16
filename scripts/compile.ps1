@@ -61,7 +61,11 @@ Download it from https://www.cmake.org
             mkdir $HostDir | Out-Null
         }
         cp "$RepoRoot\src\corehost\cmake\$Rid\$Configuration\corehost.exe" $HostDir
-        cp "$RepoRoot\src\corehost\cmake\$Rid\$Configuration\corehost.pdb" $HostDir
+
+        if (Test-Path "$RepoRoot\src\corehost\cmake\$Rid\$Configuration\corehost.pdb")
+        {
+            cp "$RepoRoot\src\corehost\cmake\$Rid\$Configuration\corehost.pdb" $HostDir
+        }
     } finally {
         popd
     }
