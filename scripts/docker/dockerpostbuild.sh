@@ -21,11 +21,6 @@ cd $DIR/../..
 info "Building docker container"
 docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
 
-# First thing make sure all of our build containers are stopped
-info "Terminating and cleaning all running containers"
-docker stop $DOTNET_BUILD_CONTAINER_NAME
-docker rm $DOTNET_BUILD_CONTAINER_NAME
-
 # Remove the sticky bit on directories created by docker so we can delete them
 info "Cleaning directories created by docker build"
 docker run --rm \
