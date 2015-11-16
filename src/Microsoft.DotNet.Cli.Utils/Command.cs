@@ -5,8 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -49,6 +47,20 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static Command Create(string executable, string args)
         {
+            ResolveExecutablePath(ref executable, ref args);
+
+            return new Command(executable, args);
+        }
+
+        private static void ResolveExecutablePath(ref string executable, ref string args)
+        {
+            var fullExecutable = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, executable + Constants.ExeSuffix));
+
+            if (File.Exists(fullExecutable))
+            {
+                executable = fullExecutable;
+            }
+
             // On Windows, we want to avoid using "cmd" if possible (it mangles the colors, and a bunch of other things)
             // So, do a quick path search to see if we can just directly invoke it
             var useCmd = ShouldUseCmd(executable);
@@ -66,8 +78,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 args = $"/C \"{executable}\"";
                 executable = comSpec;
             }
-
-            return new Command(executable, args);
         }
 
         private static bool ShouldUseCmd(string executable)
