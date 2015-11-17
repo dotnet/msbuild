@@ -32,12 +32,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 		
 		private string ArgStr { get; set; }
 		
-		public ILCompilerInvoker(Config config)
+		public ILCompilerInvoker(NativeCompileSettings config)
 		{
 			InitializeArgs(config);
 		}
 		
-		private void InitializeArgs(Config config)
+		private void InitializeArgs(NativeCompileSettings config)
 		{
 			var argsList = new List<string>();
 
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			this.ArgStr = string.Join(" ", argsList);
 		}
 		
-		public int Invoke(Config config)
+		public int Invoke(NativeCompileSettings config)
 		{
 			var executablePath = Path.Combine(config.ILToNativePath, ExecutableName);
 			
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			return result.ExitCode;
 		}
 		
-		public string DetermineOutputFile(Config config)
+		public string DetermineOutputFile(NativeCompileSettings config)
 		{
 			var intermediateDirectory = config.IntermediateDirectory;
 			

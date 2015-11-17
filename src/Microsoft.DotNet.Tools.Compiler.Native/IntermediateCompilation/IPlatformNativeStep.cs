@@ -12,8 +12,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 {
 	public interface IPlatformNativeStep
 	{
-		int Invoke(Config config);
-		string DetermineOutputFile(Config config);
+		int Invoke(NativeCompileSettings config);
+		string DetermineOutputFile(NativeCompileSettings config);
 		bool CheckPreReqs();
 	}
 }

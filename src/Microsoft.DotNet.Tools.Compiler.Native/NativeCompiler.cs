@@ -4,7 +4,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 {
 	public class NativeCompiler 
 	{
-		public static NativeCompiler Create(Config config)
+		public static NativeCompiler Create(NativeCompileSettings config)
 		{
 			var invoker = new ILCompilerInvoker(config);
 			var intCompiler = IntermediateCompiler.Create(config);
@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private ILCompilerInvoker invoker;
         private IntermediateCompiler intermediateCompiler;
 
-		public bool CompileToNative(Config config)
+		public bool CompileToNative(NativeCompileSettings config)
 		{	
 			int result = invoker.Invoke(config);
             if(result != 0)

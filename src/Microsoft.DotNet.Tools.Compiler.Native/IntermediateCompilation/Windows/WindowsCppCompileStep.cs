@@ -28,12 +28,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 		
 		private string CompilerArgStr { get; set; }
 		
-		public WindowsCppCompileStep(Config config)
+		public WindowsCppCompileStep(NativeCompileSettings config)
 		{
 			InitializeArgs(config);
 		}
 		
-		public int Invoke(Config config)
+		public int Invoke(NativeCompileSettings config)
 		{
 			var result = WindowsCommon.SetVCVars();
 			if (result != 0)
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return !string.IsNullOrEmpty(vcInstallDir);
 		}
 		
-		private void InitializeArgs(Config config)
+		private void InitializeArgs(NativeCompileSettings config)
 		{
 			var argsList = new List<string>();
 			
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			this.CompilerArgStr = string.Join(" ", argsList);
 		}
 		
-		private int InvokeCompiler(Config config)
+		private int InvokeCompiler(NativeCompileSettings config)
 		{
 			var vcInstallDir = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
 			var compilerPath = Path.Combine(vcInstallDir, VSBin, CompilerName);
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			return result.ExitCode;
 		}
 		
-		private string DetermineInFile(Config config)
+		private string DetermineInFile(NativeCompileSettings config)
 		{
 			var intermediateDirectory = config.IntermediateDirectory;
 			
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			return infile;
 		}
 		
-		public string DetermineOutputFile(Config config)
+		public string DetermineOutputFile(NativeCompileSettings config)
 		{
             var intermediateDirectory = config.IntermediateDirectory;
 

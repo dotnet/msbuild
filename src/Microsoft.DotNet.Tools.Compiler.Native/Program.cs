@@ -142,9 +142,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return app;
         }
         
-        private static Config ParseAndValidateArgs(ArgValues args)
+        private static NativeCompileSettings ParseAndValidateArgs(ArgValues args)
         {
-            var config = new Config();
+            var config = new NativeCompileSettings();
             
             // Managed Input
             if (string.IsNullOrEmpty(args.InputManagedAssemblyPath) || !File.Exists(args.InputManagedAssemblyPath))
@@ -307,14 +307,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return config;
         }
 
-        private static string GetDefaultOutputDir(Config config)
+        private static string GetDefaultOutputDir(NativeCompileSettings config)
         {
             var dir = Path.Combine(Constants.BinDirectoryName, config.Architecture.ToString(), config.BuildType.ToString(), "native");
 
             return Path.GetFullPath(dir);
         }
 
-        private static string GetDefaultIntermediateDir(Config config)
+        private static string GetDefaultIntermediateDir(NativeCompileSettings config)
         {
             var dir = Path.Combine(Constants.ObjDirectoryName, config.Architecture.ToString(), config.BuildType.ToString(), "native");
 

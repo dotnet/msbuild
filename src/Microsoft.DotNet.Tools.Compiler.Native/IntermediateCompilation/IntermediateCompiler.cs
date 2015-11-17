@@ -12,14 +12,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 {
 	public class IntermediateCompiler
 	{
-		public static IntermediateCompiler Create(Config config)
+		public static IntermediateCompiler Create(NativeCompileSettings config)
 		{
             var platformStepList = CreatePlatformNativeSteps(config);
 			
 			return new IntermediateCompiler(platformStepList);
 		}
 		
-		private static List<IPlatformNativeStep> CreatePlatformNativeSteps(Config config)
+		private static List<IPlatformNativeStep> CreatePlatformNativeSteps(NativeCompileSettings config)
 		{
 			if (config.NativeMode == NativeIntermediateMode.cpp)
 			{
@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
 		}
 		
-		private static List<IPlatformNativeStep> CreateCppSteps(Config config)
+		private static List<IPlatformNativeStep> CreateCppSteps(NativeCompileSettings config)
 		{
             var stepList = new List<IPlatformNativeStep>();
 
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return stepList;
 		}
 		
-		private static List<IPlatformNativeStep> CreateJitSteps(Config config)
+		private static List<IPlatformNativeStep> CreateJitSteps(NativeCompileSettings config)
 		{
             var stepList = new List<IPlatformNativeStep>();
 
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             this.StepList = stepList;
 		}
 		
-		public int Invoke(Config config)
+		public int Invoke(NativeCompileSettings config)
         {
             foreach(var step in StepList)
             {
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return 0;
         }
 		
-		public string DetermineOutputFile(Config config)
+		public string DetermineOutputFile(NativeCompileSettings config)
 		{
 			return StepList.Last().DetermineOutputFile(config);
 		}

@@ -32,12 +32,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         
         private string CompilerArgStr { get; set; }
 
-        public LinuxCppCompiler(Config config)
+        public LinuxCppCompiler(NativeCompileSettings config)
         {
             InitializeArgs(config);
         }
 
-        public int Invoke(Config config)
+        public int Invoke(NativeCompileSettings config)
         {
             var result = InvokeCompiler(config);
             if (result != 0)
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return true;
         }
 
-        private void InitializeArgs(Config config)
+        private void InitializeArgs(NativeCompileSettings config)
         {
             var argsList = new List<string>();
             
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             this.CompilerArgStr = string.Join(" ", argsList);
         }
 
-        private int InvokeCompiler(Config config)
+        private int InvokeCompiler(NativeCompileSettings config)
         {
             var result = Command.Create(CompilerName, CompilerArgStr)
                 .ForwardStdErr()
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return result.ExitCode;
         }
 
-        private string DetermineInFile(Config config)
+        private string DetermineInFile(NativeCompileSettings config)
         {
             var intermediateDirectory = config.IntermediateDirectory;
 
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return infile;
         }
 
-        public string DetermineOutputFile(Config config)
+        public string DetermineOutputFile(NativeCompileSettings config)
         {
             var inputFile = DetermineInFile(config);
 

@@ -12,12 +12,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 {
 	public class MacCppCompileStep : IPlatformNativeStep
 	{
-        public MacCppCompileStep(Config config)
+        public MacCppCompileStep(NativeCompileSettings config)
         {
             throw new NotImplementedException("Mac Cpp Not Supported Yet");
         }
 
-        public int Invoke(Config config)
+        public int Invoke(NativeCompileSettings config)
 		{
 			throw new NotImplementedException("mac cpp Not supported yet.");
 		}
@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			throw new NotImplementedException("mac cpp Not supported yet.");
 		}
 		
-		public string DetermineOutputFile(Config config)
+		public string DetermineOutputFile(NativeCompileSettings config)
 		{
 			throw new NotImplementedException("Mac cpp Not supported yet.");
 		}
