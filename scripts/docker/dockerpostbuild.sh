@@ -8,9 +8,9 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/_common.sh"
+source "$DIR/../_common.sh"
 
-cd $DIR/..
+cd $DIR/../..
 
 [ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
 [ -z "$DOTNET_BUILD_CONTAINER_NAME" ] && DOTNET_BUILD_CONTAINER_NAME="dotnetcli-build-container"
@@ -19,11 +19,6 @@ cd $DIR/..
 # Build the docker container (will be fast if it is already built)
 info "Building docker container"
 docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
-
-# First thing make sure all of our build containers are stopped
-info "Terminating and cleaning all running containers"
-docker stop $DOTNET_BUILD_CONTAINER_NAME
-docker rm $DOTNET_BUILD_CONTAINER_NAME
 
 # Remove the sticky bit on directories created by docker so we can delete them
 info "Cleaning directories created by docker build"
