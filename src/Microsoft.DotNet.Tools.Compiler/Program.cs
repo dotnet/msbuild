@@ -141,6 +141,32 @@ namespace Microsoft.DotNet.Tools.Compiler
             nativeArgs.Add("--output");
             nativeArgs.Add($"\"{outputPath}\"");
 
+            // Dependencies
+            var exporter = context.CreateExporter(configuration);
+            var dependencies = exporter.GetDependencies().ToList();
+            foreach (var dependency in dependencies)
+            {
+                var projectDependency = dependency.Library as ProjectDescription;
+
+                if (projectDependency != null)
+                {
+                    if (projectDependency.Project.Files.SourceFiles.Any())
+                    {
+                        var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
+                        nativeArgs.Add("-r");
+                        nativeArgs.Add($"\"{projectOutputPath}\"");
+                    }
+                }
+                else
+                {
+                    foreach(var dep in dependency.RuntimeAssemblies)
+                    {
+                        nativeArgs.Add("-r");
+                        nativeArgs.Add($"\"{dep.ResolvedPath}\"");
+                    }
+                }
+            }
+
             // Write Response File
             var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile-native.{context.ProjectFile.Name}.rsp");
             File.WriteAllLines(rsp, nativeArgs);
