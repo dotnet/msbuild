@@ -1,28 +1,28 @@
 ﻿{
   "dependencies": {
-    "System.Reflection.Metadata": "1.1.0"
+    "System.Reflection.Metadata": "1.1.1-rc2-23428"
   },
   "frameworks": {
     "net451": { },
     "net46": { },
     "dnxcore50": {
       "dependencies": {
-        "System.Net.NetworkInformation": "4.1.0-beta-23413",
-        "Microsoft.NETCore": "5.0.1-beta-23406",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23406",
-        "System.Console": "4.0.0-beta-23406",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23406",
-        "System.IO.Pipes": "4.0.0-beta-23406",
-        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23406",
-        "System.Diagnostics.Process": "4.1.0-beta-23406",
-        "System.Diagnostics.TraceSource": "4.0.0-beta-23406",
-        "System.Security.Cryptography.X509Certificates": "4.0.0-beta-23413",
-        "System.Threading.Thread": "4.0.0-beta-23406",
-        "System.Threading.ThreadPool": "4.0.10-beta-23413",
-        "System.Xml.XmlDocument": "4.0.1-beta-23406",
-        "System.Xml.XPath.XmlDocument": "4.0.1-beta-23406",
-        "Microsoft.NETCore.Runtime": "1.0.1-beta-23406",
-        "Microsoft.NETCore.TestHost": "1.0.0-beta-23406"
+        "System.Net.NetworkInformation": "4.1.0-beta-23428",
+        "Microsoft.NETCore": "5.0.1-beta-23428",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23428",
+        "System.Console": "4.0.0-beta-23428",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23428",
+        "System.IO.Pipes": "4.0.0-beta-23428",
+        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23428",
+        "System.Diagnostics.Process": "4.1.0-beta-23428",
+        "System.Diagnostics.TraceSource": "4.0.0-beta-23428",
+        "System.Security.Cryptography.X509Certificates": "4.0.0-beta-23504",
+        "System.Threading.Thread": "4.0.0-beta-23428",
+        "System.Threading.ThreadPool": "4.0.10-beta-23428",
+        "System.Xml.XmlDocument": "4.0.1-beta-23428",
+        "System.Xml.XPath.XmlDocument": "4.0.1-beta-23428",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23428",
+        "Microsoft.NETCore.TestHost": "1.0.0-beta-23428"
       },
       "imports": "portable-net451+win81"
     }

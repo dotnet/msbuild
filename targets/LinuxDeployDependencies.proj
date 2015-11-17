@@ -82,7 +82,7 @@
   </Target>
 
   <Target Name="RestoreRuntimePackages"
-          DependsOnTargets="RestoreRuntimePackagesDnu"
+          DependsOnTargets="RestoreRuntimePackagesNuget"
   />
 
   <Target Name="DeployRuntime"
@@ -94,7 +94,7 @@
       <_OmitTransitiveReferences Condition="'$(NetCoreBuild)'!='true'">true</_OmitTransitiveReferences>
     </PropertyGroup>
 
-    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
+    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="true"
                                          IncludeFrameworkReferences="false"
                                          RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
                                          NuGetPackagesDirectory="$(PackagesCache)"

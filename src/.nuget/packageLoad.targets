@@ -39,8 +39,9 @@
     <!-- UNDO: When fixed https://github.com/NuGet/Home/issues/1517 -->
     <NuGetPackageRestoreOptions Condition="'$(OsEnvironment)'!='Windows_NT'">$(NuGetPackageRestoreOptions) -PackagesDirectory "$(PackagesCache)"</NuGetPackageRestoreOptions>
     <NuGetRestoreCommand>$(NuGetToolPath) restore $(NuGetCommonOptions)</NuGetRestoreCommand>
+    <NuGetRestoreCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetRestoreCommand)</NuGetRestoreCommand>
     <NuGetInstallCommand>$(NuGetToolPath) install $(NuGetCommonOptions)</NuGetInstallCommand>
-    <NuGetInstallCommand Condition="'$(OsEnvironment)'!='Windows_NT' and '$(MonoBuild)' == 'true'">export MONO_THREADS_PER_CPU=2000; mono $(NuGetInstallCommand)</NuGetInstallCommand>
+    <NuGetInstallCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetInstallCommand)</NuGetInstallCommand>
     <SolutionSemaphore>$(NuGetDir)Solution.semaphore</SolutionSemaphore>
     <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/v3.2.1-rc/nuget.exe</NugetDownloadURL>
     <DownloadCommand Condition="'$(OsEnvironment)'=='Windows_NT'">powershell -noprofile -nologo -command "(new-object System.Net.WebClient).DownloadFile('$(NugetDownloadURL)', '$(NuGetToolPath)')"</DownloadCommand>
