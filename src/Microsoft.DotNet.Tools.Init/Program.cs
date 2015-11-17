@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Init
                             where resourceName.ToLowerInvariant().EndsWith(".cs") || resourceName.ToLowerInvariant().EndsWith(".json")
                             select resourceName;
 
-            Dictionary<string, string> resourceNameToFileName = new Dictionary<string, string>();
+            var resourceNameToFileName = new Dictionary<string, string>();
             bool hasFilesToOverride = false;
             foreach (string resourceName in resources)
             {
