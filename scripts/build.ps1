@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference="Stop"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
-$env:DOTNET_INSTALL_DIR="$PSScriptRoot\.dotnet_stage0\win7-x64"
+$env:DOTNET_INSTALL_DIR="$(Convert-Path "$PSScriptRoot\..")\.dotnet_stage0\win7-x64"
 if (!(Test-Path $env:DOTNET_INSTALL_DIR))
 {
     mkdir $env:DOTNET_INSTALL_DIR | Out-Null
