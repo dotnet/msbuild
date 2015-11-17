@@ -89,7 +89,7 @@ Download it from https://www.cmake.org
     cmd /c "$PSScriptRoot\crossgen\crossgen_roslyn.cmd" "$Stage2Dir"
 
     # Copy dnx into stage 2
-    cp -rec "$DnxDir\*" "$Stage2Dir\bin\dnx\"
+    cp -rec "$DnxDir\" "$Stage2Dir\bin\dnx\"
 
     # Copy in the dotnet-restore script
     cp "$PSScriptRoot\dotnet-restore.cmd" "$Stage2Dir\bin\dotnet-restore.cmd"
