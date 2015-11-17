@@ -5,16 +5,16 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-	"Microsoft.NETCore.Platforms":"1.0.1-*",
-        "Microsoft.NETCore.Runtime": "1.0.1-*",
-        "System.Console": "4.0.0-*",
-        "System.Collections": "4.0.11-*",
-      "System.Linq": "4.0.1-*",
-      "Microsoft.NETCore.TestHost": "1.0.0-*",
-        "System.Diagnostics.Process": "4.1.0-*",
-        "System.IO": "4.0.11-*",
-        "System.IO.FileSystem": "4.0.1-*",
-        "System.AppContext": "4.0.1-*",
+	"Microsoft.NETCore.Platforms":"1.0.1-beta-23504",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23504",
+        "System.Console": "4.0.0-beta-23504",
+        "System.Collections": "4.0.11-beta-23504",
+      "System.Linq": "4.0.1-beta-23504",
+      "Microsoft.NETCore.TestHost": "1.0.0-beta-23504",
+        "System.Diagnostics.Process": "4.1.0-beta-23504",
+        "System.IO": "4.0.11-beta-23504",
+        "System.IO.FileSystem": "4.0.1-beta-23504",
+        "System.AppContext": "4.0.1-beta-23504",
         "Microsoft.DotNet.Cli.Utils": {
             "type": "build",
             "version": "1.0.0-*"
@@ -24,7 +24,7 @@
             "version": "1.0.0-*"
         },
       "Microsoft.DotNet.ILCompiler": "1.0.0-*",
-      "Microsoft.DotNet.ObjectWriter": "1.0.0-*",
+      "Microsoft.DotNet.ObjectWriter": "1.0.1-*",
       "Microsoft.DotNet.RyuJit": "1.0.0-*"
     },
     "frameworks": {
