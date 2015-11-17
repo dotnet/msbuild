@@ -18,7 +18,8 @@ $Projects = @(
     "Microsoft.DotNet.Tools.Pack",
     "Microsoft.DotNet.Tools.Publish",
     "Microsoft.DotNet.Tools.Resgen",
-    "Microsoft.DotNet.Tools.Run"
+    "Microsoft.DotNet.Tools.Run",
+    "Microsoft.DotNet.Tools.Init"
 )
 
 $BinariesForCoreHost = @(
