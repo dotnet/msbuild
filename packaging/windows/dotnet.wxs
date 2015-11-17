@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="{12897D7D-AC14-4971-AF57-157E8D327C79}" Language="1033" Manufacturer="Microsoft" Name="Dotnet CLI" UpgradeCode="{FCBF9710-A891-4FF5-8909-48E6EEC9180A}" Version="1.0.0.0">
+        <Package Compressed="yes" InstallerVersion="200" />
+		
+		<WixVariable Id="WixUILicenseRtf" Value="$(var.MicrosoftEula)" />
+		
+		<Property Id="WIXUI_INSTALLDIR" Value="DOTNETHOME"/>
+		<UIRef Id="WixUI_InstallDir" />
+		
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="DOTNETHOME" Name="dotnet"/>					
+			</Directory>
+		</Directory>
+		
+		<DirectoryRef Id="TARGETDIR">
+			<Component Id="SETENVVARS" Guid="{E503A496-DE1B-4646-81D4-47213B4CCFAF}">
+				<Environment Id="PATH" Name="PATH" Value="[DOTNETHOME]bin" Permanent="no" Part="last" Action="set" System="no" />
+				<Environment Id="DOTNET_HOME" Name="DOTNET_HOME" Value="[DOTNETHOME]" Permanent="no" Part="all" Action="set" System="no" />
+			</Component>
+		</DirectoryRef>
+		
+		<Feature Id="SetEnvVarsFeature" Level="1" Title="Set required env vars">
+            <ComponentRef Id="SETENVVARS" />
+        </Feature>
+		
+		<Feature Id="DotnetFilesFeatures" Level="1" Title="Dotnet Files">
+            <ComponentGroupRef Id="InstallFiles" />
+        </Feature>
+        <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
+    </Product>
+</Wix>

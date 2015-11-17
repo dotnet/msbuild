@@ -6,6 +6,8 @@
 param(
     [string]$Configuration="Debug")
 
+. "$PSScriptRoot\_common.ps1"
+
 $ErrorActionPreference="Stop"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
@@ -31,3 +33,6 @@ Write-Host -ForegroundColor Green "*** Building dotnet tools version $($env:DOTN
 
 Write-Host -ForegroundColor Green "*** Packaging dotnet ***"
 & "$PSScriptRoot\package\package.ps1"
+
+Write-Host -ForegroundColor Green "*** Generating dotnet MSI ***"
+& "$RepoRoot\packaging\windows\generatemsi.ps1" $Stage2Dir

@@ -1,0 +1,13 @@
+{
+  "compilationOptions": {
+      "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "WiX.Toolset.2015": "3.10.0.1503"
+  },
+
+  "frameworks": {
+    "dnxcore50": { }
+  }
+}
