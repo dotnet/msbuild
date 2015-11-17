@@ -40,14 +40,14 @@ namespace Microsoft.DotNet.Tools.Init
                 resourceNameToFileName.Add(resourceName, fileName);
                 if (File.Exists(fileName))
                 {
-                    Console.WriteLine("Creating new project would override file {0}.", fileName);
+                    Reporter.Error.WriteLine($"Creating new project would override file {fileName}.");
                     hasFilesToOverride = true;
                 }
             }
 
             if (hasFilesToOverride)
             {
-                Console.WriteLine("Creating new project failed.");
+                Reporter.Error.WriteLine("Creating new project failed.");
                 return 1;
             }
 
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Init
                 }
             }
 
-            Console.WriteLine("Created new project in {0}.", Directory.GetCurrentDirectory());
+            Reporter.Output.WriteLine($"Created new project in {Directory.GetCurrentDirectory()}.");
 
             return 0;
         }
@@ -87,9 +87,9 @@ namespace Microsoft.DotNet.Tools.Init
             catch (Exception ex)
             {
 #if DEBUG
-                Console.Error.WriteLine(ex);
+                Reporter.Error.WriteLine(ex.ToString());
 #else
-                Console.Error.WriteLine(ex.Message);
+                Reporter.Error.WriteLine(ex.Message);
 #endif
                 return 1;
             }
