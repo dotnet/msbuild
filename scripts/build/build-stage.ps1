@@ -17,12 +17,15 @@ $Projects = @(
     "Microsoft.DotNet.Tools.Compiler.Csc",
     "Microsoft.DotNet.Tools.Pack",
     "Microsoft.DotNet.Tools.Publish",
+    "Microsoft.DotNet.Tools.Repl",
+    "Microsoft.DotNet.Tools.Repl.Csi",
     "Microsoft.DotNet.Tools.Resgen",
     "Microsoft.DotNet.Tools.Run",
     "Microsoft.DotNet.Tools.Init"
 )
 
 $BinariesForCoreHost = @(
+    "csi"
     "csc"
     "vbc"
 )
