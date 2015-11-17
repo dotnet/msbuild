@@ -10,6 +10,7 @@ $Projects = @(
     "Microsoft.DotNet.Cli",
     "Microsoft.DotNet.Tools.Compiler",
     "Microsoft.DotNet.Tools.Compiler.Csc",
+    "Microsoft.DotNet.Tools.Pack",
     "Microsoft.DotNet.Tools.Publish",
     "Microsoft.DotNet.Tools.Resgen",
     "Microsoft.DotNet.Tools.Run"
