@@ -94,12 +94,8 @@ Common Commands:
             }
         }
 
-        private static void PrintHelp(string errorMessage = null)
+        private static void PrintHelp()
         {
-            if(!string.IsNullOrEmpty(errorMessage))
-            {
-                Reporter.Error.WriteLine(errorMessage.Red());
-            }
             Reporter.Output.WriteLine(HelpText);
         }
 
