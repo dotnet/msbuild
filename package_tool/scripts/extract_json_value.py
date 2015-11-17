@@ -1,4 +1,9 @@
 #!/usr/bin/python
+#
+# Copyright (c) .NET Foundation and contributors. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#
+
 # Extract Json Value
 #
 # Very simple tool to ease extracting json values from the cmd line.

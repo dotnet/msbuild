@@ -1,5 +1,9 @@
 #!/usr/bin/python
 #
+# Copyright (c) .NET Foundation and contributors. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#
+
 # Parses debian_config.json and generates appropriate templates
 # Where optional defaults exist, they are defined in the template_dict
 #     of the appropriate generation function

@@ -1,4 +1,9 @@
 #!/usr/bin/python
+#
+# Copyright (c) .NET Foundation and contributors. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#
+
 # manpage_generator
 #       Converts top level docs.json format command info to
 #       nroff manpage format. Done in python for easy json parsing.
