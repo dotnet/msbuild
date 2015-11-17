@@ -96,6 +96,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			{
 				argsList.Add(Path.Combine(config.RuntimeLibPath, lib));
 			}
+
+			// Link Libs
+			foreach(var path in config.LinkLibPaths){
+				argsList.Add($"\"{path}\"");
+			}
 			
 			//arch
 			argsList.Add($"/MACHINE:{config.Architecture}");

@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 return null;
             }
 
-            string[] nArgs = Helpers.SplitStringCommandLine(rspPath).ToArray();
+            string[] nArgs = content.Split('\n');
             return nArgs;
         }
 
@@ -298,7 +298,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Link Libs
             foreach (var lib in args.LinkLibPaths)
             {
-                config.LinkLibPaths.Add(Path.GetFullPath(lib));
+                config.LinkLibPaths.Add(lib);
             }
 
             // OS
