@@ -12,7 +12,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 {
 	public class ILCompilerInvoker
 	{
-        //private readonly string ExecutableName = "ILToNative" + Constants.ExeSuffix;
         private readonly string ExecutableName = "corerun" + Constants.ExeSuffix;
         private readonly string ILCompiler = "ilc.exe";
 
@@ -41,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 		{
 			var argsList = new List<string>();
 
-            var managedPath = Path.Combine(config.ILToNativePath, ILCompiler);
+            var managedPath = Path.Combine(config.IlcPath, ILCompiler);
             argsList.Add(managedPath);
 			
 			// Input File 
@@ -49,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			argsList.Add(inputFilePath);
 			
 			// System.Private.CoreLib Reference
-			var coreLibPath = Path.Combine(config.ILToNativePath, OSCoreLibNameMap[config.OS]);
+			var coreLibPath = Path.Combine(config.IlcPath, OSCoreLibNameMap[config.OS]);
 			argsList.Add($"-r \"{coreLibPath}\"");
 			
 			// Dependency References
@@ -79,7 +78,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 		
 		public int Invoke(NativeCompileSettings config)
 		{
-			var executablePath = Path.Combine(config.ILToNativePath, ExecutableName);
+			var executablePath = Path.Combine(config.IlcPath, ExecutableName);
 			
 			var result = Command.Create(executablePath, ArgStr)
 				.ForwardStdErr()

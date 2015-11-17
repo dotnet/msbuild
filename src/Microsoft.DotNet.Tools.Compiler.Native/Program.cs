@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             
             // Custom Extensibility Points to support CoreRT workflow TODO better descriptions
             var ilcArgs = app.Option("--ilcargs <CODEGEN>", "Use to specify custom arguments for the IL Compiler.", CommandOptionType.SingleValue);
-            var iltonativePathArg = app.Option("--iltonative-path <ILTONATIVE>", "Use to plug in a custom built iltonative.exe", CommandOptionType.SingleValue);
+            var ilcPathArg = app.Option("--ilcpath <ILC_PATH>", "Use to plug in a custom built ilc.exe", CommandOptionType.SingleValue);
             var runtimeLibPathArg = app.Option("--runtimelib-path <LIB_PATH>", "Use to plug in custom runtime and bootstrapper libs.", CommandOptionType.SingleValue);
             var linklibArg = app.Option("--linklib <LINKLIB>", "Use to link in additional static libs", CommandOptionType.MultipleValue);
             
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                     NativeMode = modeArg.Value(),
                     ReferencePaths = referencesArg.Values,
                     IlcArgs = ilcArgs.Value(),
-                    ILToNativePath = iltonativePathArg.Value(),
+                    IlcPath = ilcPathArg.Value(),
                     RuntimeLibPath = runtimeLibPathArg.Value(),
                     LinkLibPaths = linklibArg.Values,
                     AppDepSDKPath = appdepSDKPathArg.Value(),
@@ -247,19 +247,19 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 config.ReferencePaths.Add(reference);
             }
 
-            // ILToNativePath
-            if (!string.IsNullOrEmpty(args.ILToNativePath))
+            // IlcPath
+            if (!string.IsNullOrEmpty(args.IlcPath))
             {
-                if (!Directory.Exists(args.ILToNativePath))
+                if (!Directory.Exists(args.IlcPath))
                 {
-                    throw new Exception("ILToNative Directory does not exist.");
+                    throw new Exception("ILC Directory does not exist.");
                 }
 
-                config.ILToNativePath = args.ILToNativePath;
+                config.IlcPath = args.IlcPath;
             }
             else
             {
-                config.ILToNativePath = GetDefaultILToNativePath();
+                config.IlcPath = GetDefaultIlcPath();
             }
 
             // RuntimeLibPath
@@ -340,7 +340,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             return dir;
         }
 
-        private static string GetDefaultILToNativePath()
+        private static string GetDefaultIlcPath()
         {
             return AppContext.BaseDirectory;
         }

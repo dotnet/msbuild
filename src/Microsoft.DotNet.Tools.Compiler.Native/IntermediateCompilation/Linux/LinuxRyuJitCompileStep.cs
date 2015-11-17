@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 .Execute();
 
             // Needs System.Native.so in output
-            var sharedLibPath = Path.Combine(config.ILToNativePath, "System.Native.so");
+            var sharedLibPath = Path.Combine(config.IlcPath, "System.Native.so");
             var outputSharedLibPath = Path.Combine(config.OutputDirectory, "System.Native.so");
             try
             {

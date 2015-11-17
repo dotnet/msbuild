@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         public string IlcArgs { get; set; }
         public List<string> LinkLibPaths { get; set; }
         public string AppDepSDKPath { get; set; }
-        public string ILToNativePath { get; set; }
+        public string IlcPath { get; set; }
         public string RuntimeLibPath { get; set; }
     }
 
