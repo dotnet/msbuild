@@ -15,17 +15,18 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // TODO: This is not working because it sets the environment variables in a child process
             // For now get around this by using x86_amd64 cross tools
 
-            var commonToolsPath = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
+            // var commonToolsPath = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
 
-            var scriptPath = Path.Combine(commonToolsPath, "..\\..\\VC\\vcvarsall.bat");
-            var scriptArgs = "x86_amd64";
+            // var scriptPath = Path.Combine(commonToolsPath, "..\\..\\VC\\vcvarsall.bat");
+            // var scriptArgs = "x86_amd64";
 
-            var result = Command.Create(scriptPath, scriptArgs)
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .Execute();
+            // var result = Command.Create(scriptPath, scriptArgs)
+            //     .ForwardStdErr()
+            //     .ForwardStdOut()
+            //     .Execute();
 
-            return result.ExitCode;
+            // return result.ExitCode;
+            return 0;
         }
     }
 }
