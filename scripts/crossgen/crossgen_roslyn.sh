@@ -42,8 +42,8 @@ chmod +x crossgen
 
 ./crossgen -nologo -platform_assemblies_paths $BIN_DIR Microsoft.CodeAnalysis.VisualBasic.dll
 
-./crossgen -MissingDependenciesOK -nologo -platform_assemblies_paths $BIN_DIR csc.dll
+./crossgen -nologo -platform_assemblies_paths $BIN_DIR csc.dll
 [ -e csc.ni.exe ] && [ ! -e csc.ni.dll ] && mv csc.ni.exe csc.ni.dll
 
-./crossgen -MissingDependenciesOK -nologo -platform_assemblies_paths $BIN_DIR vbc.dll
+./crossgen -nologo -platform_assemblies_paths $BIN_DIR vbc.dll
 [ -e vbc.ni.exe ] && [ ! -e vbc.ni.dll ] && mv vbc.ni.exe vbc.ni.dll

@@ -522,7 +522,7 @@ namespace Microsoft.Extensions.ProjectModel
                 Optimize = rawOptions.ValueAsNullableBoolean("optimize"),
                 KeyFile = rawOptions.ValueAsString("keyFile"),
                 DelaySign = rawOptions.ValueAsNullableBoolean("delaySign"),
-                UseOssSigning = rawOptions.ValueAsNullableBoolean("useOssSigning"),
+                PublicSign = rawOptions.ValueAsNullableBoolean("publicSign"),
                 EmitEntryPoint = rawOptions.ValueAsNullableBoolean("emitEntryPoint")
             };
         }
