@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler.Native
 {
@@ -78,17 +72,19 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
         private static CommandLineApplication SetupApp()
         {
-            var app = new CommandLineApplication();
-            app.Name = "dotnet compile native";
-            app.FullName = "IL to Native compiler";
-            app.Description = "IL to Native compiler Compiler for the .NET Platform";
+            var app = new CommandLineApplication
+            {
+                Name = "dotnet compile native",
+                FullName = "IL to Native compiler",
+                Description = "IL to Native compiler Compiler for the .NET Platform"
+            };
+
             app.HelpOption("-h|--help");
 
             var managedInputArg = app.Argument("<INPUT_ASSEMBLY>", "The managed input assembly to compile to native.");
             var outputArg = app.Option("-o|--out <OUTPUT_DIR>", "Output Directory for native executable.", CommandOptionType.SingleValue);
-            var intermediateArg = app.Option("--temp-output <OUTPUT_DIR>", "Directory for intermediate files.", CommandOptionType.SingleValue);
-            var archArg = app.Option("-a|--arch <ARCH>", "Architecture type to compile for, defaults to the arch of the machine.", CommandOptionType.SingleValue );
-            var buildTypeArg = app.Option("-c|--configuration <TYPE>", "debug/release build type. Defaults to debug.", CommandOptionType.SingleValue);
+            var intermediateArg = app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory for intermediate files.", CommandOptionType.SingleValue);
+            var buildConfigArg = app.Option("-c|--configuration <TYPE>", "debug/release build configuration. Defaults to debug.", CommandOptionType.SingleValue);
             var modeArg = app.Option("-m|--mode <MODE>", "Code Generation mode. Defaults to ryujit. ", CommandOptionType.SingleValue);
 
             var referencesArg = app.Option("-r|--reference <REF_PATH>", "Use to specify Managed DLL references of the app.", CommandOptionType.MultipleValue);
@@ -99,14 +95,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var linklibArg = app.Option("--linklib <LINKLIB>", "Use to link in additional static libs", CommandOptionType.MultipleValue);
             
             // TEMPORARY Hack until CoreRT compatible Framework Libs are available 
-            var appdepSDKPathArg = app.Option("--appdepsdk <SDK>", "Use to plug in custom appdepsdk path", CommandOptionType.SingleValue);
+            var appdepSdkPathArg = app.Option("--appdepsdk <SDK>", "Use to plug in custom appdepsdk path", CommandOptionType.SingleValue);
             
             // Optional Log Path
             var logpathArg = app.Option("--logpath <LOG_PATH>", "Use to dump Native Compilation Logs to a file.", CommandOptionType.SingleValue);
-
-            // Use Response File
-            var responseFilePathArg = app.Option("--rsp <RSP_FILE>", "Compilation Response File", CommandOptionType.SingleValue);
-
+            
             app.OnExecute(() =>
             {
                 var cmdLineArgs = new ArgValues()
@@ -114,14 +107,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                     InputManagedAssemblyPath = managedInputArg.Value,
                     OutputDirectory = outputArg.Value(),
                     IntermediateDirectory = intermediateArg.Value(),
-                    Architecture = archArg.Value(),
-                    BuildType = buildTypeArg.Value(),
+                    Architecture = "x64",
+                    BuildConfiguration = buildConfigArg.Value(),
                     NativeMode = modeArg.Value(),
                     ReferencePaths = referencesArg.Values,
                     IlcArgs = ilcArgs.Value(),
                     IlcPath = ilcPathArg.Value(),
                     LinkLibPaths = linklibArg.Values,
-                    AppDepSDKPath = appdepSDKPathArg.Value(),
+                    AppDepSDKPath = appdepSdkPathArg.Value(),
                     LogPath = logpathArg.Value()
                 };
 
@@ -176,8 +169,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 }
             }
             
-            // BuildType 
-            if(string.IsNullOrEmpty(args.BuildType))
+            // BuildConfiguration 
+            if(string.IsNullOrEmpty(args.BuildConfiguration))
             {
                 config.BuildType = GetDefaultBuildType();
             }
@@ -185,11 +178,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             {
                 try
                 {
-                    config.BuildType = EnumExtensions.Parse<BuildConfiguration>(args.BuildType.ToLower());
+                    config.BuildType = EnumExtensions.Parse<BuildConfiguration>(args.BuildConfiguration.ToLower());
                 }
                 catch (Exception e)
                 {
-                    throw new Exception("Invalid BuildType Option.");
+                    throw new Exception("Invalid Configuration Option.");
                 }
             }
             
