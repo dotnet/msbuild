@@ -20,11 +20,6 @@
 
   <Import Project="..\dir.traversal.targets" />
 
-  <PropertyGroup>
-    <!-- Explicitly set the OutDir as it is used by the packaging targets -->
-    <OutDir>$(BaseOutputPathWithConfig)</OutDir>
-  </PropertyGroup>
-
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
   <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />
 

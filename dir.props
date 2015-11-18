@@ -294,16 +294,23 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <BaseOutputPath>$(BinDir)</BaseOutputPath>
-    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath)$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
+    <BaseOutputPathWithConfig>$([System.IO.Path]::Combine($(BaseOutputPath),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
     <BaseOutputPathWithConfig Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseOutputPath)$(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</BaseOutputPathWithConfig>
-    <OutputPath>$(BaseOutputPathWithConfig)</OutputPath>
+    <OutputPath>$([System.IO.Path]::Combine($(BaseOutputPathWithConfig),"Output"))$([System.IO.Path]::DirectorySeparatorChar)</OutputPath>
 
     <BaseIntermediateOutputPath>$(BaseOutputPath)obj$([System.IO.Path]::DirectorySeparatorChar)</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
-    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+    <IntermediateOutputPath>$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(BaseIntermediateOutputPath)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</IntermediateOutputPath>
 
-    <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
-    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(TargetPlatformIdentifier),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
+    <!-- The TestPath seems to be used by Microsoft.DotNet.BuildTools targets. It does not seem to affect the MSBuild build in any way -->
+    <TestPath>$(TestWorkingDir)$([System.IO.Path]::Combine($(MSBuildProjectName),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
+    <TestPath Condition="'$(Platform)' != 'AnyCPU'">$([System.IO.Path]::Combine($(TestWorkingDir)$(MSBuildProjectName),$(Platform),$(Configuration)))$([System.IO.Path]::DirectorySeparatorChar)</TestPath>
     <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
+
+    <DeploymentDirName>$(TargetPlatformIdentifier)_Deployment</DeploymentDirName>
+    <TestDeploymentDirName>$(DeploymentDirName)_Test</TestDeploymentDirName>
+
+    <DeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(DeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</DeploymentDir>
+    <TestDeploymentDir>$([System.IO.Path]::Combine($(BaseOutputPath), $(Configuration), $(TestDeploymentDirName)))$([System.IO.Path]::DirectorySeparatorChar)</TestDeploymentDir>
   </PropertyGroup>
 </Project>

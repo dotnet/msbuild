@@ -12,10 +12,23 @@
 
       <!-- For each package, get its content files. -->
       <ContentFilesFromPackage Include="%(PackagesFoldersInPackagesDir.Identity)content\**\*.*" />
-      <DestinationFilesFromPackage Include="@(ContentFilesFromPackage->'$(OutputPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </ItemGroup>
+
+    <!-- Copy the dependencies to both the deployment and the test directories -->
+    <ItemGroup>
+      <DeploymentDestination Include="@(ContentFilesFromPackage->'$(DeploymentDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+      <TestDeploymentDestination Include="@(ContentFilesFromPackage->'$(TestDeploymentDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+
+    <!-- Copy the package contents to both the deployment and test deployment directory -->
+
     <Copy SourceFiles="@(ContentFilesFromPackage)"
-          DestinationFiles="@(DestinationFilesFromPackage)"
+          DestinationFiles="@(DeploymentDestination)"
+          SkipUnchangedFiles="true"
+          />
+
+    <Copy SourceFiles="@(ContentFilesFromPackage)"
+          DestinationFiles="@(TestDeploymentDestination)"
           SkipUnchangedFiles="true"
           />
   </Target>
@@ -27,7 +40,6 @@
     <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)\runtime.project.lock.json</RuntimeProjectLockJson>
     <RestoreRuntimePackagesCommand>"$(NuGetToolPath)" restore $(RuntimeProjectJson) -Verbosity detailed</RestoreRuntimePackagesCommand>
     <RestoreRuntimePackagesCommand Condition="'$(OsEnvironment)'!='Windows_NT' and '$(MonoBuild)' == 'true'">export MONO_THREADS_PER_CPU=2000; mono $(RestoreRuntimePackagesCommand)</RestoreRuntimePackagesCommand>
-    <RuntimeDirectory Condition="'$(RuntimeDirectory)' ==''">$(OutputPath)</RuntimeDirectory>
     <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
@@ -63,11 +75,17 @@
       <Output TaskParameter="ReferencedPackages" ItemName="ReferencedNuGetPackages" />-->
     </ResolveNuGetPackageAssets>
 
+    <!-- Copy the dependencies to both the deployment and the test directories -->
+
     <Copy SourceFiles="@(ResolvedRuntimeFiles)"
-          DestinationFolder="$(RuntimeDirectory)"
+          DestinationFolder="$(DeploymentDir)"
           SkipUnchangedFiles="true"
           />
 
+    <Copy SourceFiles="@(ResolvedRuntimeFiles)"
+          DestinationFolder="$(TestDeploymentDir)"
+          SkipUnchangedFiles="true"
+          />
   </Target>
 
   <Target Name="DeployDependencies"

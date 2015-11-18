@@ -10,7 +10,7 @@
     </ItemGroup>
     
     <Copy SourceFiles="@(CompilerToolsFiles)"
-          DestinationFolder="$(OutputPath)"
+          DestinationFolder="$(TestDeploymentDir)"
           SkipUnchangedFiles="true"           
           />
   </Target>
@@ -21,14 +21,14 @@
     </ItemGroup>
     
     <Copy SourceFiles="@(CompilerToolsFiles)"
-          DestinationFolder="$(OutputPath)"
+          DestinationFolder="$(TestDeploymentDir)"
           SkipUnchangedFiles="true"           
           />
   </Target>
 
   <Target Name="CopyXunitConfiguration">
     <Copy SourceFiles="$(MSBuildThisFileDirectory)xunit.runner.json"
-          DestinationFolder="$(OutputPath)"
+          DestinationFolder="$(TestDeploymentDir)"
           SkipUnchangedFiles="true" />
   </Target>
 
