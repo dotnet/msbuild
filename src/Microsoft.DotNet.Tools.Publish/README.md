@@ -17,13 +17,18 @@ dotnet-publish needs access to project.json to work. If it is not specified on i
 The command also requires information on the targeted framework and runtime, both of which can be specified on the command line. If the runtime is not specified, the command will default to the runtime for the current operating system. If the framework is not specified, the command will read the information from the project.json file. In case of no valid framework found, the command will error out. In case of multiple valid frameworks found, the command will publish for all valid frameworks. 
 
 
+* ubuntu
+
 **Options**
 
 -f, --framework [FID]
 Publish the application for a given framework identifier (FID). If not specified, FID is read from project.json
 
 -r, --runtime [RID]
-Publish the application for a given runtime. If not specified, will default to the current operating system. 
+Publish the application for a given runtime. Supported values for runtimes at this time are:
+	* ubuntu.14.04-x64
+	* win7-x64
+	* osx.10.10-x64
 
 -o, --output
 Specify the path where to place the directory. If not specified, will default to ./bin/[configuration]/[framework]/[runtime]/

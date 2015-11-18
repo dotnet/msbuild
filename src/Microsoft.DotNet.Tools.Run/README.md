@@ -12,11 +12,7 @@ The run command provides a convenient option to run source code with one command
 
 This command relies on the [compile command](https://github.com/dotnet/cli/issues/48) to compile source inputs to a .NET assembly, before launching the program. The requirements for and handling of source inputs for this command are all inhereted from the compile command. The documentation for the compile command provides more information on those requirements.
 
-The native command uses compile in the following way:
-
-	dotnet compile -o dotnetapp.exe [overriden defaults from dotnet run]
-
-Output files, including temporary files, are written to the child `bin` folder, which will be created if it doesn't exist. Files will be overwritten as needed. 
+Output files, are written to the child `bin` folder, which will be created if it doesn't exist. Files will be overwritten as needed. Temporary files are written to the child `obj` folder.  
 
 **Options**
 
