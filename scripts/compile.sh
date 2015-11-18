@@ -51,7 +51,7 @@ if [ ! -d "$DNX_ROOT" ] || [ ! -e "$DNX_ROOT/dnx" ]; then
 fi
 
 header "Restoring packages"
-dotnet restore "$REPOROOT" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
+dotnet restore "$REPOROOT" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
 
 header "Building corehost"
 
@@ -105,6 +105,10 @@ cp -R $DNX_ROOT $STAGE2_DIR/bin/dnx
 # Copy and CHMOD the dotnet-restore script
 cp $DIR/dotnet-restore.sh $STAGE2_DIR/bin/dotnet-restore
 chmod a+x $STAGE2_DIR/bin/dotnet-restore
+
+# Copy in AppDeps
+header "Acquiring Native App Dependencies"
+DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $REPOROOT/scripts/build/build_appdeps.sh "$STAGE2_DIR/bin"
 
 # Stamp the output with the commit metadata
 COMMIT_ID=$(git rev-parse HEAD)

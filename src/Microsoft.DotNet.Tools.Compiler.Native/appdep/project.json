@@ -1,0 +1,13 @@
+{
+    "name": "appdepsdk",
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+    "dependencies": {
+        "Microsoft.DotNet.AppDep":"1.0.1-*"
+    },
+    "frameworks": {
+        "dnxcore50": { }
+    }
+}

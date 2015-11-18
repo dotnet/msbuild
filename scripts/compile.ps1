@@ -46,7 +46,7 @@ Download it from https://www.cmake.org
 
     # Restore packages
     header "Restoring packages"
-    dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
+    dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
 
     header "Building corehost"
     pushd "$RepoRoot\src\corehost"
@@ -94,8 +94,12 @@ Download it from https://www.cmake.org
     # Copy in the dotnet-restore script
     cp "$PSScriptRoot\dotnet-restore.cmd" "$Stage2Dir\bin\dotnet-restore.cmd"
 
-    # Smoke test stage2
+    # Copy in AppDeps
     $env:PATH = "$Stage2Dir\bin;$StartPath"
+    header "Acquiring Native App Dependencies"
+    cmd /c "$PSScriptRoot\build\build_appdeps.cmd" "$Stage2Dir"
+
+    # Smoke test stage2
     $env:DOTNET_HOME = "$Stage2Dir"
     & "$PSScriptRoot\test\smoke-test.ps1"
 } finally {

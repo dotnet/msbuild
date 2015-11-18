@@ -35,7 +35,12 @@ namespace Microsoft.DotNet.Tools.Compiler
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
+
+            // Native Args
             var native = app.Option("-n|--native", "Compiles source to native machine code.", CommandOptionType.NoValue);
+            var arch = app.Option("-a|--arch <ARCH>", "The architecture for which to compile. x64 only currently supported.", CommandOptionType.SingleValue);
+            var ilcArgs = app.Option("--ilc-args <ARGS>", "String to pass directory to ilc in native compilation.", CommandOptionType.SingleValue);
+            var cppMode = app.Option("--cpp", "Flag to do native compilation with C++ code generator.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -48,8 +53,12 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                 var buildProjectReferences = !noProjectDependencies.HasValue();
                 var isNative = native.HasValue();
+                var isCppMode = cppMode.HasValue();
+                var archValue = arch.Value();
+                var ilcArgsValue = ilcArgs.Value();
                 var configValue = configuration.Value() ?? Constants.DefaultConfiguration;
                 var outputValue = output.Value();
+                var intermediateValue = intermediateOutput.Value();
 
                 // Load project contexts for each framework and compile them
                 bool success = true;
@@ -61,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     success &= Compile(context, configValue, outputValue, intermediateOutput.Value(), buildProjectReferences);
                     if (isNative && success)
                     {
-                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences);
+                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, isCppMode);
                     }
                 }
 
@@ -83,15 +92,90 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences)
+        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences, string intermediateOutputValue, string archValue, string ilcArgsValue, bool isCppMode)
         {
-            string outputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
+            var outputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
+            var intermediateOutputPath = GetIntermediateOutputPath(context, configuration, intermediateOutputValue, outputOptionValue);
+
+            Directory.CreateDirectory(outputPath);
+            Directory.CreateDirectory(intermediateOutputPath);
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
-            var managedBinaryPath = Path.Combine(outputPath, context.ProjectFile.Name + (compilationOptions.EmitEntryPoint.GetValueOrDefault() ? ".exe" : ".dll"));
+            var managedOutput = GetProjectOutput(context.ProjectFile, context.TargetFramework, configuration, outputPath);
+            
+            var nativeArgs = new List<string>();
+
+            // Input Assembly
+            nativeArgs.Add($"\"{managedOutput}\"");
+
+            // ILC Args
+            nativeArgs.Add("--ilcargs");
+            nativeArgs.Add($"\"{ilcArgsValue}\"");
+
+            // CodeGen Mode
+            if(isCppMode)
+            {
+                nativeArgs.Add("--mode");
+                nativeArgs.Add("cpp");
+            }
+
+            // Configuration
+            if (configuration != null)
+            {
+                nativeArgs.Add("--configuration");
+                nativeArgs.Add(configuration);
+            }
+
+            // Architecture
+            if (archValue != null)
+            {
+                nativeArgs.Add("--arch");
+                nativeArgs.Add(archValue);
+            }
+
+            // Intermediate Path
+            nativeArgs.Add("--temp-output");
+            nativeArgs.Add($"\"{intermediateOutputPath}\"");
+
+            // Output Path
+            nativeArgs.Add("--output");
+            nativeArgs.Add($"\"{outputPath}\"");
+
+            // Dependencies
+            var exporter = context.CreateExporter(configuration);
+            var dependencies = exporter.GetDependencies().ToList();
+            foreach (var dependency in dependencies)
+            {
+                var projectDependency = dependency.Library as ProjectDescription;
+
+                if (projectDependency != null)
+                {
+                    if (projectDependency.Project.Files.SourceFiles.Any())
+                    {
+                        var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
+                        nativeArgs.Add("-r");
+                        nativeArgs.Add($"\"{projectOutputPath}\"");
+                    }
+                }
+                else
+                {
+                    foreach(var dep in dependency.RuntimeAssemblies)
+                    {
+                        nativeArgs.Add("-r");
+                        nativeArgs.Add($"\"{dep.ResolvedPath}\"");
+                    }
+                }
+            }
+
+            // Write Response File
+            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile-native.{context.ProjectFile.Name}.rsp");
+            File.WriteAllLines(rsp, nativeArgs);
+
+            // TODO Add -r assembly.dll for all Nuget References
+            //     Need CoreRT Framework published to nuget
 
             // Do Native Compilation
-            var result = Command.Create($"dotnet-compile-native", $"\"{managedBinaryPath}\" \"{outputPath}\"")
+            var result = Command.Create($"dotnet-compile-native", $"--rsp \"{rsp}\"")
                                 .ForwardStdErr()
                                 .ForwardStdOut()
                                 .Execute();
