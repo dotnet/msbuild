@@ -7,7 +7,7 @@ Goals:
 
 - Language agnostic - embrace "common language runtime".
 - Target agnostic - multi-targets.
-- Runtime agnostic - BYOR.
+- Runtime agnostic.
 - Simple extensibility and layering - "you had one job!"
 - Cross-platform - support and personality.
 - Outside-in philosphy - higher-level tools drive the CLI.
@@ -26,7 +26,7 @@ ASP.NET 5 will transition to the new tools for RC2. This is already in progress.
 Experience 
 ==========
 
-The [CLI tools](https://github.com/dotnet/cli) implement key scenarios, such as app and library compilation and NuGet package management. The "dotnet" tool is the entry-point tool that you will use in most cases. It provides higher-level commands, often using multiple tools together to complete a task. It's a convenience wrapper over the other tools, which can also be used directly. "dotnet" isn't magical at all, but a very simple aggregator of other tools.
+The [CLI tools](https://github.com/dotnet/cli) present the "dotnet" tool as the entry-point tool. It provides higher-level commands, often using multiple tools together to complete a task. It's a convenience wrapper over the other tools, which can also be used directly. "dotnet" isn't magical at all, but a very simple aggregator of other tools.
 
 You can get a sense of using the tools from the examples below.
 
