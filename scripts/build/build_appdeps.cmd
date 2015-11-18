@@ -7,8 +7,6 @@ set __ScriptDir=%~dp0
 set __RepoRoot=%__ScriptDir%\..\..
 set __AppDepsProjectDir=%__RepoRoot%\src\Microsoft.DotNet.Tools.Compiler.Native\appdep
 
-set PATH=%RepoRoot%\artifacts\win7-x64\stage0\bin;%PATH%
-
 REM Get absolute path
 pushd %1
 set __OutputPath=%CD%\bin

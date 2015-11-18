@@ -95,11 +95,11 @@ Download it from https://www.cmake.org
     cp "$PSScriptRoot\dotnet-restore.cmd" "$Stage2Dir\bin\dotnet-restore.cmd"
 
     # Copy in AppDeps
+    $env:PATH = "$Stage2Dir\bin;$StartPath"
     header "Acquiring Native App Dependencies"
     cmd /c "$PSScriptRoot\build\build_appdeps.cmd" "$Stage2Dir"
 
     # Smoke test stage2
-    $env:PATH = "$Stage2Dir\bin;$StartPath"
     $env:DOTNET_HOME = "$Stage2Dir"
     & "$PSScriptRoot\test\smoke-test.ps1"
 } finally {
