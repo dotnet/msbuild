@@ -21,7 +21,7 @@ Installers
 Interested in .NET Core + ASP.NET 5 RC bits?
 ----------------------------------------
 
-This toolchain is independent from the DNX-based .NET Core RC1 bits. If you are looking for the RC1 bits, you can find instructions on the [ASP.NET documentation site](http://get.asp.net/). 
+This toolchain is independent from the DNX-based .NET Core + ASP.NET 5 bits. If you are looking for .NET Core + ASP.NET 5 bits bits, you can find instructions on the http://get.asp.net/.  
 
 Docker
 ------
