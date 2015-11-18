@@ -108,7 +108,7 @@ chmod a+x $STAGE2_DIR/bin/dotnet-restore
 
 # Copy in AppDeps
 header "Acquiring Native App Dependencies"
-$REPOROOT/scripts/build/build_appdeps.sh "$STAGE2_DIR/bin"
+DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $REPOROOT/scripts/build/build_appdeps.sh "$STAGE2_DIR/bin"
 
 # Stamp the output with the commit metadata
 COMMIT_ID=$(git rev-parse HEAD)
