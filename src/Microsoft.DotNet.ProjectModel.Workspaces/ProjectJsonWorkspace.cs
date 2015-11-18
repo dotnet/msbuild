@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
 
         private static CSharpCompilationOptions AddSigningOptions(CSharpCompilationOptions options, CommonCompilerOptions compilerOptions, string projectDirectory)
         {
-            var useOssSigning = compilerOptions.UseOssSigning == true;
+            var useOssSigning = compilerOptions.PublicSign == true;
             var keyFile = compilerOptions.KeyFile;
 
             if (!string.IsNullOrEmpty(keyFile))
