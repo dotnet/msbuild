@@ -6,6 +6,8 @@
 param(
     [string]$Configuration="Debug")
 
+. "$PSScriptRoot\_common.ps1"
+
 $ErrorActionPreference="Stop"
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
@@ -19,11 +21,14 @@ $env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$env:PATH"
 if (!$env:DOTNET_BUILD_VERSION) {
     # Get the timestamp of the most recent commit
     $timestamp = git log -1 --format=%ct
-    $origin = New-Object -Type DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0
-    $commitTime = $origin.AddSeconds($timestamp)
-    $LastCommitTimestamp = $commitTime.ToString("yyyyMMdd-HHmmss")
+    $commitTime = [timespan]::FromSeconds($timestamp)
 
-    $env:DOTNET_BUILD_VERSION = "0.0.1-alpha-$LastCommitTimestamp"
+    $majorVersion = 1
+    $minorVersion = 0
+    $buildnumber = $commitTime.Days
+    $revnumber = $commitTime.TotalSeconds
+
+    $env:DOTNET_BUILD_VERSION = "$majorVersion.$minorVersion.$buildnumber.$revnumber"
 }
 
 Write-Host -ForegroundColor Green "*** Building dotnet tools version $($env:DOTNET_BUILD_VERSION) - $Configuration ***"
@@ -31,3 +36,6 @@ Write-Host -ForegroundColor Green "*** Building dotnet tools version $($env:DOTN
 
 Write-Host -ForegroundColor Green "*** Packaging dotnet ***"
 & "$PSScriptRoot\package\package.ps1"
+
+Write-Host -ForegroundColor Green "*** Generating dotnet MSI ***"
+& "$RepoRoot\packaging\windows\generatemsi.ps1" $Stage2Dir

@@ -1,0 +1,13 @@
+{
+  "compilationOptions": {
+      "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "WiX": "3.10.0.2103-pre1"
+  },
+
+  "frameworks": {
+    "dnxcore50": { }
+  }
+}

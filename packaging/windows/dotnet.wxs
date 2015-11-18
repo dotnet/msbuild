@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <?include "Variables.wxi" ?>
+    <Product Id="*" Name="$(var.ProductName)" Language="$(var.ProductLanguage)" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
+        <Package Compressed="yes" InstallerVersion="200" />
+        <Upgrade Id="$(var.UpgradeCode)">
+          <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" Property="NEWERVERSIONDETECTED" Language="$(var.LCID)" />
+          <UpgradeVersion Minimum="0.0.0.0" Maximum="$(var.ProductVersion)" IncludeMinimum="no" IncludeMaximum="no" Property="WIX_DOWNGRADE_DETECTED" Language="$(var.LCID)" />
+        </Upgrade>
+        <InstallExecuteSequence>
+            <RemoveExistingProducts Before="InstallInitialize" />
+        </InstallExecuteSequence>
+        <MediaTemplate CompressionLevel="mszip" EmbedCab="yes"/>
+        <Feature Id="MainFeature" Title="Main Feature" Level="1">
+            <ComponentGroupRef Id="InstallFiles" />
+            <ComponentRef Id="SetEnvVars" />
+            <ComponentGroupRef Id="AuthoredRegistryKeys"/>
+        </Feature>
+        <Feature Id="Provider" Absent="disallow" AllowAdvertise="no" Description="Used for Ref Counting" Display="hidden" Level="1" InstallDefault="local" Title="RefCounting" TypicalDefault="install">
+            <ComponentRef Id="Dotnet_CLI_$(var.Dotnet_DisplayVersion)" />
+        </Feature>
+        <Property Id="ProductFamily" Value="$(var.ProductFamily)" />
+        <Property Id="ProductEdition" Value="$(var.ProductEdition)" />
+        <Property Id="ProductCPU" Value="$(var.Platform)" />
+        <Property Id="RTM_ProductVersion" Value="$(var.Dotnet_ProductVersion)" />
+        <!--Property Id="ARPNOMODIFY" Value="1" /-->
+
+
+        <WixVariable Id="WixUILicenseRtf" Value="$(var.MicrosoftEula)" />
+
+        <Property Id="WIXUI_INSTALLDIR" Value="DOTNETHOME"/>
+        <UIRef Id="WixUI_InstallDir" />
+    </Product>
+    <Fragment>
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="$(var.Program_Files)" Name="$(var.Program_Files)">
+                <Directory Id="ProgramFilesFolder.Microsoft" Name="Microsoft">
+                    <Directory Id="DOTNETHOME" Name="dotnet"/>
+                </Directory>
+            </Directory>
+        </Directory>
+    </Fragment>
+</Wix>
