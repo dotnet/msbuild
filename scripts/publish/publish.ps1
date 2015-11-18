@@ -38,16 +38,24 @@ function CheckRequiredVariables
         return $false
     }
 
+    # this variable is set by the CI system
+    if([string]::IsNullOrEmpty($env:CONNECTION_STRING))
+    {
+        return $false
+    }
+
     return $true
 }
 
-function UploadFile($Upload_URI, $Uploadfile)
+function UploadFile($Blob, $Uploadfile)
 {
     Write-Host "Uploading $Uploadfile to dotnet feed to.."
 
-    $statusCode = (Invoke-WebRequest -URI "$Upload_URI" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $Uploadfile).StatusCode
+    # use azure cli to upload to blob storage. We cannot use Invoke-WebRequest to do this becuase azure has a max limit of 64mb that can be uploaded using REST
+    #$statusCode = (Invoke-WebRequest -URI "$Upload_URI" -Method PUT -Headers @{"x-ms-blob-type"="BlockBlob"; "x-ms-date"="2015-10-23";"x-ms-version"="2013-08-15"} -InFile $Uploadfile).StatusCode
+    azure storage blob upload --quiet --container $env:STORAGE_CONTAINER --blob $Blob --blobtype block --connection-string "$env:CONNECTION_STRING" --file $Uploadfile
 
-    if($statusCode -eq 201)
+    if($LastExitCode -eq 0)
     {
         Write-Host "Successfully uploaded $Uploadfile to dotnet feed."
         return $true
@@ -63,17 +71,17 @@ function UploadBinaries($zipFile)
 {
     $result = -1
     $fileName = [System.IO.Path]::GetFileName($zipFile)
-    $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Binaries/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN"
+    $zipBlob = "$env:CHANNEL/Binaries/$env:DOTNET_BUILD_VERSION/$fileName"
 
-    if(-Not (UploadFile $Upload_URI $zipFile))
+    if(-Not (UploadFile $zipBlob $zipFile))
     {
         return -1
     }
 
     Write-Host "Updating the latest dotnet binaries for windows.."
-    $Upload_URI_Latest = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Binaries/Latest/dotnet-win-x64.latest.zip$env:SASTOKEN"
+    $zipBlobLatest = "$env:CHANNEL/Binaries/Latest/dotnet-win-x64.latest.zip"
 
-    if(-Not (UploadFile $Upload_URI_Latest $zipFile))
+    if(-Not (UploadFile $zipBlobLatest $zipFile))
     {
         return -1
     }
@@ -85,18 +93,18 @@ function UploadBinaries($zipFile)
     $indexContent | Out-File -FilePath $indexFile
 
     # upload the index file
-    $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/dnvm/latest.win.index$env:SASTOKEN"
+    $indexBlob = "$env:CHANNEL/dnvm/latest.win.index"
 
-    if(-Not (UploadFile $Upload_URI $indexFile))
+    if(-Not (UploadFile $indexBlob $indexFile))
     {
         return -1
     }
 
     # update the version file
     $versionFile = Convert-Path $PSScriptRoot\..\..\artifacts\win7-x64\stage2\.version
-    $Version_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/dnvm/latest.win.version$env:SASTOKEN"
+    $versionBlob = "$env:CHANNEL/dnvm/latest.win.version"
 
-    if(-Not (UploadFile $Version_URI $versionFile))
+    if(-Not (UploadFile $versionBlob $versionFile))
     {
         return -1
     }
@@ -107,17 +115,17 @@ function UploadBinaries($zipFile)
 function UploadInstallers($msiFile)
 {
     $fileName = [System.IO.Path]::GetFileName($msiFile)
-    $Upload_URI = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Installers/$env:DOTNET_BUILD_VERSION/$fileName$env:SASTOKEN"
+    $msiBlob = "$env:CHANNEL/Installers/$env:DOTNET_BUILD_VERSION/$fileName"
 
-    if(-Not (UploadFile $Upload_URI $msiFile))
+    if(-Not (UploadFile $msiBlob $msiFile))
     {
         return -1
     }
 
     Write-Host "Updating the latest dotnet installer for windows.."
-    $Upload_URI_Latest = "https://$env:STORAGE_ACCOUNT.blob.core.windows.net/$env:STORAGE_CONTAINER/$env:CHANNEL/Installers/Latest/dotnet-win-x64.latest.msi$env:SASTOKEN"
+    $msiBlobLatest = "$env:CHANNEL/Installers/Latest/dotnet-win-x64.latest.msi"
 
-    if(-Not (UploadFile $Upload_URI_Latest $msiFile))
+    if(-Not (UploadFile $msiBlobLatest $msiFile))
     {
         return -1
     }
