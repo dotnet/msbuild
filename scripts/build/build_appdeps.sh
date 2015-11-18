@@ -4,8 +4,12 @@
 # The AppDepSDK package is a temporary artifact until we have CoreRT assemblies published to Nuget
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source $SCRIPT_DIR/../_common.sh
+export PATH=$REPOROOT/artifacts/$RID/stage0/bin:$PATH
+
 REPO_ROOT="$SCRIPT_DIR/../.."
-APPDEPS_PROJECT_DIR=%REPO_ROOT%\Microsoft.DotNet.Tools.Compiler.Native\appdep
+APPDEPS_PROJECT_DIR=$REPO_ROOT/src/Microsoft.DotNet.Tools.Compiler.Native/appdep
 
 # Get Absolute Output Dir
 pushd $1
@@ -14,8 +18,9 @@ popd
 
 ## App Deps ##
 pushd $APPDEPS_PROJECT_DIR
-dotnet restore --packages $APPDEPS_PROJECT_DIR\packages
-APPDEP_SDK=$APPDEPS_PROJECT_DIR\packages\toolchain*\*\
+dotnet restore --packages $APPDEPS_PROJECT_DIR/packages
+APPDEP_SDK=$APPDEPS_PROJECT_DIR/packages/toolchain*/*/
+
 popd
 
 mkdir -p $OUTPUT_DIR/appdepsdk
