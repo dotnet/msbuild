@@ -4,7 +4,7 @@
   },
 
   "dependencies": {
-    "WiX.Toolset.2015": "3.10.0.1503"
+    "WiX": "3.10.0.2103-pre1"
   },
 
   "frameworks": {

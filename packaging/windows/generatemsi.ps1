@@ -18,7 +18,7 @@ function AcquireWixTools
 
     Write-Host Restoring Wixtools..
 
-    $result = Join-Path $env:TEMP WiX
+    $result = $env:TEMP
     
     .\dotnet restore $RepoRoot\packaging\windows\WiXTools --packages $result | Out-Null
 
@@ -29,7 +29,7 @@ function AcquireWixTools
     }
     else
     {
-        $result = Join-Path $result WiX.Toolset.2015\3.10.0.1503\tools\wix        
+        $result = Join-Path $result WiX\3.10.0.2103-pre1\tools
     }
 
     popd    
@@ -61,8 +61,15 @@ function RunCandle
     pushd "$WixRoot"
 
     Write-Host Running candle..
+    $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows"
 
-    .\candle.exe -dDotnetSrc="$inputDir" -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf"  "$RepoRoot\packaging\windows\dotnet.wxs" $InstallFileswsx | Out-Null
+    .\candle.exe -dDotnetSrc="$inputDir" -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" -dBuildVersion="$env:DOTNET_BUILD_VERSION" -arch x64 `
+        -ext WixDependencyExtension.dll `
+        "$AuthWsxRoot\dotnet.wxs" `
+        "$AuthWsxRoot\envvars.wxs" `
+        "$AuthWsxRoot\provider.wxs" `
+        "$AuthWsxRoot\registrykeys.wxs" `
+        $InstallFileswsx | Out-Null
 
     if($LastExitCode -ne 0)
     {
@@ -81,7 +88,14 @@ function RunLight
 
     Write-Host Running light..
 
-    .\light -ext WixUIExtension -cultures:en-us  dotnet.wixobj $InstallFilesWixobj -out $DotnetMSIOutput | Out-Null
+    .\light -ext WixUIExtension -ext WixDependencyExtension -ext WixUtilExtension `
+        -cultures:en-us `
+        dotnet.wixobj `
+        envvars.wixobj `
+        provider.wixobj `
+        registrykeys.wixobj `
+        $InstallFilesWixobj `
+        -out $DotnetMSIOutput | Out-Null
 
     if($LastExitCode -ne 0)
     {
@@ -117,7 +131,6 @@ if([string]::IsNullOrEmpty($WixRoot))
 
 if(-Not (RunHeat))
 {    
-    Write-Host Fooooobar
     return -1
 }
 
@@ -139,4 +152,7 @@ if(!(Test-Path $DotnetMSIOutput))
 
 Write-Host -ForegroundColor Green "Successfully create dotnet MSI - $DotnetMSIOutput"
 
-return 0
+$PublishScript = Join-Path $PSScriptRoot "..\..\scripts\publish\publish.ps1"
+& $PublishScript -file $DotnetMSIOutput
+
+exit $LastExitCode
