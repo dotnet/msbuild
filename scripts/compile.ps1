@@ -46,7 +46,7 @@ Download it from https://www.cmake.org
 
     # Restore packages
     header "Restoring packages"
-    dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
+    dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
 
     header "Building corehost"
     pushd "$RepoRoot\src\corehost"
