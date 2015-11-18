@@ -1,5 +1,6 @@
+Developer Guide
+===============
 
-# Start developing on .NET Command Line Interface
 ## Prerequisites
 
 In order to build .NET Command Line Interface, you need the following installed on you machine.
@@ -28,29 +29,14 @@ In order to build .NET Command Line Interface, you need the following installed 
 1. Run `build.cmd` or `build.sh` from the root depending on your OS.
 2. Use `artifacts/{os}-{arch}/stage2/dotnet` to try out the `dotnet` command. You can also add `artifacts/{os}-{arch}/stage2` to the PATH if you want to run `dotnet` from anywhere.
 
-
-# Tools 
-
-## Visual Studio
-
-* You can use Visual Studio 2015 to work on these bits. 
-
-## Visual Studio Code
-
-* You can also use Visual Studo code https://code.visualstudio.com/ to contribute to this project. 
-
 ## A simple test
 
 1. `cd test\TestApp`
 2. `dotnet run`
 
-# Contributing to the repo
 
-## Contribution Guidelines
+##Adding a Command
 
-Once you are set up with requirements and you want to start, please review our [contribution guidelines](Contributing.md) to get up to speed with the process. 
-
-### Adding a Command
 The donet CLI considers any executable on the path named `dotnet-{commandName}` to be a command it can call out to. `dotnet publish`, for example, is added to the path as an executable called `dotnet-publish`. To add a new command we must create the executable and then add it to the distribution packages for installation.
 
 0. Create an issue on https://github.com/dotnet/cli and get consensus on the need for and behavior of the command.
@@ -77,7 +63,3 @@ Each command's project root should contain a manpage-style Readme.md that descri
 
 #### Add command to packages
 - Update the symlinks property of debian_config.json to include the new command
-
-# I just want to use this toolchain
-
-If you just want to use the .NET Command Line Interface, your best bet would be to use the installers provided on the [main README file](../README.md). You can also follow the above guide for building from source to get the lastest (bleeding edge) bits. 
