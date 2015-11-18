@@ -6,7 +6,9 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $SCRIPT_DIR/../_common.sh
-export PATH=$REPOROOT/artifacts/$RID/stage0/bin:$PATH
+export PATH=$REPOROOT/artifacts/$RID/stage0/bin
+export DOTNET_HOME=$REPOROOT/artifacts/$RID/stage0/bin 
+export DOTNET_TOOLS=$REPOROOT/artifacts/$RID/stage0/bin
 
 REPO_ROOT="$SCRIPT_DIR/../.."
 APPDEPS_PROJECT_DIR=$REPO_ROOT/src/Microsoft.DotNet.Tools.Compiler.Native/appdep
