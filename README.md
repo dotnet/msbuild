@@ -18,10 +18,10 @@ Installers
 |**Installers**|[Download Debian Package](https://dotnetcli.blob.core.windows.net/dotnet/dev/Installers/Latest/dotnet-linux-x64.latest.deb)|[Download Msi](https://dotnetcli.blob.core.windows.net/dotnet/dev/Installers/Latest/dotnet-win-x64.latest.msi)|[Download Pkg](https://dotnetcli.blob.core.windows.net/dotnet/dev/Installers/Latest/dotnet-osx-x64.latest.pkg) |
 |**Binaries**|[Download tar file](https://dotnetcli.blob.core.windows.net/dotnet/dev/Binaries/Latest/dotnet-linux-x64.latest.tar.gz)|[Download zip file](https://dotnetcli.blob.core.windows.net/dotnet/dev/Binaries/Latest/dotnet-win-x64.latest.zip)|[Download tar file](https://dotnetcli.blob.core.windows.net/dotnet/dev/Binaries/Latest/dotnet-osx-x64.latest.tar.gz) |
 
-Interested in .NET Core RC1 bits?
----------------------------------
+Interested in .NET Core + ASP.NET 5 RC bits?
+----------------------------------------
 
-This toolchain is independent from the DNX-based .NET Core RC1 bits. If you are looking for the RC1 bits, you can find instructions on the [ASP.NET documentation site](https://docs.asp.net/en/latest/). 
+This toolchain is independent from the DNX-based .NET Core RC1 bits. If you are looking for the RC1 bits, you can find instructions on the [ASP.NET documentation site](http://get.asp.net/). 
 
 Docker
 ------
