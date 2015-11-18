@@ -33,18 +33,24 @@ Common Commands:
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
             var verbose = false;
+            var success = true;    
             var command = string.Empty;
             var lastArg = 0;
-
             for (; lastArg < args.Length; lastArg++)
             {
                 if (IsArg(args[lastArg], "v", "verbose"))
                 {
                     verbose = true;
                 }
+                else if (IsArg(args[lastArg], "h", "help"))
+                {
+                    PrintHelp();
+                    return 0;
+                }
                 else if (args[lastArg].StartsWith("-"))
                 {
-                    PrintHelp($"Unknown option: ${args[lastArg]}");
+                    Reporter.Error.WriteLine($"Unknown option: {args[lastArg]}");
+                    success = false;
                 }
                 else
                 {
@@ -52,6 +58,10 @@ Common Commands:
                     command = args[lastArg];
                     break;
                 }
+            }
+            if (!success) {
+                PrintHelp();
+                return 1;
             }
 
             var appArgs = (lastArg + 1) >= args.Length ? Enumerable.Empty<string>() : args.Skip(lastArg + 1).ToArray();
@@ -87,12 +97,8 @@ Common Commands:
             }
         }
 
-        private static void PrintHelp(string errorMessage = null)
+        private static void PrintHelp()
         {
-            if(!string.IsNullOrEmpty(errorMessage))
-            {
-                Reporter.Error.WriteLine(errorMessage.Red());
-            }
             Reporter.Output.WriteLine(HelpText);
         }
 
