@@ -7,6 +7,11 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $SCRIPT_DIR/../_common.sh
 
+# Dotnet-compile-native doesn't work for mac yet
+if [[ "$(uname)" != "Linux" ]]; then
+	exit 0
+fi
+
 REPO_ROOT="$SCRIPT_DIR/../.."
 APPDEPS_PROJECT_DIR=$REPO_ROOT/src/Microsoft.DotNet.Tools.Compiler.Native/appdep
 
