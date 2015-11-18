@@ -1,30 +1,36 @@
 ﻿{
-  "version": "1.0.0-*",
-  "description": "Types to model a .NET Project",
-  "dependencies": {
-    "Microsoft.CSharp": "4.0.1-beta-23504",
-    "System.Collections": "4.0.11-beta-23504",
-    "System.Linq": "4.0.1-beta-23504",
-    "System.Threading.Thread": "4.0.0-beta-23504",
-    "System.Runtime.Loader": "4.0.0-beta-23504",
-    "System.Dynamic.Runtime": "4.0.11-beta-23504",
-    "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23504",
-    "System.Security.Cryptography.Algorithms": "4.0.0-beta-23504",
+    "version": "1.0.0-*",
+    "description": "Types to model a .NET Project",
+    "dependencies": {
+        "Microsoft.CSharp": "4.0.1-beta-23504",
+        "System.Collections": "4.0.11-beta-23504",
+        "System.Linq": "4.0.1-beta-23504",
+        "System.Threading.Thread": "4.0.0-beta-23504",
+        "System.Runtime.Loader": "4.0.0-beta-23504",
+        "System.Dynamic.Runtime": "4.0.11-beta-23504",
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23504",
+        "System.Security.Cryptography.Algorithms": "4.0.0-beta-23504",
 
-    "NuGet.Packaging": "3.3.0-*",
+        "NuGet.Packaging": "3.3.0-*",
 
-    "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15791",
-    "Microsoft.Extensions.JsonParser.Sources": {
-      "type": "build",
-      "version": "1.0.0-*"
+        "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15791",
+        "Microsoft.Extensions.JsonParser.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        },
+        "Microsoft.Extensions.HashCodeCombiner.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        }
     },
-    "Microsoft.Extensions.HashCodeCombiner.Sources": {
-      "type": "build",
-      "version": "1.0.0-*"
-    }
-  },
 
-  "frameworks": {
-    "dnxcore50": { }
-  }
+    "frameworks": {
+        "dnxcore50": { }
+    },
+    "scripts": {
+        "postcompile": [
+            "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
+            "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
+        ]
+    }
 }

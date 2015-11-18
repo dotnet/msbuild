@@ -7,6 +7,8 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public struct CommandResult
     {
+        public static readonly CommandResult Empty = new CommandResult();
+
         public int ExitCode { get; }
         public string StdOut { get; }
         public string StdErr { get; }
