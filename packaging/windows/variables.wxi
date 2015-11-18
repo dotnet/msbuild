@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define Servicing_Key_SP   =   "0" ?>
+  <?define Servicing_Key_SPIndex   =   "0" ?>
+  <?define Servicing_Key_SPName   =   "Beta" ?>
+  <?define Dotnet_ProductVersion   =   "$(var.BuildVersion)" ?>
+  <?define Dotnet_DisplayVersion   =   "1.0" ?>
+  <?define Dotnet_BuildVersion   =   "$(var.BuildVersion)" ?>
+  <?define Manufacturer     =   "Microsoft Corporation" ?>
+  <?define ProductName      =   "Microsoft Dotnet CLI for Windows" ?>
+  <?define ProductLanguage  =   "1033" ?>
+  <?define ProductVersion   =   "$(var.Dotnet_ProductVersion)" ?>
+  <?define ProductFamily    =   "dotnet" ?>
+  <?define ProductEdition   =   "001dotnet" ?>
+  <?define LCID  = "$(var.ProductLanguage)"?>
+  
+  <?define Platform   =   "$(sys.BUILDARCH)" ?>
+  <?if $(var.Platform)=x86?>  
+  <?define Program_Files="ProgramFilesFolder"?>
+  <?define Win64AttributeValue=no?>
+  <?define UpgradeCode="70A1576F-63B6-4659-9E39-25C7B769DDE5"?>
+  <?elseif $(var.Platform)=x64?>
+  <?define Program_Files="ProgramFiles64Folder"?>
+  <?define Win64AttributeValue=yes?>
+  <?define UpgradeCode="7D73E4F7-71E2-4236-8CF5-1C499BA3FF50"?>
+  <?else?>
+  <?error Invalid Platform ($(var.Platform))?>
+  <?endif?>
+</Include>

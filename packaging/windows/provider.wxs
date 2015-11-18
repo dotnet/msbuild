@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:dep="http://schemas.microsoft.com/wix/DependencyExtension">
+  <?include "Variables.wxi" ?>
+  <Fragment>
+    <DirectoryRef Id="TARGETDIR">
+      <Component Id="Dotnet_CLI_$(var.Dotnet_DisplayVersion)" DiskId="1" Win64="no" Guid="3B7DF8C8-9BB9-3F4C-8CBF-E393E4D7FF43">
+        <dep:Provides Key="Dotnet.CLI_$(var.Dotnet_DisplayVersion)" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>
