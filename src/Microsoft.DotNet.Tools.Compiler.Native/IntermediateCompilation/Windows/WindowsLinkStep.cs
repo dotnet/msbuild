@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 	{
 		private readonly string LinkerName = "link.exe";
 		private readonly string LinkerOutputExtension = ".exe";
-        private readonly string VSBin = "..\\..\\VC\\bin\\x86_amd64";
+        private readonly string VSBin = "..\\..\\VC\\bin\\amd64";
 
         private readonly string InputExtension = ".obj";
 

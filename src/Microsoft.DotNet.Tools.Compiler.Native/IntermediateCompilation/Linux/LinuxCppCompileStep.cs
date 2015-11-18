@@ -10,12 +10,10 @@ using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler.Native
 {
-    public class LinuxCppCompiler : IPlatformNativeStep
+    public class LinuxCppCompileStep : IPlatformNativeStep
     {
         private readonly string CompilerName = "clang-3.5";
         private readonly string InputExtension = ".cpp";
-
-        private readonly string CompilerOutputExtension = ".a";
 
         // TODO: debug/release support
         private readonly string cLibsFlags = "-lm -ldl";
@@ -23,16 +21,16 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
         private readonly string[] libs = new string[]
         {
-            "System.Native.so",
-            "libPortableRuntime.a",
             "libbootstrappercpp.a",
+            "libPortableRuntime.a",
             "libSystem.Private.CoreLib.Native.a",
+            "System.Native.so"
         };
 
         
         private string CompilerArgStr { get; set; }
 
-        public LinuxCppCompiler(NativeCompileSettings config)
+        public LinuxCppCompileStep(NativeCompileSettings config)
         {
             InitializeArgs(config);
         }
@@ -68,12 +66,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             argsList.Add("-I");
             argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk"));
 
-            // Add Stubs
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04/lxstubs.cpp"));
 
             // Input File
             var inCppFile = DetermineInFile(config);
             argsList.Add(inCppFile);
+
+            // Add Stubs
+            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04/lxstubs.cpp"));
+
 
             // Libs
             foreach (var lib in libs)
@@ -115,15 +115,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
         public string DetermineOutputFile(NativeCompileSettings config)
         {
-            var inputFile = DetermineInFile(config);
+            var intermediateDirectory = config.OutputDirectory;
 
-            return inputFile + CompilerOutputExtension;
+            var filename = Path.GetFileNameWithoutExtension(config.InputManagedAssemblyPath);
+
+            var outfile = Path.Combine(intermediateDirectory, filename);
+
+            return outfile;
         }
-
-        public bool RequiresLinkStep()
-        {
-            return false;
-        }
-
     }
 }

@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			}
 			else if (config.OS == OSMode.Linux)
 			{
-                throw new NotImplementedException("Linux Cpp not yet supported.");
+                stepList.Add(new LinuxCppCompileStep(config));
 			}
 			else if (config.OS == OSMode.Mac)
 			{

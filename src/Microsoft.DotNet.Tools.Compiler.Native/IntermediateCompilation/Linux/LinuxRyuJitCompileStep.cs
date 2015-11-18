@@ -24,7 +24,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         {
             "libbootstrapper.a",
             "libRuntime.a",
-            "libPortableRuntime.a",
             "libSystem.Private.CoreLib.Native.a",
             "System.Native.so"
         };
