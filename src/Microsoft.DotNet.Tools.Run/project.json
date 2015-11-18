@@ -20,7 +20,7 @@
         "type": "build",
         "version": "1.0.0-*"
     },
-    "Microsoft.Net.Compilers.netcore": "1.2.0-beta-20151111-02"
+    "Microsoft.Net.Compilers.netcore": "1.2.0-beta-20151117-04"
   },
   "frameworks": {
     "dnxcore50": { }

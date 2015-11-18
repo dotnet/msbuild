@@ -149,9 +149,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 commonArgs.Add("-delaysign");
             }
 
-            // TODO: What is this? What does it mean to sign without a key?
-            // Is this "OSS" signing?
-            // if (options.StrongName)
+            if (options.PublicSign == true)
+            {
+                commonArgs.Add("-publicsign");
+            }
 
             if (options.EmitEntryPoint != true)
             {

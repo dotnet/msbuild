@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         internal static readonly OptionTemplate s_delaySignTemplate = new OptionTemplate("delay-sign");
 
-        internal static readonly OptionTemplate s_ossSignTemplate = new OptionTemplate("oss-sign");
+        internal static readonly OptionTemplate s_publicSignTemplate = new OptionTemplate("public-sign");
 
         internal static readonly OptionTemplate s_emitEntryPointTemplate = new OptionTemplate("emit-entry-point");
 
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             bool? optimize = null;
             string keyFile = null;
             bool? delaySign = null;
-            bool? strongName = null;
+            bool? publicSign = null;
             bool? emitEntryPoint = null;
 
             Func<string, bool?> nullableBoolConverter = v => bool.Parse(v);
@@ -70,8 +70,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             syntax.DefineOption(s_delaySignTemplate.LongName, ref delaySign,
                     nullableBoolConverter, "Delay-sign the output assembly");
 
-            syntax.DefineOption(s_ossSignTemplate.LongName, ref strongName,
-                    nullableBoolConverter, "OSS sign the output assembly");
+            syntax.DefineOption(s_publicSignTemplate.LongName, ref publicSign,
+                    nullableBoolConverter, "Public-sign the output assembly");
 
             syntax.DefineOption(s_emitEntryPointTemplate.LongName, ref emitEntryPoint,
                     nullableBoolConverter, "Output an executable console program");
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 Optimize = optimize,
                 KeyFile = keyFile,
                 DelaySign = delaySign,
-                UseOssSigning = strongName,
+                PublicSign = publicSign,
                 EmitEntryPoint = emitEntryPoint
             };
         }
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             var optimize = options.Optimize;
             var keyFile = options.KeyFile;
             var delaySign = options.DelaySign;
-            var ossSign = options.UseOssSigning;
+            var publicSign = options.PublicSign;
             var emitEntryPoint = options.EmitEntryPoint;
 
             var args = new List<string>();
@@ -146,9 +146,9 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 args.Add(s_delaySignTemplate.ToLongArg(delaySign));
             }
 
-            if (ossSign != null)
+            if (publicSign != null)
             {
-                args.Add(s_ossSignTemplate.ToLongArg(ossSign));
+                args.Add(s_publicSignTemplate.ToLongArg(publicSign));
             }
 
             if (emitEntryPoint != null)
