@@ -92,25 +92,39 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool CompileNative(ProjectContext context, string configuration, string outputOptionValue, bool buildProjectReferences, string intermediateOutputValue, string archValue, string ilcArgsValue, bool isCppMode)
+        private static bool CompileNative(
+            ProjectContext context, 
+            string configuration, 
+            string outputOptionValue, 
+            bool buildProjectReferences, 
+            string intermediateOutputValue, 
+            string archValue, 
+            string ilcArgsValue, 
+            bool isCppMode)
         {
-            var outputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
-            var intermediateOutputPath = GetIntermediateOutputPath(context, configuration, intermediateOutputValue, outputOptionValue);
+            var outputPath = GetOutputPath(context, configuration, outputOptionValue);
+            var nativeOutputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
+            var intermediateOutputPath = 
+                GetIntermediateOutputPath(context, configuration, intermediateOutputValue, outputOptionValue);
 
-            Directory.CreateDirectory(outputPath);
+            Directory.CreateDirectory(nativeOutputPath);
             Directory.CreateDirectory(intermediateOutputPath);
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
-            var managedOutput = GetProjectOutput(context.ProjectFile, context.TargetFramework, configuration, outputPath);
+            var managedOutput = 
+                GetProjectOutput(context.ProjectFile, context.TargetFramework, configuration, outputPath);
             
             var nativeArgs = new List<string>();
 
             // Input Assembly
-            nativeArgs.Add($"\"{managedOutput}\"");
+            nativeArgs.Add($"{managedOutput}");
 
             // ILC Args
-            nativeArgs.Add("--ilcargs");
-            nativeArgs.Add($"\"{ilcArgsValue}\"");
+            if (!string.IsNullOrWhiteSpace(ilcArgsValue))
+            {
+                nativeArgs.Add("--ilcargs");
+                nativeArgs.Add($"{ilcArgsValue}");
+            }            
 
             // CodeGen Mode
             if(isCppMode)
@@ -135,37 +149,11 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             // Intermediate Path
             nativeArgs.Add("--temp-output");
-            nativeArgs.Add($"\"{intermediateOutputPath}\"");
+            nativeArgs.Add($"{intermediateOutputPath}");
 
             // Output Path
             nativeArgs.Add("--output");
-            nativeArgs.Add($"\"{outputPath}\"");
-
-            // Dependencies
-            var exporter = context.CreateExporter(configuration);
-            var dependencies = exporter.GetDependencies().ToList();
-            foreach (var dependency in dependencies)
-            {
-                var projectDependency = dependency.Library as ProjectDescription;
-
-                if (projectDependency != null)
-                {
-                    if (projectDependency.Project.Files.SourceFiles.Any())
-                    {
-                        var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
-                        nativeArgs.Add("-r");
-                        nativeArgs.Add($"\"{projectOutputPath}\"");
-                    }
-                }
-                else
-                {
-                    foreach(var dep in dependency.RuntimeAssemblies)
-                    {
-                        nativeArgs.Add("-r");
-                        nativeArgs.Add($"\"{dep.ResolvedPath}\"");
-                    }
-                }
-            }
+            nativeArgs.Add($"{nativeOutputPath}");            
 
             // Write Response File
             var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile-native.{context.ProjectFile.Name}.rsp");
@@ -175,7 +163,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             //     Need CoreRT Framework published to nuget
 
             // Do Native Compilation
-            var result = Command.Create($"dotnet-compile-native", $"--rsp \"{rsp}\"")
+            var result = Command.Create("dotnet-compile-native", $"--rsp \"{rsp}\"")
                                 .ForwardStdErr()
                                 .ForwardStdOut()
                                 .Execute();

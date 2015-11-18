@@ -12,10 +12,20 @@ pushd %1
 set __OutputPath=%CD%\bin
 popd
 
+
+rmdir /S /Q %AppDepsProjectDir%\packages
+
 pushd %__AppDepsProjectDir%
 dotnet restore --packages %AppDepsProjectDir%\packages
-set __AppDepSDK=%AppDepsProjectDir%\packages\toolchain*\*\
+set __AppDepSDK=%AppDepsProjectDir%\packages\toolchain*\
 popd
 
 mkdir %__OutputPath%\appdepsdk
-xcopy /S/E/H/Y %__AppDepSDK% %__OutputPath%\appdepsdk
+cd %__AppDepSDK%
+FOR /D %%a IN (*) DO (
+  CD %%a
+  GOTO :Copy
+)
+
+:Copy
+xcopy /S/E/H/Y * %__OutputPath%\appdepsdk
