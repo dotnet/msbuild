@@ -43,7 +43,7 @@ Compiling to IL is done using:
 	dotnet compile
 This will drop a binary in `./bin/[configuration]/[framework]/[binary name]` that you can just run.
 
-Finally, you can also try out native compilation on Windows and Linux. **Note:** at this point, only the `helloworld` and `dotnetbot` samples will work with native compilation; in general, only simple applications like hello world will work reliably.
+Finally, you can also try out native compilation on Windows and Linux. **Note:** at this point, only the `helloworld` and `dotnetbot` samples will work with native compilation.
 
 	dotnet compile --native
 	
