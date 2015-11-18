@@ -4,12 +4,12 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-ln -s $2/dotnet /usr/local/bin/
-ln -s $2/dotnet-compile /usr/local/bin/
-ln -s $2/dotnet-compile-csc /usr/local/bin/
-ln -s $2/dotnet-publish /usr/local/bin/
-ln -s $2/dotnet-restore /usr/local/bin/
-ln -s $2/dotnet-restore /usr/local/bin/
-ln -s $2/resgen /usr/local/bin/
+ln -s $2/bin/dotnet /usr/local/bin/
+ln -s $2/bin/dotnet-compile /usr/local/bin/
+ln -s $2/bin/dotnet-compile-csc /usr/local/bin/
+ln -s $2/bin/dotnet-publish /usr/local/bin/
+ln -s $2/bin/dotnet-restore /usr/local/bin/
+ln -s $2/bin/dotnet-restore /usr/local/bin/
+ln -s $2/bin/resgen /usr/local/bin/
 
 exit 0
