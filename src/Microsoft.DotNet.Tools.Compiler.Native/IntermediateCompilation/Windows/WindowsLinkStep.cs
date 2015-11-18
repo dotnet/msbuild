@@ -45,6 +45,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             "odbc32.lib",
             "odbccp32.lib"
         };
+
+        private static readonly Dictionary<BuildConfiguration, string[]> ConfigurationLinkLibMap = new Dictionary<BuildConfiguration, string[]>()
+        {
+        	{ BuildConfiguration.debug , new string[] { "msvcrtd" } },
+        	{ BuildConfiguration.release , new string[] { "msvcrt" } }
+        };
 		
 		private string ArgStr { get; set; }
 		private NativeCompileSettings config;
@@ -97,6 +103,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			foreach (var lib in SDKLibs)
 			{
 				argsList.Add(Path.Combine(config.IlcPath, lib));
+			}
+
+			// Configuration Based Libs
+			var configLibs = ConfigurationLinkLibMap[config.BuildType];
+			foreach (var lib in configLibs)
+			{
+				argsList.Add(lib);
 			}
 
 			// Link Libs
