@@ -40,6 +40,7 @@
         "bin/dotnet-repl-csi" : "usr/bin/dotnet-repl-csi",
         "bin/dotnet-restore" : "usr/bin/dotnet-restore",
         "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native",
-        "bin/resgen" : "usr/bin/resgen"
+        "bin/resgen" : "usr/bin/resgen",
+	"bin/dotnet-init":"usr/bin/dotnet-init"
     }
 }
