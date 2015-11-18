@@ -40,12 +40,13 @@ export PATH=$DOTNET_INSTALL_DIR/bin:$PATH
 
 # UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
 LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
+major=1
+minor=0
+# no. of days since epoch
+build=$(($LAST_COMMIT_TIMESTAMP/3600/24))
+revision=$LAST_COMMIT_TIMESTAMP
 
-if [ "$(uname)" == "Darwin" ]; then
-    export DOTNET_BUILD_VERSION=0.0.1-alpha-$(date -ur $LAST_COMMIT_TIMESTAMP "+%Y%m%d-%H%M%S")
-else
-    export DOTNET_BUILD_VERSION=0.0.1-alpha-$(date -ud @$LAST_COMMIT_TIMESTAMP "+%Y%m%d-%H%M%S")
-fi
+export DOTNET_BUILD_VERSION=$major.$minor.$build.$revision
 
 header "Building dotnet tools version $DOTNET_BUILD_VERSION - $CONFIGURATION"
 
