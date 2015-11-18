@@ -142,6 +142,15 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             if (options.KeyFile != null)
             {
                 commonArgs.Add($"-keyfile:\"{options.KeyFile}\"");
+
+                // If we're not on Windows, full signing isn't supported, so we'll
+                // public sign, unless the public sign switch has explicitly been
+                // set to false
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                    options.PublicSign == null)
+                {
+                    commonArgs.Add("-publicsign");
+                }
             }
 
             if (options.DelaySign == true)
