@@ -32,13 +32,14 @@
     },
 
     "symlinks": {
-        "dotnet" : "usr/bin/dotnet",
-        "dotnet-compile" : "usr/bin/dotnet-compile",
-        "dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
-        "dotnet-publish" : "usr/bin/dotnet-publish",
-        "dotnet-repl" : "usr/bin/dotnet-repl",
-        "dotnet-repl-csi" : "usr/bin/dotnet-repl-csi",
-        "dotnet-restore" : "usr/bin/dotnet-restore",
-        "resgen" : "usr/bin/resgen"
+        "bin/dotnet" : "usr/bin/dotnet",
+        "bin/dotnet-compile" : "usr/bin/dotnet-compile",
+        "bin/dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
+        "bin/dotnet-publish" : "usr/bin/dotnet-publish",
+        "bin/dotnet-repl" : "usr/bin/dotnet-repl",
+        "bin/dotnet-repl-csi" : "usr/bin/dotnet-repl-csi",
+        "bin/dotnet-restore" : "usr/bin/dotnet-restore",
+        "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native",
+        "bin/resgen" : "usr/bin/resgen"
     }
 }
