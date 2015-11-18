@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             throw new NotImplementedException("Mac Cpp Not Supported Yet");
         }
 
-        public int Invoke(NativeCompileSettings config)
+        public int Invoke()
 		{
 			throw new NotImplementedException("mac cpp Not supported yet.");
 		}

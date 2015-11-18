@@ -23,13 +23,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
 		public bool CompileToNative(NativeCompileSettings config)
 		{	
-			int result = invoker.Invoke(config);
+			int result = invoker.Invoke();
             if(result != 0)
             {
                 return false;
             }
 
-            result = intermediateCompiler.Invoke(config);
+            result = intermediateCompiler.Invoke();
             if (result != 0)
             {
                 return false;

@@ -47,13 +47,15 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         };
 		
 		private string ArgStr { get; set; }
+		private NativeCompileSettings config;
 		
 		public WindowsLinkStep(NativeCompileSettings config)
 		{
+			this.config = config;
 			InitializeArgs(config);
 		}
 		
-		public int Invoke(NativeCompileSettings config)
+		public int Invoke()
 		{
 			var result = WindowsCommon.SetVCVars();
 			if (result != 0)
@@ -62,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 				return result;
 			}
 			
-			result = InvokeLinker(config);
+			result = InvokeLinker();
 			if (result != 0)
 			{
                 Reporter.Error.WriteLine("Linking of intermediate files failed.");
@@ -94,7 +96,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var SDKLibs = ModeLibMap[config.NativeMode];
 			foreach (var lib in SDKLibs)
 			{
-				argsList.Add(Path.Combine(config.RuntimeLibPath, lib));
+				argsList.Add(Path.Combine(config.IlcPath, lib));
 			}
 
 			// Link Libs
@@ -112,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			this.ArgStr = string.Join(" ", argsList);
 		}
 		
-		private int InvokeLinker(NativeCompileSettings config)
+		private int InvokeLinker()
 		{
 			var vcInstallDir = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
 			var linkerPath = Path.Combine(vcInstallDir, VSBin, LinkerName);

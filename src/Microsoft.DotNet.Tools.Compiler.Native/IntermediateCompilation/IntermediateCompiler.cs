@@ -96,11 +96,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             this.StepList = stepList;
 		}
 		
-		public int Invoke(NativeCompileSettings config)
+		public int Invoke()
         {
             foreach(var step in StepList)
             {
-                int result = step.Invoke(config);
+                int result = step.Invoke();
 
                 if (result != 0)
                 {
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 		
 		public string DetermineOutputFile(NativeCompileSettings config)
 		{
-			return StepList.Last().DetermineOutputFile(config);
+			return config.DetermineFinalOutputPath();
 		}
 		
 		public bool CheckPreReqs()

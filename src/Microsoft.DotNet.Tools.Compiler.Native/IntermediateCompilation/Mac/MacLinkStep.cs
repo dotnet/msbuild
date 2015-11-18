@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 {
 	public class MacLinkStep : IPlatformNativeStep
 	{
-		public int Invoke(NativeCompileSettings config)
+		public int Invoke()
 		{
 			throw new NotImplementedException("Mac linker Not supported yet.");
 		}

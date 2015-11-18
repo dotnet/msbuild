@@ -27,13 +27,16 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         };
         
         private string CompilerArgStr { get; set; }
+
+        private NativeCompileSettings config;
         
         public WindowsCppCompileStep(NativeCompileSettings config)
         {
+            this.config = config;
             InitializeArgs(config);
         }
         
-        public int Invoke(NativeCompileSettings config)
+        public int Invoke()
         {
             var result = WindowsCommon.SetVCVars();
             if (result != 0)
@@ -42,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 return result;
             }
             
-            result = InvokeCompiler(config);
+            result = InvokeCompiler();
             if (result != 0)
             {
                 Reporter.Error.WriteLine("Compilation of intermediate files failed.");
@@ -85,7 +88,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             this.CompilerArgStr = string.Join(" ", argsList);
         }
         
-        private int InvokeCompiler(NativeCompileSettings config)
+        private int InvokeCompiler()
         {
             var vcInstallDir = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
             var compilerPath = Path.Combine(vcInstallDir, VSBin, CompilerName);

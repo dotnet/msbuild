@@ -96,7 +96,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Custom Extensibility Points to support CoreRT workflow TODO better descriptions
             var ilcArgs = app.Option("--ilcargs <CODEGEN>", "Use to specify custom arguments for the IL Compiler.", CommandOptionType.SingleValue);
             var ilcPathArg = app.Option("--ilcpath <ILC_PATH>", "Use to plug in a custom built ilc.exe", CommandOptionType.SingleValue);
-            var runtimeLibPathArg = app.Option("--runtimelib-path <LIB_PATH>", "Use to plug in custom runtime and bootstrapper libs.", CommandOptionType.SingleValue);
             var linklibArg = app.Option("--linklib <LINKLIB>", "Use to link in additional static libs", CommandOptionType.MultipleValue);
             
             // TEMPORARY Hack until CoreRT compatible Framework Libs are available 
@@ -121,7 +120,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                     ReferencePaths = referencesArg.Values,
                     IlcArgs = ilcArgs.Value(),
                     IlcPath = ilcPathArg.Value(),
-                    RuntimeLibPath = runtimeLibPathArg.Value(),
                     LinkLibPaths = linklibArg.Values,
                     AppDepSDKPath = appdepSDKPathArg.Value(),
                     LogPath = logpathArg.Value()
@@ -129,8 +127,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
                 var config = ParseAndValidateArgs(cmdLineArgs);
                 
-                Helpers.CleanOrCreateDirectory(config.OutputDirectory);
-                Helpers.CleanOrCreateDirectory(config.IntermediateDirectory);
+                DirectoryExtensions.CleanOrCreateDirectory(config.OutputDirectory);
+                DirectoryExtensions.CleanOrCreateDirectory(config.IntermediateDirectory);
                 
                 var nativeCompiler = NativeCompiler.Create(config);
                 
@@ -158,13 +156,19 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Architecture
             if(string.IsNullOrEmpty(args.Architecture))
             {
-                config.Architecture = Helpers.GetCurrentArchitecture();
+                config.Architecture = RuntimeExtensions.GetCurrentArchitecture();
+
+                // CoreRT does not support x86 yet
+                if (config.Architecture != ArchitectureMode.x64)
+                {
+                    throw new Exception("Native Compilation currently only supported for x64.");
+                }
             }
             else
             {
                 try
                 {
-                    config.Architecture = Helpers.ParseEnum<ArchitectureMode>(args.Architecture.ToLower());
+                    config.Architecture = EnumExtensions.Parse<ArchitectureMode>(args.Architecture.ToLower());
                 }
                 catch (Exception e)
                 {
@@ -181,7 +185,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             {
                 try
                 {
-                    config.BuildType = Helpers.ParseEnum<BuildConfiguration>(args.BuildType.ToLower());
+                    config.BuildType = EnumExtensions.Parse<BuildConfiguration>(args.BuildType.ToLower());
                 }
                 catch (Exception e)
                 {
@@ -218,7 +222,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             {
                 try
                 {
-                    config.NativeMode = Helpers.ParseEnum<NativeIntermediateMode>(args.NativeMode.ToLower());
+                    config.NativeMode = EnumExtensions.Parse<NativeIntermediateMode>(args.NativeMode.ToLower());
                 }
                 catch (Exception e)
                 {
@@ -262,21 +266,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 config.IlcPath = GetDefaultIlcPath();
             }
 
-            // RuntimeLibPath
-            if (!string.IsNullOrEmpty(args.RuntimeLibPath))
-            {
-                if (!Directory.Exists(args.RuntimeLibPath))
-                {
-                    throw new Exception("RuntimeLib Directory does not exist.");
-                }
-
-                config.RuntimeLibPath = args.RuntimeLibPath;
-            }
-            else
-            {
-                config.RuntimeLibPath = GetDefaultRuntimeLibPath();
-            }
-
             // logpath
             if (!string.IsNullOrEmpty(args.LogPath))
             {
@@ -302,7 +291,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
 
             // OS
-            config.OS = Helpers.GetCurrentOS();
+            config.OS = RuntimeInformationExtensions.GetCurrentOS();
             
             return config;
         }
@@ -341,11 +330,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         }
 
         private static string GetDefaultIlcPath()
-        {
-            return AppContext.BaseDirectory;
-        }
-
-        private static string GetDefaultRuntimeLibPath()
         {
             return AppContext.BaseDirectory;
         }

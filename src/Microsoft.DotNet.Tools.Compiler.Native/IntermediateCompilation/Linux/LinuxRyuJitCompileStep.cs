@@ -24,21 +24,27 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         {
             "libbootstrapper.a",
             "libRuntime.a",
-            "libSystem.Private.CoreLib.Native.a",
-            "System.Native.so"
+            "libSystem.Private.CoreLib.Native.a"
+        };
+
+        private readonly string[] appdeplibs = new string[]
+        {
+            "libSystem.Native.a"
         };
 
 
         private string CompilerArgStr { get; set; }
+        private NativeCompileSettings config;
 
         public LinuxRyuJitCompileStep(NativeCompileSettings config)
         {
+            this.config = config;
             InitializeArgs(config);
         }
 
-        public int Invoke(NativeCompileSettings config)
+        public int Invoke()
         {
-            var result = InvokeCompiler(config);
+            var result = InvokeCompiler();
             if (result != 0)
             {
                 Reporter.Error.WriteLine("Compilation of intermediate files failed.");
@@ -67,7 +73,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Libs
             foreach (var lib in libs)
             {
-                var libPath = Path.Combine(config.RuntimeLibPath, lib);
+                var libPath = Path.Combine(config.IlcPath, lib);
+                argsList.Add(libPath);
+            }
+
+            // AppDep Libs
+            foreach (var lib in appdeplibs)
+            {
+                var libPath = Path.Combine(config.AppDepSDKPath, lib);
                 argsList.Add(libPath);
             }
 
@@ -81,7 +94,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             this.CompilerArgStr = string.Join(" ", argsList);
         }
 
-        private int InvokeCompiler(NativeCompileSettings config)
+        private int InvokeCompiler()
         {
             var result = Command.Create(CompilerName, CompilerArgStr)
                 .ForwardStdErr()
@@ -124,11 +137,5 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
             return outfile;
         }
-
-        public bool RequiresLinkStep()
-        {
-            return false;
-        }
-
     }
 }
