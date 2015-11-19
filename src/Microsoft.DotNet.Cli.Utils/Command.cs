@@ -170,6 +170,12 @@ namespace Microsoft.DotNet.Cli.Utils
                 _stdErrCapture?.GetStringBuilder()?.ToString());
         }
 
+        public Command WorkingDirectory(string projectDirectory)
+        {
+            _process.StartInfo.WorkingDirectory = projectDirectory;
+            return this;
+        }
+
         public Command EnvironmentVariable(string name, string value)
         {
             _process.StartInfo.Environment[name] = value;

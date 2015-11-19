@@ -1,28 +1,34 @@
 ﻿{
-  "name": "dotnet-repl-csi",
-  "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
-  "dependencies": {
-    "System.Console": "4.0.0-beta-23504",
-    "System.Collections": "4.0.11-beta-23504",
-    "System.Linq": "4.0.1-beta-23504",
-    "System.Diagnostics.Process": "4.1.0-beta-23504",
-    "System.IO.FileSystem": "4.0.1-beta-23504",
-    "System.AppContext": "4.0.1-beta-23504",
+    "name": "dotnet-repl-csi",
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+    "dependencies": {
+        "System.Console": "4.0.0-beta-23504",
+        "System.Collections": "4.0.11-beta-23504",
+        "System.Linq": "4.0.1-beta-23504",
+        "System.Diagnostics.Process": "4.1.0-beta-23504",
+        "System.IO.FileSystem": "4.0.1-beta-23504",
+        "System.AppContext": "4.0.1-beta-23504",
 
-    "Microsoft.DotNet.Cli.Utils": {
-      "type": "build",
-      "version": "1.0.0-*"
+        "Microsoft.DotNet.Cli.Utils": {
+            "type": "build",
+            "version": "1.0.0-*"
+        },
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        },
+        "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta-20151106-02"
     },
-    "Microsoft.Extensions.CommandLineUtils.Sources": {
-      "type": "build",
-      "version": "1.0.0-*"
+    "frameworks": {
+        "dnxcore50": { }
     },
-    "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta-20151106-02"
-  },
-  "frameworks": {
-    "dnxcore50": { }
-  }
+    "scripts": {
+        "postcompile": [
+            "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
+            "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
+        ]
+    }
 }

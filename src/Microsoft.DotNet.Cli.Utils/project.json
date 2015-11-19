@@ -4,12 +4,14 @@
     "shared": "**/*.cs",
 
     "dependencies": {
-        "System.AppContext": "4.0.0-beta-23504",
+        "System.AppContext": "4.0.0",
         "System.Console": "4.0.0-beta-23504",
         "System.IO.FileSystem": "4.0.1-beta-23504",
         "System.Threading": "4.0.11-beta-23504",
         "System.Diagnostics.Process": "4.1.0-beta-23504",
-        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23504"
+        "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23504",
+
+        "Microsoft.DotNet.ProjectModel": { "target": "project" }
     },
     "frameworks": {
         "dnxcore50": { }

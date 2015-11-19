@@ -1,5 +1,5 @@
 ﻿{
-    "name" : "dotnet-init",
+    "name": "dotnet-init",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
@@ -25,8 +25,14 @@
         }
     },
     "compileExclude": [ "Template/**" ],
-    "resource":  [ "Template/**" ],
+    "resource": [ "Template/**" ],
     "frameworks": {
         "dnxcore50": { }
+    },
+    "scripts": {
+        "postcompile": [
+            "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
+            "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
+        ]
     }
 }

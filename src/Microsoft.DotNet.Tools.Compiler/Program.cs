@@ -230,6 +230,11 @@ namespace Microsoft.DotNet.Tools.Compiler
                 projects.Clear();
             }
 
+            return CompileProject(context, configuration, outputPath, intermediateOutputPath, dependencies);
+        }
+
+        private static bool CompileProject(ProjectContext context, string configuration, string outputPath, string intermediateOutputPath, List<LibraryExport> dependencies)
+        {
             Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
             var sw = Stopwatch.StartNew();
 
@@ -257,9 +262,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Dump dependency data
-            // TODO: Turn on only if verbose, we can look at the response
-            // file anyways
-            // ShowDependencyInfo(dependencies);
+            ShowDependencyInfo(dependencies);
 
             // Get compilation options
             var outputName = GetProjectOutput(context.ProjectFile, context.TargetFramework, configuration, outputPath);
@@ -278,7 +281,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 // Resolve full path to key file
                 compilationOptions.KeyFile = Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
             }
-            
+
             // Add compilation options to the args
             compilerArgs.AddRange(compilationOptions.SerializeToArgs());
 
@@ -317,33 +320,46 @@ namespace Microsoft.DotNet.Tools.Compiler
             var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{context.ProjectFile.Name}.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
-            var result = Command.Create($"dotnet-compile-{compilerName}", $"@\"{rsp}\"")
-                                 .OnErrorLine(line =>
-                                 {
-                                     var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
-                                     if (diagnostic != null)
-                                     {
-                                         diagnostics.Add(diagnostic);
-                                     }
-                                     else
-                                     {
-                                         Reporter.Error.WriteLine(line);
-                                     }
-                                 })
-                                 .OnOutputLine(line =>
-                                 {
-                                     var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
+            // Run pre-compile event
+            var contextVariables = new Dictionary<string, string>()
+            {
+                { "compile:TargetFramework", context.TargetFramework.DotNetFrameworkName },
+                { "compile:Configuration", configuration },
+                { "compile:OutputFile", outputName },
+                { "compile:OutputDir", outputPath },
+                { "compile:ResponseFile", rsp }
+            };
+            RunScripts(context, ScriptNames.PreCompile, contextVariables);
 
-                                     if (diagnostic != null)
-                                     {
-                                         diagnostics.Add(diagnostic);
-                                     }
-                                     else
-                                     {
-                                         Reporter.Output.WriteLine(line);
-                                     }
-                                 })
-                                 .Execute();
+            var result = Command.Create($"dotnet-compile-{compilerName}", $"@\"{rsp}\"")
+                .OnErrorLine(line =>
+                {
+                    var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
+                    if (diagnostic != null)
+                    {
+                        diagnostics.Add(diagnostic);
+                    }
+                    else
+                    {
+                        Reporter.Error.WriteLine(line);
+                    }
+                })
+                .OnOutputLine(line =>
+                {
+                    var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
+                    if (diagnostic != null)
+                    {
+                        diagnostics.Add(diagnostic);
+                    }
+                    else
+                    {
+                        Reporter.Output.WriteLine(line);
+                    }
+                }).Execute();
+
+            // Run post-compile event
+            contextVariables["compile:CompilerExitCode"] = result.ExitCode.ToString();
+            RunScripts(context, ScriptNames.PostCompile, contextVariables);
 
             var success = result.ExitCode == 0;
 
@@ -356,6 +372,17 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             return PrintSummary(diagnostics, sw, success);
+        }
+
+        private static void RunScripts(ProjectContext context, string name, Dictionary<string, string> contextVariables)
+        {
+            foreach (var script in context.ProjectFile.Scripts.GetOrEmpty(name))
+            {
+                ScriptExecutor.CreateCommandForScript(context.ProjectFile, script, contextVariables)
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .Execute();
+            }
         }
 
         private static string GetProjectOutput(Project project, NuGetFramework framework, string configuration, string outputPath)
@@ -663,7 +690,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 PrintDiagnostic(diag);
             }
         }
-        
+
         private static void PrintDiagnostic(DiagnosticMessage diag)
         {
             switch (diag.Severity)
@@ -682,28 +709,31 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static void ShowDependencyInfo(IEnumerable<LibraryExport> dependencies)
         {
-            foreach (var dependency in dependencies)
+            if (CommandContext.IsVerbose())
             {
-                if (!dependency.Library.Resolved)
+                foreach (var dependency in dependencies)
                 {
-                    Reporter.Error.WriteLine($"  Unable to resolve dependency {dependency.Library.Identity.ToString().Red().Bold()}");
-                    Reporter.Error.WriteLine("");
-                }
-                else
-                {
-                    Reporter.Output.WriteLine($"  Using {dependency.Library.Identity.Type.Value.Cyan().Bold()} dependency {dependency.Library.Identity.ToString().Cyan().Bold()}");
-                    Reporter.Output.WriteLine($"    Path: {dependency.Library.Path}");
-
-                    foreach (var metadataReference in dependency.CompilationAssemblies)
+                    if (!dependency.Library.Resolved)
                     {
-                        Reporter.Output.WriteLine($"    Assembly: {metadataReference}");
+                        Reporter.Verbose.WriteLine($"  Unable to resolve dependency {dependency.Library.Identity.ToString().Red().Bold()}");
+                        Reporter.Verbose.WriteLine("");
                     }
-
-                    foreach (var sourceReference in dependency.SourceReferences)
+                    else
                     {
-                        Reporter.Output.WriteLine($"    Source: {sourceReference}");
+                        Reporter.Verbose.WriteLine($"  Using {dependency.Library.Identity.Type.Value.Cyan().Bold()} dependency {dependency.Library.Identity.ToString().Cyan().Bold()}");
+                        Reporter.Verbose.WriteLine($"    Path: {dependency.Library.Path}");
+
+                        foreach (var metadataReference in dependency.CompilationAssemblies)
+                        {
+                            Reporter.Verbose.WriteLine($"    Assembly: {metadataReference}");
+                        }
+
+                        foreach (var sourceReference in dependency.SourceReferences)
+                        {
+                            Reporter.Verbose.WriteLine($"    Source: {sourceReference}");
+                        }
+                        Reporter.Verbose.WriteLine("");
                     }
-                    Reporter.Output.WriteLine("");
                 }
             }
         }
