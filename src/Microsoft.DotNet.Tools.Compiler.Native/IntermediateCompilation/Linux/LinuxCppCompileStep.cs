@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
         // TODO: debug/release support
         private readonly string cLibsFlags = "-lm -ldl";
-        private readonly string cflags = "-g -lstdc++ -lrt -Xlinker -lrt -Wno-invalid-offsetof -pthread";
+        private readonly string cflags = "-g -lstdc++ -lrt -Wno-invalid-offsetof -pthread";
 
         private readonly string[] libs = new string[]
         {
