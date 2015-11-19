@@ -3,7 +3,7 @@ The Microsoft Build Engine is a platform for building applications. This engine,
 
 For more information on MSBuild, see the [MSDN documentation](https://msdn.microsoft.com/en-us/library/dd393574(v=vs.120).aspx).
 
-[![Build Status](http://dotnet-ci.cloudapp.net/job/microsoft_msbuild/badge/icon)](http://dotnet-ci.cloudapp.net/job/microsoft_msbuild/)
+[![Build Status](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_master/badge/icon)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_master/)
 
 ### Source code
 

@@ -2013,13 +2013,13 @@ namespace Microsoft.Build.CommandLine
         private static void StartLocalNode(CommandLineSwitches commandLineSwitches)
         {
             string[] input = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeMode];
-            int nodeNumber = 0;
+            int nodeModeNumber = 0;
 
             if (input.Length > 0)
             {
                 try
                 {
-                    nodeNumber = int.Parse(input[0], CultureInfo.InvariantCulture);
+                    nodeModeNumber = int.Parse(input[0], CultureInfo.InvariantCulture);
                 }
                 catch (FormatException ex)
                 {
@@ -2030,7 +2030,7 @@ namespace Microsoft.Build.CommandLine
                     CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0], ex.Message);
                 }
 
-                CommandLineSwitchException.VerifyThrow(nodeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
+                CommandLineSwitchException.VerifyThrow(nodeModeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
             }
 
 #if !STANDALONEBUILD
@@ -2043,13 +2043,13 @@ namespace Microsoft.Build.CommandLine
                     Exception nodeException = null;
                     NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
                     // normal OOP node case
-                    if (nodeNumber == 1)
+                    if (nodeModeNumber == 1)
                     {
                         OutOfProcNode node = new OutOfProcNode();
-                        shutdownReason = node.Run(out nodeException);
+                        shutdownReason = node.Run(ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]), out nodeException);
                         FileUtilities.ClearCacheDirectory();
                     }
-                    else if (nodeNumber == 2)
+                    else if (nodeModeNumber == 2)
                     {
                         OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                         shutdownReason = node.Run(out nodeException);

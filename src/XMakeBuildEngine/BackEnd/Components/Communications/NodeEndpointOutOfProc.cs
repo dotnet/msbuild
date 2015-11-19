@@ -36,6 +36,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private IBuildComponentHost _componentHost;
 
+        private readonly bool _enableReuse;
+
         #endregion
 
         #region Constructors and Factories
@@ -45,10 +47,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         /// <param name="host">The component host.</param>
-        internal NodeEndpointOutOfProc(string pipeName, IBuildComponentHost host)
+        /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
+        internal NodeEndpointOutOfProc(string pipeName, IBuildComponentHost host, bool enableReuse)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");
             _componentHost = host;
+            _enableReuse = enableReuse;
 
             InternalConstruct(pipeName);
         }
@@ -60,7 +64,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetHostHandshake()
         {
-            return NodeProviderOutOfProc.HostHandshake;
+            return NodeProviderOutOfProc.GetHostHandshake(_enableReuse);
         }
 
         /// <summary>
@@ -68,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetClientHandshake()
         {
-            return NodeProviderOutOfProc.ClientHandshake;
+            return NodeProviderOutOfProc.GetClientHandshake();
         }
 
         #region Structs
