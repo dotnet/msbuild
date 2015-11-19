@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Native Args
             var native = app.Option("-n|--native", "Compiles source to native machine code.", CommandOptionType.NoValue);
             var arch = app.Option("-a|--arch <ARCH>", "The architecture for which to compile. x64 only currently supported.", CommandOptionType.SingleValue);
-            var ilcArgs = app.Option("--ilc-args <ARGS>", "String to pass directory to ilc in native compilation.", CommandOptionType.SingleValue);
+            var ilcArgs = app.Option("--ilcargs <ARGS>", "String to pass directory to ilc in native compilation.", CommandOptionType.SingleValue);
             var cppMode = app.Option("--cpp", "Flag to do native compilation with C++ code generator.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
