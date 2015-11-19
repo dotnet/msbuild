@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             
             // Add Includes
             argsList.Add("/I");
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk\\Windows_NT"));
+            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk\\win7"));
             
             argsList.Add("/I");
             argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk"));
