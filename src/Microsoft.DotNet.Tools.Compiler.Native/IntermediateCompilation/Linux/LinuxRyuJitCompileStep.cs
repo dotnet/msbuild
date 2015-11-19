@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private readonly string CompilerOutputExtension = "";
 
         // TODO: debug/release support
-        private readonly string cflags = "-lstdc++ -lpthread -ldl -lm";
+        private readonly string cflags = "-lstdc++ -lpthread -ldl -lm -lrt";
 
         private readonly string[] libs = new string[]
         {
