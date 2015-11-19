@@ -65,7 +65,7 @@
                                IncludeFrameworkReferences="false"
                                NuGetPackagesDirectory=""
                                RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
-                               ProjectLanguage=""
+                               ProjectLanguage="C#"
                                ProjectLockFile="$(RuntimeProjectLockJson)"
                                TargetMonikers="$(NuGetTargetMoniker)">
 

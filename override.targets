@@ -24,7 +24,7 @@
     <PrereleaseResolveNuGetPackageAssets Condition="'$(ProjectLockFile)' != ''"
                                AllowFallbackOnTargetSelection="false"
                                IncludeFrameworkReferences="true"
-                               ProjectLanguage="$(Language)"
+                               ProjectLanguage="C#"
                                ProjectLockFile="$(ProjectLockFile)"
                                TargetMonikers="$(NuGetTargetMoniker)"
                                OmitTransitiveCompileReferences="$(_OmitTransitiveReferences)">
