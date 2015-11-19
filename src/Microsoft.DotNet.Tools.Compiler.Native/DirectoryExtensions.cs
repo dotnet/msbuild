@@ -29,6 +29,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                     Console.WriteLine(e.Message);
                 }
             }
+            else
+            {
+                Directory.CreateDirectory(path);
+            }
         }
     }
 }

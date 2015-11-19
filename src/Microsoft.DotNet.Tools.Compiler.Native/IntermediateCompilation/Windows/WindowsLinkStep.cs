@@ -48,8 +48,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
         private static readonly Dictionary<BuildConfiguration, string[]> ConfigurationLinkLibMap = new Dictionary<BuildConfiguration, string[]>()
         {
-        	{ BuildConfiguration.debug , new string[] { "msvcrtd" } },
-        	{ BuildConfiguration.release , new string[] { "msvcrt" } }
+        	{ BuildConfiguration.debug , new string[] { "msvcrtd.lib" } },
+        	{ BuildConfiguration.release , new string[] { "msvcrt.lib" } }
         };
 		
 		private string ArgStr { get; set; }
