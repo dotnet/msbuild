@@ -41,7 +41,8 @@ TestResult.xml
 dlldata.c
 
 # DNX
-#project.lock.json
+project.lock.json
+*.project.lock.json
 artifacts/
 
 # Nuget v3
