@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         
         private static NativeCompileSettings ParseAndValidateArgs(ArgValues args)
         {
-            var config = new NativeCompileSettings();
+            var config = NativeCompileSettings.Default;
             
             // Managed Input
             if (string.IsNullOrEmpty(args.InputManagedAssemblyPath) || !File.Exists(args.InputManagedAssemblyPath))
@@ -159,18 +159,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             config.InputManagedAssemblyPath = Path.GetFullPath(args.InputManagedAssemblyPath);
             
             // Architecture
-            if(string.IsNullOrEmpty(args.Architecture))
-            {
-                config.Architecture = RuntimeExtensions.GetCurrentArchitecture();
-
-                // CoreRT does not support x86 yet
-                if (config.Architecture != ArchitectureMode.x64)
-                {
-                    throw new Exception("Native Compilation currently only supported for x64.");
-                }
-            }
-            else
-            {
+            if(!string.IsNullOrEmpty(args.Architecture))
+            {               
                 try
                 {
                     config.Architecture = EnumExtensions.Parse<ArchitectureMode>(args.Architecture.ToLower());
@@ -182,11 +172,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
             
             // BuildConfiguration 
-            if(string.IsNullOrEmpty(args.BuildConfiguration))
-            {
-                config.BuildType = GetDefaultBuildType();
-            }
-            else
+            if(!string.IsNullOrEmpty(args.BuildConfiguration))
             {
                 try
                 {
@@ -198,32 +184,20 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 }
             }
             
-            // Output
-            if(string.IsNullOrEmpty(args.OutputDirectory))
-            {
-                config.OutputDirectory = GetDefaultOutputDir(config);
-            }
-            else
+            // TODO: track changing it when architeture or buildtype change Output
+            if(!string.IsNullOrEmpty(args.OutputDirectory))
             {
                 config.OutputDirectory = args.OutputDirectory;
             }
             
-            // Intermediate
-            if(string.IsNullOrEmpty(args.IntermediateDirectory))
-            {
-                config.IntermediateDirectory = GetDefaultIntermediateDir(config);
-            }
-            else
+            // TODO: same here Intermediate
+            if(!string.IsNullOrEmpty(args.IntermediateDirectory))
             {
                 config.IntermediateDirectory = args.IntermediateDirectory; 
             }
             
             // Mode
-            if (string.IsNullOrEmpty(args.NativeMode))
-            {
-                config.NativeMode = GetDefaultNativeMode();
-            }
-            else
+            if (!string.IsNullOrEmpty(args.NativeMode))
             {
                 try
                 {
@@ -248,13 +222,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 var reference = Path.Combine(config.AppDepSDKPath, "*.dll");
                 config.ReferencePaths.Add(reference);
             }
-            else
-            {
-                config.AppDepSDKPath = GetDefaultAppDepSDKPath();
-
-                var reference = Path.Combine(config.AppDepSDKPath, "*.dll");
-                config.ReferencePaths.Add(reference);
-            }
 
             // IlcPath
             if (!string.IsNullOrEmpty(args.IlcPath))
@@ -265,10 +232,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 }
 
                 config.IlcPath = args.IlcPath;
-            }
-            else
-            {
-                config.IlcPath = GetDefaultIlcPath();
             }
 
             // logpath
@@ -294,49 +257,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             {
                 config.LinkLibPaths.Add(lib);
             }
-
-            // OS
-            config.OS = RuntimeInformationExtensions.GetCurrentOS();
             
             return config;
-        }
-
-        private static string GetDefaultOutputDir(NativeCompileSettings config)
-        {
-            var dir = Path.Combine(Constants.BinDirectoryName, config.Architecture.ToString(), config.BuildType.ToString(), "native");
-
-            return Path.GetFullPath(dir);
-        }
-
-        private static string GetDefaultIntermediateDir(NativeCompileSettings config)
-        {
-            var dir = Path.Combine(Constants.ObjDirectoryName, config.Architecture.ToString(), config.BuildType.ToString(), "native");
-
-            return Path.GetFullPath(dir);
-        }
-
-        private static BuildConfiguration GetDefaultBuildType()
-        {
-            return BuildConfiguration.debug;
-        }
-
-        private static NativeIntermediateMode GetDefaultNativeMode()
-        {
-            return NativeIntermediateMode.ryujit;
-        }
-
-        private static string GetDefaultAppDepSDKPath()
-        {
-            var appRoot = AppContext.BaseDirectory;
-
-            var dir = Path.Combine(appRoot, "appdepsdk");
-
-            return dir;
-        }
-
-        private static string GetDefaultIlcPath()
-        {
-            return AppContext.BaseDirectory;
-        }
+        }        
     }
 }
