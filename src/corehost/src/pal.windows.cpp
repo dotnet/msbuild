@@ -10,6 +10,26 @@
 
 static std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> g_converter;
 
+bool pal::find_coreclr(pal::string_t& recv)
+{
+    pal::string_t candidate;
+    pal::string_t test;
+
+    // Try %LocalAppData%\dotnet
+    if (pal::getenv(_X("LocalAppData"), candidate)) {
+        append_path(candidate, _X("dotnet"));
+        append_path(candidate, _X("runtime"));
+        append_path(candidate, _X("coreclr"));
+        if (coreclr_exists_in_dir(candidate)) {
+            recv.assign(candidate);
+            return true;
+        }
+    }
+
+    // TODO: Try somewhere in Program Files, see https://github.com/dotnet/cli/issues/249
+    return false;
+}
+
 bool pal::load_library(const char_t* path, dll_t& dll)
 {
     dll = ::LoadLibraryW(path);
@@ -27,7 +47,7 @@ bool pal::load_library(const char_t* path, dll_t& dll)
         return false;
     }
 
-    if (trace::is_enabled(trace::level_t::Info))
+    if (trace::is_enabled())
     {
         pal::char_t buf[PATH_MAX];
         ::GetModuleFileNameW(dll, buf, PATH_MAX);
