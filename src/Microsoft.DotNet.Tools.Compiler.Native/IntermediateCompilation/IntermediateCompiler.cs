@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			}
 			else if (config.OS == OSMode.Mac)
 			{
-                throw new NotImplementedException("Mac not yet supported.");
+				stepList.Add(new MacCppCompileStep(config));
 			}
 			else
 			{
