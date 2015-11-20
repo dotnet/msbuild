@@ -1347,6 +1347,12 @@ namespace Microsoft.Build.Evaluation
                 builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.frameworkToolsRoot, NativeMethodsShared.FrameworkBasePath));
             }
 
+#if RUNTIME_TYPE_NETCORE
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Core"));
+#else
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Full"));
+#endif
+
             if (String.IsNullOrEmpty(_projectRootElement.FullPath))
             {
                 // If this is an un-saved project, this is as far as we can go

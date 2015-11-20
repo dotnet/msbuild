@@ -37,6 +37,7 @@ namespace Microsoft.Build.Internal
         internal const string userExtensionsPath = "MSBuildUserExtensionsPath";
         internal const string toolsPath = MSBuildConstants.ToolsPath;
         internal const string toolsVersion = "MSBuildToolsVersion";
+        internal const string msbuildRuntimeType = "MSBuildRuntimeType";
         internal const string overrideTasksPath = "MSBuildOverrideTasksPath";
         internal const string defaultOverrideToolsVersion = "DefaultOverrideToolsVersion";
         internal const string startupDirectory = "MSBuildStartupDirectory";
@@ -92,6 +93,7 @@ namespace Microsoft.Build.Internal
                         s_reservedProperties.Add(projectDefaultTargets);
                         s_reservedProperties.Add(toolsPath);
                         s_reservedProperties.Add(toolsVersion);
+                        s_reservedProperties.Add(msbuildRuntimeType);
                         s_reservedProperties.Add(startupDirectory);
                         s_reservedProperties.Add(buildNodeCount);
                         s_reservedProperties.Add(lastTaskResult);
