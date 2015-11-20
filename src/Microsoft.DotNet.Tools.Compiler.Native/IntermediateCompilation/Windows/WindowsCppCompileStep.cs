@@ -68,11 +68,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             argsList.Add("/c");
             
             // Add Includes
+            var win7CppSdkPath = Path.Combine(config.AppDepSDKPath, "CPPSdk\\win7");
             argsList.Add("/I");
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk\\win7"));
+            argsList.Add($"\"{win7CppSdkPath}\"");
             
+            var cppSdkPath = Path.Combine(config.AppDepSDKPath, "CPPSdk");
             argsList.Add("/I");
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk"));
+            argsList.Add($"\"{cppSdkPath}\"");
             
             // Configuration Based Compiler Options 
             argsList.Add(ConfigurationCompilerOptionsMap[config.BuildType]);
@@ -83,7 +85,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             
             // Input File
             var inCppFile = DetermineInFile(config);
-            argsList.Add(inCppFile);
+            argsList.Add($"\"{inCppFile}\"");
             
             this.CompilerArgStr = string.Join(" ", argsList);
         }
