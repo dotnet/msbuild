@@ -33,6 +33,7 @@ PROJECTS=( \
     Microsoft.DotNet.Tools.Repl.Csi \
     Microsoft.DotNet.Tools.Resgen \
     Microsoft.DotNet.Tools.Run \
+    Microsoft.DotNet.Tools.Init \
     Microsoft.DotNet.Tools.Compiler.Native \
 )
 
