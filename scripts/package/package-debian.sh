@@ -22,6 +22,7 @@ if [ "$UNAME" != "Linux" ]; then
 fi
 
 REPO_ROOT=$(readlink -f $DIR/../..)
+PACKAGING_ROOT=$REPO_ROOT/packaging/debian
 
 OUTPUT_DIR="$REPO_ROOT/artifacts"
 PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/deb_intermediate"
@@ -54,7 +55,7 @@ copy_files_to_debian_layout(){
     cp -a "$REPO_BINARIES_DIR/." "$PACKAGE_LAYOUT_DIR/package_root"
 
     # Copy config file
-    cp "$REPO_ROOT/debian_config.json" "$PACKAGE_LAYOUT_DIR"
+    cp "$PACKAGING_ROOT/debian_config.json" "$PACKAGE_LAYOUT_DIR"
 }
 
 create_debian_package(){
@@ -62,7 +63,7 @@ create_debian_package(){
 
     mkdir -p $PACKAGE_OUTPUT_DIR
 
-    $REPO_ROOT/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR $DOTNET_BUILD_VERSION
+    $PACKAGING_ROOT/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR $DOTNET_BUILD_VERSION
 }
 
 test_debian_package(){
