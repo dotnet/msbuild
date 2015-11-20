@@ -39,7 +39,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Native Args
             var native = app.Option("-n|--native", "Compiles source to native machine code.", CommandOptionType.NoValue);
             var arch = app.Option("-a|--arch <ARCH>", "The architecture for which to compile. x64 only currently supported.", CommandOptionType.SingleValue);
-            var ilcArgs = app.Option("--ilcargs <ARGS>", "String to pass directory to ilc in native compilation.", CommandOptionType.SingleValue);
+            var ilcArgs = app.Option("--ilcargs <ARGS>", "Command line arguments to be passed directly to ILCompiler.", CommandOptionType.SingleValue);
+            var ilcPath = app.Option("--ilcpath <PATH>", "Path to the folder containing custom built ILCompiler.", CommandOptionType.SingleValue);
             var cppMode = app.Option("--cpp", "Flag to do native compilation with C++ code generator.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
@@ -56,6 +57,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var isCppMode = cppMode.HasValue();
                 var archValue = arch.Value();
                 var ilcArgsValue = ilcArgs.Value();
+                var ilcPathValue = ilcPath.Value();
                 var configValue = configuration.Value() ?? Constants.DefaultConfiguration;
                 var outputValue = output.Value();
                 var intermediateValue = intermediateOutput.Value();
@@ -70,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     success &= Compile(context, configValue, outputValue, intermediateOutput.Value(), buildProjectReferences);
                     if (isNative && success)
                     {
-                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, isCppMode);
+                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, isCppMode);
                     }
                 }
 
@@ -100,6 +102,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             string intermediateOutputValue, 
             string archValue, 
             string ilcArgsValue, 
+            string ilcPathValue,
             bool isCppMode)
         {
             var outputPath = GetOutputPath(context, configuration, outputOptionValue);
@@ -125,6 +128,13 @@ namespace Microsoft.DotNet.Tools.Compiler
                 nativeArgs.Add("--ilcargs");
                 nativeArgs.Add($"{ilcArgsValue}");
             }            
+            
+            // ILC Path
+            if (!string.IsNullOrWhiteSpace(ilcPathValue))
+            {
+                nativeArgs.Add("--ilcpath");
+                nativeArgs.Add(ilcPathValue);
+            }
 
             // CodeGen Mode
             if(isCppMode)
