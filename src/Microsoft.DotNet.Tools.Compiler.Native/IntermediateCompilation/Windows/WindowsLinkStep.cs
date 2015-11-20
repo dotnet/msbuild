@@ -102,14 +102,15 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var SDKLibs = ModeLibMap[config.NativeMode];
             foreach (var lib in SDKLibs)
             {
-                argsList.Add(Path.Combine(config.IlcPath, lib));
+                var sdkLibPath = Path.Combine(config.IlcPath, lib);
+                argsList.Add($"\"{sdkLibPath}\"");
             }
 
             // Configuration Based Libs
             var configLibs = ConfigurationLinkLibMap[config.BuildType];
             foreach (var lib in configLibs)
             {
-                argsList.Add(lib);
+                argsList.Add($"\"{lib}\"");
             }
 
             // Link Libs
@@ -136,7 +137,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
-            
             return result.ExitCode;
         }
         

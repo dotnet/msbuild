@@ -42,11 +42,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var argsList = new List<string>();
 
             var managedPath = Path.Combine(config.IlcPath, ILCompiler);
-            argsList.Add(managedPath);
+            argsList.Add($"\"{managedPath}\"");
             
             // Input File 
             var inputFilePath = config.InputManagedAssemblyPath;
-            argsList.Add(inputFilePath);
+            argsList.Add($"\"{inputFilePath}\"");
             
             // System.Private.CoreLib Reference
             var coreLibPath = Path.Combine(config.IlcPath, OSCoreLibNameMap[config.OS]);
