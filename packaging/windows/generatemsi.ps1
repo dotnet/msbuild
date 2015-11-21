@@ -43,7 +43,7 @@ function RunHeat
 
     Write-Host Running heat..
 
-    .\heat.exe dir `"$inputDir`" -template fragment -sreg -gg -var var.DotnetSrc -cg InstallFiles -srd -dr DOTNETHOME -out $InstallFileswsx | Out-Null
+    .\heat.exe dir `"$inputDir`" -template fragment -sreg -gg -var var.DotnetSrc -cg InstallFiles -srd -dr DOTNETHOME -out $InstallFileswsx | Out-Host
 
     if($LastExitCode -ne 0)
     {
@@ -66,10 +66,9 @@ function RunCandle
     .\candle.exe -dDotnetSrc="$inputDir" -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" -dBuildVersion="$env:DOTNET_BUILD_VERSION" -arch x64 `
         -ext WixDependencyExtension.dll `
         "$AuthWsxRoot\dotnet.wxs" `
-        "$AuthWsxRoot\envvars.wxs" `
         "$AuthWsxRoot\provider.wxs" `
         "$AuthWsxRoot\registrykeys.wxs" `
-        $InstallFileswsx | Out-Null
+        $InstallFileswsx | Out-Host
 
     if($LastExitCode -ne 0)
     {
@@ -91,11 +90,10 @@ function RunLight
     .\light -ext WixUIExtension -ext WixDependencyExtension -ext WixUtilExtension `
         -cultures:en-us `
         dotnet.wixobj `
-        envvars.wixobj `
         provider.wixobj `
         registrykeys.wixobj `
         $InstallFilesWixobj `
-        -out $DotnetMSIOutput | Out-Null
+        -out $DotnetMSIOutput | Out-Host
 
     if($LastExitCode -ne 0)
     {

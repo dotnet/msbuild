@@ -4,12 +4,14 @@
   <Fragment>
     <ComponentGroup Id="AuthoredRegistryKeys">
       <Component Directory="TARGETDIR" Guid="*" Win64="$(var.Win64AttributeValue)">
-        <RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Dotnet CLI\Setup">
-      <RegistryValue Action="write" Name="Install" Type="integer" Value="1" />
-            <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[DOTNETHOME]" />
-            <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
+        <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\Setup">
+          <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
+          <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[DOTNETHOME]" />
+          <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
         </RegistryKey>
-      </Component>      
+        <Environment Id="E_PATH" Name="PATH" Value="[DOTNETHOME]bin" Permanent="no" Part="last" Action="set" System="yes" />
+        <Environment Id="E_DOTNET_HOME" Name="DOTNET_HOME" Value="[DOTNETHOME]" Permanent="no" Part="all" Action="set" System="yes" />
+      </Component>
     </ComponentGroup>
   </Fragment>
 </Wix>
