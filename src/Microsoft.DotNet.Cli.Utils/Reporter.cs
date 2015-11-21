@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

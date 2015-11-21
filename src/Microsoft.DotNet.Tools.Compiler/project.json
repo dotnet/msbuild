@@ -21,7 +21,8 @@
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "type": "build",
       "version": "1.0.0-*"
-    }
+    },
+    "System.CommandLine" : "0.1.0-d111815-3"
   },
   "frameworks": {
     "dnxcore50": { }

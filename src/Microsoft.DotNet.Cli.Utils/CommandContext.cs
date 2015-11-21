@@ -33,12 +33,24 @@ namespace Microsoft.DotNet.Cli.Utils
         private static bool GetBool(string name, bool defaultValue = false)
         {
             var str = Environment.GetEnvironmentVariable(name);
-            bool value;
-            if(string.IsNullOrEmpty(str) || !bool.TryParse(str, out value))
+            if (string.IsNullOrEmpty(str))
             {
                 return defaultValue;
             }
-            return value;
+
+            switch (str.ToLowerInvariant())
+            {
+                case "true":
+                case "1":
+                case "yes":
+                    return true;
+                case "false":
+                case "0":
+                case "no":
+                    return false;
+                default:
+                    return defaultValue;
+            }
         }
     }
 }
