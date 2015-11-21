@@ -16,10 +16,16 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private string _ilcPath;
         private string _outputDirectory;
         private string _intermediateDirectory;
+        private string _logPath;
+        private string _ilcArgs;
         private readonly List<string> _referencePaths;
         private readonly List<string> _linkLibPaths;
 
-        public string LogPath { get; set; }
+        public string LogPath
+        {
+            get { return _logPath; }
+            set { _logPath = Path.GetFullPath(value); }
+        }
 
         public string InputManagedAssemblyPath
         {
@@ -82,7 +88,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         }
 
         // Optional Customization Points (Can be null)
-        public string IlcArgs { get; set; }
+        public string IlcArgs
+        {
+            get { return _ilcArgs; }
+            set { _ilcArgs = Path.GetFullPath(value); }
+        }
         public IEnumerable<string> LinkLibPaths => _linkLibPaths;
 
         // Required Customization Points (Must have default)
