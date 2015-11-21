@@ -11,72 +11,138 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private const NativeIntermediateMode DefaultNativeModel = NativeIntermediateMode.ryujit;
         private const ArchitectureMode DefaultArchitectureMode = ArchitectureMode.x64;
 
+        private string _inputManagedAssemblyPath;
+        private string _appDepSdkPath;
+        private string _ilcPath;
+        private string _outputDirectory;
+        private string _intermediateDirectory;
+        private readonly List<string> _referencePaths;
+        private readonly List<string> _linkLibPaths;
+
         public string LogPath { get; set; }
-        public string InputManagedAssemblyPath { get; set; }
-        
-        public string OutputDirectory { get; set; }
-        public string IntermediateDirectory { get; set; }
 
-        public BuildConfiguration BuildType { get; set; }
-
-        public string BuildTypeString
+        public string InputManagedAssemblyPath
         {
+            get
+            {
+                return _inputManagedAssemblyPath;
+            }
             set
             {
-                try
+                if(!File.Exists(value))
                 {
-                    BuildType = EnumExtensions.Parse<BuildConfiguration>(value.ToLower());
+                    throw new Exception($"Could not find the input managed assembly: {value}");
                 }
-                catch (Exception e)
-                {
-                    throw new Exception("Invalid Configuration Option.");
-                }
+
+                _inputManagedAssemblyPath = Path.GetFullPath(value);
             }
         }
 
+        public string OutputDirectory
+        {
+            get
+            {
+                return _outputDirectory ?? GetDefaultOutputDirectory();
+            }
+            set
+            {
+                _outputDirectory = value;
+            }
+        }
+
+        public string IntermediateDirectory
+        {
+            get
+            {
+                return _intermediateDirectory ?? GetDefaultIntermediateDirectory();
+            }
+            set
+            {
+                _intermediateDirectory = value;
+            }
+        }
+
+        public BuildConfiguration BuildType { get; set; }
+        
         public ArchitectureMode Architecture { get; set; }
         public NativeIntermediateMode NativeMode { get; set; }
         public OSMode OS { get; set; }
-        
-        public List<string> ReferencePaths { get; set; }
-        
+
+        public IEnumerable<string> ReferencePaths
+        {
+            get
+            {
+                var referencePaths = new List<string>(_referencePaths)
+                {
+                    Path.Combine(AppDepSDKPath, "*.dll")
+                };
+
+                return referencePaths;
+            }            
+        }
+
         // Optional Customization Points (Can be null)
         public string IlcArgs { get; set; }
-        public List<string> LinkLibPaths { get; set; }
-        
+        public IEnumerable<string> LinkLibPaths => _linkLibPaths;
+
         // Required Customization Points (Must have default)
-        public string AppDepSDKPath { get; set; }
-        public string IlcPath { get; set; }
+        public string AppDepSDKPath {
+            get
+            {
+                return _appDepSdkPath;
+            }
+            set
+            {
+                if (!Directory.Exists(value))
+                {
+                    throw new Exception($"AppDepSDK Directory does not exist: {value}.");
+                }
+
+                _appDepSdkPath = value;                
+            }
+        }
+
+        public string IlcPath
+        {
+            get
+            {
+                return _ilcPath;
+            }
+            set
+            {
+                if (!Directory.Exists(value))
+                {
+                    throw new Exception($"ILC Directory does not exist: {value}.");
+                }
+
+                _ilcPath = value;
+            }
+        }
 
         private NativeCompileSettings()
         {
-            LinkLibPaths = new List<string>();
-            ReferencePaths = new List<string>();
+            _linkLibPaths = new List<string>();
+            _referencePaths = new List<string>();
             
             IlcPath = AppContext.BaseDirectory;
             Architecture = DefaultArchitectureMode;
             BuildType = DefaultBuiltType;
             NativeMode = DefaultNativeModel;
-            AppDepSDKPath = Path.Combine(AppContext.BaseDirectory, "appdepsdk");
-
-            ReferencePaths.Add(Path.Combine(AppDepSDKPath, "*.dll"));
+            AppDepSDKPath = Path.Combine(AppContext.BaseDirectory, "appdepsdk");            
         }
 
         public static NativeCompileSettings Default
         {
             get
             {
-                var nativeCompileSettings = new NativeCompileSettings
-                {                                        
+                var defaultNativeCompileSettings = new NativeCompileSettings
+                {
                     OS = RuntimeInformationExtensions.GetCurrentOS()
                 };
 
-                nativeCompileSettings.SetDefaultOutputDirectory();
-                nativeCompileSettings.SetDefaultIntermediateDirectory();
-
-                return nativeCompileSettings;
+                return defaultNativeCompileSettings;
             }
-        }
+        } 
 
         public string DetermineFinalOutputPath()
         {
@@ -87,16 +153,26 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var outFile = Path.Combine(outputDirectory, filename + Constants.ExeSuffix);
             
             return outFile;
-        }        
-
-        private void SetDefaultOutputDirectory()
-        {
-            OutputDirectory = GetOutputDirectory(Constants.BinDirectoryName);
         }
 
-        private void SetDefaultIntermediateDirectory()
+        public void AddReference(string reference)
         {
-            IntermediateDirectory = GetOutputDirectory(Constants.ObjDirectoryName);
+            _referencePaths.Add(Path.GetFullPath(reference));
+        }
+
+        public void AddLinkLibPath(string linkLibPath)
+        {
+            _linkLibPaths.Add(linkLibPath);
+        }
+
+        private string GetDefaultOutputDirectory()
+        {
+            return GetOutputDirectory(Constants.BinDirectoryName);
+        }
+
+        private string GetDefaultIntermediateDirectory()
+        {
+            return GetOutputDirectory(Constants.ObjDirectoryName);
         }
 
         private string GetOutputDirectory(string beginsWith)

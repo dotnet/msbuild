@@ -18,9 +18,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         public string InputManagedAssemblyPath { get; set; }
         public string OutputDirectory { get; set; }
         public string IntermediateDirectory { get; set; }
-        public string BuildConfiguration { get; set; }
-        public string Architecture { get; set; }
-        public string NativeMode { get; set; }
+        public BuildConfiguration? BuildConfiguration { get; set; }
+        public ArchitectureMode Architecture { get; set; }
+        public NativeIntermediateMode? NativeMode { get; set; }
         public List<string> ReferencePaths { get; set; }
         public string IlcArgs { get; set; }
         public List<string> LinkLibPaths { get; set; }
