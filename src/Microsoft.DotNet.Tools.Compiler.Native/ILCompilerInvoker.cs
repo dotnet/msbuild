@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         
         public int Invoke()
         {
-            var executablePath = Path.Combine(AppContext.BaseDirectory, ExecutableName);
+            var executablePath = Path.Combine(config.IlcPath, ExecutableName);
             
             var result = Command.Create(executablePath, ArgStr)
                 .ForwardStdErr()
