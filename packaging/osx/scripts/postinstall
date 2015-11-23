@@ -12,4 +12,8 @@ ln -s $2/bin/dotnet-restore /usr/local/bin/
 ln -s $2/bin/dotnet-restore /usr/local/bin/
 ln -s $2/bin/resgen /usr/local/bin/
 
+# A temporary solution to unblock dotnet compile
+cp $2/bin/corehost /usr/local/bin/
+
+
 exit 0
