@@ -21,20 +21,20 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The list of registered assembly files.
         /// </summary>
-        private ArrayList _assemblies = null;
+        private ArrayList assemblies = null;
 
         /// <summary>
         /// The list of registered type library files.
         /// </summary>
-        private ArrayList _typeLibraries = null;
+        private ArrayList typeLibraries = null;
 
         /// <summary>
         /// Construct.
         /// </summary>
         internal AssemblyRegistrationCache()
         {
-            _assemblies = new ArrayList();
-            _typeLibraries = new ArrayList();
+            assemblies = new ArrayList();
+            typeLibraries = new ArrayList();
         }
 
         /// <summary>
@@ -44,8 +44,8 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_assemblies.Count == _typeLibraries.Count, "Internal assembly and type library lists should have the same number of entries in AssemblyRegistrationCache");
-                return _assemblies.Count;
+                ErrorUtilities.VerifyThrow(assemblies.Count == typeLibraries.Count, "Internal assembly and type library lists should have the same number of entries in AssemblyRegistrationCache");
+                return assemblies.Count;
             }
         }
 
@@ -57,8 +57,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="typeLibraryPath"></param>
         internal void AddEntry(string assemblyPath, string typeLibraryPath)
         {
-            _assemblies.Add(assemblyPath);
-            _typeLibraries.Add(typeLibraryPath);
+            assemblies.Add(assemblyPath);
+            typeLibraries.Add(typeLibraryPath);
         }
 
         /// <summary>
@@ -69,9 +69,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="typeLibraryPath"></param>
         internal void GetEntry(int index, out string assemblyPath, out string typeLibraryPath)
         {
-            ErrorUtilities.VerifyThrow((index >= 0) && (index < _assemblies.Count), "Invalid index in the call to AssemblyRegistrationCache.GetEntry");
-            assemblyPath = (string)_assemblies[index];
-            typeLibraryPath = (string)_typeLibraries[index];
+            ErrorUtilities.VerifyThrow((index >= 0) && (index < assemblies.Count), "Invalid index in the call to AssemblyRegistrationCache.GetEntry");
+            assemblyPath = (string)assemblies[index];
+            typeLibraryPath = (string)typeLibraries[index];
         }
     }
 }

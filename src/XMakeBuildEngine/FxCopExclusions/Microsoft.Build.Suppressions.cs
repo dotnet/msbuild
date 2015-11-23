@@ -18,7 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 [module: SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", Scope="namespace", Target="Microsoft.Build.Shared", MessageId="Shared")]
 [module: SuppressMessage("Microsoft.MSInternal", "CA905:SystemAndMicrosoftNamespacesRequireApproval", Scope="namespace", Target="Microsoft.Build.Shared")]
 [module: SuppressMessage("Microsoft.Naming","CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId="aspnetcompiler", Scope="resource", Target="Microsoft.Build.Resources.Strings.resources", Justification="AspNetCompiler is the name of the task")]
-[module: SuppressMessage("Microsoft.Naming","CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId="vcproj", Scope="resource", Target="Microsoft.Build.Resources.Strings.resources", Justification="vcproj is an extension and is spelled corectly")]
+[module: SuppressMessage("Microsoft.Naming","CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId="vcproj", Scope="resource", Target="Microsoft.Build.Resources.Strings.resources", Justification="vcproj is an extension and is spelled correctly")]
 
 [module: SuppressMessage("Microsoft.Security","CA2119:SealMethodsThatSatisfyPrivateInterfaces", Scope="member", Target="Microsoft.Build.Construction.ElementLocation.#get_Line()", Justification="This must be overridable. SmallElementLocation and RegularElementLocation already override it")]
 [module: SuppressMessage("Microsoft.Security","CA2119:SealMethodsThatSatisfyPrivateInterfaces", Scope="member", Target="Microsoft.Build.Construction.ElementLocation.#get_File()", Justification="This must be overridable. SmallElementLocation and RegularElementLocation already override it")]

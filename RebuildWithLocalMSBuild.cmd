@@ -11,7 +11,7 @@ set MSBuildTempPath=%~dp0bin\MSBuild
 :: Check prerequisites
 if not defined VS140COMNTOOLS (
     echo Error: This script should be run from a Visual Studio 2015 Command Prompt.  
-    echo        Please see https://github.com/Microsoft/msbuild/wiki/Developer-Guide for build instructions.
+    echo        Please see https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging for build instructions.
     exit /b 1
 )
 
