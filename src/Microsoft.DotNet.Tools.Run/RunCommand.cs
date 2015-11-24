@@ -31,7 +31,6 @@ namespace Microsoft.DotNet.Tools.Run
             }
             else
             {
-                CalculateDefaultsForNonAssigned();
                 return RunExecutable();
             }
         }
@@ -51,7 +50,10 @@ namespace Microsoft.DotNet.Tools.Run
 
         private void CalculateDefaultsForNonAssigned()
         {
-            Project = Directory.GetCurrentDirectory();
+            if (string.IsNullOrWhiteSpace(Project))
+            {
+                Project = Directory.GetCurrentDirectory();
+            }
 
             if (string.IsNullOrWhiteSpace(Configuration))
             {
@@ -81,6 +83,8 @@ namespace Microsoft.DotNet.Tools.Run
 
         private int RunExecutable()
         {
+            CalculateDefaultsForNonAssigned();
+
             // Create a temporary directory
             var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
