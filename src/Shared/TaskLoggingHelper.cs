@@ -486,7 +486,7 @@ namespace Microsoft.Build.Utilities
             // Debug only because it is in theory legitimate to pass importance as a string format parameter.
             Debug.Assert(messageArgs == null || messageArgs.Length == 0 || messageArgs[0].GetType() != typeof(MessageImportance), "Did you call the wrong overload?");
 
-            LogMessageFromResources(MessageImportance.Normal, messageResourceName, messageArgs);
+            LogMessageFromResources(MessageImportance.Normal, messageResourceName, messageArgs, new object[0]);
         }
 
         /// <summary>
@@ -506,7 +506,7 @@ namespace Microsoft.Build.Utilities
             // global state.
             ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, "messageResourceName");
 
-            LogMessage(importance, FormatResourceString(messageResourceName, messageArgs));
+            LogMessage(importance, FormatResourceString(messageResourceName, messageArgs), new object[0]);
 #if _DEBUG
             // Assert that the message does not contain an error code.  Only errors and warnings
             // should have error codes.
@@ -736,7 +736,7 @@ namespace Microsoft.Build.Utilities
 
             if (subcategoryResourceName != null)
             {
-                subcategory = FormatResourceString(subcategoryResourceName);
+                subcategory = FormatResourceString(subcategoryResourceName, new object[0]);
             }
 
 #if _DEBUG
@@ -759,7 +759,8 @@ namespace Microsoft.Build.Utilities
                 columnNumber,
                 endLineNumber,
                 endColumnNumber,
-                FormatResourceString(messageResourceName, messageArgs)
+                FormatResourceString(messageResourceName, messageArgs),
+                new object[0]
             );
         }
 
@@ -822,7 +823,7 @@ namespace Microsoft.Build.Utilities
 
             if (subcategoryResourceName != null)
             {
-                subcategory = FormatResourceString(subcategoryResourceName);
+                subcategory = FormatResourceString(subcategoryResourceName, new object[0]);
             }
 
             string errorCode;
@@ -845,7 +846,8 @@ namespace Microsoft.Build.Utilities
                 columnNumber,
                 endLineNumber,
                 endColumnNumber,
-                message
+                message, 
+                new object[0]
             );
         }
 
@@ -920,7 +922,7 @@ namespace Microsoft.Build.Utilities
                 message = builder.ToString();
             }
 
-            LogError(null, null, null, file, 0, 0, 0, 0, message);
+            LogError(null, null, null, file, 0, 0, 0, 0, message, new object[0]);
         }
 
         #endregion
@@ -1056,7 +1058,7 @@ namespace Microsoft.Build.Utilities
 
             if (subcategoryResourceName != null)
             {
-                subcategory = FormatResourceString(subcategoryResourceName);
+                subcategory = FormatResourceString(subcategoryResourceName, new object[0]);
             }
 
 #if DEBUG
@@ -1079,7 +1081,8 @@ namespace Microsoft.Build.Utilities
                 columnNumber,
                 endLineNumber,
                 endColumnNumber,
-                FormatResourceString(messageResourceName, messageArgs)
+                FormatResourceString(messageResourceName, messageArgs),
+                new object[0]
             );
         }
 
@@ -1142,7 +1145,7 @@ namespace Microsoft.Build.Utilities
 
             if (subcategoryResourceName != null)
             {
-                subcategory = FormatResourceString(subcategoryResourceName);
+                subcategory = FormatResourceString(subcategoryResourceName, new object[0]);
             }
 
             string warningCode;
@@ -1165,7 +1168,8 @@ namespace Microsoft.Build.Utilities
                 columnNumber,
                 endLineNumber,
                 endColumnNumber,
-                message
+                message,
+                new object[0]
             );
         }
 
@@ -1200,7 +1204,7 @@ namespace Microsoft.Build.Utilities
                 message += Environment.NewLine + exception.StackTrace;
             }
 
-            LogWarning(message);
+            LogWarning(message, new object[0]);
         }
 
         #endregion
@@ -1296,7 +1300,7 @@ namespace Microsoft.Build.Utilities
             if (null == messageParts)
             {
                 // Line was not recognized as a canonical error. Log it as a message.
-                LogMessage(messageImportance, lineOfText);
+                LogMessage(messageImportance, lineOfText, new object[0]);
             }
             else
             {
@@ -1324,7 +1328,8 @@ namespace Microsoft.Build.Utilities
                                 messageParts.column,
                                 messageParts.endLine,
                                 messageParts.endColumn,
-                                messageParts.text
+                                messageParts.text,
+                                new object[0]
                             );
 
                             isError = true;
@@ -1343,7 +1348,8 @@ namespace Microsoft.Build.Utilities
                                 messageParts.column,
                                 messageParts.endLine,
                                 messageParts.endColumn,
-                                messageParts.text
+                                messageParts.text,
+                                new object[0]
                             );
 
                             break;
