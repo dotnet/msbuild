@@ -33,9 +33,22 @@ if (!$env:DOTNET_BUILD_VERSION) {
 
 Write-Host -ForegroundColor Green "*** Building dotnet tools version $($env:DOTNET_BUILD_VERSION) - $Configuration ***"
 & "$PSScriptRoot\compile.ps1" -Configuration:$Configuration
+if (!$?) {
+    Write-Host "Building dotnet tools finished with errors."
+    Exit 1
+}
 
 Write-Host -ForegroundColor Green "*** Packaging dotnet ***"
 & "$PSScriptRoot\package\package.ps1"
+if (!$?) {
+    Write-Host "Packaging dotnet finished with errors."
+    Exit 1
+}
+
 
 Write-Host -ForegroundColor Green "*** Generating dotnet MSI ***"
 & "$RepoRoot\packaging\windows\generatemsi.ps1" $Stage2Dir
+if (!$?) {
+    Write-Host "Generating dotnet MSI finished with errors."
+    Exit 1
+}

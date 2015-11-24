@@ -26,6 +26,11 @@ Download it from https://www.cmake.org
     # Install a stage 0
     header "Installing dotnet stage 0"
     & "$PSScriptRoot\install.ps1"
+    if (!$?) {
+        Write-Host "Command failed: $PSScriptRoot\install.ps1"
+        Exit 1
+    }
+
 
     # Put stage 0 on the path
     $DotNetTools = $env:DOTNET_INSTALL_DIR
@@ -47,6 +52,11 @@ Download it from https://www.cmake.org
     # Restore packages
     header "Restoring packages"
     dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+    if (!$?) {
+        Write-Host "Command failed: " dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+        Exit 1
+    }
+
 
     header "Building corehost"
     pushd "$RepoRoot\src\corehost"
@@ -78,15 +88,30 @@ Download it from https://www.cmake.org
     # Build Stage 1
     header "Building stage1 dotnet using downloaded stage0 ..."
     & "$PSScriptRoot\build\build-stage.ps1" -Tfm:$Tfm -Rid:$Rid -Configuration:$Configuration -OutputDir:$Stage1Dir -RepoRoot:$RepoRoot -HostDir:$HostDir
+    if (!$?) {
+        Write-Host "Command failed: $PSScriptRoot\build\build-stage.ps1" -Tfm:$Tfm -Rid:$Rid -Configuration:$Configuration -OutputDir:$Stage1Dir -RepoRoot:$RepoRoot -HostDir:$HostDir
+        Exit 1
+    }
+
 
     # Build Stage 2 using Stage 1
     $env:PATH = "$Stage1Dir\bin;$StartPath"
     header "Building stage2 dotnet using just-built stage1 ..."
     & "$PSScriptRoot\build\build-stage.ps1" -Tfm:$Tfm -Rid:$Rid -Configuration:$Configuration -OutputDir:$Stage2Dir -RepoRoot:$RepoRoot -HostDir:$HostDir
+    if (!$?) {
+        Write-Host "Command failed: $PSScriptRoot\build\build-stage.ps1" -Tfm:$Tfm -Rid:$Rid -Configuration:$Configuration -OutputDir:$Stage2Dir -RepoRoot:$RepoRoot -HostDir:$HostDir
+        Exit 1
+    }
+
 
     # Crossgen Roslyn
     header "Crossgening Roslyn compiler ..."
     cmd /c "$PSScriptRoot\crossgen\crossgen_roslyn.cmd" "$Stage2Dir"
+    if (!$?) {
+        Write-Host "Command failed: " cmd /c "$PSScriptRoot\crossgen\crossgen_roslyn.cmd" "$Stage2Dir"
+        Exit 1
+    }
+
 
     # Copy dnx into stage 2
     cp -rec "$DnxDir\" "$Stage2Dir\bin\dnx\"
@@ -98,10 +123,20 @@ Download it from https://www.cmake.org
     $env:PATH = "$Stage2Dir\bin;$StartPath"
     header "Acquiring Native App Dependencies"
     cmd /c "$PSScriptRoot\build\build_appdeps.cmd" "$Stage2Dir"
+    if (!$?) {
+        Write-Host "Command failed: " cmd /c "$PSScriptRoot\build\build_appdeps.cmd" "$Stage2Dir"
+        Exit 1
+    }
+
 
     # Smoke test stage2
     $env:DOTNET_HOME = "$Stage2Dir"
     & "$PSScriptRoot\test\smoke-test.ps1"
+    if (!$?) {
+        Write-Host "Command failed: $PSScriptRoot\test\smoke-test.ps1"
+        Exit 1
+    }
+
 } finally {
     $env:PATH = $StartPath
     $env:DOTNET_HOME = $StartDotNetHome
