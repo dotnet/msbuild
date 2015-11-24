@@ -53,7 +53,7 @@ Compiling to IL is done using:
 	dotnet compile
 This will drop a binary in `./bin/[configuration]/[framework]/[binary name]` that you can just run.
 
-**Note: the below is not currently working with the installers above - fix coming ASAP!**
+**Note: the below is currently working on Windows and Ubuntu - OS X support coming soon!**
 
 Finally, you can also try out native compilation on Windows and Linux. **Note:** at this point, only the `helloworld` and `dotnetbot` samples will work with native compilation.
 
