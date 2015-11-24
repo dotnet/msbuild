@@ -2,6 +2,10 @@
 
 This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms as well as documentation. 
 
+New to .NET CLI?
+------------
+Check out our http://dotnet.github.io/getting-started/
+
 Build Status
 ------------
 
