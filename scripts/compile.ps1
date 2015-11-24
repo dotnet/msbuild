@@ -71,6 +71,10 @@ Download it from https://www.cmake.org
             $pf = (cat "env:\ProgramFiles(x86)")
         }
         & "$pf\MSBuild\14.0\Bin\MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration="$Configuration"
+        if (!$?) {
+            Write-Host "Command failed: $pf\MSBuild\14.0\Bin\MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration="$Configuration"
+            Exit 1
+        }
 
         if (!(Test-Path $HostDir)) {
             mkdir $HostDir | Out-Null
