@@ -63,9 +63,15 @@
      -->
   </ItemGroup>
 
+  <PropertyGroup>
+    <RestoreBuildToolsPackagesConfigInputs>$(GlobalPropertiesFile);$(NuGetPackagesFile)</RestoreBuildToolsPackagesConfigInputs>
+    <!-- Make sure we don't use a file that doesn't exist as one of our inputs, otherwise the target will always be built even if it's up-to-date -->
+    <RestoreBuildToolsPackagesConfigInputs Condition="Exists('$(NuGetPackagesFileTargetSpecific)')">$(RestoreBuildToolsPackagesConfigInputs);$(NuGetPackagesFileTargetSpecific)</RestoreBuildToolsPackagesConfigInputs>
+  </PropertyGroup>
+
   <!-- Restore NuGet.exe and use it to process Nuget.config. -->
   <Target Name="_RestoreBuildToolsPackagesConfig"
-          Inputs="$(GlobalPropertiesFile);$(NuGetPackagesFile);$(NuGetPackagesFileTargetSpecific)"
+          Inputs="$(RestoreBuildToolsPackagesConfigInputs)"
           Outputs="$(BuildToolsSemaphore);$(NuGetToolPath)"
           Condition="Exists('$(NuGetPackagesFile)') or Exists('$(NuGetPackagesFileTargetSpecific)')">
     <Message Importance="High" Text="Restoring build tools..." />
@@ -75,6 +81,18 @@
 
     <!-- Download NuGet.exe -->
     <Exec Command="$(DownloadCommand)" Condition="!Exists('$(NuGetToolPath)')" />
+
+    <Touch Files="$(NuGetToolPath)" />
+    
+        <!--
+      Touch our semaphore file to ensure Inputs/Outputs comparison for this target will show that we're up to date.
+      Ignore failures in the unlikely, but possible, event that we hit this from two projects simultaneously.
+    -->
+    <Touch Files="$(BuildToolsSemaphore)"
+           ContinueOnError="WarnAndContinue"
+           AlwaysCreate="true"
+           ForceTouch="true" />
+
 
     <!-- Restore build tools using packages.config if it exists -->
     <Exec Condition="Exists('$(NuGetPackagesFile)')" Command="$(NugetInstallCommand) $(NuGetPackageInstallOptions) &quot;$(NuGetPackagesFile)&quot;" />
@@ -86,14 +104,6 @@
 
   <!-- All work is done in the dependent targets -->
   <Target Name="_RestoreGlobalReferences" DependsOnTargets="_RestoreBuildToolsPackagesConfig">
-    <!--
-      Touch our semaphore file to ensure Inputs/Outputs comparison for this target will show that we're up to date.
-      Ignore failures in the unlikely, but possible, event that we hit this from two projects simultaneously.
-    -->
-    <Touch Files="$(BuildToolsSemaphore)"
-           ContinueOnError="WarnAndContinue"
-           AlwaysCreate="true"
-           ForceTouch="true" />
 
   </Target>
 
