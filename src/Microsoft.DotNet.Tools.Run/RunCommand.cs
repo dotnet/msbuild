@@ -20,38 +20,38 @@ namespace Microsoft.DotNet.Tools.Run
         public string Project = null;
         public IReadOnlyList<string> Args = null;
 
-        bool _isInteractive = false;
         ProjectContext _context;
         List<string> _args;
 
         public int Start()
         {
-            CalculateDefaultsForNonAssigned();
-
-            if (_isInteractive)
+            if (IsInteractive())
             {
                 return RunInteractive(Project);
             }
             else
             {
+                CalculateDefaultsForNonAssigned();
                 return RunExecutable();
             }
         }
 
-        private void CalculateDefaultsForNonAssigned()
+        private bool IsInteractive()
         {
             if (!string.IsNullOrEmpty(Project))
             {
-                if (File.Exists(Project) && (Path.GetExtension(Project) == ".csx"))
+                if (File.Exists(Project) && (Path.GetExtension(Project).ToLowerInvariant() == ".csx"))
                 {
-                    _isInteractive = true;
-                    return;
+                    return true;
                 }
             }
-            else
-            {
-                Project = Directory.GetCurrentDirectory();
-            }
+
+            return false;
+        }
+
+        private void CalculateDefaultsForNonAssigned()
+        {
+            Project = Directory.GetCurrentDirectory();
 
             if (string.IsNullOrWhiteSpace(Configuration))
             {
