@@ -187,6 +187,8 @@
     <!-- Setting this to false stops the AppX targets, which aren't supported on .NET Core, from beeing imported -->
     <WindowsAppContainer>false</WindowsAppContainer>
 
+    <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreSurface)' != 'true'">
