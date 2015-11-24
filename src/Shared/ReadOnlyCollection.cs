@@ -101,7 +101,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(T item)
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(T item)
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
             return false;
         }
 

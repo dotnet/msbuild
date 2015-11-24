@@ -662,7 +662,7 @@ namespace Microsoft.Build.Tasks
 
             return (string[])files.ToArray(typeof(string));
 #else
-            return Array.Empty<string>();
+            return new string[0];
 #endif
         }
 

@@ -359,7 +359,7 @@ namespace Microsoft.Build
 #if DEBUG
                 if (startIndex + count > target.Length)
                 {
-                    ErrorUtilities.ThrowInternalError("wrong length");
+                    ErrorUtilities.ThrowInternalError("wrong length", new object[0]);
                 }
 #endif
                 _target = target;
@@ -387,7 +387,7 @@ namespace Microsoft.Build
                 {
                     if (index > _startIndex + _count - 1 || index < 0)
                     {
-                        ErrorUtilities.ThrowInternalError("past end");
+                        ErrorUtilities.ThrowInternalError("past end", new object[0]);
                     }
 
                     return _target[index + _startIndex];

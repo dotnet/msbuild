@@ -2787,7 +2787,7 @@ namespace Microsoft.Build.Tasks
 
                 if (machineType == NativeMethods.IMAGE_FILE_MACHINE_INVALID)
                 {
-                    throw new BadImageFormatException(ResourceUtilities.FormatResourceString("ResolveAssemblyReference.ImplementationDllHasInvalidPEHeader"));
+                    throw new BadImageFormatException(ResourceUtilities.FormatResourceString("ResolveAssemblyReference.ImplementationDllHasInvalidPEHeader", new object[0]));
                 }
 
                 switch (machineType)

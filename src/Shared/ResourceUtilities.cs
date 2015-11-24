@@ -291,7 +291,7 @@ namespace Microsoft.Build.Shared
 
                 if (unformattedMessage == null)
                 {
-                    ErrorUtilities.ThrowInternalError("The resource string \"" + resourceName + "\" was not found.");
+                    ErrorUtilities.ThrowInternalError("The resource string \"" + resourceName + "\" was not found.", new object[0]);
                 }
             }
             catch (ArgumentException e)
@@ -299,21 +299,21 @@ namespace Microsoft.Build.Shared
 #if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
 #endif
-                ErrorUtilities.ThrowInternalError(e.Message);
+                ErrorUtilities.ThrowInternalError(e.Message, new object[0]);
             }
             catch (InvalidOperationException e)
             {
 #if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
 #endif
-                ErrorUtilities.ThrowInternalError(e.Message);
+                ErrorUtilities.ThrowInternalError(e.Message, new object[0]);
             }
             catch (MissingManifestResourceException e)
             {
 #if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
 #endif
-                ErrorUtilities.ThrowInternalError(e.Message);
+                ErrorUtilities.ThrowInternalError(e.Message, new object[0]);
             }
 #endif
         }

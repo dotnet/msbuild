@@ -153,7 +153,7 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+                ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
             }
         }
 
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(K key, V value)
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(K key)
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
             return false;
         }
 
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(KeyValuePair<K, V> item)
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(KeyValuePair<K, V> item)
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection", new object[0]);
             return false;
         }
 

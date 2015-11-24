@@ -126,7 +126,7 @@ namespace Microsoft.Build.Shared
 #if !CLR2COMPATIBILITY
             if (!Monitor.IsEntered(locker))
             {
-                ThrowInternalError("Lock should already have been taken");
+                ThrowInternalError("Lock should already have been taken", new object[0]);
             }
 #endif
         }

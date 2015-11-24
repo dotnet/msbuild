@@ -96,7 +96,7 @@ namespace Microsoft.Build.Tasks
         {
             if (Text != null || Code != null)
             {
-                Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, (Text == null) ? String.Empty : Text);
+                Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, (Text == null) ? String.Empty : Text, new object[0]);
             }
 
             // careful to return false. Otherwise the build would continue.

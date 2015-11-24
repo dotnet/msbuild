@@ -666,7 +666,7 @@ namespace Microsoft.Build.Tasks
                 // If there are no sources to process, just return (with success) and report the condition.
                 if ((Sources == null) || (Sources.Length == 0))
                 {
-                    Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.NoSources");
+                    Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.NoSources", new object[0]);
                     // Indicate we generated nothing
                     OutputResources = null;
                     return true;
@@ -702,7 +702,7 @@ namespace Microsoft.Build.Tasks
                         OutputResources = cachedOutputFiles.ToArray();
                     }
 
-                    Log.LogMessageFromResources("GenerateResource.NothingOutOfDate");
+                    Log.LogMessageFromResources("GenerateResource.NothingOutOfDate", new object[0]);
                 }
                 else
                 {
@@ -970,7 +970,7 @@ namespace Microsoft.Build.Tasks
 
             return resGenSucceeded;
 #else
-            Log.LogError("ResGen.exe not supported on .NET Core MSBuild");
+            Log.LogError("ResGen.exe not supported on .NET Core MSBuild", new object[0]);
             return false;
 #endif
         }
@@ -1182,7 +1182,7 @@ namespace Microsoft.Build.Tasks
                 // STR classes for each input, but then the class name and file name parameters would have to be vectors.
                 if (Sources.Length != 1)
                 {
-                    Log.LogErrorWithCodeFromResources("GenerateResource.STRLanguageButNotExactlyOneSourceFile");
+                    Log.LogErrorWithCodeFromResources("GenerateResource.STRLanguageButNotExactlyOneSourceFile", new object[0]);
                     return false;
                 }
             }
@@ -1192,7 +1192,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // We have no language to generate a STR, but nevertheless the user passed us a class, 
                     // namespace, and/or filename. Let them know that they probably wanted to pass a language too.
-                    Log.LogErrorWithCodeFromResources("GenerateResource.STRClassNamespaceOrFilenameWithoutLanguage");
+                    Log.LogErrorWithCodeFromResources("GenerateResource.STRClassNamespaceOrFilenameWithoutLanguage", new object[0]);
                     return false;
                 }
             }
@@ -1202,7 +1202,7 @@ namespace Microsoft.Build.Tasks
                 // This combination isn't currently supported, because ResGen may produce some not-easily-predictable
                 // set of ResW files and we don't have any logic to get that set of files back into GenerateResource
                 // at the moment.  This could be solved fixed with some engineering effort.
-                Log.LogErrorWithCodeFromResources("GenerateResource.ExecuteAsToolAndExtractResWNotSupported");
+                Log.LogErrorWithCodeFromResources("GenerateResource.ExecuteAsToolAndExtractResWNotSupported", new object[0]);
                 return false;
             }
 
@@ -1620,7 +1620,7 @@ namespace Microsoft.Build.Tasks
         {
             if (NeverLockTypeAssemblies)
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.SeparateAppDomainBecauseNeverLockTypeAssembliesTrue");
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateResource.SeparateAppDomainBecauseNeverLockTypeAssembliesTrue", new object[0]);
                 return true;
             }
 
@@ -2866,7 +2866,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM
                 ReadAssemblyResources(filename, outFileOrDir);
 #else
-                _logger.LogError("Reading resources from Assembly not supported on .NET Core MSBuild");
+                _logger.LogError("Reading resources from Assembly not supported on .NET Core MSBuild", new object[0]);
 #endif
             }
             else
@@ -2913,7 +2913,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESX_RESOURCE_READER
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
 #else
-                        _logger.LogError("ResGen.exe not supported on .NET Core MSBuild");
+                        _logger.LogError("ResGen.exe not supported on .NET Core MSBuild", new object[0]);
 #endif
                         break;
 
@@ -3163,7 +3163,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESX_RESOURCE_READER
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
 #else
-                    _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
+                    _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild", new object[0]);
 #endif
                     break;
 
@@ -3254,7 +3254,7 @@ namespace Microsoft.Build.Tasks
             }
 #else
             sourceFile = null;
-            _logger.LogError("Generating strongly typed resource files not currently supported on .NET Core MSBuild");
+            _logger.LogError("Generating strongly typed resource files not currently supported on .NET Core MSBuild", new object[0]);
 #endif
         }
 
@@ -3371,7 +3371,7 @@ namespace Microsoft.Build.Tasks
                     {
                         String skip = sr.ReadLine();
                         if (skip.Equals("strings]"))
-                            _logger.LogWarningWithCodeFromResources(null, fileName, sr.LineNumber - 1, 1, 0, 0, "GenerateResource.ObsoleteStringsTag");
+                            _logger.LogWarningWithCodeFromResources(null, fileName, sr.LineNumber - 1, 1, 0, 0, "GenerateResource.ObsoleteStringsTag", new object[0]);
                         else
                         {
                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.UnexpectedInfBracket", "[" + skip), fileName, sr.LineNumber - 1, 1);
@@ -3393,7 +3393,7 @@ namespace Microsoft.Build.Tasks
                             break;
                     }
                     if (name.Length == 0)
-                        throw new TextFileException(_logger.FormatResourceString("GenerateResource.NoNameInLine"), fileName, sr.LineNumber, sr.LinePosition);
+                        throw new TextFileException(_logger.FormatResourceString("GenerateResource.NoNameInLine", new object[0]), fileName, sr.LineNumber, sr.LinePosition);
 
                     // For the INF file, we must allow a space on both sides of the equals
                     // sign.  Deal with it.

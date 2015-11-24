@@ -223,7 +223,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 #else
-                        Log.LogError("PFX signing not supported on .NET Core");
+                        Log.LogError("PFX signing not supported on .NET Core", new object[0]);
                         pfxSuccess = false;
 #endif
                     }
@@ -262,7 +262,7 @@ namespace Microsoft.Build.Tasks
                 }
                 if (!certSuccess)
                 {
-                    Log.LogWarningWithCodeFromResources("ResolveKeySource.ResolvedThumbprintEmpty");
+                    Log.LogWarningWithCodeFromResources("ResolveKeySource.ResolvedThumbprintEmpty", new object[0]);
                 }
             }
 
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Tasks
                 // if the cert isn't on disk, we can't import it
                 if (!File.Exists(CertificateFile))
                 {
-                    Log.LogErrorWithCodeFromResources("ResolveKeySource.CertificateNotInStore");
+                    Log.LogErrorWithCodeFromResources("ResolveKeySource.CertificateNotInStore", new object[0]);
                 }
                 else
                 {
@@ -331,13 +331,13 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 #else
-                Log.LogError("Certificate signing not supported on .NET Core");
+                Log.LogError("Certificate signing not supported on .NET Core", new object[0]);
 #endif
             }
             else if (!certInStore && !string.IsNullOrEmpty(CertificateFile) && !string.IsNullOrEmpty(CertificateThumbprint))
             {
                 // no file and not in store, error out
-                Log.LogErrorWithCodeFromResources("ResolveKeySource.CertificateNotInStore");
+                Log.LogErrorWithCodeFromResources("ResolveKeySource.CertificateNotInStore", new object[0]);
                 certSuccess = false;
             }
             else
