@@ -16,6 +16,7 @@ if not defined VS140COMNTOOLS (
 )
 
 :: Build and copy output to bin\bootstrap
+set MSBUILDLOGPATH=%~dp0msbuild_bootstrap.log
 call "%~dp0BuildAndCopy.cmd"
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -24,6 +25,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 :: Rebuild with bootstrapped msbuild
+set MSBUILDLOGPATH=%~dp0msbuild_local.log
 set MSBUILDCUSTOMPATH="%~dp0\bin\Bootstrap\14.1\Bin\MSBuild.exe"
 "%~dp0build.cmd" /t:RebuildAndTest /p:BootstrappedMSBuild=true
 if %ERRORLEVEL% NEQ 0 (
