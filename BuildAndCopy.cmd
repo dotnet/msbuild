@@ -25,14 +25,25 @@ echo ** Additional Build Parameters:%AdditionalBuildCommand%
 echo.
 :: Build MSBuild
 call "%~dp0build.cmd" /t:Rebuild %AdditionalBuildCommand%
+set BUILDERRORLEVEL=%ERRORLEVEL%
 
 :: Kill Roslyn, which may have handles open to files we want
 taskkill /F /IM vbcscompiler.exe
 
+if %BUILDERRORLEVEL% NEQ 0 (
+    echo.
+    echo Failed to build with errorlevel %BUILDERRORLEVEL% 1>&2
+    exit /b %BUILDERRORLEVEL%
+)
+
 :: Make a copy of our build
 echo ** Copying bootstrapped MSBuild to the bootstrap folder
-msbuild /v:m CreatePrivateMSBuildEnvironment.proj
-echo.
+msbuild /verbosity:minimal CreatePrivateMSBuildEnvironment.proj
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo Failed building CreatePrivateMSBuildEnvironment.proj with error %ERRORLEVEL%
+    exit /b %ERRORLEVEL%
+)
 
 echo.
 echo ** Packaging complete.
