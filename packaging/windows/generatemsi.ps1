@@ -148,7 +148,15 @@ if(!(Test-Path $DotnetMSIOutput))
     return -1
 }
 
-Write-Host -ForegroundColor Green "Successfully create dotnet MSI - $DotnetMSIOutput"
+Write-Host -ForegroundColor Green "Successfully created dotnet MSI - $DotnetMSIOutput"
+
+& $PSScriptRoot\testmsi.ps1 -inputMsi $DotnetMSIOutput
+
+if($LastExitCode -ne 0)
+{
+    Write-Host -ForegroundColor Red "Msi testing failed."
+    Exit 1
+}
 
 $PublishScript = Join-Path $PSScriptRoot "..\..\scripts\publish\publish.ps1"
 & $PublishScript -file $DotnetMSIOutput

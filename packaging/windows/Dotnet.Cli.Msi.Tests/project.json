@@ -1,0 +1,17 @@
+﻿{
+  "compilationOptions": {
+        "emitEntryPoint": true
+    },
+  "dependencies": {
+    "xunit": "2.1.0",
+    "xunit.runner.console": "2.1.0",
+    "Microsoft.Deployment.WindowsInstaller": "1.0.0"    
+  },
+  "frameworks": {
+    "net46": {
+		  "frameworkAssemblies": {
+                "System.Runtime": ""
+         }
+	  }
+  }
+}
