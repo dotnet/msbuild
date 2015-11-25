@@ -132,12 +132,18 @@ Download it from https://www.cmake.org
         Exit 1
     }
 
-
     # Smoke test stage2
     $env:DOTNET_HOME = "$Stage2Dir"
     & "$PSScriptRoot\test\smoke-test.ps1"
     if (!$?) {
         Write-Host "Command failed: $PSScriptRoot\test\smoke-test.ps1"
+        Exit 1
+    }
+
+    # E2E Test of stage2
+    & "$PSScriptRoot\test\e2e-test.ps1"
+    if (!$?) {
+        Write-Host "Command failed: $PSScriptRoot\test\e2e-test.ps1"
         Exit 1
     }
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -141,3 +141,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8a53c73... E2E Testing First pass. Test each command in a sequence to mock what a user might do.
