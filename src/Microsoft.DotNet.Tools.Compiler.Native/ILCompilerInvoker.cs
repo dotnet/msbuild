@@ -42,6 +42,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var argsList = new List<string>();
 
             var managedPath = Path.Combine(config.IlcPath, ILCompiler);
+            if (!File.Exists(managedPath))
+            {
+                throw new FileNotFoundException("Unable to find ILCompiler at " + managedPath);
+            }
+
             argsList.Add($"\"{managedPath}\"");
             
             // Input File 
