@@ -7,8 +7,8 @@
 #Ensure running with superuser privileges
 current_user=$(whoami)
 if [ $current_user != "root" ]; then
-	echo "test_package.sh requires superuser privileges to run"
-	exit 1
+	echo "WARNING: test_package.sh requires superuser privileges to run"
+	SUDO_PREFIX="sudo"
 fi
 
 setup(){
@@ -22,15 +22,15 @@ setup(){
 }
 
 install_package(){
-	dpkg -i $PACKAGE_PATH
+	$SUDO_PREFIX dpkg -i $PACKAGE_PATH
 }
 
 remove_package(){
-	dpkg -r $PACKAGE_NAME
+	$SUDO_PREFIX dpkg -r $PACKAGE_NAME
 }
 
 purge_package(){
-	dpkg -P $PACKAGE_NAME
+	$SUDO_PREFIX dpkg -P $PACKAGE_NAME
 }
 
 @test "package install + removal test" {

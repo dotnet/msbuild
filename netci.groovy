@@ -35,7 +35,6 @@ def static getBuildJobName(def configuration, def os) {
         }
         else {
             buildCommand = "./scripts/ci_build.sh ${lowerConfiguration}"
-            postBuildCommand = "./scripts/ci_postbuild.sh ${lowerConfiguration}"
         }
 
         // Create the new job
@@ -50,16 +49,6 @@ def static getBuildJobName(def configuration, def os) {
                 else {
                     // Shell
                     shell(buildCommand)
-
-                    // Post Build Cleanup
-                    publishers {
-                        postBuildScripts {
-                            steps {
-                                shell(postBuildCommand)
-                            }
-                            onlyIfBuildSucceeds(false)
-                        }
-                    }
                 }
             }
         }

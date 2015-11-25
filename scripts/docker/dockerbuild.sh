@@ -23,7 +23,7 @@ cd $DIR/../..
 
 # Build the docker container (will be fast if it is already built)
 header "Building Docker Container"
-docker build -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/
+docker build --build-arg USER_ID=$(id -u) -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/ 
 
 # Run the build in the container
 header "Launching build in Docker Container"
