@@ -2082,7 +2082,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     foreach (string s in potentialSolutionFiles)
                     {
-                        if (s.EndsWith("~", true, CultureInfo.CurrentCulture))
+                        if (!FileUtilities.IsSolutionFilename(s))
                         {
                             extensionsToIgnore.Add(Path.GetExtension(s));
                         }
