@@ -12,6 +12,12 @@ namespace Microsoft.DotNet.Cli.Utils
     internal static class Constants
     {
         public static readonly string ExeSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+
+        // Priority order of runnable suffixes to look for and run
+        public static readonly string[] RunnableSuffixes = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                                                         ? new string[] { ".exe", ".cmd", ".bat" }
+                                                         : new string[] { string.Empty };
+
         public static readonly string HostExecutableName = "corehost" + ExeSuffix;
         public static readonly string DefaultConfiguration = "Debug";
         public static readonly string BinDirectoryName = "bin";
