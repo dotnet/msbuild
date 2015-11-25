@@ -15,12 +15,13 @@
     },
     "dnxcore50": {
       "dependencies": {
-        "System.Net.NetworkInformation": "4.1.0-beta-23413",
-        "Microsoft.NETCore": "5.0.1-beta-23406",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23406",
-        "System.Console": "4.0.0-beta-23406",
-        "Microsoft.NETCore.Runtime": "1.0.1-beta-23406",
-        "Microsoft.NETCore.TestHost": "1.0.0-beta-23406",
+        "System.Net.NetworkInformation": "4.1.0-beta-23428",
+        "Microsoft.NETCore": "5.0.1-beta-23428",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23428",
+        "System.Console": "4.0.0-beta-23428",
+        "System.Collections.NonGeneric": "4.0.1-rc2-23428",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23428",
+        "Microsoft.NETCore.TestHost": "1.0.0-beta-23428",
         "xunit.console.netcore": "1.0.2-prerelease-00096"
       },
       "imports": "portable-net451+win81"

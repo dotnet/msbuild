@@ -39,8 +39,9 @@
     <!-- UNDO: When fixed https://github.com/NuGet/Home/issues/1517 -->
     <NuGetPackageRestoreOptions Condition="'$(OsEnvironment)'!='Windows_NT'">$(NuGetPackageRestoreOptions) -PackagesDirectory "$(PackagesCache)"</NuGetPackageRestoreOptions>
     <NuGetRestoreCommand>$(NuGetToolPath) restore $(NuGetCommonOptions)</NuGetRestoreCommand>
+    <NuGetRestoreCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetRestoreCommand)</NuGetRestoreCommand>
     <NuGetInstallCommand>$(NuGetToolPath) install $(NuGetCommonOptions)</NuGetInstallCommand>
-    <NuGetInstallCommand Condition="'$(OsEnvironment)'!='Windows_NT' and '$(MonoBuild)' == 'true'">export MONO_THREADS_PER_CPU=2000; mono $(NuGetInstallCommand)</NuGetInstallCommand>
+    <NuGetInstallCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetInstallCommand)</NuGetInstallCommand>
     <SolutionSemaphore>$(NuGetDir)Solution.semaphore</SolutionSemaphore>
     <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/v3.2.1-rc/nuget.exe</NugetDownloadURL>
     <DownloadCommand Condition="'$(OsEnvironment)'=='Windows_NT'">powershell -noprofile -nologo -command "(new-object System.Net.WebClient).DownloadFile('$(NugetDownloadURL)', '$(NuGetToolPath)')"</DownloadCommand>
@@ -129,15 +130,19 @@
           Inputs="@(ProjectJsonFile)"
           Outputs="%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)project.lock.json"
           AfterTargets="_RestoreGlobalReferences"
-          Condition="('$(SolutionFile)'=='' or !Exists('$(SolutionFile)')) and '$(OS)'=='Unix'"  >
+          Condition="('$(SolutionFile)'=='' or !Exists('$(SolutionFile)')) and '$(OS)'!='Windows_NT'"  >
     <PropertyGroup>
       <ProjectDirectory>%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)</ProjectDirectory>
     </PropertyGroup>
 
     <Message Importance="High" Text="Restoring in $(ProjectDirectory)" />
 
-    <!-- Restore packages for this directory -->
-    <Exec Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) -PackagesDirectory &quot;$(HOME)/.nuget/packages&quot; &quot;@(ProjectJsonFile)&quot;" />
+    <!-- TODO: Restore back to Nuget once Nuget works -->
+    <!-- Restore packages for this directory using Nuget-->
+    <!-- <Exec Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) -PackagesDirectory &quot;$(HOME)/.nuget/packages&quot; &quot;@(ProjectJsonFile)&quot;" />  -->
+    
+    <!-- Restore packages for this directory using DNU-->
+    <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;@(ProjectJsonFile)&quot;" />
   </Target>
 
   <!--
