@@ -30,11 +30,10 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             var corerun = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
             var csiExe = Path.Combine(AppContext.BaseDirectory, "csi.exe");
             var csiArgs = string.IsNullOrEmpty(scriptOpt) ? "-i" : scriptOpt;
-            var command = File.Exists(corerun) && File.Exists(csiExe) ?
-                Command.Create(corerun, $@"""{csiExe}"" {csiArgs}") :
-                Command.Create(csiExe, csiArgs);
-            command = command.ForwardStdOut().ForwardStdErr();
-            var result = command.Execute();
+            var result = Command.Create(csiExe, csiArgs)
+                .ForwardStdOut()
+                .ForwardStdErr()
+                .Execute();
             return result.ExitCode;
         }
     }
