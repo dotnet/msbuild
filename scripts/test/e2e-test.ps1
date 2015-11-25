@@ -25,14 +25,14 @@ pushd "$env:VS140COMNTOOLS\..\..\VC"
 cmd /c "vcvarsall.bat x64&set" |
 foreach {
   if ($_ -match "=") {
-    $v = $_.split("="); set-item -force -path "ENV:\$($v[0])"  -value "$($v[1])"
+    $v = $_.split("="); set-item -force -path "ENV:\$($v[0])" -value "$($v[1])"
   }
 }
 popd
 
 # Run the app and check the exit code
 pushd "$RepoRoot\artifacts\$Rid\e2etest"
-& "CoreRun.exe" "xunit.console.netcore.exe" "E2E.dll"
+& "CoreRun.exe" "xunit.console.netcore.exe" "E2E.dll" -xml ..\..\e2etest.xml
 if (!$?) {
     Write-Host "E2E Test Failure"
     popd
