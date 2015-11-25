@@ -57,11 +57,18 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static void ResolveExecutablePath(ref string executable, ref string args)
         {
-            var fullExecutable = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, executable + Constants.ExeSuffix));
-
-            if (File.Exists(fullExecutable))
+            foreach (string suffix in Constants.RunnableSuffixes)
             {
-                executable = fullExecutable;
+                var fullExecutable = Path.GetFullPath(Path.Combine(
+                                        AppContext.BaseDirectory, executable + suffix));
+
+                if (File.Exists(fullExecutable))
+                {
+                    executable = fullExecutable;
+
+                    // In priority order we've found the best runnable extension, so break.
+                    break;
+                }
             }
 
             // On Windows, we want to avoid using "cmd" if possible (it mangles the colors, and a bunch of other things)
