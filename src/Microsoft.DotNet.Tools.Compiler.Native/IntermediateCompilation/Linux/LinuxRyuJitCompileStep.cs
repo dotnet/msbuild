@@ -78,10 +78,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
 
             // AppDep Libs
+            var baseAppDepLibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04", config.Architecture.ToString());
             foreach (var lib in appdeplibs)
             {
-                var libPath = Path.Combine(config.AppDepSDKPath, lib);
-                argsList.Add(libPath);
+                var appDepLibPath = Path.Combine(baseAppDepLibPath, lib);
+                argsList.Add(appDepLibPath);
             }
 
             // Output
