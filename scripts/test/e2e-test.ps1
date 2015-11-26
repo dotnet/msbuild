@@ -32,7 +32,8 @@ popd
 
 # Run the app and check the exit code
 pushd "$RepoRoot\artifacts\$Rid\e2etest"
-& "CoreRun.exe" "xunit.console.netcore.exe" "E2E.dll" -xml ..\..\e2etest.xml
+mv E2E.exe corehost.exe
+& "corehost.exe" "xunit.console.netcore.exe" "E2E.dll" -xml ..\..\e2etest.xml
 if (!$?) {
     Write-Host "E2E Test Failure"
     popd

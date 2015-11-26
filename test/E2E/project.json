@@ -6,21 +6,20 @@
 
     "dependencies": {
         "Microsoft.NETCore.Platforms":"1.0.1-beta-*",
-        "Microsoft.NETCore.TestHost": "1.0.0-beta-*",
         "Microsoft.NETCore.Runtime": "1.0.1-beta-*",
-        "Microsoft.NETCore.Console": "1.0.0-beta-*",
-        "System.IO": "4.0.11-beta-*",
         "System.Console": "4.0.0-beta-*",
         "System.Runtime": "4.0.21-beta-*",
+        "System.AppContext": "4.0.1-beta-*",
+
         "xunit": "2.1.0",
+        "xunit.console.netcore": "1.0.2-prerelease-00101",
+        "xunit.runner.utility": "2.1.0",
+
+        "Microsoft.DotNet.ProjectModel": { "target": "project" },
         "Microsoft.DotNet.Cli.Utils": {
           "type": "build",
           "version": "1.0.0-*"
         },
-        "System.AppContext": "4.0.1-beta-*",
-        "xunit.console.netcore": "1.0.2-prerelease-00101",
-        "xunit.runner.utility": "2.1.0",
-        "Microsoft.DotNet.ProjectModel": { "target": "project" }
     },
 
     "frameworks": {

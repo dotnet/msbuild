@@ -23,5 +23,6 @@ dotnet publish --framework dnxcore50 --runtime "$RID" --output "$REPOROOT/artifa
 
 # set -e will abort if the exit code of this is non-zero
 pushd "$REPOROOT/artifacts/$RID/e2etest"
-./corerun xunit.console.netcore.exe E2E.dll
+mv ./E2E ./corehost
+./corehost xunit.console.netcore.exe E2E.dll
 popd
