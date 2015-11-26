@@ -16,11 +16,8 @@
             "type": "build",
             "version": "1.0.0-*"
         },
-        "Microsoft.Extensions.CommandLineUtils.Sources": {
-            "type": "build",
-            "version": "1.0.0-*"
-        },
-        "Microsoft.Net.Compilers.netcore": "1.2.0-beta-20151117-04"
+        "Microsoft.Net.Compilers.netcore": "1.2.0-beta-20151117-04",
+        "System.CommandLine" : "0.1.0-d111815-3"
     },
     "frameworks": {
         "dnxcore50": { }

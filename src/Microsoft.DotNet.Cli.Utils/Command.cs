@@ -132,6 +132,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public CommandResult Execute()
         {
+            Reporter.Verbose.WriteLine($"Running {_process.StartInfo.FileName} {_process.StartInfo.Arguments}");
+
             ThrowIfRunning();
             _running = true;
 

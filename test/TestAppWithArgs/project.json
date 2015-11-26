@@ -1,0 +1,17 @@
+﻿{
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+
+    "dependencies": {
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-*",
+        "System.IO": "4.0.10-beta-*",
+        "System.Console": "4.0.0-beta-*",
+        "System.Runtime": "4.0.21-beta-*"
+    },
+
+    "frameworks": {
+        "dnxcore50": { }
+    }
+}
