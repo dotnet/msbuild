@@ -67,9 +67,15 @@ On Mac OSX, we currently support the C++ Codegenerator (as shown below) and supp
 
     dotnet compile --native --cpp
 
-This will drop a native single binary in `./bin/[configuration]/[framework]/native/[binary name]` that you can run.  
+This will drop a native single binary in `./bin/[configuration]/[framework]/native/[binary name]` that you can run.
 
 For more details, please refer to the [documentation](https://github.com/dotnet/corert/tree/master/Documentation).
+
+Building from source
+--------------------
+
+If you are building from source, take note that the build depends on NuGet packages hosted on Myget, so if it is down, the build may fail. If that happens, you can always see the [Myget status page](http://status.myget.org/) for more info.  
+
 
 Questions & Comments
 --------------------

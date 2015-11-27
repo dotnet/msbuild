@@ -47,7 +47,41 @@ You can get a sense of using the tools from the examples below.
 Design
 ======
 
-More content here.
+There are couple of moving pieces that you make up the general design of the .NET Core CLI:
+
+* The `dotnet` driver
+* Specific commands that are part of the package
+
+The `dotnet` driver is very simple and its primary role is to run the commands and give users basic information about usage. 
+
+The way `dotnet` driver finds the command it is instructed to run using `dotnet {command}` is via convention; any exectuable that is placed in the PATH and is named `dotnet-{command}` will be available to the driver. For example, when you install the CLI toolchain there will be a command called `dotnet-compile` in your PATH; when you run `dotnet compile`, the driver will run `dotnet-compile`. All of the arguments are passed to the command being invoked. 
+
+This is also the basics of the current extensibility model of the toolchain. Any executable found in the PATH named in this way will be invoked by the `dotnet` driver. 
+
+There are some principles that we are using when adding new commands:
+
+* Each command is represented by a verb (`run`, `compile`, `publish`, `restore` etc.)
+* We support the short and the long form of switches for most commands
+* The switches have the same format on all supported platforms (so, no /-style switches on Windows for example)
+* Each command has a help that can be viewed
+
+Adding a new command to the .NET Core CLI 
+=========================================
+
+If you want to contribute to the actual .NET Core CLI by adding a new command that you think would be useful, please refer to the [developer guide](developer-guide.md) in this directory. It contains all of the guidance on both the process as well as the infrastructure that is provided in t
+
+Adding a new command locally
+============================ 
+Given the extensibility model described above, it is very easy to add a command that can be invoked with the `dotnet` driver. Just add any executable in a PATH and name it appropriatelly. 
+
+Guidances on how to write a command 
+===================================
+How do you write a given command depends largely on whether you are trying to add it to the CLI project or are writing an addition outside of it. 
+
+In the first case, the [developer guide](developer-guide.md) has all of the details on the styles and the infrastructure that is provided and that you can (and need) to use to implement new commands. 
+
+If you are adding a command on your own machine(s), then any model of doing things is available to you. However, since your users will be using the local commands through `dotnet` driver, it would be preferable to keep the style consistent to the one described in the deisgn section above. 
+
 
 
 
