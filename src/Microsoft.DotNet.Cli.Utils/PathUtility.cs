@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.Tools.Common
             {
                 try
                 {
-                    directoryPath = Path.GetDirectoryName(directoryPath);
+                    directoryPath = Path.GetDirectoryName(path);
                 }
                 catch (ArgumentException)
                 {
@@ -222,9 +222,7 @@ namespace Microsoft.DotNet.Tools.Common
             }
 
             string projectRootPath = null;
-
-            directoryPath = directoryPath ?? Directory.GetCurrentDirectory();
-
+            
             var directory = new DirectoryInfo(directoryPath);
 
             while (projectRootPath == null && directory != null)
