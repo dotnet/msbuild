@@ -8,6 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.ProjectModel;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -43,19 +46,26 @@ namespace Microsoft.DotNet.Cli.Utils
             };
         }
 
-        public static Command Create(string executable, IEnumerable<string> args)
+        public static Command Create(string executable, IEnumerable<string> args, NuGetFramework framework = null)
         {
-            return Create(executable, string.Join(" ", args));
+            return Create(executable, string.Join(" ", args), framework);
         }
 
-        public static Command Create(string executable, string args)
+        public static Command Create(string executable, string args, NuGetFramework framework = null)
         {
-            ResolveExecutablePath(ref executable, ref args);
+            ResolveExecutablePath(ref executable, ref args, framework);
 
             return new Command(executable, args);
         }
 
-        private static void ResolveExecutablePath(ref string executable, ref string args)
+        private static void ResolveExecutablePath(ref string executable, ref string args, NuGetFramework framework = null)
+        {
+            executable = 
+                ResolveExecutablePathFromProject(executable, framework) ??
+                ResolveExecutableFromPath(executable, ref args);
+        }
+
+        private static string ResolveExecutableFromPath(string executable, ref string args)
         {
             foreach (string suffix in Constants.RunnableSuffixes)
             {
@@ -88,6 +98,43 @@ namespace Microsoft.DotNet.Cli.Utils
                 args = $"/C \"{executable}\"";
                 executable = comSpec;
             }
+
+            return executable;
+        }
+
+        private static string ResolveExecutablePathFromProject(string executable, NuGetFramework framework)
+        {
+            if (framework == null) return null;
+
+            var projectRootPath = PathUtility.GetProjectRootPath();
+
+            if (projectRootPath == null) return null;
+
+            var commandName = Path.GetFileNameWithoutExtension(executable);
+
+            var projectContext = ProjectContext.Create(projectRootPath, framework);
+
+            var commandPackage = projectContext.LibraryManager.GetLibraries()
+                .Where(l => l.GetType() == typeof (PackageDescription))
+                .Select(l => l as PackageDescription)
+                .FirstOrDefault(p =>
+                {
+                    var fileNames = p.Library.Files
+                        .Select(Path.GetFileName)
+                        .Where(n => Path.GetFileNameWithoutExtension(n) == commandName)
+                        .ToList();
+
+                    return fileNames.Contains(commandName + FileNameSuffixes.ExeSuffix) &&
+                           fileNames.Contains(commandName + FileNameSuffixes.DynamicLib) &&
+                           fileNames.Contains(commandName + FileNameSuffixes.Deps);
+                });
+
+            if (commandPackage == null) return null;
+
+            var commandPath = commandPackage.Library.Files
+                .First(f => Path.GetFileName(f) == commandName + FileNameSuffixes.ExeSuffix);
+
+            return Path.Combine(projectContext.PackagesDirectory, commandPackage.Path, commandPath);
         }
 
         private static bool ShouldUseCmd(string executable)

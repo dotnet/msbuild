@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -31,6 +28,8 @@ Common Commands:
 
         public static int Main(string[] args)
         {
+            DebugHelper.HandleDebugSwitch(ref args);
+
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
             var verbose = false;
             var success = true;    
@@ -71,7 +70,7 @@ Common Commands:
                 return RunHelpCommand(appArgs);
             }
 
-            return Command.Create("dotnet-" + command, appArgs)
+            return Command.Create("dotnet-" + command, appArgs, new NuGetFramework("DNXCore", Version.Parse("5.0")))
                 .EnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString())
                 .EnvironmentVariable(CommandContext.Variables.AnsiPassThru, bool.TrueString)
                 .ForwardStdErr()
