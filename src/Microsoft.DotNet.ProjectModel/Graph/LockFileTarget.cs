@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel.Graph
+namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public class LockFileTarget
     {

@@ -12,7 +12,7 @@ using System.Text;
 
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.Extensions.ProjectModel;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Compiler.Csc
 {

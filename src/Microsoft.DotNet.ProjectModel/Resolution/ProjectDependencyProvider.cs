@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
-using Microsoft.Extensions.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel.Resolution
+namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     public class ProjectDependencyProvider
     {

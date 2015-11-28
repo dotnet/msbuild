@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Extensions.JsonParser.Sources;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     public sealed class FileFormatException : Exception
     {

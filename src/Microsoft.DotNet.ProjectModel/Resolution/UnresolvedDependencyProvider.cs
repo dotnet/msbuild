@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
-using Microsoft.Extensions.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel.Resolution
+namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     public static class UnresolvedDependencyProvider
     {

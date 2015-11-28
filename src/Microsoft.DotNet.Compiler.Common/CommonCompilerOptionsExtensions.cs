@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.Linq;
 
-using Microsoft.Extensions.ProjectModel;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {

@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.Extensions.JsonParser.Sources;
-using Microsoft.Extensions.ProjectModel.Files;
-using Microsoft.Extensions.ProjectModel.Graph;
-using Microsoft.Extensions.ProjectModel.Utilities;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     public class ProjectReader
     {

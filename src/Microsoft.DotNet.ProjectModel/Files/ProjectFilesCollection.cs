@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.JsonParser.Sources;
 
-namespace Microsoft.Extensions.ProjectModel.Files
+namespace Microsoft.DotNet.ProjectModel.Files
 {
     public class ProjectFilesCollection
     {

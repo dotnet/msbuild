@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.ProjectModel.Graph
+namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public struct LibraryType : IEquatable<LibraryType>
     {

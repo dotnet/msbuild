@@ -3,11 +3,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.ProjectModel.Graph;
-using Microsoft.Extensions.ProjectModel.Utilities;
+using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Versioning;
 
-namespace Microsoft.Extensions.ProjectModel.Resolution
+namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     public class LibraryManager
     {

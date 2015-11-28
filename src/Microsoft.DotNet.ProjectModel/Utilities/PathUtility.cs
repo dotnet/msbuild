@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Extensions.ProjectModel.Utilities
+namespace Microsoft.DotNet.ProjectModel.Utilities
 {
     internal static class PathUtility
     {

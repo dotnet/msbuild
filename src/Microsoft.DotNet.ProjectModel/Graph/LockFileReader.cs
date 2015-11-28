@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.Extensions.JsonParser.Sources;
-using Microsoft.Extensions.ProjectModel.Utilities;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 
-namespace Microsoft.Extensions.ProjectModel.Graph
+namespace Microsoft.DotNet.ProjectModel.Graph
 {
     internal static class LockFileReader
     {

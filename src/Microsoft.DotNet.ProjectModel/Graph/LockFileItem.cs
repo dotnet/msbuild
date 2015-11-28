@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Extensions.ProjectModel.Graph
+namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public class LockFileItem
     {

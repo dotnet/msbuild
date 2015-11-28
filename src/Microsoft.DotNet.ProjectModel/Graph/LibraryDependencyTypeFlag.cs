@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Extensions.ProjectModel.Graph
+namespace Microsoft.DotNet.ProjectModel.Graph
 {
     [Flags]
     public enum LibraryDependencyTypeFlag

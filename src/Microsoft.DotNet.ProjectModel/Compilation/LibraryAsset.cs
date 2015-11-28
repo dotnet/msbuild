@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Extensions.ProjectModel.Compilation
+namespace Microsoft.DotNet.ProjectModel.Compilation
 {
     public struct LibraryAsset
     {

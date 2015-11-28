@@ -6,7 +6,7 @@ using System.Text;
 using Microsoft.Extensions.Internal;
 using NuGet.Versioning;
 
-namespace Microsoft.Extensions.ProjectModel.Graph
+namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public struct LibraryRange : IEquatable<LibraryRange>
     {

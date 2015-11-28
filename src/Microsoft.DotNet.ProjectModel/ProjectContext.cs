@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.ProjectModel.Compilation;
-using Microsoft.Extensions.ProjectModel.Resolution;
+using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Resolution;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     // NOTE(anurse): Copied from ApplicationHostContext in DNX. This name seemed more appropriate for this :)
     public class ProjectContext

@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.ProjectModel.Graph;
-using Microsoft.Extensions.ProjectModel.Resolution;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     public class ProjectContextBuilder
     {

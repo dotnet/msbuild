@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Extensions.ProjectModel.Utilities;
+using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Versioning;
 
-namespace Microsoft.Extensions.ProjectModel.Graph
+namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public class LockFile
     {
