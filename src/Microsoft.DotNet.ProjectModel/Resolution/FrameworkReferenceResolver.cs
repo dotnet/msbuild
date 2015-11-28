@@ -7,10 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
-using Microsoft.Extensions.ProjectModel.Utilities;
+using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel.Resolution
+namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     public class FrameworkReferenceResolver
     {

@@ -7,18 +7,18 @@ using System.IO;
 using System.Linq;
 
 using System.Text;
-using Microsoft.Extensions.ProjectModel;
+using Microsoft.DotNet.ProjectModel;
 using NuGet;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Packaging.Core;
-using Microsoft.Extensions.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Versioning;
 using NuGet.Frameworks;
-using Microsoft.Extensions.ProjectModel.Files;
+using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
-using Microsoft.Extensions.ProjectModel.Utilities;
+using Microsoft.DotNet.ProjectModel.Utilities;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {

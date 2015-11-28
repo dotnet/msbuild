@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     public static class ProjectRootResolver
     {

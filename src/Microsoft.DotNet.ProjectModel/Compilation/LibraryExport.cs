@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Microsoft.Extensions.ProjectModel.Compilation
+namespace Microsoft.DotNet.ProjectModel.Compilation
 {
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class LibraryExport

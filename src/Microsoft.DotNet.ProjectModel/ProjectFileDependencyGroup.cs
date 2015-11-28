@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     public class ProjectFileDependencyGroup
     {

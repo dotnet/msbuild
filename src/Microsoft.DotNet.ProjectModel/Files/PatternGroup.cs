@@ -8,7 +8,7 @@ using System.Linq;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.JsonParser.Sources;
 
-namespace Microsoft.Extensions.ProjectModel.Files
+namespace Microsoft.DotNet.ProjectModel.Files
 {
     public class PatternGroup
     {

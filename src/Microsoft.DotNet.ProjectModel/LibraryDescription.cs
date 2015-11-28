@@ -4,11 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.ProjectModel.Graph;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     /// <summary>
     /// Represents the result of resolving the library

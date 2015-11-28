@@ -11,8 +11,8 @@ using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Tools.Common;
-using Microsoft.Extensions.ProjectModel;
-using Microsoft.Extensions.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Compilation;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Compiler

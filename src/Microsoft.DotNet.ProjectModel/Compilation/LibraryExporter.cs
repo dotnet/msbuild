@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.ProjectModel.Graph;
-using Microsoft.Extensions.ProjectModel.Resolution;
-using Microsoft.Extensions.ProjectModel.Utilities;
+using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Resolution;
+using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
 
-namespace Microsoft.Extensions.ProjectModel.Compilation
+namespace Microsoft.DotNet.ProjectModel.Compilation
 {
     public class LibraryExporter
     {

@@ -3,7 +3,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     public static class RuntimeIdentifier
     {

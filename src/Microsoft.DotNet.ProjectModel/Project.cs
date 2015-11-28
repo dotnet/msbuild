@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Extensions.ProjectModel.Files;
-using Microsoft.Extensions.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Files;
+using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
-namespace Microsoft.Extensions.ProjectModel
+namespace Microsoft.DotNet.ProjectModel
 {
     public class Project
     {

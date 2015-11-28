@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Microsoft.Extensions.ProjectModel.Resolution
+namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     internal class FrameworkInformation
     {

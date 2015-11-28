@@ -4,12 +4,12 @@
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
-using Microsoft.Extensions.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
-namespace Microsoft.Extensions.ProjectModel.Resolution
+namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     public class ReferenceAssemblyDependencyResolver
     {

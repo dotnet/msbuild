@@ -6,7 +6,7 @@ using System.Runtime.Loader;
 using System.Text;
 using NuGet.Versioning;
 
-namespace Microsoft.Extensions.ProjectModel.Utilities
+namespace Microsoft.DotNet.ProjectModel.Utilities
 {
     public static class VersionUtility
     {
