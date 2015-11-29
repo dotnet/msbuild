@@ -28,6 +28,9 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string DynamicLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll"   : 
                                                          RuntimeInformation.IsOSPlatform(OSPlatform.OSX)     ? ".dylib" : ".so";
 
+        public static readonly string RuntimeIdentifier = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win7-x64" :
+                                                          RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx.10.10-x64" : "ubuntu.14.04-x64";
+
         public static readonly string StaticLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".lib" : ".a" ;
     }
 }
