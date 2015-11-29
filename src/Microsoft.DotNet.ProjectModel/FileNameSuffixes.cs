@@ -4,18 +4,44 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public static class FileNameSuffixes
     {
-        public static readonly string DynamicLib = 
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" :
-            RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? ".dylib" : ".so";
+        public static PlatformFileNameSuffixes DotNet { get; } = new PlatformFileNameSuffixes
+        {
+            DynamicLib = ".dll",
+            Exe = ".exe",
+            ProgramDatabase = ".pdb",
+            StaticLib = ".lib",
+            Deps = ".deps",
+        };
 
-        public static readonly string ExeSuffix = 
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+        public static PlatformFileNameSuffixes Windows { get; } = new PlatformFileNameSuffixes
+        {
+            DynamicLib = ".dll",
+            Exe = ".exe",
+            ProgramDatabase = ".pdb",
+            StaticLib = ".lib",
+            Deps = ".deps",
+        };
 
-        public const string ProgramDatabase = ".pdb";
+        public static PlatformFileNameSuffixes OSX { get; } = new PlatformFileNameSuffixes
+        {
+            DynamicLib = ".dylib",
+            Exe = "",
+            ProgramDatabase = ".pdb",
+            StaticLib = ".a",
+            Deps = ".deps"
+        };
 
-        public static readonly string StaticLib = 
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".lib" : ".a" ;
+        public struct PlatformFileNameSuffixes
+        {
+            public string DynamicLib { get; set; }
 
-        public static readonly string Deps = ".deps";
+            public string Exe { get; set; }
+
+            public string ProgramDatabase { get; set; }
+
+            public string StaticLib { get; set; }
+
+            public string Deps { get; set; }
+        }
     }
 }

@@ -199,41 +199,5 @@ namespace Microsoft.DotNet.Tools.Common
                 return GetPathWithBackSlashes(path);
             }
         }
-
-        public static string GetProjectRootPath(string path = null)
-        {
-            var directoryPath = Directory.GetCurrentDirectory();
-
-            if (path != null)
-            {
-                try
-                {
-                    directoryPath = Path.GetDirectoryName(path);
-                }
-                catch (ArgumentException)
-                {
-                    throw new ArgumentException("Illegal Characters in Path", nameof(directoryPath));
-                }
-            
-                if(!Directory.Exists(directoryPath))
-                {
-                    throw new ArgumentException($"'{directoryPath}' does not exist.", nameof(directoryPath));
-                }
-            }
-
-            string projectRootPath = null;
-            
-            var directory = new DirectoryInfo(directoryPath);
-
-            while (projectRootPath == null && directory != null)
-            {
-                if (directory.GetFiles("project.json").Any())
-                    projectRootPath = directory.FullName;
-
-                directory = directory.GetFiles("global.json").Any() ? null : directory.Parent;
-            }
-
-            return projectRootPath;
-        }
     }
 }

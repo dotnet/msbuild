@@ -106,9 +106,9 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (framework == null) return null;
 
-            var projectRootPath = PathUtility.GetProjectRootPath();
+            var projectRootPath = Directory.GetCurrentDirectory();
 
-            if (projectRootPath == null) return null;
+            if (!File.Exists(Path.Combine(projectRootPath, Project.FileName))) return null;
 
             var commandName = Path.GetFileNameWithoutExtension(executable);
 
@@ -124,15 +124,15 @@ namespace Microsoft.DotNet.Cli.Utils
                         .Where(n => Path.GetFileNameWithoutExtension(n) == commandName)
                         .ToList();
 
-                    return fileNames.Contains(commandName + FileNameSuffixes.ExeSuffix) &&
-                           fileNames.Contains(commandName + FileNameSuffixes.DynamicLib) &&
-                           fileNames.Contains(commandName + FileNameSuffixes.Deps);
+                    return fileNames.Contains(commandName + FileNameSuffixes.DotNet.Exe) &&
+                           fileNames.Contains(commandName + FileNameSuffixes.DotNet.DynamicLib) &&
+                           fileNames.Contains(commandName + FileNameSuffixes.DotNet.Deps);
                 });
 
             if (commandPackage == null) return null;
 
             var commandPath = commandPackage.Library.Files
-                .First(f => Path.GetFileName(f) == commandName + FileNameSuffixes.ExeSuffix);
+                .First(f => Path.GetFileName(f) == commandName + FileNameSuffixes.DotNet.Exe);
 
             return Path.Combine(projectContext.PackagesDirectory, commandPackage.Path, commandPath);
         }
