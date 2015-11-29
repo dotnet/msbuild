@@ -40,12 +40,13 @@ compilers, package managers and other utilities that developers need.",
         "bin/dotnet" : "usr/bin/dotnet",
         "bin/dotnet-compile" : "usr/bin/dotnet-compile",
         "bin/dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
+        "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native",
+	    "bin/dotnet-init":"usr/bin/dotnet-init",
         "bin/dotnet-publish" : "usr/bin/dotnet-publish",
         "bin/dotnet-repl" : "usr/bin/dotnet-repl",
         "bin/dotnet-repl-csi" : "usr/bin/dotnet-repl-csi",
         "bin/dotnet-restore" : "usr/bin/dotnet-restore",
-        "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native",
-        "bin/resgen" : "usr/bin/resgen",
-	"bin/dotnet-init":"usr/bin/dotnet-init"
+        "bin/dotnet-test" : "usr/bin/dotnet-test",
+        "bin/resgen" : "usr/bin/resgen"
     }
 }
