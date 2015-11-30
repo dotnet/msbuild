@@ -141,7 +141,3 @@ namespace Microsoft.DotNet.Cli.Utils
         }
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 8a53c73... E2E Testing First pass. Test each command in a sequence to mock what a user might do.
