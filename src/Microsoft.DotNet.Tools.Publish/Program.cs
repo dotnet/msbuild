@@ -118,7 +118,12 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-compile", $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" --output \"{outputPath}\" --configuration \"{configuration}\" \"{context.ProjectFile.ProjectDirectory}\"")
+            var result = Command.Create("dotnet-compile", 
+                $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" " +
+                $"--output \"{outputPath}\" " +
+                $"--configuration \"{configuration}\" " +
+                "--no-host " +
+                $"\"{context.ProjectFile.ProjectDirectory}\"")
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
@@ -170,7 +175,33 @@ namespace Microsoft.DotNet.Tools.Publish
 
             // Copy the host
             File.Copy(hostPath, outputExe, overwrite: true);
+
+            // Publish the runtime
+            var runtimePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "runtime", "coreclr"));
+            if(!Directory.Exists(runtimePath))
+            {
+                Reporter.Error.WriteLine($"Unable to find runtime in expected location: {runtimePath}");
+                return 1;
+            }
+            Reporter.Verbose.WriteLine($"Publishing runtime from {runtimePath.Cyan()}");
+            CopyFolder(runtimePath, outputPath);
+
             return 0;
+        }
+        
+        private static void CopyFolder(string sourceFolder, string targetFolder)
+        {
+            foreach (var filePath in Directory.EnumerateFiles(sourceFolder))
+            {
+                var fileName = Path.GetFileName(filePath);
+                File.Copy(filePath, Path.Combine(targetFolder, fileName), overwrite: true);
+            }
+
+            foreach (var folderPath in Directory.EnumerateDirectories(sourceFolder))
+            {
+                var folderName = new DirectoryInfo(folderPath).Name;
+                CopyFolder(folderPath, Path.Combine(targetFolder, folderName));
+            }
         }
 
         private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath)
