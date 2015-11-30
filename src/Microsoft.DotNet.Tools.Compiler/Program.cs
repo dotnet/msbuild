@@ -41,6 +41,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var arch = app.Option("-a|--arch <ARCH>", "The architecture for which to compile. x64 only currently supported.", CommandOptionType.SingleValue);
             var ilcArgs = app.Option("--ilcargs <ARGS>", "Command line arguments to be passed directly to ILCompiler.", CommandOptionType.SingleValue);
             var ilcPath = app.Option("--ilcpath <PATH>", "Path to the folder containing custom built ILCompiler.", CommandOptionType.SingleValue);
+            var ilcSdkPath = app.Option("--ilcsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
             var cppMode = app.Option("--cpp", "Flag to do native compilation with C++ code generator.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
@@ -58,6 +59,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var archValue = arch.Value();
                 var ilcArgsValue = ilcArgs.Value();
                 var ilcPathValue = ilcPath.Value();
+                var ilcSdkPathValue = ilcSdkPath.Value();
                 var configValue = configuration.Value() ?? Constants.DefaultConfiguration;
                 var outputValue = output.Value();
                 var intermediateValue = intermediateOutput.Value();
@@ -72,7 +74,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     success &= Compile(context, configValue, outputValue, intermediateOutput.Value(), buildProjectReferences);
                     if (isNative && success)
                     {
-                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, isCppMode);
+                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, isCppMode);
                     }
                 }
 
@@ -103,6 +105,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             string archValue, 
             string ilcArgsValue, 
             string ilcPathValue,
+            string ilcSdkPathValue,
             bool isCppMode)
         {
             var outputPath = GetOutputPath(context, configuration, outputOptionValue);
@@ -134,6 +137,13 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 nativeArgs.Add("--ilcpath");
                 nativeArgs.Add(ilcPathValue);
+            }
+
+            // ILC SDK Path
+            if (!string.IsNullOrWhiteSpace(ilcSdkPathValue))
+            {
+                nativeArgs.Add("--appdepsdk");
+                nativeArgs.Add(ilcSdkPathValue);
             }
 
             // CodeGen Mode
