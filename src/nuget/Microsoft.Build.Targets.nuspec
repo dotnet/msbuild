@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata minClientVersion="2.8.1">
+    <id>Microsoft.Build.Targets</id>
+    <version>0.1.0-preview</version>
+    <title>MSBuild APIs</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>http://go.microsoft.com/fwlink/?LinkId=329770</licenseUrl>
+    <projectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</projectUrl>
+    <iconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</iconUrl>
+    <summary>MSBuild APIs</summary>
+    <description>
+      This package includes APIs that support writing MSBuild tasks.
+    </description>
+    <copyright>Copyright © Microsoft Corporation</copyright>
+    <dependencies>
+      <group targetFramework="dotnet">
+        <dependency id="Microsoft.Build.Framework" />
+        <dependency id="Microsoft.Build" />
+        <dependency id="Microsoft.Build.Utilities.Core" />
+        <dependency id="Microsoft.Build.Tasks.Core" />
+        <dependency id="MSBuild" />
+      </group>
+    </dependencies>
+    <contentFiles>
+      <files include="any/any/**/*.*" buildAction="None" copyToOutput="true" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="_._" target="lib\dotnet" />
+    <file src="Microsoft.Common.CurrentVersion.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Common.targets" target="runtimes\any\native" />
+    <file src="Microsoft.CSharp.CurrentVersion.targets" target="runtimes\any\native" />
+    <file src="Microsoft.CSharp.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Data.Entity.Shim.targets" target="runtimes\any\native" />
+    <file src="Microsoft.NETFramework.CurrentVersion.targets" target="runtimes\any\native" />
+    <file src="Microsoft.NETFramework.targets" target="runtimes\any\native" />
+    <file src="Microsoft.ServiceModel.Shim.targets" target="runtimes\any\native" />
+    <file src="Microsoft.VisualBasic.CurrentVersion.targets" target="runtimes\any\native" />
+    <file src="Microsoft.VisualBasic.targets" target="runtimes\any\native" />
+    <file src="Microsoft.WinFx.Shim.targets" target="runtimes\any\native" />
+    <file src="Microsoft.WorkflowBuildExtensions.Shim.targets" target="runtimes\any\native" />
+    <file src="Microsoft.Xaml.Shim.targets" target="runtimes\any\native" />
+    <file src="Workflow.Shim.Targets" target="runtimes\any\native" />
+    <file src="Workflow.VisualBasic.Shim.Targets" target="runtimes\any\native" />
+    <file src="Microsoft.Common.overridetasks" target="runtimes\any\native" />
+    <file src="Extensions\14.1\Microsoft.Common.props" target="contentFiles\any\any\14.1" />
+    <file src="Microsoft.Common.tasks" target="runtimes\any\native" />
+    <file src="Microsoft.NETFramework.CurrentVersion.props" target="runtimes\any\native" />
+    <file src="Microsoft.NETFramework.props" target="runtimes\any\native" />
+    <file src="Microsoft.VisualStudioVersion.v11.Common.props" target="runtimes\any\native" />
+    <file src="Microsoft.VisualStudioVersion.v12.Common.props" target="runtimes\any\native" />
+    <file src="Microsoft.VisualStudioVersion.v14.Common.props" target="runtimes\any\native" />
+    <file src="Microsoft.Xaml.Shim.targets" target="runtimes\any\native" />
+  </files>
+</package>
