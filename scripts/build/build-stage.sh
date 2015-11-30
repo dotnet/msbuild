@@ -83,9 +83,6 @@ do
     mv $OUTPUT_DIR/bin/${binary}.exe $OUTPUT_DIR/bin/${binary}.dll
 done
 
-# remove any deps files that got brought along (they aren't needed because we have an app-local runtime and dependencies)
-rm $OUTPUT_DIR/bin/*.deps
-
 cd $OUTPUT_DIR
 
 # Fix up permissions. Sometimes they get dropped with the wrong info

@@ -81,6 +81,3 @@ $BinariesForCoreHost | ForEach-Object {
     mv $OutputDir\bin\$_.exe $OutputDir\bin\$_.dll
     cp $OutputDir\bin\corehost.exe $OutputDir\bin\$_.exe
 }
-
-# remove any deps files that got brought along (they aren't needed because we have an app-local runtime and dependencies)
-del $OutputDir\bin\*.deps
