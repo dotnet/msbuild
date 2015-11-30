@@ -21,13 +21,13 @@ echo ** MSBuild Path: %MSBUILDCUSTOMPATH%
 echo ** Building all sources
 
 :: Call MSBuild
-echo ** "%MSBUILDCUSTOMPATH%" "%~dp0build.proj" /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=diag;LogFile="%~dp0msbuild.log" %*
+echo ** "%MSBUILDCUSTOMPATH%" "%~dp0build.proj" /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=diag;LogFile="%MSBUILDLOGPATH%" %*
 "%MSBUILDCUSTOMPATH%" "%~dp0build.proj" /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=diag;LogFile="%MSBUILDLOGPATH%" %*
 set BUILDERRORLEVEL=%ERRORLEVEL%
 echo.
 
 :: Pull the build summary from the log file
 findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%~dp0msbuild.log"
-echo ** Build completed. Exit code: %BUILDERRORLEVEL%
+echo ** Build completed. Log: %MSBUILDLOGPATH% Exit code: %BUILDERRORLEVEL%
 
 exit /b %BUILDERRORLEVEL%
