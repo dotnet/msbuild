@@ -4,8 +4,13 @@
 
     "package_name": "dotnet",                           
 
-    "short_description": "NOT FINAL debian package for dotnet cli",              
-    "long_description": "NOT FINAL This package restores, compiles, and publishes.", 
+    "short_description": ".NET Core & command line toolchain",              
+    "long_description": ".NET Core is a cross-platform implementation of .NET Framework, a modern, modular platform 
+for building diverse kinds of applications, from command-line applications to microservices and 
+modern websites.
+
+This package contains the tools you will need to start writing applications for .NET Core. It includes 
+compilers, package managers and other utilities that developers need.", 
     "homepage": "https://dotnet.github.io/core",                        
 
     "release":{
