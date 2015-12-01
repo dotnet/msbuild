@@ -95,12 +95,6 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var options = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
 
-            if (!options.EmitEntryPoint.GetValueOrDefault())
-            {
-                Reporter.Output.WriteLine($"{context.RootProject.Identity} does not have an entry point defined.".Red());
-                return 1;
-            }
-
             // Generate the output path
             if (string.IsNullOrEmpty(outputPath))
             {
@@ -145,8 +139,12 @@ namespace Microsoft.DotNet.Tools.Publish
                 PublishFiles(export.NativeLibraries, outputPath);
             }
 
-            // Publish the application itself
-            PublishHost(context, outputPath);
+            // Publish a host if this is an application
+            if (options.EmitEntryPoint.GetValueOrDefault())
+            {
+                Reporter.Verbose.WriteLine($"Making {context.ProjectFile.Name.Cyan()} runnable ...");
+                PublishHost(context, outputPath);
+            }
 
             Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
             return 0;
