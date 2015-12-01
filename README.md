@@ -61,7 +61,7 @@ This will drop a binary in `./bin/[configuration]/[framework]/[binary name]` tha
 
 Finally, you can also try out native compilation on Windows and Ubuntu and Mac.  
 
-***Note:** at this point, only the `helloworld` and `dotnetbot` samples will work with native compilation.*
+**Note:** at this point, only the `helloworld` and `dotnetbot` samples will work with native compilation.
 
 	dotnet compile --native
 
