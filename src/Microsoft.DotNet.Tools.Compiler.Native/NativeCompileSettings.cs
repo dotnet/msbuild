@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         public string IlcArgs
         {
             get { return _ilcArgs; }
-            set { _ilcArgs = Path.GetFullPath(value); }
+            set { _ilcArgs = value; }
         }
         public IEnumerable<string> LinkLibPaths => _linkLibPaths;
 
