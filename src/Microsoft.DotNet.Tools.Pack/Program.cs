@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
                 var outputValue = output.Value();
 
-                return BuildPackage(path, configValue, outputValue, intermediateOutput.Value()) ? 0 : 1;
+                return BuildPackage(path, configValue, outputValue, intermediateOutput.Value()) ? 1 : 0;
             });
 
             try
