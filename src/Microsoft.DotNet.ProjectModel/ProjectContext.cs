@@ -99,5 +99,28 @@ namespace Microsoft.DotNet.ProjectModel
                                 .Build();
             }
         }
+        public string GetAssemblyPath(string buildConfiguration)
+        {
+            return Path.Combine(
+                GetOutputDirectoryPath(buildConfiguration),
+                ProjectFile.Name + FileNameSuffixes.DotNet.DynamicLib);
+        }
+
+        public string GetPdbPath(string buildConfiguration)
+        {
+            return Path.Combine(
+                GetOutputDirectoryPath(buildConfiguration),
+                ProjectFile.Name + FileNameSuffixes.DotNet.ProgramDatabase);
+        }
+
+        private string GetOutputDirectoryPath(string buildConfiguration)
+        {
+            return Path.Combine(
+                ProjectDirectory,
+                DirectoryNames.Bin,
+                buildConfiguration,
+                TargetFramework.GetShortFolderName(),
+                ProjectModel.RuntimeIdentifier.Current);
+        }
     }
 }
