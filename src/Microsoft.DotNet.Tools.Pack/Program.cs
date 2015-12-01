@@ -29,9 +29,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             DebugHelper.HandleDebugSwitch(ref args);
 
             var app = new CommandLineApplication();
-            app.Name = "dotnet compile";
-            app.FullName = ".NET Compiler";
-            app.Description = "Compiler for the .NET Platform";
+            app.Name = "dotnet pack";
+            app.FullName = ".NET Packager";
+            app.Description = "Packager for the .NET Platform";
             app.HelpOption("-h|--help");
 
             var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
@@ -46,6 +46,17 @@ namespace Microsoft.DotNet.Tools.Compiler
                 if (string.IsNullOrEmpty(path))
                 {
                     path = Directory.GetCurrentDirectory();
+                }
+
+                if(!path.EndsWith(Project.FileName))
+                {
+                    path = Path.Combine(path, Project.FileName);
+                }
+
+                if(!File.Exists(path))
+                {
+                    Reporter.Error.WriteLine($"Unable to find a project.json in {path}");
+                    return 1;
                 }
 
                 var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
