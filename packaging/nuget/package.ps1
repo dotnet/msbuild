@@ -1,26 +1,30 @@
-Push-Location $PSScriptRoot
-[Environment]::CurrentDirectory = $PWD
+. "$PSScriptRoot\..\..\scripts\_common.ps1"
 
-$ProjectsDir = "..\..\src"
-$IntermediatePackagesDir = "..\..\artifacts\packages\intermediate"
-$PackagesDir = "..\..\artifacts\packages"
+$IntermediatePackagesDir = "$RepoRoot\artifacts\packages\intermediate"
+$PackagesDir = "$RepoRoot\artifacts\packages"
 
 New-Item -ItemType Directory -Force -Path $IntermediatePackagesDir
 
-foreach ($file in [System.IO.Directory]::EnumerateFiles($ProjectsDir, "project.json", "AllDirectories")) {
-    & dotnet restore "$file"
+$Projects = @(
+    "Microsoft.DotNet.Cli.Utils",
+    "Microsoft.DotNet.ProjectModel",
+    "Microsoft.DotNet.ProjectModel.Workspaces",
+    "Microsoft.DotNet.Runtime",
+    "Microsoft.Extensions.Testing.Abstractions"
+)
+
+foreach ($ProjectName in $Projects) {
+    $ProjectFile = "$RepoRoot\src\$ProjectName\project.json"
+    & dotnet restore "$ProjectFile"
     if (!$?) {
-        Write-Host "dotnet restore failed for: $file"
+        Write-Host "dotnet restore failed for: $ProjectFile"
         Exit 1
     }
-    & dotnet pack "$file" --output "$IntermediatePackagesDir"
+    & dotnet pack "$ProjectFile" --output "$IntermediatePackagesDir"
     if (!$?) {
-        Write-Host "dotnet pack failed for: $file"
+        Write-Host "dotnet pack failed for: $ProjectFile"
         Exit 1
     }
 }
 
 Get-ChildItem $IntermediatePackagesDir -Filter *.nupkg | Copy-Item -Destination $PackagesDir
-
-Pop-Location
-[Environment]::CurrentDirectory = $PWD
