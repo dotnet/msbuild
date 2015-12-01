@@ -619,7 +619,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                         // {file}.resx -> {file}.resources
                         var resourcesFile = Path.Combine(intermediateOutputPath, name);
 
-                        var result = Command.Create("resgen", $"\"{fileName}\" \"{resourcesFile}\"")
+                        var result = Command.Create("dotnet-resgen", $"\"{fileName}\" \"{resourcesFile}\"")
                                             .ForwardStdErr()
                                             .ForwardStdOut()
                                             .Execute();
