@@ -5,8 +5,7 @@
   <Import Project="../override.targets" />
 
   <PropertyGroup>
-    <NuGetRuntimeIdentifier Condition="'$(NetCoreBuild)' == 'true'">ubuntu.14.04-x64</NuGetRuntimeIdentifier>
-    <NuGetRuntimeIdentifier Condition="'$(NetCoreBuild)' != 'true'">win7-x64</NuGetRuntimeIdentifier>
+    <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,6 +46,7 @@
           Inputs="@(IntermediateRuntimeProjectJsonLockFile)"
           Outputs="@(RuntimeProjectJsonLockFile)"
           AfterTargets="RestoreRuntimePackagesDnu"
+          BeforeTargets="DeployRuntime"
   >
     <Copy SourceFiles="@(IntermediateRuntimeProjectJsonLockFile)"
           DestinationFiles="@(RuntimeProjectJsonLockFile)"
@@ -63,7 +63,7 @@
           Outputs="@(RuntimeProjectJsonFile->'%(Directory)%(Filename).lock.json')"
           >
 
-    <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;%(IntermediateRuntimeProjectJsonFile.FullPath)&quot; --parallel " />
+    <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;%(IntermediateRuntimeProjectJsonFile.FullPath)&quot;" />
     
   </Target>
 
@@ -94,11 +94,16 @@
       <_OmitTransitiveReferences Condition="'$(NetCoreBuild)'!='true'">true</_OmitTransitiveReferences>
     </PropertyGroup>
 
-    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="false"
+    <Error
+            Text="'%(RuntimeProjectJsonLockFile.FullPath)' does not exist"
+            Condition="!Exists('%(RuntimeProjectJsonLockFile.FullPath)')" />
+
+
+    <PrereleaseResolveNuGetPackageAssets AllowFallbackOnTargetSelection="true"
                                          IncludeFrameworkReferences="false"
                                          RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
                                          NuGetPackagesDirectory="$(PackagesCache)"
-                                         ProjectLanguage="$(Language)"
+                                         ProjectLanguage="C#"
                                          ProjectLockFile="%(RuntimeProjectJsonLockFile.FullPath)"
                                          TargetMonikers="$(NuGetTargetMoniker)"
                                          OmitTransitiveCompileReferences="$(_OmitTransitiveReferences)">
@@ -106,10 +111,21 @@
 
     </PrereleaseResolveNuGetPackageAssets>
 
+    <!-- Copy the dependencies to both the deployment and the test directories -->
+
     <Copy SourceFiles="@(ResolvedRuntimeFiles)"
-          DestinationFolder="$(RuntimeDirectory)"
+          DestinationFolder="$(DeploymentDir)"
           SkipUnchangedFiles="true"
           />
+
+    <Copy SourceFiles="@(ResolvedRuntimeFiles)"
+          DestinationFolder="$(TestDeploymentDir)"
+          SkipUnchangedFiles="true"
+          />
+
+    <Exec Command="find &quot;$(DeploymentDir)&quot; -type f -a -name &quot;*&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
+
+    <Exec Command="find &quot;$(TestDeploymentDir)&quot; -type f -a -name &quot;*&quot; -print0 | xargs -0 -I {} chmod a+xr {}" />
 
   </Target>
 

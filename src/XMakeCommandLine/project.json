@@ -16,6 +16,7 @@
         "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23406",
         "System.Diagnostics.Process": "4.1.0-beta-23406",
         "System.Diagnostics.TraceSource": "4.0.0-beta-23406",
+        "System.Runtime.Loader": "4.0.0-beta-23406",
         "System.Security.Cryptography.X509Certificates": "4.0.0-beta-23413",
         "System.Threading.Thread": "4.0.0-beta-23406",
         "System.Threading.ThreadPool": "4.0.10-beta-23413",

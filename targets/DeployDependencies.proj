@@ -39,7 +39,7 @@
     <RuntimeProjectJson>$(MSBuildThisFileDirectory)\runtime.project.json</RuntimeProjectJson>
     <RuntimeProjectLockJson>$(MSBuildThisFileDirectory)\runtime.project.lock.json</RuntimeProjectLockJson>
     <RestoreRuntimePackagesCommand>"$(NuGetToolPath)" restore $(RuntimeProjectJson) -Verbosity detailed</RestoreRuntimePackagesCommand>
-    <RestoreRuntimePackagesCommand Condition="'$(OsEnvironment)'!='Windows_NT' and '$(MonoBuild)' == 'true'">export MONO_THREADS_PER_CPU=2000; mono $(RestoreRuntimePackagesCommand)</RestoreRuntimePackagesCommand>
+    <RestoreRuntimePackagesCommand Condition="'$(OsEnvironment)'!='Windows_NT' and '$(MonoBuild)' == 'true'">MONO_THREADS_PER_CPU=2000 mono $(RestoreRuntimePackagesCommand)</RestoreRuntimePackagesCommand>
     <NuGetRuntimeIdentifier>$(RuntimeSystem)-$(RuntimeArchitecture)</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
@@ -65,7 +65,7 @@
                                IncludeFrameworkReferences="false"
                                NuGetPackagesDirectory=""
                                RuntimeIdentifier="$(NuGetRuntimeIdentifier)"
-                               ProjectLanguage=""
+                               ProjectLanguage="C#"
                                ProjectLockFile="$(RuntimeProjectLockJson)"
                                TargetMonikers="$(NuGetTargetMoniker)">
 

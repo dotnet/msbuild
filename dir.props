@@ -24,8 +24,8 @@
 
    <!-- Common repo directories -->
   <PropertyGroup>
-    <BuildToolsVersion>1.0.25-prerelease-00115</BuildToolsVersion>
-    <CompilerToolsVersion>1.1.0-rc1</CompilerToolsVersion>
+    <BuildToolsVersion>1.0.25-prerelease-00120</BuildToolsVersion>
+    <CompilerToolsVersion>1.2.0-beta-20151112-01</CompilerToolsVersion>
     <NuSpecReferenceGeneratorVersion>1.3.1</NuSpecReferenceGeneratorVersion>
     <XunitVersion>2.1.0</XunitVersion>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
@@ -35,6 +35,8 @@
     <DnxVersion Condition="'$(OsEnvironment)'=='Windows_NT'">1.0.0-beta8</DnxVersion>
     <DnxDir Condition="'$(OsEnvironment)'=='Unix'">dnx-coreclr-linux-x64</DnxDir>
     <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-beta8</DnxVersion>
+    <DnxDir Condition="'$(OsEnvironment)'=='OSX'">dnx-coreclr-darwin-x64</DnxDir>
+    <DnxVersion Condition="'$(OsEnvironment)'=='OSX'">1.0.0-rc2-16177</DnxVersion>
 
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
@@ -48,7 +50,8 @@
 
     <DnuToolDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(PackagesDir), "$(DnxDir).$(DnxVersion)"))</DnuToolDir>
     <DnuToolPath Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu.cmd"))</DnuToolPath>
-    <DnuToolPath Condition="'$(OsEnvironment)'=='Unix'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu"))</DnuToolPath>
+    <DnuToolPath Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu"))</DnuToolPath>
+
   </PropertyGroup>
 
   <PropertyGroup>
