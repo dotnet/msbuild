@@ -47,6 +47,6 @@ compilers, package managers and other utilities that developers need.",
         "bin/dotnet-repl-csi" : "usr/bin/dotnet-repl-csi",
         "bin/dotnet-restore" : "usr/bin/dotnet-restore",
         "bin/dotnet-test" : "usr/bin/dotnet-test",
-        "bin/resgen" : "usr/bin/resgen"
+        "bin/dotnet-resgen" : "usr/bin/dotnet-resgen"
     }
 }
