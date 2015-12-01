@@ -25,7 +25,7 @@ pushd "$env:VS140COMNTOOLS\..\..\VC"
 cmd /c "vcvarsall.bat x64&set" |
 foreach {
   if ($_ -match "=") {
-    $v = $_.split("="); set-item -force -path "ENV:\$($v[0])" -value "$($v[1])"
+    $v = $_.split("="); set-item -force -literalpath "ENV:\$($v[0])" -value "$($v[1])"
   }
 }
 popd
