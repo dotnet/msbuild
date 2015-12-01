@@ -30,7 +30,7 @@ RUN apt-get install -qqy sudo
 
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0
-RUN useradd code_executor -u ${USER_ID} -g sudo
+RUN useradd -m code_executor -u ${USER_ID} -g sudo
 RUN echo 'code_executor ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # With the User Change, we need to change permssions on these directories
