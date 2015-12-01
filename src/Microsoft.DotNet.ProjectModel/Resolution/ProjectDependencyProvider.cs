@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.DotNet.ProjectModel.Graph;
@@ -13,17 +14,37 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 {
     public class ProjectDependencyProvider
     {
-        public ProjectDescription GetDescription(string name, string path, LockFileTargetLibrary targetLibrary)
-        {
-            Project project;
+        private Func<string, Project> _resolveProject;
 
-            // Can't find a project file with the name so bail
-            if (!ProjectReader.TryGetProject(path, out project))
+        public ProjectDependencyProvider()
+        {
+            _resolveProject = ResolveProject;
+        }
+
+        public ProjectDependencyProvider(Func<string, Project> projectCacheResolver)
+        {
+            _resolveProject = projectCacheResolver;
+        }
+
+        public ProjectDescription GetDescription(string name,
+                                                 string path,
+                                                 LockFileTargetLibrary targetLibrary,
+                                                 Func<string, Project> projectCacheResolver)
+        {
+            var project = _resolveProject(Path.GetDirectoryName(path));
+            if (project != null)
+            {
+                return GetDescription(targetLibrary.TargetFramework, project);
+            }
+            else
             {
                 return new ProjectDescription(name, path);
             }
+        }
 
-            return GetDescription(targetLibrary.TargetFramework, project);
+        public ProjectDescription GetDescription(string name, string path, LockFileTargetLibrary targetLibrary)
+        {
+            return GetDescription(name, path, targetLibrary, projectCacheResolver: null);
         }
 
         public ProjectDescription GetDescription(NuGetFramework targetFramework, Project project)
@@ -61,6 +82,19 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 dependencies,
                 targetFrameworkInfo,
                 !unresolved);
+        }
+
+        private Project ResolveProject(string path)
+        {
+            Project project;
+            if (ProjectReader.TryGetProject(path, out project))
+            {
+                return project;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

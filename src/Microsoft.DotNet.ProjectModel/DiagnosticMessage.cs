@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.ProjectModel
                     source: null)
         { }
 
-        public DiagnosticMessage(string errorCode, string message, string filePath, DiagnosticMessageSeverity severity, int startLine, int startColumn, object source)
+        public DiagnosticMessage(string errorCode, string message, string filePath, DiagnosticMessageSeverity severity, int startLine, int startColumn, LibraryDescription source)
                 : this(
                     errorCode,
                     message,
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.ProjectModel
             int startColumn,
             int endLine,
             int endColumn,
-            object source)
+            LibraryDescription source)
         {
             ErrorCode = errorCode;
             Message = message;
@@ -127,6 +127,6 @@ namespace Microsoft.DotNet.ProjectModel
         /// <summary>
         /// Gets the source of this message
         /// </summary>
-        public object Source { get; }
+        public LibraryDescription Source { get; }
     }
 }

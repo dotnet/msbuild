@@ -30,33 +30,37 @@ namespace Microsoft.DotNet.ProjectModel
         private string ProjectDirectory { get; set; }
 
         private string PackagesDirectory { get; set; }
-        
+
         private string ReferenceAssembliesPath { get; set; }
+
+        private Func<string, Project> ProjectResolver { get; set; }
+
+        private Func<string, LockFile> LockFileResolver { get; set; }
 
         public ProjectContextBuilder WithLockFile(LockFile lockFile)
         {
             LockFile = lockFile;
             return this;
         }
-        
+
         public ProjectContextBuilder WithProject(Project project)
         {
             Project = project;
             return this;
         }
-        
+
         public ProjectContextBuilder WithProjectDirectory(string projectDirectory)
         {
             ProjectDirectory = projectDirectory;
             return this;
         }
-        
+
         public ProjectContextBuilder WithTargetFramework(NuGetFramework targetFramework)
         {
             TargetFramework = targetFramework;
             return this;
         }
-        
+
         public ProjectContextBuilder WithTargetFramework(string targetFramework)
         {
             TargetFramework = NuGetFramework.Parse(targetFramework);
@@ -74,21 +78,36 @@ namespace Microsoft.DotNet.ProjectModel
             ReferenceAssembliesPath = referenceAssembliesPath;
             return this;
         }
-        
+
         public ProjectContextBuilder WithPackagesDirectory(string packagesDirectory)
         {
             PackagesDirectory = packagesDirectory;
             return this;
         }
-        
+
         public ProjectContextBuilder WithRootDirectory(string rootDirectory)
         {
             RootDirectory = rootDirectory;
             return this;
         }
 
+        public ProjectContextBuilder WithProjectResolver(Func<string, Project> projectResolver)
+        {
+            ProjectResolver = projectResolver;
+            return this;
+        }
+
+        public ProjectContextBuilder WithLockFileResolver(Func<string, LockFile> lockFileResolver)
+        {
+            LockFileResolver = lockFileResolver;
+            return this;
+        }
+
         public ProjectContext Build()
         {
+            ProjectResolver = ProjectResolver ?? ResolveProject;
+            LockFileResolver = LockFileResolver ?? (projectDir => LockFileReader.Read(Path.Combine(projectDir, LockFile.FileName)));
+
             ProjectDirectory = Project?.ProjectDirectory ?? ProjectDirectory;
 
             if (GlobalSettings == null)
@@ -114,7 +133,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             if (LockFile == null && File.Exists(projectLockJsonPath))
             {
-                LockFile = LockFileReader.Read(projectLockJsonPath);
+                LockFile = LockFileResolver(ProjectDirectory);
             }
 
             var validLockFile = true;
@@ -218,12 +237,12 @@ namespace Microsoft.DotNet.ProjectModel
                 libraryManager);
         }
 
-        private void ResolveDependencies(Dictionary<LibraryKey, LibraryDescription> libraries, 
+        private void ResolveDependencies(Dictionary<LibraryKey, LibraryDescription> libraries,
                                          ReferenceAssemblyDependencyResolver referenceAssemblyDependencyResolver,
                                          out bool requiresFrameworkAssemblies)
         {
             requiresFrameworkAssemblies = false;
-            
+
             foreach (var library in libraries.Values.ToList())
             {
                 if (Equals(library.Identity.Type, LibraryType.Package) &&
@@ -265,7 +284,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
         }
 
-        private void ScanLibraries(LockFileTarget target, LockFileLookup lockFileLookup, Dictionary<LibraryKey, LibraryDescription> libraries, PackageDependencyProvider packageResolver, ProjectDependencyProvider projectResolver)
+        private void ScanLibraries(LockFileTarget target, LockFileLookup lockFileLookup, Dictionary<LibraryKey, LibraryDescription> libraries, PackageDependencyProvider packageResolver, ProjectDependencyProvider projectDependencyProvider)
         {
             foreach (var library in target.Libraries)
             {
@@ -279,8 +298,7 @@ namespace Microsoft.DotNet.ProjectModel
                     if (projectLibrary != null)
                     {
                         var path = Path.GetFullPath(Path.Combine(ProjectDirectory, projectLibrary.Path));
-
-                        description = projectResolver.GetDescription(library.Name, path, library);
+                        description = projectDependencyProvider.GetDescription(library.Name, path, library, ProjectResolver);
                     }
 
                     type = LibraryType.Project;
@@ -340,17 +358,13 @@ namespace Microsoft.DotNet.ProjectModel
                     programFiles,
                     "Reference Assemblies", "Microsoft", "Framework");
         }
-        
+
         private void EnsureProjectLoaded()
         {
             if (Project == null)
             {
-                Project project;
-                if (ProjectReader.TryGetProject(ProjectDirectory, out project))
-                {
-                    Project = project;
-                }
-                else
+                Project = ProjectResolver(ProjectDirectory);
+                if (Project == null)
                 {
                     throw new InvalidOperationException($"Unable to resolve project from {ProjectDirectory}");
                 }
@@ -379,6 +393,19 @@ namespace Microsoft.DotNet.ProjectModel
             }
 
             return null;
+        }
+
+        private static Project ResolveProject(string projectDirectory)
+        {
+            Project project;
+            if (ProjectReader.TryGetProject(projectDirectory, out project))
+            {
+                return project;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private struct LibraryKey
