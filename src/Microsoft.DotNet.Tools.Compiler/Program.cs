@@ -14,6 +14,7 @@ using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using NuGet.Frameworks;
+using Microsoft.DotNet.ProjectModel.Utilities;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {

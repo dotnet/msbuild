@@ -15,14 +15,15 @@ $Projects = @(
     "Microsoft.DotNet.Cli",
     "Microsoft.DotNet.Tools.Compiler",
     "Microsoft.DotNet.Tools.Compiler.Csc",
+    "Microsoft.DotNet.Tools.Compiler.Native",
+    "Microsoft.DotNet.Tools.Init",
     "Microsoft.DotNet.Tools.Pack",
     "Microsoft.DotNet.Tools.Publish",
     "Microsoft.DotNet.Tools.Repl",
     "Microsoft.DotNet.Tools.Repl.Csi",
     "Microsoft.DotNet.Tools.Resgen",
     "Microsoft.DotNet.Tools.Run",
-    "Microsoft.DotNet.Tools.Init",
-    "Microsoft.DotNet.Tools.Compiler.Native"
+    "Microsoft.DotNet.Tools.Test"    
 )
 
 $BinariesForCoreHost = @(

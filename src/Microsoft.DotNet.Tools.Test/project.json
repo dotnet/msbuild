@@ -1,0 +1,63 @@
+{
+  "name": "dotnet-test",
+  "description": "Test host for discovering and running unit tests at design time, such as in Visual Studio.",
+  "version": "1.0.0-*",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dotnet/cli"
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true,
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.NETCore.ConsoleHost": "1.0.0-beta-23409",
+    "Microsoft.NETCore.TestHost": "1.0.0-beta-23409",
+    "Microsoft.Extensions.Compilation.Abstractions": "1.0.0-*",
+    "Microsoft.DotNet.Cli.Utils": {
+      "type": "build",
+      "version": "1.0.0-*"
+    },
+    "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Dnx.Runtime.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.Testing.Abstractions": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.CommandLineUtils.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    },
+    "Microsoft.Extensions.Logging": "1.0.0-*",
+    "Newtonsoft.Json": "7.0.1"
+  },
+  "frameworks": {
+    "dnxcore50": {
+      "dependencies": {
+        "System.Console": "4.0.0-beta-*",
+        "System.Diagnostics.Process": "4.1.0-beta-*",
+        "System.Diagnostics.TextWriterTraceListener": "4.0.0-beta-*",
+        "System.Diagnostics.TraceSource": "4.0.0-beta-*",
+        "System.Dynamic.Runtime": "4.0.11-beta-*",
+        "System.Net.Primitives": "4.0.11-beta-*",
+        "System.Net.Sockets": "4.1.0-beta-*",
+        "System.Runtime": "4.0.21-rc2-*",
+        "System.Reflection.Extensions": "4.0.1-beta-*",
+        "System.Reflection.TypeExtensions": "4.0.1-beta-*",
+        "System.Threading.Thread": "4.0.0-beta-*"
+      }
+    }
+  },
+  "scripts": {
+    "postcompile": [
+      "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
+      "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
+    ]
+  }
+}

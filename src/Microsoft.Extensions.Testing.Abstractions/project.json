@@ -1,0 +1,38 @@
+{
+  "description": "Abstractions for test runners to communicate to a tool, such as Visual Studio.",
+  "version": "1.0.0-*",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dotnet/cli"
+  },
+  "compilationOptions": {
+    "warningsAsErrors": true
+  },
+  "dependencies": {
+    "Newtonsoft.Json": "7.0.1",
+    "Microsoft.DotNet.ProjectModel": {
+      "version": "1.0.0",
+      "type": "build"
+    },
+    "Microsoft.Extensions.Compilation.Abstractions": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-*",
+    "System.Runtime.Serialization.Primitives": "4.0.11-beta-*"
+  },
+  "frameworks": {
+    "dnxcore50": {
+      "dependencies": {
+        "System.Collections": "4.0.11-rc2-*",
+        "System.Reflection": "4.1.0-beta-*",
+        "System.Resources.ResourceManager": "4.0.1-beta-*",
+        "System.Runtime": "4.0.21-rc2-*",
+        "System.Runtime.Extensions": "4.0.11-rc2-*"
+      }
+    }
+  },
+  "scripts": {
+      "postcompile": [
+          "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
+          "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
+      ]
+  }
+}

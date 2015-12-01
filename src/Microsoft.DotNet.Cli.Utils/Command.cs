@@ -201,6 +201,9 @@ namespace Microsoft.DotNet.Cli.Utils
             Reporter.Verbose.WriteLine($"> {FormatProcessInfo(_process.StartInfo)}".White());
 #endif
             _process.Start();
+
+            Reporter.Verbose.WriteLine($"Process ID: {_process.Id}");
+
             _process.BeginOutputReadLine();
             _process.BeginErrorReadLine();
 

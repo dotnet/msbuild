@@ -140,6 +140,7 @@ namespace Microsoft.DotNet.ProjectModel
             project.LicenseUrl = rawProject.ValueAsString("licenseUrl");
             project.IconUrl = rawProject.ValueAsString("iconUrl");
             project.CompilerName = rawProject.ValueAsString("compilerName");
+            project.TestRunner = rawProject.ValueAsString("testRunner");
 
             project.Authors = rawProject.ValueAsStringArray("authors") ?? Array.Empty<string>();
             project.Owners = rawProject.ValueAsStringArray("owners") ?? Array.Empty<string>();
