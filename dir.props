@@ -36,7 +36,7 @@
     <DnxDir Condition="'$(OsEnvironment)'=='Unix'">dnx-coreclr-linux-x64</DnxDir>
     <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-beta8</DnxVersion>
     <DnxDir Condition="'$(OsEnvironment)'=='OSX'">dnx-coreclr-darwin-x64</DnxDir>
-    <DnxVersion Condition="'$(OsEnvironment)'=='OSX'">1.0.0-rc1-final</DnxVersion>
+    <DnxVersion Condition="'$(OsEnvironment)'=='OSX'">1.0.0-rc2-16177</DnxVersion>
 
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>
@@ -51,16 +51,6 @@
     <DnuToolDir Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(PackagesDir), "$(DnxDir).$(DnxVersion)"))</DnuToolDir>
     <DnuToolPath Condition="'$(OsEnvironment)'=='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu.cmd"))</DnuToolPath>
     <DnuToolPath Condition="'$(OsEnvironment)'!='Windows_NT'">$([System.IO.Path]::Combine($(DnuToolDir), "bin", "dnu"))</DnuToolPath>
-    <!-- The DNU package from Nuget does not work on OSX. Using system installed one-->
-    <!-- dnu `dash``dash`version returns:
-          Microsoft .NET Development Utility
-            Version:      1.0.0-rc2-16128
-            Type:         Mono
-            Architecture: x64
-            OS Name:      Darwin
-            OS Version:   10.11
-            Runtime Id:   osx.10.11-x64 -->
-    <DnuToolPath Condition="'$(OsEnvironment)'=='OSX'">dnu</DnuToolPath>
 
   </PropertyGroup>
 
