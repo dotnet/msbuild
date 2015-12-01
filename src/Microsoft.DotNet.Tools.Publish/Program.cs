@@ -53,11 +53,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
 
                 // get the lock file
-                var projectDir = path.ToLower().EndsWith(Project.FileName) ?
-                                    Path.GetDirectoryName(path) :
-                                    path;
-
-                var projectLockJsonPath = Path.Combine(projectDir, LockFile.FileName);
+                var projectLockJsonPath = GetProjectLockFile(path);
                 if (!File.Exists(projectLockJsonPath))
                 {
                     Reporter.Output.WriteLine($"Unable to locate {LockFile.FileName} for project '{project.Value}'".Red());
@@ -66,24 +62,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
 
                 var lockFile = LockFileReader.Read(projectLockJsonPath);
-
-                var lockFileTargets = lockFile.Targets.Where(target =>
-                {
-                    if(target.TargetFramework == null || string.IsNullOrEmpty(target.RuntimeIdentifier))
-                    {
-                        return false;
-                    }
-
-                    if (!runtime.HasValue() || runtime.Value().Equals(target.RuntimeIdentifier))
-                    {
-                        if (!framework.HasValue() || NuGetFramework.Parse(framework.Value()).Equals(target.TargetFramework))
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                });
+                var lockFileTargets = GetMatchingTargets(lockFile, framework.Value(), runtime.Value());
 
                 if(lockFileTargets.Count() == 0)
                 {
@@ -136,11 +115,49 @@ namespace Microsoft.DotNet.Tools.Publish
             return NuGetFramework.Parse(framework).Equals(NuGetFramework.UnsupportedFramework);
         }
 
+        private static string GetProjectDirectory(string project)
+        {
+            return project.ToLower().EndsWith(Project.FileName) ?
+                                    Path.GetDirectoryName(project) :
+                                    project;
+        }
+
+        private static string GetProjectLockFile(string project)
+        {
+            string projectDir = GetProjectDirectory(project);
+            return Path.Combine(projectDir, LockFile.FileName);
+        }
+
+        // return the matching framework/runtime targets in the lock file
+        // if 'framework' or 'runtime' is null or empty then it matches with any.
+        private static IEnumerable<LockFileTarget> GetMatchingTargets(LockFile lockFile, string framework, string runtime)
+        {
+            var lockFileTargets = lockFile.Targets.Where(target =>
+            {
+                if (target.TargetFramework == null || string.IsNullOrEmpty(target.RuntimeIdentifier))
+                {
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(runtime) || runtime.Equals(target.RuntimeIdentifier))
+                {
+                    if (string.IsNullOrEmpty(framework) || NuGetFramework.Parse(framework).Equals(target.TargetFramework))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+            return lockFileTargets;
+        }
+
         private static int Publish(NuGetFramework framework, string runtimeIdentifier, string projectPath, string outputPath, string configuration)
         {
             // Load project context and publish it
-            var rids = new[] { runtimeIdentifier };
-            var context = ProjectContext.Create(projectPath, framework, rids);
+            var runtimeIdentifiers = new[] { runtimeIdentifier };
+            var context = ProjectContext.Create(projectPath, framework, runtimeIdentifiers);
 
             if (string.IsNullOrEmpty(context.RuntimeIdentifier))
             {
