@@ -21,6 +21,7 @@
 *.vcxproj	wintext
 *.filters	wintext
 *.cd	wintext
+cibuild.sh text eol=lf
 
 # Sources (Managed)
 *.cs	wintext
