@@ -35,7 +35,6 @@ execute_build(){
     create_empty_debian_layout
     copy_files_to_debian_layout
     create_debian_package
-    test_debian_package
 }
 
 execute_test(){
