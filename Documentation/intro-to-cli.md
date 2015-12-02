@@ -47,7 +47,58 @@ You can get a sense of using the tools from the examples below.
 Design
 ======
 
-More content here.
+There are a couple of moving pieces that you make up the general design of the .NET Core CLI:
+
+* The `dotnet` driver
+* Specific commands that are part of the package
+
+The `dotnet` driver is very simple and its primary role is to run commands and give users basic information about usage. 
+
+The way the `dotnet` driver finds the command it is instructed to run using `dotnet {command}` is via a convention; any executable that is placed in the PATH and is named `dotnet-{command}` will be available to the driver. For example, when you install the CLI toolchain there will be an executable called `dotnet-compile` in your PATH; when you run `dotnet compile`, the driver will run the `dotnet-compile` executable. All of the arguments following the command are passed to the command being invoked. So, in the invocation of `dotnet compile --native`, the `--native` switch will be passed to `dotnet-compile` executable that will do some action based on it (in this case, produce a single native binary).
+
+This is also the basics of the current extensibility model of the toolchain. Any executable found in the PATH named in this way, that is as `dotnet-{command}`, will be invoked by the `dotnet` driver. 
+
+There are some principles that we are using when adding new commands:
+
+* Each command is represented by a verb (`run`, `compile`, `publish`, `restore` etc.)
+* We support the short and the long form of switches for most commands
+* The switches have the same format on all supported platforms (so, no /-style switches on Windows for example)
+* Each command has a help that can be viewed by running `dotnet [command] --help`
+
+Adding a new command to the .NET Core CLI 
+=========================================
+
+If you want to contribute to the actual .NET Core CLI by adding a new command that you think would be useful, please refer to the [developer guide](developer-guide.md) in this directory. It contains all of the guidance on both the process as well as the infrastructure that you need to adhere to when adding a new command to the CLI toolchain. 
+
+Adding a new command locally
+============================ 
+Given the extensibility model described above, it is very easy to add a command that can be invoked with the `dotnet` driver. Just add any executable in a PATH and name it as per the instructions above.
+
+As an example, let's say we want to add a local command that will mimick `dotnet clean`. By convention, `dotnet compile` will drop binaries in two directories `./bin` and `./obj`. A clean command thus will need to delete these two directores. A trivial example, but it should work.
+
+On *nix OS-es, we will write a very simple shell script to help us with this:
+```shell
+#!/bin/bash
+
+rm -rf bin/ obj/
+```
+
+We then do the following to make it be a command in the CLI toolchain
+
+* Name it as `dotnet-clean`
+* Set the executable bit on: `chmod +X dotnet-clean`
+* Copy it over somewhere in the $PATH: `sudo cp dotnet-clean /usr/local/bin`
+
+After this, the command ready to be invoked via the `dotnet` driver. 
+
+Guidances on how to write a command 
+===================================
+How you write a given command depends largely on whether you are trying to add it to the CLI project or want to add the command locally, i.e. on your machine or server. 
+
+For the former case, the [developer guide](developer-guide.md) has all of the details that you will need to get going. 
+
+If you are adding a command on your own machine(s), then there is really no special model to keep in mind. However, since your users will be using the local commands through the `dotnet` driver, we strongly suggest to keep to the principles outlned above in the [design section](#design) to have an unified user experience for your users. 
+
 
 
 
