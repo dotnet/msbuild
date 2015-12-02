@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
@@ -112,7 +110,12 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-compile", $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" --output \"{outputPath}\" --configuration \"{configuration}\" \"{context.ProjectFile.ProjectDirectory}\"")
+            var result = Command.Create("dotnet-compile", 
+                $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" " +
+                $"--output \"{outputPath}\" " +
+                $"--configuration \"{configuration}\" " +
+                "--no-host " +
+                $"\"{context.ProjectFile.ProjectDirectory}\"")
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
@@ -168,6 +171,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             // Copy the host
             File.Copy(hostPath, outputExe, overwrite: true);
+
             return 0;
         }
 

@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
+            var noHost = app.Option("--no-host", "Set this to skip publishing a runtime host when building for CoreCLR", CommandOptionType.NoValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             // Native Args
@@ -72,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     ProjectContext.CreateContextForEachFramework(path);
                 foreach (var context in contexts)
                 {
-                    success &= Compile(context, configValue, outputValue, intermediateOutput.Value(), buildProjectReferences);
+                    success &= Compile(context, configValue, outputValue, intermediateOutput.Value(), buildProjectReferences, noHost.HasValue());
                     if (isNative && success)
                     {
                         success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, isCppMode);
@@ -192,7 +193,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             return result.ExitCode == 0;
         }
 
-        private static bool Compile(ProjectContext context, string configuration, string outputOptionValue, string intermediateOutputValue, bool buildProjectReferences)
+        private static bool Compile(ProjectContext context, string configuration, string outputOptionValue, string intermediateOutputValue, bool buildProjectReferences, bool noHost)
         {
             // Set up Output Paths
             string outputPath = GetOutputPath(context, configuration, outputOptionValue);
@@ -225,7 +226,14 @@ namespace Microsoft.DotNet.Tools.Compiler
                 foreach (var projectDependency in Sort(projects))
                 {
                     // Skip compiling project dependencies since we've already figured out the build order
-                    var compileResult = Command.Create("dotnet-compile", $"--framework {projectDependency.Framework} --configuration {configuration} --output \"{outputPath}\" --temp-output \"{intermediateOutputPath}\" --no-project-dependencies \"{projectDependency.Project.ProjectDirectory}\"")
+                    var compileResult = Command.Create("dotnet-compile", 
+                        $"--framework {projectDependency.Framework} " +
+                        $"--configuration {configuration} " +
+                        $"--output \"{outputPath}\" " +
+                        $"--temp-output \"{intermediateOutputPath}\" " +
+                        "--no-project-dependencies " +
+                        (noHost ? "--no-host " : string.Empty) +
+                        $"\"{projectDependency.Project.ProjectDirectory}\"")
                             .ForwardStdOut()
                             .ForwardStdErr()
                             .Execute();
@@ -239,10 +247,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                 projects.Clear();
             }
 
-            return CompileProject(context, configuration, outputPath, intermediateOutputPath, dependencies);
+            return CompileProject(context, configuration, outputPath, intermediateOutputPath, dependencies, noHost);
         }
 
-        private static bool CompileProject(ProjectContext context, string configuration, string outputPath, string intermediateOutputPath, List<LibraryExport> dependencies)
+        private static bool CompileProject(ProjectContext context, string configuration, string outputPath, string intermediateOutputPath, List<LibraryExport> dependencies, bool noHost)
         {
             Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
             var sw = Stopwatch.StartNew();
@@ -372,7 +380,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var success = result.ExitCode == 0;
 
-            if (success && compilationOptions.EmitEntryPoint.GetValueOrDefault())
+            if (success && !noHost && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
                 var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
                 MakeRunnable(runtimeContext,
