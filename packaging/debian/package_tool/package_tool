@@ -199,7 +199,7 @@ generate_sample_manifest(){
     if [[ -d "$INPUT_SAMPLES_DIR" ]]; then
         generated_manpages=( $(_get_files_in_dir_tree $INPUT_SAMPLES_DIR) )
 
-        rm sample_manifest
+        rm -f sample_manifest
         for sample in $samples
         do
             echo "$sample" >> "${DEBIAN_DIR}/${PACKAGE_NAME}.examples"
