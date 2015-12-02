@@ -28,7 +28,8 @@
     },
 
     "debian_dependencies":{
-        "libssl-dev" : {}
+        "libssl-dev" : {},
+        "clang-3.5" : {}
     },
 
     "symlinks": {
