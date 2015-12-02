@@ -11,6 +11,7 @@ usage()
 downloadMSBuild(){
     if [ ! -e "$MSBUILD_EXE" ]
     then
+        mkdir -p $PACKAGES_DIR # Create packages dir if it doesn't exist.
         echo "Downloading MSBUILD from $MSBUILD_DOWNLOAD_URL"
         curl -sL "$MSBUILD_DOWNLOAD_URL" | tar xz -C "$PACKAGES_DIR"
     fi
@@ -28,8 +29,8 @@ build()
 }
 
 THIS_SCRIPT_PATH="`dirname \"$0\"`"
-PACKAGES_DIR="$THIS_SCRIPT_PATH"/"packages"
-MSBUILD_EXE="$PACKAGES_DIR"/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe
+PACKAGES_DIR="$THIS_SCRIPT_PATH/packages"
+MSBUILD_EXE="$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO/MSBuild.exe"
 MSBUILD_DOWNLOAD_URL="https://github.com/Microsoft/msbuild/releases/download/mono-hosted-msbuild-v0.1/mono-msbuild.zip"
 
 #Default build arguments
