@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
                 var outputValue = output.Value();
 
-                return BuildPackage(path, configValue, outputValue, intermediateOutput.Value()) ? 1 : 0;
+                return TryBuildPackage(path, configValue, outputValue, intermediateOutput.Value()) ? 0 : 1;
             });
 
             try
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool BuildPackage(string path, string configuration, string outputValue, string intermediateOutputValue)
+        private static bool TryBuildPackage(string path, string configuration, string outputValue, string intermediateOutputValue)
         {
             var contexts = ProjectContext.CreateContextForEachFramework(path);
             var project = contexts.First().ProjectFile;
