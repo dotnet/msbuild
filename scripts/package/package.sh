@@ -4,6 +4,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+set -e
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
