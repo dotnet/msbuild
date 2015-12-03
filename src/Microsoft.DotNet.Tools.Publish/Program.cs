@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Publish
@@ -32,13 +34,23 @@ namespace Microsoft.DotNet.Tools.Publish
 
             app.OnExecute(() =>
             {
-                if (!CheckArg(framework))
+                NuGetFramework nugetframework = null;
+
+                if (framework.HasValue())
                 {
-                    return 1;
+                    nugetframework = NuGetFramework.Parse(framework.Value());
+
+                    if (nugetframework.IsUnsupported)
+                    {
+                        Reporter.Output.WriteLine($"Unsupported framework {framework.Value()}.".Red());
+                        return 1;
+                    }
                 }
-                if (!CheckArg(runtime))
+
+                // TODO: Remove this once xplat publish is enabled.
+                if (!runtime.HasValue())
                 {
-                    return 1;
+                    runtime.Values.Add(RuntimeIdentifier.Current);
                 }
 
                 // Locate the project and get the name and full path
@@ -48,18 +60,28 @@ namespace Microsoft.DotNet.Tools.Publish
                     path = Directory.GetCurrentDirectory();
                 }
 
-                // Load project context and publish it
-                var fx = NuGetFramework.Parse(framework.Value());
-                var rids = new[] { runtime.Value() };
-                var context = ProjectContext.Create(path, fx, rids);
+                var projectContexts = ProjectContext.CreateContextForEachTarget(path);
+                projectContexts = GetMatchingProjectContexts(projectContexts, nugetframework, runtime.Value());
 
-                if (string.IsNullOrEmpty(context.RuntimeIdentifier))
+                if (projectContexts.Count() == 0)
                 {
-                    Reporter.Output.WriteLine($"Unknown runtime identifier {runtime.Value()}.".Red());
+                    string errMsg = $"'{project.Value}' cannot be published";
+                    if (framework.HasValue() || runtime.HasValue())
+                    {
+                        errMsg += $" for '{framework.Value()}' '{runtime.Value()}'";
+                    }
+
+                    Reporter.Output.WriteLine(errMsg.Red());
                     return 1;
                 }
 
-                return Publish(context, output.Value(), configuration.Value() ?? Constants.DefaultConfiguration);
+                int result = 0;
+                foreach (var projectContext in projectContexts)
+                {
+                    result += Publish(projectContext, output.Value(), configuration.Value() ?? Constants.DefaultConfiguration);
+                }
+
+                return result;
             });
 
             try
@@ -87,6 +109,38 @@ namespace Microsoft.DotNet.Tools.Publish
             return true;
         }
 
+        // return the matching framework/runtime ProjectContext.
+        // if 'nugetframework' or 'runtime' is null or empty then it matches with any.
+        private static IEnumerable<ProjectContext> GetMatchingProjectContexts(IEnumerable<ProjectContext> contexts, NuGetFramework framework, string runtimeIdentifier)
+        {
+            var matchingContexts = contexts.Where(context =>
+            {
+                if (context.TargetFramework == null || string.IsNullOrEmpty(context.RuntimeIdentifier))
+                {
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(runtimeIdentifier) || runtimeIdentifier.Equals(context.RuntimeIdentifier))
+                {
+                    if (framework == null || framework.Equals(context.TargetFramework))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+            return matchingContexts;
+        }
+
+        /// <summary>
+        /// Publish the project for given 'framework (ex - dnxcore50)' and 'runtimeID (ex - win7-x64)'
+        /// </summary>
+        /// <param name="context">project that is to be published</param>
+        /// <param name="outputPath">Location of published files</param>
+        /// <param name="configuration">Debug or Release</param>
+        /// <returns>Return 0 if successful else return non-zero</returns>
         private static int Publish(ProjectContext context, string outputPath, string configuration)
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
@@ -110,7 +164,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-compile", 
+            var result = Command.Create("dotnet-compile",
                 $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" " +
                 $"--output \"{outputPath}\" " +
                 $"--configuration \"{configuration}\" " +

@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.ProjectModel
         /// </summary>
         public static ProjectContext Create(string projectPath, NuGetFramework framework, IEnumerable<string> runtimeIdentifiers)
         {
-            if(projectPath.EndsWith(Project.FileName))
+            if (projectPath.EndsWith(Project.FileName))
             {
                 projectPath = Path.GetDirectoryName(projectPath);
             }
@@ -85,13 +85,13 @@ namespace Microsoft.DotNet.ProjectModel
         /// </summary>
         public static IEnumerable<ProjectContext> CreateContextForEachFramework(string projectPath)
         {
-            if(!projectPath.EndsWith(Project.FileName))
+            if (!projectPath.EndsWith(Project.FileName))
             {
                 projectPath = Path.Combine(projectPath, Project.FileName);
             }
             var project = ProjectReader.GetProject(projectPath);
 
-            foreach(var framework in project.GetTargetFrameworks())
+            foreach (var framework in project.GetTargetFrameworks())
             {
                 yield return new ProjectContextBuilder()
                                 .WithProject(project)
@@ -99,6 +99,23 @@ namespace Microsoft.DotNet.ProjectModel
                                 .Build();
             }
         }
+
+        /// <summary>
+        /// Creates a project context for each target located in the project at <paramref name="projectPath"/>
+        /// </summary>
+        public static IEnumerable<ProjectContext> CreateContextForEachTarget(string projectPath)
+        {
+            if (!projectPath.EndsWith(Project.FileName))
+            {
+                projectPath = Path.Combine(projectPath, Project.FileName);
+            }
+            var project = ProjectReader.GetProject(projectPath);
+
+            return new ProjectContextBuilder()
+                        .WithProject(project)
+                        .BuildAllTargets();
+        }
+
         public string GetAssemblyPath(string buildConfiguration)
         {
             return Path.Combine(

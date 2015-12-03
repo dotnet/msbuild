@@ -37,6 +37,12 @@ namespace Microsoft.DotNet.ProjectModel
 
         private Func<string, LockFile> LockFileResolver { get; set; }
 
+        public ProjectContextBuilder()
+        {
+            ProjectResolver = ResolveProject;
+            LockFileResolver = ResolveLockFile;
+        }
+
         public ProjectContextBuilder WithLockFile(LockFile lockFile)
         {
             LockFile = lockFile;
@@ -103,11 +109,28 @@ namespace Microsoft.DotNet.ProjectModel
             return this;
         }
 
+        public IEnumerable<ProjectContext> BuildAllTargets()
+        {
+            ProjectDirectory = Project?.ProjectDirectory ?? ProjectDirectory;
+            EnsureProjectLoaded();
+            LockFile = LockFile ?? LockFileResolver(ProjectDirectory);
+
+            if (LockFile != null)
+            {
+                foreach (var target in LockFile.Targets)
+                {
+                    yield return new ProjectContextBuilder()
+                    .WithProject(Project)
+                    .WithLockFile(LockFile)
+                    .WithTargetFramework(target.TargetFramework)
+                    .WithRuntimeIdentifiers(new[] { target.RuntimeIdentifier })
+                    .Build();
+                }
+            }
+        }
+
         public ProjectContext Build()
         {
-            ProjectResolver = ProjectResolver ?? ResolveProject;
-            LockFileResolver = LockFileResolver ?? (projectDir => LockFileReader.Read(Path.Combine(projectDir, LockFile.FileName)));
-
             ProjectDirectory = Project?.ProjectDirectory ?? ProjectDirectory;
 
             if (GlobalSettings == null)
@@ -129,12 +152,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             EnsureProjectLoaded();
 
-            var projectLockJsonPath = Path.Combine(ProjectDirectory, LockFile.FileName);
-
-            if (LockFile == null && File.Exists(projectLockJsonPath))
-            {
-                LockFile = LockFileResolver(ProjectDirectory);
-            }
+            LockFile = LockFile ?? LockFileResolver(ProjectDirectory);
 
             var validLockFile = true;
             string lockFileValidationMessage = null;
@@ -406,6 +424,14 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 return null;
             }
+        }
+
+        private static LockFile ResolveLockFile(string projectDir)
+        {
+            var projectLockJsonPath = Path.Combine(projectDir, LockFile.FileName);
+            return File.Exists(projectLockJsonPath) ?
+                        LockFileReader.Read(Path.Combine(projectDir, LockFile.FileName)) :
+                        null;
         }
 
         private struct LibraryKey
