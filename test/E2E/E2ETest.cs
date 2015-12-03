@@ -115,7 +115,7 @@ namespace ConsoleApplication
 
             Directory.SetCurrentDirectory(TestDirectory);
 
-            TestRunCommand("dotnet", "init");
+            TestRunCommand("dotnet", "new");
             TestRunCommand("dotnet", "restore --quiet");
         }
 
