@@ -116,7 +116,7 @@ namespace ConsoleApplication
             Directory.SetCurrentDirectory(TestDirectory);
 
             TestRunCommand("dotnet", "init");
-            TestRunCommand("dotnet", "restore");
+            TestRunCommand("dotnet", "restore --quiet");
         }
 
         private bool SkipForOS(OSPlatform os, string reason)

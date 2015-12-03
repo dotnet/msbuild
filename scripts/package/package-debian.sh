@@ -6,6 +6,8 @@
 # Debian Packaging Script
 # Currently Intended to build on ubuntu14.04
 
+set -e
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -21,18 +23,21 @@ if [ "$UNAME" != "Linux" ]; then
     exit 1
 fi
 
-REPO_ROOT=$(readlink -f $DIR/../..)
-PACKAGING_ROOT=$REPO_ROOT/packaging/debian
+PACKAGING_ROOT=$REPOROOT/packaging/debian
 
-OUTPUT_DIR="$REPO_ROOT/artifacts"
+OUTPUT_DIR="$REPOROOT/artifacts"
 PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/deb_intermediate"
 PACKAGE_OUTPUT_DIR="$OUTPUT_DIR/packages/debian"
-REPO_BINARIES_DIR="$REPO_ROOT/artifacts/ubuntu.14.04-x64/stage2"
+TEST_STAGE_DIR="$PACKAGE_OUTPUT_DIR/test"
+REPO_BINARIES_DIR="$REPOROOT/artifacts/ubuntu.14.04-x64/stage2"
 
-execute(){
+execute_build(){
     create_empty_debian_layout
     copy_files_to_debian_layout
     create_debian_package
+}
+
+execute_test(){
     test_debian_package
 }
 
@@ -69,15 +74,31 @@ create_debian_package(){
 test_debian_package(){
     header "Testing debian package"
 
-    git clone https://github.com/sstephenson/bats.git /tmp/bats
-    pushd /tmp/bats
-    ./install.sh /usr/local
-    popd
+    git clone https://github.com/sstephenson/bats.git $TEST_STAGE_DIR
+    
+    $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
 
-    bats $PACKAGE_OUTPUT_DIR/test_package.bats
+    # E2E Testing of package surface area
+    # Disabled: https://github.com/dotnet/cli/issues/381
+    #run_e2e_test
 }
 
-execute
+run_e2e_test(){
+    set +e    
+    sudo dpkg -i $DEBIAN_FILE
+    $REPOROOT/scripts/test/e2e-test.sh
+    result=$?
+    sudo dpkg -r dotnet
+    set -e
+    
+    return result
+}
+
+execute_build
 
 DEBIAN_FILE=$(find $PACKAGE_OUTPUT_DIR -iname "*.deb")
-$DIR/../publish/publish.sh $DEBIAN_FILE 
+
+execute_test
+
+# Publish
+$REPOROOT/scripts/publish/publish.sh $DEBIAN_FILE 
