@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "System.Threading.Tasks.Dataflow": "4.5.26-beta-23406",
+    "System.Threading.Tasks.Dataflow": "4.5.26-beta-23516",
     "xunit": "2.1.0",
     "xunit.netcore.extensions": "1.0.0-prerelease-00116",
     "xunit.core": "2.1.0",
@@ -16,20 +16,20 @@
     },
     "dnxcore50": {
       "dependencies": {
-        "System.Net.NetworkInformation": "4.1.0-beta-23413",
-        "Microsoft.NETCore": "5.0.1-beta-23406",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23406",
-        "System.Console": "4.0.0-beta-23406",
-        "System.Diagnostics.Contracts": "4.0.1-beta-23406",
-        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23406",
-        "System.Diagnostics.Process": "4.1.0-beta-23406",
-        "System.Diagnostics.TraceSource": "4.0.0-beta-23406",
-        "System.Threading.Thread": "4.0.0-beta-23406",
-        "System.Threading.ThreadPool": "4.0.10-beta-23413",
-        "System.Xml.XmlDocument": "4.0.1-beta-23406",
-        "System.Xml.XPath.XmlDocument": "4.0.1-beta-23406",
-        "Microsoft.NETCore.Runtime": "1.0.1-beta-23406",
-        "Microsoft.NETCore.TestHost": "1.0.0-beta-23406",
+        "System.Net.NetworkInformation": "4.1.0-beta-23516",
+        "Microsoft.NETCore": "5.0.1-beta-23516",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23516",
+        "System.Console": "4.0.0-beta-23516",
+        "System.Diagnostics.Contracts": "4.0.1-beta-23516",
+        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23516",
+        "System.Diagnostics.Process": "4.1.0-beta-23516",
+        "System.Diagnostics.TraceSource": "4.0.0-beta-23516",
+        "System.Threading.Thread": "4.0.0-beta-23516",
+        "System.Threading.ThreadPool": "4.0.10-beta-23516",
+        "System.Xml.XmlDocument": "4.0.1-beta-23516",
+        "System.Xml.XPath.XmlDocument": "4.0.1-beta-23516",
+        "Microsoft.NETCore.Runtime": "1.0.1-beta-23516",
+        "Microsoft.NETCore.TestHost": "1.0.0-beta-23516",
         "System.Reflection.Metadata": "1.1.0"
       },
       "imports": "portable-net451+win81"
