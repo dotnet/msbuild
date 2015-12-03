@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
@@ -33,10 +34,17 @@ namespace Microsoft.DotNet.Tools.Publish
 
             app.OnExecute(() =>
             {
-                if (framework.HasValue() && IsUnsupportedFramework(framework.Value()))
+                NuGetFramework nugetframework = null;
+
+                if (framework.HasValue())
                 {
-                    Reporter.Output.WriteLine($"Unsupported framework {framework.Value()}.".Red());
-                    return 1;
+                    nugetframework = NuGetFramework.Parse(framework.Value());
+
+                    if (nugetframework.IsUnsupported)
+                    {
+                        Reporter.Output.WriteLine($"Unsupported framework {framework.Value()}.".Red());
+                        return 1;
+                    }
                 }
 
                 // TODO: Remove this once xplat publish is enabled.
@@ -52,22 +60,13 @@ namespace Microsoft.DotNet.Tools.Publish
                     path = Directory.GetCurrentDirectory();
                 }
 
-                // get the lock file
-                var projectLockJsonPath = GetProjectLockFile(path);
-                if (!File.Exists(projectLockJsonPath))
-                {
-                    Reporter.Output.WriteLine($"Unable to locate {LockFile.FileName} for project '{project.Value}'".Red());
-                    Reporter.Output.WriteLine($"Run 'dotnet restore' before calling 'dotnet publish'".Red());
-                    return 1;
-                }
+                var projectContexts = ProjectContext.CreateContextForEachTarget(path);
+                projectContexts = GetMatchingProjectContexts(projectContexts, nugetframework, runtime.Value());
 
-                var lockFile = LockFileReader.Read(projectLockJsonPath);
-                var lockFileTargets = GetMatchingTargets(lockFile, framework.Value(), runtime.Value());
-
-                if(lockFileTargets.Count() == 0)
+                if (projectContexts.Count() == 0)
                 {
                     string errMsg = $"'{project.Value}' cannot be published";
-                    if(framework.HasValue() || runtime.HasValue())
+                    if (framework.HasValue() || runtime.HasValue())
                     {
                         errMsg += $" for '{framework.Value()}' '{runtime.Value()}'";
                     }
@@ -77,9 +76,9 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
 
                 int result = 0;
-                foreach(var target in lockFileTargets)
+                foreach (var projectContext in projectContexts)
                 {
-                    result += Publish(target.TargetFramework, target.RuntimeIdentifier, path, output.Value(), configuration.Value() ?? Constants.DefaultConfiguration);
+                    result += Publish(projectContext, output.Value(), configuration.Value() ?? Constants.DefaultConfiguration);
                 }
 
                 return result;
@@ -110,38 +109,20 @@ namespace Microsoft.DotNet.Tools.Publish
             return true;
         }
 
-        private static bool IsUnsupportedFramework(string framework)
+        // return the matching framework/runtime ProjectContext.
+        // if 'nugetframework' or 'runtime' is null or empty then it matches with any.
+        private static IEnumerable<ProjectContext> GetMatchingProjectContexts(IEnumerable<ProjectContext> contexts, NuGetframework framework, string runtimeIdentifier)
         {
-            return NuGetFramework.Parse(framework).Equals(NuGetFramework.UnsupportedFramework);
-        }
-
-        private static string GetProjectDirectory(string project)
-        {
-            return project.ToLower().EndsWith(Project.FileName) ?
-                                    Path.GetDirectoryName(project) :
-                                    project;
-        }
-
-        private static string GetProjectLockFile(string project)
-        {
-            string projectDir = GetProjectDirectory(project);
-            return Path.Combine(projectDir, LockFile.FileName);
-        }
-
-        // return the matching framework/runtime targets in the lock file
-        // if 'framework' or 'runtime' is null or empty then it matches with any.
-        private static IEnumerable<LockFileTarget> GetMatchingTargets(LockFile lockFile, string framework, string runtime)
-        {
-            var lockFileTargets = lockFile.Targets.Where(target =>
+            var matchingContexts = contexts.Where(context =>
             {
-                if (target.TargetFramework == null || string.IsNullOrEmpty(target.RuntimeIdentifier))
+                if (context.TargetFramework == null || string.IsNullOrEmpty(context.RuntimeIdentifier))
                 {
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(runtime) || runtime.Equals(target.RuntimeIdentifier))
+                if (string.IsNullOrEmpty(runtimeIdentifier) || runtimeIdentifier.Equals(context.RuntimeIdentifier))
                 {
-                    if (string.IsNullOrEmpty(framework) || NuGetFramework.Parse(framework).Equals(target.TargetFramework))
+                    if (framework == null || framework.Equals(context.TargetFramework))
                     {
                         return true;
                     }
@@ -150,24 +131,16 @@ namespace Microsoft.DotNet.Tools.Publish
                 return false;
             });
 
-            return lockFileTargets;
+            return matchingContexts;
         }
 
-        private static int Publish(NuGetFramework framework, string runtimeIdentifier, string projectPath, string outputPath, string configuration)
-        {
-            // Load project context and publish it
-            var runtimeIdentifiers = new[] { runtimeIdentifier };
-            var context = ProjectContext.Create(projectPath, framework, runtimeIdentifiers);
-
-            if (string.IsNullOrEmpty(context.RuntimeIdentifier))
-            {
-                Reporter.Output.WriteLine($"{context.RootProject.Identity} cannot be published for {context.TargetFramework.DotNetFrameworkName}/{runtimeIdentifier}.".Red());
-                return 1;
-            }
-
-            return Publish(context, outputPath, configuration);
-        }
-
+        /// <summary>
+        /// Publish the project for given 'framework (ex - dnxcore50)' and 'runtimeID (ex - win7-x64)'
+        /// </summary>
+        /// <param name="context">project that is to be published</param>
+        /// <param name="outputPath">Location of published files</param>
+        /// <param name="configuration">Debug or Release</param>
+        /// <returns>Return 0 if successful else return non-zero</returns>
         private static int Publish(ProjectContext context, string outputPath, string configuration)
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
@@ -191,7 +164,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-compile", 
+            var result = Command.Create("dotnet-compile",
                 $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" " +
                 $"--output \"{outputPath}\" " +
                 $"--configuration \"{configuration}\" " +

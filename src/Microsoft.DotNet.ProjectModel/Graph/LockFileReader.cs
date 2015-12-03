@@ -13,7 +13,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel.Graph
 {
-    public static class LockFileReader
+    internal static class LockFileReader
     {
         public static LockFile Read(string filePath)
         {
