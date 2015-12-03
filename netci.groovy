@@ -64,7 +64,7 @@ def static getBuildJobName(def configuration, def os) {
             }
 
 
-            Utilities.standardJobSetup(newJob, project, true)
+            Utilities.standardJobSetup(newJob, project, isPR)
             if (isPR) {
                 Utilities.addGithubPRTrigger(newJob, "${os} ${configuration} Build")
             }
