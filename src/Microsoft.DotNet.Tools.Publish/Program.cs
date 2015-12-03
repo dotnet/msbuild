@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
         // return the matching framework/runtime ProjectContext.
         // if 'nugetframework' or 'runtime' is null or empty then it matches with any.
-        private static IEnumerable<ProjectContext> GetMatchingProjectContexts(IEnumerable<ProjectContext> contexts, NuGetframework framework, string runtimeIdentifier)
+        private static IEnumerable<ProjectContext> GetMatchingProjectContexts(IEnumerable<ProjectContext> contexts, NuGetFramework framework, string runtimeIdentifier)
         {
             var matchingContexts = contexts.Where(context =>
             {
