@@ -408,11 +408,7 @@ namespace Microsoft.Build.Utilities
         /// Gets the item-spec.
         /// </summary>
         /// <returns>The item-spec string.</returns>
-#if FEATURE_APPDOMAIN
         public override string ToString()
-#else
-        public string ToString()
-#endif
         {
             return _itemSpec;
         }
