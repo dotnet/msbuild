@@ -90,7 +90,6 @@ namespace ConsoleApplication
             TestRunCommand("dotnet", $"run");
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/333")]
         public void TestDotnetPack()
         {
             TestSetup();
