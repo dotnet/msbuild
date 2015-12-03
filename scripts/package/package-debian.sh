@@ -79,7 +79,8 @@ test_debian_package(){
     $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
 
     # E2E Testing of package surface area
-    run_e2e_test
+    # Disabled: https://github.com/dotnet/cli/issues/381
+    #run_e2e_test
 }
 
 run_e2e_test(){
