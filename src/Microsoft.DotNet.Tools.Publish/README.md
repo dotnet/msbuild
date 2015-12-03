@@ -27,8 +27,6 @@ In case of no valid framework found, the command will error out.
 In case of multiple valid frameworks found, the command will publish for all valid frameworks. 
 
 
-* ubuntu
-
 **Options**
 
 `-f`, `--framework` [FID]
