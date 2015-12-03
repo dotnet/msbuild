@@ -4,9 +4,8 @@
 // Import the utility functionality.
 
 import jobs.generation.Utilities;
-import jobs.generation.InternalUtilities;
 
-def project = 'dotnet/cli'
+def project = GithubProject
 
 def osList = ['Ubuntu', 'OSX', 'Windows_NT']
 
@@ -38,7 +37,7 @@ def static getBuildJobName(def configuration, def os) {
         }
 
         // Create the new job
-        def newCommitJob = job(InternalUtilities.getFullJobName(project, jobName, false)) {
+        def newCommitJob = job(Utilities.getFullJobName(project, jobName, false)) {
             // Set the label.
             label(machineLabelMap[os])
             steps {
@@ -53,14 +52,13 @@ def static getBuildJobName(def configuration, def os) {
             }
         }
 
-        InternalUtilities.addPrivatePermissions(newCommitJob)
-        InternalUtilities.addPrivateScm(newCommitJob, project)
+        Utilities.addScm(newCommitJob, project)
         Utilities.addStandardOptions(newCommitJob)
         Utilities.addStandardNonPRParameters(newCommitJob)
         Utilities.addGithubPushTrigger(newCommitJob)
 
 
-        def newPRJob = job(InternalUtilities.getFullJobName(project, jobName, true)) {
+        def newPRJob = job(Utilities.getFullJobName(project, jobName, true)) {
             // Set the label.
             label(machineLabelMap[os])
             steps {
@@ -87,8 +85,7 @@ def static getBuildJobName(def configuration, def os) {
         }
 
 
-        InternalUtilities.addPrivatePermissions(newPRJob)
-        InternalUtilities.addPrivatePRTestSCM(newPRJob, project)
+        Utilities.addPrivatePRTestSCM(newPRJob, project)
         Utilities.addStandardOptions(newPRJob)
         Utilities.addStandardPRParameters(newPRJob, project)
         Utilities.addGithubPRTrigger(newPRJob, "${os} ${configuration} Build")
