@@ -18,76 +18,59 @@ def static getBuildJobName(def configuration, def os) {
 }
 
 
-['Debug', 'Release'].each { configuration ->
-    osList.each { os ->
-        // Calculate names
-        def lowerConfiguration = configuration.toLowerCase()
+[true, false].each { isPR ->
+    ['Debug', 'Release'].each { configuration ->
+        osList.each { os ->
+            // Calculate names
+            def lowerConfiguration = configuration.toLowerCase()
 
-        // Calculate job name
-        def jobName = getBuildJobName(configuration, os)
-        def buildCommand = '';
-        def postBuildCommand = '';
+            // Calculate job name
+            def jobName = getBuildJobName(configuration, os)
+            def buildCommand = '';
+            def postBuildCommand = '';
 
-        // Calculate the build command
-        if (os == 'Windows_NT') {
-            buildCommand = ".\\scripts\\ci_build.cmd ${lowerConfiguration}"
-        }
-        else {
-            buildCommand = "./scripts/ci_build.sh ${lowerConfiguration}"
-        }
-
-        // Create the new job
-        def newCommitJob = job(Utilities.getFullJobName(project, jobName, false)) {
-            // Set the label.
-            label(machineLabelMap[os])
-            steps {
-                if (os == 'Windows_NT') {
-                    // Batch
-                    batchFile(buildCommand)
-                }
-                else {
-                    // Shell
-                    shell(buildCommand)
-                }
+            // Calculate the build command
+            if (os == 'Windows_NT') {
+                buildCommand = ".\\scripts\\ci_build.cmd ${lowerConfiguration}"
             }
-        }
+            else {
+                buildCommand = "./scripts/ci_build.sh ${lowerConfiguration}"
+            }
 
-        Utilities.addScm(newCommitJob, project)
-        Utilities.addStandardOptions(newCommitJob)
-        Utilities.addStandardNonPRParameters(newCommitJob)
-        Utilities.addGithubPushTrigger(newCommitJob)
-
-
-        def newPRJob = job(Utilities.getFullJobName(project, jobName, true)) {
-            // Set the label.
-            label(machineLabelMap[os])
-            steps {
-                if (os == 'Windows_NT') {
-                    // Batch
-                    batchFile(buildCommand)
-                }
-                else {
-                    // Shell
-                    shell(buildCommand)
-
-                    // Post Build Cleanup
-                    publishers {
-                        postBuildScripts {
-                            steps {
-                                shell(postBuildCommand)
-                            }
-                            onlyIfBuildSucceeds(false)
-                        }
+            def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
+                // Set the label.
+                label(machineLabelMap[os])
+                steps {
+                    if (os == 'Windows_NT') {
+                        // Batch
+                        batchFile(buildCommand)
                     }
+                    else {
+                        // Shell
+                        shell(buildCommand)
 
+                        // Post Build Cleanup
+                        publishers {
+                            postBuildScripts {
+                                steps {
+                                    shell(postBuildCommand)
+                                }
+                                onlyIfBuildSucceeds(false)
+                            }
+                        }
+
+                    }
                 }
             }
+
+
+            Utilities.standardJobSetup(newJob, project, true)
+            if (isPR) {
+                Utilities.addGithubPRTrigger(newJob, "${os} ${configuration} Build")
+            }
+            else {
+                Utilities.addGithubPushTrigger(newJob)
+            }
         }
-
-
-        Utilities.addPrivatePRTestSCM(newPRJob, project)
-        Utilities.addStandardOptions(newPRJob)
-        Utilities.addStandardPRParameters(newPRJob, project)
-        Utilities.addGithubPRTrigger(newPRJob, "${os} ${configuration} Build")
-	}
+    }
 }
