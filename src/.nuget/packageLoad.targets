@@ -101,7 +101,7 @@
            ContinueOnError="WarnAndContinue"
            AlwaysCreate="true"
            ForceTouch="true" />
-    
+
   </Target>
 
   <!-- All work is done in the dependent targets -->
@@ -131,9 +131,9 @@
 
     <!-- TODO: Restore back to Nuget once Nuget works -->
     <!-- Restore packages for this directory using Nuget-->
-     <Exec Condition="'$(OsEnvironment)'=='Windows_NT'" 
-        Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) -PackagesDirectory &quot;$(HOME)/.nuget/packages&quot; &quot;@(ProjectJsonFile)&quot;" />  
-    
+     <Exec Condition="'$(OsEnvironment)'=='Windows_NT'"
+        Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) &quot;@(ProjectJsonFile)&quot;" />
+
     <!-- Restore packages for this directory using DNU-->
     <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;@(ProjectJsonFile)&quot;" />
   </Target>
