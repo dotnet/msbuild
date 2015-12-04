@@ -9,6 +9,8 @@ Ubuntu: [![Build Status](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job
 
 OSX: [![Build Status](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_OSX/badge/icon)](http://dotnet-ci.cloudapp.net/job/Microsoft_msbuild/job/innerloop_xplat_OSX/)
 
+Ubuntu and OSX CIs are failing due to issue [#390](https://github.com/Microsoft/msbuild/issues/390)
+
 ### Source code
 
 * Clone the sources: `git clone https://github.com/Microsoft/msbuild.git`
