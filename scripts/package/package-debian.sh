@@ -74,6 +74,7 @@ create_debian_package(){
 test_debian_package(){
     header "Testing debian package"
 
+    rm -rf $TEST_STAGE_DIR
     git clone https://github.com/sstephenson/bats.git $TEST_STAGE_DIR
     
     $TEST_STAGE_DIR/bin/bats $PACKAGE_OUTPUT_DIR/test_package.bats
