@@ -10,15 +10,15 @@ using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler.Native
 {
-    public class LinuxRyuJitCompileStep : IPlatformNativeStep
+    public class MacRyuJitCompileStep : IPlatformNativeStep
     {
-        private readonly string CompilerName = "clang-3.5";
+        private readonly string CompilerName = "clang";
         private readonly string InputExtension = ".obj";
 
         private readonly string CompilerOutputExtension = "";
 
         // TODO: debug/release support
-        private readonly string cflags = "-lstdc++ -lpthread -ldl -lm -lrt";
+        private readonly string cflags = "-g -lstdc++ -Wno-invalid-offsetof -pthread -ldl -lm -liconv";
 
         private readonly string[] libs = new string[]
         {
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private string CompilerArgStr { get; set; }
         private NativeCompileSettings config;
 
-        public LinuxRyuJitCompileStep(NativeCompileSettings config)
+        public MacRyuJitCompileStep(NativeCompileSettings config)
         {
             this.config = config;
             InitializeArgs(config);
@@ -66,31 +66,33 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Flags
             argsList.Add(cflags);
             
+            // Add Stubs
+            argsList.Add("-I "+Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10"));
+            argsList.Add("-I "+Path.Combine(config.AppDepSDKPath, "CPPSdk"));
+            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10/osxstubs.cpp"));
+
             // Input File
             var inLibFile = DetermineInFile(config);
-            argsList.Add(inLibFile);
+            argsList.Add("-Xlinker "+inLibFile);
 
             // Libs
             foreach (var lib in libs)
             {
                 var libPath = Path.Combine(config.IlcPath, lib);
-                argsList.Add(libPath);
+                argsList.Add("-Xlinker "+libPath);
             }
 
             // AppDep Libs
-            var baseAppDepLibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04", config.Architecture.ToString());
+            var baseAppDepLibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10", config.Architecture.ToString());
             foreach (var lib in appdeplibs)
             {
                 var appDepLibPath = Path.Combine(baseAppDepLibPath, lib);
-                argsList.Add(appDepLibPath);
+                argsList.Add("-Xlinker "+appDepLibPath);
             }
 
             // Output
             var libOut = DetermineOutputFile(config);
             argsList.Add($"-o \"{libOut}\"");
-
-            // Add Stubs
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04/lxstubs.cpp"));
 
             this.CompilerArgStr = string.Join(" ", argsList);
         }
