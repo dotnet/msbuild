@@ -83,13 +83,13 @@ namespace Microsoft.DotNet.ProjectModel
         /// <summary>
         /// Creates a project context for each framework located in the project at <paramref name="projectPath"/>
         /// </summary>
-        public static IEnumerable<ProjectContext> CreateContextForEachFramework(string projectPath)
+        public static IEnumerable<ProjectContext> CreateContextForEachFramework(string projectPath, ProjectReader.Settings settings = null)
         {
             if(!projectPath.EndsWith(Project.FileName))
             {
                 projectPath = Path.Combine(projectPath, Project.FileName);
             }
-            var project = ProjectReader.GetProject(projectPath);
+            var project = ProjectReader.GetProject(projectPath, settings);
 
             foreach(var framework in project.GetTargetFrameworks())
             {

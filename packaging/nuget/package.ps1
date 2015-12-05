@@ -1,3 +1,18 @@
+# Copyright (c) .NET Foundation and contributors. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+param(
+    [string]$toolsDir = $(throw "Specify the full path to the directory which has dotnet tool"),
+    [string]$versionSuffix = ""
+)
+
+# unify trailing backslash
+$toolsDir = $toolsDir.TrimEnd('\')
+$versionArg = ""
+if ($versionSuffix -ne "") {
+    $versionArg = "--version-suffix $VersionSuffix"
+}
+
 . "$PSScriptRoot\..\..\scripts\_common.ps1"
 
 $IntermediatePackagesDir = "$RepoRoot\artifacts\packages\intermediate"
@@ -15,14 +30,14 @@ $Projects = @(
 
 foreach ($ProjectName in $Projects) {
     $ProjectFile = "$RepoRoot\src\$ProjectName\project.json"
-    & dotnet restore "$ProjectFile"
+    & $toolsDir\dotnet restore "$ProjectFile"
     if (!$?) {
-        Write-Host "dotnet restore failed for: $ProjectFile"
+        Write-Host "$toolsDir\dotnet restore failed for: $ProjectFile"
         Exit 1
     }
-    & dotnet pack "$ProjectFile" --output "$IntermediatePackagesDir"
+    & $toolsDir\dotnet pack "$ProjectFile" --output "$IntermediatePackagesDir" $versionArg
     if (!$?) {
-        Write-Host "dotnet pack failed for: $ProjectFile"
+        Write-Host "$toolsDir\dotnet pack failed for: $ProjectFile"
         Exit 1
     }
 }

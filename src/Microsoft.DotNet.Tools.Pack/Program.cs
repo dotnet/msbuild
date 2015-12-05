@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
             var intermediateOutput = app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
+            var versionSuffix = app.Option("--version-suffix <VERSION_SUFFIX>", "Defines what `*` should be replaced with in version field in project.json", CommandOptionType.SingleValue);
             var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             app.OnExecute(() =>
@@ -59,10 +60,17 @@ namespace Microsoft.DotNet.Tools.Compiler
                     return 1;
                 }
 
+                ProjectReader.Settings settings = null;
+                if (versionSuffix.HasValue())
+                {
+                    settings = new ProjectReader.Settings();
+                    settings.VersionSuffix = versionSuffix.Value();
+                }
+
                 var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
                 var outputValue = output.Value();
 
-                return TryBuildPackage(path, configValue, outputValue, intermediateOutput.Value()) ? 0 : 1;
+                return TryBuildPackage(path, configValue, outputValue, intermediateOutput.Value(), settings) ? 0 : 1;
             });
 
             try
@@ -80,9 +88,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool TryBuildPackage(string path, string configuration, string outputValue, string intermediateOutputValue)
+        private static bool TryBuildPackage(string path, string configuration, string outputValue, string intermediateOutputValue, ProjectReader.Settings settings = null)
         {
-            var contexts = ProjectContext.CreateContextForEachFramework(path);
+            var contexts = ProjectContext.CreateContextForEachFramework(path, settings);
             var project = contexts.First().ProjectFile;
 
             if (project.Files.SourceFiles.Any())
