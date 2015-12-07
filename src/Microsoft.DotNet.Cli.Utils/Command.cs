@@ -8,7 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Tools.Common;
+using System.Text;
+using System.Threading;
 using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 
@@ -16,16 +17,9 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public class Command
     {
-        private Process _process;
-
-        private StringWriter _stdOutCapture;
-        private StringWriter _stdErrCapture;
-
-        private Action<string> _stdOutForward;
-        private Action<string> _stdErrForward;
-
-        private Action<string> _stdOutHandler;
-        private Action<string> _stdErrHandler;
+        private readonly Process _process;
+        private readonly StreamForwarder _stdOut;
+        private readonly StreamForwarder _stdErr;
 
         private bool _running = false;
 
@@ -44,6 +38,9 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 StartInfo = psi
             };
+
+            _stdOut = new StreamForwarder();
+            _stdErr = new StreamForwarder();
         }
 
         public static Command Create(string executable, IEnumerable<string> args, NuGetFramework framework = null)
@@ -184,16 +181,6 @@ namespace Microsoft.DotNet.Cli.Utils
             ThrowIfRunning();
             _running = true;
 
-            _process.OutputDataReceived += (sender, args) =>
-            {
-                ProcessData(args.Data, _stdOutCapture, _stdOutForward, _stdOutHandler);
-            };
-
-            _process.ErrorDataReceived += (sender, args) =>
-            {
-                ProcessData(args.Data, _stdErrCapture, _stdErrForward, _stdErrHandler);
-            };
-
             _process.EnableRaisingEvents = true;
 
 #if DEBUG
@@ -204,10 +191,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
             Reporter.Verbose.WriteLine($"Process ID: {_process.Id}");
 
-            _process.BeginOutputReadLine();
-            _process.BeginErrorReadLine();
+            var threadOut = _stdOut.BeginRead(_process.StandardOutput);
+            var threadErr = _stdErr.BeginRead(_process.StandardError);
 
             _process.WaitForExit();
+            threadOut.Join();
+            threadErr.Join();
 
             var exitCode = _process.ExitCode;
 
@@ -225,8 +214,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return new CommandResult(
                 exitCode,
-                _stdOutCapture?.GetStringBuilder()?.ToString(),
-                _stdErrCapture?.GetStringBuilder()?.ToString());
+                _stdOut.GetCapturedOutput(),
+                _stdErr.GetCapturedOutput());
         }
 
         public Command WorkingDirectory(string projectDirectory)
@@ -244,14 +233,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public Command CaptureStdOut()
         {
             ThrowIfRunning();
-            _stdOutCapture = new StringWriter();
+            _stdOut.Capture();
             return this;
         }
 
         public Command CaptureStdErr()
         {
             ThrowIfRunning();
-            _stdErrCapture = new StringWriter();
+            _stdErr.Capture();
             return this;
         }
 
@@ -262,11 +251,11 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 if (to == null)
                 {
-                    _stdOutForward = Reporter.Output.WriteLine;
+                    _stdOut.ForwardTo(write: Reporter.Output.Write, writeLine: Reporter.Output.WriteLine);
                 }
                 else
                 {
-                    _stdOutForward = to.WriteLine;
+                    _stdOut.ForwardTo(write: to.Write, writeLine: to.WriteLine);
                 }
             }
             return this;
@@ -279,11 +268,11 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 if (to == null)
                 {
-                    _stdErrForward = Reporter.Error.WriteLine;
+                    _stdErr.ForwardTo(write: Reporter.Error.Write, writeLine: Reporter.Error.WriteLine);
                 }
                 else
                 {
-                    _stdErrForward = to.WriteLine;
+                    _stdErr.ForwardTo(write: to.Write, writeLine: to.WriteLine);
                 }
             }
             return this;
@@ -292,22 +281,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public Command OnOutputLine(Action<string> handler)
         {
             ThrowIfRunning();
-            if (_stdOutHandler != null)
-            {
-                throw new InvalidOperationException("Already handling stdout!");
-            }
-            _stdOutHandler = handler;
+            _stdOut.ForwardTo(write: null, writeLine: handler);
             return this;
         }
 
         public Command OnErrorLine(Action<string> handler)
         {
             ThrowIfRunning();
-            if (_stdErrHandler != null)
-            {
-                throw new InvalidOperationException("Already handling stderr!");
-            }
-            _stdErrHandler = handler;
+            _stdErr.ForwardTo(write: null, writeLine: handler);
             return this;
         }
 
@@ -328,27 +309,147 @@ namespace Microsoft.DotNet.Cli.Utils
                 throw new InvalidOperationException($"Unable to invoke {memberName} after the command has been run");
             }
         }
+    }
 
-        private void ProcessData(string data, StringWriter capture, Action<string> forward, Action<string> handler)
+    internal sealed class StreamForwarder
+    {
+        private const int DefaultBufferSize = 256;
+
+        private readonly int _bufferSize;
+        private StringBuilder _builder;
+        private StringWriter _capture;
+        private Action<string> _write;
+        private Action<string> _writeLine;
+
+        internal StreamForwarder(int bufferSize = DefaultBufferSize)
         {
-            if (data == null)
+            _bufferSize = bufferSize;
+        }
+
+        internal void Capture()
+        {
+            if (_capture != null)
+            {
+                throw new InvalidOperationException("Already capturing stream!");
+            }
+            _capture = new StringWriter();
+        }
+
+        internal string GetCapturedOutput()
+        {
+            return _capture?.GetStringBuilder()?.ToString();
+        }
+
+        internal void ForwardTo(Action<string> write, Action<string> writeLine)
+        {
+            if (writeLine == null)
+            {
+                throw new ArgumentNullException(nameof(writeLine));
+            }
+            if (_writeLine != null)
+            {
+                throw new InvalidOperationException("Already handling stream!");
+            }
+            _write = write;
+            _writeLine = writeLine;
+        }
+
+        internal Thread BeginRead(TextReader reader)
+        {
+            var thread = new Thread(() => Read(reader)) { IsBackground = true };
+            thread.Start();
+            return thread;
+        }
+
+        internal void Read(TextReader reader)
+        {
+            _builder = new StringBuilder();
+            var buffer = new char[_bufferSize];
+            int n;
+            while ((n = reader.Read(buffer, 0, _bufferSize)) > 0)
+            {
+                _builder.Append(buffer, 0, n);
+                WriteBlocks();
+            }
+            WriteRemainder();
+        }
+
+        private void WriteBlocks()
+        {
+            int n = _builder.Length;
+            if (n == 0)
             {
                 return;
             }
 
-            if (capture != null)
+            int offset = 0;
+            bool sawReturn = false;
+            for (int i = 0; i < n; i++)
             {
-                capture.WriteLine(data);
+                char c = _builder[i];
+                switch (c)
+                {
+                    case '\r':
+                        sawReturn = true;
+                        continue;
+                    case '\n':
+                        WriteLine(_builder.ToString(offset, i - offset - (sawReturn ? 1 : 0)));
+                        offset = i + 1;
+                        break;
+                }
+                sawReturn = false;
             }
 
-            if (forward != null)
+            // If the buffer contains no line breaks and _write is
+            // supported, send the buffer content.
+            if (!sawReturn &&
+                (offset == 0) &&
+                ((_write != null) || (_writeLine == null)))
             {
-                forward(data);
+                WriteRemainder();
             }
-
-            if (handler != null)
+            else
             {
-                handler(data);
+                _builder.Remove(0, offset);
+            }
+        }
+
+        private void WriteRemainder()
+        {
+            if (_builder.Length == 0)
+            {
+                return;
+            }
+            Write(_builder.ToString());
+            _builder.Clear();
+        }
+
+        private void WriteLine(string str)
+        {
+            if (_capture != null)
+            {
+                _capture.WriteLine(str);
+            }
+            // If _write is supported, so is _writeLine.
+            if (_writeLine != null)
+            {
+                _writeLine(str);
+            }
+        }
+
+        private void Write(string str)
+        {
+            if (_capture != null)
+            {
+                _capture.Write(str);
+            }
+            if (_write != null)
+            {
+                _write(str);
+            }
+            else if (_writeLine != null)
+            {
+                _writeLine(str);
             }
         }
     }

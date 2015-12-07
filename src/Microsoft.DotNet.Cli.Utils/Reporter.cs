@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -14,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private static readonly Reporter Null = new Reporter(console: null);
         private static object _lock = new object();
 
-        private AnsiConsole _console;
+        private readonly AnsiConsole _console;
 
         private Reporter(AnsiConsole console)
         {
@@ -32,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public void WriteLine(string message)
         {
-            lock(_lock)
+            lock (_lock)
             {
                 if (CommandContext.ShouldPassAnsiCodesThrough())
                 {
@@ -47,9 +45,17 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public void WriteLine()
         {
-            lock(_lock)
+            lock (_lock)
             {
                 _console?.Writer?.WriteLine();
+            }
+        }
+
+        public void Write(string message)
+        {
+            lock (_lock)
+            {
+                _console?.Writer?.Write(message);
             }
         }
     }

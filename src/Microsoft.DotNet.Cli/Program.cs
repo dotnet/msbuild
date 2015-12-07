@@ -27,6 +27,7 @@ Common Commands:
   compile       Compiles a .NET project
   publish       Publishes a .NET project for deployment (including the runtime)
   run           Compiles and immediately executes a .NET project
+  repl          Launch an interactive session (read, eval, print, loop)
   pack          Creates a NuGet package";
 
         public static int Main(string[] args)
