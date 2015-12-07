@@ -51,7 +51,7 @@
   <Target Name="Test" />
 
   <Target Name="EnsureDependenciesDeployed"
-          AfterTargets="_RestoreBuildToolsWrapper">
+          AfterTargets="Build">
     <MSBuild Projects="$(RepoRoot)\targets\DeployDependencies.proj"
              Targets="DeployDependencies"
              BuildInParallel="true"

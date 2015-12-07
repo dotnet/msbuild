@@ -11,16 +11,12 @@
                                    packages.Windows_NT.config - old-facioned way to install packages for Windows
                                    project.json - new way to install packages
           NuGetDir               - location to install packages
-          SolutionFile           - if set, pass to NuGet.exe to restore everything for the solution
-          SolutionRoot           - if SolutionFile is not set and this is set, process all project.json
-                                   files under this directory. Excludes project.json in NuGetConfigDir.
+          SolutionRoot           - Process all project.json files under this directory. Excludes project.json in NuGetConfigDir.
           InstallationDependency - list of files that, when changed, need to cause reinstall
           BuildToolsSemaphore    - Created when build tools are restored
         1. Downloads NuGet.exe
         2. Use NuGet.exe to process packages.*.config and download packages it specifies into $(NuGetDir)
         3. Handle project.json installation. This allows loading specific runtime
-        4. Handle the solution file if given via the $(SolutionFile)
-        5. Handle project.json using dnu instead of NuGet.exe if the solution file is not provided
   -->
 
   <!-- These properties are related to NuGet -->
@@ -42,8 +38,9 @@
     <NuGetRestoreCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetRestoreCommand)</NuGetRestoreCommand>
     <NuGetInstallCommand>$(NuGetToolPath) install $(NuGetCommonOptions)</NuGetInstallCommand>
     <NuGetInstallCommand Condition="'$(OsEnvironment)'!='Windows_NT'">MONO_THREADS_PER_CPU=2000 mono --server $(NuGetInstallCommand)</NuGetInstallCommand>
-    <SolutionSemaphore>$(NuGetDir)Solution.semaphore</SolutionSemaphore>
-    <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/v3.2.1-rc/nuget.exe</NugetDownloadURL>
+    <NugetVersion>v3.3.0</NugetVersion>
+    <NugetDownloadURL>https://dist.nuget.org/win-x86-commandline/$(NugetVersion)/nuget.exe</NugetDownloadURL>
+    <NugetExeSemaphore>$(NuGetDir)NuGet.$(NugetVersion).semaphore</NugetExeSemaphore>
     <DownloadCommand Condition="'$(OsEnvironment)'=='Windows_NT'">powershell -noprofile -nologo -command "(new-object System.Net.WebClient).DownloadFile('$(NugetDownloadURL)', '$(NuGetToolPath)')"</DownloadCommand>
     <DownloadCommand Condition="'$(OsEnvironment)'!='Windows_NT'">curl -sSL --create-dirs -o $(NuGetToolPath) $(NugetDownloadURL)</DownloadCommand>
     <BuildToolsSemaphore>$(NuGetDir)BuildTools.semaphore</BuildToolsSemaphore>
@@ -63,10 +60,16 @@
      -->
   </ItemGroup>
 
+  <PropertyGroup>
+    <RestoreBuildToolsPackagesConfigInputs>$(GlobalPropertiesFile);$(NuGetPackagesFile)</RestoreBuildToolsPackagesConfigInputs>
+    <!-- Make sure we don't use a file that doesn't exist as one of our inputs, otherwise the target will always be built even if it's up-to-date -->
+    <RestoreBuildToolsPackagesConfigInputs Condition="Exists('$(NuGetPackagesFileTargetSpecific)')">$(RestoreBuildToolsPackagesConfigInputs);$(NuGetPackagesFileTargetSpecific)</RestoreBuildToolsPackagesConfigInputs>
+  </PropertyGroup>
+
   <!-- Restore NuGet.exe and use it to process Nuget.config. -->
   <Target Name="_RestoreBuildToolsPackagesConfig"
-          Inputs="$(GlobalPropertiesFile);$(NuGetPackagesFile);$(NuGetPackagesFileTargetSpecific)"
-          Outputs="$(BuildToolsSemaphore);$(NuGetToolPath)"
+          Inputs="$(RestoreBuildToolsPackagesConfigInputs)"
+          Outputs="$(BuildToolsSemaphore);$(NugetExeSemaphore);$(NuGetToolPath)"
           Condition="Exists('$(NuGetPackagesFile)') or Exists('$(NuGetPackagesFileTargetSpecific)')">
     <Message Importance="High" Text="Restoring build tools..." />
 
@@ -74,7 +77,15 @@
              Condition="!Exists('$(NuGetDir)')" />
 
     <!-- Download NuGet.exe -->
-    <Exec Command="$(DownloadCommand)" Condition="!Exists('$(NuGetToolPath)')" />
+    <Exec Command="$(DownloadCommand)" Condition="!Exists('$(NugetExeSemaphore)')" />
+
+    <Touch Files="$(NuGetToolPath)" />
+
+    <Touch Files="$(NugetExeSemaphore)"
+           ContinueOnError="WarnAndContinue"
+           AlwaysCreate="true"
+           ForceTouch="true" />
+
 
     <!-- Restore build tools using packages.config if it exists -->
     <Exec Condition="Exists('$(NuGetPackagesFile)')" Command="$(NugetInstallCommand) $(NuGetPackageInstallOptions) &quot;$(NuGetPackagesFile)&quot;" />
@@ -82,10 +93,6 @@
     <Error Condition="'$(ErrorIfBuildToolsRestoredFromIndividualProject)'=='true'"
            Text="The build tools package was just restored and so we cannot continue the build of an individual project because targets from the build tools package were not able to be imported. Please retry the build the individual project again." />
 
-  </Target>
-
-  <!-- All work is done in the dependent targets -->
-  <Target Name="_RestoreGlobalReferences" DependsOnTargets="_RestoreBuildToolsPackagesConfig">
     <!--
       Touch our semaphore file to ensure Inputs/Outputs comparison for this target will show that we're up to date.
       Ignore failures in the unlikely, but possible, event that we hit this from two projects simultaneously.
@@ -94,6 +101,11 @@
            ContinueOnError="WarnAndContinue"
            AlwaysCreate="true"
            ForceTouch="true" />
+
+  </Target>
+
+  <!-- All work is done in the dependent targets -->
+  <Target Name="_RestoreGlobalReferences" DependsOnTargets="_RestoreBuildToolsPackagesConfig">
 
   </Target>
 
@@ -107,30 +119,10 @@
 
   </Target>
 
-
-  <!-- Restore everything based on a solution file -->
-  <Target Name="_RestoreSolution"
-          Inputs="$(SolutionFile)"
-          Outputs="$(SolutionSemaphore)"
-          Condition="'$(SolutionFile)'!='' and Exists('$(SolutionFile)')" 
-  >
-    <Exec Command="$(NugetRestoreCommand)  $(NuGetPackageRestoreOptions) &quot;$(SolutionFile)&quot;" StandardOutputImportance="Low" />
-
-    <!--
-      Touch our semaphore file to ensure Inputs/Outputs comparison for this target will show that we're up to date.
-      Ignore failures in the unlikely, but possible, event that we hit this from two projects simultaneously.
-    -->
-    <Touch Files="$(SolutionSemaphore)"
-           ContinueOnError="WarnAndContinue"
-           AlwaysCreate="true"
-           ForceTouch="true" />
-  </Target>
-    
   <Target Name="_RestoreDnuProjectJsonReferences"
           Inputs="@(ProjectJsonFile)"
           Outputs="%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)project.lock.json"
-          AfterTargets="_RestoreGlobalReferences"
-          Condition="('$(SolutionFile)'=='' or !Exists('$(SolutionFile)')) and '$(OS)'!='Windows_NT'"  >
+          AfterTargets="_RestoreGlobalReferences" >
     <PropertyGroup>
       <ProjectDirectory>%(ProjectJsonFile.RootDir)%(ProjectJsonFile.Directory)</ProjectDirectory>
     </PropertyGroup>
@@ -139,8 +131,9 @@
 
     <!-- TODO: Restore back to Nuget once Nuget works -->
     <!-- Restore packages for this directory using Nuget-->
-    <!-- <Exec Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) -PackagesDirectory &quot;$(HOME)/.nuget/packages&quot; &quot;@(ProjectJsonFile)&quot;" />  -->
-    
+     <Exec Condition="'$(OsEnvironment)'=='Windows_NT'"
+        Command="$(NugetRestoreCommand) $(NuGetPackageRestoreOptions) &quot;@(ProjectJsonFile)&quot;" />
+
     <!-- Restore packages for this directory using DNU-->
     <Exec Condition="'$(OsEnvironment)'!='Windows_NT'" Command="$(DnuRestoreCommand) &quot;@(ProjectJsonFile)&quot;" />
   </Target>

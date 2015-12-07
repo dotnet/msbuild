@@ -10,6 +10,7 @@
         "System.Net.NetworkInformation": "4.1.0-beta-23516",
         "Microsoft.NETCore": "5.0.1-beta-23516",
         "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23516",
+        "System.Collections.NonGeneric": "4.0.1-beta-23516",
         "System.Console": "4.0.0-beta-23516",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23516",
         "System.IO.Pipes": "4.0.0-beta-23516",
@@ -22,6 +23,8 @@
         "System.Threading.ThreadPool": "4.0.10-beta-23516",
         "System.Xml.XmlDocument": "4.0.1-beta-23516",
         "System.Xml.XPath.XmlDocument": "4.0.1-beta-23516",
+        "Microsoft.Win32.Primitives":  "4.0.1-beta-23516",
+        "Microsoft.Win32.Registry": "4.0.0-beta-23516",
         "Microsoft.NETCore.Runtime": "1.0.1-beta-23516",
         "Microsoft.NETCore.TestHost": "1.0.0-beta-23516"
       },
