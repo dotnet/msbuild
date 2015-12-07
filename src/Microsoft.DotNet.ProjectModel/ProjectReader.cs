@@ -16,6 +16,11 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class ProjectReader
     {
+        public class Settings
+        {
+            public string VersionSuffix = null;
+        }
+
         public static bool TryGetProject(string path, out Project project, ICollection<DiagnosticMessage> diagnostics = null)
         {
             project = null;
@@ -61,22 +66,23 @@ namespace Microsoft.DotNet.ProjectModel
             return true;
         }
 
-        public static Project GetProject(string projectFile)
+        public static Project GetProject(string projectFile, Settings settings = null)
         {
-            return GetProject(projectFile, new List<DiagnosticMessage>());
+            return GetProject(projectFile, new List<DiagnosticMessage>(), settings);
         }
 
-        public static Project GetProject(string projectFile, ICollection<DiagnosticMessage> diagnostics)
+        public static Project GetProject(string projectFile, ICollection<DiagnosticMessage> diagnostics, Settings settings = null)
         {
             var name = Path.GetFileName(Path.GetDirectoryName(projectFile));
             using (var stream = new FileStream(projectFile, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return new ProjectReader().ReadProject(stream, name, projectFile, diagnostics);
+                return new ProjectReader().ReadProject(stream, name, projectFile, diagnostics, settings);
             }
         }
 
-        public Project ReadProject(Stream stream, string projectName, string projectPath, ICollection<DiagnosticMessage> diagnostics)
+        public Project ReadProject(Stream stream, string projectName, string projectPath, ICollection<DiagnosticMessage> diagnostics, Settings settings = null)
         {
+            settings = settings ?? new Settings();
             var project = new Project();
 
             var reader = new StreamReader(stream);
@@ -101,7 +107,7 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 try
                 {
-                    var buildVersion = Environment.GetEnvironmentVariable("DOTNET_BUILD_VERSION");
+                    var buildVersion = settings.VersionSuffix ?? Environment.GetEnvironmentVariable("DOTNET_BUILD_VERSION");
                     project.Version = SpecifySnapshot(version, buildVersion);
                 }
                 catch (Exception ex)

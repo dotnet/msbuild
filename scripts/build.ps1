@@ -18,6 +18,7 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR))
 }
 $env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$env:PATH"
 
+$VersionSuffix = ""
 if (!$env:DOTNET_BUILD_VERSION) {
     # Get the timestamp of the most recent commit
     $timestamp = git log -1 --format=%ct
@@ -27,8 +28,10 @@ if (!$env:DOTNET_BUILD_VERSION) {
     $minorVersion = 0
     $buildnumber = $commitTime.Days
     $revnumber = $commitTime.TotalSeconds
+    
+    $VersionSuffix = "$buildnumber.$revnumber"
 
-    $env:DOTNET_BUILD_VERSION = "$majorVersion.$minorVersion.$buildnumber.$revnumber"
+    $env:DOTNET_BUILD_VERSION = "$majorVersion.$minorVersion.$VersionSuffix"
 }
 
 Write-Host -ForegroundColor Green "*** Building dotnet tools version $($env:DOTNET_BUILD_VERSION) - $Configuration ***"
@@ -50,5 +53,13 @@ Write-Host -ForegroundColor Green "*** Generating dotnet MSI ***"
 & "$RepoRoot\packaging\windows\generatemsi.ps1" $Stage2Dir
 if (!$?) {
     Write-Host "Generating dotnet MSI finished with errors."
+    Exit 1
+}
+
+
+Write-Host -ForegroundColor Green "*** Generating NuGet packages ***"
+& "$RepoRoot\packaging\nuget\package.ps1" $Stage2Dir\bin $VersionSuffix
+if (!$?) {
+    Write-Host "Generating NuGet packages finished with errors."
     Exit 1
 }

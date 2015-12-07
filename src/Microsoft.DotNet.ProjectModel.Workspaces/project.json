@@ -1,4 +1,5 @@
 {
+    "version": "1.0.0-*",
     "dependencies": {
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.1.0-*"
