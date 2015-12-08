@@ -5,13 +5,10 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "System.Console": "4.0.0-beta-23504",
-        "System.Collections": "4.0.11-beta-23504",
-        "System.Linq": "4.0.1-beta-23504",
-        "System.Diagnostics.Process": "4.1.0-beta-23504",
-        "System.IO.FileSystem": "4.0.1-beta-23504",
+        "NETStandard.Library": "1.0.0-rc2-23608",
+        "System.Linq": "4.0.1-rc2-23608",
         "System.Xml.XDocument": "4.0.11-beta-23504",
-        "System.Resources.ReaderWriter": "4.0.0-beta-23504",
+        "System.Resources.ReaderWriter": "4.0.0-rc2-23608",
 
         "Microsoft.DotNet.Cli.Utils": {
             "type": "build",

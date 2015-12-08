@@ -40,17 +40,11 @@
   "frameworks": {
     "dnxcore50": {
       "dependencies": {
-        "System.Console": "4.0.0-beta-*",
-        "System.Diagnostics.Process": "4.1.0-beta-*",
-        "System.Diagnostics.TextWriterTraceListener": "4.0.0-beta-*",
-        "System.Diagnostics.TraceSource": "4.0.0-beta-*",
-        "System.Dynamic.Runtime": "4.0.11-beta-*",
-        "System.Net.Primitives": "4.0.11-beta-*",
-        "System.Net.Sockets": "4.1.0-beta-*",
-        "System.Runtime": "4.0.21-rc2-*",
-        "System.Reflection.Extensions": "4.0.1-beta-*",
-        "System.Reflection.TypeExtensions": "4.0.1-beta-*",
-        "System.Threading.Thread": "4.0.0-beta-*"
+        "NETStandard.Library": "1.0.0-rc2-23608",
+        "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-23608",
+        "System.Diagnostics.TraceSource": "4.0.0-rc2-23608",
+        "System.Dynamic.Runtime": "4.0.11-rc2-23608",
+        "System.Threading.Thread": "4.0.0-rc2-23608"
       }
     }
   },
