@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.ProjectModel.Loader
 
             foreach (var export in exporter.GetAllExports())
             {
-                // TODO: Handle project references
                 // TODO: Handle resource assemblies
                 foreach (var asset in export.RuntimeAssemblies)
                 {
@@ -35,6 +34,8 @@ namespace Microsoft.DotNet.ProjectModel.Loader
             return new ProjectLoadContext(
                 assemblies,
                 dllImports,
+
+                // Add the project's output directory path to ensure project-to-project references get located
                 new[] { context.GetOutputDirectoryPath(configuration) });
         }
     }
