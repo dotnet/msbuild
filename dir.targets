@@ -95,7 +95,7 @@
 
     <!-- Download latest nuget.exe -->
     <DownloadFile FileName="$(NuGetToolPath)"
-                  Address="https://dist.nuget.org/win-x86-commandline/v3.2.0/nuget.exe"
+                  Address="https://dist.nuget.org/win-x86-commandline/v3.3.0/nuget.exe"
                   Condition="!Exists('$(NuGetToolPath)') and '$(OsEnvironment)'=='Windows_NT'" />
 
     <Exec Command="curl -sSL --create-dirs -o $(NuGetToolPath) https://api.nuget.org/downloads/nuget.exe"
@@ -157,7 +157,7 @@
   <!-- See https://github.com/Microsoft/msbuild/issues/224 -->
   <Target Name="EnsureSDKTargetPresent"
           BeforeTargets="_RestoreBuildToolsWrapper" >
-    <Error Condition="!Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\Microsoft.NuGet.ImportAfter.targets')" 
+    <Error Condition="!Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\Microsoft.NuGet.ImportAfter.targets')"
       Text="MSBuild depends on the 'Tools and Windows SDK' Visual Studio plugin. Please install it. Reference: https://github.com/Microsoft/msbuild/wiki/Building+Testing+and+Debugging" />
   </Target>
 
