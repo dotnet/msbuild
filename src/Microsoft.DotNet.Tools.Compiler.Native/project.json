@@ -23,9 +23,8 @@
             "type": "build",
             "version": "1.0.0-*"
         },
-      "Microsoft.DotNet.ILCompiler": "1.0.2-*",
-      "Microsoft.DotNet.ObjectWriter": "1.0.2-*",
-      "Microsoft.DotNet.RyuJit": "1.0.0-*",
+      "Microsoft.DotNet.ILCompiler": "1.0.3-*",
+      "Microsoft.DotNet.ILCompiler.SDK": "1.0.3-*",
       "Microsoft.DotNet.Compiler.Common": "1.0.0-*"
     },
     "frameworks": {
