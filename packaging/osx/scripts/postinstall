@@ -7,11 +7,14 @@
 ln -s $2/bin/dotnet /usr/local/bin/
 ln -s $2/bin/dotnet-compile /usr/local/bin/
 ln -s $2/bin/dotnet-compile-csc /usr/local/bin/
+ln -s $2/bin/dotnet-new /usr/local/bin/
+ln -s $2/bin/dotnet-pack /usr/local/bin/
 ln -s $2/bin/dotnet-publish /usr/local/bin/
+ln -s $2/bin/dotnet-repl /usr/local/bin/
 ln -s $2/bin/dotnet-restore /usr/local/bin/
-ln -s $2/bin/dotnet-restore /usr/local/bin/
-ln -s $2/bin/dotnet-init /usr/local/bin/
 ln -s $2/bin/dotnet-resgen /usr/local/bin/
+ln -s $2/bin/dotnet-run /usr/local/bin/
+ln -s $2/bin/dotnet-test /usr/local/bin/
 
 # A temporary solution to unblock dotnet compile
 cp $2/bin/corehost /usr/local/bin/

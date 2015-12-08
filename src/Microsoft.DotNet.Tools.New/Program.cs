@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Tools.New
             app.HelpOption("-h|--help");
 
             var dotnetNew = new Program();
-            app.OnExecute((Func<int>)dotnetNew.CreateEmptyProject);
+            app.OnExecute(() => dotnetNew.CreateEmptyProject());
 
             try
             {
