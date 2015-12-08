@@ -1,5 +1,4 @@
 using Microsoft.CodeAnalysis;
-using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel.Workspaces
 {

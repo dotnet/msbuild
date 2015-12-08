@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
-using Microsoft.Extensions.ProjectModel;
 
 namespace Microsoft.DotNet.ProjectModel.Loader
 {
     public static class LoaderProjectContextExtensions
     {
-        public static AssemblyLoadContext Create(this ProjectContext context, string configuration = "Debug")
+        public static AssemblyLoadContext CreateLoadContext(this ProjectContext context, string configuration = "Debug")
         {
             var exporter = context.CreateExporter(configuration);
             var assemblies = new Dictionary<AssemblyName, string>();
@@ -32,7 +32,10 @@ namespace Microsoft.DotNet.ProjectModel.Loader
                 }
             }
 
-            return new ProjectContextLoadContext(assemblies, dllImports);
+            return new ProjectLoadContext(
+                assemblies,
+                dllImports,
+                new[] { context.GetOutputDirectoryPath(configuration) });
         }
     }
 }

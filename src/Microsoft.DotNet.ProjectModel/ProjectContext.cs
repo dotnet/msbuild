@@ -113,14 +113,18 @@ namespace Microsoft.DotNet.ProjectModel
                 ProjectFile.Name + FileNameSuffixes.DotNet.ProgramDatabase);
         }
 
-        private string GetOutputDirectoryPath(string buildConfiguration)
+        public string GetOutputDirectoryPath(string buildConfiguration)
         {
-            return Path.Combine(
+            var outDir = Path.Combine(
                 ProjectDirectory,
                 DirectoryNames.Bin,
                 buildConfiguration,
-                TargetFramework.GetShortFolderName(),
-                ProjectModel.RuntimeIdentifier.Current);
+                TargetFramework.GetShortFolderName());
+            if (!string.IsNullOrEmpty(RuntimeIdentifier))
+            {
+                outDir = Path.Combine(outDir, RuntimeIdentifier);
+            }
+            return outDir;
         }
     }
 }
