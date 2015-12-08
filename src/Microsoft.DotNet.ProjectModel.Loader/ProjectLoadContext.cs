@@ -40,7 +40,10 @@ namespace Microsoft.DotNet.ProjectModel.Loader
             {
                 NativeLibraryExtensions = new[] { ".so" };
             }
-            NativeLibraryExtensions = new string[0];
+            else
+            {
+                NativeLibraryExtensions = new string[0];
+            }
         }
 
         public ProjectLoadContext(IDictionary<AssemblyName, string> assemblyPaths,
@@ -76,12 +79,12 @@ namespace Microsoft.DotNet.ProjectModel.Loader
 
         private bool SearchForLibrary(string[] extensions, string name, out string path)
         {
-            foreach(var searchPath in _searchPaths)
+            foreach (var searchPath in _searchPaths)
             {
-                foreach(var extension in extensions)
+                foreach (var extension in extensions)
                 {
                     var candidate = Path.Combine(searchPath, name + extension);
-                    if(File.Exists(candidate))
+                    if (File.Exists(candidate))
                     {
                         path = candidate;
                         return true;
