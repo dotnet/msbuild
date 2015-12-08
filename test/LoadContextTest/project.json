@@ -1,10 +1,6 @@
 ﻿{
     "version": "1.0.0-*",
     "description": "LoadContextTest Console Application",
-    "authors": [ "anurse" ],
-    "tags": [ "" ],
-    "projectUrl": "",
-    "licenseUrl": "",
 
     "compilationOptions": {
         "emitEntryPoint": true
