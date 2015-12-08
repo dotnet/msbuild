@@ -10,7 +10,7 @@
         "System.Dynamic.Runtime": "4.0.11-beta-23504",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23504",
         "System.Security.Cryptography.Algorithms": "4.0.0-beta-23504",
-
+        "System.Xml.XDocument": "4.0.11-beta-23504",
         "NuGet.Packaging": "3.3.0-*",
 
         "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15791",
