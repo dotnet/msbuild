@@ -61,7 +61,7 @@ def project = GithubProject
         Utilities.setMachineAffinity(newJob, osName)
         Utilities.standardJobSetup(newJob, project, isPR, branch)
         // Add archiving of logs
-        Utilities.addArchival(newJob, 'msbuild.log')
+        Utilities.addArchival(newJob, 'msbuild*.log')
         // Add trigger
         if (isPR) {
             Utilities.addGithubPRTrigger(newJob, "${osName} Build")
