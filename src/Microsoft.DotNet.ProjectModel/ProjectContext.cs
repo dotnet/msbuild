@@ -11,7 +11,6 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel
 {
-    // NOTE(anurse): Copied from ApplicationHostContext in DNX. This name seemed more appropriate for this :)
     public class ProjectContext
     {
         public GlobalSettings GlobalSettings { get; }
