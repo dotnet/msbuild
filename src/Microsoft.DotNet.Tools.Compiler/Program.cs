@@ -496,10 +496,22 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     CopyExport(outputPath, export);
                 }
+                GenerateBindingRedirects(runtimeContext, outputPath, exporter);
             }
             else
             {
                 EmitHost(runtimeContext, outputPath, exporter);
+            }
+        }
+
+        private static void GenerateBindingRedirects(ProjectContext runtimeContext, string outputPath, LibraryExporter exporter)
+        {
+            var generator = new BindingRedirectGenerator();
+            var config = generator.Generate(exporter.GetAllExports());
+            var path = Path.Combine(outputPath, runtimeContext.ProjectFile.Name + ".exe.config");
+            using (var stream = File.Create(path))
+            {
+                config.Save(stream);
             }
         }
 
