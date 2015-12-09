@@ -64,5 +64,148 @@ namespace Microsoft.DotNet.Tools.Publish
                 return 1;
             }
         }
+
+        private static bool CheckArg(CommandOption argument)
+        {
+            if (!argument.HasValue())
+            {
+                Reporter.Error.WriteLine($"Missing required argument: {argument.LongName.Red().Bold()}");
+                return false;
+            }
+            return true;
+        }
+
+        // return the matching framework/runtime ProjectContext.
+        // if 'nugetframework' or 'runtime' is null or empty then it matches with any.
+        private static IEnumerable<ProjectContext> GetMatchingProjectContexts(IEnumerable<ProjectContext> contexts, NuGetFramework framework, string runtimeIdentifier)
+        {
+            var matchingContexts = contexts.Where(context =>
+            {
+                if (context.TargetFramework == null || string.IsNullOrEmpty(context.RuntimeIdentifier))
+                {
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(runtimeIdentifier) || runtimeIdentifier.Equals(context.RuntimeIdentifier))
+                {
+                    if (framework == null || framework.Equals(context.TargetFramework))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+            return matchingContexts;
+        }
+
+        /// <summary>
+        /// Publish the project for given 'framework (ex - dnxcore50)' and 'runtimeID (ex - win7-x64)'
+        /// </summary>
+        /// <param name="context">project that is to be published</param>
+        /// <param name="outputPath">Location of published files</param>
+        /// <param name="configuration">Debug or Release</param>
+        /// <returns>Return 0 if successful else return non-zero</returns>
+        private static int Publish(ProjectContext context, string outputPath, string configuration)
+        {
+            Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
+
+            var options = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+
+            // Generate the output path
+            if (string.IsNullOrEmpty(outputPath))
+            {
+                outputPath = Path.Combine(
+                    context.ProjectFile.ProjectDirectory,
+                    Constants.BinDirectoryName,
+                    configuration,
+                    context.TargetFramework.GetTwoDigitShortFolderName(),
+                    context.RuntimeIdentifier);
+            }
+
+            if (!Directory.Exists(outputPath))
+            {
+                Directory.CreateDirectory(outputPath);
+            }
+
+            // Compile the project (and transitively, all it's dependencies)
+            var result = Command.Create("dotnet-compile",
+                $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" " +
+                $"--output \"{outputPath}\" " +
+                $"--configuration \"{configuration}\" " +
+                "--no-host " +
+                $"\"{context.ProjectFile.ProjectDirectory}\"")
+                .ForwardStdErr()
+                .ForwardStdOut()
+                .Execute();
+
+            if (result.ExitCode != 0)
+            {
+                return result.ExitCode;
+            }
+
+            // Use a library exporter to collect publish assets
+            var exporter = context.CreateExporter(configuration);
+
+            foreach (var export in exporter.GetAllExports())
+            {
+                // Skip copying project references
+                if (export.Library is ProjectDescription)
+                {
+                    continue;
+                }
+
+                Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
+
+                PublishFiles(export.RuntimeAssemblies, outputPath);
+                PublishFiles(export.NativeLibraries, outputPath);
+            }
+
+            // Publish a host if this is an application
+            if (options.EmitEntryPoint.GetValueOrDefault())
+            {
+                Reporter.Verbose.WriteLine($"Making {context.ProjectFile.Name.Cyan()} runnable ...");
+                PublishHost(context, outputPath);
+            }
+
+            Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
+            return 0;
+        }
+
+        private static int PublishHost(ProjectContext context, string outputPath)
+        {
+            if (context.TargetFramework.IsDesktop())
+            {
+                return 0;
+            }
+
+            var hostPath = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
+            if (!File.Exists(hostPath))
+            {
+                Reporter.Error.WriteLine($"Cannot find {Constants.HostExecutableName} in the dotnet directory.".Red());
+                return 1;
+            }
+
+            var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
+
+            // Copy the host
+            File.Copy(hostPath, outputExe, overwrite: true);
+
+            return 0;
+        }
+
+        private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath, bool subdirectories)
+        {
+            foreach (var file in files)
+            {
+                var copyDir = subdirectories ? Path.Combine(outputPath, Path.GetDirectoryName(copyPath)) : outputPath;
+                if (!Directory.Exists(copyDir))
+                {
+                    Directory.CreateDirectory(copyDir);
+                }
+                File.Copy(path, Path.Combine(copyDir, Path.GetFileName(file.ResolvedPath)), overwrite: true);
+            }
+        }
     }
 }
