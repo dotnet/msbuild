@@ -1,5 +1,5 @@
 ﻿{
-    "name": "dotnet-init",
+    "name": "dotnet-new",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true

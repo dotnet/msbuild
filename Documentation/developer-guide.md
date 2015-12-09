@@ -55,11 +55,12 @@ Make sure to use the System.CommandLine parser so behavior is consistant across 
 Each command's project root should contain a manpage-style Readme.md that describes the usage of the command. See other commands for reference.
 
 #### Add project to build scripts
-1. Add the project to /scripts/build/build-stage.ps1
+1. Add the project to `/scripts/build/build-stage.ps1`
   - Add the project name to the `$Projects` list
-2. Add the project to /scripts/build/build-stage.sh
+2. Add the project to `/scripts/build/build-stage.sh`
   - Add the project name to the `PROJECTS` list
 3. run *build* from the root directory and make sure your project is producing binaries in /artifacts/
 
 #### Add command to packages
-- Update the symlinks property of debian_config.json to include the new command
+- Update the `symlinks` property of `packaging/debian/debian_config.json` to include the new command
+- Update the `$Projects` property in `packaging/osx/scripts/postinstall`

@@ -22,7 +22,7 @@ Common Options (passed before the command):
   -v|--verbose  Enable verbose output
 
 Common Commands:
-  init          Initialize a basic .NET project
+  new           Initialize a basic .NET project
   restore       Restore dependencies specified in the .NET project
   compile       Compiles a .NET project
   publish       Publishes a .NET project for deployment (including the runtime)

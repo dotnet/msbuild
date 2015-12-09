@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.Tools.Init
+namespace Microsoft.DotNet.Tools.New
 {
     public class Program
     {
@@ -72,13 +72,13 @@ namespace Microsoft.DotNet.Tools.Init
             DebugHelper.HandleDebugSwitch(ref args);
 
             var app = new CommandLineApplication();
-            app.Name = "dotnet init";
+            app.Name = "dotnet new";
             app.FullName = ".NET Initializer";
             app.Description = "Initializes empty project for .NET Platform";
             app.HelpOption("-h|--help");
 
-            var dotnetInit = new Program();
-            app.OnExecute((Func<int>)dotnetInit.CreateEmptyProject);
+            var dotnetNew = new Program();
+            app.OnExecute(() => dotnetNew.CreateEmptyProject());
 
             try
             {
