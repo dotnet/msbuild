@@ -76,7 +76,15 @@ Download it from https://www.cmake.org
     
         # Restore packages
         header "Restoring packages"
-        & "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "$Rid" --no-cache
+        & "$DnxRoot\dnu" restore "$RepoRoot\src" --quiet --runtime "$Rid" --no-cache
+        & "$DnxRoot\dnu" restore "$RepoRoot\test" --quiet --runtime "$Rid" --no-cache
+        & "$DnxRoot\dnu" restore "$RepoRoot\tools" --quiet --runtime "$Rid" --no-cache
+
+        $oldErrorAction=$ErrorActionPreference
+        $ErrorActionPreference="SilentlyContinue"
+        & "$DnxRoot\dnu" restore "$RepoRoot\testapp" --quiet --runtime "$Rid" --no-cache 2>&1 | Out-Null
+        $ErrorActionPreference=$oldErrorAction
+
         if (!$?) {
             Write-Host "Command failed: " "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "$Rid" --no-cache
             Exit 1

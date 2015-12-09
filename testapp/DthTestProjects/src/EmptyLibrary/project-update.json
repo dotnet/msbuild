@@ -1,0 +1,11 @@
+{
+  "dependencies": { },
+  "frameworks": {
+    "dnxcore50": {
+      "dependencies":{
+        "System.Runtime": "4.0.21-beta-*",
+        "System.Console": "4.0.0-beta-*"
+      }
+    }
+  }
+}

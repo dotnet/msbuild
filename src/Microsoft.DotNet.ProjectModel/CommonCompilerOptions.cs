@@ -31,6 +31,28 @@ namespace Microsoft.DotNet.ProjectModel
 
         public bool? PreserveCompilationContext { get; set; }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as CommonCompilerOptions;
+            return other != null &&
+                   LanguageVersion == other.LanguageVersion &&
+                   Platform == other.Platform &&
+                   AllowUnsafe == other.AllowUnsafe &&
+                   WarningsAsErrors == other.WarningsAsErrors &&
+                   Optimize == other.Optimize &&
+                   KeyFile == other.KeyFile &&
+                   DelaySign == other.DelaySign &&
+                   PublicSign == other.PublicSign &&
+                   EmitEntryPoint == other.EmitEntryPoint &&
+                   PreserveCompilationContext == other.PreserveCompilationContext &&
+                   Enumerable.SequenceEqual(Defines ?? Enumerable.Empty<string>(), other.Defines ?? Enumerable.Empty<string>());
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         public static CommonCompilerOptions Combine(params CommonCompilerOptions[] options)
         {
             var result = new CommonCompilerOptions();
@@ -102,6 +124,5 @@ namespace Microsoft.DotNet.ProjectModel
 
             return result;
         }
-
     }
 }

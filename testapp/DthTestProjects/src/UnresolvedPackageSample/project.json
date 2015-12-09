@@ -1,0 +1,8 @@
+{
+  "dependencies": { 
+    "NoSuchPackage": "1.0.0"
+  },
+  "frameworks": {
+    "dnx451": { }
+  }
+}

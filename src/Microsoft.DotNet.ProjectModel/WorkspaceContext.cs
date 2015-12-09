@@ -21,17 +21,15 @@ namespace Microsoft.DotNet.ProjectModel
                    = new ConcurrentDictionary<string, FileModelEntry<LockFile>>();
 
         // key: project directory, target framework
-        private readonly ConcurrentDictionary<string, ProjectContextEntry> _projectContextsCache
-                   = new ConcurrentDictionary<string, ProjectContextEntry>();
+        private readonly ConcurrentDictionary<string, ProjectContextCollection> _projectContextsCache
+                   = new ConcurrentDictionary<string, ProjectContextCollection>();
 
         private readonly HashSet<string> _projects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private bool _needRefresh;
 
-        private WorkspaceContext(List<string> projectPaths, string configuration)
+        private WorkspaceContext(IEnumerable<string> projectPaths)
         {
-            Configuration = configuration;
-
             foreach (var path in projectPaths)
             {
                 AddProject(path);
@@ -39,8 +37,6 @@ namespace Microsoft.DotNet.ProjectModel
 
             Refresh();
         }
-
-        public string Configuration { get; }
 
         /// <summary>
         /// Create a WorkspaceContext from a given path.
@@ -54,7 +50,7 @@ namespace Microsoft.DotNet.ProjectModel
         /// If the given path points to a project.json, all the projects it referenced as well as itself
         /// are added to the WorkspaceContext.
         /// </summary>
-        public static WorkspaceContext CreateFrom(string projectPath, string configuration)
+        public static WorkspaceContext CreateFrom(string projectPath)
         {
             var projectPaths = ResolveProjectPath(projectPath);
             if (projectPaths == null || !projectPaths.Any())
@@ -62,13 +58,13 @@ namespace Microsoft.DotNet.ProjectModel
                 return null;
             }
 
-            var context = new WorkspaceContext(projectPaths, configuration);
+            var context = new WorkspaceContext(projectPaths);
             return context;
         }
 
-        public static WorkspaceContext CreateFrom(string projectPath)
+        public static WorkspaceContext Create()
         {
-            return CreateFrom(projectPath, "Debug");
+            return new WorkspaceContext(Enumerable.Empty<string>());
         }
 
         public void AddProject(string path)
@@ -107,7 +103,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             foreach (var projectDirectory in basePaths)
             {
-                var project = GetProject(projectDirectory);
+                var project = GetProject(projectDirectory).Model;
                 if (project == null)
                 {
                     continue;
@@ -119,7 +115,7 @@ namespace Microsoft.DotNet.ProjectModel
                 {
                     foreach (var reference in GetProjectReferences(projectContext))
                     {
-                        var referencedProject = GetProject(reference.Path);
+                        var referencedProject = GetProject(reference.Path).Model;
                         if (referencedProject != null)
                         {
                             _projects.Add(referencedProject.ProjectDirectory);
@@ -133,18 +129,23 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IReadOnlyList<ProjectContext> GetProjectContexts(string projectPath)
         {
+            return GetProjectContextCollection(projectPath).ProjectContexts;
+        }
+
+        public ProjectContextCollection GetProjectContextCollection(string projectPath)
+        {
             return _projectContextsCache.AddOrUpdate(
                 projectPath,
                 key => AddProjectContextEntry(key, null),
-                (key, oldEntry) => AddProjectContextEntry(key, oldEntry)).ProjectContexts;
+                (key, oldEntry) => AddProjectContextEntry(key, oldEntry));
         }
 
-        private Project GetProject(string projectDirectory)
+        private FileModelEntry<Project> GetProject(string projectDirectory)
         {
             return _projectsCache.AddOrUpdate(
                 projectDirectory,
                 key => AddProjectEntry(key, null),
-                (key, oldEntry) => AddProjectEntry(key, oldEntry)).Model;
+                (key, oldEntry) => AddProjectEntry(key, oldEntry));
         }
 
         private LockFile GetLockFile(string projectDirectory)
@@ -171,7 +172,7 @@ namespace Microsoft.DotNet.ProjectModel
             if (currentEntry.IsInvalid)
             {
                 Project project;
-                if (!ProjectReader.TryGetProject(projectDirectory, out project))
+                if (!ProjectReader.TryGetProject(projectDirectory, out project, currentEntry.Diagnostics))
                 {
                     currentEntry.Reset();
                 }
@@ -208,23 +209,24 @@ namespace Microsoft.DotNet.ProjectModel
             return currentEntry;
         }
 
-        private ProjectContextEntry AddProjectContextEntry(string projectDirectory,
-                                                           ProjectContextEntry currentEntry)
+        private ProjectContextCollection AddProjectContextEntry(string projectDirectory,
+                                                                 ProjectContextCollection currentEntry)
         {
             if (currentEntry == null)
             {
                 // new entry required
-                currentEntry = new ProjectContextEntry();
+                currentEntry = new ProjectContextCollection();
             }
 
-            var project = GetProject(projectDirectory);
-            if (project == null)
+            var projectEntry = GetProject(projectDirectory);
+            if (projectEntry.Model == null)
             {
                 // project doesn't exist anymore
                 currentEntry.Reset();
                 return currentEntry;
             }
 
+            var project = projectEntry.Model;
             if (currentEntry.HasChanged)
             {
                 currentEntry.Reset();
@@ -232,7 +234,7 @@ namespace Microsoft.DotNet.ProjectModel
                 foreach (var framework in project.GetTargetFrameworks())
                 {
                     var builder = new ProjectContextBuilder()
-                        .WithProjectResolver(path => GetProject(path))
+                        .WithProjectResolver(path => GetProject(path).Model)
                         .WithLockFileResolver(path => GetLockFile(path))
                         .WithProject(project)
                         .WithTargetFramework(framework.FrameworkName);
@@ -249,6 +251,8 @@ namespace Microsoft.DotNet.ProjectModel
                     currentEntry.LockFilePath = lockFilePath;
                     currentEntry.LastLockFileWriteTime = File.GetLastWriteTime(lockFilePath);
                 }
+
+                currentEntry.ProjectDiagnostics.AddRange(projectEntry.Diagnostics);
             }
 
             return currentEntry;
@@ -261,6 +265,8 @@ namespace Microsoft.DotNet.ProjectModel
             public TModel Model { get; set; }
 
             public string FilePath { get; set; }
+
+            public List<DiagnosticMessage> Diagnostics { get; } = new List<DiagnosticMessage>();
 
             public void UpdateLastWriteTime()
             {
@@ -289,57 +295,8 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 Model = null;
                 FilePath = null;
+                Diagnostics.Clear();
                 _lastWriteTime = DateTime.MinValue;
-            }
-        }
-
-        private class ProjectContextEntry
-        {
-            public List<ProjectContext> ProjectContexts { get; } = new List<ProjectContext>();
-
-            public string LockFilePath { get; set; }
-
-            public string ProjectFilePath { get; set; }
-
-            public DateTime LastProjectFileWriteTime { get; set; }
-
-            public DateTime LastLockFileWriteTime { get; set; }
-
-            public bool HasChanged
-            {
-                get
-                {
-                    if (ProjectFilePath == null || !File.Exists(ProjectFilePath))
-                    {
-                        return true;
-                    }
-
-                    if (LastProjectFileWriteTime < File.GetLastWriteTime(ProjectFilePath))
-                    {
-                        return true;
-                    }
-
-                    if (LockFilePath == null || !File.Exists(LockFilePath))
-                    {
-                        return true;
-                    }
-
-                    if (LastLockFileWriteTime < File.GetLastWriteTime(LockFilePath))
-                    {
-                        return true;
-                    }
-
-                    return false;
-                }
-            }
-
-            public void Reset()
-            {
-                ProjectContexts.Clear();
-                ProjectFilePath = null;
-                LockFilePath = null;
-                LastLockFileWriteTime = DateTime.MinValue;
-                LastProjectFileWriteTime = DateTime.MinValue;
             }
         }
 

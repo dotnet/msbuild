@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
+using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
 
@@ -18,6 +19,8 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         private static readonly NuGetFramework Dnx46 = new NuGetFramework(
             FrameworkConstants.FrameworkIdentifiers.Dnx,
             new Version(4, 6));
+            
+        private static FrameworkReferenceResolver _default;
 
         private readonly IDictionary<NuGetFramework, FrameworkInformation> _cache = new Dictionary<NuGetFramework, FrameworkInformation>();
 
@@ -33,6 +36,19 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         }
         
         public string ReferenceAssembliesPath { get; }
+        
+        public static FrameworkReferenceResolver Default
+        {
+            get
+            {
+                if (_default == null)
+                {
+                    _default = new FrameworkReferenceResolver(ProjectContextBuilder.GetDefaultReferenceAssembliesPath());
+                }
+                
+                return _default;
+            }
+        }
 
         public bool TryGetAssembly(string name, NuGetFramework targetFramework, out string path, out Version version)
         {

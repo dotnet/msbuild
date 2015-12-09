@@ -94,8 +94,7 @@ namespace Microsoft.DotNet.ProjectModel
             return _compilerOptionsByConfiguration.Keys;
         }
 
-        public CommonCompilerOptions GetCompilerOptions(NuGetFramework targetFramework,
-                                                   string configurationName)
+        public CommonCompilerOptions GetCompilerOptions(NuGetFramework targetFramework, string configurationName)
         {
             // Get all project options and combine them
             var rootOptions = GetCompilerOptions();
