@@ -95,6 +95,7 @@ namespace Microsoft.DotNet.ProjectModel
                 yield return new ProjectContextBuilder()
                                 .WithProject(project)
                                 .WithTargetFramework(framework.FrameworkName)
+                                .WithSettings(settings)
                                 .Build();
             }
         }

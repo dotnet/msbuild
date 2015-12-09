@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ProjectModel
             public string VersionSuffix = null;
         }
 
-        public static bool TryGetProject(string path, out Project project, ICollection<DiagnosticMessage> diagnostics = null)
+        public static bool TryGetProject(string path, out Project project, ICollection<DiagnosticMessage> diagnostics = null, Settings settings = null)
         {
             project = null;
 
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.ProjectModel
                 using (var stream = File.OpenRead(projectPath))
                 {
                     var reader = new ProjectReader();
-                    project = reader.ReadProject(stream, projectName, projectPath, diagnostics);
+                    project = reader.ReadProject(stream, projectName, projectPath, diagnostics, settings);
                 }
             }
             catch (Exception ex)
