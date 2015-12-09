@@ -77,15 +77,19 @@ if [ -z "$RID" ]; then
     if [ "$UNAME" == "Darwin" ]; then
         export OSNAME=osx
         export RID=osx.10.10-x64
+        export DNX_FLAVOR="dnx-coreclr-darwin-x64"
     elif [ "$UNAME" == "Linux" ]; then
         # Detect Distro?
         export OSNAME=linux
         export RID=ubuntu.14.04-x64
+        export DNX_FLAVOR="dnx-coreclr-linux-x64"
     else
         error "unknown OS: $UNAME" 1>&2
         exit 1
     fi
 fi
+
+export DNX_VERSION="1.0.0-rc1-update1"
 
 export REPOROOT=$(cd $COMMONDIR/.. && pwd)
 export OUTPUT_ROOT=$REPOROOT/artifacts/$RID

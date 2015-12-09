@@ -13,7 +13,6 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-REPOROOT="$( cd -P "$DIR/.." && pwd )"
 
 source "$DIR/_common.sh"
 
@@ -26,7 +25,15 @@ fi
 
 [ -z "$CONFIGURATION" ] && export CONFIGURATION=Debug
 
-REPOROOT="$( cd -P "$DIR/.." && pwd )"
+# Download DNX to copy into stage2
+header "Downloading DNX $DNX_VERSION"
+DNX_URL="https://api.nuget.org/packages/$DNX_FLAVOR.$DNX_VERSION.nupkg"
+DNX_ROOT="$DNX_DIR/bin"
+rm -rf $DNX_DIR
+mkdir -p $DNX_DIR
+curl -o $DNX_DIR/dnx.zip $DNX_URL --silent
+unzip -qq $DNX_DIR/dnx.zip -d $DNX_DIR
+chmod a+x $DNX_ROOT/dnu $DNX_ROOT/dnx
 
 # Ensure the latest stage0 is installed
 $DIR/install.sh
@@ -39,19 +46,9 @@ unset DOTNET_TOOLS
 
 DOTNET_PATH=$(which dotnet)
 PREFIX="$(cd -P "$(dirname "$DOTNET_PATH")/.." && pwd)"
-DNX_ROOT="$PREFIX/share/dotnet/cli/bin/dnx"
-if [ ! -d "$DNX_ROOT" ]; then
-    echo "warning: your stage0 is using the old layout" 1>&2
-    DNX_ROOT="$PREFIX/share/dotnet/cli/dnx"
-fi
-
-if [ ! -d "$DNX_ROOT" ] || [ ! -e "$DNX_ROOT/dnx" ]; then
-    echo "error: could not find DNX in $DNX_ROOT" 1>&2
-    exit 1
-fi
 
 header "Restoring packages"
-dotnet restore "$REPOROOT" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+$DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
 
 header "Building corehost"
 
