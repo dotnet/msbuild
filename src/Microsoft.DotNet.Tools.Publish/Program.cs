@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Publish
             var output = app.Option("-o|--output <OUTPUT_PATH>", "Path in which to publish the app", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var projectPath = app.Argument("<PROJECT>", "The project to publish, defaults to the current directory. Can be a path to a project.json or a project directory");
+            var subdirectories = app.Option("--subdir", "Include Subdirectories in native assets in the output", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -107,7 +108,7 @@ namespace Microsoft.DotNet.Tools.Publish
         /// <param name="outputPath">Location of published files</param>
         /// <param name="configuration">Debug or Release</param>
         /// <returns>Return 0 if successful else return non-zero</returns>
-        private static int Publish(ProjectContext context, string outputPath, string configuration)
+        private static int Publish(ProjectContext context, string outputPath, string configuration, bool subdirectories)
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
 
@@ -158,8 +159,8 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
-                PublishFiles(export.RuntimeAssemblies, outputPath);
-                PublishFiles(export.NativeLibraries, outputPath);
+                PublishFiles(export.RuntimeAssemblies, outputPath, false);
+                PublishFiles(export.NativeLibraries, outputPath, subdirectories);
             }
 
             // Publish a host if this is an application
@@ -199,13 +200,44 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             foreach (var file in files)
             {
-                var copyDir = subdirectories ? Path.Combine(outputPath, Path.GetDirectoryName(copyPath)) : outputPath;
-                if (!Directory.Exists(copyDir))
+                var destinationDirectory = outputPath;
+
+                if (subdirectories)
                 {
-                    Directory.CreateDirectory(copyDir);
+                    destinationDirectory = Path.Combine(outputPath, GetNativeRelativeSubdirectory(file.RelativePath));
                 }
-                File.Copy(path, Path.Combine(copyDir, Path.GetFileName(file.ResolvedPath)), overwrite: true);
+
+                if (!Directory.Exists(destinationDirectory))
+                {
+                    Directory.CreateDirectory(destinationDirectory);
+                }
+
+                File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
         }
+
+        private static string GetNativeRelativeSubdirectory(string filepath)
+        {
+            string directoryPath = Path.GetDirectoryName(filepath);
+
+            string[] parts = directoryPath.Split(new string[] { "native" }, 2, StringSplitOptions.None);
+
+            if (parts.Length != 2)
+            {
+                throw new UnrecognizedNativeDirectoryFormat() { FailedPath = filepath };
+            }
+
+            string candidate = parts[1];
+            candidate = candidate.TrimStart(new char[] { '/', '\\' });
+
+            return candidate;
+        }
+
+        private class UnrecognizedNativeDirectoryFormat : Exception
+        {
+            public string FailedPath { get; set; }
+        }
     }
+
+    
 }
