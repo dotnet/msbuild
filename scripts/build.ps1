@@ -26,7 +26,7 @@ if (!$env:DOTNET_BUILD_VERSION) {
 
     $majorVersion = 1
     $minorVersion = 0
-    $buildnumber = $commitTime.Days
+    $buildnumber = 0
     $revnumber = $commitTime.TotalSeconds
     
     $VersionSuffix = "dev-$revnumber"
