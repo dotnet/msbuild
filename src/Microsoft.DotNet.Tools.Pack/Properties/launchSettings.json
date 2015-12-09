@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "dotnet-pack": {
+    "dotnet pack": {
       "executablePath": "..\\..\\artifacts\\win7-x64\\stage2\\bin\\dotnet-pack.exe"
     }
   }

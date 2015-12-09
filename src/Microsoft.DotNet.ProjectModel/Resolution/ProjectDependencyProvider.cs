@@ -15,15 +15,15 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
     public class ProjectDependencyProvider
     {
         private Func<string, Project> _resolveProject;
-        private ProjectReader.Settings _settings;
+        private ProjectReaderSettings _settings;
 
-        public ProjectDependencyProvider(ProjectReader.Settings settings = null)
+        public ProjectDependencyProvider(ProjectReaderSettings settings = null)
         {
             _resolveProject = ResolveProject;
             _settings = settings;
         }
 
-        public ProjectDependencyProvider(Func<string, Project> projectCacheResolver, ProjectReader.Settings settings = null)
+        public ProjectDependencyProvider(Func<string, Project> projectCacheResolver, ProjectReaderSettings settings = null)
         {
             _resolveProject = projectCacheResolver;
             _settings = settings;

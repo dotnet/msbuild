@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private Func<string, LockFile> LockFileResolver { get; set; }
 
-        private ProjectReader.Settings Settings { get; set; }
+        private ProjectReaderSettings Settings { get; set; }
 
         public ProjectContextBuilder()
         {
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.ProjectModel
             return this;
         }
 
-        public ProjectContextBuilder WithSettings(ProjectReader.Settings settings)
+        public ProjectContextBuilder WithReaderSettings(ProjectReaderSettings settings)
         {
             Settings = settings;
             return this;

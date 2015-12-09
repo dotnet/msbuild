@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.ProjectModel
         /// <summary>
         /// Creates a project context for each framework located in the project at <paramref name="projectPath"/>
         /// </summary>
-        public static IEnumerable<ProjectContext> CreateContextForEachFramework(string projectPath, ProjectReader.Settings settings = null)
+        public static IEnumerable<ProjectContext> CreateContextForEachFramework(string projectPath, ProjectReaderSettings settings = null)
         {
             if (!projectPath.EndsWith(Project.FileName))
             {
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.ProjectModel
                 yield return new ProjectContextBuilder()
                                 .WithProject(project)
                                 .WithTargetFramework(framework.FrameworkName)
-                                .WithSettings(settings)
+                                .WithReaderSettings(settings)
                                 .Build();
             }
         }

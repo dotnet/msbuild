@@ -60,10 +60,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                     return 1;
                 }
 
-                ProjectReader.Settings settings = null;
+                ProjectReaderSettings settings = null;
                 if (versionSuffix.HasValue())
                 {
-                    settings = new ProjectReader.Settings();
+                    settings = new ProjectReaderSettings();
                     settings.VersionSuffix = versionSuffix.Value();
                 }
 
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static bool TryBuildPackage(string path, string configuration, string outputValue, string intermediateOutputValue, ProjectReader.Settings settings = null)
+        private static bool TryBuildPackage(string path, string configuration, string outputValue, string intermediateOutputValue, ProjectReaderSettings settings = null)
         {
             var contexts = ProjectContext.CreateContextForEachFramework(path, settings);
             var project = contexts.First().ProjectFile;
