@@ -88,14 +88,8 @@ namespace Microsoft.DotNet.Cli.Utils
             if (useCmd)
             {
                 var comSpec = Environment.GetEnvironmentVariable("ComSpec");
-
-                // cmd doesn't like "foo.exe ", so we need to ensure that if
-                // args is empty, we just run "foo.exe"
-                if (!string.IsNullOrEmpty(args))
-                {
-                    executable = (executable + " " + args).Replace("\"", "\\\"");
-                }
-                args = $"/C \"{executable}\"";
+                // wrap 'executable' within quotes to deal woth space in its path.
+                args = $"/S /C \"\"{executable}\" {args}\"";
                 executable = comSpec;
             }
 
