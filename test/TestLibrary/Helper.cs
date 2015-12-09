@@ -11,5 +11,10 @@ namespace TestLibrary
         {
             return "This string came from the test library!";
         }
+
+        public static void SayHi()
+        {
+            Console.WriteLine("Hello there!");
+        }
     }
 }

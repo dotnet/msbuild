@@ -21,22 +21,23 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
     {
         private Dictionary<string, AssemblyMetadata> _cache = new Dictionary<string, AssemblyMetadata>();
 
-        private readonly string[] _projectPaths;
+        public ProjectJsonWorkspace(ProjectContext context) : base(MefHostServices.DefaultHost, "Custom")
+        {
+            AddProject(context);
+        }
 
         public ProjectJsonWorkspace(string projectPath) : this(new[] { projectPath })
         {
         }
 
-        public ProjectJsonWorkspace(string[] projectPaths) : base(MefHostServices.DefaultHost, "Custom")
+        public ProjectJsonWorkspace(IEnumerable<string> projectPaths) : base(MefHostServices.DefaultHost, "Custom")
         {
-            _projectPaths = projectPaths;
-
-            Initialize();
+            Initialize(projectPaths);
         }
 
-        private void Initialize()
+        private void Initialize(IEnumerable<string> projectPaths)
         {
-            foreach (var projectPath in _projectPaths)
+            foreach (var projectPath in projectPaths)
             {
                 AddProject(projectPath);
             }
