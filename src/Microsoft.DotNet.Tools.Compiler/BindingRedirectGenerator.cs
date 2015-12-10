@@ -36,11 +36,19 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         public XDocument Generate(IEnumerable<LibraryExport> dependencies)
         {
+            var redirects = CollectRedirects(dependencies);
+            
+            if (!redirects.Any())
+            {
+                // No redirects required
+                return null;
+            }
+
             var document = new XDocument(
                 new XElement(ConfigurationElementName,
                     new XElement(RuntimeElementName,
                         new XElement(AssemblyBindingElementName,
-                            CollectRedirects(dependencies).Select(GetDependentAssembly)
+                            redirects.Select(GetDependentAssembly)
                             )
                         )
                     )
@@ -108,8 +116,8 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var identity = new AssemblyIdentity(
                     metadataReader.GetString(definition.Name),
                     definition.Version,
-                    publicKeyToken,
-                    metadataReader.GetString(definition.Culture)
+                    metadataReader.GetString(definition.Culture),
+                    publicKeyToken
                 );
 
                 var references = new List<AssemblyIdentity>(metadataReader.AssemblyReferences.Count);
@@ -120,8 +128,8 @@ namespace Microsoft.DotNet.Tools.Compiler
                     references.Add(new AssemblyIdentity(
                         metadataReader.GetString(assemblyReference.Name),
                         assemblyReference.Version,
-                        GetPublicKeyToken(metadataReader.GetBlobBytes(assemblyReference.PublicKeyOrToken)),
-                        metadataReader.GetString(assemblyReference.Culture)
+                        metadataReader.GetString(assemblyReference.Culture),
+                        GetPublicKeyToken(metadataReader.GetBlobBytes(assemblyReference.PublicKeyOrToken))
                     ));
                 }
 

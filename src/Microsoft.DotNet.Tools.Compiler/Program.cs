@@ -496,6 +496,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     CopyExport(outputPath, export);
                 }
+
                 GenerateBindingRedirects(runtimeContext, outputPath, exporter);
             }
             else
@@ -508,10 +509,16 @@ namespace Microsoft.DotNet.Tools.Compiler
         {
             var generator = new BindingRedirectGenerator();
             var config = generator.Generate(exporter.GetAllExports());
-            var path = Path.Combine(outputPath, runtimeContext.ProjectFile.Name + ".exe.config");
-            using (var stream = File.Create(path))
+
+            if (config != null)
             {
-                config.Save(stream);
+                // TODO: Handle existing App.config file transformation
+                // We have something to generate
+                var path = Path.Combine(outputPath, runtimeContext.ProjectFile.Name + ".exe.config");
+                using (var stream = File.Create(path))
+                {
+                    config.Save(stream);
+                }
             }
         }
 
