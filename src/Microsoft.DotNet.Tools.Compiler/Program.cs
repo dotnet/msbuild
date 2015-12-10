@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
+using System.Xml.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Compiler.Common;
@@ -507,17 +507,32 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static void GenerateBindingRedirects(ProjectContext runtimeContext, string outputPath, LibraryExporter exporter)
         {
-            var generator = new BindingRedirectGenerator();
-            var config = generator.Generate(exporter.GetAllExports());
+            var appConfigNames = new[] { "app.config", "App.config" };
+            XDocument baseAppConfig = null;
 
-            if (config != null)
+            foreach (var appConfigName in appConfigNames)
             {
-                // TODO: Handle existing App.config file transformation
-                // We have something to generate
+                var baseAppConfigPath = Path.Combine(runtimeContext.ProjectDirectory, appConfigName);
+
+                if (File.Exists(baseAppConfigPath))
+                {
+                    using (var fileStream = File.OpenRead(baseAppConfigPath))
+                    {
+                        baseAppConfig = XDocument.Load(fileStream);
+                        break;
+                    }
+                }
+            }
+
+            var generator = new BindingRedirectGenerator();
+            var appConfig = generator.Generate(exporter.GetAllExports(), baseAppConfig);
+
+            if (appConfig != null)
+            {
                 var path = Path.Combine(outputPath, runtimeContext.ProjectFile.Name + ".exe.config");
                 using (var stream = File.Create(path))
                 {
-                    config.Save(stream);
+                    appConfig.Save(stream);
                 }
             }
         }

@@ -34,43 +34,77 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private readonly SHA1 _sha1 = SHA1.Create();
 
-        public XDocument Generate(IEnumerable<LibraryExport> dependencies)
+        public XDocument Generate(IEnumerable<LibraryExport> dependencies, XDocument document)
         {
             var redirects = CollectRedirects(dependencies);
-            
+
             if (!redirects.Any())
             {
                 // No redirects required
-                return null;
+                return document;
+            }
+            document = document ?? new XDocument();
+
+            var configuration = GetOrAddElement(document, ConfigurationElementName);
+            var runtime = GetOrAddElement(configuration, RuntimeElementName);
+            var assemblyBindings = GetOrAddElement(runtime, AssemblyBindingElementName);
+
+            foreach (var redirect in redirects)
+            {
+                AddDependentAssembly(redirect, assemblyBindings);
             }
 
-            var document = new XDocument(
-                new XElement(ConfigurationElementName,
-                    new XElement(RuntimeElementName,
-                        new XElement(AssemblyBindingElementName,
-                            redirects.Select(GetDependentAssembly)
-                            )
-                        )
-                    )
-                );
             return document;
         }
 
-        private XElement GetDependentAssembly(AssemblyRedirect redirect)
+        private void AddDependentAssembly(AssemblyRedirect redirect, XElement assemblyBindings)
         {
-            var culture = string.IsNullOrEmpty(redirect.From.Culture) ? "neutral" : redirect.From.Culture;
+            var dependencyElement = assemblyBindings.Elements(DependentAssemblyElementName)
+                .FirstOrDefault(element => IsSameAssembly(redirect, element));
 
-            return new XElement(DependentAssemblyElementName,
-                new XElement(AssemblyIdentityElementName,
-                    new XAttribute(NameAttributeName, redirect.From.Name),
-                    new XAttribute(PublicKeyTokenAttributeName, redirect.From.PublicKeyToken),
-                    new XAttribute(CultureAttributeName, culture)
-                    ),
-                new XElement(BindingRedirectElementName,
+            if (dependencyElement == null)
+            {
+                dependencyElement = new XElement(DependentAssemblyElementName,
+                    new XElement(AssemblyIdentityElementName,
+                                new XAttribute(NameAttributeName, redirect.From.Name),
+                                new XAttribute(PublicKeyTokenAttributeName, redirect.From.PublicKeyToken),
+                                new XAttribute(CultureAttributeName, redirect.From.Culture)
+                            )
+                        );
+                assemblyBindings.Add(dependencyElement);
+            }
+
+            dependencyElement.Add(new XElement(BindingRedirectElementName,
                     new XAttribute(OldVersionAttributeName, redirect.From.Version),
                     new XAttribute(NewVersionAttributeName, redirect.To.Version)
-                    )
-                );
+                    ));
+        }
+
+        private bool IsSameAssembly(AssemblyRedirect redirect, XElement dependentAssemblyElement)
+        {
+            var identity = dependentAssemblyElement.Element(AssemblyIdentityElementName);
+            if (identity == null)
+            {
+                return false;
+            }
+            return (string) identity.Attribute(NameAttributeName) == redirect.From.Name &&
+                   (string) identity.Attribute(PublicKeyTokenAttributeName) == redirect.From.PublicKeyToken &&
+                   (string) identity.Attribute(CultureAttributeName) == redirect.From.Culture;
+        }
+
+        public static XElement GetOrAddElement(XContainer parent, XName elementName)
+        {
+            XElement element;
+            if (parent.Element(elementName) != null)
+            {
+                element = parent.Element(elementName);
+            }
+            else
+            {
+                element = new XElement(elementName);
+                parent.Add(element);
+            }
+            return element;
         }
 
         private AssemblyRedirect[] CollectRedirects(IEnumerable<LibraryExport> dependencies)
@@ -109,15 +143,12 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var metadataReader = peReader.GetMetadataReader();
 
                 var definition = metadataReader.GetAssemblyDefinition();
-
-                var publicKey = metadataReader.GetBlobBytes(definition.PublicKey);
-                var publicKeyToken = GetPublicKeyToken(publicKey);
                 
                 var identity = new AssemblyIdentity(
                     metadataReader.GetString(definition.Name),
                     definition.Version,
                     metadataReader.GetString(definition.Culture),
-                    publicKeyToken
+                    GetPublicKeyToken(metadataReader.GetBlobBytes(definition.PublicKey))
                 );
 
                 var references = new List<AssemblyIdentity>(metadataReader.AssemblyReferences.Count);
@@ -184,7 +215,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 Name = name;
                 Version = version;
-                Culture = culture;
+                Culture = string.IsNullOrEmpty(culture)? "neutral" : culture;
                 PublicKeyToken = publicKeyToken;
             }
 
