@@ -230,7 +230,7 @@ sub runbuild {
     # Run build, parsing it's output to count errors and warnings
     # Harakiri if can't run
     my $buildOutput = gensym;
-    open3(\*STDIN, $buildOutput, $buildOutput, @command)
+    my $pid = open3(\*STDIN, $buildOutput, $buildOutput, @command)
       or die "Cannot run $program, error $!";
     my $warningCount = 0;
     my $errorCount = 0;
@@ -242,6 +242,7 @@ sub runbuild {
 
     die "Failed to run $program, exit code $!" if $! != 0;
     close $buildOutput;
+    waitpid $pid, 0;
     my $exitCode = $? >> 8;
 
     # Search the log for the full output path
@@ -293,8 +294,9 @@ sub runtests {
     {
         my $outputHandle = gensym;
         open $outputHandle, '>', $outputFile or die "Could not open '$outputFile': $!";
-        open3 \*STDIN, $outputHandle, $outputHandle, @command;
+        my $pid = open3 \*STDIN, $outputHandle, $outputHandle, @command;
         close $outputHandle;
+        waitpid $pid, 0;
     }
 
     # Count the passed/failed tests by reading the output XML file
