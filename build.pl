@@ -104,9 +104,9 @@ if ($runTests) {
     # Find the nunit console program
     my $n = ($^O eq 'MSWin32') ? `where nunit-console` : `which nunit-console`;
     chomp $n;
-    
+
     die ("Tests are requested, but nunit-console was not found") unless -e $n;
-    
+
     # Resolve any links
     $nunitConsole = abs_path($n);
     # Use version 4 if found
@@ -123,9 +123,9 @@ if ($^O eq "MSWin32") {
     print "For MSBuild: got $n[0]\n";
     chomp @n;
     print "Chomped MSBuild: got $n[0]\n";
-    
+
     die ('Installed MSBuild was not found') unless -e $n[0];
-   
+
     # Resolve any links
     $installedBuild = abs_path($n[0]);
     $slash = '\\';
@@ -211,7 +211,7 @@ sub runbuild {
     push @switches, "p:BuildNugetPackage=true" if $createPackage;
 
     # Except on Windows, we need to specifiy 4.0 toolse
-    push @switches, "tv:4.0" if $overrideToolset; 
+    push @switches, "tv:4.0" if $overrideToolset;
 
     @switches = map { $switch.$_ } (
             @switches,
@@ -302,7 +302,7 @@ sub runtests {
     # Count the passed/failed tests by reading the output XML file
     my $testsFailed = 0;
     my $testsSucceeded = 0;
-    
+
     my $testRegex = qr!^\s*<test-case.+executed="True".+success="((?:True)|(?:False))"!;
 
     if (open my ($LOG), '<', $xmlResultFile) {
