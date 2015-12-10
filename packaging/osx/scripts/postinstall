@@ -13,6 +13,7 @@ chmod -R 755 $INSTALL_DESTINATION
 
 ln -s $INSTALL_DESTINATION/bin/dotnet /usr/local/bin/
 ln -s $INSTALL_DESTINATION/bin/dotnet-compile /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-build /usr/local/bin/
 ln -s $INSTALL_DESTINATION/bin/dotnet-compile-csc /usr/local/bin/
 ln -s $INSTALL_DESTINATION/bin/dotnet-new /usr/local/bin/
 ln -s $INSTALL_DESTINATION/bin/dotnet-pack /usr/local/bin/

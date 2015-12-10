@@ -2,13 +2,15 @@ dotnet-compile
 ===========
 
 **NAME** 
-dotnet-compile -- Compiles source files to a binary format and saves to a target file.
+dotnet-compile -- Compiles source files for a single project to a binary format and saves to a target file.
 
 **SYNOPSIS**
 dotnet compile [options]
 
 **DESCRIPTION**
-The compile command compiles source files to a binary file, either IL byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future.
+The compile command compiles source files from a single project to a binary file, either IL byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future.
+
+Users who want to benefit from incremental builds and who want to compile both the project and its dependencies should use the Build command.
 
 The default IL [--il] output is a PE32 exe [exe], with the default extension of ".exe" on all OSes. The exe must include a public static void or public static int main entry point, or it is an error. The dll [dll] output option has the default extension of ".dll".
 

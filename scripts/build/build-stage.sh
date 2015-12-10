@@ -26,6 +26,7 @@ source "$DIR/../_common.sh"
 PROJECTS=( \
     Microsoft.DotNet.Cli \
     Microsoft.DotNet.Tools.Compiler \
+    Microsoft.DotNet.Tools.Builder \
     Microsoft.DotNet.Tools.Compiler.Csc \
     Microsoft.DotNet.Tools.Compiler.Native \
     Microsoft.DotNet.Tools.New \

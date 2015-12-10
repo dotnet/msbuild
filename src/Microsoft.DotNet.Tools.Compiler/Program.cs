@@ -22,76 +22,15 @@ namespace Microsoft.DotNet.Tools.Compiler
 {
     public class Program
     {
+
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var app = new CommandLineApplication();
-            app.Name = "dotnet compile";
-            app.FullName = ".NET Compiler";
-            app.Description = "Compiler for the .NET Platform";
-            app.HelpOption("-h|--help");
-
-            var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
-            var intermediateOutput = app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
-            var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
-            var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
-            var noProjectDependencies = app.Option("--no-project-dependencies", "Skips building project references.", CommandOptionType.NoValue);
-            var noHost = app.Option("--no-host", "Set this to skip publishing a runtime host when building for CoreCLR", CommandOptionType.NoValue);
-            var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
-
-            // Native Args
-            var native = app.Option("-n|--native", "Compiles source to native machine code.", CommandOptionType.NoValue);
-            var arch = app.Option("-a|--arch <ARCH>", "The architecture for which to compile. x64 only currently supported.", CommandOptionType.SingleValue);
-            var ilcArgs = app.Option("--ilcargs <ARGS>", "Command line arguments to be passed directly to ILCompiler.", CommandOptionType.SingleValue);
-            var ilcPath = app.Option("--ilcpath <PATH>", "Path to the folder containing custom built ILCompiler.", CommandOptionType.SingleValue);
-            var ilcSdkPath = app.Option("--ilcsdkpath <PATH>", "Path to the folder containing custom built ILCompiler SDK.", CommandOptionType.SingleValue);
-            var appDepSdkPath = app.Option("--appdepsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
-            var cppMode = app.Option("--cpp", "Flag to do native compilation with C++ code generator.", CommandOptionType.NoValue);
-            var cppCompilerFlags = app.Option("--cppcompilerflags <flags>", "Additional flags to be passed to the native compiler.", CommandOptionType.SingleValue);
-
-            app.OnExecute(() =>
-            {
-                // Locate the project and get the name and full path
-                var path = project.Value;
-                if (string.IsNullOrEmpty(path))
-                {
-                    path = Directory.GetCurrentDirectory();
-                }
-
-                var buildProjectReferences = !noProjectDependencies.HasValue();
-                var isNative = native.HasValue();
-                var isCppMode = cppMode.HasValue();
-                var archValue = arch.Value();
-                var ilcArgsValue = ilcArgs.Value();
-                var ilcPathValue = ilcPath.Value();
-                var ilcSdkPathValue = ilcSdkPath.Value();
-                var appDepSdkPathValue = appDepSdkPath.Value();
-                var configValue = configuration.Value() ?? Constants.DefaultConfiguration;
-                var outputValue = output.Value();
-                var intermediateValue = intermediateOutput.Value();
-                var cppCompilerFlagsValue = cppCompilerFlags.Value();
-
-                // Load project contexts for each framework and compile them
-                bool success = true;
-                var contexts = framework.HasValue() ?
-                    framework.Values.Select(f => ProjectContext.Create(path, NuGetFramework.Parse(f))) :
-                    ProjectContext.CreateContextForEachFramework(path);
-                foreach (var context in contexts)
-                {
-                    success &= Compile(context, configValue, outputValue, intermediateValue, buildProjectReferences, noHost.HasValue());
-                    if (isNative && success)
-                    {
-                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, appDepSdkPathValue, isCppMode, cppCompilerFlagsValue);
-                    }
-                }
-
-                return success ? 0 : 1;
-            });
-
             try
             {
-                return app.Execute(args);
+                var compilerCommandArgs = new CompilerCommandApp("dotnet compile", ".NET Compiler", "Compiler for the .NET Platform");
+                return compilerCommandArgs.Execute(OnExecute, args);
             }
             catch (Exception ex)
             {
@@ -104,31 +43,36 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
+        private static bool OnExecute(List<ProjectContext> contexts, CompilerCommandApp args)
+        {
+            var success = true;
+
+            foreach (var context in contexts)
+            {
+                success &= CompileProject(context, args);
+                if (args.IsNativeValue && success)
+                {
+                    success &= CompileNative(context, args);
+                }
+            }
+            return success;
+        }
+
         private static bool CompileNative(
             ProjectContext context, 
-            string configuration, 
-            string outputOptionValue, 
-            bool buildProjectReferences, 
-            string intermediateOutputValue, 
-            string archValue, 
-            string ilcArgsValue, 
-            string ilcPathValue,
-            string ilcSdkPathValue,
-            string appDepSdkPathValue,
-            bool isCppMode,
-            string cppCompilerFlagsValue)
+            CompilerCommandApp args)
         {
-            var outputPath = GetOutputPath(context, configuration, outputOptionValue);
-            var nativeOutputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
+            var outputPath = context.GetOutputPath(args.ConfigValue, args.OutputValue);
+            var nativeOutputPath = Path.Combine(outputPath, "native");
             var intermediateOutputPath = 
-                GetIntermediateOutputPath(context, configuration, intermediateOutputValue, outputOptionValue);
+                context.GetIntermediateOutputPath(args.ConfigValue, args.IntermediateValue, outputPath);
 
             Directory.CreateDirectory(nativeOutputPath);
             Directory.CreateDirectory(intermediateOutputPath);
 
-            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, args.ConfigValue);
             var managedOutput = 
-                GetProjectOutput(context.ProjectFile, context.TargetFramework, configuration, outputPath);
+                GetProjectOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
             
             var nativeArgs = new List<string>();
 
@@ -136,58 +80,58 @@ namespace Microsoft.DotNet.Tools.Compiler
             nativeArgs.Add($"{managedOutput}");
 
             // ILC Args
-            if (!string.IsNullOrWhiteSpace(ilcArgsValue))
+            if (!string.IsNullOrWhiteSpace(args.IlcArgsValue))
             {
                 nativeArgs.Add("--ilcargs");
-                nativeArgs.Add($"{ilcArgsValue}");
+                nativeArgs.Add($"{args.IlcArgsValue}");
             }            
             
             // ILC Path
-            if (!string.IsNullOrWhiteSpace(ilcPathValue))
+            if (!string.IsNullOrWhiteSpace(args.IlcPathValue))
             {
                 nativeArgs.Add("--ilcpath");
-                nativeArgs.Add(ilcPathValue);
+                nativeArgs.Add(args.IlcPathValue);
             }
 
             // ILC SDK Path
-            if (!string.IsNullOrWhiteSpace(ilcSdkPathValue))
+            if (!string.IsNullOrWhiteSpace(args.IlcSdkPathValue))
             {
                 nativeArgs.Add("--ilcsdkpath");
-                nativeArgs.Add(ilcSdkPathValue);
+                nativeArgs.Add(args.IlcSdkPathValue);
             }
 
             // AppDep SDK Path
-            if (!string.IsNullOrWhiteSpace(appDepSdkPathValue))
+            if (!string.IsNullOrWhiteSpace(args.AppDepSdkPathValue))
             {
                 nativeArgs.Add("--appdepsdk");
-                nativeArgs.Add(appDepSdkPathValue);
+                nativeArgs.Add(args.AppDepSdkPathValue);
             }
 
             // CodeGen Mode
-            if(isCppMode)
+            if(args.IsCppModeValue)
             {
                 nativeArgs.Add("--mode");
                 nativeArgs.Add("cpp");
             }
 
-            if (!string.IsNullOrWhiteSpace(cppCompilerFlagsValue))
+            if (!string.IsNullOrWhiteSpace(args.CppCompilerFlagsValue))
             {
                 nativeArgs.Add("--cppcompilerflags");
-                nativeArgs.Add(cppCompilerFlagsValue);
+                nativeArgs.Add(args.CppCompilerFlagsValue);
             }
 
             // Configuration
-            if (configuration != null)
+            if (args.ConfigValue != null)
             {
                 nativeArgs.Add("--configuration");
-                nativeArgs.Add(configuration);
+                nativeArgs.Add(args.ConfigValue);
             }
 
             // Architecture
-            if (archValue != null)
+            if (args.ArchValue != null)
             {
                 nativeArgs.Add("--arch");
-                nativeArgs.Add(archValue);
+                nativeArgs.Add(args.ArchValue);
             }
 
             // Intermediate Path
@@ -214,65 +158,21 @@ namespace Microsoft.DotNet.Tools.Compiler
             return result.ExitCode == 0;
         }
 
-        private static bool Compile(ProjectContext context, string configuration, string outputOptionValue, string intermediateOutputValue, bool buildProjectReferences, bool noHost)
+        private static bool CompileProject(ProjectContext context, CompilerCommandApp args)
         {
             // Set up Output Paths
-            string outputPath = GetOutputPath(context, configuration, outputOptionValue);
-            string intermediateOutputPath = GetIntermediateOutputPath(context, configuration, intermediateOutputValue, outputOptionValue);
+            string outputPath = context.GetOutputPath(args.ConfigValue, args.OutputValue);
+            string intermediateOutputPath = context.GetIntermediateOutputPath(args.ConfigValue, args.IntermediateValue, outputPath);
 
             Directory.CreateDirectory(outputPath);
             Directory.CreateDirectory(intermediateOutputPath);
 
             // Create the library exporter
-            var exporter = context.CreateExporter(configuration);
+            var exporter = context.CreateExporter(args.ConfigValue);
 
             // Gather exports for the project
             var dependencies = exporter.GetDependencies().ToList();
 
-            if (buildProjectReferences)
-            {
-                var projects = new Dictionary<string, ProjectDescription>();
-
-                // Build project references
-                foreach (var dependency in dependencies)
-                {
-                    var projectDependency = dependency.Library as ProjectDescription;
-
-                    if (projectDependency != null && projectDependency.Project.Files.SourceFiles.Any())
-                    {
-                        projects[projectDependency.Identity.Name] = projectDependency;
-                    }
-                }
-
-                foreach (var projectDependency in Sort(projects))
-                {
-                    // Skip compiling project dependencies since we've already figured out the build order
-                    var compileResult = Command.Create("dotnet-compile", 
-                        $"--framework {projectDependency.Framework} " +
-                        $"--configuration {configuration} " +
-                        $"--output \"{outputPath}\" " +
-                        $"--temp-output \"{intermediateOutputPath}\" " +
-                        "--no-project-dependencies " +
-                        (noHost ? "--no-host " : string.Empty) +
-                        $"\"{projectDependency.Project.ProjectDirectory}\"")
-                            .ForwardStdOut()
-                            .ForwardStdErr()
-                            .Execute();
-
-                    if (compileResult.ExitCode != 0)
-                    {
-                        return false;
-                    }
-                }
-
-                projects.Clear();
-            }
-
-            return CompileProject(context, configuration, outputPath, intermediateOutputPath, dependencies, noHost);
-        }
-
-        private static bool CompileProject(ProjectContext context, string configuration, string outputPath, string intermediateOutputPath, List<LibraryExport> dependencies, bool noHost)
-        {
             Reporter.Output.WriteLine($"Compiling {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}");
             var sw = Stopwatch.StartNew();
 
@@ -300,7 +200,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Get compilation options
-            var outputName = GetProjectOutput(context.ProjectFile, context.TargetFramework, configuration, outputPath);
+            var outputName = GetProjectOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
 
             // Assemble args
             var compilerArgs = new List<string>()
@@ -309,7 +209,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 $"--out:{outputName}"
             };
 
-            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, args.ConfigValue);
 
             // Path to strong naming key in environment variable overrides path in project.json
             var environmentKeyFile = Environment.GetEnvironmentVariable(EnvironmentNames.StrongNameKeyFile);
@@ -340,7 +240,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     if (projectDependency.Project.Files.SourceFiles.Any())
                     {
-                        var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
+                        var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, args.ConfigValue, outputPath);
                         references.Add(projectOutputPath);
                     }
                 }
@@ -355,7 +255,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             compilerArgs.AddRange(references.Select(r => $"--reference:{r}"));
 
             var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
-            var libraryExporter = runtimeContext.CreateExporter(configuration);
+            var libraryExporter = runtimeContext.CreateExporter(args.ConfigValue);
 
             if (compilationOptions.PreserveCompilationContext == true)
             {
@@ -384,7 +284,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 }
             }
 
-            if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
+            if (!AddNonCultureResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
             {
                 return false;
             }
@@ -392,8 +292,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var sourceFiles = context.ProjectFile.Files.SourceFiles;
             compilerArgs.AddRange(sourceFiles);
 
-            var compilerName = context.ProjectFile.CompilerName;
-            compilerName = compilerName ?? "csc";
+            var compilerName = CompilerUtil.ResolveCompilerName(context);
 
             // Write RSP file
             var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{context.ProjectFile.Name}.rsp");
@@ -403,7 +302,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var contextVariables = new Dictionary<string, string>()
             {
                 { "compile:TargetFramework", context.TargetFramework.DotNetFrameworkName },
-                { "compile:Configuration", configuration },
+                { "compile:Configuration", args.ConfigValue },
                 { "compile:OutputFile", outputName },
                 { "compile:OutputDir", outputPath },
                 { "compile:ResponseFile", rsp }
@@ -444,10 +343,10 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (success)
             {
-                success &= GenerateResourceAssemblies(context.ProjectFile, dependencies, outputPath, configuration);
+                success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, outputPath);
             }
 
-            if (success && !noHost && compilationOptions.EmitEntryPoint.GetValueOrDefault())
+            if (success && !args.NoHostValue && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
                 MakeRunnable(runtimeContext,
                              outputPath,
@@ -479,58 +378,6 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             return Path.Combine(outputPath, project.Name + outputExtension);
-        }
-
-        private static string GetOutputPath(ProjectContext context, string configuration, string outputOptionValue)
-        {
-            var outputPath = string.Empty;
-
-            if (string.IsNullOrEmpty(outputOptionValue))
-            {
-                outputPath = Path.Combine(
-                    GetDefaultRootOutputPath(context, outputOptionValue),
-                    Constants.BinDirectoryName,
-                    configuration,
-                    context.TargetFramework.GetTwoDigitShortFolderName());
-            }
-            else
-            {
-                outputPath = outputOptionValue;
-            }
-
-            return outputPath;
-        }
-
-        private static string GetIntermediateOutputPath(ProjectContext context, string configuration, string intermediateOutputValue, string outputOptionValue)
-        {
-            var intermediateOutputPath = string.Empty;
-
-            if (string.IsNullOrEmpty(intermediateOutputValue))
-            {
-                intermediateOutputPath = Path.Combine(
-                    GetDefaultRootOutputPath(context, outputOptionValue),
-                    Constants.ObjDirectoryName,
-                    configuration,
-                    context.TargetFramework.GetTwoDigitShortFolderName());
-            }
-            else
-            {
-                intermediateOutputPath = intermediateOutputValue;
-            }
-
-            return intermediateOutputPath;
-        }
-
-        private static string GetDefaultRootOutputPath(ProjectContext context, string outputOptionValue)
-        {
-            string rootOutputPath = string.Empty;
-
-            if (string.IsNullOrEmpty(outputOptionValue))
-            {
-                rootOutputPath = context.ProjectFile.ProjectDirectory;
-            }
-
-            return rootOutputPath;
         }
 
         private static void CleanOrCreateDirectory(string path)
@@ -686,145 +533,77 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             Reporter.Output.WriteLine();
 
-            Reporter.Output.WriteLine($"Time elapsed {sw.Elapsed}");
-            Reporter.Output.WriteLine();
+            Reporter.Output.Write($"Time elapsed {sw.Elapsed}");
 
             return success;
         }
 
-        private static bool AddResources(Project project, List<string> compilerArgs, string intermediateOutputPath)
+        private static bool AddNonCultureResources(Project project, List<string> compilerArgs, string intermediateOutputPath)
         {
+            var resgenFiles = CompilerUtil.GetNonCultureResources(project, intermediateOutputPath);
 
-            foreach (var resourceFile in project.Files.ResourceFiles)
+            foreach (var resgenFile in resgenFiles)
             {
-                var resourcePath = resourceFile.Key;
-
-                if (!string.IsNullOrEmpty(ResourceUtility.GetResourceCultureName(resourcePath)))
+                if (ResourceUtility.IsResxFile(resgenFile.InputFile))
                 {
-                    // Include only "neutral" resources into main assembly
-                    continue;
+                    var result =
+                        Command.Create("dotnet-resgen",
+                            $"\"{resgenFile.InputFile}\" -o \"{resgenFile.OutputFile}\" -v \"{project.Version.Version}\"")
+                            .ForwardStdErr()
+                            .ForwardStdOut()
+                            .Execute();
+
+                    if (result.ExitCode != 0)
+                    {
+                        return false;
+                    }
+
+                    compilerArgs.Add($"--resource:\"{resgenFile.OutputFile}\",{Path.GetFileName(resgenFile.MetadataName)}");
+                }
+                else
+                {
+                    compilerArgs.Add($"--resource:\"{resgenFile.InputFile}\",{Path.GetFileName(resgenFile.MetadataName)}");
+                }
+            }
+
+            return true;
+        }
+
+        private static bool GenerateCultureResourceAssemblies(Project project, List<LibraryExport> dependencies, string outputPath)
+        {
+            var referencePaths = CompilerUtil.GetReferencePathsForCultureResgen(dependencies);
+            var resgenReferenceArgs = referencePaths.Select(referencePath => $"-r \"{referencePath}\"").ToList();
+
+            var cultureResgenFiles = CompilerUtil.GetCultureResources(project, outputPath);
+
+            foreach (var resgenFile in cultureResgenFiles)
+            {
+                var resourceOutputPath = Path.GetDirectoryName(resgenFile.OutputFile);
+
+                if (!Directory.Exists(resourceOutputPath))
+                {
+                    Directory.CreateDirectory(resourceOutputPath);
                 }
 
-                var name = GetResourceFileMetadataName(project, resourceFile);
+                var arguments = new List<string>();
 
-                var fileName = resourcePath;
+                arguments.AddRange(resgenReferenceArgs);
+                arguments.Add($"-o \"{resgenFile.OutputFile}\"");
+                arguments.Add($"-c {resgenFile.Culture}");
+                arguments.Add($"-v {project.Version.Version}");
+                arguments.AddRange(resgenFile.InputFileToMetadata.Select(fileToMetadata => $"\"{fileToMetadata.Key}\",{fileToMetadata.Value}"));
 
-                if (ResourceUtility.IsResxFile(fileName))
-                {
-                    // {file}.resx -> {file}.resources
-                    var resourcesFile = Path.Combine(intermediateOutputPath, name);
-
-                    var result = Command.Create("dotnet-resgen", $"\"{fileName}\" -o \"{resourcesFile}\" -v \"{project.Version.Version}\"")
+                var result = Command.Create("dotnet-resgen", arguments)
                                         .ForwardStdErr()
                                         .ForwardStdOut()
                                         .Execute();
-
-                    if (result.ExitCode != 0)
-                    {
-                        return false;
-                    }
-
-                    // Use this as the resource name instead
-                    fileName = resourcesFile;
+                if (result.ExitCode != 0)
+                {
+                    return false;
                 }
-
-                compilerArgs.Add($"--resource:\"{fileName}\",{name}");
             }
 
             return true;
-        }
-
-        private static string GetResourceFileMetadataName(Project project, KeyValuePair<string, string> resourceFile)
-        {
-            string resourceName = null;
-            string rootNamespace = null;
-
-            string root = PathUtility.EnsureTrailingSlash(project.ProjectDirectory);
-            string resourcePath = resourceFile.Key;
-            if (string.IsNullOrEmpty(resourceFile.Value))
-            {
-                // No logical name, so use the file name
-                resourceName = ResourceUtility.GetResourceName(root, resourcePath);
-                rootNamespace = project.Name;
-            }
-            else
-            {
-                resourceName = ResourceManifestName.EnsureResourceExtension(resourceFile.Value, resourcePath);
-                rootNamespace = null;
-            }
-
-            var name = ResourceManifestName.CreateManifestName(resourceName, rootNamespace);
-            return name;
-        }
-
-        private static bool GenerateResourceAssemblies(Project project, List<LibraryExport> dependencies, string outputPath, string configuration)
-        {
-            var references = dependencies.SelectMany(libraryExport => libraryExport.CompilationAssemblies);
-
-            foreach (var resourceFileGroup in project.Files.ResourceFiles.GroupBy(file => ResourceUtility.GetResourceCultureName(file.Key)))
-            {
-                var culture = resourceFileGroup.Key;
-                if (!string.IsNullOrEmpty(culture))
-                {
-                    var resourceOutputPath = Path.Combine(outputPath, culture);
-
-                    if (!Directory.Exists(resourceOutputPath))
-                    {
-                        Directory.CreateDirectory(resourceOutputPath);
-                    }
-
-                    var resourceOuputFile = Path.Combine(resourceOutputPath, project.Name + ".resources.dll");
-
-                    var arguments = new List<string>();
-                    arguments.AddRange(references.Select(r => $"-r \"{r.ResolvedPath}\""));
-                    arguments.Add($"-o \"{resourceOuputFile}\"");
-                    arguments.Add($"-c {culture}");
-                    arguments.Add($"-v {project.Version.Version}");
-
-                    foreach (var resourceFile in resourceFileGroup)
-                    {
-                        var metadataName = GetResourceFileMetadataName(project, resourceFile);
-                        arguments.Add($"\"{resourceFile.Key}\",{metadataName}");
-                    }
-
-                    var result = Command.Create("dotnet-resgen", arguments)
-                                            .ForwardStdErr()
-                                            .ForwardStdOut()
-                                            .Execute();
-                    if (result.ExitCode != 0)
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)
-        {
-            var outputs = new HashSet<ProjectDescription>();
-
-            foreach (var pair in projects)
-            {
-                Sort(pair.Value, projects, outputs);
-            }
-
-            return outputs;
-        }
-
-        private static void Sort(ProjectDescription project, Dictionary<string, ProjectDescription> projects, ISet<ProjectDescription> outputs)
-        {
-            // Sorts projects in dependency order so that we only build them once per chain
-            foreach (var dependency in project.Dependencies)
-            {
-                ProjectDescription projectDependency;
-                if (projects.TryGetValue(dependency.Name, out projectDependency))
-                {
-                    Sort(projectDependency, projects, outputs);
-                }
-            }
-
-            outputs.Add(project);
         }
 
         private static DiagnosticMessage ParseDiagnostic(string projectRootPath, string line)
