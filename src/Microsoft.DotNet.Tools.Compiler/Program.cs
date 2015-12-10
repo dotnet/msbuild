@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     ProjectContext.CreateContextForEachFramework(path);
                 foreach (var context in contexts)
                 {
-                    success &= Compile(context, configValue, outputValue, intermediateOutput.Value(), buildProjectReferences, noHost.HasValue());
+                    success &= Compile(context, configValue, outputValue, intermediateValue, buildProjectReferences, noHost.HasValue());
                     if (isNative && success)
                     {
                         success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, isCppMode);
