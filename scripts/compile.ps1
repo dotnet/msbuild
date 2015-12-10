@@ -31,27 +31,26 @@ Download it from https://www.cmake.org
         Exit 1
     }
 
-
     # Put stage 0 on the path
     $DotNetTools = $env:DOTNET_INSTALL_DIR
     if (!$DotNetTools) {
         $DotNetTools = "$($env:LOCALAPPDATA)\Microsoft\dotnet"
     }
 
-    if (Test-Path "$DotNetTools\cli\dotnet.exe") {
-        Write-Warning "Your stage0 is using the old layout"
-        $DnxDir = "$DotNetTools\cli\dnx"
-        $env:PATH = "$DotNetTools\cli;$StartPath"
-    } elseif (Test-Path "$DotNetTools\cli\bin\dotnet.exe") {
-        $DnxDir = "$DotNetTools\cli\bin\dnx"
-        $env:PATH = "$DotNetTools\cli\bin;$StartPath"
-    } else {
-        throw "Couldn't find stage0 dotnet tools!"
+    # Download dnx to copy to stage2
+    if ((Test-Path "$DnxDir")) {
+        Remove-Item -Recurse -Force $DnxDir
     }
+    mkdir "$DnxDir" | Out-Null
+    $DnxUrl="https://api.nuget.org/packages/dnx-coreclr-win-x64.$DnxVersion.nupkg"
+    Invoke-WebRequest -UseBasicParsing "$DnxUrl" -OutFile "$DnxDir\dnx.zip"
+    Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
+    [System.IO.Compression.ZipFile]::ExtractToDirectory("$DnxDir\dnx.zip", "$DnxDir")
+    $DnxRoot = "$DnxDir/bin"
 
     # Restore packages
     header "Restoring packages"
-    dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+    & "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
     if (!$?) {
         Write-Host "Command failed: " dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
         Exit 1
@@ -118,7 +117,7 @@ Download it from https://www.cmake.org
 
 
     # Copy dnx into stage 2
-    cp -rec "$DnxDir\" "$Stage2Dir\bin\dnx\"
+    cp -rec "$DnxRoot\" "$Stage2Dir\bin\dnx\"
 
     # Copy in the dotnet-restore script
     cp "$PSScriptRoot\dotnet-restore.cmd" "$Stage2Dir\bin\dotnet-restore.cmd"

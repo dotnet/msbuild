@@ -5,19 +5,17 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "System.Console": "4.0.0-beta-23504",
-        "System.Collections": "4.0.11-beta-23504",
+        "NETStandard.Library": "1.0.0-rc2-23608",
         "System.Linq": "4.0.1-beta-23504",
-        "System.Diagnostics.Process": "4.1.0-beta-23504",
-        "System.IO.FileSystem": "4.0.1-beta-23504",
+        
+        "Microsoft.Net.Compilers.netcore": "1.2.0-beta-20151117-04",
+        "System.CommandLine" : "0.1.0-d111815-3",
 
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": {
             "type": "build",
             "version": "1.0.0-*"
-        },
-        "Microsoft.Net.Compilers.netcore": "1.2.0-beta-20151117-04",
-        "System.CommandLine" : "0.1.0-d111815-3"
+        }
     },
     "frameworks": {
         "dnxcore50": { }
