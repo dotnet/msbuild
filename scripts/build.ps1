@@ -26,12 +26,12 @@ if (!$env:DOTNET_BUILD_VERSION) {
 
     $majorVersion = 1
     $minorVersion = 0
-    $buildnumber = $commitTime.Days
+    $buildnumber = 0
     $revnumber = $commitTime.TotalSeconds
     
-    $VersionSuffix = "$buildnumber.$revnumber"
+    $VersionSuffix = "dev-$revnumber"
 
-    $env:DOTNET_BUILD_VERSION = "$majorVersion.$minorVersion.$VersionSuffix"
+    $env:DOTNET_BUILD_VERSION = "$majorVersion.$minorVersion.$buildnumber.$revnumber"
 }
 
 Write-Host -ForegroundColor Green "*** Building dotnet tools version $($env:DOTNET_BUILD_VERSION) - $Configuration ***"

@@ -43,7 +43,7 @@ LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
 major=1
 minor=0
 # no. of days since epoch
-build=$(($LAST_COMMIT_TIMESTAMP/3600/24))
+build=0
 revision=$LAST_COMMIT_TIMESTAMP
 
 export DOTNET_BUILD_VERSION=$major.$minor.$build.$revision

@@ -15,15 +15,18 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
     public class ProjectDependencyProvider
     {
         private Func<string, Project> _resolveProject;
+        private ProjectReaderSettings _settings;
 
-        public ProjectDependencyProvider()
+        public ProjectDependencyProvider(ProjectReaderSettings settings = null)
         {
             _resolveProject = ResolveProject;
+            _settings = settings;
         }
 
-        public ProjectDependencyProvider(Func<string, Project> projectCacheResolver)
+        public ProjectDependencyProvider(Func<string, Project> projectCacheResolver, ProjectReaderSettings settings = null)
         {
             _resolveProject = projectCacheResolver;
+            _settings = settings;
         }
 
         public ProjectDescription GetDescription(string name,
@@ -87,7 +90,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         private Project ResolveProject(string path)
         {
             Project project;
-            if (ProjectReader.TryGetProject(path, out project))
+            if (ProjectReader.TryGetProject(path, out project, settings: _settings))
             {
                 return project;
             }

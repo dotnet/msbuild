@@ -16,12 +16,7 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class ProjectReader
     {
-        public class Settings
-        {
-            public string VersionSuffix = null;
-        }
-
-        public static bool TryGetProject(string path, out Project project, ICollection<DiagnosticMessage> diagnostics = null)
+        public static bool TryGetProject(string path, out Project project, ICollection<DiagnosticMessage> diagnostics = null, ProjectReaderSettings settings = null)
         {
             project = null;
 
@@ -55,7 +50,7 @@ namespace Microsoft.DotNet.ProjectModel
                 using (var stream = File.OpenRead(projectPath))
                 {
                     var reader = new ProjectReader();
-                    project = reader.ReadProject(stream, projectName, projectPath, diagnostics);
+                    project = reader.ReadProject(stream, projectName, projectPath, diagnostics, settings);
                 }
             }
             catch (Exception ex)
@@ -66,12 +61,12 @@ namespace Microsoft.DotNet.ProjectModel
             return true;
         }
 
-        public static Project GetProject(string projectFile, Settings settings = null)
+        public static Project GetProject(string projectFile, ProjectReaderSettings settings = null)
         {
             return GetProject(projectFile, new List<DiagnosticMessage>(), settings);
         }
 
-        public static Project GetProject(string projectFile, ICollection<DiagnosticMessage> diagnostics, Settings settings = null)
+        public static Project GetProject(string projectFile, ICollection<DiagnosticMessage> diagnostics, ProjectReaderSettings settings = null)
         {
             var name = Path.GetFileName(Path.GetDirectoryName(projectFile));
             using (var stream = new FileStream(projectFile, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -80,9 +75,9 @@ namespace Microsoft.DotNet.ProjectModel
             }
         }
 
-        public Project ReadProject(Stream stream, string projectName, string projectPath, ICollection<DiagnosticMessage> diagnostics, Settings settings = null)
+        public Project ReadProject(Stream stream, string projectName, string projectPath, ICollection<DiagnosticMessage> diagnostics, ProjectReaderSettings settings = null)
         {
-            settings = settings ?? new Settings();
+            settings = settings ?? new ProjectReaderSettings();
             var project = new Project();
 
             var reader = new StreamReader(stream);

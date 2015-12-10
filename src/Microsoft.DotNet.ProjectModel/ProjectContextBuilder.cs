@@ -37,6 +37,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         private Func<string, LockFile> LockFileResolver { get; set; }
 
+        private ProjectReaderSettings Settings { get; set; }
+
         public ProjectContextBuilder()
         {
             ProjectResolver = ResolveProject;
@@ -109,6 +111,12 @@ namespace Microsoft.DotNet.ProjectModel
             return this;
         }
 
+        public ProjectContextBuilder WithReaderSettings(ProjectReaderSettings settings)
+        {
+            Settings = settings;
+            return this;
+        }
+
         public IEnumerable<ProjectContext> BuildAllTargets()
         {
             ProjectDirectory = Project?.ProjectDirectory ?? ProjectDirectory;
@@ -165,7 +173,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
 
             var libraries = new Dictionary<LibraryKey, LibraryDescription>();
-            var projectResolver = new ProjectDependencyProvider();
+            var projectResolver = new ProjectDependencyProvider(Settings);
 
             var mainProject = projectResolver.GetDescription(TargetFramework, Project);
 
