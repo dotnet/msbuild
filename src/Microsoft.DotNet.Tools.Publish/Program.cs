@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Publish
             var output = app.Option("-o|--output <OUTPUT_PATH>", "Path in which to publish the app", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var projectPath = app.Argument("<PROJECT>", "The project to publish, defaults to the current directory. Can be a path to a project.json or a project directory");
-            var subdirectories = app.Option("--subdir", "Include Subdirectories in native assets in the output", CommandOptionType.NoValue);
+            var nativeSubdirectories = app.Option("--native-subdirectory", "Include subdirectories from native assets of dependency packages in output", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Tools.Publish
         /// <param name="outputPath">Location of published files</param>
         /// <param name="configuration">Debug or Release</param>
         /// <returns>Return 0 if successful else return non-zero</returns>
-        private static int Publish(ProjectContext context, string outputPath, string configuration, bool subdirectories)
+        private static int Publish(ProjectContext context, string outputPath, string configuration, bool nativeSubdirectories)
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
 
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
                 PublishFiles(export.RuntimeAssemblies, outputPath, false);
-                PublishFiles(export.NativeLibraries, outputPath, subdirectories);
+                PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories);
             }
 
             // Publish a host if this is an application
@@ -196,16 +196,11 @@ namespace Microsoft.DotNet.Tools.Publish
             return 0;
         }
 
-        private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath, bool subdirectories)
+        private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath, bool nativeSubdirectories)
         {
             foreach (var file in files)
             {
-                var destinationDirectory = outputPath;
-
-                if (subdirectories)
-                {
-                    destinationDirectory = Path.Combine(outputPath, GetNativeRelativeSubdirectory(file.RelativePath));
-                }
+                var destinationDirectory = DetermineFileDestinationDirectory(file, outputPath, nativeSubdirectories);
 
                 if (!Directory.Exists(destinationDirectory))
                 {
@@ -214,6 +209,18 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
+        }
+
+        private static string DetermineFileDestinationDirectory(LibraryAsset file, string outputPath, bool nativeSubdirectories)
+        {
+            var destinationDirectory = outputPath;
+
+            if (nativeSubdirectories)
+            {
+                destinationDirectory = Path.Combine(outputPath, GetNativeRelativeSubdirectory(file.RelativePath));
+            }
+
+            return destinationDirectory;
         }
 
         private static string GetNativeRelativeSubdirectory(string filepath)
