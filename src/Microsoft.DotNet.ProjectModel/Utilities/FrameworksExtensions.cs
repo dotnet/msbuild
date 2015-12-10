@@ -22,6 +22,10 @@ namespace NuGet.Frameworks
             }
 
             var versionPart = original.Substring(index);
+            if (versionPart.Length >= 2)
+            {
+                return original;
+            }
 
             // Assume if the version part was preserved then leave it alone
             if (versionPart.IndexOf('.') != -1)
