@@ -6,7 +6,7 @@
     },
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23608",
-        "System.Linq": "4.0.1-beta-23504",
+        "System.Linq": "4.0.1-rc2-23608",
         
         "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta-20151106-02",
 

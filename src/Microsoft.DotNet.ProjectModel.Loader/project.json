@@ -1,8 +1,8 @@
 {
     "dependencies": {
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "System.AppContext": "4.0.1-beta-23504",
-        "System.Runtime.Loader": "4.0.0-beta-23504"
+    	"NETStandard.Library": "1.0.0-rc2-23608",
+        "System.Runtime.Loader": "4.0.0-rc2-23608"
     },
     "frameworks": {
         "dnxcore50": { }
