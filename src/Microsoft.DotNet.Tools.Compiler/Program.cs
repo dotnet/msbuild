@@ -293,7 +293,14 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
 
-            if (!string.IsNullOrEmpty(compilationOptions.KeyFile))
+            // Path to strong naming key in environment variable overrides path in project.json
+            var environmentKeyFile = Environment.GetEnvironmentVariable(EnvironmentNames.StrongNameKeyFile);
+
+            if (!string.IsNullOrWhiteSpace(environmentKeyFile))
+            {
+                compilationOptions.KeyFile = environmentKeyFile;
+            }
+            else  if (!string.IsNullOrWhiteSpace(compilationOptions.KeyFile))
             {
                 // Resolve full path to key file
                 compilationOptions.KeyFile = Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
