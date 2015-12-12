@@ -10,14 +10,17 @@ use File::Basename;
 use FindBin qw($RealBin);
 use Cwd qw(abs_path);
 use POSIX;
-use Symbol 'gensym';
-use IPC::Open3 'open3';
+use Symbol qw(gensym);
+use IPC::Open3 qw(open3);
 
-#set the timestamp in case we need to create a directory
+# set the timestamp in case we need to create a directory
 use constant DATETIME=>strftime('%Y-%m-%d_%H-%M-%S', localtime);
 
 # The source solution
 my $solutionToBuild = catfile($RealBin, 'build.proj');
+
+# Handle absolute paths
+$solutionToBuild =~ s!(^/[^/])!//$1!;
 
 my $usage = <<'USAGE';
 Usage build.pl [-root=<outputRoot>] [-fullbuild] [-verify] [-tests] [-all] [-quiet] [-silent]
@@ -135,6 +138,10 @@ else {
     $slash = '/';
 }
 
+if ($solutionToBuild =~ /^-/) {
+  $solutionToBuild = ".$slash$solutionToBuild";
+}
+
 # Find the location where we're going to store results
 # If no root is specifed, use the script location (we'll create
 # bin, packages, bin-verify, packages-verify directories and the
@@ -161,7 +168,7 @@ my $exitCode;
 my $errorCount;
 
 # Run the first build
-($exitCode, $errorCount, $msbuildPath) = runbuild($installedBuild, '', '/', ($^O ne "MSWin32"));
+($exitCode, $errorCount, $msbuildPath) = runbuild([$installedBuild], '', '/', ($^O ne "MSWin32"));
 
 die ("Build with xbuild failed (code $exitCode)") unless $exitCode == 0;
 die ("Build with xbuild failed (error count $errorCount") unless $errorCount == 0;
@@ -169,8 +176,8 @@ die ("Build succeeded, but MSBuild.exe binary was not found at $msbuildPath") un
 
 # Use the MSBuild.exe we created and rebuild (if requested)
 if ($verification) {
-    my $MSBuildProgram = catfile($msbuildPath, 'MSBuild.exe');
-    $MSBuildProgram = 'mono ' . "\"$MSBuildProgram\"" unless $^O eq "MSWin32";
+    my $MSBuildProgram = [catfile($msbuildPath, 'MSBuild.exe')];
+    $MSBuildProgram = ['mono', @$MSBuildProgram] unless $^O eq "MSWin32";
     my $newMSBuildPath;
     ($exitCode, $errorCount, $newMSBuildPath) = runbuild($MSBuildProgram, '-verify', '-', 0);
     die ("Build with msbuild failed (code $exitCode)") unless $exitCode == 0;
@@ -221,9 +228,9 @@ sub runbuild {
             'fl', "flp:LogFile=$logFile;V=diag", 'p:BuildSamples=false');
 
     # Generate and print the command we run
-    my @command = ($program, @switches, $solutionToBuild);
+    my @command = (@$program, @switches, $solutionToBuild);
     {
-         local $, = ' ';
+         local $" = ' ';
          print "@command\n" unless $silent;
     }
 
@@ -287,8 +294,10 @@ sub runtests {
         @command = ($nunitConsole, "-exclude:$excludeCategories",
                 "-xml:$xmlResultFile", @files);
     }
-    local $" = ' ';
-    print @command unless $silent;
+    {
+        local $" = ' ';
+        print @command unless $silent;
+    }
 
     # Run it silently
     {
