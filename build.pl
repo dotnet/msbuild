@@ -13,9 +13,6 @@ use POSIX;
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
 
-# set the timestamp in case we need to create a directory
-use constant DATETIME=>strftime('%Y-%m-%d_%H-%M-%S', localtime);
-
 # The source solution
 my $solutionToBuild = catfile($RealBin, 'build.proj');
 
@@ -152,7 +149,8 @@ if (!$buildRoot) {
     $buildRoot = canonpath($RealBin);
 }
 else {
-    $buildRoot = catfile(rel2abs($buildRoot), DATETIME);
+    $buildRoot = catfile(rel2abs($buildRoot),
+            strftime('%Y-%m-%d_%H-%M-%S', localtime));
     # Just make sure it's not a file
     die ("Verification root '$buildRoot' exists and is a file") if -f $buildRoot;
     make_path($buildRoot);
@@ -221,11 +219,11 @@ sub runbuild {
     push @switches, "tv:4.0" if $overrideToolset;
 
     @switches = map { $switch.$_ } (
-            @switches,
-            "p:Configuration=Debug" . ($^O eq "MSWin32" ? '' : '-MONO'),
-            "p:BinDir=$binDir",
-            "p:PackagesDir=$packagesDir",
-            'fl', "flp:LogFile=$logFile;V=diag", 'p:BuildSamples=false');
+        @switches,
+        "p:Configuration=Debug" . ($^O eq "MSWin32" ? '' : '-MONO'),
+        "p:BinDir=$binDir",
+        "p:PackagesDir=$packagesDir",
+        'fl', "flp:LogFile=$logFile;V=diag", 'p:BuildSamples=false');
 
     # Generate and print the command we run
     my @command = (@$program, @switches, $solutionToBuild);
