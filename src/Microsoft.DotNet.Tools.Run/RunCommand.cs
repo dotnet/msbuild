@@ -85,8 +85,9 @@ namespace Microsoft.DotNet.Tools.Run
         {
             CalculateDefaultsForNonAssigned();
 
-            // Create a temporary directory
-            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            // Create a temporary directory under the project root
+            // REVIEW: MAX_PATH?
+            var tempDir = Path.Combine(_context.ProjectDirectory, "bin", ".dotnetrun", Guid.NewGuid().ToString("N"));
 
             // Compile to that directory
             var result = Command.Create($"dotnet-compile", $"--output \"{tempDir}\" --temp-output \"{tempDir}\" --framework \"{_context.TargetFramework}\" --configuration \"{Configuration}\" {_context.ProjectFile.ProjectDirectory}")
@@ -136,7 +137,7 @@ namespace Microsoft.DotNet.Tools.Run
                 .ForwardStdErr()
                 .EnvironmentVariable("DOTNET_HOME", runtime)
                 .Execute();
-
+                
             // Clean up
             if (!PreserveTemporary)
             {
