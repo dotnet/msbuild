@@ -1,9 +1,9 @@
 {
     "version": "1.0.0-*",
     "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23614",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    	"NETStandard.Library": "1.0.0-rc2-23608",
-        "System.Runtime.Loader": "4.0.0-rc2-23608"
+        "System.Runtime.Loader": "4.0.0-rc2-23614"
     },
     "frameworks": {
         "dnxcore50": { }

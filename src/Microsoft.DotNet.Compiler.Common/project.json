@@ -2,9 +2,8 @@
     "version": "1.0.0-*",
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23608",
-        "System.Linq": "4.0.1-rc2-23608",
-        "System.Reflection": "4.0.10-rc2-23608",
+        "System.Reflection": "4.0.10-rc2-23616",
+        "NETStandard.Library": "1.0.0-rc2-23614",
         "System.CommandLine": "0.1.0-*",
         "Microsoft.CodeAnalysis.CSharp":  "1.1.1",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",

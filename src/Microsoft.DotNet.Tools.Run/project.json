@@ -5,8 +5,7 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23608",
-        "System.Linq": "4.0.1-beta-23504",
+        "NETStandard.Library": "1.0.0-rc2-23614",
         
         "Microsoft.Net.Compilers.netcore": "1.2.0-beta-20151215-01",
         "System.CommandLine" : "0.1.0-d111815-3",

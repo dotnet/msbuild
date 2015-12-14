@@ -13,13 +13,13 @@
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.Extensions.Compilation.Abstractions": "1.0.0-*",
     "Microsoft.Extensions.Logging.Abstractions": "1.0.0-*",
-    "System.Runtime.Serialization.Primitives": "4.0.11-rc2-23608"
+    "System.Runtime.Serialization.Primitives": "4.0.11-rc2-23614"
   },
   "frameworks": {
     "dnxcore50": {
       "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23608",
-        "System.Resources.ResourceManager": "4.0.1-rc2-23608"
+        "NETStandard.Library": "1.0.0-rc2-23614",
+        "System.Resources.ResourceManager": "4.0.1-rc2-23614"
       }
     }
   },
