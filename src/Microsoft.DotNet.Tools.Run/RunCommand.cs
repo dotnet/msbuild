@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Tools.Run
                 .ForwardStdErr()
                 .EnvironmentVariable("DOTNET_HOME", runtime)
                 .Execute();
-                
+
             // Clean up
             if (!PreserveTemporary)
             {
