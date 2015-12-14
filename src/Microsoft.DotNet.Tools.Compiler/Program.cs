@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
+using Microsoft.Dotnet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Tools.Common;
@@ -309,6 +310,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Add compilation options to the args
             compilerArgs.AddRange(compilationOptions.SerializeToArgs());
 
+            // Add metadata options
+            compilerArgs.AddRange(AssemblyInfoOptions.SerializeToArgs(AssemblyInfoOptions.CreateForProject(context.ProjectFile)));
+
             foreach (var dependency in dependencies)
             {
                 var projectDependency = dependency.Library as ProjectDescription;
@@ -332,7 +336,6 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 return false;
             }
-
             // Add project source files
             var sourceFiles = context.ProjectFile.Files.SourceFiles;
             compilerArgs.AddRange(sourceFiles);
@@ -660,7 +663,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     // {file}.resx -> {file}.resources
                     var resourcesFile = Path.Combine(intermediateOutputPath, name);
 
-                    var result = Command.Create("dotnet-resgen", $"\"{fileName}\" -o \"{resourcesFile}\"")
+                    var result = Command.Create("dotnet-resgen", $"\"{fileName}\" -o \"{resourcesFile}\" -v \"{project.Version.Version}\"")
                                         .ForwardStdErr()
                                         .ForwardStdOut()
                                         .Execute();
@@ -725,6 +728,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     arguments.AddRange(references.Select(r => $"-r \"{r.ResolvedPath}\""));
                     arguments.Add($"-o \"{resourceOuputFile}\"");
                     arguments.Add($"-c {culture}");
+                    arguments.Add($"-v {project.Version.Version}");
 
                     foreach (var resourceFile in resourceFileGroup)
                     {

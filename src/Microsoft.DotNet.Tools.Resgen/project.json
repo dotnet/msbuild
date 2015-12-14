@@ -11,6 +11,7 @@
         "System.Resources.ReaderWriter": "4.0.0-rc2-23608",
 
         "Microsoft.CodeAnalysis.CSharp":  "1.1.1",
+        "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": {
             "type": "build",
             "version": "1.0.0-*"

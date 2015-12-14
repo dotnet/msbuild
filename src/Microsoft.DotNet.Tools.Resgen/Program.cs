@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using System;
+using Microsoft.Dotnet.Cli.Compiler.Common;
 
 namespace Microsoft.DotNet.Tools.Resgen
 {
@@ -23,6 +24,7 @@ namespace Microsoft.DotNet.Tools.Resgen
 
             var ouputFile = app.Option("-o", "Output file name", CommandOptionType.SingleValue);
             var culture = app.Option("-c", "Ouput assembly culture", CommandOptionType.SingleValue);
+            var version = app.Option("-v", "Ouput assembly version", CommandOptionType.SingleValue);
             var references = app.Option("-r", "Compilation references", CommandOptionType.MultipleValue);
             var inputFiles = app.Argument("<input>", "Input files", true);
 
@@ -42,10 +44,14 @@ namespace Microsoft.DotNet.Tools.Resgen
                     case ResourceFileType.Dll:
                         using (var outputStream = outputResourceFile.File.Create())
                         {
+                            var metadata = new AssemblyInfoOptions();
+                            metadata.Culture = culture.Value();
+                            metadata.AssemblyVersion = version.Value();
+
                             ResourceAssemblyGenerator.Generate(intputResourceFiles,
                                 outputStream,
+                                metadata,
                                 Path.GetFileNameWithoutExtension(outputResourceFile.File.Name),
-                                culture.Value(),
                                 references.Values.ToArray()
                                 );
                         }

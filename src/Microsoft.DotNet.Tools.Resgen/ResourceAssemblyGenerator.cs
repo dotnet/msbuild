@@ -7,13 +7,14 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.Dotnet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Resgen
 {
     internal class ResourceAssemblyGenerator
     {
-        public static void Generate(ResourceSource[] sourceFiles, Stream outputStream, string asemblyName, string culture, string[] references)
+        public static void Generate(ResourceSource[] sourceFiles, Stream outputStream, AssemblyInfoOptions metadata, string assemblyName, string[] references)
         {
             if (sourceFiles == null)
             {
@@ -51,17 +52,14 @@ namespace Microsoft.DotNet.Tools.Resgen
             }
 
             var compilationOptions = new CSharpCompilationOptions(outputKind: OutputKind.DynamicallyLinkedLibrary);
-            var compilation = CSharpCompilation.Create(asemblyName,
+            var compilation = CSharpCompilation.Create(assemblyName,
                 references: references.Select(reference => MetadataReference.CreateFromFile(reference)),
                 options: compilationOptions);
 
-            if (!string.IsNullOrEmpty(culture))
+            compilation = compilation.AddSyntaxTrees(new[]
             {
-                compilation = compilation.AddSyntaxTrees(new[]
-                {
-                    CSharpSyntaxTree.ParseText($"[assembly:System.Reflection.AssemblyCultureAttribute(\"{culture}\")]")
-                });
-            }
+                CSharpSyntaxTree.ParseText(AssemblyInfoFileGenerator.Generate(metadata, Enumerable.Empty<string>()))
+            });
 
             var result = compilation.Emit(outputStream, manifestResources: resourceDescriptions);
             if (!result.Success)

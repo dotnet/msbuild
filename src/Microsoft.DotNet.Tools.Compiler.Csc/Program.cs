@@ -13,6 +13,7 @@ using System.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.Dotnet.Cli.Compiler.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler.Csc
 {
@@ -25,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             DebugHelper.HandleDebugSwitch(ref args);
 
             CommonCompilerOptions commonOptions = null;
+            AssemblyInfoOptions assemblyInfoOptions = null;
             string tempOutDir = null;
             IReadOnlyList<string> references = Array.Empty<string>();
             IReadOnlyList<string> resources = Array.Empty<string>();
@@ -37,6 +39,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 {
                     commonOptions = CommonCompilerOptionsExtensions.Parse(syntax);
 
+                    assemblyInfoOptions = AssemblyInfoOptions.Parse(syntax);
+
                     syntax.DefineOption("temp-output", ref tempOutDir, "Compilation temporary directory");
 
                     syntax.DefineOption("out", ref outputName, "Name of the output assembly");
@@ -46,7 +50,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                     syntax.DefineOptionList("resource", ref resources, "Resources to embed");
 
                     syntax.DefineParameterList("source-files", ref sources, "Compilation sources");
-
                     if (tempOutDir == null)
                     {
                         syntax.ReportError("Option '--temp-output' is required");
@@ -62,6 +65,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
             var allArgs = new List<string>(translated);
             allArgs.AddRange(GetDefaultOptions());
+
+            // Generate assembly info
+            var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.cs");
+            File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.Generate(assemblyInfoOptions, sources));
+            allArgs.Add($"\"{assemblyInfo}\"");
 
             if (outputName != null)
             {
