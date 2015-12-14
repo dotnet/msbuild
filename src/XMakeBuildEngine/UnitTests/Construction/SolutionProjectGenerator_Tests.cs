@@ -628,7 +628,7 @@ EndGlobal
         /// Here B depends on C
         /// </summary>
         /// <seealso href="https://github.com/Microsoft/msbuild/issues/69">
-        /// MSBuild should generate metaprojects that merge the outputs of the individual MSBuild invocations
+        /// MSBuild should generate metaprojects that relay the outputs of the individual MSBuild invocations
         /// </seealso>
         [Fact]
         public void SolutionConfigurationWithDependenciesRelaysItsOutputs()
@@ -648,17 +648,12 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = preSolution
 		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.Build.0 = Release|Any CPU
 		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -687,30 +682,50 @@ EndGlobal
                     ";
             const string automaticProjectFileContents = @"
 <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='compile' xmlns='msbuildnamespace'>
-	<Target Name='compile'>
-		<MSBuild Projects='B.csproj' Targets='Build'>
-			<Output
-				TaskParameter='TargetOutputs'
-				ItemName='BravoProjectOutputs' />
-		</MSBuild>
-		<Message Importance='high' Text='BravoProjectOutputs: @(BravoProjectOutputs)' />
-		<MSBuild Projects='C.csproj' Targets='Build'>
-			<Output
-				TaskParameter='TargetOutputs'
-				ItemName='CharlieProjectOutputs' />
-		</MSBuild>
-		<Message Importance='high' Text='CharlieProjectOutputs: @(CharlieProjectOutputs)' />
-		<MSBuild Projects='B.csproj.metaproj' Targets='Build'>
-			<Output
-				TaskParameter='TargetOutputs'
-				ItemName='BravoMetaProjectOutputs' />
-		</MSBuild>
-		<Message Importance='high' Text='BravoMetaProjectOutputs: @(BravoMetaProjectOutputs)' />
-		<Error Condition=` '@(CharlieProjectOutputs);@(BravoProjectOutputs)' != '@(BravoMetaProjectOutputs)' ` Text='Metaproj must relay outputs' />
-	</Target>
+    <Target Name='compile'>
+        <!-- Build projects to get a baseline for their output -->
+        <MSBuild Projects='B.csproj' Targets='Build'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='BravoProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='BravoProjectOutputs: @(BravoProjectOutputs)' />
+
+        <MSBuild Projects='C.csproj' Targets='Build'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='CharlieProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='CharlieProjectOutputs: @(CharlieProjectOutputs)' />
+
+        <PropertyGroup>
+            <StringifiedBravoProjectOutputs>@(BravoProjectOutputs)</StringifiedBravoProjectOutputs>
+            <StringifiedCharlieProjectOutputs>@(CharlieProjectOutputs)</StringifiedCharlieProjectOutputs>
+        </PropertyGroup>
+
+        <!-- Explicitly build the metaproject generated for B -->
+        <MSBuild Projects='B.csproj.metaproj' Targets='Build'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='BravoMetaProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='BravoMetaProjectOutputs: @(BravoMetaProjectOutputs)' />
+        <Error Condition=` '@(BravoProjectOutputs)' != '@(BravoMetaProjectOutputs)' ` Text='Metaproj outputs must match outputs of normal project build.' />
+
+        <!-- Build the solution as a whole (which will build the metaproj and return overall outputs) -->
+        <MSBuild Projects='MSBuildIssue.sln'>
+            <Output
+                TaskParameter='TargetOutputs'
+                ItemName='SolutionProjectOutputs' />
+        </MSBuild>
+        <Message Importance='high' Text='SolutionProjectOutputs: @(SolutionProjectOutputs)' />
+        <Error Condition=` '@(SolutionProjectOutputs->Count())' != '2' ` Text='Overall sln outputs must include outputs of each referenced project (there should be 2).' />
+        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedBravoProjectOutputs)'))' != 'true'` Text='Overall sln outputs must include outputs of normal project build of project B.' />
+        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedCharlieProjectOutputs)'))' != 'true' ` Text='Overall sln outputs must include outputs of normal project build of project C.' />
+    </Target>
 </Project>";
             #endregion
-            // arrange
+
             var logger = new MockLogger();
             var loggers = new List<ILogger>(1) { logger };
             var solutionFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("MSBuildIssue.sln", solutionFileContents);
@@ -719,10 +734,8 @@ EndGlobal
             var solution = new SolutionFile { FullPath = solutionFile };
             solution.ParseSolutionFile();
 
-            // act
             var instances = SolutionProjectGenerator.Generate(solution, null, null, new BuildEventContext(0, 0, 0, 0), null);
 
-            // assert
             var projectBravoMetaProject = instances[1];
             Assert.False(projectBravoMetaProject.Targets.Any(kvp => kvp.Value.Outputs.Equals("@()"))); // "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case."
             // saves the in-memory metaproj to disk
@@ -730,6 +743,8 @@ EndGlobal
             var automaticProjectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("automatic.msbuild", automaticProjectFileContents);
             var automaticProject = new Project(automaticProjectFile);
             var buildResult = automaticProject.Build(loggers);
+
+            // NOTE: most of the actual assertions for this test are embedded in automaticProjectFileContents as <Error>s
             Assert.True(buildResult, String.Join(Environment.NewLine, logger.Errors.Select(beea => beea.Message)));
         }
 
