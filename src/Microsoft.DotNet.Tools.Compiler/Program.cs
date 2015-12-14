@@ -13,8 +13,8 @@ using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
-using NuGet.Frameworks;
 using Microsoft.DotNet.ProjectModel.Utilities;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -380,6 +380,11 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var success = result.ExitCode == 0;
 
+            if (success)
+            {
+                success &= GenerateResourceAssemblies(context.ProjectFile, dependencies, outputPath, configuration);
+            }
+
             if (success && !noHost && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
                 var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
@@ -628,57 +633,108 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         private static bool AddResources(Project project, List<string> compilerArgs, string intermediateOutputPath)
         {
-            string root = PathUtility.EnsureTrailingSlash(project.ProjectDirectory);
 
             foreach (var resourceFile in project.Files.ResourceFiles)
             {
-                string resourceName = null;
-                string rootNamespace = null;
-
                 var resourcePath = resourceFile.Key;
 
-                if (string.IsNullOrEmpty(resourceFile.Value))
+                if (!string.IsNullOrEmpty(ResourceUtility.GetResourceCultureName(resourcePath)))
                 {
-                    // No logical name, so use the file name
-                    resourceName = ResourcePathUtility.GetResourceName(root, resourcePath);
-                    rootNamespace = project.Name;
-                }
-                else
-                {
-                    resourceName = CreateCSharpManifestResourceName.EnsureResourceExtension(resourceFile.Value, resourcePath);
-                    rootNamespace = null;
+                    // Include only "neutral" resources into main assembly
+                    continue;
                 }
 
-                var name = CreateCSharpManifestResourceName.CreateManifestName(resourceName, rootNamespace);
+                var name = GetResourceFileMetadataName(project, resourceFile);
+
                 var fileName = resourcePath;
 
-                if (ResourcePathUtility.IsResxResourceFile(fileName))
+                if (ResourceUtility.IsResxFile(fileName))
                 {
-                    var ext = Path.GetExtension(fileName);
+                    // {file}.resx -> {file}.resources
+                    var resourcesFile = Path.Combine(intermediateOutputPath, name);
 
-                    if (string.Equals(ext, ".resx", StringComparison.OrdinalIgnoreCase))
+                    var result = Command.Create("dotnet-resgen", $"\"{fileName}\" -o \"{resourcesFile}\"")
+                                        .ForwardStdErr()
+                                        .ForwardStdOut()
+                                        .Execute();
+
+                    if (result.ExitCode != 0)
                     {
-                        // {file}.resx -> {file}.resources
-                        var resourcesFile = Path.Combine(intermediateOutputPath, name);
-
-                        var result = Command.Create("dotnet-resgen", $"\"{fileName}\" \"{resourcesFile}\"")
-                                            .ForwardStdErr()
-                                            .ForwardStdOut()
-                                            .Execute();
-
-                        if (result.ExitCode != 0)
-                        {
-                            return false;
-                        }
-
-                        // Use this as the resource name instead
-                        fileName = resourcesFile;
+                        return false;
                     }
+
+                    // Use this as the resource name instead
+                    fileName = resourcesFile;
                 }
 
                 compilerArgs.Add($"--resource:\"{fileName}\",{name}");
             }
 
+            return true;
+        }
+
+        private static string GetResourceFileMetadataName(Project project, KeyValuePair<string, string> resourceFile)
+        {
+            string resourceName = null;
+            string rootNamespace = null;
+
+            string root = PathUtility.EnsureTrailingSlash(project.ProjectDirectory);
+            string resourcePath = resourceFile.Key;
+            if (string.IsNullOrEmpty(resourceFile.Value))
+            {
+                // No logical name, so use the file name
+                resourceName = ResourceUtility.GetResourceName(root, resourcePath);
+                rootNamespace = project.Name;
+            }
+            else
+            {
+                resourceName = ResourceManifestName.EnsureResourceExtension(resourceFile.Value, resourcePath);
+                rootNamespace = null;
+            }
+
+            var name = ResourceManifestName.CreateManifestName(resourceName, rootNamespace);
+            return name;
+        }
+
+        private static bool GenerateResourceAssemblies(Project project, List<LibraryExport> dependencies, string outputPath, string configuration)
+        {
+            var references = dependencies.SelectMany(libraryExport => libraryExport.CompilationAssemblies);
+
+            foreach (var resourceFileGroup in project.Files.ResourceFiles.GroupBy(file => ResourceUtility.GetResourceCultureName(file.Key)))
+            {
+                var culture = resourceFileGroup.Key;
+                if (!string.IsNullOrEmpty(culture))
+                {
+                    var resourceOutputPath = Path.Combine(outputPath, culture);
+
+                    if (!Directory.Exists(resourceOutputPath))
+                    {
+                        Directory.CreateDirectory(resourceOutputPath);
+                    }
+
+                    var resourceOuputFile = Path.Combine(resourceOutputPath, project.Name + ".resources.dll");
+
+                    var arguments = new List<string>();
+                    arguments.AddRange(references.Select(r => $"-r \"{r.ResolvedPath}\""));
+                    arguments.Add($"-o \"{resourceOuputFile}\"");
+                    arguments.Add($"-c {culture}");
+
+                    foreach (var resourceFile in resourceFileGroup)
+                    {
+                        var metadataName = GetResourceFileMetadataName(project, resourceFile);
+                        arguments.Add($"\"{resourceFile.Key}\",{metadataName}");
+                    }
+
+                    var result = Command.Create("dotnet-resgen", arguments)
+                                            .ForwardStdErr()
+                                            .ForwardStdOut()
+                                            .Execute();
+                    if (result.ExitCode != 0)
+                    {
+                        return false;
+                    }
+                }
+            }
             return true;
         }
 

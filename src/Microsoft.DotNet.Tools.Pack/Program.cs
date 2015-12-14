@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using System.Text;
 using Microsoft.DotNet.ProjectModel;
 using NuGet;
@@ -19,6 +18,7 @@ using Microsoft.DotNet.ProjectModel.Files;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using Microsoft.DotNet.ProjectModel.Utilities;
+using Microsoft.DotNet.Cli.Compiler.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -141,6 +141,21 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var outputName = GetProjectOutputName(context.ProjectFile, context.TargetFramework, configuration);
 
                 TryAddOutputFile(packageBuilder, context, outputPath, outputName);
+
+                var resourceCultures = context.ProjectFile.Files.ResourceFiles
+                    .Select(resourceFile => ResourceUtility.GetResourceCultureName(resourceFile.Key))
+                    .Distinct();
+
+                foreach (var culture in resourceCultures)
+                {
+                    if (string.IsNullOrEmpty(culture))
+                    {
+                        continue;
+                    }
+
+                    var resourceFilePath = Path.Combine(culture, $"{project.Name}.resources.dll");
+                    TryAddOutputFile(packageBuilder, context, outputPath, resourceFilePath);
+                }
 
                 // REVIEW: Do we keep making symbols packages?
                 TryAddOutputFile(packageBuilder, context, outputPath, $"{project.Name}.pdb");
@@ -304,7 +319,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                                              string outputPath,
                                              string filePath)
         {
-            var targetPath = Path.Combine("lib", context.TargetFramework.GetTwoDigitShortFolderName(), Path.GetFileName(filePath));
+            var targetPath = Path.Combine("lib", context.TargetFramework.GetTwoDigitShortFolderName(), filePath);
             var sourcePath = Path.Combine(outputPath, filePath);
 
             if (!File.Exists(sourcePath))

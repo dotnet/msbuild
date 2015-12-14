@@ -1,13 +1,11 @@
-﻿﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Resources;
-using System.Xml.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using System;
 
 namespace Microsoft.DotNet.Tools.Resgen
 {
@@ -17,53 +15,91 @@ namespace Microsoft.DotNet.Tools.Resgen
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var app = new CommandLineApplication();
+            var app = new CommandLineApplication(false);
             app.Name = "resgen";
             app.FullName = "Resource compiler";
             app.Description = "Microsoft (R) .NET Resource Generator";
             app.HelpOption("-h|--help");
 
-            var inputFile = app.Argument("<input>", "The .resx file to transform");
-            var outputFile = app.Argument("<output>", "The .resources file to produce");
+            var ouputFile = app.Option("-o", "Output file name", CommandOptionType.SingleValue);
+            var culture = app.Option("-c", "Ouput assembly culture", CommandOptionType.SingleValue);
+            var references = app.Option("-r", "Compilation references", CommandOptionType.MultipleValue);
+            var inputFiles = app.Argument("<input>", "Input files", true);
 
             app.OnExecute(() =>
             {
-                WriteResourcesFileIfNotEmpty(inputFile.Value, outputFile.Value);
+                if (!inputFiles.Values.Any())
+                {
+                    Reporter.Error.WriteLine("No input files specified");
+                    return 1;
+                }
+
+                var intputResourceFiles = inputFiles.Values.Select(ParseInputFile).ToArray();
+                var outputResourceFile = ResourceFile.Create(ouputFile.Value());
+
+                switch (outputResourceFile.Type)
+                {
+                    case ResourceFileType.Dll:
+                        using (var outputStream = outputResourceFile.File.Create())
+                        {
+                            ResourceAssemblyGenerator.Generate(intputResourceFiles,
+                                outputStream,
+                                Path.GetFileNameWithoutExtension(outputResourceFile.File.Name),
+                                culture.Value(),
+                                references.Values.ToArray()
+                                );
+                        }
+                        break;
+                    case ResourceFileType.Resources:
+                        using (var outputStream = outputResourceFile.File.Create())
+                        {
+                            if (intputResourceFiles.Length > 1)
+                            {
+                                Reporter.Error.WriteLine("Only one input file required when generating .resource output");
+                                return 1;
+                            }
+                            ResourcesFileGenerator.Generate(intputResourceFiles.Single().Resource, outputStream);
+                        }
+                        break;
+                    default:
+                        Reporter.Error.WriteLine("Resx output type not supported");
+                        return 1;
+                }
+
                 return 0;
             });
 
-            return app.Execute(args);
-        }
-
-        private static void WriteResourcesFileIfNotEmpty(string resxFilePath, string outputFile)
-        {
-            using (var fs = File.OpenRead(resxFilePath))
-            using (var outfs = File.Create(outputFile))
+            try
             {
-                var document = XDocument.Load(fs);
-
-                var data = document.Root.Elements("data");
-
-                if (data.Any())
-                {
-                    WriteResourcesFile(outfs, data);
-                }
+                return app.Execute(args);
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                Reporter.Error.WriteLine(ex.ToString());
+#else
+                Reporter.Error.WriteLine(ex.Message);
+#endif
+                return 1;
             }
         }
 
-        private static void WriteResourcesFile(Stream outfs, IEnumerable<XElement> data)
+        private static ResourceSource ParseInputFile(string arg)
         {
-            var rw = new ResourceWriter(outfs);
-
-            foreach (var e in data)
+            var seperatorIndex = arg.IndexOf(',');
+            string name = null;
+            string metadataName = null;
+            if (seperatorIndex > 0)
             {
-                var name = e.Attribute("name").Value;
-                var value = e.Element("value").Value;
-
-                rw.AddResource(name, value);
+                name = arg.Substring(0, seperatorIndex);
+                metadataName = arg.Substring(seperatorIndex + 1);
             }
-
-            rw.Generate();
+            else
+            {
+                name = arg;
+                metadataName = arg;
+            }
+            return new ResourceSource(ResourceFile.Create(name), metadataName);
         }
     }
 }

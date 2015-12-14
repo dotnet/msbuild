@@ -15,7 +15,7 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class Command
+    internal class Command
     {
         private readonly Process _process;
         private readonly StreamForwarder _stdOut;

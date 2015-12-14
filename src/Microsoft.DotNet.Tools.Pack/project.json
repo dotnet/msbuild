@@ -7,10 +7,8 @@
   "dependencies": {
     "NETStandard.Library": "1.0.0-rc2-23608",
     "System.IO.Compression.ZipFile": "4.0.1-rc2-23608",
-    "Microsoft.NETCore.Targets.DNXCore": "5.0.0-beta-23511",
-
     "System.Linq": "4.0.1-rc2-23608",
-
+    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": {
       "type": "build",
@@ -23,5 +21,12 @@
   },
   "frameworks": {
     "dnxcore50": { }
+  },
+  "scripts": {
+    "postcompile": [
+       "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
+       "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
+    ]
   }
 }
+

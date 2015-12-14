@@ -5,10 +5,11 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using Microsoft.DotNet.Cli.Compiler.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
-    internal static class CreateCSharpManifestResourceName
+    internal static class ResourceManifestName
     {
         // Original source: https://raw.githubusercontent.com/Microsoft/msbuild/82177a50da735cc0443ac10fa490d69368403d71/src/XMakeTasks/CreateCSharpManifestResourceName.cs
 
@@ -32,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             // This is different from the msbuild task: we always append extensions because otherwise,
             // the emitted resource doesn't have an extension and it is not the same as in the classic
             // C# assembly
-            if (ResourcePathUtility.IsResxResourceFile(fileName))
+            if (ResourceUtility.IsResourceFile(fileName))
             {
                 name.Append(Path.Combine(path, Path.GetFileNameWithoutExtension(fileName)));
                 name.Append(".resources");
@@ -103,8 +104,9 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             return id.ToString();
         }
+
         /// <summary>
-        /// Make a folder subname into identifier 
+        /// Make a folder subname into identifier
         /// </summary>
         private static string MakeValidSubFolderIdentifier(string subName)
         {
