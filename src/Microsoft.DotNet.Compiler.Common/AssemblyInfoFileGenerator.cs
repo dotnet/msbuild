@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.IO;
+using System.Runtime.Versioning;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Microsoft.Dotnet.Cli.Compiler.Common
@@ -26,7 +26,8 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 [typeof(AssemblyVersionAttribute)] = EscapeCharacters(metadata.AssemblyVersion?.ToString()),
                 [typeof(AssemblyInformationalVersionAttribute)] = EscapeCharacters(metadata.InformationalVersion),
                 [typeof(AssemblyCultureAttribute)] = EscapeCharacters(metadata.Culture),
-                [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage)
+                [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage),
+                [typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework)
             };
 
             var existingAttributes = new List<Type>();

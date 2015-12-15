@@ -311,7 +311,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             compilerArgs.AddRange(compilationOptions.SerializeToArgs());
 
             // Add metadata options
-            compilerArgs.AddRange(AssemblyInfoOptions.SerializeToArgs(AssemblyInfoOptions.CreateForProject(context.ProjectFile)));
+            compilerArgs.AddRange(AssemblyInfoOptions.SerializeToArgs(AssemblyInfoOptions.CreateForProject(context)));
 
             foreach (var dependency in dependencies)
             {

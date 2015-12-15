@@ -5,6 +5,8 @@ using Microsoft.DotNet.ProjectModel;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.Linq;
+using NuGet.Frameworks;
 
 namespace Microsoft.Dotnet.Cli.Compiler.Common
 {
@@ -26,6 +28,8 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         private const string NeutralCultureOptionName = "neutral-language";
 
+        private const string TargetFrameworkOptionName = "target-framework";
+
         public string Title { get; set; }
 
         public string Description { get; set; }
@@ -42,8 +46,22 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         public string NeutralLanguage { get; set; }
 
-        public static AssemblyInfoOptions CreateForProject(Project project)
+        public string TargetFramework { get; set; }
+
+        public static AssemblyInfoOptions CreateForProject(ProjectContext context)
         {
+            var project = context.ProjectFile;
+            NuGetFramework targetFramework = null;
+            // force .NETFramework instead of DNX
+            if (context.TargetFramework.IsDesktop())
+            {
+                targetFramework = new NuGetFramework(FrameworkConstants.FrameworkIdentifiers.Net, context.TargetFramework.Version);
+            }
+            else
+            {
+                targetFramework = context.TargetFramework;
+            }
+
             return new AssemblyInfoOptions()
             {
                 AssemblyVersion = project.Version?.Version.ToString(),
@@ -52,7 +70,8 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 Copyright = project.Copyright,
                 Description = project.Description,
                 Title = project.Title,
-                NeutralLanguage = project.Language
+                NeutralLanguage = project.Language,
+                TargetFramework = targetFramework.DotNetFrameworkName
             };
         }
 
@@ -66,6 +85,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             string copyright = null;
             string culture = null;
             string neutralCulture = null;
+            string targetFramework = null;
 
             syntax.DefineOption(AssemblyVersionOptionName, ref version, UnescapeNewlines, "Assembly version");
 
@@ -83,6 +103,8 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
             syntax.DefineOption(AssemblyFileVersionOptionName, ref fileVersion, UnescapeNewlines, "Assembly title");
 
+            syntax.DefineOption(TargetFrameworkOptionName, ref targetFramework, UnescapeNewlines, "Assembly target framework");
+
             return new AssemblyInfoOptions()
             {
                 AssemblyFileVersion = fileVersion,
@@ -91,7 +113,8 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 NeutralLanguage = neutralCulture,
                 Description = description,
                 InformationalVersion = informationalVersion,
-                Title = title
+                Title = title,
+                TargetFramework = targetFramework
             };
         }
 
@@ -130,6 +153,10 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             if (!string.IsNullOrWhiteSpace(assemblyInfoOptions.NeutralLanguage))
             {
                 options.Add(FormatOption(NeutralCultureOptionName, assemblyInfoOptions.NeutralLanguage));
+            }
+            if (!string.IsNullOrWhiteSpace(assemblyInfoOptions.TargetFramework))
+            {
+                options.Add(FormatOption(TargetFrameworkOptionName, assemblyInfoOptions.TargetFramework));
             }
 
             return options;
