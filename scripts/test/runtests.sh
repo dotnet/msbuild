@@ -16,12 +16,30 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../_common.sh"
 
-rm "$REPOROOT/test/E2E/project.lock.json"
-dotnet restore --quiet "$REPOROOT/test/E2E" --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
-dotnet publish --framework dnxcore50 --runtime "$RID" --output "$REPOROOT/artifacts/$RID/e2etest" "$REPOROOT/test/E2E" 
+
+TestBinRoot="$REPOROOT/artifacts/tests"
+
+TestProjects=( \
+    E2E \
+    Microsoft.DotNet.Tools.Publish.Tests \
+)
+
+
+for project in ${TestProjects[@]}
+do
+    dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$TestBinRoot" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
+done
+
+# copy TestProjects folder which is used by the test cases
+mkdir -p "$TestBinRoot/TestProjects"
+cp -R $REPOROOT/test/TestProjects/* $TestBinRoot/TestProjects
 
 # set -e will abort if the exit code of this is non-zero
-pushd "$REPOROOT/artifacts/$RID/e2etest"
-mv ./E2E ./corehost
-./corehost xunit.console.netcore.exe E2E.dll
+pushd "$TestBinRoot"
+
+for project in ${TestProjects[@]}
+do
+    ./corerun  "xunit.console.netcore.exe" "$project.dll" -xml "project.xml"
+done
+
 popd
