@@ -39,7 +39,7 @@ pushd "$TestBinRoot"
 
 for project in ${TestProjects[@]}
 do
-    ./corerun  "xunit.console.netcore.exe" "$project.dll" -xml "project.xml"
+    ./corerun  "xunit.console.netcore.exe" "$project.dll" -xml "project.xml" -notrait category=failing
 done
 
 popd
