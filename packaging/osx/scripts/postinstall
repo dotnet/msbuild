@@ -4,6 +4,9 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+# A temporary fix for the permissions issue(s)
+chmod -R 755 $2
+
 ln -s $2/bin/dotnet /usr/local/bin/
 ln -s $2/bin/dotnet-compile /usr/local/bin/
 ln -s $2/bin/dotnet-compile-csc /usr/local/bin/
