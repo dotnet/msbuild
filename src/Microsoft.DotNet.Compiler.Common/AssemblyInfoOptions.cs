@@ -67,21 +67,21 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             string culture = null;
             string neutralCulture = null;
 
-            syntax.DefineOption(AssemblyVersionOptionName, ref version, "Assembly version");
+            syntax.DefineOption(AssemblyVersionOptionName, ref version, UnescapeNewlines, "Assembly version");
 
-            syntax.DefineOption(TitleOptionName, ref title, "Assembly title");
+            syntax.DefineOption(TitleOptionName, ref title, UnescapeNewlines, "Assembly title");
 
-            syntax.DefineOption(DescriptionOptionName, ref description, "Assembly description");
+            syntax.DefineOption(DescriptionOptionName, ref description, UnescapeNewlines, "Assembly description");
 
-            syntax.DefineOption(CopyrightOptionName, ref copyright, "Assembly copyright");
+            syntax.DefineOption(CopyrightOptionName, ref copyright, UnescapeNewlines, "Assembly copyright");
 
-            syntax.DefineOption(NeutralCultureOptionName, ref neutralCulture, "Assembly neutral culture");
+            syntax.DefineOption(NeutralCultureOptionName, ref neutralCulture, UnescapeNewlines, "Assembly neutral culture");
 
-            syntax.DefineOption(CultureOptionName, ref culture, "Assembly culture");
+            syntax.DefineOption(CultureOptionName, ref culture, UnescapeNewlines, "Assembly culture");
 
-            syntax.DefineOption(InformationalVersionOptionName, ref informationalVersion, "Assembly informational version");
+            syntax.DefineOption(InformationalVersionOptionName, ref informationalVersion, UnescapeNewlines, "Assembly informational version");
 
-            syntax.DefineOption(AssemblyFileVersionOptionName, ref fileVersion, "Assembly title");
+            syntax.DefineOption(AssemblyFileVersionOptionName, ref fileVersion, UnescapeNewlines, "Assembly title");
 
             return new AssemblyInfoOptions()
             {
@@ -137,7 +137,16 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         private static string FormatOption(string optionName, string value)
         {
-            return $"--{optionName}:{value}";
+            return $"--{optionName}:{EscapeNewlines(value)}";
+        }
+
+        private static string UnescapeNewlines(string text)
+        {
+            return text.Replace("\\r", "\r").Replace("\\n", "\n");
+        }
+        private static string EscapeNewlines(string text)
+        {
+            return text.Replace("\r", "\\r").Replace("\n", "\\n");
         }
     }
 }
