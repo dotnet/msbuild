@@ -32,11 +32,17 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             IReadOnlyList<string> resources = Array.Empty<string>();
             IReadOnlyList<string> sources = Array.Empty<string>();
             string outputName = null;
+            var help = false;
+            var returnCode = 0;
+            string helpText = null;
 
             try
             {
                 ArgumentSyntax.Parse(args, syntax =>
                 {
+                    syntax.HandleHelp = false;
+                    syntax.HandleErrors = false;
+
                     commonOptions = CommonCompilerOptionsExtensions.Parse(syntax);
 
                     assemblyInfoOptions = AssemblyInfoOptions.Parse(syntax);
@@ -49,16 +55,30 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
                     syntax.DefineOptionList("resource", ref resources, "Resources to embed");
 
+                    syntax.DefineOption("h|help", ref help, "Help for compile native.");
+
                     syntax.DefineParameterList("source-files", ref sources, "Compilation sources");
+
+                    helpText = syntax.GetHelpText();
+
                     if (tempOutDir == null)
                     {
                         syntax.ReportError("Option '--temp-output' is required");
                     }
                 });
             }
-            catch (ArgumentSyntaxException)
+            catch (ArgumentSyntaxException exception)
             {
-                return ExitFailed;
+                Console.Error.WriteLine(exception.Message);
+                help = true;
+                returnCode = ExitFailed;
+            }
+
+            if (help)
+            {
+                Console.WriteLine(helpText);
+
+                return returnCode;
             }
 
             var translated = TranslateCommonOptions(commonOptions);
