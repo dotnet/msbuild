@@ -32,11 +32,10 @@ echo $DOTNET_BUILD_VERSION >> $STAGE2_DIR/.version
 # Create Dnvm Package
 $DIR/package-dnvm.sh
 
-if [[ "$UNAME" == "Linux" ]]; then
+if [[ "$OSNAME" == "ubuntu" ]]; then
     # Create Debian package
     $DIR/package-debian.sh
-elif [[ "$UNAME" == "Darwin" ]]; then
+elif [[ "$OSNAME" == "osx" ]]; then
     # Create OSX PKG
     $DIR/../../packaging/osx/package-osx.sh
 fi
-

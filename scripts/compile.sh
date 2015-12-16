@@ -48,7 +48,7 @@ DOTNET_PATH=$(which dotnet)
 PREFIX="$(cd -P "$(dirname "$DOTNET_PATH")/.." && pwd)"
 
 header "Restoring packages"
-$DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+$DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "$RID" --no-cache
 
 header "Building corehost"
 
