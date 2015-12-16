@@ -32,14 +32,31 @@ done
 
 # copy TestProjects folder which is used by the test cases
 mkdir -p "$TestBinRoot/TestProjects"
-cp -R $REPOROOT/test/TestProjects/* $TestBinRoot/TestProjects
+cp -a $REPOROOT/test/TestProjects/* $TestBinRoot/TestProjects
 
-# set -e will abort if the exit code of this is non-zero
+
 pushd "$TestBinRoot"
+set +e
+
+failedTests=()
+failCount=0
 
 for project in ${TestProjects[@]}
 do
     ./corerun  "xunit.console.netcore.exe" "$project.dll" -xml "project.xml" -notrait category=failing
+    exitCode=$?
+    failCount+=$exitCode
+    if [ $exitCode -ne 0 ]; then
+        failedTests+=($project)
+    fi
+done
+
+for test in ${failedTests[@]}
+do
+    error "$test.dll failed. Logs in '$TestBinRoot/$test.xml'"
 done
 
 popd
+set -e
+
+exit $failCount

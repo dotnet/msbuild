@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                     new object[] { "", RuntimeIdentifier.Current, "", "" },
                     new object[] { "", "", "Release", "" },
                     new object[] { "", "", "", "some/dir"},
-                    //new object[] { "", "", "", "\"some/dir/with spaces\"" },
+                    //new object[] { "", "", "", "\"some/dir/with spaces\"" }, // issue - https://github.com/dotnet/cli/issues/525
                     new object[] { "dnxcore50", RuntimeIdentifier.Current, "Debug", "some/dir" },
                 };
             }
