@@ -5,10 +5,9 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23608",
-        "System.Linq": "4.0.1-rc2-23608",
-        "System.Xml.XDocument": "4.0.11-rc2-23608",
-        "System.Resources.ReaderWriter": "4.0.0-rc2-23608",
+        "NETStandard.Library": "1.0.0-rc2-23616",
+        "System.Xml.XDocument": "4.0.11-rc2-23616",
+        "System.Resources.ReaderWriter": "4.0.0-rc2-23616",
 
         "Microsoft.CodeAnalysis.CSharp":  "1.1.1",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
