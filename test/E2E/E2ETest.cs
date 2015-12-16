@@ -59,6 +59,11 @@ namespace ConsoleApplication
                 return;
             }
 
+            if(SkipForOS(OSPlatform.Linux, "https://github.com/dotnet/cli/issues/527"))
+            {
+                return;
+            }
+
             TestSetup();
 
             TestRunCommand("dotnet", $"compile --native -o {OutputDirectory}");
