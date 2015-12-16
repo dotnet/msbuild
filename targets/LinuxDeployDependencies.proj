@@ -72,7 +72,7 @@
           Outputs="@(RuntimeProjectJsonFile->'%(Directory)%(Filename).lock.json')"
           >
 
-    <Exec Command="$(RestoreRuntimePackagesCommand) -Verbosity detailed -PackagesDirectory &quot;$(HOME)/.nuget/packages&quot;" StandardOutputImportance="Low" />
+    <Exec Command="$(RestoreRuntimePackagesCommand) -Verbosity detailed -PackagesDirectory &quot;$(PackagesCache)&quot;" StandardOutputImportance="Low" />
     <!--
     <Exec Command="$(DnuToolPath) restore
     &quot;$(IntermediateOutputPath)%(RuntimeProjectJsonFile.Filename)\project.json&quot;
