@@ -625,7 +625,7 @@ EndGlobal
 
         /// <summary>
         /// Generated project metaproj should declare its outputs for relay.
-        /// Here B depends on C and D
+        /// Here B depends on C (via solution dep only) and D (via ProjectReference only)
         /// </summary>
         /// <seealso href="https://github.com/Microsoft/msbuild/issues/69">
         /// MSBuild should generate metaprojects that relay the outputs of the individual MSBuild invocations
@@ -696,9 +696,9 @@ EndGlobal
                             <PropertyGroup>
                                 <ProjectGuid>{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}</ProjectGuid>
                             </PropertyGroup>
-                            <Target Name='Build' Outputs='@(ComputedAnswer)'>
+                            <Target Name='Build' Outputs='@(ComputedPunctuation)'>
                                 <ItemGroup>
-                                    <ComputedAnswer Include='42' />
+                                    <ComputedPunctuation Include='!!!' />
                                 </ItemGroup>
                             </Target>
                         </Project>
