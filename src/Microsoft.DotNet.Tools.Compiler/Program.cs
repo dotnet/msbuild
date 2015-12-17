@@ -279,9 +279,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                 return false;
             }
 
-            // Dump dependency data
-            ShowDependencyInfo(dependencies);
-
             // Get compilation options
             var outputName = GetProjectOutput(context.ProjectFile, context.TargetFramework, configuration, outputPath);
 
@@ -822,37 +819,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                 case DiagnosticMessageSeverity.Error:
                     Reporter.Error.WriteLine(diag.FormattedMessage.Red().Bold());
                     break;
-            }
-        }
-
-        private static void ShowDependencyInfo(IEnumerable<LibraryExport> dependencies)
-        {
-            if (CommandContext.IsVerbose())
-            {
-                foreach (var dependency in dependencies)
-                {
-                    if (!dependency.Library.Resolved)
-                    {
-                        Reporter.Verbose.WriteLine($"  Unable to resolve dependency {dependency.Library.Identity.ToString().Red().Bold()}");
-                        Reporter.Verbose.WriteLine("");
-                    }
-                    else
-                    {
-                        Reporter.Verbose.WriteLine($"  Using {dependency.Library.Identity.Type.Value.Cyan().Bold()} dependency {dependency.Library.Identity.ToString().Cyan().Bold()}");
-                        Reporter.Verbose.WriteLine($"    Path: {dependency.Library.Path}");
-
-                        foreach (var metadataReference in dependency.CompilationAssemblies)
-                        {
-                            Reporter.Verbose.WriteLine($"    Assembly: {metadataReference}");
-                        }
-
-                        foreach (var sourceReference in dependency.SourceReferences)
-                        {
-                            Reporter.Verbose.WriteLine($"    Source: {sourceReference}");
-                        }
-                        Reporter.Verbose.WriteLine("");
-                    }
-                }
             }
         }
 
