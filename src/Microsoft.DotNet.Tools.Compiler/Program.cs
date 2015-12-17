@@ -16,6 +16,7 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
+using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -304,6 +305,8 @@ namespace Microsoft.DotNet.Tools.Compiler
                 compilationOptions.KeyFile = Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
             }
 
+            var references = new List<string>();
+
             // Add compilation options to the args
             compilerArgs.AddRange(compilationOptions.SerializeToArgs());
 
@@ -319,14 +322,47 @@ namespace Microsoft.DotNet.Tools.Compiler
                     if (projectDependency.Project.Files.SourceFiles.Any())
                     {
                         var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
-                        compilerArgs.Add($"--reference:{projectOutputPath}");
+                        references.Add(projectOutputPath);
                     }
                 }
                 else
                 {
-                    compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"--reference:{r.ResolvedPath}"));
+                    references.AddRange(dependency.CompilationAssemblies.Select(r => r.ResolvedPath));
                 }
+
                 compilerArgs.AddRange(dependency.SourceReferences);
+            }
+
+            compilerArgs.AddRange(references.Select(r => $"--reference:{r}"));
+
+            var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
+            var libraryExporter = runtimeContext.CreateExporter(configuration);
+
+            if (compilationOptions.PreserveCompilationContext == true)
+            {
+                var dependencyContext = DependencyContextBuilder.FromLibraryExporter(
+                    libraryExporter, context.TargetFramework.DotNetFrameworkName, context.RuntimeIdentifier);
+
+                var writer = new DependencyContextWriter();
+                var depsJsonFile = Path.Combine(intermediateOutputPath, context.ProjectFile.Name + "dotnet-compile.deps.json");
+                using (var fileStream = File.Create(depsJsonFile))
+                {
+                    writer.Write(dependencyContext, fileStream);
+                }
+
+                compilerArgs.Add($"--resource:\"{depsJsonFile}\",{context.ProjectFile.Name}.deps.json");
+
+                var refsFolder = Path.Combine(outputPath, "refs");
+                if (Directory.Exists(refsFolder))
+                {
+                    Directory.Delete(refsFolder, true);
+                }
+
+                Directory.CreateDirectory(refsFolder);
+                foreach (var reference in references)
+                {
+                    File.Copy(reference, Path.Combine(refsFolder, Path.GetFileName(reference)));
+                }
             }
 
             if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
@@ -394,10 +430,9 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (success && !noHost && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
-                var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
                 MakeRunnable(runtimeContext,
                              outputPath,
-                             runtimeContext.CreateExporter(configuration));
+                             libraryExporter);
             }
 
             return PrintSummary(diagnostics, sw, success);

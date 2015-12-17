@@ -29,6 +29,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public bool? EmitEntryPoint { get; set; }
 
+        public bool? PreserveCompilationContext { get; set; }
+
         public static CommonCompilerOptions Combine(params CommonCompilerOptions[] options)
         {
             var result = new CommonCompilerOptions();
@@ -90,6 +92,11 @@ namespace Microsoft.DotNet.ProjectModel
                 if (option.EmitEntryPoint != null)
                 {
                     result.EmitEntryPoint = option.EmitEntryPoint;
+                }
+
+                if (option.PreserveCompilationContext != null)
+                {
+                    result.PreserveCompilationContext = option.PreserveCompilationContext;
                 }
             }
 
