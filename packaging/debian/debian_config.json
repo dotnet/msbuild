@@ -37,6 +37,7 @@
         "bin/dotnet" : "usr/bin/dotnet",
         "bin/dotnet-compile" : "usr/bin/dotnet-compile",
         "bin/dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
+        "bin/dotnet-compile-fsc" : "usr/bin/dotnet-compile-fsc",
         "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native",
         "bin/dotnet-init":"usr/bin/dotnet-new",
         "bin/dotnet-publish" : "usr/bin/dotnet-publish",

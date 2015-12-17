@@ -17,18 +17,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
     {
         public static string Generate(AssemblyInfoOptions metadata, IEnumerable<string> sourceFiles)
         {
-            var projectAttributes = new Dictionary<Type, string>()
-            {
-                [typeof(AssemblyTitleAttribute)] = EscapeCharacters(metadata.Title),
-                [typeof(AssemblyDescriptionAttribute)] = EscapeCharacters(metadata.Description),
-                [typeof(AssemblyCopyrightAttribute)] = EscapeCharacters(metadata.Copyright),
-                [typeof(AssemblyFileVersionAttribute)] = EscapeCharacters(metadata.AssemblyFileVersion?.ToString()),
-                [typeof(AssemblyVersionAttribute)] = EscapeCharacters(metadata.AssemblyVersion?.ToString()),
-                [typeof(AssemblyInformationalVersionAttribute)] = EscapeCharacters(metadata.InformationalVersion),
-                [typeof(AssemblyCultureAttribute)] = EscapeCharacters(metadata.Culture),
-                [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage),
-                [typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework)
-            };
+            var projectAttributes = GetProjectAttributes(metadata);
 
             var existingAttributes = new List<Type>();
             foreach (var sourceFile in sourceFiles)
@@ -56,6 +45,32 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             return string.Join(Environment.NewLine, projectAttributes
                 .Where(projectAttribute => projectAttribute.Value != null && !existingAttributes.Contains(projectAttribute.Key))
                 .Select(projectAttribute => $"[assembly:{projectAttribute.Key.FullName}(\"{projectAttribute.Value}\")]"));
+        }
+
+        public static string GenerateFSharp(AssemblyInfoOptions metadata)
+        {
+            var projectAttributes = GetProjectAttributes(metadata);
+
+            return string.Join(Environment.NewLine,
+                new[] { "namespace System", Environment.NewLine, Environment.NewLine } 
+                .Concat(projectAttributes.Select(projectAttribute => $"[<assembly:{projectAttribute.Key.FullName}(\"{projectAttribute.Value}\")>]"))
+                .Concat(new[] { "do ()", Environment.NewLine }));
+        }
+
+        private static Dictionary<Type, string> GetProjectAttributes(AssemblyInfoOptions metadata)
+        {
+            return new Dictionary<Type, string>()
+            {
+                [typeof(AssemblyTitleAttribute)] = EscapeCharacters(metadata.Title),
+                [typeof(AssemblyDescriptionAttribute)] = EscapeCharacters(metadata.Description),
+                [typeof(AssemblyCopyrightAttribute)] = EscapeCharacters(metadata.Copyright),
+                [typeof(AssemblyFileVersionAttribute)] = EscapeCharacters(metadata.AssemblyFileVersion?.ToString()),
+                [typeof(AssemblyVersionAttribute)] = EscapeCharacters(metadata.AssemblyVersion?.ToString()),
+                [typeof(AssemblyInformationalVersionAttribute)] = EscapeCharacters(metadata.InformationalVersion),
+                [typeof(AssemblyCultureAttribute)] = EscapeCharacters(metadata.Culture),
+                [typeof(NeutralResourcesLanguageAttribute)] = EscapeCharacters(metadata.NeutralLanguage),
+                [typeof(TargetFrameworkAttribute)] = EscapeCharacters(metadata.TargetFramework)
+            };
         }
 
         private static bool IsSameAttribute(Type attributeType, AttributeSyntax attributeSyntax)
