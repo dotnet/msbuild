@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class Constants
     {
+        public static readonly string ProjectFileName = "project.json";
         public static readonly string ExeSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
 
         // Priority order of runnable suffixes to look for and run
