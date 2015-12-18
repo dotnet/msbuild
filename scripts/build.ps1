@@ -5,7 +5,7 @@
 
 param(
     [string]$Configuration="Debug",
-    [string]$Offline=$false)
+    [switch]$Offline)
 
 . "$PSScriptRoot\_common.ps1"
 

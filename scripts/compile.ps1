@@ -4,7 +4,7 @@
 #
 
 param([string]$Configuration = "Debug",
-      [string]$Offline = $false)
+      [switch]$Offline)
 
 $ErrorActionPreference="Stop"
 
