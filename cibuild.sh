@@ -9,7 +9,7 @@ usage()
 }
 
 setHome(){
-    if [ -z ${HOME+x}]
+    if [ -z ${HOME+x} ]
     then
         MONO_COMMAND="( export HOME=$HOME_DEFAULT ; $MONO_COMMAND )"
         mkdir -p $HOME_DEFAULT
