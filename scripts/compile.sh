@@ -25,30 +25,34 @@ fi
 
 [ -z "$CONFIGURATION" ] && export CONFIGURATION=Debug
 
-# Download DNX to copy into stage2
-header "Downloading DNX $DNX_VERSION"
-DNX_URL="https://api.nuget.org/packages/$DNX_FLAVOR.$DNX_VERSION.nupkg"
-DNX_ROOT="$DNX_DIR/bin"
-rm -rf $DNX_DIR
-mkdir -p $DNX_DIR
-curl -o $DNX_DIR/dnx.zip $DNX_URL --silent
-unzip -qq $DNX_DIR/dnx.zip -d $DNX_DIR
-chmod a+x $DNX_ROOT/dnu $DNX_ROOT/dnx
+if [[ ! -z "$OFFLINE" ]]; then
+    header "Skipping Stage 0, Dnx, and Packages download: Offline Build"
+else
+    # Download DNX to copy into stage2
+    header "Downloading DNX $DNX_VERSION"
+    DNX_URL="https://api.nuget.org/packages/$DNX_FLAVOR.$DNX_VERSION.nupkg"
+    DNX_ROOT="$DNX_DIR/bin"
+    rm -rf $DNX_DIR
+    mkdir -p $DNX_DIR
+    curl -o $DNX_DIR/dnx.zip $DNX_URL --silent
+    unzip -qq $DNX_DIR/dnx.zip -d $DNX_DIR
+    chmod a+x $DNX_ROOT/dnu $DNX_ROOT/dnx
 
-# Ensure the latest stage0 is installed
-$DIR/install.sh
+    # Ensure the latest stage0 is installed
+    $DIR/install.sh
 
-# And put the stage0 on the PATH
-export PATH=$REPOROOT/artifacts/$RID/stage0/bin:$PATH
+    # And put the stage0 on the PATH
+    export PATH=$REPOROOT/artifacts/$RID/stage0/bin:$PATH
 
-# Intentionally clear the DOTNET_TOOLS path, we want to use the default installed version
-unset DOTNET_TOOLS
+    # Intentionally clear the DOTNET_TOOLS path, we want to use the default installed version
+    unset DOTNET_TOOLS
 
-DOTNET_PATH=$(which dotnet)
-PREFIX="$(cd -P "$(dirname "$DOTNET_PATH")/.." && pwd)"
+    DOTNET_PATH=$(which dotnet)
+    PREFIX="$(cd -P "$(dirname "$DOTNET_PATH")/.." && pwd)"
 
-header "Restoring packages"
-$DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "$RID" --no-cache
+    header "Restoring packages"
+    $DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "$RID" --no-cache
+fi
 
 header "Building corehost"
 
