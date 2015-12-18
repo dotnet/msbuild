@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal struct CommandResult
+    public struct CommandResult
     {
         public static readonly CommandResult Empty = new CommandResult();
 
