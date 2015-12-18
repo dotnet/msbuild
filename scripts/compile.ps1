@@ -3,7 +3,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-param([string]$Configuration = "Debug")
+param([string]$Configuration = "Debug",
+      [string]$Offline = $false)
 
 $ErrorActionPreference="Stop"
 
@@ -23,39 +24,43 @@ Download it from https://www.cmake.org
 "@
     }
 
-    # Install a stage 0
-    header "Installing dotnet stage 0"
-    & "$PSScriptRoot\install.ps1"
-    if (!$?) {
-        Write-Host "Command failed: $PSScriptRoot\install.ps1"
-        Exit 1
+    if($Offline){
+        Write-Host "Skipping Stage 0, Dnx, and Packages dowlnoad: Offline build"
     }
-
-    # Put stage 0 on the path
-    $DotNetTools = $env:DOTNET_INSTALL_DIR
-    if (!$DotNetTools) {
-        $DotNetTools = "$($env:LOCALAPPDATA)\Microsoft\dotnet"
+    else {
+        # Install a stage 0
+        header "Installing dotnet stage 0"
+        & "$PSScriptRoot\install.ps1"
+        if (!$?) {
+            Write-Host "Command failed: $PSScriptRoot\install.ps1"
+            Exit 1
+        }
+    
+        # Put stage 0 on the path
+        $DotNetTools = $env:DOTNET_INSTALL_DIR
+        if (!$DotNetTools) {
+            $DotNetTools = "$($env:LOCALAPPDATA)\Microsoft\dotnet"
+        }
+    
+        # Download dnx to copy to stage2
+        if ((Test-Path "$DnxDir")) {
+            Remove-Item -Recurse -Force $DnxDir
+        }
+        mkdir "$DnxDir" | Out-Null
+        $DnxUrl="https://api.nuget.org/packages/dnx-coreclr-win-x64.$DnxVersion.nupkg"
+        Invoke-WebRequest -UseBasicParsing "$DnxUrl" -OutFile "$DnxDir\dnx.zip"
+        Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("$DnxDir\dnx.zip", "$DnxDir")
+        $DnxRoot = "$DnxDir/bin"
+    
+        # Restore packages
+        header "Restoring packages"
+        & "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+        if (!$?) {
+            Write-Host "Command failed: " dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+            Exit 1
+        }
     }
-
-    # Download dnx to copy to stage2
-    if ((Test-Path "$DnxDir")) {
-        Remove-Item -Recurse -Force $DnxDir
-    }
-    mkdir "$DnxDir" | Out-Null
-    $DnxUrl="https://api.nuget.org/packages/dnx-coreclr-win-x64.$DnxVersion.nupkg"
-    Invoke-WebRequest -UseBasicParsing "$DnxUrl" -OutFile "$DnxDir\dnx.zip"
-    Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
-    [System.IO.Compression.ZipFile]::ExtractToDirectory("$DnxDir\dnx.zip", "$DnxDir")
-    $DnxRoot = "$DnxDir/bin"
-
-    # Restore packages
-    header "Restoring packages"
-    & "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
-    if (!$?) {
-        Write-Host "Command failed: " dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
-        Exit 1
-    }
-
 
     header "Building corehost"
     pushd "$RepoRoot\src\corehost"

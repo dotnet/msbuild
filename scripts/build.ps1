@@ -4,7 +4,8 @@
 #
 
 param(
-    [string]$Configuration="Debug")
+    [string]$Configuration="Debug",
+    [string]$Offline=$false)
 
 . "$PSScriptRoot\_common.ps1"
 
@@ -35,7 +36,11 @@ if (!$env:DOTNET_BUILD_VERSION) {
 }
 
 Write-Host -ForegroundColor Green "*** Building dotnet tools version $($env:DOTNET_BUILD_VERSION) - $Configuration ***"
-& "$PSScriptRoot\compile.ps1" -Configuration:$Configuration
+if ($Offline)
+{
+    Write-Host -ForegroundColor Yellow "  - Offline Build -"
+}
+& "$PSScriptRoot\compile.ps1" -Configuration:$Configuration -Offline:$Offline
 if (!$?) {
     Write-Host "Building dotnet tools finished with errors."
     Exit 1
