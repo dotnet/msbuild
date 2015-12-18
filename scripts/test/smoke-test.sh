@@ -18,7 +18,7 @@ REPOROOT="$( cd -P "$DIR/../.." && pwd )"
 source "$DIR/../_common.sh"
 
 rm "$REPOROOT/test/TestApp/project.lock.json"
-dotnet restore "$REPOROOT/test/TestApp" --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
+dotnet restore "$REPOROOT/test/TestApp" --runtime "$RID"
 dotnet compile "$REPOROOT/test/TestApp" --output "$REPOROOT/artifacts/$RID/smoketest"
 
 # set -e will abort if the exit code of this is non-zero
