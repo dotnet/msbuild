@@ -32,6 +32,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             try
             {
                 var cmdLineArgs = ArgumentsParser.Parse(args);
+
+                if (cmdLineArgs.IsHelp) return cmdLineArgs.ReturnCode;
+
                 var config = cmdLineArgs.GetNativeCompileSettings();
 
                 DirectoryExtensions.CleanOrCreateDirectory(config.OutputDirectory);

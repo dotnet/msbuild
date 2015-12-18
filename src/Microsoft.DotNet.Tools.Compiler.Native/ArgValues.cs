@@ -17,6 +17,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         public string AppDepSDKPath { get; set; }
         public string IlcPath { get; set; }
 
+        public bool IsHelp { get; set; }
+        public int ReturnCode { get; set; }
+
         public NativeCompileSettings GetNativeCompileSettings()
         {
             var config = NativeCompileSettings.Default;

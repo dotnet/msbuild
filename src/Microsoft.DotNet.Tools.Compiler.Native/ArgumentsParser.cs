@@ -19,14 +19,20 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             string ilcPath = null;
             string appDepSdk = null;
             string logPath = null;
+            var help = false;
+            string helpText = null;
+            var returnCode = 0;
 
             IReadOnlyList<string> references = Array.Empty<string>();
-            IReadOnlyList<string> linklib = Array.Empty<string>();
+            IReadOnlyList<string> linklib = Array.Empty<string>();            
 
             try
             {
                 ArgumentSyntax.Parse(args, syntax =>
                 {
+                    syntax.HandleHelp = false;
+                    syntax.HandleErrors = false;
+
                     syntax.DefineOption("output", ref outputDirectory, "Output Directory for native executable.");
                     syntax.DefineOption("temp-output", ref temporaryOutputDirectory, "Directory for intermediate files.");
 
@@ -48,12 +54,17 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                     // Optional Log Path
                     syntax.DefineOption("logpath", ref logPath, "Use to dump Native Compilation Logs to a file.");
 
+                    syntax.DefineOption("h|help", ref help, "Help for compile native.");
+
                     syntax.DefineParameter("INPUT_ASSEMBLY", ref inputAssembly,
                         "The managed input assembly to compile to native.");
 
+                    helpText = syntax.GetHelpText();
+                    
                     if (string.IsNullOrWhiteSpace(inputAssembly))
                     {
                         syntax.ReportError("Input Assembly is a required parameter.");
+                        help = true;
                     }
 
                     if (!string.IsNullOrEmpty(configuration))
@@ -65,6 +76,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                         catch (ArgumentException)
                         {
                             syntax.ReportError($"Invalid Configuration Option: {configuration}");
+                            help = true;
                         }
                     }
 
@@ -77,13 +89,27 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                         catch (ArgumentException)
                         {
                             syntax.ReportError($"Invalid Mode Option: {mode}");
+                            help = true;
                         }
                     }
                 });
             }
-            catch (ArgumentSyntaxException)
+            catch (ArgumentSyntaxException exception)
             {
-                //return ExitFailed;
+                Console.Error.WriteLine(exception.Message);
+                help = true;
+                returnCode = 1;
+            }
+
+            if (help)
+            {
+                Console.WriteLine(helpText);
+
+                return new ArgValues
+                {
+                    IsHelp = help,
+                    ReturnCode = returnCode
+                };
             }
 
             Console.WriteLine($"Input Assembly: {inputAssembly}");
