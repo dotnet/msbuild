@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
+use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use File::Path qw(make_path);
@@ -9,14 +10,16 @@ use File::Basename;
 use FindBin qw($RealBin);
 use Cwd qw(abs_path);
 use POSIX;
-
-#set the timestamp in case we need to create a directory
-use constant DATETIME=>strftime("%Y-%m-%d_%H-%M-%S", localtime);
+use Symbol qw(gensym);
+use IPC::Open3 qw(open3);
 
 # The source solution
 my $solutionToBuild = catfile($RealBin, 'build.proj');
 
-my $usage = <<"USAGE";
+# Handle absolute paths
+$solutionToBuild =~ s!(^/[^/])!//$1!;
+
+my $usage = <<'USAGE';
 Usage build.pl [-root=<outputRoot>] [-fullbuild] [-verify] [-tests] [-all] [-quiet] [-silent]
 
 The script can build MSBuild.exe using mono, verify by
@@ -101,9 +104,9 @@ if ($runTests) {
     # Find the nunit console program
     my $n = ($^O eq 'MSWin32') ? `where nunit-console` : `which nunit-console`;
     chomp $n;
-    
+
     die ("Tests are requested, but nunit-console was not found") unless -e $n;
-    
+
     # Resolve any links
     $nunitConsole = abs_path($n);
     # Use version 4 if found
@@ -117,19 +120,23 @@ my $installedBuild;
 if ($^O eq "MSWin32") {
     # Find the nunit console program
     my @n = `where msbuild`;
-    print "For MSBuild: got @n[0]\n";
+    print "For MSBuild: got $n[0]\n";
     chomp @n;
-    print "Chomped MSBuild: got @n[0]\n";
-    
-    die ("Installed MSBuild was not found") unless -e @n[0];
-   
+    print "Chomped MSBuild: got $n[0]\n";
+
+    die ('Installed MSBuild was not found') unless -e $n[0];
+
     # Resolve any links
-    $installedBuild = abs_path(@n[0]);
+    $installedBuild = abs_path($n[0]);
     $slash = '\\';
 }
 else {
     $installedBuild = $xbuild;
     $slash = '/';
+}
+
+if ($solutionToBuild =~ /^-/) {
+  $solutionToBuild = ".$slash$solutionToBuild";
 }
 
 # Find the location where we're going to store results
@@ -142,7 +149,8 @@ if (!$buildRoot) {
     $buildRoot = canonpath($RealBin);
 }
 else {
-    $buildRoot = catfile(rel2abs($buildRoot), DATETIME);
+    $buildRoot = catfile(rel2abs($buildRoot),
+            strftime('%Y-%m-%d_%H-%M-%S', localtime));
     # Just make sure it's not a file
     die ("Verification root '$buildRoot' exists and is a file") if -f $buildRoot;
     make_path($buildRoot);
@@ -158,7 +166,7 @@ my $exitCode;
 my $errorCount;
 
 # Run the first build
-($exitCode, $errorCount, $msbuildPath) = runbuild("\"$installedBuild\"", '', '/', ($^O ne "MSWin32"));
+($exitCode, $errorCount, $msbuildPath) = runbuild([$installedBuild], '', '/', ($^O ne "MSWin32"));
 
 die ("Build with xbuild failed (code $exitCode)") unless $exitCode == 0;
 die ("Build with xbuild failed (error count $errorCount") unless $errorCount == 0;
@@ -166,8 +174,8 @@ die ("Build succeeded, but MSBuild.exe binary was not found at $msbuildPath") un
 
 # Use the MSBuild.exe we created and rebuild (if requested)
 if ($verification) {
-    my $MSBuildProgram = catfile($msbuildPath, 'MSBuild.exe');
-    $MSBuildProgram = 'mono ' . "\"$MSBuildProgram\"" unless $^O eq "MSWin32";
+    my $MSBuildProgram = [catfile($msbuildPath, 'MSBuild.exe')];
+    $MSBuildProgram = ['mono', @$MSBuildProgram] unless $^O eq "MSWin32";
     my $newMSBuildPath;
     ($exitCode, $errorCount, $newMSBuildPath) = runbuild($MSBuildProgram, '-verify', '-', 0);
     die ("Build with msbuild failed (code $exitCode)") unless $exitCode == 0;
@@ -188,54 +196,65 @@ if ($runTests) {
 #   suffix -- appended to log and output directory names
 #   switch -- either - or /
 sub runbuild {
-    die ('runbuild sub was not called correctly') unless @_ == 4;
     my ($program, $suffix, $switch, $overrideToolset) = @_;
+    die ('runbuild sub was not called correctly') unless @_ == 4;
 
     # Get paths of output directories and the log
-    (my $binDir = catfile($buildRoot, "bin$suffix")) =~ s:(?<![\/])$:$slash:;
+    (my $binDir = catfile($buildRoot, "bin$suffix")) =~ s|(?<![\/])$|$slash|;
     #$binDir =~ s:(?<![\/])$:\\:;
     print "BinDir = $binDir\n";
-    (my $packagesDir = catfile ($buildRoot, "packages$suffix")) =~ s:(?<![\/])$:$slash:;
+    (my $packagesDir = catfile ($buildRoot, "packages$suffix")) =~ s|(?<![\/])$|$slash|;
     my $logFile = catfile($buildRoot, "MSBuild${suffix}.log");
 
-    # If we need to rebuild, add a switch for the task
-    my $rebuildSwitch = $fullBuild ? "${switch}t:Rebuild " : "";
+    # Array to hold switches
+    my @switches = ('nologo', 'v:q');
 
-    # If we need to create NuGet package, add a witch for the property
-    my $packageProperty = $createPackage ? "${switch}p:BuildNugetPackage=true " : "";
+    # If we need to rebuild, add a switch for the task
+    push @switches, "t:Rebuild" if $fullBuild;
+
+    # If we need to create NuGet package, add a switch for the property
+    push @switches, "p:BuildNugetPackage=true" if $createPackage;
 
     # Except on Windows, we need to specifiy 4.0 toolse
-    my $toolSet = $overrideToolset ? "${switch}tv:4.0 " : "";
-    my $configSwitch = $^O eq "MSWin32" ? "${switch}p:Configuration=Debug " : "${switch}p:Configuration=Debug-MONO ";
-    
+    push @switches, "tv:4.0" if $overrideToolset;
+
+    @switches = map { $switch.$_ } (
+        @switches,
+        "p:Configuration=Debug" . ($^O eq "MSWin32" ? '' : '-MONO'),
+        "p:BinDir=$binDir",
+        "p:PackagesDir=$packagesDir",
+        'fl', "flp:LogFile=$logFile;V=diag", 'p:BuildSamples=false');
+
     # Generate and print the command we run
-    my $command = "$program ${switch}nologo ${switch}v:q " .
-                  "$rebuildSwitch $configSwitch $toolSet $packageProperty" .
-                  "${switch}p:BinDir=$binDir ${switch}p:PackagesDir=$packagesDir " .
-                  "${switch}fl \"${switch}flp:LogFile=$logFile;V=diag\" ${switch}p:BuildSamples=false " .
-                  " $solutionToBuild";
-    print $command . "\n" unless $silent;
+    my @command = (@$program, @switches, $solutionToBuild);
+    {
+         local $" = ' ';
+         print "@command\n" unless $silent;
+    }
 
     # Run build, parsing it's output to count errors and warnings
     # Harakiri if can't run
-    open(BUILD_OUTPUT, "$command 2>&1 |") or die "Cannot run $program, error $!";
+    my $buildOutput = gensym;
+    my $pid = open3(\*STDIN, $buildOutput, $buildOutput, @command)
+      or die "Cannot run $program, error $!";
     my $warningCount = 0;
     my $errorCount = 0;
-    for (<BUILD_OUTPUT>) {
+    while (<$buildOutput>) {
         print $_ unless ($quiet || $silent);
         m/:\s+error / && ($errorCount++, next);
         m/:\s+warning / && ($warningCount++, next);
     }
 
     die "Failed to run $program, exit code $!" if $! != 0;
-    close BUILD_OUTPUT;
+    close $buildOutput;
+    waitpid $pid, 0;
     my $exitCode = $? >> 8;
 
     # Search the log for the full output path
     my $msbuildPath;
-    if (open LOG, '<', $logFile) {
-        m/$extractRegex/ && ($msbuildPath = $1, last) for <LOG>;
-        close (LOG);
+    if (open my $log, '<', $logFile) {
+        m/$extractRegex/ && ($msbuildPath = $1, last) for <$log>;
+        close ($log);
     }
     else {
         # It's not an error if the path cannot be found. At worst, we cannot verify
@@ -259,36 +278,48 @@ sub runtests {
     my $outputFile = catfile($testResultsDir, 'TestOutput.txt');
 
     # Build the command to run the test
-    my $command = '';
+    my @command = ();
     my $excludeCategories = '';
     if ($^O ne 'MSWin32') {
         $excludeCategories = "WindowsOnly";
     }
     if ($testName) {
-        $command = "\"$nunitConsole\" -run:$testName -xml:$xmlResultFile " . join (' ', @files);
+        @command = ($nunitConsole, "-run:$testName", "-xml:$xmlResultFile",
+        , @files);
     } elsif ($fixture) {
-        $command = "\"$nunitConsole\" -fixture:$fixture -exclude:$excludeCategories -xml:$xmlResultFile " . join (' ', @files);
+        @command = ($nunitConsole, "-fixture:$fixture", "-exclude:$excludeCategories", "-xml:$xmlResultFile", @files);
     } else {
-        $command = "\"$nunitConsole\" -exclude:$excludeCategories -xml:$xmlResultFile " . join (' ', @files);
+        @command = ($nunitConsole, "-exclude:$excludeCategories",
+                "-xml:$xmlResultFile", @files);
     }
-    print $command . "\n" unless $silent;
+    {
+        local $" = ' ';
+        print @command unless $silent;
+    }
 
     # Run it silently
-    system("$command 2>&1 >$outputFile");
+    {
+        my $outputHandle = gensym;
+        open $outputHandle, '>', $outputFile or die "Could not open '$outputFile': $!";
+        my $pid = open3 \*STDIN, $outputHandle, $outputHandle, @command;
+        close $outputHandle;
+        waitpid $pid, 0;
+    }
 
-    # Count the passed/failed tests by readin the output XML file
+    # Count the passed/failed tests by reading the output XML file
     my $testsFailed = 0;
     my $testsSucceeded = 0;
-    
+
     my $testRegex = qr!^\s*<test-case.+executed="True".+success="((?:True)|(?:False))"!;
 
-    if (open LOG, '<', $xmlResultFile) {
-        m/$testRegex/ && ($1 eq 'True' ? $testsSucceeded++ : $testsFailed++) for <LOG>;
-        close (LOG);
+    if (open my ($LOG), '<', $xmlResultFile) {
+        m/$testRegex/ && ($1 eq 'True' ? $testsSucceeded++ : $testsFailed++) for <$LOG>;
+        close ($LOG);
         my $testsRan = $testsSucceeded + $testsFailed;
         print "Tests ran: $testsRan, tests succeeded: $testsSucceeded, tests failed: $testsFailed\n" unless $silent;
     }
     else {
         print "Warning: Cannot open log file $xmlResultFile: $!\n" if $! && !$silent;
     }
+    return;
 }
