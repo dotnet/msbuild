@@ -90,7 +90,8 @@ namespace ConsoleApplication
 
             TestRunCommand("dotnet", $"run");
         }
-
+        
+        [Fact]
         public void TestDotnetPack()
         {
             TestSetup();
