@@ -4,20 +4,27 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-ln -s $2/bin/dotnet /usr/local/bin/
-ln -s $2/bin/dotnet-compile /usr/local/bin/
-ln -s $2/bin/dotnet-compile-csc /usr/local/bin/
-ln -s $2/bin/dotnet-new /usr/local/bin/
-ln -s $2/bin/dotnet-pack /usr/local/bin/
-ln -s $2/bin/dotnet-publish /usr/local/bin/
-ln -s $2/bin/dotnet-repl /usr/local/bin/
-ln -s $2/bin/dotnet-restore /usr/local/bin/
-ln -s $2/bin/dotnet-resgen /usr/local/bin/
-ln -s $2/bin/dotnet-run /usr/local/bin/
-ln -s $2/bin/dotnet-test /usr/local/bin/
+PACKAGE=$1
+INSTALL_DESTINATION=$2
+
+
+# A temporary fix for the permissions issue(s)
+chmod -R 755 $INSTALL_DESTINATION
+
+ln -s $INSTALL_DESTINATION/bin/dotnet /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-compile /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-compile-csc /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-new /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-pack /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-publish /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-repl /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-restore /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-resgen /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-run /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/dotnet-test /usr/local/bin/
 
 # A temporary solution to unblock dotnet compile
-cp $2/bin/corehost /usr/local/bin/
+cp $INSTALL_DESTINATION/bin/corehost /usr/local/bin/
 
 
 exit 0

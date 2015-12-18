@@ -5,9 +5,9 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23608",
-    "System.IO.Compression.ZipFile": "4.0.1-rc2-23608",
-    "System.Linq": "4.0.1-rc2-23608",
+    "NETStandard.Library": "1.0.0-rc2-23616",
+    "System.IO.Compression.ZipFile": "4.0.1-rc2-23616",
+    
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": {
@@ -24,8 +24,8 @@
   },
   "scripts": {
     "postcompile": [
-       "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
-       "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
+      "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
+      "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
     ]
   }
 }

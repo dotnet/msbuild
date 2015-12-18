@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 			}
 			else if (config.OS == OSMode.Mac)
 			{
-				throw new NotImplementedException("Mac RyuJit not supported");
+				stepList.Add(new MacRyuJitCompileStep(config));
 			}
 			else
 			{

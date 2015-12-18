@@ -48,7 +48,7 @@ DOTNET_PATH=$(which dotnet)
 PREFIX="$(cd -P "$(dirname "$DOTNET_PATH")/.." && pwd)"
 
 header "Restoring packages"
-$DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+$DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "$RID" --no-cache
 
 header "Building corehost"
 
@@ -111,6 +111,13 @@ DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $REPOROOT/scripts/build/build_a
 COMMIT_ID=$(git rev-parse HEAD)
 echo $COMMIT_ID > $STAGE2_DIR/.commit
 
-# E2E test on the output
+# Run tests on the stage2 output
 header "Testing stage2..."
 DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $DIR/test/runtests.sh
+
+# Run Validation for Project.json dependencies
+dotnet publish "$REPOROOT/tools/MultiProjectValidator" -o "$STAGE2_DIR/../tools"
+#TODO for release builds this should fail
+set +e
+"$STAGE2_DIR/../tools/pjvalidate" "$REPOROOT/src"
+set -e

@@ -53,8 +53,7 @@ namespace ConsoleApplication
         [Fact]
         public void TestDotnetCompileNativeRyuJit()
         {
-            // Skip this test on mac
-            if(SkipForOS(OSPlatform.OSX, "https://github.com/dotnet/cli/issues/246"))
+            if(SkipForOS(OSPlatform.Linux, "https://github.com/dotnet/cli/issues/527"))
             {
                 return;
             }

@@ -41,9 +41,8 @@ PACKAGE_NAME=$PACKAGE_DIR/dotnet-cli-x64.${DOTNET_BUILD_VERSION}.pkg
 pkgbuild --root $STAGE2_DIR \
          --version $DOTNET_BUILD_VERSION \
          --scripts $DIR/scripts \
-         --ownership preserve \
          --identifier com.microsoft.dotnet.cli.pkg.dotnet-osx-x64 \
-         --install-location /usr/local/share/dotnet/cli \
+         --install-location /usr/local/share/dotnet \
          $DIR/dotnet-osx-x64.$DOTNET_BUILD_VERSION.pkg
 
 cat $DIR/Distribution-Template | sed "/{VERSION}/s//$DOTNET_BUILD_VERSION/g" > $DIR/Dist

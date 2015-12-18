@@ -79,10 +79,17 @@ if [ -z "$RID" ]; then
         export RID=osx.10.10-x64
         export DNX_FLAVOR="dnx-coreclr-darwin-x64"
     elif [ "$UNAME" == "Linux" ]; then
-        # Detect Distro?
-        export OSNAME=linux
-        export RID=ubuntu.14.04-x64
-        export DNX_FLAVOR="dnx-coreclr-linux-x64"
+        # Detect Distro
+        if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
+            export OSNAME=ubuntu
+            export RID=ubuntu.14.04-x64
+            export DNX_FLAVOR="dnx-coreclr-linux-x64"
+        elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
+            export OSNAME=centos
+            export RID=centos.7-x64
+        else
+            error "unknown Linux Distro" 1>&2
+        fi
     else
         error "unknown OS: $UNAME" 1>&2
         exit 1
