@@ -4,7 +4,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-# $1 is passed to package to enable deb or pkg packaging
+# Set OFFLINE environment variable to build offline
+
 set -e
 
 SOURCE="${BASH_SOURCE[0]}"
@@ -27,11 +28,18 @@ do
     debug)
         export CONFIGURATION=Debug
         ;;
+    offline)
+        export OFFLINE=true
+        ;;
     *)
     esac
 done
 
 [ -z "$CONFIGURATION" ] && CONFIGURATION=Debug
+
+if [ ! -z "$OFFLINE" ]; then
+    header "  - Offline Build -  "
+fi
 
 # Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
 export DOTNET_INSTALL_DIR=$DIR/.dotnet_stage0/$RID
