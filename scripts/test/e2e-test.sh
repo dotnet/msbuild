@@ -17,7 +17,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/../_common.sh"
 
 rm "$REPOROOT/test/E2E/project.lock.json"
-dotnet restore --quiet "$REPOROOT/test/E2E" --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64"
+dotnet restore --quiet "$REPOROOT/test/E2E" --runtime "$RID"
 dotnet publish --framework dnxcore50 --runtime "$RID" --output "$REPOROOT/artifacts/$RID/e2etest" "$REPOROOT/test/E2E" 
 
 # set -e will abort if the exit code of this is non-zero
