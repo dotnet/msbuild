@@ -13,20 +13,46 @@ namespace Microsoft.DotNet.Tools.Run
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
+            var help = false;
+            string helpText = null;
+            var returnCode = 0;
+
             RunCommand runCmd = new RunCommand();
 
-            ArgumentSyntax.Parse(args, syntax =>
+            try
             {
-                syntax.HandleErrors = false;
-                syntax.DefineOption("f|framework", ref runCmd.Framework, "Compile a specific framework");
-                syntax.DefineOption("c|configuration", ref runCmd.Configuration, "Configuration under which to build");
-                syntax.DefineOption("t|preserve-temporary", ref runCmd.PreserveTemporary, "Keep the output's temporary directory around");
-                syntax.DefineOption("p|project", ref runCmd.Project, "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory");
+                ArgumentSyntax.Parse(args, syntax =>
+                {
+                    syntax.HandleHelp = false;
+                    syntax.HandleErrors = false;
 
-                // TODO: this is not supporting args which can be switches (i.e. --test)
-                // TODO: we need to make a change in System.CommandLine or parse args ourselves.
-                syntax.DefineParameterList("args", ref runCmd.Args, "Arguments to pass to the executable or script");
-            });
+                    syntax.DefineOption("f|framework", ref runCmd.Framework, "Compile a specific framework");
+                    syntax.DefineOption("c|configuration", ref runCmd.Configuration, "Configuration under which to build");
+                    syntax.DefineOption("t|preserve-temporary", ref runCmd.PreserveTemporary, "Keep the output's temporary directory around");
+                    syntax.DefineOption("p|project", ref runCmd.Project, "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory");
+
+                    syntax.DefineOption("h|help", ref help, "Help for compile native.");
+
+                    // TODO: this is not supporting args which can be switches (i.e. --test)
+                    // TODO: we need to make a change in System.CommandLine or parse args ourselves.
+                    syntax.DefineParameterList("args", ref runCmd.Args, "Arguments to pass to the executable or script");
+
+                    helpText = syntax.GetHelpText();
+                });
+            }
+            catch (ArgumentSyntaxException exception)
+            {
+                Console.Error.WriteLine(exception.Message);
+                help = true;
+                returnCode = 1;
+            }
+
+            if (help)
+            {
+                Console.WriteLine(helpText);
+
+                return returnCode;
+            }
 
             try
             {
