@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             NativeIntermediateMode? nativeMode = null;
             string ilcArgs = null;
             string ilcPath = null;
+            string ilcSdkPath = null;
             string appDepSdk = null;
             string logPath = null;
             var help = false;
@@ -45,7 +46,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
                     // Custom Extensibility Points to support CoreRT workflow TODO better descriptions
                     syntax.DefineOption("ilcargs", ref ilcArgs, "Use to specify custom arguments for the IL Compiler.");
-                    syntax.DefineOption("ilcpath", ref ilcPath, "Use to plug in a custom built ilc.exe");
+                    syntax.DefineOption("ilcpath", ref ilcPath, "Use to specify a custom build of IL Compiler.");
+                    syntax.DefineOption("ilcsdkpath", ref ilcSdkPath, "Use to specify a custom build of IL Compiler SDK");
+
                     syntax.DefineOptionList("linklib", ref linklib, "Use to link in additional static libs");
 
                     // TEMPORARY Hack until CoreRT compatible Framework Libs are available 
@@ -125,6 +128,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 ReferencePaths = references,
                 IlcArgs = ilcArgs,
                 IlcPath = ilcPath,
+                IlcSdkPath = ilcSdkPath,
                 LinkLibPaths = linklib,
                 AppDepSDKPath = appDepSdk,
                 LogPath = logPath

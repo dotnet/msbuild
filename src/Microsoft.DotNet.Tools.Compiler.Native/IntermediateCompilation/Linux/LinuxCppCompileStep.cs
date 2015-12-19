@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private readonly string cLibsFlags = "-lm -ldl";
         private readonly string cflags = "-g -lstdc++ -lrt -Wno-invalid-offsetof -pthread";
 
-        private readonly string[] libs = new string[]
+        private readonly string[] IlcSdkLibs = new string[]
         {
             "libbootstrappercpp.a",
             "libPortableRuntime.a",
@@ -79,10 +79,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Add Stubs
             argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04/lxstubs.cpp"));
 
-            // Libs
-            foreach (var lib in libs)
+            // ILC SDK Libs
+            foreach (var lib in IlcSdkLibs)
             {
-                var libPath = Path.Combine(config.IlcPath, lib);
+                var libPath = Path.Combine(config.IlcSdkPath, lib);
                 argsList.Add(libPath);
             }
 
