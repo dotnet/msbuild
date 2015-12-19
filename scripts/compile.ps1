@@ -14,6 +14,36 @@ $ErrorActionPreference="Stop"
 $StartPath = $env:PATH
 $StartDotNetHome = $env:DOTNET_HOME
 
+function getDnx()
+{
+    $DnxPackage = "dnx-coreclr-win-x64.1.0.0-rc1-update1.nupkg"
+    $DnxVersion = "1.0.0-rc1-16231"
+    $DnxDir = "$OutputDir\dnx"
+    $DnxRoot = "$DnxDir/bin"
+
+    # check if the required dnx version is already downloaded
+    if ((Test-Path "$DnxRoot\dnx.exe")) {
+        $dnxOut = & "$DnxRoot\dnx.exe" --version
+
+        if ($dnxOut -Match $DnxVersion) {
+            Write-Host "Dnx version - $DnxVersion already downloaded."
+            return $DnxRoot
+        }
+    }
+
+    # Download dnx to copy to stage2
+    Remove-Item -Recurse -Force -ErrorAction Ignore $DnxDir
+    mkdir -Force "$DnxDir" | Out-Null
+
+    Write-Host "Downloading Dnx version - $DnxVersion."
+    $DnxUrl="https://api.nuget.org/packages/$DnxPackage"
+    Invoke-WebRequest -UseBasicParsing "$DnxUrl" -OutFile "$DnxDir\dnx.zip"
+
+    Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
+    [System.IO.Compression.ZipFile]::ExtractToDirectory("$DnxDir\dnx.zip", "$DnxDir")
+    return $DnxRoot
+}
+
 try {
 
     # Check prereqs
@@ -42,22 +72,13 @@ Download it from https://www.cmake.org
             $DotNetTools = "$($env:LOCALAPPDATA)\Microsoft\dotnet"
         }
     
-        # Download dnx to copy to stage2
-        if ((Test-Path "$DnxDir")) {
-            Remove-Item -Recurse -Force $DnxDir
-        }
-        mkdir "$DnxDir" | Out-Null
-        $DnxUrl="https://api.nuget.org/packages/dnx-coreclr-win-x64.$DnxVersion.nupkg"
-        Invoke-WebRequest -UseBasicParsing "$DnxUrl" -OutFile "$DnxDir\dnx.zip"
-        Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
-        [System.IO.Compression.ZipFile]::ExtractToDirectory("$DnxDir\dnx.zip", "$DnxDir")
-        $DnxRoot = "$DnxDir/bin"
+        $DnxRoot = getDnx
     
         # Restore packages
         header "Restoring packages"
-        & "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+        & "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "$Rid" --no-cache
         if (!$?) {
-            Write-Host "Command failed: " dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
+            Write-Host "Command failed: " "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "$Rid" --no-cache
             Exit 1
         }
     }
