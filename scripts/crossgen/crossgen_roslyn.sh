@@ -10,15 +10,14 @@ BIN_DIR="$( cd $1 && pwd )"
 
 UNAME=`uname`
 
-if [ -z "$RID" ]; then
-    if [ "$UNAME" == "Darwin" ]; then
-        RID=osx.10.10-x64
-    elif [ "$UNAME" == "Linux" ]; then
-        RID=ubuntu.14.04-x64
-    else
-        echo "Unknown OS: $UNAME" 1>&2
-        exit 1
-    fi
+# Always recalculate the RID because the package always uses a specific RID, regardless of OS X version or Linux distro.
+if [ "$UNAME" == "Darwin" ]; then
+    RID=osx.10.10-x64
+elif [ "$UNAME" == "Linux" ]; then
+    RID=ubuntu.14.04-x64
+else
+    echo "Unknown OS: $UNAME" 1>&2
+    exit 1
 fi
 
 # Replace with a robust method for finding the right crossgen.exe

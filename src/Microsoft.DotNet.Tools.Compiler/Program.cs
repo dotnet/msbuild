@@ -13,6 +13,7 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -344,8 +345,9 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (success && !args.NoHostValue && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
-                var projectContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
-                projectContext
+                var rids = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
+                var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, rids);
+                runtimeContext
                     .MakeCompilationOutputRunnable(outputPath, args.ConfigValue);
             }
 

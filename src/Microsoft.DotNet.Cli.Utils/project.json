@@ -1,13 +1,14 @@
 ﻿{
-  "version": "1.0.0-*",
-  
-  "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23704",
-    "Microsoft.DotNet.ProjectModel": "1.0.0",
-    "System.Reflection.Metadata": "1.1.0"
-  },
-    
-  "frameworks": {
-      "dnxcore50": { }
-  }
+    "version": "1.0.0-*",
+
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23704",
+        "Microsoft.DotNet.ProjectModel": "1.0.0",
+        "System.Reflection.Metadata": "1.1.0",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
+    },
+
+    "frameworks": {
+        "dnxcore50": { }
+    }
 }

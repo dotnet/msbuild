@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -39,10 +40,8 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
             }
 
-            ProjectContexts = ProjectContext.CreateContextForEachTarget(ProjectPath);
-            ProjectContexts = GetMatchingProjectContexts(ProjectContexts, NugetFramework, Runtime);
-
-            if (ProjectContexts.Count() == 0)
+            ProjectContexts = SelectContexts(ProjectPath, NugetFramework, Runtime);
+            if (!ProjectContexts.Any())
             {
                 string errMsg = $"'{ProjectPath}' cannot be published  for '{Framework ?? "<no framework provided>"}' '{Runtime ?? "<no runtime provided>"}'";
                 Reporter.Output.WriteLine(errMsg.Red());
@@ -64,29 +63,6 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
 
                 NumberOfProjects++;
-            }
-        }
-
-        /// <summary>
-        /// Return the matching framework/runtime ProjectContext.
-        /// If 'nugetframework' or 'runtime' is null or empty then it matches with any.
-        /// </summary>
-        private static IEnumerable<ProjectContext> GetMatchingProjectContexts(IEnumerable<ProjectContext> contexts, NuGetFramework framework, string runtimeIdentifier)
-        {
-            foreach (var context in contexts)
-            {
-                if (context.TargetFramework == null || string.IsNullOrEmpty(context.RuntimeIdentifier))
-                {
-                    continue;
-                }
-
-                if (string.IsNullOrEmpty(runtimeIdentifier) || runtimeIdentifier.Equals(context.RuntimeIdentifier))
-                {
-                    if (framework == null || framework.Equals(context.TargetFramework))
-                    {
-                        yield return context;
-                    }
-                }
             }
         }
 
@@ -227,6 +203,52 @@ namespace Microsoft.DotNet.Tools.Publish
             candidate = candidate.TrimStart(new char[] { '/', '\\' });
 
             return candidate;
+        }
+
+        private static IEnumerable<ProjectContext> SelectContexts(string projectPath, NuGetFramework framework, string runtime)
+        {
+            var allContexts = ProjectContext.CreateContextForEachTarget(projectPath);
+            if (string.IsNullOrEmpty(runtime))
+            {
+                // Nothing was specified, so figure out what the candidate runtime identifiers are and try each of them
+                // Temporary until #619 is resolved
+                foreach (var candidate in PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers())
+                {
+                    var contexts = GetMatchingProjectContexts(allContexts, framework, candidate);
+                    if (contexts.Any())
+                    {
+                        return contexts;
+                    }
+                }
+                return Enumerable.Empty<ProjectContext>();
+            }
+            else
+            {
+                return GetMatchingProjectContexts(allContexts, framework, runtime);
+            }
+        }
+
+        /// <summary>
+        /// Return the matching framework/runtime ProjectContext.
+        /// If 'framework' or 'runtimeIdentifier' is null or empty then it matches with any.
+        /// </summary>
+        private static IEnumerable<ProjectContext> GetMatchingProjectContexts(IEnumerable<ProjectContext> contexts, NuGetFramework framework, string runtimeIdentifier)
+        {
+            foreach (var context in contexts)
+            {
+                if (context.TargetFramework == null || string.IsNullOrEmpty(context.RuntimeIdentifier))
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(runtimeIdentifier) || string.Equals(runtimeIdentifier, context.RuntimeIdentifier, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (framework == null || framework.Equals(context.TargetFramework))
+                    {
+                        yield return context;
+                    }
+                }
+            }
         }
     }
 }

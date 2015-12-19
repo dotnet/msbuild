@@ -33,6 +33,10 @@ else {
 header "Compiling"
 _ "$RepoRoot\scripts\compile\compile.ps1" @("$Configuration")
 
+# Put stage2 on the PATH now that we have a build
+$env:PATH = "$Stage2Dir\bin;$env:PATH"
+$env:DOTNET_HOME = "$Stage2Dir"
+
 header "Running Tests"
 _ "$RepoRoot\scripts\test\runtests.ps1"
 

@@ -12,7 +12,7 @@ if [ -z "$RID" ]; then
         if [ -n "$(sw_vers -productVersion | grep 10.10)" ]; then
             export RID=osx.10.10-x64
         elif [ -n "$(sw_vers -productVersion | grep 10.11)" ]; then
-            export RID=osx.10.10-x64
+            export RID=osx.10.11-x64
         else
             error "unknown OS X: $(sw_vers -productVersion)" 1>&2
         fi

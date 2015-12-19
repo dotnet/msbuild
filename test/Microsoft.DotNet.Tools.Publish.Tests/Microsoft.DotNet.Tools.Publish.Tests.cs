@@ -9,6 +9,7 @@ using Xunit;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Publish.Tests
 {
@@ -24,11 +25,11 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                 {
                     new object[] { "", "", "", "" },
                     new object[] { "dnxcore50", "", "", "" },
-                    new object[] { "", RuntimeIdentifier.Current, "", "" },
+                    new object[] { "", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "", "" },
                     new object[] { "", "", "Release", "" },
                     new object[] { "", "", "", "some/dir"},
                     //new object[] { "", "", "", "\"some/dir/with spaces\"" }, // issue - https://github.com/dotnet/cli/issues/525
-                    new object[] { "dnxcore50", RuntimeIdentifier.Current, "Debug", "some/dir" },
+                    new object[] { "dnxcore50", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "Debug", "some/dir" },
                 };
             }
         }

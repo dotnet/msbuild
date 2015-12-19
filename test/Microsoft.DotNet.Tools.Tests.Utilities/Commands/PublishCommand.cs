@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -55,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string config = string.IsNullOrEmpty(_config) ? "Debug" : _config;
             string framework = string.IsNullOrEmpty(_framework) ? 
                 _project.GetTargetFrameworks().First().FrameworkName.GetShortFolderName() : _framework;
-            string runtime = string.IsNullOrEmpty(_runtime) ? RuntimeIdentifier.Current : _runtime;
+            string runtime = string.IsNullOrEmpty(_runtime) ? PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier() : _runtime;
             string output = Path.Combine("bin", config, framework, runtime);
 
             return output;

@@ -4,15 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
-        private const string HelpText = @".NET Command Line Interface
-Usage: dotnet [common-options] [command] [arguments]
+        private const string ProductLongName = ".NET Command Line Tools";
+        private const string UsageText = @"Usage: dotnet [common-options] [command] [arguments]
 
 Arguments:
   [command]     The command to execute
@@ -20,6 +22,7 @@ Arguments:
 
 Common Options (passed before the command):
   -v|--verbose  Enable verbose output
+  --version     Display .NET CLI Version Info
 
 Common Commands:
   new           Initialize a basic .NET project
@@ -29,6 +32,13 @@ Common Commands:
   run           Compiles and immediately executes a .NET project
   repl          Launch an interactive session (read, eval, print, loop)
   pack          Creates a NuGet package";
+        private static readonly string ProductVersion = GetProductVersion();
+
+        private static string GetProductVersion()
+        {
+            var attr = typeof(Program).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            return attr?.InformationalVersion;
+        }
 
         public static int Main(string[] args)
         {
@@ -44,6 +54,11 @@ Common Commands:
                 if (IsArg(args[lastArg], "v", "verbose"))
                 {
                     verbose = true;
+                }
+                else if(IsArg(args[lastArg], "version"))
+                {
+                    PrintVersionInfo();
+                    return 0;
                 }
                 else if (IsArg(args[lastArg], "h", "help"))
                 {
@@ -102,12 +117,38 @@ Common Commands:
 
         private static void PrintHelp()
         {
-            Reporter.Output.WriteLine(HelpText);
+            PrintVersionHeader();
+            Reporter.Output.WriteLine(UsageText);
+        }
+
+        private static void PrintVersionHeader()
+        {
+            var versionString = string.IsNullOrEmpty(ProductVersion) ?
+                string.Empty :
+                $" ({ProductVersion})";
+            Reporter.Output.WriteLine(ProductLongName + versionString);
+        }
+
+        private static void PrintVersionInfo()
+        {
+            PrintVersionHeader();
+
+            var runtimeEnvironment = PlatformServices.Default.Runtime;
+            Reporter.Output.WriteLine("Runtime Environment:");
+            Reporter.Output.WriteLine($" OS Name:     {runtimeEnvironment.OperatingSystem}");
+            Reporter.Output.WriteLine($" OS Version:  {runtimeEnvironment.OperatingSystemVersion}");
+            Reporter.Output.WriteLine($" OS Platform: {runtimeEnvironment.OperatingSystemPlatform}");
+            Reporter.Output.WriteLine($" Runtime Id:  {runtimeEnvironment.GetRuntimeIdentifier()}");
+        }
+
+        private static bool IsArg(string candidate, string longName)
+        {
+            return IsArg(candidate, shortName: null, longName: longName);
         }
 
         private static bool IsArg(string candidate, string shortName, string longName)
         {
-            return candidate.Equals("-" + shortName) || candidate.Equals("--" + longName);
+            return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
         }
     }
 }
