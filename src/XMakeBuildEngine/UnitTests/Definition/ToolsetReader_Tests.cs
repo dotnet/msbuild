@@ -31,6 +31,7 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Unit tests for ToolsetReader class and its derived classes
     /// </summary>
+    [PlatformSpecific(Xunit.PlatformID.Windows)]
     public class ToolsetReaderTests : IDisposable
     {
         // The registry key that is passed as the baseKey parameter to the ToolsetRegistryReader class
