@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         // Link to iconv APIs
         private readonly string libFlags = "-liconv";
 
-        private readonly string[] libs = new string[]
+        private readonly string[] IlcSdkLibs = new string[]
         {
             "libbootstrappercpp.a",
             "libPortableRuntime.a",
@@ -84,10 +84,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Lib flags
             argsList.Add(libFlags);
 
-            // Libs
-            foreach (var lib in libs)
+            // ILC SDK Libs
+            foreach (var lib in IlcSdkLibs)
             {
-                var libPath = Path.Combine(config.IlcPath, lib);
+                var libPath = Path.Combine(config.IlcSdkPath, lib);
 
                 // Forward the library to linked to the linker
                 argsList.Add("-Xlinker");

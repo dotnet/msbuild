@@ -45,7 +45,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             var arch = app.Option("-a|--arch <ARCH>", "The architecture for which to compile. x64 only currently supported.", CommandOptionType.SingleValue);
             var ilcArgs = app.Option("--ilcargs <ARGS>", "Command line arguments to be passed directly to ILCompiler.", CommandOptionType.SingleValue);
             var ilcPath = app.Option("--ilcpath <PATH>", "Path to the folder containing custom built ILCompiler.", CommandOptionType.SingleValue);
-            var ilcSdkPath = app.Option("--ilcsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
+            var ilcSdkPath = app.Option("--ilcsdkpath <PATH>", "Path to the folder containing custom built ILCompiler SDK.", CommandOptionType.SingleValue);
+            var appDepSdkPath = app.Option("--appdepsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
             var cppMode = app.Option("--cpp", "Flag to do native compilation with C++ code generator.", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
@@ -64,6 +65,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var ilcArgsValue = ilcArgs.Value();
                 var ilcPathValue = ilcPath.Value();
                 var ilcSdkPathValue = ilcSdkPath.Value();
+                var appDepSdkPathValue = appDepSdkPath.Value();
                 var configValue = configuration.Value() ?? Constants.DefaultConfiguration;
                 var outputValue = output.Value();
                 var intermediateValue = intermediateOutput.Value();
@@ -78,7 +80,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     success &= Compile(context, configValue, outputValue, intermediateValue, buildProjectReferences, noHost.HasValue());
                     if (isNative && success)
                     {
-                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, isCppMode);
+                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, appDepSdkPathValue, isCppMode);
                     }
                 }
 
@@ -110,6 +112,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             string ilcArgsValue, 
             string ilcPathValue,
             string ilcSdkPathValue,
+            string appDepSdkPathValue,
             bool isCppMode)
         {
             var outputPath = GetOutputPath(context, configuration, outputOptionValue);
@@ -146,8 +149,15 @@ namespace Microsoft.DotNet.Tools.Compiler
             // ILC SDK Path
             if (!string.IsNullOrWhiteSpace(ilcSdkPathValue))
             {
-                nativeArgs.Add("--appdepsdk");
+                nativeArgs.Add("--ilcsdkpath");
                 nativeArgs.Add(ilcSdkPathValue);
+            }
+
+            // AppDep SDK Path
+            if (!string.IsNullOrWhiteSpace(appDepSdkPathValue))
+            {
+                nativeArgs.Add("--appdepsdk");
+                nativeArgs.Add(appDepSdkPathValue);
             }
 
             // CodeGen Mode

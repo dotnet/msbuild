@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         // TODO: debug/release support
         private readonly string cflags = "-g -lstdc++ -Wno-invalid-offsetof -pthread -ldl -lm -liconv";
 
-        private readonly string[] libs = new string[]
+        private readonly string[] IlcSdkLibs = new string[]
         {
             "libbootstrapper.a",
             "libRuntime.a",
@@ -75,10 +75,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var inLibFile = DetermineInFile(config);
             argsList.Add("-Xlinker "+inLibFile);
 
-            // Libs
-            foreach (var lib in libs)
+            // ILC SDK Libs
+            foreach (var lib in IlcSdkLibs)
             {
-                var libPath = Path.Combine(config.IlcPath, lib);
+                var libPath = Path.Combine(config.IlcSdkPath, lib);
                 argsList.Add("-Xlinker "+libPath);
             }
 

@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             { BuildConfiguration.release, "/NOLOGO /ERRORREPORT:PROMPT /INCREMENTAL:NO /OPT:REF /OPT:ICF /LTCG:incremental /MANIFEST /MANIFESTUAC:\"level='asInvoker' uiAccess='false'\" /manifest:embed /Debug /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT" }
         };
 
-        private static readonly Dictionary<NativeIntermediateMode, string[]> ModeLibMap = new Dictionary<NativeIntermediateMode, string[]>
+        private static readonly Dictionary<NativeIntermediateMode, string[]> IlcSdkLibMap = new Dictionary<NativeIntermediateMode, string[]>
         {
             { NativeIntermediateMode.cpp, new string[] { "PortableRuntime.lib", "bootstrappercpp.lib" } },
             { NativeIntermediateMode.ryujit, new string[] { "Runtime.lib", "bootstrapper.lib" } }
@@ -98,11 +98,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Constant Libs
             argsList.Add(string.Join(" ", ConstantLinkLibs));
 
-            // SDK Libs
-            var SDKLibs = ModeLibMap[config.NativeMode];
+            // ILC SDK Libs
+            var SDKLibs = IlcSdkLibMap[config.NativeMode];
             foreach (var lib in SDKLibs)
             {
-                var sdkLibPath = Path.Combine(config.IlcPath, lib);
+                var sdkLibPath = Path.Combine(config.IlcSdkPath, lib);
                 argsList.Add($"\"{sdkLibPath}\"");
             }
 
