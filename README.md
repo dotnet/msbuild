@@ -59,17 +59,17 @@ Compiling to IL is done using:
 	dotnet compile
 This will drop a binary in `./bin/[configuration]/[framework]/[binary name]` that you can just run.
 
-Finally, you can also try out native compilation on Windows and Ubuntu and Mac.  
-
-**Note:** at this point, only the `helloworld` and `dotnetbot` samples will work with native compilation.
+Finally, you can also try out native compilation using RyuJIT as shown below:  
 
 	dotnet compile --native
 
-On Mac OSX, we currently support the C++ Codegenerator (as shown below) and support for RyuJIT (as exemplified above) is coming soon.
+The following command will perform native compilation using the C++ Codegenerator:
 
     dotnet compile --native --cpp
 
 This will drop a native single binary in `./bin/[configuration]/[framework]/native/[binary name]` that you can run.
+
+**Note:** At this point, only the `helloworld` and `dotnetbot` samples will work with native compilation.
 
 For more details, please refer to the [documentation](https://github.com/dotnet/corert/tree/master/Documentation).
 
