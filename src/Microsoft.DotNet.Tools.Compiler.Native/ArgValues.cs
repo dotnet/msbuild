@@ -56,6 +56,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             if (!string.IsNullOrEmpty(IlcPath))
             {
                 config.IlcPath = IlcPath;
+
+                // If ILCSdkPath is not specified, then default it to be the same as the overridden ILCPath
+                if (string.IsNullOrEmpty(IlcSdkPath))
+                {
+                    IlcSdkPath = IlcPath;
+                }
             }
 
             if (!string.IsNullOrEmpty(IlcSdkPath))
