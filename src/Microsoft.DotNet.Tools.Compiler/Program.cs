@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, args.ConfigValue);
             var managedOutput = 
-                GetProjectOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
+                CompilerUtil.GetCompilationOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
             
             var nativeArgs = new List<string>();
 
@@ -199,7 +199,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Get compilation options
-            var outputName = GetProjectOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
+            var outputName = CompilerUtil.GetCompilationOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
 
             // Assemble args
             var compilerArgs = new List<string>()
@@ -208,20 +208,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 $"--out:{outputName}"
             };
 
-            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, args.ConfigValue);
-
-            // Path to strong naming key in environment variable overrides path in project.json
-            var environmentKeyFile = Environment.GetEnvironmentVariable(EnvironmentNames.StrongNameKeyFile);
-
-            if (!string.IsNullOrWhiteSpace(environmentKeyFile))
-            {
-                compilationOptions.KeyFile = environmentKeyFile;
-            }
-            else  if (!string.IsNullOrWhiteSpace(compilationOptions.KeyFile))
-            {
-                // Resolve full path to key file
-                compilationOptions.KeyFile = Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
-            }
+            var compilationOptions = CompilerUtil.ResolveCompilationOptions(context, args.ConfigValue);
 
             var references = new List<string>();
 
@@ -239,7 +226,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 {
                     if (projectDependency.Project.Files.SourceFiles.Any())
                     {
-                        var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, args.ConfigValue, outputPath);
+                        var projectOutputPath = CompilerUtil.GetCompilationOutput(projectDependency.Project, projectDependency.Framework, args.ConfigValue, outputPath);
                         references.Add(projectOutputPath);
                     }
                 }
@@ -288,7 +275,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 return false;
             }
             // Add project source files
-            var sourceFiles = context.ProjectFile.Files.SourceFiles;
+            var sourceFiles = CompilerUtil.GetCompilationSources(context);
             compilerArgs.AddRange(sourceFiles);
 
             var compilerName = CompilerUtil.ResolveCompilerName(context);
@@ -367,6 +354,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             return PrintSummary(diagnostics, sw, success);
         }
 
+
+
         private static void RunScripts(ProjectContext context, string name, Dictionary<string, string> contextVariables)
         {
             foreach (var script in context.ProjectFile.Scripts.GetOrEmpty(name))
@@ -378,18 +367,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private static string GetProjectOutput(Project project, NuGetFramework framework, string configuration, string outputPath)
-        {
-            var compilationOptions = project.GetCompilerOptions(framework, configuration);
-            var outputExtension = ".dll";
 
-            if (framework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
-            {
-                outputExtension = ".exe";
-            }
-
-            return Path.Combine(outputPath, project.Name + outputExtension);
-        }
 
         
         private static void CopyExport(string outputPath, LibraryExport export)

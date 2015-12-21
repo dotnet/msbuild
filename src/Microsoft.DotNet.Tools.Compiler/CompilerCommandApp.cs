@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
@@ -10,8 +9,8 @@ using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 using System.Linq;
 
-//This class is responsible with defining the arguments for the Compile verb.
-//It knows how to interpret them and set default values
+// This class is responsible with defining the arguments for the Compile verb.
+// It knows how to interpret them and set default values
 namespace Microsoft.DotNet.Tools.Compiler
 {
     public delegate bool OnExecute(List<ProjectContext> contexts, CompilerCommandApp compilerCommand);
@@ -20,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Compiler
     {
         private readonly CommandLineApplication _app;
 
-        //options and arguments for compilation
+        // options and arguments for compilation
         private CommandOption _outputOption;
         private CommandOption _intermediateOutputOption;
         private CommandOption _frameworkOption;
@@ -36,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         private CommandOption _cppModeOption;
         private CommandOption _cppCompilerFlagsOption;
 
-        //resolved values for the options and arguments
+        // resolved values for the options and arguments
         public string ProjectPathValue { get; set; }
         public string OutputValue { get; set; }
         public string IntermediateValue { get; set; }
@@ -51,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         public string AppDepSdkPathValue { get; set; }
         public string CppCompilerFlagsValue { get; set; }
 
-        //workaround: CommandLineApplication is internal therefore I cannot make _app protected so baseclasses can add their own params
+        // workaround: CommandLineApplication is internal therefore I cannot make _app protected so baseclasses can add their own params
         private readonly Dictionary<string, CommandOption> baseClassOptions; 
 
         public CompilerCommandApp(string name, string fullName, string description)
@@ -115,7 +114,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                 IsCppModeValue = _cppModeOption.HasValue();
                 CppCompilerFlagsValue = _cppCompilerFlagsOption.Value();
 
-
                 // Load project contexts for each framework
                 var contexts = _frameworkOption.HasValue() ?
                     _frameworkOption.Values.Select(f => ProjectContext.Create(ProjectPathValue, NuGetFramework.Parse(f))) :
@@ -129,7 +127,12 @@ namespace Microsoft.DotNet.Tools.Compiler
             return _app.Execute(args);
         }
 
-        //CommandOptionType is internal. Cannot pass it as argument. Therefore the method name encodes the option type.
+        public CompilerCommandApp ShallowCopy()
+        {
+            return (CompilerCommandApp) MemberwiseClone();
+        }
+
+        // CommandOptionType is internal. Cannot pass it as argument. Therefore the method name encodes the option type.
         protected void AddNoValueOption(string optionTemplate, string descriptino){
             baseClassOptions[optionTemplate] = _app.Option(optionTemplate, descriptino, CommandOptionType.NoValue);
         }

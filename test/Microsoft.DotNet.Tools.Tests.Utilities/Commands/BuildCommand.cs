@@ -23,6 +23,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _appDepSDKPath;
         private bool _nativeCppMode;
         private string _cppCompilerFlags;
+        private bool _buildProfile;
+        private bool _forceIncrementalUnsafe;
 
         private string OutputOption
         {
@@ -134,6 +136,26 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
+        private string BuildProfile
+        {
+            get
+            {
+                return _buildProfile ?
+                    "--build-profile" :
+                    "";
+            }
+        }
+
+        private string ForceIncrementalUnsafe
+        {
+            get
+            {
+                return _forceIncrementalUnsafe ?
+                    "--force-incremental-unsafe" :
+                    "";
+            }
+        }
+
         public BuildCommand(
             string projectPath,
             string output="",
@@ -146,7 +168,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string ilcPath="",
             string appDepSDKPath="",
             bool nativeCppMode=false,
-            string cppCompilerFlags=""
+            string cppCompilerFlags="",
+            bool buildProfile=true,
+            bool forceIncrementalUnsafe=false
             )
             : base("dotnet")
         {
@@ -165,12 +189,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _appDepSDKPath = appDepSDKPath;
             _nativeCppMode = nativeCppMode;
             _cppCompilerFlags = cppCompilerFlags;
-
+            _buildProfile = buildProfile;
+            _forceIncrementalUnsafe = forceIncrementalUnsafe;
         }
 
         public override CommandResult Execute(string args = "")
         {
-            args = $"build {BuildArgs()} {args}";
+            args = $"--verbose build {BuildArgs()} {args}";
             return base.Execute(args);
         }
 
@@ -189,7 +214,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string BuildArgs()
         {
-            return $"{_projectPath} {OutputOption} {TempOutputOption} {ConfigurationOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
+            return $"{BuildProfile} {ForceIncrementalUnsafe} {_projectPath} {OutputOption} {TempOutputOption} {ConfigurationOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
         }
     }
 }

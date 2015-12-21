@@ -10,13 +10,13 @@ namespace Microsoft.DotNet.Tools.Build
 {
     internal class IncrementalPreconditions
     {
-        private readonly List<string> _preconditions;
+        private readonly ISet<string> _preconditions;
         private readonly bool _isProfile;
 
         public IncrementalPreconditions(bool isProfile)
         {
             _isProfile = isProfile;
-            _preconditions = new List<string>();
+            _preconditions = new HashSet<string>();
         }
 
         public void AddPrePostScriptPrecondition(string projectName, string scriptType)
@@ -32,6 +32,11 @@ namespace Microsoft.DotNet.Tools.Build
         public void AddPathProbingPrecondition(string projectName, string commandName)
         {
             _preconditions.Add($"[PATH Probing] Project {projectName} is loading tool \"{commandName}\" from PATH");
+        }
+
+        public void AddForceUnsafePrecondition()
+        {
+            _preconditions.Add($"[Forced Unsafe] The build was marked as unsafe. Remove the {BuilderCommandApp.ForceUnsafeFlag} flag to enable incremental compilation");
         }
 
         public bool PreconditionsDetected()
@@ -70,7 +75,7 @@ namespace Microsoft.DotNet.Tools.Build
         {
             if (PreconditionsDetected())
             {
-                return _isProfile ? PreconditionsMessage().Yellow() : "(The compilation time can be improved. Run \"dotnet build --profile\" for more information)";
+                return _isProfile ? PreconditionsMessage().Yellow() : $"(The compilation time can be improved. Run \"dotnet build {BuilderCommandApp.BuildProfileFlag}\" for more information)";
             }
 
             return "";
