@@ -46,9 +46,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             "odbccp32.lib"
         };
 
+        // We will always link against msvcrt.lib since the runtime libraries are also built against msvcrt.lib as we are not interested in assertions
+        // from CRT code.
         private static readonly Dictionary<BuildConfiguration, string[]> ConfigurationLinkLibMap = new Dictionary<BuildConfiguration, string[]>()
         {
-            { BuildConfiguration.debug , new string[] { "msvcrtd.lib" } },
+            { BuildConfiguration.debug , new string[] { "msvcrt.lib" } },
             { BuildConfiguration.release , new string[] { "msvcrt.lib" } }
         };
         
