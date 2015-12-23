@@ -1,6 +1,10 @@
 ﻿{
     "version": "1.0.0-*",
 
+    "compilationOptions": {
+        "keyFile": "../../tools/Key.snk"
+    },
+
     "dependencies": {
         "System.Reflection": "4.0.10-rc2-23616",
         "NETStandard.Library": "1.0.0-rc2-23616",
