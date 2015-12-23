@@ -6,6 +6,7 @@ usage()
 {
     echo "Options"
     echo "  --scope <scope>                Scope of the build (Compile / Test)"
+    echo "  --target <target>              CoreCLR or Mono (default: CoreCLR)"
 }
 
 setHome(){
@@ -69,6 +70,11 @@ do
         shift 2
         ;;
 
+        --target)
+        target=$2
+        shift 2
+        ;;
+
         *)
         usage
         exit 1
@@ -99,7 +105,20 @@ elif [[ "$SCOPE" = "Test" ]]; then
 	TARGET_ARG="BuildAndTest"
 fi
 
-MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=Debug-Netcore /verbosity:minimal"' "'"/fileloggerparameters:Verbosity=diag;LogFile=$LOG_PATH_ARG"'"'
+case $target in
+    CoreCLR)
+        CONFIGURATION=Debug-Netcore
+        ;;
+    Mono)
+        CONFIGURATION=Debug-MONO
+        ;;
+    *)
+        echo "Unsupported target $target detected, configuring as if for CoreCLR"
+        CONFIGURATION=Debug-Netcore
+        ;;
+esac
+
+MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal"' "'"/fileloggerparameters:Verbosity=diag;LogFile=$LOG_PATH_ARG"'"'
 
 MONO_COMMAND="mono $MSBUILD_EXE $MSBUILD_ARGS"
 
