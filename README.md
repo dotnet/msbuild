@@ -76,6 +76,11 @@ If you are building from source, take note that the build depends on NuGet packa
 
 Also, when building from source, you need to set up the `DOTNET_HOME` environment variable. It needs to point to the parent directory of where `bin` and `runtime` directories are. 
 
+Known issues
+------------
+
+You can also consult the [known issues page](Documentation/known-issues.md) to find out the current issues and 
+to see the workarounds.  
 
 Questions & Comments
 --------------------
