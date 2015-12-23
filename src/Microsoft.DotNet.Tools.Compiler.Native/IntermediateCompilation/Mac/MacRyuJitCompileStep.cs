@@ -66,11 +66,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Flags
             argsList.Add(cflags);
             
-            // Add Stubs
-            argsList.Add("-I "+Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10"));
-            argsList.Add("-I "+Path.Combine(config.AppDepSDKPath, "CPPSdk"));
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10/osxstubs.cpp"));
-
+            // Pass the optional native compiler flags if specified
+            if (!string.IsNullOrWhiteSpace(config.CppCompilerFlags))
+            {
+                argsList.Add(config.CppCompilerFlags);
+            }
+            
             // Input File
             var inLibFile = DetermineInFile(config);
             argsList.Add("-Xlinker "+inLibFile);

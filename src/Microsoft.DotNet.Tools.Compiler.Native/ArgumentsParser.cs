@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var help = false;
             string helpText = null;
             var returnCode = 0;
+            string cppCompilerFlags = null;
 
             IReadOnlyList<string> references = Array.Empty<string>();
             IReadOnlyList<string> linklib = Array.Empty<string>();            
@@ -56,6 +57,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
                     // Optional Log Path
                     syntax.DefineOption("logpath", ref logPath, "Use to dump Native Compilation Logs to a file.");
+
+                    // Optional flags to be passed to the native compiler
+                    syntax.DefineOption("cppcompilerflags", ref cppCompilerFlags, "Additional flags to be passed to the native compiler.");
 
                     syntax.DefineOption("h|help", ref help, "Help for compile native.");
 
@@ -131,7 +135,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 IlcSdkPath = ilcSdkPath,
                 LinkLibPaths = linklib,
                 AppDepSDKPath = appDepSdk,
-                LogPath = logPath
+                LogPath = logPath,
+                CppCompilerFlags = cppCompilerFlags
             };
         }
     }

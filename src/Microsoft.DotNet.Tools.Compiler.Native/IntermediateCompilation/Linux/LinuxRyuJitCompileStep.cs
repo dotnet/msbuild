@@ -70,6 +70,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var inLibFile = DetermineInFile(config);
             argsList.Add(inLibFile);
 
+            // Pass the optional native compiler flags if specified
+            if (!string.IsNullOrWhiteSpace(config.CppCompilerFlags))
+            {
+                argsList.Add(config.CppCompilerFlags);
+            }
+            
             // ILC SDK Libs
             foreach (var lib in IlcSdkLibs)
             {

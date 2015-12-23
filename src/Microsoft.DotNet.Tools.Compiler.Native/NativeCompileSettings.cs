@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private string _ilcArgs;
         private readonly List<string> _referencePaths;
         private readonly List<string> _linkLibPaths;
+        private string _cppCompilerFlags;
 
         public string LogPath
         {
@@ -144,6 +145,18 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 }
 
                 _ilcSdkPath = value;
+            }
+        }
+
+        public string CppCompilerFlags
+        {
+            get
+            {
+                return _cppCompilerFlags;
+            }
+            set
+            {
+                _cppCompilerFlags = value;
             }
         }
 

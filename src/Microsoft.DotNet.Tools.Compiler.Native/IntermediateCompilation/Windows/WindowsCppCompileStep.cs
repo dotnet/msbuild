@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         
         private static readonly Dictionary<BuildConfiguration, string> ConfigurationCompilerOptionsMap = new Dictionary<BuildConfiguration, string>
         {
-            { BuildConfiguration.debug, "/ZI /nologo /W3 /WX- /sdl /Od /D CPPCODEGEN /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Gd /TP /wd4477 /errorReport:prompt" },
+            { BuildConfiguration.debug, "/ZI /nologo /W3 /WX- /sdl /Od /D CPPCODEGEN /D WIN32 /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Gd /TP /wd4477 /errorReport:prompt" },
             { BuildConfiguration.release, "/Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D CPPCODEGEN /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Gd /TP /wd4477 /errorReport:prompt" }
         };
         
@@ -68,17 +68,26 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             argsList.Add("/c");
             
             // Add Includes
-            var win7CppSdkPath = Path.Combine(config.AppDepSDKPath, "CPPSdk\\win7");
+            // 
+            // TODO: Enable this when https://github.com/dotnet/cli/pull/469 goes through.
+            // var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
+            //
+            // Get the directory name to ensure there are no trailing slashes as they may conflict
+            // with the terminating "  we suffix to account for paths with spaces in them.
+            var ilcSdkIncPath = config.IlcSdkPath;
+            ilcSdkIncPath = ilcSdkIncPath.TrimEnd(new char[] {'\\'});
             argsList.Add("/I");
-            argsList.Add($"\"{win7CppSdkPath}\"");
-            
-            var cppSdkPath = Path.Combine(config.AppDepSDKPath, "CPPSdk");
-            argsList.Add("/I");
-            argsList.Add($"\"{cppSdkPath}\"");
+            argsList.Add($"\"{ilcSdkIncPath}\"");
             
             // Configuration Based Compiler Options 
             argsList.Add(ConfigurationCompilerOptionsMap[config.BuildType]);
             
+            // Pass the optional native compiler flags if specified
+            if (!string.IsNullOrWhiteSpace(config.CppCompilerFlags))
+            {
+                argsList.Add(config.CppCompilerFlags);
+            }
+
             // Output
             var objOut = DetermineOutputFile(config);
             argsList.Add($"/Fo\"{objOut}\"");

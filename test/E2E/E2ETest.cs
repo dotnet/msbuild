@@ -69,12 +69,6 @@ namespace ConsoleApplication
         [Fact]
         public void TestDotnetCompileNativeCpp()
         {
-            // Skip this test on windows
-            if(SkipForOS(OSPlatform.Windows, "https://github.com/dotnet/cli/issues/335"))
-            {
-                return;
-            }
-
             TestSetup();
 
             TestRunCommand("dotnet", $"compile --native --cpp -o {OutputDirectory}");

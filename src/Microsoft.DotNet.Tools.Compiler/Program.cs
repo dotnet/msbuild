@@ -48,6 +48,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var ilcSdkPath = app.Option("--ilcsdkpath <PATH>", "Path to the folder containing custom built ILCompiler SDK.", CommandOptionType.SingleValue);
             var appDepSdkPath = app.Option("--appdepsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
             var cppMode = app.Option("--cpp", "Flag to do native compilation with C++ code generator.", CommandOptionType.NoValue);
+            var cppCompilerFlags = app.Option("--cppcompilerflags <flags>", "Additional flags to be passed to the native compiler.", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
@@ -69,6 +70,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var configValue = configuration.Value() ?? Constants.DefaultConfiguration;
                 var outputValue = output.Value();
                 var intermediateValue = intermediateOutput.Value();
+                var cppCompilerFlagsValue = cppCompilerFlags.Value();
 
                 // Load project contexts for each framework and compile them
                 bool success = true;
@@ -80,7 +82,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     success &= Compile(context, configValue, outputValue, intermediateValue, buildProjectReferences, noHost.HasValue());
                     if (isNative && success)
                     {
-                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, appDepSdkPathValue, isCppMode);
+                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, appDepSdkPathValue, isCppMode, cppCompilerFlagsValue);
                     }
                 }
 
@@ -113,7 +115,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             string ilcPathValue,
             string ilcSdkPathValue,
             string appDepSdkPathValue,
-            bool isCppMode)
+            bool isCppMode,
+            string cppCompilerFlagsValue)
         {
             var outputPath = GetOutputPath(context, configuration, outputOptionValue);
             var nativeOutputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
@@ -165,6 +168,12 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 nativeArgs.Add("--mode");
                 nativeArgs.Add("cpp");
+            }
+
+            if (!string.IsNullOrWhiteSpace(cppCompilerFlagsValue))
+            {
+                nativeArgs.Add("--cppcompilerflags");
+                nativeArgs.Add(cppCompilerFlagsValue);
             }
 
             // Configuration
