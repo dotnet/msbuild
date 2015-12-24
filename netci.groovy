@@ -7,11 +7,12 @@ import jobs.generation.Utilities;
 
 def project = GithubProject
 
-def osList = ['Ubuntu', 'OSX', 'Windows_NT']
+def osList = ['Ubuntu', 'OSX', 'Windows_NT', 'CentOS7.1']
 
 def machineLabelMap = ['Ubuntu':'ubuntu-doc',
                        'OSX':'mac',
-                       'Windows_NT':'windows']
+                       'Windows_NT':'windows',
+                       'CentOS7.1' : 'centos-71']
 
 def static getBuildJobName(def configuration, def os) {
     return configuration.toLowerCase() + '_' + os.toLowerCase()

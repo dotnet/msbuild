@@ -16,6 +16,37 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/_common.sh"
 
+getDnx()
+{
+    DNX_FEED="https://api.nuget.org/packages"
+    DNX_VERSION="1.0.0-rc1-update1"
+    DNX_DIR=$OUTPUT_ROOT/dnx
+
+    if [ "$OSNAME" == "osx" ]; then
+        DNX_FLAVOR="dnx-coreclr-darwin-x64"
+    elif [ "$OSNAME" == "ubuntu" ]; then
+        DNX_FLAVOR="dnx-coreclr-linux-x64"
+    elif [ "$OSNAME" == "centos"  ]; then
+        # No support dnx on redhat yet.
+        # using patched dnx
+        DNX_FEED="https://dotnetcli.blob.core.windows.net/dotnet/redhat_dnx"
+        DNX_VERSION="1.0.0-rc2-15000"
+        DNX_FLAVOR="dnx-coreclr-redhat-x64"
+    else
+        error "unknown OS: $OSNAME" 1>&2
+        exit 1
+    fi
+
+    header "Downloading DNX $DNX_VERSION"
+    DNX_URL="$DNX_FEED/$DNX_FLAVOR.$DNX_VERSION.nupkg"
+    DNX_ROOT="$DNX_DIR/bin"
+    rm -rf $DNX_DIR
+    mkdir -p $DNX_DIR
+    curl -o $DNX_DIR/dnx.zip $DNX_URL --silent
+    unzip -qq $DNX_DIR/dnx.zip -d $DNX_DIR
+    chmod a+x $DNX_ROOT/dnu $DNX_ROOT/dnx
+}
+
 if ! type -p cmake >/dev/null; then
     error "cmake is required to build the native host 'corehost'"
     error "OS X w/Homebrew: 'brew install cmake'"
@@ -29,14 +60,7 @@ if [[ ! -z "$OFFLINE" ]]; then
     header "Skipping Stage 0, Dnx, and Packages download: Offline Build"
 else
     # Download DNX to copy into stage2
-    header "Downloading DNX $DNX_VERSION"
-    DNX_URL="https://api.nuget.org/packages/$DNX_FLAVOR.$DNX_VERSION.nupkg"
-    DNX_ROOT="$DNX_DIR/bin"
-    rm -rf $DNX_DIR
-    mkdir -p $DNX_DIR
-    curl -o $DNX_DIR/dnx.zip $DNX_URL --silent
-    unzip -qq $DNX_DIR/dnx.zip -d $DNX_DIR
-    chmod a+x $DNX_ROOT/dnu $DNX_ROOT/dnx
+    getDnx
 
     # Ensure the latest stage0 is installed
     $DIR/install.sh
@@ -107,17 +131,25 @@ cp -R $DNX_ROOT $STAGE2_DIR/bin/dnx
 cp $DIR/dotnet-restore.sh $STAGE2_DIR/bin/dotnet-restore
 chmod a+x $STAGE2_DIR/bin/dotnet-restore
 
-# Copy in AppDeps
-header "Acquiring Native App Dependencies"
-DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $REPOROOT/scripts/build/build_appdeps.sh "$STAGE2_DIR/bin"
+# No compile native support in centos yet
+# https://github.com/dotnet/cli/issues/453
+if [ "$OSNAME" != "centos"  ]; then
+    # Copy in AppDeps
+    header "Acquiring Native App Dependencies"
+    DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $REPOROOT/scripts/build/build_appdeps.sh "$STAGE2_DIR/bin"
+fi
 
 # Stamp the output with the commit metadata
 COMMIT_ID=$(git rev-parse HEAD)
 echo $COMMIT_ID > $STAGE2_DIR/.commit
 
-# Run tests on the stage2 output
-header "Testing stage2..."
-DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $DIR/test/runtests.sh
+# Skipping tests for centos
+# tracked by issue - https://github.com/dotnet/corefx/issues/5066
+if [ "$OSNAME" != "centos"  ]; then
+    # Run tests on the stage2 output
+    header "Testing stage2..."
+    DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $DIR/test/runtests.sh
+fi
 
 # Run Validation for Project.json dependencies
 dotnet publish "$REPOROOT/tools/MultiProjectValidator" -o "$STAGE2_DIR/../tools"

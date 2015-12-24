@@ -77,16 +77,14 @@ if [ -z "$RID" ]; then
     if [ "$UNAME" == "Darwin" ]; then
         export OSNAME=osx
         export RID=osx.10.10-x64
-        export DNX_FLAVOR="dnx-coreclr-darwin-x64"
     elif [ "$UNAME" == "Linux" ]; then
         # Detect Distro
         if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
             export OSNAME=ubuntu
             export RID=ubuntu.14.04-x64
-            export DNX_FLAVOR="dnx-coreclr-linux-x64"
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
             export OSNAME=centos
-            export RID=centos.7-x64
+            export RID=centos.7.1-x64
         else
             error "unknown Linux Distro" 1>&2
         fi
@@ -96,11 +94,8 @@ if [ -z "$RID" ]; then
     fi
 fi
 
-export DNX_VERSION="1.0.0-rc1-update1"
-
 export REPOROOT=$(cd $COMMONDIR/.. && pwd)
 export OUTPUT_ROOT=$REPOROOT/artifacts/$RID
-export DNX_DIR=$OUTPUT_ROOT/dnx
 export STAGE1_DIR=$OUTPUT_ROOT/stage1
 export STAGE2_DIR=$OUTPUT_ROOT/stage2
 export HOST_DIR=$OUTPUT_ROOT/corehost
