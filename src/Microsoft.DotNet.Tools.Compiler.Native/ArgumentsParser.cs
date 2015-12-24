@@ -17,11 +17,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             NativeIntermediateMode? nativeMode = null;
             string ilcArgs = null;
             string ilcPath = null;
+            string ilcSdkPath = null;
             string appDepSdk = null;
             string logPath = null;
             var help = false;
             string helpText = null;
             var returnCode = 0;
+            string cppCompilerFlags = null;
 
             IReadOnlyList<string> references = Array.Empty<string>();
             IReadOnlyList<string> linklib = Array.Empty<string>();            
@@ -45,7 +47,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
                     // Custom Extensibility Points to support CoreRT workflow TODO better descriptions
                     syntax.DefineOption("ilcargs", ref ilcArgs, "Use to specify custom arguments for the IL Compiler.");
-                    syntax.DefineOption("ilcpath", ref ilcPath, "Use to plug in a custom built ilc.exe");
+                    syntax.DefineOption("ilcpath", ref ilcPath, "Use to specify a custom build of IL Compiler.");
+                    syntax.DefineOption("ilcsdkpath", ref ilcSdkPath, "Use to specify a custom build of IL Compiler SDK");
+
                     syntax.DefineOptionList("linklib", ref linklib, "Use to link in additional static libs");
 
                     // TEMPORARY Hack until CoreRT compatible Framework Libs are available 
@@ -53,6 +57,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
                     // Optional Log Path
                     syntax.DefineOption("logpath", ref logPath, "Use to dump Native Compilation Logs to a file.");
+
+                    // Optional flags to be passed to the native compiler
+                    syntax.DefineOption("cppcompilerflags", ref cppCompilerFlags, "Additional flags to be passed to the native compiler.");
 
                     syntax.DefineOption("h|help", ref help, "Help for compile native.");
 
@@ -125,9 +132,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 ReferencePaths = references,
                 IlcArgs = ilcArgs,
                 IlcPath = ilcPath,
+                IlcSdkPath = ilcSdkPath,
                 LinkLibPaths = linklib,
                 AppDepSDKPath = appDepSdk,
-                LogPath = logPath
+                LogPath = logPath,
+                CppCompilerFlags = cppCompilerFlags
             };
         }
     }

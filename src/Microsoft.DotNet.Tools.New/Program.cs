@@ -28,7 +28,9 @@ namespace Microsoft.DotNet.Tools.New
         {
             var thisAssembly = typeof(Program).GetTypeInfo().Assembly;
             var resources = from resourceName in thisAssembly.GetManifestResourceNames()
-                            where resourceName.ToLowerInvariant().EndsWith(".cs") || resourceName.ToLowerInvariant().EndsWith(".json")
+                            where resourceName.ToLowerInvariant().EndsWith(".cs")
+                            || resourceName.ToLowerInvariant().EndsWith(".json")
+                            || resourceName.ToLowerInvariant().EndsWith(".config")
                             select resourceName;
 
             var resourceNameToFileName = new Dictionary<string, string>();

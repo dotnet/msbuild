@@ -46,11 +46,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             argsList.Add($"\"{inputFilePath}\"");
             
             // System.Private.CoreLib Reference
-            String[] coreLibs = new String[] { "System.Private.CoreLib.dll", "System.Private.Corelib.dll" };
-            var coreLibPath = Path.Combine(config.IlcPath, Array.Find(coreLibs, lib => File.Exists(Path.Combine(config.IlcPath, lib))));
+            var coreLibPath = Path.Combine(config.IlcSdkPath, "System.Private.CoreLib.dll");
             argsList.Add($"-r \"{coreLibPath}\"");
             
-            // Dependency References
+            // AppDep References
             foreach (var reference in config.ReferencePaths)
             {
                 argsList.Add($"-r \"{reference}\"");

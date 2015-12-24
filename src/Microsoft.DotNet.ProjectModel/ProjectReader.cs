@@ -525,7 +525,8 @@ namespace Microsoft.DotNet.ProjectModel
                 KeyFile = rawOptions.ValueAsString("keyFile"),
                 DelaySign = rawOptions.ValueAsNullableBoolean("delaySign"),
                 PublicSign = rawOptions.ValueAsNullableBoolean("publicSign"),
-                EmitEntryPoint = rawOptions.ValueAsNullableBoolean("emitEntryPoint")
+                EmitEntryPoint = rawOptions.ValueAsNullableBoolean("emitEntryPoint"),
+                PreserveCompilationContext = rawOptions.ValueAsNullableBoolean("preserveCompilationContext")
             };
         }
 

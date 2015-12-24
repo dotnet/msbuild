@@ -3,7 +3,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-param([string]$Configuration = "Debug")
+param([string]$Configuration = "Debug",
+      [switch]$Offline)
 
 $ErrorActionPreference="Stop"
 
@@ -12,6 +13,36 @@ $ErrorActionPreference="Stop"
 # Capture PATH for later
 $StartPath = $env:PATH
 $StartDotNetHome = $env:DOTNET_HOME
+
+function getDnx()
+{
+    $DnxPackage = "dnx-coreclr-win-x64.1.0.0-rc1-update1.nupkg"
+    $DnxVersion = "1.0.0-rc1-16231"
+    $DnxDir = "$OutputDir\dnx"
+    $DnxRoot = "$DnxDir/bin"
+
+    # check if the required dnx version is already downloaded
+    if ((Test-Path "$DnxRoot\dnx.exe")) {
+        $dnxOut = & "$DnxRoot\dnx.exe" --version
+
+        if ($dnxOut -Match $DnxVersion) {
+            Write-Host "Dnx version - $DnxVersion already downloaded."
+            return $DnxRoot
+        }
+    }
+
+    # Download dnx to copy to stage2
+    Remove-Item -Recurse -Force -ErrorAction Ignore $DnxDir
+    mkdir -Force "$DnxDir" | Out-Null
+
+    Write-Host "Downloading Dnx version - $DnxVersion."
+    $DnxUrl="https://api.nuget.org/packages/$DnxPackage"
+    Invoke-WebRequest -UseBasicParsing "$DnxUrl" -OutFile "$DnxDir\dnx.zip"
+
+    Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
+    [System.IO.Compression.ZipFile]::ExtractToDirectory("$DnxDir\dnx.zip", "$DnxDir")
+    return $DnxRoot
+}
 
 try {
 
@@ -23,39 +54,34 @@ Download it from https://www.cmake.org
 "@
     }
 
-    # Install a stage 0
-    header "Installing dotnet stage 0"
-    & "$PSScriptRoot\install.ps1"
-    if (!$?) {
-        Write-Host "Command failed: $PSScriptRoot\install.ps1"
-        Exit 1
+    if($Offline){
+        Write-Host "Skipping Stage 0, Dnx, and Packages dowlnoad: Offline build"
     }
-
-    # Put stage 0 on the path
-    $DotNetTools = $env:DOTNET_INSTALL_DIR
-    if (!$DotNetTools) {
-        $DotNetTools = "$($env:LOCALAPPDATA)\Microsoft\dotnet"
+    else {
+        # Install a stage 0
+        header "Installing dotnet stage 0"
+        & "$PSScriptRoot\install.ps1"
+        if (!$?) {
+            Write-Host "Command failed: $PSScriptRoot\install.ps1"
+            Exit 1
+        }
+    
+        # Put stage 0 on the path
+        $DotNetTools = $env:DOTNET_INSTALL_DIR
+        if (!$DotNetTools) {
+            $DotNetTools = "$($env:LOCALAPPDATA)\Microsoft\dotnet"
+        }
+    
+        $DnxRoot = getDnx
+    
+        # Restore packages
+        header "Restoring packages"
+        & "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "$Rid" --no-cache
+        if (!$?) {
+            Write-Host "Command failed: " "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "$Rid" --no-cache
+            Exit 1
+        }
     }
-
-    # Download dnx to copy to stage2
-    if ((Test-Path "$DnxDir")) {
-        Remove-Item -Recurse -Force $DnxDir
-    }
-    mkdir "$DnxDir" | Out-Null
-    $DnxUrl="https://api.nuget.org/packages/dnx-coreclr-win-x64.$DnxVersion.nupkg"
-    Invoke-WebRequest -UseBasicParsing "$DnxUrl" -OutFile "$DnxDir\dnx.zip"
-    Add-Type -Assembly System.IO.Compression.FileSystem | Out-Null
-    [System.IO.Compression.ZipFile]::ExtractToDirectory("$DnxDir\dnx.zip", "$DnxDir")
-    $DnxRoot = "$DnxDir/bin"
-
-    # Restore packages
-    header "Restoring packages"
-    & "$DnxRoot\dnu" restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
-    if (!$?) {
-        Write-Host "Command failed: " dotnet restore "$RepoRoot" --quiet --runtime "osx.10.10-x64" --runtime "ubuntu.14.04-x64" --runtime "win7-x64" --no-cache
-        Exit 1
-    }
-
 
     header "Building corehost"
     pushd "$RepoRoot\src\corehost"
@@ -129,20 +155,13 @@ Download it from https://www.cmake.org
     if (!$?) {
         Write-Host "Command failed: " cmd /c "$PSScriptRoot\build\build_appdeps.cmd" "$Stage2Dir"
         Exit 1
-    }
+    }    
 
-    # Smoke test stage2
     $env:DOTNET_HOME = "$Stage2Dir"
-    & "$PSScriptRoot\test\smoke-test.ps1"
+    # Run tests on stage2 dotnet tools
+    & "$PSScriptRoot\test\runtests.ps1"
     if (!$?) {
-        Write-Host "Command failed: $PSScriptRoot\test\smoke-test.ps1"
-        Exit 1
-    }
-
-    # E2E Test of stage2
-    & "$PSScriptRoot\test\e2e-test.ps1"
-    if (!$?) {
-        Write-Host "Command failed: $PSScriptRoot\test\e2e-test.ps1"
+        Write-Host "Command failed: $PSScriptRoot\test\runtests.ps1"
         Exit 1
     }
 

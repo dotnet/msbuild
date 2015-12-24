@@ -14,12 +14,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private string _inputManagedAssemblyPath;
         private string _appDepSdkPath;
         private string _ilcPath;
+        private string _ilcSdkPath;
         private string _outputDirectory;
         private string _intermediateDirectory;
         private string _logPath;
         private string _ilcArgs;
         private readonly List<string> _referencePaths;
         private readonly List<string> _linkLibPaths;
+        private string _cppCompilerFlags;
 
         public string LogPath
         {
@@ -129,12 +131,44 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
         }
 
+        public string IlcSdkPath
+        {
+            get
+            {
+                return _ilcSdkPath;
+            }
+            set
+            {
+                if (!Directory.Exists(value))
+                {
+                    throw new Exception($"ILC SDK Directory does not exist: {value}.");
+                }
+
+                _ilcSdkPath = value;
+            }
+        }
+
+        public string CppCompilerFlags
+        {
+            get
+            {
+                return _cppCompilerFlags;
+            }
+            set
+            {
+                _cppCompilerFlags = value;
+            }
+        }
+
         private NativeCompileSettings()
         {
             _linkLibPaths = new List<string>();
             _referencePaths = new List<string>();
             
             IlcPath = AppContext.BaseDirectory;
+
+            // By default, ILC SDK Path is assumed to be the same folder as ILC path
+            IlcSdkPath = IlcPath;
             Architecture = DefaultArchitectureMode;
             BuildType = DefaultBuiltType;
             NativeMode = DefaultNativeModel;

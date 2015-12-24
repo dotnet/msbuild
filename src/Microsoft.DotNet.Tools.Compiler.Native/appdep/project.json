@@ -5,7 +5,7 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "Microsoft.DotNet.AppDep":"1.0.2-*"
+        "Microsoft.DotNet.AppDep":"1.0.3-*"
     },
     "frameworks": {
         "dnxcore50": { }

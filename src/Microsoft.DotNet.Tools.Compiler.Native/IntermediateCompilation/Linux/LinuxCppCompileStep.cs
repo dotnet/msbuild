@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private readonly string cLibsFlags = "-lm -ldl";
         private readonly string cflags = "-g -lstdc++ -lrt -Wno-invalid-offsetof -pthread";
 
-        private readonly string[] libs = new string[]
+        private readonly string[] IlcSdkLibs = new string[]
         {
             "libbootstrappercpp.a",
             "libPortableRuntime.a",
@@ -65,24 +65,29 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Flags
             argsList.Add(cflags);
 
-            // Add Includes
+            // TODO: Enable this when https://github.com/dotnet/cli/pull/469 goes through.
+            // var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
+            //
+            // Get the directory name to ensure there are no trailing slashes as they may conflict
+            // with the terminating "  we suffix to account for paths with spaces in them.
+            var ilcSdkIncPath = Path.GetDirectoryName(config.IlcSdkPath);
             argsList.Add("-I");
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04"));
-
-            argsList.Add("-I");
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk"));
+            argsList.Add($"\"{ilcSdkIncPath}\"");
 
             // Input File
             var inCppFile = DetermineInFile(config);
             argsList.Add(inCppFile);
 
-            // Add Stubs
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04/lxstubs.cpp"));
-
-            // Libs
-            foreach (var lib in libs)
+            // Pass the optional native compiler flags if specified
+            if (!string.IsNullOrWhiteSpace(config.CppCompilerFlags))
             {
-                var libPath = Path.Combine(config.IlcPath, lib);
+                argsList.Add(config.CppCompilerFlags);
+            }
+            
+            // ILC SDK Libs
+            foreach (var lib in IlcSdkLibs)
+            {
+                var libPath = Path.Combine(config.IlcSdkPath, lib);
                 argsList.Add(libPath);
             }
 

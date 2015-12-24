@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         // TODO: debug/release support
         private readonly string cflags = "-g -lstdc++ -Wno-invalid-offsetof -pthread -ldl -lm -liconv";
 
-        private readonly string[] libs = new string[]
+        private readonly string[] IlcSdkLibs = new string[]
         {
             "libbootstrapper.a",
             "libRuntime.a",
@@ -66,19 +66,20 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Flags
             argsList.Add(cflags);
             
-            // Add Stubs
-            argsList.Add("-I "+Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10"));
-            argsList.Add("-I "+Path.Combine(config.AppDepSDKPath, "CPPSdk"));
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10/osxstubs.cpp"));
-
+            // Pass the optional native compiler flags if specified
+            if (!string.IsNullOrWhiteSpace(config.CppCompilerFlags))
+            {
+                argsList.Add(config.CppCompilerFlags);
+            }
+            
             // Input File
             var inLibFile = DetermineInFile(config);
             argsList.Add("-Xlinker "+inLibFile);
 
-            // Libs
-            foreach (var lib in libs)
+            // ILC SDK Libs
+            foreach (var lib in IlcSdkLibs)
             {
-                var libPath = Path.Combine(config.IlcPath, lib);
+                var libPath = Path.Combine(config.IlcSdkPath, lib);
                 argsList.Add("-Xlinker "+libPath);
             }
 

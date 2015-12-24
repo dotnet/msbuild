@@ -56,24 +56,27 @@ fi
 
 [ -z "$CONFIGURATION" ] && export CONFIGURATION=Debug
 
-# Download DNX to copy into stage2
-getDnx
+if [[ ! -z "$OFFLINE" ]]; then
+    header "Skipping Stage 0, Dnx, and Packages download: Offline Build"
+else
+    # Download DNX to copy into stage2
+    getDnx
 
+    # Ensure the latest stage0 is installed
+    $DIR/install.sh
 
-# Ensure the latest stage0 is installed
-$DIR/install.sh
+    # And put the stage0 on the PATH
+    export PATH=$REPOROOT/artifacts/$RID/stage0/bin:$PATH
 
-# And put the stage0 on the PATH
-export PATH=$REPOROOT/artifacts/$RID/stage0/bin:$PATH
+    # Intentionally clear the DOTNET_TOOLS path, we want to use the default installed version
+    unset DOTNET_TOOLS
 
-# Intentionally clear the DOTNET_TOOLS path, we want to use the default installed version
-unset DOTNET_TOOLS
+    DOTNET_PATH=$(which dotnet)
+    PREFIX="$(cd -P "$(dirname "$DOTNET_PATH")/.." && pwd)"
 
-DOTNET_PATH=$(which dotnet)
-PREFIX="$(cd -P "$(dirname "$DOTNET_PATH")/.." && pwd)"
-
-header "Restoring packages"
-$DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "$RID" --no-cache
+    header "Restoring packages"
+    $DNX_ROOT/dnu restore "$REPOROOT" --quiet --runtime "$RID" --no-cache
+fi
 
 header "Building corehost"
 
@@ -140,16 +143,12 @@ fi
 COMMIT_ID=$(git rev-parse HEAD)
 echo $COMMIT_ID > $STAGE2_DIR/.commit
 
-# Smoke-test the output
-header "Testing stage2 ..."
-DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $DIR/test/smoke-test.sh
-
-# Skipping E2E tests for centos
+# Skipping tests for centos
 # tracked by issue - https://github.com/dotnet/corefx/issues/5066
 if [ "$OSNAME" != "centos"  ]; then
-    # E2E test on the output
-    header "Testing stage2 End to End ..."
-    DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $DIR/test/e2e-test.sh
+    # Run tests on the stage2 output
+    header "Testing stage2..."
+    DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $DIR/test/runtests.sh
 fi
 
 # Run Validation for Project.json dependencies

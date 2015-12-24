@@ -16,6 +16,7 @@ using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
+using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -44,8 +45,10 @@ namespace Microsoft.DotNet.Tools.Compiler
             var arch = app.Option("-a|--arch <ARCH>", "The architecture for which to compile. x64 only currently supported.", CommandOptionType.SingleValue);
             var ilcArgs = app.Option("--ilcargs <ARGS>", "Command line arguments to be passed directly to ILCompiler.", CommandOptionType.SingleValue);
             var ilcPath = app.Option("--ilcpath <PATH>", "Path to the folder containing custom built ILCompiler.", CommandOptionType.SingleValue);
-            var ilcSdkPath = app.Option("--ilcsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
+            var ilcSdkPath = app.Option("--ilcsdkpath <PATH>", "Path to the folder containing custom built ILCompiler SDK.", CommandOptionType.SingleValue);
+            var appDepSdkPath = app.Option("--appdepsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
             var cppMode = app.Option("--cpp", "Flag to do native compilation with C++ code generator.", CommandOptionType.NoValue);
+            var cppCompilerFlags = app.Option("--cppcompilerflags <flags>", "Additional flags to be passed to the native compiler.", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
             {
@@ -63,9 +66,11 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var ilcArgsValue = ilcArgs.Value();
                 var ilcPathValue = ilcPath.Value();
                 var ilcSdkPathValue = ilcSdkPath.Value();
+                var appDepSdkPathValue = appDepSdkPath.Value();
                 var configValue = configuration.Value() ?? Constants.DefaultConfiguration;
                 var outputValue = output.Value();
                 var intermediateValue = intermediateOutput.Value();
+                var cppCompilerFlagsValue = cppCompilerFlags.Value();
 
                 // Load project contexts for each framework and compile them
                 bool success = true;
@@ -77,7 +82,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     success &= Compile(context, configValue, outputValue, intermediateValue, buildProjectReferences, noHost.HasValue());
                     if (isNative && success)
                     {
-                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, isCppMode);
+                        success &= CompileNative(context, configValue, outputValue, buildProjectReferences, intermediateValue, archValue, ilcArgsValue, ilcPathValue, ilcSdkPathValue, appDepSdkPathValue, isCppMode, cppCompilerFlagsValue);
                     }
                 }
 
@@ -109,7 +114,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             string ilcArgsValue, 
             string ilcPathValue,
             string ilcSdkPathValue,
-            bool isCppMode)
+            string appDepSdkPathValue,
+            bool isCppMode,
+            string cppCompilerFlagsValue)
         {
             var outputPath = GetOutputPath(context, configuration, outputOptionValue);
             var nativeOutputPath = Path.Combine(GetOutputPath(context, configuration, outputOptionValue), "native");
@@ -145,8 +152,15 @@ namespace Microsoft.DotNet.Tools.Compiler
             // ILC SDK Path
             if (!string.IsNullOrWhiteSpace(ilcSdkPathValue))
             {
-                nativeArgs.Add("--appdepsdk");
+                nativeArgs.Add("--ilcsdkpath");
                 nativeArgs.Add(ilcSdkPathValue);
+            }
+
+            // AppDep SDK Path
+            if (!string.IsNullOrWhiteSpace(appDepSdkPathValue))
+            {
+                nativeArgs.Add("--appdepsdk");
+                nativeArgs.Add(appDepSdkPathValue);
             }
 
             // CodeGen Mode
@@ -154,6 +168,12 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 nativeArgs.Add("--mode");
                 nativeArgs.Add("cpp");
+            }
+
+            if (!string.IsNullOrWhiteSpace(cppCompilerFlagsValue))
+            {
+                nativeArgs.Add("--cppcompilerflags");
+                nativeArgs.Add(cppCompilerFlagsValue);
             }
 
             // Configuration
@@ -304,6 +324,8 @@ namespace Microsoft.DotNet.Tools.Compiler
                 compilationOptions.KeyFile = Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
             }
 
+            var references = new List<string>();
+
             // Add compilation options to the args
             compilerArgs.AddRange(compilationOptions.SerializeToArgs());
 
@@ -319,14 +341,47 @@ namespace Microsoft.DotNet.Tools.Compiler
                     if (projectDependency.Project.Files.SourceFiles.Any())
                     {
                         var projectOutputPath = GetProjectOutput(projectDependency.Project, projectDependency.Framework, configuration, outputPath);
-                        compilerArgs.Add($"--reference:{projectOutputPath}");
+                        references.Add(projectOutputPath);
                     }
                 }
                 else
                 {
-                    compilerArgs.AddRange(dependency.CompilationAssemblies.Select(r => $"--reference:{r.ResolvedPath}"));
+                    references.AddRange(dependency.CompilationAssemblies.Select(r => r.ResolvedPath));
                 }
+
                 compilerArgs.AddRange(dependency.SourceReferences);
+            }
+
+            compilerArgs.AddRange(references.Select(r => $"--reference:{r}"));
+
+            var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
+            var libraryExporter = runtimeContext.CreateExporter(configuration);
+
+            if (compilationOptions.PreserveCompilationContext == true)
+            {
+                var dependencyContext = DependencyContextBuilder.FromLibraryExporter(
+                    libraryExporter, context.TargetFramework.DotNetFrameworkName, context.RuntimeIdentifier);
+
+                var writer = new DependencyContextWriter();
+                var depsJsonFile = Path.Combine(intermediateOutputPath, context.ProjectFile.Name + "dotnet-compile.deps.json");
+                using (var fileStream = File.Create(depsJsonFile))
+                {
+                    writer.Write(dependencyContext, fileStream);
+                }
+
+                compilerArgs.Add($"--resource:\"{depsJsonFile}\",{context.ProjectFile.Name}.deps.json");
+
+                var refsFolder = Path.Combine(outputPath, "refs");
+                if (Directory.Exists(refsFolder))
+                {
+                    Directory.Delete(refsFolder, true);
+                }
+
+                Directory.CreateDirectory(refsFolder);
+                foreach (var reference in references)
+                {
+                    File.Copy(reference, Path.Combine(refsFolder, Path.GetFileName(reference)));
+                }
             }
 
             if (!AddResources(context.ProjectFile, compilerArgs, intermediateOutputPath))
@@ -394,10 +449,9 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (success && !noHost && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
-                var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
                 MakeRunnable(runtimeContext,
                              outputPath,
-                             runtimeContext.CreateExporter(configuration));
+                             libraryExporter);
             }
 
             return PrintSummary(diagnostics, sw, success);

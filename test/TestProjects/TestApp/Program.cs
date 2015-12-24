@@ -8,9 +8,10 @@ namespace TestApp
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
             Console.WriteLine(TestLibrary.Helper.GetMessage());
+            return 100;
         }
     }
 }

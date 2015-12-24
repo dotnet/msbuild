@@ -18,6 +18,7 @@ In order to build .NET Command Line Interface, you need the following installed 
 1. CMake (available from https://cmake.org/) is required to build the native host `corehost`. Make sure to add it to the PATH.
 2. git (available from http://www.git-scm.com/) on the PATH.
 3. clang (available from http://clang.llvm.org) on the PATH.
+
 ### For OS X
 
 1. Xcode
@@ -37,7 +38,7 @@ In order to build .NET Command Line Interface, you need the following installed 
 
 ##Adding a Command
 
-The donet CLI considers any executable on the path named `dotnet-{commandName}` to be a command it can call out to. `dotnet publish`, for example, is added to the path as an executable called `dotnet-publish`. To add a new command we must create the executable and then add it to the distribution packages for installation.
+The dotnet CLI considers any executable on the path named `dotnet-{commandName}` to be a command it can call out to. `dotnet publish`, for example, is added to the path as an executable called `dotnet-publish`. To add a new command we must create the executable and then add it to the distribution packages for installation.
 
 0. Create an issue on https://github.com/dotnet/cli and get consensus on the need for and behavior of the command.
 1. Add a new project for the command. 

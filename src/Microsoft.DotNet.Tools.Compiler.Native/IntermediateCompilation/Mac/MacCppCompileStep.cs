@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         // Link to iconv APIs
         private readonly string libFlags = "-liconv";
 
-        private readonly string[] libs = new string[]
+        private readonly string[] IlcSdkLibs = new string[]
         {
             "libbootstrappercpp.a",
             "libPortableRuntime.a",
@@ -67,27 +67,32 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Flags
             argsList.Add(cflags);
 
-            // Add Includes
+            // TODO: Enable this when https://github.com/dotnet/cli/pull/469 goes through.
+            // var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
+            //
+            // Get the directory name to ensure there are no trailing slashes as they may conflict
+            // with the terminating "  we suffix to account for paths with spaces in them.
+            var ilcSdkIncPath = Path.GetDirectoryName(config.IlcSdkPath);
             argsList.Add("-I");
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10"));
-
-            argsList.Add("-I");
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk"));
+            argsList.Add($"\"{ilcSdkIncPath}\"");
 
             // Input File
             var inCppFile = DetermineInFile(config);
             argsList.Add(inCppFile);
 
-            // Add Stubs
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10/osxstubs.cpp"));
-
             // Lib flags
             argsList.Add(libFlags);
 
-            // Libs
-            foreach (var lib in libs)
+            // Pass the optional native compiler flags if specified
+            if (!string.IsNullOrWhiteSpace(config.CppCompilerFlags))
             {
-                var libPath = Path.Combine(config.IlcPath, lib);
+                argsList.Add(config.CppCompilerFlags);
+            }
+            
+            // ILC SDK Libs
+            foreach (var lib in IlcSdkLibs)
+            {
+                var libPath = Path.Combine(config.IlcSdkPath, lib);
 
                 // Forward the library to linked to the linker
                 argsList.Add("-Xlinker");

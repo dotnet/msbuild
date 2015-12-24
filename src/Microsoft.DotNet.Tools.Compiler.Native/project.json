@@ -15,8 +15,8 @@
             "type": "build",
             "version": "1.0.0-*"
         },
-        "Microsoft.DotNet.ILCompiler": "1.0.3-*",
-        "Microsoft.DotNet.ILCompiler.SDK": "1.0.3-*",
+        "Microsoft.DotNet.ILCompiler": "1.0.4-*",
+        "Microsoft.DotNet.ILCompiler.SDK": "1.0.4-*",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*"
     },
     "frameworks": {

@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         public IEnumerable<string> LinkLibPaths { get; set; }
         public string AppDepSDKPath { get; set; }
         public string IlcPath { get; set; }
+        public string IlcSdkPath { get; set; }
+        public string CppCompilerFlags { get; set; }
 
         public bool IsHelp { get; set; }
         public int ReturnCode { get; set; }
@@ -55,6 +57,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             if (!string.IsNullOrEmpty(IlcPath))
             {
                 config.IlcPath = IlcPath;
+                config.IlcSdkPath = IlcPath;
+            }
+
+            if (!string.IsNullOrEmpty(IlcSdkPath))
+            {
+                config.IlcSdkPath = IlcSdkPath;
             }
 
             if (!string.IsNullOrEmpty(LogPath))
@@ -65,6 +73,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             if (!string.IsNullOrEmpty(IlcArgs))
             {
                 config.IlcArgs = IlcArgs;
+            }
+
+            if (!string.IsNullOrWhiteSpace(CppCompilerFlags))
+            {
+                config.CppCompilerFlags = CppCompilerFlags;
             }
 
             foreach (var reference in ReferencePaths)
