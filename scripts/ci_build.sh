@@ -30,7 +30,7 @@ fi
 
 
 
-if [[ "$(uname)" == "Linux" ]]; then
+if [[ "$OSNAME" == "ubuntu" ]]; then
     # Set Docker Container name to be unique
     container_name=""
 
