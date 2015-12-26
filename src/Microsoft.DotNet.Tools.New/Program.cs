@@ -24,13 +24,11 @@ namespace Microsoft.DotNet.Tools.New
             return parts[parts.Length - 2] + "." + parts[parts.Length - 1];
         }
 
-        public int CreateEmptyProject()
+        public int CreateEmptyProject(string languageName, string templateDir)
         {
             var thisAssembly = typeof(Program).GetTypeInfo().Assembly;
             var resources = from resourceName in thisAssembly.GetManifestResourceNames()
-                            where resourceName.ToLowerInvariant().EndsWith(".cs")
-                            || resourceName.ToLowerInvariant().EndsWith(".json")
-                            || resourceName.ToLowerInvariant().EndsWith(".config")
+                            where resourceName.Contains(templateDir)
                             select resourceName;
 
             var resourceNameToFileName = new Dictionary<string, string>();
@@ -42,14 +40,14 @@ namespace Microsoft.DotNet.Tools.New
                 resourceNameToFileName.Add(resourceName, fileName);
                 if (File.Exists(fileName))
                 {
-                    Reporter.Error.WriteLine($"Creating new project would override file {fileName}.");
+                    Reporter.Error.WriteLine($"Creating new {languageName} project would override file {fileName}.");
                     hasFilesToOverride = true;
                 }
             }
 
             if (hasFilesToOverride)
             {
-                Reporter.Error.WriteLine("Creating new project failed.");
+                Reporter.Error.WriteLine($"Creating new {languageName} project failed.");
                 return 1;
             }
 
@@ -64,7 +62,7 @@ namespace Microsoft.DotNet.Tools.New
                 }
             }
 
-            Reporter.Output.WriteLine($"Created new project in {Directory.GetCurrentDirectory()}.");
+            Reporter.Output.WriteLine($"Created new {languageName} project in {Directory.GetCurrentDirectory()}.");
 
             return 0;
         }
@@ -79,8 +77,44 @@ namespace Microsoft.DotNet.Tools.New
             app.Description = "Initializes empty project for .NET Platform";
             app.HelpOption("-h|--help");
 
+            var lang = app.Option("-l|--lang <LANGUAGE>", "Language of project [C#|F#]", CommandOptionType.SingleValue);
+            var type = app.Option("-t|--type <TYPE>", "Type of project", CommandOptionType.SingleValue);
+
             var dotnetNew = new Program();
-            app.OnExecute(() => dotnetNew.CreateEmptyProject());
+            app.OnExecute(() => {
+
+                var csharp = new { Name = "C#", Alias = new[] { "c#", "cs", "csharp" }, TemplatePrefix = "CSharp", Templates = new[] { "Console" } };
+                var fsharp = new { Name = "F#", Alias = new[] { "f#", "fs", "fsharp" }, TemplatePrefix = "FSharp", Templates = new[] { "Console" } };
+
+                string languageValue = lang.Value() ?? csharp.Name;
+
+                var language = new[] { csharp, fsharp }
+                    .FirstOrDefault(l => l.Alias.Contains(languageValue, StringComparer.OrdinalIgnoreCase));
+
+                if (language == null)
+                {
+                    Reporter.Error.WriteLine($"Unrecognized language: {languageValue}".Red());
+                    return -1;
+                }
+
+                string typeValue = type.Value() ?? language.Templates.First();
+
+                string templateName = language.Templates.FirstOrDefault(t => StringComparer.OrdinalIgnoreCase.Equals(typeValue, t));
+                if (templateName == null)
+                {
+                    Reporter.Error.WriteLine($"Unrecognized type: {typeValue}".Red());
+                    Reporter.Error.WriteLine($"Avaiable types for {language.Name} :".Red());
+                    foreach (var t in language.Templates)
+                    {
+                        Reporter.Error.WriteLine($"- {t}".Red());
+                    }
+                    return -1;
+                }
+
+                string templateDir = $"{language.TemplatePrefix}_{templateName}";
+
+                return dotnetNew.CreateEmptyProject(language.Name, templateDir);
+            });
 
             try
             {
