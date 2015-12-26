@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
 
@@ -43,11 +43,49 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             {
                 if (_default == null)
                 {
-                    _default = new FrameworkReferenceResolver(ProjectContextBuilder.GetDefaultReferenceAssembliesPath());
+                    _default = new FrameworkReferenceResolver(GetDefaultReferenceAssembliesPath());
                 }
                 
                 return _default;
             }
+        }
+        
+        public static string GetDefaultReferenceAssembliesPath()
+        {
+            // Allow setting the reference assemblies path via an environment variable
+            var referenceAssembliesPath = Environment.GetEnvironmentVariable("DOTNET_REFERENCE_ASSEMBLIES_PATH");
+
+            if (!string.IsNullOrEmpty(referenceAssembliesPath))
+            {
+                return referenceAssembliesPath;
+            }
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // There is no reference assemblies path outside of windows
+                // The enviorment variable can be used to specify one
+                return null;
+            }
+
+            // References assemblies are in %ProgramFiles(x86)% on
+            // 64 bit machines
+            var programFiles = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+
+            if (string.IsNullOrEmpty(programFiles))
+            {
+                // On 32 bit machines they are in %ProgramFiles%
+                programFiles = Environment.GetEnvironmentVariable("ProgramFiles");
+            }
+
+            if (string.IsNullOrEmpty(programFiles))
+            {
+                // Reference assemblies aren't installed
+                return null;
+            }
+
+            return Path.Combine(
+                    programFiles,
+                    "Reference Assemblies", "Microsoft", "Framework");
         }
 
         public bool TryGetAssembly(string name, NuGetFramework targetFramework, out string path, out Version version)

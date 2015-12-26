@@ -279,8 +279,6 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 return false;
             }
 
-            var frameworkReferenceResolver = FrameworkReferenceResolver.Default;
-
             _local = Snapshot.CreateFromProject(state.Project);
             _local.ProjectDiagnostics = state.Diagnostics;
 
