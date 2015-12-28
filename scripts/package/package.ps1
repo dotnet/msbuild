@@ -3,7 +3,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-. "$PSScriptRoot\..\_common.ps1"
+. "$PSScriptRoot\..\common\_common.ps1"
 
 if(!(Test-Path $PackageDir)) {
     mkdir $PackageDir | Out-Null

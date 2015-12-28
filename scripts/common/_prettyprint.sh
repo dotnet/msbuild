@@ -1,17 +1,8 @@
+#!/usr/bin/env bash
 #
 # Copyright (c) .NET Foundation and contributors. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
-
-# Source this to add some fancy stuff to your scripts
-
-COMMONSOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  COMMONDIR="$( cd -P "$( dirname "$COMMONSOURCE" )" && pwd )"
-  COMMONSOURCE="$(readlink "$COMMONSOURCE")"
-  [[ $COMMONSOURCE != /* ]] && COMMONSOURCE="$COMMONDIR/$COMMONSOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-COMMONDIR="$( cd -P "$( dirname "$COMMONSOURCE" )" && pwd )"
 
 # Detect build servers
 if [[ ! -z "$JENKINS_URL" || ! -z "$BUILD_BUILDID" ]]; then
@@ -70,35 +61,3 @@ die()
     error "$text"
     exit 1
 }
-
-export UNAME=$(uname)
-
-if [ -z "$RID" ]; then
-    if [ "$UNAME" == "Darwin" ]; then
-        export OSNAME=osx
-        export RID=osx.10.10-x64
-    elif [ "$UNAME" == "Linux" ]; then
-        # Detect Distro
-        if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
-            export OSNAME=ubuntu
-            export RID=ubuntu.14.04-x64
-        elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
-            export OSNAME=centos
-            export RID=centos.7.1-x64
-        else
-            error "unknown Linux Distro" 1>&2
-        fi
-    else
-        error "unknown OS: $UNAME" 1>&2
-        exit 1
-    fi
-fi
-
-export REPOROOT=$(cd $COMMONDIR/.. && pwd)
-export OUTPUT_ROOT=$REPOROOT/artifacts/$RID
-export STAGE1_DIR=$OUTPUT_ROOT/stage1
-export STAGE2_DIR=$OUTPUT_ROOT/stage2
-export HOST_DIR=$OUTPUT_ROOT/corehost
-
-# TODO: Replace this with a dotnet generation
-export TFM=dnxcore50

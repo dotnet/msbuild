@@ -2,7 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 param(
-    [string]$toolsDir = $(throw "Specify the full path to the directory which has dotnet tool"),
+    [Parameter(Mandatory=$true)][string]$toolsDir,
     [string]$versionSuffix = ""
 )
 
@@ -13,7 +13,7 @@ if ($versionSuffix -ne "") {
     $versionArg = "--version-suffix $VersionSuffix"
 }
 
-. "$PSScriptRoot\..\..\scripts\_common.ps1"
+. "$PSScriptRoot\..\..\scripts\common\_common.ps1"
 
 $IntermediatePackagesDir = "$RepoRoot\artifacts\packages\intermediate"
 $PackagesDir = "$RepoRoot\artifacts\packages"
