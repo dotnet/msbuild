@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                 argsBuilder.Append($" \"{path}\"");
 
-                var result = Command.Create("dotnet-compile", argsBuilder.ToString())
+                var result = Command.Create("dotnet-build", argsBuilder.ToString())
                        .ForwardStdOut()
                        .ForwardStdErr()
                        .Execute();

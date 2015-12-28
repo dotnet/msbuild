@@ -46,7 +46,7 @@ namespace ConsoleApplication
         {
             TestSetup();
 
-            TestRunCommand("dotnet", $"compile -o {OutputDirectory}");
+            TestRunCommand("dotnet", $"build -o {OutputDirectory}");
             TestOutputExecutable(OutputDirectory);
         }
 
@@ -60,7 +60,7 @@ namespace ConsoleApplication
 
             TestSetup();
 
-            TestRunCommand("dotnet", $"compile --native -o {OutputDirectory}");
+            TestRunCommand("dotnet", $"build --native -o {OutputDirectory}");
 
             var nativeOut = Path.Combine(OutputDirectory, "native");
             TestOutputExecutable(nativeOut);
@@ -71,7 +71,7 @@ namespace ConsoleApplication
         {
             TestSetup();
 
-            TestRunCommand("dotnet", $"compile --native --cpp -o {OutputDirectory}");
+            TestRunCommand("dotnet", $"build --native --cpp -o {OutputDirectory}");
             
             var nativeOut = Path.Combine(OutputDirectory, "native");
             TestOutputExecutable(nativeOut);

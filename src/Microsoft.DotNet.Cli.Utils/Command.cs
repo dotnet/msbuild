@@ -21,9 +21,24 @@ namespace Microsoft.DotNet.Cli.Utils
         private readonly StreamForwarder _stdOut;
         private readonly StreamForwarder _stdErr;
 
+        public enum CommandResolutionStrategy
+        {
+            //command loaded from a nuget package
+            NugetPackage,
+
+            //command loaded from the same directory as the executing assembly
+            BaseDirectory,
+
+            //command loaded from path
+            Path,
+
+            //command not found
+            None
+        }
+
         private bool _running = false;
 
-        private Command(string executable, string args)
+        private Command(string executable, string args, CommandResolutionStrategy resolutionStrategy)
         {
             // Set the things we need
             var psi = new ProcessStartInfo()
@@ -41,6 +56,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
             _stdOut = new StreamForwarder();
             _stdErr = new StreamForwarder();
+
+            ResolutionStrategy = resolutionStrategy;
         }
 
         public static Command Create(string executable, IEnumerable<string> args, NuGetFramework framework = null)
@@ -50,20 +67,25 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static Command Create(string executable, string args, NuGetFramework framework = null)
         {
-            ResolveExecutablePath(ref executable, ref args, framework);
 
-            return new Command(executable, args);
+            var resolutionStrategy = CommandResolutionStrategy.None;
+
+            ResolveExecutablePath(ref executable, ref args, ref resolutionStrategy, framework);
+
+            return new Command(executable, args, resolutionStrategy);
         }
 
-        private static void ResolveExecutablePath(ref string executable, ref string args, NuGetFramework framework = null)
+        private static void ResolveExecutablePath(ref string executable, ref string args, ref CommandResolutionStrategy resolutionStrategy, NuGetFramework framework = null)
         {
             executable = 
-                ResolveExecutablePathFromProject(executable, framework) ??
-                ResolveExecutableFromPath(executable, ref args);
+                ResolveExecutablePathFromProject(executable, framework, ref resolutionStrategy) ??
+                ResolveExecutableFromPath(executable, ref args, ref resolutionStrategy);
         }
 
-        private static string ResolveExecutableFromPath(string executable, ref string args)
+        private static string ResolveExecutableFromPath(string executable, ref string args, ref CommandResolutionStrategy resolutionStrategy)
         {
+            resolutionStrategy = CommandResolutionStrategy.Path;
+
             foreach (string suffix in Constants.RunnableSuffixes)
             {
                 var fullExecutable = Path.GetFullPath(Path.Combine(
@@ -72,6 +94,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 if (File.Exists(fullExecutable))
                 {
                     executable = fullExecutable;
+                    
+                    resolutionStrategy = CommandResolutionStrategy.BaseDirectory;
 
                     // In priority order we've found the best runnable extension, so break.
                     break;
@@ -93,7 +117,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return executable;
         }
 
-        private static string ResolveExecutablePathFromProject(string executable, NuGetFramework framework)
+        private static string ResolveExecutablePathFromProject(string executable, NuGetFramework framework, ref CommandResolutionStrategy resolutionStrategy)
         {
             if (framework == null) return null;
 
@@ -124,6 +148,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var commandPath = commandPackage.Library.Files
                 .First(f => Path.GetFileName(f) == commandName + FileNameSuffixes.DotNet.Exe);
+
+            resolutionStrategy = CommandResolutionStrategy.NugetPackage;
 
             return Path.Combine(projectContext.PackagesDirectory, commandPackage.Path, commandPath);
         }
@@ -285,6 +311,10 @@ namespace Microsoft.DotNet.Cli.Utils
             _stdErr.ForwardTo(write: null, writeLine: handler);
             return this;
         }
+
+        public CommandResolutionStrategy ResolutionStrategy { get; }
+
+        public string CommandName => _process.StartInfo.FileName;
 
         private string FormatProcessInfo(ProcessStartInfo info)
         {

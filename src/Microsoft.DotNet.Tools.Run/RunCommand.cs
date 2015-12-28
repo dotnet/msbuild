@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Tools.Run
             var tempDir = Path.Combine(_context.ProjectDirectory, "bin", ".dotnetrun", Guid.NewGuid().ToString("N"));
 
             // Compile to that directory
-            var result = Command.Create($"dotnet-compile", $"--output \"{tempDir}\" --temp-output \"{tempDir}\" --framework \"{_context.TargetFramework}\" --configuration \"{Configuration}\" {_context.ProjectFile.ProjectDirectory}")
+            var result = Command.Create($"dotnet-build", $"--output \"{tempDir}\" --temp-output \"{tempDir}\" --framework \"{_context.TargetFramework}\" --configuration \"{Configuration}\" {_context.ProjectFile.ProjectDirectory}")
                 .ForwardStdOut(onlyIfVerbose: true)
                 .ForwardStdErr()
                 .Execute();
