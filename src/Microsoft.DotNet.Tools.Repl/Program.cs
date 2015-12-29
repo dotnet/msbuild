@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -9,38 +10,81 @@ namespace Microsoft.DotNet.Tools.Repl
 {
     public sealed class Program
     {
+        private const string DefaultReplLanguage = "csharp";
+
+        private const string AppName = "dotnet repl";
+        private const string AppFullName = ".NET interactive REPL";
+        private const string AppDescription = "Interactive REPL for the .NET platform";
+
+        private static readonly string AppHelpText = $@"{AppFullName}
+Usage: {AppName} [language] [arguments]
+
+Languages:
+  csharp|csi        Launches the C# REPL (default)
+
+Arguments:
+  [arguments]       Arguments to pass to the target REPL
+
+Options:
+  -h|--help         Show help information
+";
+
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var app = new CommandLineApplication();
-            app.Name = "dotnet repl";
-            app.FullName = ".NET interactive REPL";
-            app.Description = "Interactive REPL for the .NET platform";
-            app.HelpOption("-h|--help");
-            var language = app.Argument("<LANGUAGE>", "The interactive programming language, defaults to csharp");
+            var app = new CommandLineApplication(throwOnUnexpectedArg: false) {
+                Name = "dotnet repl",
+                FullName = ".NET interactive REPL",
+                Description = "Interactive REPL for the .NET platform"
+            };
 
-            app.OnExecute(() => Run(language.Value));
+            var language = app.Argument("[language]", "The interactive programming language, defaults to csharp");
+            var help = app.Option("-h|--help", "Show help information", CommandOptionType.NoValue);
+
+            app.OnExecute(() => Run(language.Value, help.HasValue(), app.RemainingArguments));
             return app.Execute(args);
         }
 
-        private static int Run(string languageOpt)
+        private static void ShowHelp()
         {
+            Console.WriteLine(AppHelpText);
+        }
+
+        private static int Run(string language, bool help, List<string> remainingArguments)
+        {
+            if (language == null)
+            {
+                if (help)
+                {
+                    ShowHelp();
+                    return 0;
+                }
+
+                language = DefaultReplLanguage;
+            }
+
             string replName;
-            if ((languageOpt == null) || (languageOpt == "csharp"))
+            if (language.Equals("csharp") || language.Equals("csi"))
             {
                 replName = "csi";
             }
             else
             {
-                Reporter.Error.WriteLine($"Unrecognized language: {languageOpt}".Red());
+                Reporter.Error.WriteLine($"Unrecognized language: {language}".Red());
                 return -1;
             }
-            var command = Command.Create($"dotnet-repl-{replName}", string.Empty)
+
+            if (help)
+            {
+                remainingArguments.Add("--help");
+            }
+
+            return Command.Create($"dotnet-repl-{replName}", remainingArguments)
                 .ForwardStdOut()
-                .ForwardStdErr();
-            var result = command.Execute();
-            return result.ExitCode;
+                .ForwardStdErr()
+                .Execute()
+                .ExitCode;
         }
     }
 }
