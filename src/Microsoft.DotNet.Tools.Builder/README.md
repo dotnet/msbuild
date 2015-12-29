@@ -28,5 +28,5 @@ Build inherits all the [Compile command line parameters](https://github.com/dotn
 
 In addition Compile's parameters, Build adds the following flag:
 
---build-profile [exe | dynlib | lib]
+--build-profile
 Prints out the incremental safety checks that users need to address in order for incremental compilation to be automatically turned on.
