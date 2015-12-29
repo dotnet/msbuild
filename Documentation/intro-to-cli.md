@@ -38,11 +38,11 @@ You can get a sense of using the tools from the examples below.
 
 `dotnet run` compiles and runs your app with one step. Same as `dnx run`.
 
-**dotnet compile**
+**dotnet build**
 
-`dotnet compile --native` native compiles your app into a single executable file.
+`dotnet build --native` native compiles your app into a single executable file.
 
-`dotnet compile` compiles your app or library as an IL binary. In the case of an app, `compile` generates runable assets by copying an executable host to make the IL binary runable. The host relies on a shared framework for dependencies, including a runtime.
+`dotnet build` compiles your app or library as an IL binary. In the case of an app, `build` generates runable assets by copying an executable host to make the IL binary runable. The host relies on a shared framework for dependencies, including a runtime.
 
 Design
 ======
@@ -54,13 +54,13 @@ There are a couple of moving pieces that you make up the general design of the .
 
 The `dotnet` driver is very simple and its primary role is to run commands and give users basic information about usage. 
 
-The way the `dotnet` driver finds the command it is instructed to run using `dotnet {command}` is via a convention; any executable that is placed in the PATH and is named `dotnet-{command}` will be available to the driver. For example, when you install the CLI toolchain there will be an executable called `dotnet-compile` in your PATH; when you run `dotnet compile`, the driver will run the `dotnet-compile` executable. All of the arguments following the command are passed to the command being invoked. So, in the invocation of `dotnet compile --native`, the `--native` switch will be passed to `dotnet-compile` executable that will do some action based on it (in this case, produce a single native binary).
+The way the `dotnet` driver finds the command it is instructed to run using `dotnet {command}` is via a convention; any executable that is placed in the PATH and is named `dotnet-{command}` will be available to the driver. For example, when you install the CLI toolchain there will be an executable called `dotnet-build` in your PATH; when you run `dotnet build`, the driver will run the `dotnet-build` executable. All of the arguments following the command are passed to the command being invoked. So, in the invocation of `dotnet build --native`, the `--native` switch will be passed to `dotnet-build` executable that will do some action based on it (in this case, produce a single native binary).
 
 This is also the basics of the current extensibility model of the toolchain. Any executable found in the PATH named in this way, that is as `dotnet-{command}`, will be invoked by the `dotnet` driver. 
 
 There are some principles that we are using when adding new commands:
 
-* Each command is represented by a verb (`run`, `compile`, `publish`, `restore` etc.)
+* Each command is represented by a verb (`run`, `build`, `publish`, `restore` etc.)
 * We support the short and the long form of switches for most commands
 * The switches have the same format on all supported platforms (so, no /-style switches on Windows for example)
 * Each command has a help that can be viewed by running `dotnet [command] --help`
@@ -74,7 +74,7 @@ Adding a new command locally
 ============================ 
 Given the extensibility model described above, it is very easy to add a command that can be invoked with the `dotnet` driver. Just add any executable in a PATH and name it as per the instructions above.
 
-As an example, let's say we want to add a local command that will mimick `dotnet clean`. By convention, `dotnet compile` will drop binaries in two directories `./bin` and `./obj`. A clean command thus will need to delete these two directores. A trivial example, but it should work.
+As an example, let's say we want to add a local command that will mimick `dotnet clean`. By convention, `dotnet build` will drop binaries in two directories `./bin` and `./obj`. A clean command thus will need to delete these two directores. A trivial example, but it should work.
 
 On *nix OS-es, we will write a very simple shell script to help us with this:
 ```shell
