@@ -14,8 +14,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-REPOROOT="$( cd -P "$DIR/../.." && pwd )"
-
 if [ -z "$DOTNET_BUILD_VERSION" ]; then
     TIMESTAMP=$(date "+%Y%m%d%H%M%S")
     DOTNET_BUILD_VERSION=0.0.1-alpha-t$TIMESTAMP
@@ -44,4 +42,4 @@ tar -czf $PACKAGE_NAME * .version
 
 info "Packaged stage2 to $PACKAGE_NAME"
 
-$DIR/../publish/publish.sh $PACKAGE_NAME
+$REPOROOT/scripts/publish/publish.sh $PACKAGE_NAME

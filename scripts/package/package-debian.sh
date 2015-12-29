@@ -16,7 +16,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/../_common.sh"
+source "$DIR/../common/_common.sh"
 
 if [ "$UNAME" != "Linux" ]; then
     error "Debian Package build only supported on Linux"
