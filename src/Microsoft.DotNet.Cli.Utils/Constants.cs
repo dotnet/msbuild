@@ -33,5 +33,7 @@ namespace Microsoft.DotNet.Cli.Utils
                                                           RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx.10.10-x64" : "ubuntu.14.04-x64";
 
         public static readonly string StaticLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".lib" : ".a" ;
+
+        public static readonly string ResponseFileSuffix = ".rsp";
     }
 }
