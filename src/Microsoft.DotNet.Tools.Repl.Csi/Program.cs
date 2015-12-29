@@ -28,10 +28,10 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             var script = app.Argument("<SCRIPT>", "The .csx file to run. Defaults to interactive mode.");
             var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
-            var preserveTemporary = app.Option("-t|--preserve-temporary", "Keep the output's temporary directory around", CommandOptionType.NoValue);
+            var preserveTemporary = app.Option("-t|--preserve-temporary", "Preserve the temporary directory containing the compiled project.", CommandOptionType.NoValue);
             var project = app.Option("-p|--project <PROJECT>", "The path to the project to run. Can be a path to a project.json or a project directory", CommandOptionType.SingleValue);
 
-            app.OnExecute(() => Run(script.Value, framework.Values, (configuration.Value() ?? Constants.DefaultConfiguration), preserveTemporary.HasValue(), project.Value()));
+            app.OnExecute(() => Run(script.Value, framework.Values, configuration.Value(), preserveTemporary.HasValue(), project.Value()));
             return app.Execute(args);
         }
 
@@ -55,15 +55,15 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
             Reporter.Output.WriteLine($"Compiling {projectContext.RootProject.Identity.Name.Yellow()} for {projectContext.TargetFramework.DotNetFrameworkName.Yellow()} to use with the {"C# REPL".Yellow()} environment.");
 
-            return Command.Create($"dotnet-compile", $"--output \"{tempOutputDir}\" --temp-output \"{tempOutputDir}\" --framework \"{projectContext.TargetFramework}\" --configuration \"{configuration}\" {projectContext.ProjectFile.ProjectDirectory}")
+            return Command.Create($"dotnet-compile", $"--output \"{tempOutputDir}\" --temp-output \"{tempOutputDir}\" --framework \"{projectContext.TargetFramework}\" --configuration \"{configuration}\" \"{projectContext.ProjectFile.ProjectDirectory}\"")
                                 .ForwardStdOut(onlyIfVerbose: true)
                                 .ForwardStdErr()
                                 .Execute();
         }
 
-        private static List<string> GetRuntimeDependencies(ProjectContext projectContext, string buildConfiguration)
+        private static IEnumerable<string> GetRuntimeDependencies(ProjectContext projectContext, string buildConfiguration)
         {
-            var runtimeDependencies = new List<string>();
+            var runtimeDependencies = new HashSet<string>();
 
             var projectExporter = projectContext.CreateExporter(buildConfiguration);
             var projectDependencies = projectExporter.GetDependencies();
@@ -75,11 +75,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
                 foreach (var runtimeAssembly in runtimeAssemblies)
                 {
                     var runtimeAssemblyPath = runtimeAssembly.ResolvedPath;
-
-                    if (!runtimeDependencies.Contains(runtimeAssemblyPath))
-                    {
-                        runtimeDependencies.Add(runtimeAssemblyPath);
-                    }
+                    runtimeDependencies.Add(runtimeAssemblyPath);
                 }
             }
 
@@ -94,18 +90,15 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
             var runtimeDependencies = GetRuntimeDependencies(projectContext, buildConfiguration);
 
-            using (var fileStream = new FileStream(projectResponseFilePath, FileMode.Create))
+            var fileStream = new FileStream(projectResponseFilePath, FileMode.Create);
+            using (var streamWriter = new StreamWriter(fileStream))
             {
-                var streamWriter = new StreamWriter(fileStream);
-
                 streamWriter.WriteLine($"/r:\"{outputFilePath}\"");
 
                 foreach (var projectDependency in runtimeDependencies)
                 {
                     streamWriter.WriteLine($"/r:\"{projectDependency}\"");
                 }
-
-                streamWriter.Flush();
             }
 
             return projectResponseFilePath;
@@ -117,11 +110,21 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             var csiExe = Path.Combine(AppContext.BaseDirectory, "csi.exe");
             var csiArgs = new StringBuilder();
 
-            var tempOutputDir = string.Empty;
+            if (buildConfiguration == null)
+            {
+                buildConfiguration = Constants.DefaultConfiguration;
+            }
+
+            string tempOutputDir = null;
 
             if (!string.IsNullOrWhiteSpace(projectPath))
             {
                 var projectContext = GetProjectContext(targetFrameworks, projectPath);
+
+                if (projectContext == null)
+                {
+                    Reporter.Error.WriteLine($"Unrecognized framework: {targetFrameworks.First()}".Red());
+                }
 
                 var compileResult = CompileProject(projectContext, buildConfiguration, out tempOutputDir);
 
@@ -141,7 +144,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
                 .ForwardStdErr()
                 .Execute();
 
-            if (!string.IsNullOrWhiteSpace(tempOutputDir) && !preserveTemporaryOutput)
+            if ((tempOutputDir != null) && !preserveTemporaryOutput)
             {
                 Directory.Delete(tempOutputDir, recursive: true);
             }
