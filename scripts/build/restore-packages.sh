@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Copyright (c) .NET Foundation and contributors. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-# Resolve symlinks until we have the parent dir of the actual file
+set -e
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -13,5 +14,12 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# This is how tools should be called
-exec bash $DIR/../test_called.sh
+source "$DIR/../common/_common.sh"
+
+header "Restoring packages"
+$DNX_ROOT/dnu restore "$REPOROOT/src" --quiet --runtime "$RID" --no-cache --parallel
+$DNX_ROOT/dnu restore "$REPOROOT/test" --quiet --runtime "$RID" --no-cache --parallel
+$DNX_ROOT/dnu restore "$REPOROOT/tools" --quiet --runtime "$RID" --no-cache --parallel
+set +e
+$DNX_ROOT/dnu restore "$REPOROOT/testapp" --quiet --runtime "$RID" --no-cache --parallel >/dev/null 2>&1
+set -e

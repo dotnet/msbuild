@@ -10,12 +10,11 @@ SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-REPOROOT="$( cd -P "$DIR/../.." && pwd )"
 
-source "$DIR/../_common.sh"
+source "$DIR/../common/_common.sh"
 
 [ ! -z "$TFM" ] || die "Missing required environment variable TFM"
 [ ! -z "$RID" ] || die "Missing required environment variable RID"
@@ -25,8 +24,8 @@ source "$DIR/../_common.sh"
 
 PROJECTS=( \
     Microsoft.DotNet.Cli \
-    Microsoft.DotNet.Tools.Compiler \
     Microsoft.DotNet.Tools.Builder \
+    Microsoft.DotNet.Tools.Compiler \
     Microsoft.DotNet.Tools.Compiler.Csc \
     Microsoft.DotNet.Tools.Compiler.Fsc \
     Microsoft.DotNet.Tools.Compiler.Native \
@@ -61,6 +60,7 @@ RUNTIME_OUTPUT_DIR="$OUTPUT_DIR/runtime/coreclr"
 
 for project in ${PROJECTS[@]}
 do
+echo dotnet publish --framework "$TFM" --runtime "$RID" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project" 
     dotnet publish --framework "$TFM" --runtime "$RID" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
 done
 
@@ -90,4 +90,4 @@ cd $OUTPUT_DIR
 
 # Fix up permissions. Sometimes they get dropped with the wrong info
 find . -type f | xargs chmod 644
-$DIR/fix-mode-flags.sh
+$REPOROOT/scripts/build/fix-mode-flags.sh

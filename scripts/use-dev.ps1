@@ -1,3 +1,8 @@
+#
+# Copyright (c) .NET Foundation and contributors. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#
+
 # Put the stage2 output on the front of the path
 $stage2 = "$PSScriptRoot\..\artifacts\win7-x64\stage2\bin"
 if (Test-Path $stage2) {

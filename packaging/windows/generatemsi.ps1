@@ -2,10 +2,10 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 param(
-    [string]$inputDir = $(throw "Specify the full path to the directory which needs to be harvested")
+    [Parameter(Mandatory=$true)][string]$inputDir
 )
 
-. "$PSScriptRoot\..\..\scripts\_common.ps1"
+. "$PSScriptRoot\..\..\scripts\common\_common.ps1"
 
 $DotnetMSIOutput = ""
 $WixRoot = ""
@@ -124,39 +124,33 @@ $WixRoot = AcquireWixTools
 
 if([string]::IsNullOrEmpty($WixRoot))
 {
-    return -1
+    Exit -1
 }
 
 if(-Not (RunHeat))
 {    
-    return -1
+    Exit -1
 }
 
 if(-Not (RunCandle))
 {
-    return -1
+    Exit -1
 }
 
 if(-Not (RunLight))
 {
-    return -1
+    Exit -1
 }
 
 if(!(Test-Path $DotnetMSIOutput))
 {
     throw "Unable to create the dotnet msi."
-    return -1
+    Exit -1
 }
 
 Write-Host -ForegroundColor Green "Successfully created dotnet MSI - $DotnetMSIOutput"
 
-& $PSScriptRoot\testmsi.ps1 -inputMsi $DotnetMSIOutput
-
-if($LastExitCode -ne 0)
-{
-    Write-Host -ForegroundColor Red "Msi testing failed."
-    Exit 1
-}
+_ $PSScriptRoot\testmsi.ps1 @("$DotnetMSIOutput")
 
 $PublishScript = Join-Path $PSScriptRoot "..\..\scripts\publish\publish.ps1"
 & $PublishScript -file $DotnetMSIOutput

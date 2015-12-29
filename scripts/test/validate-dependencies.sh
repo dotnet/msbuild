@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Copyright (c) .NET Foundation and contributors. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-# Resolve symlinks until we have the parent dir of the actual file
+set -e
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -13,5 +14,11 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# This is how tools should be called
-exec bash $DIR/../test_called.sh
+source "$DIR/../common/_common.sh"
+
+# Run Validation for Project.json dependencies
+dotnet publish "$REPOROOT/tools/MultiProjectValidator" -o "$STAGE2_DIR/../tools"
+#TODO for release builds this should fail
+set +e
+"$STAGE2_DIR/../tools/pjvalidate" "$REPOROOT/src"
+set -e

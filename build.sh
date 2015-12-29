@@ -12,62 +12,26 @@ SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/scripts/_common.sh"
+source "$DIR/scripts/common/_common.sh"
+source "$REPOROOT/scripts/build/process-args.sh"
 
-for i in "$@"
-do
-    lowerI="$(echo $i | awk '{print tolower($0)}')"
-    case $lowerI in
-    release)
-        export CONFIGURATION=Release
-        ;;
-    debug)
-        export CONFIGURATION=Debug
-        ;;
-    offline)
-        export OFFLINE=true
-        ;;
-    *)
-    esac
-done
-
-[ -z "$CONFIGURATION" ] && CONFIGURATION=Debug
-
-if [ ! -z "$OFFLINE" ]; then
-    header "  - Offline Build -  "
-fi
-
-# Use a repo-local install directory (but not the artifacts directory because that gets cleaned a lot
-export DOTNET_INSTALL_DIR=$DIR/.dotnet_stage0/$RID
-[ -d $DOTNET_INSTALL_DIR ] || mkdir -p $DOTNET_INSTALL_DIR
-export PATH=$DOTNET_INSTALL_DIR/bin:$PATH
-
-# UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
-LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
-major=1
-minor=0
-# no. of days since epoch
-build=0
-revision=$LAST_COMMIT_TIMESTAMP
-
-export DOTNET_BUILD_VERSION=$major.$minor.$build.$revision
-
-header "Building dotnet tools version $DOTNET_BUILD_VERSION - $CONFIGURATION"
-
+# splitting build from package is required to work around dotnet/coreclr#2215
+# once that is fixed, we should remove the NOPACKAGE flag and do the full build either in
+# or out of docker.
 if [ ! -z "$BUILD_IN_DOCKER" ]; then
-    export BUILD_COMMAND="/opt/code/scripts/compile.sh"
-    $DIR/scripts/docker/dockerbuild.sh
+    export BUILD_COMMAND="/opt/code/scripts/build/build.sh NOPACKAGE"
+    $REPOROOT/scripts/docker/dockerbuild.sh
 else
-    $DIR/scripts/compile.sh
+    $REPOROOT/scripts/build/build.sh NOPACKAGE
 fi
 
 if [ ! -z "$PACKAGE_IN_DOCKER" ]; then
-    export BUILD_COMMAND="/opt/code/scripts/package/package.sh"
-    $DIR/scripts/docker/dockerbuild.sh
+    export BUILD_COMMAND="/opt/code/scripts/package/package-native.sh"
+    $REPOROOT/scripts/docker/dockerbuild.sh
 else
-    $DIR/scripts/package/package.sh
+    $REPOROOT/scripts/package/package.sh
 fi

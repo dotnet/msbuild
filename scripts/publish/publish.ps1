@@ -4,7 +4,7 @@
 #
 
 param(
-    [string]$file = $(throw "Specify the full path to the file to be uploaded")
+    [Parameter(Mandatory=$true)][string]$file
 )
 
 function CheckRequiredVariables 

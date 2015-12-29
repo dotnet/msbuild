@@ -4,38 +4,42 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-set -e
-
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-REPOROOT="$( cd -P "$DIR/../.." && pwd )"
 
-source "$DIR/../_common.sh"
-
-echo "Starting packaging"
+source "$DIR/../common/_common.sh"
 
 if [ -z "$DOTNET_BUILD_VERSION" ]; then
     TIMESTAMP=$(date "+%Y%m%d%H%M%S")
-    export DOTNET_BUILD_VERSION=0.0.1-alpha-t$TIMESTAMP
-    echo "Version: $DOTNET_BUILD_VERSION"
+    DOTNET_BUILD_VERSION=0.0.1-alpha-t$TIMESTAMP
 fi
 
-COMMIT=$(git rev-parse HEAD)
-echo $COMMIT > $STAGE2_DIR/.version
-echo $DOTNET_BUILD_VERSION >> $STAGE2_DIR/.version
+STAGE2_DIR=$REPOROOT/artifacts/$RID/stage2
 
-# Create Dnvm Package
-$DIR/package-dnvm.sh
-
-if [[ "$OSNAME" == "ubuntu" ]]; then
-    # Create Debian package
-    $DIR/package-debian.sh
-elif [[ "$OSNAME" == "osx" ]]; then
-    # Create OSX PKG
-    $DIR/../../packaging/osx/package-osx.sh
+if [ ! -d "$STAGE2_DIR" ]; then
+    error "missing stage2 output in $STAGE2_DIR" 1>&2
+    exit
 fi
+
+PACKAGE_DIR=$REPOROOT/artifacts/packages/dnvm
+[ -d "$PACKAGE_DIR" ] || mkdir -p $PACKAGE_DIR
+
+PACKAGE_SHORT_NAME=dotnet-${OSNAME}-x64.${DOTNET_BUILD_VERSION}
+PACKAGE_NAME=$PACKAGE_DIR/${PACKAGE_SHORT_NAME}.tar.gz
+
+cd $STAGE2_DIR
+
+header "Packaging $PACKAGE_SHORT_NAME"
+
+# Tar up the stage2 artifacts
+# We need both "*" and ".version" to ensure we pick up that file
+tar -czf $PACKAGE_NAME * .version
+
+info "Packaged stage2 to $PACKAGE_NAME"
+
+$REPOROOT/scripts/publish/publish.sh $PACKAGE_NAME

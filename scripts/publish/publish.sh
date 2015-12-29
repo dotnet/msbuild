@@ -16,12 +16,13 @@ SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
-SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-REPOROOT="$( cd -P "$SCRIPT_DIR/../.." && pwd )"
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$SCRIPT_DIR/../_common.sh"
+source "$DIR/../common/_common.sh"
+
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 UPLOAD_FILE=$1
 UPLOAD_JSON_FILE="package_upload.json"

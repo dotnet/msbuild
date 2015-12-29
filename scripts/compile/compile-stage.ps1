@@ -13,8 +13,8 @@ param(
 
 $Projects = @(
     "Microsoft.DotNet.Cli",
-    "Microsoft.DotNet.Tools.Compiler",
     "Microsoft.DotNet.Tools.Builder",
+    "Microsoft.DotNet.Tools.Compiler",
     "Microsoft.DotNet.Tools.Compiler.Csc",
     "Microsoft.DotNet.Tools.Compiler.Fsc",
     "Microsoft.DotNet.Tools.Compiler.Native",

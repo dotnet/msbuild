@@ -2,10 +2,10 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 param(
-    [string]$inputMsi = $(throw "Specify the full path to the msi which needs to be tested")
+    [Parameter(Mandatory=$true)][string]$inputMsi
 )
 
-. "$PSScriptRoot\..\..\scripts\_common.ps1"
+. "$PSScriptRoot\..\..\scripts\common\_common.ps1"
 
 function Test-Administrator  
 {  
