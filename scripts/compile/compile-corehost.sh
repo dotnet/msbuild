@@ -24,5 +24,11 @@ make
 
 # Publish to artifacts
 [ -d "$HOST_DIR" ] || mkdir -p $HOST_DIR
-cp "$REPOROOT/src/corehost/cmake/$RID/corehost" $HOST_DIR
+if [[ "$OSNAME" == "osx" ]]; then
+   COREHOST_LIBNAME=libclihost.dylib
+else
+   COREHOST_LIBNAME=libclihost.so
+fi
+cp "$REPOROOT/src/corehost/cmake/$RID/cli/corehost" $HOST_DIR
+cp "$REPOROOT/src/corehost/cmake/$RID/cli/dll/${COREHOST_LIBNAME}" $HOST_DIR
 popd 2>&1 >/dev/null
