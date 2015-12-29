@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var app = new CommandLineApplication();
+            var app = new CommandLineApplication(throwOnUnexpectedArg: false);
             app.Name = "dotnet repl csi";
             app.FullName = "C# REPL";
             app.Description = "C# REPL for the .NET platform";
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             var preserveTemporary = app.Option("-t|--preserve-temporary", "Preserve the temporary directory containing the compiled project.", CommandOptionType.NoValue);
             var project = app.Option("-p|--project <PROJECT>", "The path to the project to run. Can be a path to a project.json or a project directory", CommandOptionType.SingleValue);
 
-            app.OnExecute(() => Run(script.Value, framework.Values, configuration.Value(), preserveTemporary.HasValue(), project.Value()));
+            app.OnExecute(() => Run(script.Value, framework.Values, configuration.Value(), preserveTemporary.HasValue(), project.Value(), app.RemainingArguments));
             return app.Execute(args);
         }
 
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             return projectResponseFilePath;
         }
 
-        private static int Run(string script, IEnumerable<string> targetFrameworks, string buildConfiguration, bool preserveTemporaryOutput, string projectPath)
+        private static int Run(string script, IEnumerable<string> targetFrameworks, string buildConfiguration, bool preserveTemporaryOutput, string projectPath, IEnumerable<string> remainingArguments)
         {
             var corerun = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
             var csiExe = Path.Combine(AppContext.BaseDirectory, "csi.exe");
@@ -137,7 +137,19 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
                 csiArgs.Append($"@\"{responseFile}\" ");
             }
 
-            csiArgs.Append(string.IsNullOrEmpty(script) ? "-i" : script);
+            if (string.IsNullOrEmpty(script) && !remainingArguments.Any())
+            {
+                csiArgs.Append("-i");
+            }
+            else
+            {
+                csiArgs.Append(script);
+            }
+
+            foreach (string remainingArgument in remainingArguments)
+            {
+                csiArgs.Append($" {remainingArgument}");
+            }
 
             var result = Command.Create(csiExe, csiArgs.ToString())
                 .ForwardStdOut()
