@@ -1,13 +1,13 @@
 dotnet-compile
 ===========
 
-**NAME** 
+# NAME 
 dotnet-compile -- Compiles source files to a binary format and saves to a target file.
 
-**SYNOPSIS**
+# SYNOPSIS
 dotnet compile [options]
 
-**DESCRIPTION**
+# DESCRIPTION
 The compile command compiles source files to a binary file, either IL byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future.
 
 The default IL [--il] output is a PE32 exe [exe], with the default extension of ".exe" on all OSes. The exe must include a public static void or public static int main entry point, or it is an error. The dll [dll] output option has the default extension of ".dll".
@@ -36,7 +36,7 @@ The compile command relies on NuGet dependencies for compilation, as references.
 
 Output files, are written to the child `bin` folder, which will be created if it doesn't exist. Files will be overwritten as needed. The temporary files that are created during compilation are placed in the child `obj` folder. 
 
-**Options**
+# Options
 
 -n, --native [exe | dynlib | lib]
 Compiles source to native machine code, for the local machine. The default is a native executable. The default exe extension is no extension and ".exe" on Windows. The default dynlib extension is ".a", ".dynlib" on OS X and ".dll" on Windows.
