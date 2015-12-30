@@ -56,16 +56,16 @@ Then you can either run from source or compile the sample. Running from source i
 	
 Compiling to IL is done using:
 	
-	dotnet compile
+	dotnet build
 This will drop a binary in `./bin/[configuration]/[framework]/[binary name]` that you can just run.
 
 Finally, you can also try out native compilation using RyuJIT as shown below:  
 
-	dotnet compile --native
+	dotnet build --native
 
 The following command will perform native compilation using the C++ Codegenerator:
 
-    dotnet compile --native --cpp
+    dotnet build --native --cpp
 
 This will drop a native single binary in `./bin/[configuration]/[framework]/native/[binary name]` that you can run.
 
