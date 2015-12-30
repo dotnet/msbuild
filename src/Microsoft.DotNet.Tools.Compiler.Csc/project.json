@@ -7,7 +7,7 @@
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23616",
         
-        "Microsoft.Net.Compilers.netcore": "1.2.0-beta-20151224-03",
+        "Microsoft.Net.Compilers.netcore": "1.2.0-beta1-20151228-02",
 
         "Microsoft.DotNet.Cli.Utils": {
             "type": "build",
