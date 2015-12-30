@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Publish
             var output = app.Option("-o|--output <OUTPUT_PATH>", "Path in which to publish the app", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var projectPath = app.Argument("<PROJECT>", "The project to publish, defaults to the current directory. Can be a path to a project.json or a project directory");
+            var nativeSubdirectories = app.Option("--native-subdirectory", "Temporary mechanism to include subdirectories from native assets of dependency packages in output", CommandOptionType.NoValue);
 
             app.OnExecute(() =>
             {
@@ -36,6 +37,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 publish.Runtime = runtime.Value() ?? RuntimeIdentifier.Current;
                 publish.OutputPath = output.Value();
                 publish.Configuration = configuration.Value() ?? Constants.DefaultConfiguration;
+                publish.NativeSubdirectories = nativeSubdirectories.HasValue();
 
                 publish.ProjectPath = projectPath.Value;
                 if (string.IsNullOrEmpty(publish.ProjectPath))
@@ -64,5 +66,5 @@ namespace Microsoft.DotNet.Tools.Publish
                 return 1;
             }
         }
-    }
+     }
 }

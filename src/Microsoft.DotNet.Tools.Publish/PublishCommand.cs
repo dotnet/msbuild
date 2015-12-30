@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Tools.Publish
         public string OutputPath { get; set; }
         public string Framework { get; set; }
         public string Runtime { get; set; }
+        public bool NativeSubdirectories { get; set; }
         public NuGetFramework NugetFramework { get; set; }
         public IEnumerable<ProjectContext> ProjectContexts { get; set; }
 
@@ -57,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Publish
             NumberOfProjects = 0;
             foreach (var project in ProjectContexts)
             {
-                if (PublishProjectContext(project, OutputPath, Configuration))
+                if (PublishProjectContext(project, OutputPath, Configuration, NativeSubdirectories))
                 {
                     NumberOfPublishedProjects++;
                 }
@@ -96,7 +97,7 @@ namespace Microsoft.DotNet.Tools.Publish
         /// <param name="outputPath">Location of published files</param>
         /// <param name="configuration">Debug or Release</param>
         /// <returns>Return 0 if successful else return non-zero</returns>
-        private static bool PublishProjectContext(ProjectContext context, string outputPath, string configuration)
+        private static bool PublishProjectContext(ProjectContext context, string outputPath, string configuration, bool nativeSubdirectories)
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
 
@@ -147,8 +148,8 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
-                PublishFiles(export.RuntimeAssemblies, outputPath);
-                PublishFiles(export.NativeLibraries, outputPath);
+                PublishFiles(export.RuntimeAssemblies, outputPath, false);
+                PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories);
             }
 
             // Publish a host if this is an application
@@ -184,12 +185,48 @@ namespace Microsoft.DotNet.Tools.Publish
             return 0;
         }
 
-        private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath)
+        private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath, bool nativeSubdirectories)
         {
             foreach (var file in files)
             {
-                File.Copy(file.ResolvedPath, Path.Combine(outputPath, Path.GetFileName(file.ResolvedPath)), overwrite: true);
+                var destinationDirectory = DetermineFileDestinationDirectory(file, outputPath, nativeSubdirectories);
+
+                if (!Directory.Exists(destinationDirectory))
+                {
+                    Directory.CreateDirectory(destinationDirectory);
+                }
+
+                File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
+        }
+
+        private static string DetermineFileDestinationDirectory(LibraryAsset file, string outputPath, bool nativeSubdirectories)
+        {
+            var destinationDirectory = outputPath;
+
+            if (nativeSubdirectories)
+            {
+                destinationDirectory = Path.Combine(outputPath, GetNativeRelativeSubdirectory(file.RelativePath));
+            }
+
+            return destinationDirectory;
+        }
+
+        private static string GetNativeRelativeSubdirectory(string filepath)
+        {
+            string directoryPath = Path.GetDirectoryName(filepath);
+
+            string[] parts = directoryPath.Split(new string[] { "native" }, 2, StringSplitOptions.None);
+
+            if (parts.Length != 2)
+            {
+                throw new Exception("Unrecognized Native Directory Format: " + filepath);
+            }
+
+            string candidate = parts[1];
+            candidate = candidate.TrimStart(new char[] { '/', '\\' });
+
+            return candidate;
         }
     }
 }
