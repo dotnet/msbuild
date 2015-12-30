@@ -1,16 +1,16 @@
 dotnet-publish
 ==============
 
-**NAME**
+# NAME
 
 `dotnet-publish` 
 > packs the application and all of its dependencies into a folder getting it ready for publishing
 
-**SYNOPSIS**
+# SYNOPSIS
 
 `dotnet-publish [options] [project]`
 
-**DESCRIPTION**
+# DESCRIPTION
 
 `dotnet-publish` will compile the application, read through its dependencies specified in _project.json_ and publish the resulting set of files to a directory. 
 This directory contains the assemblies, the runtime as well as the runnable version of the application. 
@@ -27,7 +27,7 @@ In case of no valid framework found, the command will error out.
 In case of multiple valid frameworks found, the command will publish for all valid frameworks. 
 
 
-**Options**
+# Options
 
 `-f`, `--framework` [FID]
 
@@ -55,7 +55,7 @@ If not specified, will default to "Debug".
 
   
 
-**EXAMPLES**
+# EXAMPLES
 
 `dotnet-publish`
 >Publish the current application using the _project.json_ framework and runtime for the current operating system. 
@@ -69,6 +69,6 @@ If not specified, will default to "Debug".
 `dotnet-publish --framework dnxcore50 --runtime osx.10.10-x64`
 >Publish the current application using the `dnxcore50` framework and runtime for `OS X 10.10`  
 	
-**SEE ALSO**
+# SEE ALSO
 
 `dotnet-restore`
