@@ -95,9 +95,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var libOut = DetermineOutputFile(config);
             argsList.Add($"-o \"{libOut}\"");
 
-            // Add Stubs
-            argsList.Add(Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04/lxstubs.cpp"));
-
             this.CompilerArgStr = string.Join(" ", argsList);
         }
 

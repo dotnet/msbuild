@@ -65,6 +65,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 config.IlcSdkPath = IlcSdkPath;
             }
 
+            // Get the directory name to ensure there are no trailing slashes as they may conflict
+            // with the terminating "  we suffix to account for paths with spaces in them.
+            char[] charsToTrim = {'\\', '/'};
+            config.IlcSdkPath = config.IlcSdkPath.TrimEnd(charsToTrim);
+            
             if (!string.IsNullOrEmpty(LogPath))
             {
                 config.LogPath = LogPath;

@@ -67,10 +67,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
             // TODO: Enable this when https://github.com/dotnet/cli/pull/469 goes through.
             // var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
-            //
-            // Get the directory name to ensure there are no trailing slashes as they may conflict
-            // with the terminating "  we suffix to account for paths with spaces in them.
-            var ilcSdkIncPath = Path.GetDirectoryName(config.IlcSdkPath);
+            var ilcSdkIncPath = config.IlcSdkPath;
             argsList.Add("-I");
             argsList.Add($"\"{ilcSdkIncPath}\"");
 
