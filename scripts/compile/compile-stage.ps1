@@ -50,9 +50,9 @@ $RuntimeOutputDir = "$OutputDir\runtime\coreclr"
 
 # Publish each project
 $Projects | ForEach-Object {
-    dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
     if (!$?) {
-        Write-Host Command failed: dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
         exit 1
     }
 }
@@ -63,7 +63,6 @@ if (!$?) {
     Write-Host Command failed: dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
     Exit 1
 }
-
 
 # Clean up bogus additional files
 $FilesToClean | ForEach-Object {

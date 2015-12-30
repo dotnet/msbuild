@@ -61,7 +61,7 @@ RUNTIME_OUTPUT_DIR="$OUTPUT_DIR/runtime/coreclr"
 for project in ${PROJECTS[@]}
 do
 echo dotnet publish --framework "$TFM" --runtime "$RID" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project" 
-    dotnet publish --framework "$TFM" --runtime "$RID" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
+    dotnet publish --native-subdirectory --framework "$TFM" --runtime "$RID" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
 done
 
 # Bring in the runtime
