@@ -25,24 +25,28 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             app.Description = "C# REPL for the .NET platform";
             app.HelpOption("-h|--help");
 
-            var script = app.Argument("<SCRIPT>", "The .csx file to run. Defaults to interactive mode.");
-            var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
+            var script = app.Argument("<SCRIPT>", "The .csx file to run. Defaults to interactive mode");
+            var framework = app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
-            var preserveTemporary = app.Option("-t|--preserve-temporary", "Preserve the temporary directory containing the compiled project.", CommandOptionType.NoValue);
+            var preserveTemporary = app.Option("-t|--preserve-temporary", "Preserve the temporary directory containing the compiled project", CommandOptionType.NoValue);
             var project = app.Option("-p|--project <PROJECT>", "The path to the project to run. Can be a path to a project.json or a project directory", CommandOptionType.SingleValue);
 
-            app.OnExecute(() => Run(script.Value, framework.Values, configuration.Value(), preserveTemporary.HasValue(), project.Value(), app.RemainingArguments));
+            app.OnExecute(() => Run(script.Value, framework.Value(), configuration.Value(), preserveTemporary.HasValue(), project.Value(), app.RemainingArguments));
             return app.Execute(args);
         }
 
-        private static ProjectContext GetProjectContext(IEnumerable<string> targetFrameworks, string projectPath)
+        private static ProjectContext GetProjectContext(string targetFramework, string projectPath)
         {
+            // Selecting the target framework for the project is done in the same manner as dotnet run. If a target framework
+            // was specified, we attempt to create a context for that framework (and error out if the framework is unsupported).
+            // Otherwise, we pick the first context supported by the project.
+
             var contexts = ProjectContext.CreateContextForEachFramework(projectPath);
             var context = contexts.First();
 
-            if (targetFrameworks.Any())
+            if (targetFramework != null)
             {
-                var framework = NuGetFramework.Parse(targetFrameworks.First());
+                var framework = NuGetFramework.Parse(targetFramework);
                 context = contexts.FirstOrDefault(c => c.TargetFramework.Equals(framework));
             }
 
@@ -55,7 +59,8 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
             Reporter.Output.WriteLine($"Compiling {projectContext.RootProject.Identity.Name.Yellow()} for {projectContext.TargetFramework.DotNetFrameworkName.Yellow()} to use with the {"C# REPL".Yellow()} environment.");
 
-            return Command.Create($"dotnet-compile", $"--output \"{tempOutputDir}\" --temp-output \"{tempOutputDir}\" --framework \"{projectContext.TargetFramework}\" --configuration \"{configuration}\" \"{projectContext.ProjectFile.ProjectDirectory}\"")
+            // --temp-output is actually the intermediate output folder and can be the same as --output for our temporary compilation (`dotnet run` can be seen doing the same)
+            return Command.Create($"dotnet-compile", $"--output \"{tempOutputDir}\" --temp-output \"{tempOutputDir}\" --framework \"{projectContext.TargetFramework}\" --configuration \"{configuration}\" \"{projectContext.ProjectDirectory}\"")
                                 .ForwardStdOut(onlyIfVerbose: true)
                                 .ForwardStdErr()
                                 .Execute();
@@ -63,6 +68,13 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
         private static IEnumerable<string> GetRuntimeDependencies(ProjectContext projectContext, string buildConfiguration)
         {
+            // We collect the full list of runtime dependencies here and pass them back so they can be
+            // referenced by the REPL environment when seeding the context. It appears that we need to
+            // explicitly list the dependencies as they may not exist in the output directory (as is the
+            // for library projects) or they may not exist anywhere on the path (e.g. they may only exist
+            // in the nuget package that was downloaded for the compilation) or they may be specific to a
+            // specific target framework.
+
             var runtimeDependencies = new HashSet<string>();
 
             var projectExporter = projectContext.CreateExporter(buildConfiguration);
@@ -90,21 +102,23 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
             var runtimeDependencies = GetRuntimeDependencies(projectContext, buildConfiguration);
 
-            var fileStream = new FileStream(projectResponseFilePath, FileMode.Create);
-            using (var streamWriter = new StreamWriter(fileStream))
+            using (var fileStream = new FileStream(projectResponseFilePath, FileMode.Create))
             {
-                streamWriter.WriteLine($"/r:\"{outputFilePath}\"");
-
-                foreach (var projectDependency in runtimeDependencies)
+                using (var streamWriter = new StreamWriter(fileStream))
                 {
-                    streamWriter.WriteLine($"/r:\"{projectDependency}\"");
+                    streamWriter.WriteLine($"/r:\"{outputFilePath}\"");
+
+                    foreach (var projectDependency in runtimeDependencies)
+                    {
+                        streamWriter.WriteLine($"/r:\"{projectDependency}\"");
+                    }
                 }
             }
 
             return projectResponseFilePath;
         }
 
-        private static int Run(string script, IEnumerable<string> targetFrameworks, string buildConfiguration, bool preserveTemporaryOutput, string projectPath, IEnumerable<string> remainingArguments)
+        private static int Run(string script, string targetFramework, string buildConfiguration, bool preserveTemporaryOutput, string projectPath, IEnumerable<string> remainingArguments)
         {
             var corerun = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
             var csiExe = Path.Combine(AppContext.BaseDirectory, "csi.exe");
@@ -116,52 +130,55 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             }
 
             string tempOutputDir = null;
-
-            if (!string.IsNullOrWhiteSpace(projectPath))
+            try
             {
-                var projectContext = GetProjectContext(targetFrameworks, projectPath);
-
-                if (projectContext == null)
+                if (!string.IsNullOrWhiteSpace(projectPath))
                 {
-                    Reporter.Error.WriteLine($"Unrecognized framework: {targetFrameworks.First()}".Red());
+                    var projectContext = GetProjectContext(targetFramework, projectPath);
+
+                    if (projectContext == null)
+                    {
+                        Reporter.Error.WriteLine($"Unrecognized framework: {targetFramework.First()}".Red());
+                    }
+
+                    var compileResult = CompileProject(projectContext, buildConfiguration, out tempOutputDir);
+
+                    if (compileResult.ExitCode != 0)
+                    {
+                        return compileResult.ExitCode;
+                    }
+
+                    string responseFile = CreateResponseFile(projectContext, buildConfiguration, tempOutputDir);
+                    csiArgs.Append($"@\"{responseFile}\" ");
                 }
 
-                var compileResult = CompileProject(projectContext, buildConfiguration, out tempOutputDir);
-
-                if (compileResult.ExitCode != 0)
+                if (string.IsNullOrEmpty(script) && !remainingArguments.Any())
                 {
-                    return compileResult.ExitCode;
+                    csiArgs.Append("-i");
+                }
+                else
+                {
+                    csiArgs.Append(script);
                 }
 
-                string responseFile = CreateResponseFile(projectContext, buildConfiguration, tempOutputDir);
-                csiArgs.Append($"@\"{responseFile}\" ");
-            }
+                foreach (string remainingArgument in remainingArguments)
+                {
+                    csiArgs.Append($" {remainingArgument}");
+                }
 
-            if (string.IsNullOrEmpty(script) && !remainingArguments.Any())
+                return Command.Create(csiExe, csiArgs.ToString())
+                    .ForwardStdOut()
+                    .ForwardStdErr()
+                    .Execute()
+                    .ExitCode;
+            }
+            finally
             {
-                csiArgs.Append("-i");
+                if ((tempOutputDir != null) && !preserveTemporaryOutput)
+                {
+                    Directory.Delete(tempOutputDir, recursive: true);
+                }
             }
-            else
-            {
-                csiArgs.Append(script);
-            }
-
-            foreach (string remainingArgument in remainingArguments)
-            {
-                csiArgs.Append($" {remainingArgument}");
-            }
-
-            var result = Command.Create(csiExe, csiArgs.ToString())
-                .ForwardStdOut()
-                .ForwardStdErr()
-                .Execute();
-
-            if ((tempOutputDir != null) && !preserveTemporaryOutput)
-            {
-                Directory.Delete(tempOutputDir, recursive: true);
-            }
-
-            return result.ExitCode;
         }
     }
 }

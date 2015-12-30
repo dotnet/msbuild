@@ -34,9 +34,9 @@ Options:
             DebugHelper.HandleDebugSwitch(ref args);
 
             var app = new CommandLineApplication(throwOnUnexpectedArg: false) {
-                Name = "dotnet repl",
-                FullName = ".NET interactive REPL",
-                Description = "Interactive REPL for the .NET platform"
+                Name = AppName,
+                FullName = AppFullName,
+                Description = AppDescription
             };
 
             var language = app.Argument("[language]", "The interactive programming language, defaults to csharp");
