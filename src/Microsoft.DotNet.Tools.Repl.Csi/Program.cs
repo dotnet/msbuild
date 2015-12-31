@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             // was specified, we attempt to create a context for that framework (and error out if the framework is unsupported).
             // Otherwise, we pick the first context supported by the project.
 
-            var contexts = ProjectContext.CreateContextForEachFramework(projectPath);
+            var contexts = ProjectContext.CreateContextForEachFramework(Path.GetFullPath(projectPath));
             var context = contexts.First();
 
             if (targetFramework != null)
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             Reporter.Output.WriteLine($"Compiling {projectContext.RootProject.Identity.Name.Yellow()} for {projectContext.TargetFramework.DotNetFrameworkName.Yellow()} to use with the {"C# REPL".Yellow()} environment.");
 
             // --temp-output is actually the intermediate output folder and can be the same as --output for our temporary compilation (`dotnet run` can be seen doing the same)
-            return Command.Create($"dotnet-compile", $"--output \"{tempOutputDir}\" --temp-output \"{tempOutputDir}\" --framework \"{projectContext.TargetFramework}\" --configuration \"{configuration}\" \"{projectContext.ProjectDirectory}\"")
+            return Command.Create($"dotnet-build", $"--output \"{tempOutputDir}\" --temp-output \"{tempOutputDir}\" --framework \"{projectContext.TargetFramework}\" --configuration \"{configuration}\" \"{projectContext.ProjectDirectory}\"")
                                 .ForwardStdOut(onlyIfVerbose: true)
                                 .ForwardStdErr()
                                 .Execute();
@@ -145,6 +145,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
                     if (compileResult.ExitCode != 0)
                     {
+                        Reporter.Error.WriteLine($"Project compilation failed. Exiting REPL".Red());
                         return compileResult.ExitCode;
                     }
 
