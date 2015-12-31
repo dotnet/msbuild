@@ -37,7 +37,7 @@ You can also use our Docker base images found on https://hub.docker.com/r/micros
 Basic usage
 -----------
 
-When you have the .NET Command Line Interface installed on your OS of choice, you can try it out using some of the samples on the [dotnet/core repo](https://github.com/dotnet/core/tree/master/samples). You can download the sample in a directory, and then do you can kick the tires of the CLI.
+When you have the .NET Command Line Interface installed on your OS of choice, you can try it out using some of the samples on the [dotnet/core repo](https://github.com/dotnet/core/tree/master/samples). You can download the sample in a directory, and then you can kick the tires of the CLI.
 
 **Note:** on Linux, post-install, please set up the `DOTNET_HOME` environment: `export DOTNET_HOME=/usr/share/dotnet/`.
 
