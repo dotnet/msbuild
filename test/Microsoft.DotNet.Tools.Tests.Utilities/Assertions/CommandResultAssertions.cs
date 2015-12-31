@@ -48,6 +48,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> HaveStdOut(string expectedOutput)
+        {
+            Execute.Assertion.ForCondition(_commandResult.StdOut.Equals(expectedOutput, StringComparison.Ordinal))
+                .FailWith($"Command did not output with Expected Output. Expected: {expectedOutput} Actual: {_commandResult.StdOut}");
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> HaveStdErr()
         {
             Execute.Assertion.ForCondition(!string.IsNullOrEmpty(_commandResult.StdErr))
