@@ -2,18 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.DotNet.ProjectModel.Resolution;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
     internal abstract class Messenger<T> where T : class
     {
-        protected readonly FrameworkReferenceResolver _resolver;
         protected readonly Action<string, object> _transmit;
 
         public Messenger(string messageType, Action<string, object> transmit)
         {
-            _resolver = FrameworkReferenceResolver.Default;
             _transmit = transmit;
 
             MessageType = messageType;

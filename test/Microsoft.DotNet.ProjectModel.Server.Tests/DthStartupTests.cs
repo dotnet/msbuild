@@ -83,33 +83,6 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             }
         }
 
-        [Fact]
-        public void DthCompilation_GetDiagnostics_OnEmptyConsoleApp()
-        {
-            var projectPath = _testHelper.FindSampleProject("EmptyConsoleApp");
-            Assert.NotNull(projectPath);
-
-            using (var server = new DthTestServer(_testHelper.LoggerFactory))
-            using (var client = new DthTestClient(server))
-            {
-                // Drain the inital messages
-                client.Initialize(projectPath);
-                client.SendPayLoad(projectPath, "GetDiagnostics");
-
-                var diagnosticsGroup = client.DrainTillFirst("AllDiagnostics")
-                                             .EnsureSource(server, client)
-                                             .RetrievePayloadAs<JArray>()
-                                             .AssertJArrayCount(3);
-
-                foreach (var group in diagnosticsGroup)
-                {
-                    group.AsJObject()
-                         .AssertProperty<JArray>("Errors", errorsArray => !errorsArray.Any())
-                         .AssertProperty<JArray>("Warnings", warningsArray => !warningsArray.Any());
-                }
-            }
-        }
-
         [Theory]
         [InlineData("Project", "UnresolvedProjectSample", "EmptyLibrary", "Project")]
         [InlineData("Package", "UnresolvedPackageSample", "NoSuchPackage", null)]

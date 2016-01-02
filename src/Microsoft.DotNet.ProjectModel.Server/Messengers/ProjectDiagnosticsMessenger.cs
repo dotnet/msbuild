@@ -7,24 +7,24 @@ using Microsoft.DotNet.ProjectModel.Server.Models;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
-    internal class ProjectDiagnosticsMessenger : Messenger<Snapshot>
+    internal class ProjectDiagnosticsMessenger : Messenger<ProjectSnapshot>
     {
         public ProjectDiagnosticsMessenger(Action<string, object> transmit)
             : base(MessageTypes.Diagnostics, transmit)
         { }
 
-        protected override bool CheckDifference(Snapshot local, Snapshot remote)
+        protected override bool CheckDifference(ProjectSnapshot local, ProjectSnapshot remote)
         {
             return remote.ProjectDiagnostics != null &&
                    Enumerable.SequenceEqual(local.ProjectDiagnostics, remote.ProjectDiagnostics);
         }
 
-        protected override object CreatePayload(Snapshot local)
+        protected override object CreatePayload(ProjectSnapshot local)
         {
             return new DiagnosticsListMessage(local.ProjectDiagnostics);
         }
 
-        protected override void SetValue(Snapshot local, Snapshot remote)
+        protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)
         {
             remote.ProjectDiagnostics = local.ProjectDiagnostics;
         }

@@ -210,7 +210,7 @@ namespace Microsoft.DotNet.ProjectModel
         }
 
         private ProjectContextCollection AddProjectContextEntry(string projectDirectory,
-                                                                 ProjectContextCollection currentEntry)
+                                                                ProjectContextCollection currentEntry)
         {
             if (currentEntry == null)
             {
@@ -241,7 +241,8 @@ namespace Microsoft.DotNet.ProjectModel
 
                     currentEntry.ProjectContexts.Add(builder.Build());
                 }
-
+ 
+                currentEntry.Project = project;
                 currentEntry.ProjectFilePath = project.ProjectFilePath;
                 currentEntry.LastProjectFileWriteTime = File.GetLastWriteTime(currentEntry.ProjectFilePath);
 

@@ -6,7 +6,6 @@ namespace Microsoft.DotNet.ProjectModel.Server
     public class MessageTypes
     {
         // Incoming
-        public const string ProjectContexts = nameof(ProjectContexts);
         public const string Initialize = nameof(Initialize);
         public const string ChangeConfiguration = nameof(ChangeConfiguration);
         public const string RefreshDependencies = nameof(RefreshDependencies);
@@ -24,6 +23,5 @@ namespace Microsoft.DotNet.ProjectModel.Server
         public const string CompilerOptions = nameof(CompilerOptions);
         public const string References = nameof(References);
         public const string Sources = nameof(Sources);
-        public const string AllDiagnostics = nameof(AllDiagnostics);
     }
 }

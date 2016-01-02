@@ -8,15 +8,14 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
 {
     public static class NuGetFrameworkExtensions
     {
-        public static FrameworkData ToPayload(this NuGetFramework framework,
-                                              FrameworkReferenceResolver resolver)
+        public static FrameworkData ToPayload(this NuGetFramework framework)
         {
             return new FrameworkData
             {
                 ShortName = framework.GetShortFolderName(),
                 FrameworkName = framework.DotNetFrameworkName,
                 FriendlyName = framework.Framework,
-                RedistListPath = resolver.GetFrameworkRedistListPath(framework)
+                RedistListPath = FrameworkReferenceResolver.Default.GetFrameworkRedistListPath(framework)
             };
         }
     }

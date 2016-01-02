@@ -4,18 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Server.InternalModels;
 using Microsoft.DotNet.ProjectModel.Server.Models;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
-    internal class ReferencesMessenger : Messenger<ProjectSnapshot>
+    internal class ReferencesMessenger : Messenger<ProjectContextSnapshot>
     {
         public ReferencesMessenger(Action<string, object> transmit)
             : base(MessageTypes.References, transmit)
         { }
 
-        protected override bool CheckDifference(ProjectSnapshot local, ProjectSnapshot remote)
+        protected override bool CheckDifference(ProjectContextSnapshot local, ProjectContextSnapshot remote)
         {
             return remote.FileReferences != null &&
                    remote.ProjectReferences != null &&
@@ -23,17 +22,17 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
                    Enumerable.SequenceEqual(local.ProjectReferences, remote.ProjectReferences);
         }
 
-        protected override object CreatePayload(ProjectSnapshot local)
+        protected override object CreatePayload(ProjectContextSnapshot local)
         {
             return new ReferencesMessage
             {
-                Framework = local.TargetFramework.ToPayload(_resolver),
+                Framework = local.TargetFramework.ToPayload(),
                 ProjectReferences = local.ProjectReferences,
                 FileReferences = local.FileReferences
             };
         }
 
-        protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)
+        protected override void SetValue(ProjectContextSnapshot local, ProjectContextSnapshot remote)
         {
             remote.FileReferences = local.FileReferences;
             remote.ProjectReferences = local.ProjectReferences;

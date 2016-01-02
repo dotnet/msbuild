@@ -2,38 +2,37 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.DotNet.ProjectModel.Server.InternalModels;
 using Microsoft.DotNet.ProjectModel.Server.Models;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
-    internal class CompilerOptionsMessenger : Messenger<ProjectSnapshot>
+    internal class CompilerOptionsMessenger : Messenger<ProjectContextSnapshot>
     {
         public CompilerOptionsMessenger(Action<string, object> transmit)
             : base(MessageTypes.CompilerOptions, transmit)
         { }
 
-        protected override bool CheckDifference(ProjectSnapshot local, ProjectSnapshot remote)
+        protected override bool CheckDifference(ProjectContextSnapshot local, ProjectContextSnapshot remote)
         {
             return remote.CompilerOptions != null &&
                    Equals(local.CompilerOptions, remote.CompilerOptions);
         }
 
-        protected override object CreatePayload(ProjectSnapshot local)
+        protected override object CreatePayload(ProjectContextSnapshot local)
         {
-            return new CompilationOptionsMessagePayload
+            return new CompilationOptionsMessage
             {
-                Framework = local.TargetFramework.ToPayload(_resolver),
+                Framework = local.TargetFramework.ToPayload(),
                 Options = local.CompilerOptions
             };
         }
 
-        protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)
+        protected override void SetValue(ProjectContextSnapshot local, ProjectContextSnapshot remote)
         {
             remote.CompilerOptions = local.CompilerOptions;
         }
 
-        private class CompilationOptionsMessagePayload
+        private class CompilationOptionsMessage
         {
             public FrameworkData Framework { get; set; }
 

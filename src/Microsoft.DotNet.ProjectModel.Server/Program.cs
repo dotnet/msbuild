@@ -6,14 +6,13 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
-using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.ProjectModel.Server
 {
     public class Program
     {
-        private readonly Dictionary<int, ProjectContextManager> _projectContextManagers;
+        private readonly Dictionary<int, ProjectManager> _projects;
         private readonly WorkspaceContext _workspaceContext;
         private readonly ProtocolManager _protocolManager;
         private readonly ILoggerFactory _loggerFactory;
@@ -21,14 +20,14 @@ namespace Microsoft.DotNet.ProjectModel.Server
         private readonly int _port;
         private Socket _listenSocket;
 
-        public Program(int intPort, string hostName, ILoggerFactory loggerFactory)
+        public Program(int port, string hostName, ILoggerFactory loggerFactory)
         {
-            _port = intPort;
+            _port = port;
             _hostName = hostName;
             _loggerFactory = loggerFactory;
             _protocolManager = new ProtocolManager(maxVersion: 4, loggerFactory: _loggerFactory);
             _workspaceContext = WorkspaceContext.Create();
-            _projectContextManagers = new Dictionary<int, ProjectContextManager>();
+            _projects = new Dictionary<int, ProjectManager>();
         }
 
         public static int Main(string[] args)
@@ -41,8 +40,8 @@ namespace Microsoft.DotNet.ProjectModel.Server
             app.HelpOption("-?|-h|--help");
 
             var verbose = app.Option("--verbose", "Verbose ouput", CommandOptionType.NoValue);
-            var hostpid = app.Option("--hostPid", "The process id of the host", CommandOptionType.SingleValue);
-            var hostname = app.Option("--hostName", "The name of the host", CommandOptionType.SingleValue);
+            var hostpid = app.Option("--host-pid", "The process id of the host", CommandOptionType.SingleValue);
+            var hostname = app.Option("--host-name", "The name of the host", CommandOptionType.SingleValue);
             var port = app.Option("--port", "The TCP port used for communication", CommandOptionType.SingleValue);
 
             app.OnExecute(() =>
@@ -82,7 +81,6 @@ namespace Microsoft.DotNet.ProjectModel.Server
         {
             var logger = _loggerFactory.CreateLogger($"OpenChannel");
 
-            // This fixes the mono incompatibility but ties it to ipv4 connections
             _listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _listenSocket.Bind(new IPEndPoint(IPAddress.Loopback, _port));
             _listenSocket.Listen(10);
@@ -99,7 +97,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
                                                        _hostName,
                                                        _protocolManager,
                                                        _workspaceContext,
-                                                       _projectContextManagers,
+                                                       _projects,
                                                        _loggerFactory);
 
                 connection.QueueStart();

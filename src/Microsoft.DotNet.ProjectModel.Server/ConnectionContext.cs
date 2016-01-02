@@ -12,17 +12,17 @@ namespace Microsoft.DotNet.ProjectModel.Server
     {
         private readonly string _hostName;
         private readonly ProcessingQueue _queue;
-        private readonly IDictionary<int, ProjectContextManager> _projectContextManagers;
+        private readonly IDictionary<int, ProjectManager> _projects;
 
         public ConnectionContext(Socket acceptedSocket,
             string hostName,
             ProtocolManager protocolManager,
             WorkspaceContext workspaceContext,
-            IDictionary<int, ProjectContextManager> projectContextManagers,
+            IDictionary<int, ProjectManager> projects,
             ILoggerFactory loggerFactory)
         {
             _hostName = hostName;
-            _projectContextManagers = projectContextManagers;
+            _projects = projects;
 
             _queue = new ProcessingQueue(new NetworkStream(acceptedSocket), loggerFactory);
             _queue.OnReceive += message =>
@@ -35,18 +35,18 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 else
                 {
                     message.Sender = this;
-                    ProjectContextManager keeper;
-                    if (!_projectContextManagers.TryGetValue(message.ContextId, out keeper))
+                    ProjectManager projectManager;
+                    if (!_projects.TryGetValue(message.ContextId, out projectManager))
                     {
-                        keeper = new ProjectContextManager(message.ContextId,
+                        projectManager = new ProjectManager(message.ContextId,
                                                            loggerFactory,
                                                            workspaceContext,
                                                            protocolManager);
 
-                        _projectContextManagers[message.ContextId] = keeper;
+                        _projects[message.ContextId] = projectManager;
                     }
 
-                    keeper.OnReceive(message);
+                    projectManager.OnReceive(message);
                 }
             };
         }

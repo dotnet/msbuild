@@ -6,25 +6,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.DotNet.ProjectModel.Server.Helpers;
-using Microsoft.DotNet.ProjectModel.Server.InternalModels;
 using Microsoft.DotNet.ProjectModel.Server.Messengers;
 using Microsoft.DotNet.ProjectModel.Server.Models;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Server
 {
-    internal class ProjectContextManager
+    internal class ProjectManager
     {
         private readonly ILogger _log;
 
         private readonly object _processingLock = new object();
         private readonly Queue<Message> _inbox = new Queue<Message>();
         private readonly ProtocolManager _protocolManager;
-        private readonly List<ConnectionContext> _waitingForDiagnostics = new List<ConnectionContext>();
 
         private ConnectionContext _initializedContext;
 
@@ -34,29 +30,29 @@ namespace Microsoft.DotNet.ProjectModel.Server
         private readonly Trigger<int> _refreshDependencies = new Trigger<int>();
         private readonly Trigger<int> _filesChanged = new Trigger<int>();
 
-        private Snapshot _local = new Snapshot();
-        private Snapshot _remote = new Snapshot();
+        private ProjectSnapshot _local = new ProjectSnapshot();
+        private ProjectSnapshot _remote = new ProjectSnapshot();
 
         private readonly WorkspaceContext _workspaceContext;
         private int? _contextProtocolVersion;
 
-        private readonly List<Messenger<ProjectSnapshot>> _messengers;
+        private readonly List<Messenger<ProjectContextSnapshot>> _messengers;
 
         private ProjectDiagnosticsMessenger _projectDiagnosticsMessenger;
         private GlobalErrorMessenger _globalErrorMessenger;
         private ProjectInformationMessenger _projectInforamtionMessenger;
 
-        public ProjectContextManager(int contextId,
+        public ProjectManager(int contextId,
                                      ILoggerFactory loggerFactory,
                                      WorkspaceContext workspaceContext,
                                      ProtocolManager protocolManager)
         {
             Id = contextId;
-            _log = loggerFactory.CreateLogger<ProjectContextManager>();
+            _log = loggerFactory.CreateLogger<ProjectManager>();
             _workspaceContext = workspaceContext;
             _protocolManager = protocolManager;
 
-            _messengers = new List<Messenger<ProjectSnapshot>>
+            _messengers = new List<Messenger<ProjectContextSnapshot>>
             {
                 new DependencyDiagnosticsMessenger(Transmit),
                 new DependenciesMessenger(Transmit),
@@ -66,7 +62,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             };
 
             _projectDiagnosticsMessenger = new ProjectDiagnosticsMessenger(Transmit);
-            _globalErrorMessenger = new GlobalErrorMessenger(TransmitDiagnostics);
+            _globalErrorMessenger = new GlobalErrorMessenger(Transmit);
             _projectInforamtionMessenger = new ProjectInformationMessenger(Transmit);
         }
 
@@ -96,24 +92,13 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 _inbox.Enqueue(message);
             }
 
-            ThreadPool.QueueUserWorkItem(state => ((ProjectContextManager)state).ProcessLoop(), this);
+            ThreadPool.QueueUserWorkItem(state => ((ProjectManager)state).ProcessLoop(), this);
         }
 
         private void Transmit(string messageType, object payload)
         {
             var message = Message.FromPayload(messageType, Id, payload);
             _initializedContext.Transmit(message);
-        }
-
-        private void TransmitDiagnostics(string messageType, object payload)
-        {
-            var message = Message.FromPayload(messageType, Id, payload);
-            _initializedContext.Transmit(message);
-
-            foreach (var connection in _waitingForDiagnostics)
-            {
-                connection.Transmit(message);
-            }
         }
 
         private void ProcessLoop()
@@ -158,13 +143,6 @@ namespace Microsoft.DotNet.ProjectModel.Server
 
                 _initializedContext.Transmit(message);
                 _remote.GlobalErrorMessage = error;
-
-                foreach (var connection in _waitingForDiagnostics)
-                {
-                    connection.Transmit(message);
-                }
-
-                _waitingForDiagnostics.Clear();
             }
         }
 
@@ -173,12 +151,9 @@ namespace Microsoft.DotNet.ProjectModel.Server
             while (true)
             {
                 DrainInbox();
-
-                var allDiagnostics = new List<DiagnosticMessageGroup>();
-
-                UpdateProjectStates();
-                SendOutgingMessages(allDiagnostics);
-                SendDiagnostics(allDiagnostics);
+                
+                UpdateProject();
+                SendOutgingMessages();
 
                 lock (_inbox)
                 {
@@ -232,9 +207,6 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 case MessageTypes.FilesChanged:
                     _filesChanged.Value = 0;
                     break;
-                case MessageTypes.GetDiagnostics:
-                    _waitingForDiagnostics.Add(message.Sender);
-                    break;
             }
 
             return true;
@@ -260,9 +232,9 @@ namespace Microsoft.DotNet.ProjectModel.Server
             }
         }
 
-        private bool UpdateProjectStates()
+        private bool UpdateProject()
         {
-            ProjectState state = null;
+            ProjectSnapshot newSnapshot = null;
 
             if (_appPath.WasAssigned || _configure.WasAssigned || _filesChanged.WasAssigned || _refreshDependencies.WasAssigned)
             {
@@ -271,71 +243,41 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 _filesChanged.ClearAssigned();
                 _refreshDependencies.ClearAssigned();
 
-                state = ProjectState.Create(_appPath.Value, _configure.Value, _workspaceContext, _remote.ProjectSearchPaths);
+                newSnapshot = ProjectSnapshot.Create(_appPath.Value, _configure.Value, _workspaceContext, _remote.ProjectSearchPaths);
             }
 
-            if (state == null)
+            if (newSnapshot == null)
             {
                 return false;
             }
 
-            _local = Snapshot.CreateFromProject(state.Project);
-            _local.ProjectDiagnostics = state.Diagnostics;
-
-            foreach (var projectInfo in state.Projects)
-            {
-                var projectWorkd = new ProjectSnapshot
-                {
-                    RootDependency = projectInfo.RootDependency,
-                    TargetFramework = projectInfo.Framework,
-                    SourceFiles = new List<string>(projectInfo.SourceFiles),
-                    CompilerOptions = projectInfo.CompilerOptions,
-                    ProjectReferences = projectInfo.ProjectReferences,
-                    FileReferences = projectInfo.CompilationAssembiles,
-                    DependencyDiagnostics = projectInfo.DependencyDiagnostics,
-                    Dependencies = projectInfo.Dependencies
-                };
-
-                _local.Projects[projectInfo.Framework] = projectWorkd;
-            }
+            _local = newSnapshot;
 
             return true;
         }
 
-        private void SendOutgingMessages(List<DiagnosticMessageGroup> diagnostics)
+        private void SendOutgingMessages()
         {
             _projectInforamtionMessenger.UpdateRemote(_local, _remote);
             _projectDiagnosticsMessenger.UpdateRemote(_local, _remote);
 
-            if (_local.ProjectDiagnostics != null)
+            var unprocessedFrameworks = new HashSet<NuGetFramework>(_remote.ProjectContexts.Keys);
+            foreach (var pair in _local.ProjectContexts)
             {
-                diagnostics.Add(new DiagnosticMessageGroup(_local.ProjectDiagnostics));
-            }
+                ProjectContextSnapshot localProjectSnapshot = pair.Value;
+                ProjectContextSnapshot remoteProjectSnapshot;
 
-            var unprocessedFrameworks = new HashSet<NuGetFramework>(_remote.Projects.Keys);
-            foreach (var pair in _local.Projects)
-            {
-                ProjectSnapshot localProjectSnapshot = pair.Value;
-                ProjectSnapshot remoteProjectSnapshot;
-
-                if (!_remote.Projects.TryGetValue(pair.Key, out remoteProjectSnapshot))
+                if (!_remote.ProjectContexts.TryGetValue(pair.Key, out remoteProjectSnapshot))
                 {
-                    remoteProjectSnapshot = new ProjectSnapshot();
-                    _remote.Projects[pair.Key] = remoteProjectSnapshot;
-                }
-
-                if (localProjectSnapshot.DependencyDiagnostics != null)
-                {
-                    diagnostics.Add(new DiagnosticMessageGroup(
-                        localProjectSnapshot.TargetFramework,
-                        localProjectSnapshot.DependencyDiagnostics));
+                    remoteProjectSnapshot = new ProjectContextSnapshot();
+                    _remote.ProjectContexts[pair.Key] = remoteProjectSnapshot;
                 }
 
                 unprocessedFrameworks.Remove(pair.Key);
 
-                foreach(var messenger in _messengers)
+                foreach (var messenger in _messengers)
                 {
-                    messenger.UpdateRemote(localProjectSnapshot, 
+                    messenger.UpdateRemote(localProjectSnapshot,
                                            remoteProjectSnapshot);
                 }
             }
@@ -343,35 +285,10 @@ namespace Microsoft.DotNet.ProjectModel.Server
             // Remove all processed frameworks from the remote view
             foreach (var framework in unprocessedFrameworks)
             {
-                _remote.Projects.Remove(framework);
+                _remote.ProjectContexts.Remove(framework);
             }
-        }
-
-        private void SendDiagnostics(List<DiagnosticMessageGroup> allDiagnostics)
-        {
-            _log.LogInformation($"SendDiagnostics, {allDiagnostics.Count()} diagnostics, {_waitingForDiagnostics.Count()} waiting for diagnostics.");
-            if (!allDiagnostics.Any())
-            {
-                return;
-            }
-
+            
             _globalErrorMessenger.UpdateRemote(_local, _remote);
-
-            // Group all of the diagnostics into group by target framework
-            var messages = new List<DiagnosticsListMessage>();
-            foreach (var g in allDiagnostics.GroupBy(g => g.Framework))
-            {
-                var frameworkData = g.Key?.ToPayload(FrameworkReferenceResolver.Default);
-                var messageGroup = g.SelectMany(d => d.Diagnostics).ToList();
-                messages.Add(new DiagnosticsListMessage(messageGroup, frameworkData));
-            }
-
-            // Send all diagnostics back
-            TransmitDiagnostics(
-                MessageTypes.AllDiagnostics,
-                messages.Select(d => JToken.FromObject(d)));
-
-            _waitingForDiagnostics.Clear();
         }
 
         private class Trigger<TValue>

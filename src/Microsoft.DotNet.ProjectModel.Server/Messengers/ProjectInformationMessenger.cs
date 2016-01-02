@@ -4,18 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Resolution;
 using Microsoft.DotNet.ProjectModel.Server.Models;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
-    internal class ProjectInformationMessenger : Messenger<Snapshot>
+    internal class ProjectInformationMessenger : Messenger<ProjectSnapshot>
     {
         public ProjectInformationMessenger(Action<string, object> transmit)
             : base(MessageTypes.ProjectInformation, transmit)
         { }
 
-        protected override bool CheckDifference(Snapshot local, Snapshot remote)
+        protected override bool CheckDifference(ProjectSnapshot local, ProjectSnapshot remote)
         {
             return remote.Project != null &&
                    string.Equals(local.Project.Name, remote.Project.Name) &&
@@ -27,30 +26,29 @@ namespace Microsoft.DotNet.ProjectModel.Server.Messengers
                    Enumerable.SequenceEqual(local.ProjectSearchPaths, remote.ProjectSearchPaths);
         }
 
-        protected override object CreatePayload(Snapshot local)
+        protected override object CreatePayload(ProjectSnapshot local)
         {
-            return new ProjectInformation(local.Project, local.GlobalJsonPath, local.ProjectSearchPaths, _resolver);
+            return new ProjectInformationMessage(local.Project, local.GlobalJsonPath, local.ProjectSearchPaths);
         }
 
-        protected override void SetValue(Snapshot local, Snapshot remote)
+        protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)
         {
             remote.Project = local.Project;
             remote.GlobalJsonPath = local.GlobalJsonPath;
             remote.ProjectSearchPaths = local.ProjectSearchPaths;
         }
 
-        private class ProjectInformation
+        private class ProjectInformationMessage
         {
-            public ProjectInformation(Project project,
-                                      string gloablJsonPath,
-                                      IEnumerable<string> projectSearchPath,
-                                      FrameworkReferenceResolver resolver)
+            public ProjectInformationMessage(Project project,
+                                             string gloablJsonPath,
+                                             IReadOnlyList<string> projectSearchPaths)
             {
                 Name = project.Name;
-                Frameworks = project.GetTargetFrameworks().Select(f => f.FrameworkName.ToPayload(resolver)).ToList();
+                Frameworks = project.GetTargetFrameworks().Select(f => f.FrameworkName.ToPayload()).ToList();
                 Configurations = project.GetConfigurations().ToList();
                 Commands = project.Commands;
-                ProjectSearchPaths = new List<string>(projectSearchPath);
+                ProjectSearchPaths = projectSearchPaths;
                 GlobalJsonPath = gloablJsonPath;
             }
 

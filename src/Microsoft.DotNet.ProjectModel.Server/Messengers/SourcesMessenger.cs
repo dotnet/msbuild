@@ -4,39 +4,38 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Server.InternalModels;
 using Microsoft.DotNet.ProjectModel.Server.Models;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
-    internal class SourcesMessenger : Messenger<ProjectSnapshot>
+    internal class SourcesMessenger : Messenger<ProjectContextSnapshot>
     {
         public SourcesMessenger(Action<string, object> transmit)
             : base(MessageTypes.Sources, transmit)
         { }
 
-        protected override bool CheckDifference(ProjectSnapshot local, ProjectSnapshot remote)
+        protected override bool CheckDifference(ProjectContextSnapshot local, ProjectContextSnapshot remote)
         {
             return remote.SourceFiles != null &&
                    Enumerable.SequenceEqual(local.SourceFiles, remote.SourceFiles);
         }
 
-        protected override object CreatePayload(ProjectSnapshot local)
+        protected override object CreatePayload(ProjectContextSnapshot local)
         {
-            return new SourcesMessagePayload
+            return new SourcesMessage
             {
-                Framework = local.TargetFramework.ToPayload(_resolver),
+                Framework = local.TargetFramework.ToPayload(),
                 Files = local.SourceFiles,
                 GeneratedFiles = new Dictionary<string, string>()
             };
         }
 
-        protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)
+        protected override void SetValue(ProjectContextSnapshot local, ProjectContextSnapshot remote)
         {
             remote.SourceFiles = local.SourceFiles;
         }
 
-        private class SourcesMessagePayload
+        private class SourcesMessage
         {
             public FrameworkData Framework { get; set; }
             public IReadOnlyList<string> Files { get; set; }

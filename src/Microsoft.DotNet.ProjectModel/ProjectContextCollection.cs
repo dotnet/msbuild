@@ -9,6 +9,8 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class ProjectContextCollection
     {
+        public Project Project { get; set; }
+
         public List<ProjectContext> ProjectContexts { get; } = new List<ProjectContext>();
 
         public List<DiagnosticMessage> ProjectDiagnostics { get; } = new List<DiagnosticMessage>();
@@ -51,6 +53,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public void Reset()
         {
+            Project = null;
             ProjectContexts.Clear();
             ProjectFilePath = null;
             LockFilePath = null;

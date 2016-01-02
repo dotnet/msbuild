@@ -7,6 +7,24 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
     {
         private ProjectReferenceDescription() { }
 
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public string WrappedProjectPath { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as ProjectReferenceDescription;
+            return other != null &&
+                   string.Equals(Name, other.Name) &&
+                   string.Equals(Path, other.Path) &&
+                   string.Equals(WrappedProjectPath, other.WrappedProjectPath);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        
         public static ProjectReferenceDescription Create(ProjectDescription description)
         {
             var targetFrameworkInformation = description.TargetFrameworkInfo;
@@ -28,24 +46,6 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
                 Path = description.Path,
                 WrappedProjectPath = wrappedProjectPath,
             };
-        }
-
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public string WrappedProjectPath { get; set; }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as ProjectReferenceDescription;
-            return other != null &&
-                   string.Equals(Name, other.Name) &&
-                   string.Equals(Path, other.Path) &&
-                   string.Equals(WrappedProjectPath, other.WrappedProjectPath);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
     }
 }

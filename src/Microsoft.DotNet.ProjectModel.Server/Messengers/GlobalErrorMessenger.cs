@@ -5,23 +5,23 @@ using System;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
-    internal class GlobalErrorMessenger : Messenger<Snapshot>
+    internal class GlobalErrorMessenger : Messenger<ProjectSnapshot>
     {
         public GlobalErrorMessenger(Action<string, object> transmit)
             : base(MessageTypes.Error, transmit)
         { }
 
-        protected override bool CheckDifference(Snapshot local, Snapshot remote)
+        protected override bool CheckDifference(ProjectSnapshot local, ProjectSnapshot remote)
         {
             return remote != null && Equals(local.GlobalErrorMessage, remote.GlobalErrorMessage);
         }
 
-        protected override object CreatePayload(Snapshot local)
+        protected override object CreatePayload(ProjectSnapshot local)
         {
             return local.GlobalErrorMessage;
         }
 
-        protected override void SetValue(Snapshot local, Snapshot remote)
+        protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)
         {
             remote.GlobalErrorMessage = local.GlobalErrorMessage;
         }

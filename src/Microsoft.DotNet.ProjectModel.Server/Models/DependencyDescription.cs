@@ -11,28 +11,6 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
     {
         private DependencyDescription() { }
 
-        public static DependencyDescription Create(LibraryDescription library, IEnumerable<DiagnosticMessage> diagnostics)
-        {
-            return new DependencyDescription
-            {
-                Name = library.Identity.Name,
-                DisplayName = GetLibraryDisplayName(library),
-                Version = library.Identity.Version?.ToString(),
-                Type = library.Identity.Type.Value,
-                Resolved = library.Resolved,
-                Path = library.Path,
-                Dependencies = library.Dependencies.Select(dependency => new DependencyItem
-                {
-                    Name = dependency.Name,
-                    Version = dependency.VersionRange?.ToString() // TODO: review
-                }),
-                Errors = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Error)
-                                    .Select(d => new DiagnosticMessageView(d)),
-                Warnings = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Warning)
-                                      .Select(d => new DiagnosticMessageView(d))
-            };
-        }
-
         public string Name { get; private set; }
 
         public string DisplayName { get; private set; }
@@ -71,6 +49,28 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
             // These objects are currently POCOs and we're overriding equals
             // so that things like Enumerable.SequenceEqual just work.
             return base.GetHashCode();
+        }
+
+        public static DependencyDescription Create(LibraryDescription library, IEnumerable<DiagnosticMessage> diagnostics)
+        {
+            return new DependencyDescription
+            {
+                Name = library.Identity.Name,
+                DisplayName = GetLibraryDisplayName(library),
+                Version = library.Identity.Version?.ToString(),
+                Type = library.Identity.Type.Value,
+                Resolved = library.Resolved,
+                Path = library.Path,
+                Dependencies = library.Dependencies.Select(dependency => new DependencyItem
+                {
+                    Name = dependency.Name,
+                    Version = dependency.VersionRange?.ToString() // TODO: review
+                }),
+                Errors = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Error)
+                                    .Select(d => new DiagnosticMessageView(d)),
+                Warnings = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Warning)
+                                      .Select(d => new DiagnosticMessageView(d))
+            };
         }
 
         private static string GetLibraryDisplayName(LibraryDescription library)

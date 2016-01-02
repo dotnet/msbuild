@@ -3,31 +3,30 @@
 
 using System;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Server.InternalModels;
 using Microsoft.DotNet.ProjectModel.Server.Models;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Messengers
 {
-    internal class DependencyDiagnosticsMessenger : Messenger<ProjectSnapshot>
+    internal class DependencyDiagnosticsMessenger : Messenger<ProjectContextSnapshot>
     {
         public DependencyDiagnosticsMessenger(Action<string, object> transmit)
             : base(MessageTypes.DependencyDiagnostics, transmit)
         { }
 
-        protected override bool CheckDifference(ProjectSnapshot local, ProjectSnapshot remote)
+        protected override bool CheckDifference(ProjectContextSnapshot local, ProjectContextSnapshot remote)
         {
             return remote.DependencyDiagnostics != null &&
                    Enumerable.SequenceEqual(local.DependencyDiagnostics, remote.DependencyDiagnostics);
         }
 
-        protected override object CreatePayload(ProjectSnapshot local)
+        protected override object CreatePayload(ProjectContextSnapshot local)
         {
             return new DiagnosticsListMessage(
                 local.DependencyDiagnostics,
-                local.TargetFramework?.ToPayload(_resolver));
+                local.TargetFramework?.ToPayload());
         }
 
-        protected override void SetValue(ProjectSnapshot local, ProjectSnapshot remote)
+        protected override void SetValue(ProjectContextSnapshot local, ProjectContextSnapshot remote)
         {
             remote.DependencyDiagnostics = local.DependencyDiagnostics;
         }
