@@ -3,55 +3,23 @@
 
 using System;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace NuGet
 {
     public static class PackageIdValidator
     {
+        private static readonly Regex _idRegex = new Regex(@"^\w+([_.-]\w+)*$", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
+
         internal const int MaxPackageIdLength = 100;
 
         public static bool IsValidPackageId(string packageId)
         {
-            if (string.IsNullOrWhiteSpace(packageId))
+            if (packageId == null)
             {
-                throw new ArgumentException(nameof(packageId));
+                throw new ArgumentNullException("packageId");
             }
-
-            // Rules: 
-            // Should start with a character
-            // Can be followed by '.' or '-'. Cannot have 2 of these special characters consecutively. 
-            // Cannot end with '-' or '.'
-
-            var firstChar = packageId[0];
-            if (!char.IsLetterOrDigit(firstChar) && firstChar != '_')
-            {
-                // Should start with a char/digit/_.
-                return false;
-            }
-
-            var lastChar = packageId[packageId.Length - 1];
-            if (lastChar == '-' || lastChar == '.')
-            {
-                // Should not end with a '-' or '.'.
-                return false;
-            }
-
-            for (int index = 1; index < packageId.Length - 1; index++)
-            {
-                var ch = packageId[index];
-                if (!char.IsLetterOrDigit(ch) && ch != '-' && ch != '.')
-                {
-                    return false;
-                }
-
-                if ((ch == '-' || ch == '.') && ch == packageId[index - 1])
-                {
-                    // Cannot have two successive '-' or '.' in the name.
-                    return false;
-                }
-            }
-
-            return true;
+            return _idRegex.IsMatch(packageId);
         }
 
         public static void ValidatePackageId(string packageId)
