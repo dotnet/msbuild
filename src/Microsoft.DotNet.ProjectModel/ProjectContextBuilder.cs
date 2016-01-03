@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.ProjectModel
             }
 
             var libraries = new Dictionary<LibraryKey, LibraryDescription>();
-            var projectResolver = new ProjectDependencyProvider(Settings);
+            var projectResolver = new ProjectDependencyProvider(ProjectResolver);
 
             var mainProject = projectResolver.GetDescription(TargetFramework, Project);
 
@@ -382,10 +382,11 @@ namespace Microsoft.DotNet.ProjectModel
             return null;
         }
 
-        private static Project ResolveProject(string projectDirectory)
+        private Project ResolveProject(string projectDirectory)
         {
+            // TODO: Handle diagnostics
             Project project;
-            if (ProjectReader.TryGetProject(projectDirectory, out project))
+            if (ProjectReader.TryGetProject(projectDirectory, out project, diagnostics: null, settings: Settings))
             {
                 return project;
             }

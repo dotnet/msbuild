@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Packaging;
-using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ProjectModel.Resolution
 {

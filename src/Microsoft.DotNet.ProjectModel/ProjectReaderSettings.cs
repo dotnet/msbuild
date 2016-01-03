@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Microsoft.DotNet.ProjectModel
+﻿namespace Microsoft.DotNet.ProjectModel
 {
     public class ProjectReaderSettings
     {
-        public string VersionSuffix = null;
+        public string VersionSuffix { get; set; }
+        public string AssemblyFileVersion { get; set; }
     }
 }

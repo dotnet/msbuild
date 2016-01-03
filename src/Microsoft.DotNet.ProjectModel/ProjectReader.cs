@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 try
                 {
-                    var buildVersion = settings.VersionSuffix ?? Environment.GetEnvironmentVariable("DOTNET_BUILD_VERSION");
+                    var buildVersion = settings.VersionSuffix;
                     project.Version = SpecifySnapshot(version, buildVersion);
                 }
                 catch (Exception ex)
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.ProjectModel
                 }
             }
 
-            var fileVersion = Environment.GetEnvironmentVariable("DOTNET_ASSEMBLY_FILE_VERSION");
+            var fileVersion = settings.AssemblyFileVersion;
             if (string.IsNullOrWhiteSpace(fileVersion))
             {
                 project.AssemblyFileVersion = project.Version.Version;

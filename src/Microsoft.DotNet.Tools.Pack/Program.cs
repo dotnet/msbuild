@@ -9,7 +9,6 @@ using System.Text;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli.Compiler.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -51,10 +50,13 @@ namespace Microsoft.DotNet.Tools.Compiler
                     return 1;
                 }
 
-                ProjectReaderSettings settings = null;
+                // Set defaults based on the environment
+                var settings = new ProjectReaderSettings();
+                settings.VersionSuffix = Environment.GetEnvironmentVariable("DOTNET_BUILD_VERSION");
+                settings.AssemblyFileVersion = Environment.GetEnvironmentVariable("DOTNET_ASSEMBLY_FILE_VERSION");
+
                 if (versionSuffix.HasValue())
                 {
-                    settings = new ProjectReaderSettings();
                     settings.VersionSuffix = versionSuffix.Value();
                 }
 

@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Versioning;
 using Microsoft.DotNet.ProjectModel.Graph;
-using NuGet;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Resolution
@@ -15,18 +13,10 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
     public class ProjectDependencyProvider
     {
         private Func<string, Project> _resolveProject;
-        private ProjectReaderSettings _settings;
 
-        public ProjectDependencyProvider(ProjectReaderSettings settings = null)
-        {
-            _resolveProject = ResolveProject;
-            _settings = settings;
-        }
-
-        public ProjectDependencyProvider(Func<string, Project> projectCacheResolver, ProjectReaderSettings settings = null)
+        public ProjectDependencyProvider(Func<string, Project> projectCacheResolver)
         {
             _resolveProject = projectCacheResolver;
-            _settings = settings;
         }
 
         public ProjectDescription GetDescription(string name,
@@ -85,19 +75,6 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 dependencies,
                 targetFrameworkInfo,
                 !unresolved);
-        }
-
-        private Project ResolveProject(string path)
-        {
-            Project project;
-            if (ProjectReader.TryGetProject(path, out project, settings: _settings))
-            {
-                return project;
-            }
-            else
-            {
-                return null;
-            }
         }
     }
 }
