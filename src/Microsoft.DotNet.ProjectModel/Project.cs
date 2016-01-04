@@ -62,6 +62,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IList<LibraryRange> Dependencies { get; set; }
 
+        public List<LibraryRange> Tools { get; set; }
+
         public string EntryPoint { get; set; }
 
         public string ProjectUrl { get; set; }
