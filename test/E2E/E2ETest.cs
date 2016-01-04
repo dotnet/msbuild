@@ -147,6 +147,9 @@ namespace ConsoleApplication
                 .Execute();
 
             var outText = result.StdOut;
+            var errText = result.StdErr;
+            
+            Assert.Equal("", errText);
             Assert.Equal(EXPECTED_OUTPUT, outText);
         }
 
