@@ -12,29 +12,29 @@ using System.Text;
 using System.Xml.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
 
-namespace Microsoft.DotNet.Tools.Compiler
+namespace Microsoft.DotNet.Cli.Utils
 {
-    internal class BindingRedirectGenerator
+    internal static class BindingRedirectGenerator
     {
         private const int TokenLength = 8;
         private const string Namespace = "urn:schemas-microsoft-com:asm.v1";
 
-        private static XName ConfigurationElementName = XName.Get("configuration");
-        private static XName RuntimeElementName = XName.Get("runtime");
-        private static XName AssemblyBindingElementName = XName.Get("assemblyBinding", Namespace);
-        private static XName DependentAssemblyElementName = XName.Get("dependentAssembly", Namespace);
-        private static XName AssemblyIdentityElementName = XName.Get("assemblyIdentity", Namespace);
-        private static XName BindingRedirectElementName = XName.Get("bindingRedirect", Namespace);
+        private static readonly XName ConfigurationElementName = XName.Get("configuration");
+        private static readonly XName RuntimeElementName = XName.Get("runtime");
+        private static readonly XName AssemblyBindingElementName = XName.Get("assemblyBinding", Namespace);
+        private static readonly XName DependentAssemblyElementName = XName.Get("dependentAssembly", Namespace);
+        private static readonly XName AssemblyIdentityElementName = XName.Get("assemblyIdentity", Namespace);
+        private static readonly XName BindingRedirectElementName = XName.Get("bindingRedirect", Namespace);
 
-        private static XName NameAttributeName = XName.Get("name");
-        private static XName PublicKeyTokenAttributeName = XName.Get("publicKeyToken");
-        private static XName CultureAttributeName = XName.Get("culture");
-        private static XName OldVersionAttributeName = XName.Get("oldVersion");
-        private static XName NewVersionAttributeName = XName.Get("newVersion");
+        private static readonly XName NameAttributeName = XName.Get("name");
+        private static readonly XName PublicKeyTokenAttributeName = XName.Get("publicKeyToken");
+        private static readonly XName CultureAttributeName = XName.Get("culture");
+        private static readonly XName OldVersionAttributeName = XName.Get("oldVersion");
+        private static readonly XName NewVersionAttributeName = XName.Get("newVersion");
 
-        private readonly SHA1 _sha1 = SHA1.Create();
+        internal static SHA1 Sha1 { get; } = SHA1.Create();
 
-        public XDocument Generate(IEnumerable<LibraryExport> dependencies, XDocument document)
+        internal static XDocument GenerateBindingRedirects(this IEnumerable<LibraryExport> dependencies, XDocument document)
         {
             var redirects = CollectRedirects(dependencies);
 
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             return document;
         }
 
-        private void AddDependentAssembly(AssemblyRedirect redirect, XElement assemblyBindings)
+        private static void AddDependentAssembly(AssemblyRedirect redirect, XElement assemblyBindings)
         {
             var dependencyElement = assemblyBindings.Elements(DependentAssemblyElementName)
                 .FirstOrDefault(element => IsSameAssembly(redirect, element));
@@ -80,16 +80,16 @@ namespace Microsoft.DotNet.Tools.Compiler
                     ));
         }
 
-        private bool IsSameAssembly(AssemblyRedirect redirect, XElement dependentAssemblyElement)
+        private static bool IsSameAssembly(AssemblyRedirect redirect, XElement dependentAssemblyElement)
         {
             var identity = dependentAssemblyElement.Element(AssemblyIdentityElementName);
             if (identity == null)
             {
                 return false;
             }
-            return (string) identity.Attribute(NameAttributeName) == redirect.From.Name &&
-                   (string) identity.Attribute(PublicKeyTokenAttributeName) == redirect.From.PublicKeyToken &&
-                   (string) identity.Attribute(CultureAttributeName) == redirect.From.Culture;
+            return (string)identity.Attribute(NameAttributeName) == redirect.From.Name &&
+                   (string)identity.Attribute(PublicKeyTokenAttributeName) == redirect.From.PublicKeyToken &&
+                   (string)identity.Attribute(CultureAttributeName) == redirect.From.Culture;
         }
 
         public static XElement GetOrAddElement(XContainer parent, XName elementName)
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             return element;
         }
 
-        private AssemblyRedirect[] CollectRedirects(IEnumerable<LibraryExport> dependencies)
+        private static AssemblyRedirect[] CollectRedirects(IEnumerable<LibraryExport> dependencies)
         {
             var allRuntimeAssemblies = dependencies.SelectMany(d => d.RuntimeAssemblies).Select(GetAssemblyInfo).ToArray();
             var assemblyLookup = allRuntimeAssemblies.ToDictionary(r => r.Identity.ToLookupKey());
@@ -136,14 +136,14 @@ namespace Microsoft.DotNet.Tools.Compiler
             return redirectAssemblies.ToArray();
         }
 
-        private AssemblyReferenceInfo GetAssemblyInfo(LibraryAsset arg)
+        private static AssemblyReferenceInfo GetAssemblyInfo(LibraryAsset arg)
         {
             using (var peReader = new PEReader(File.OpenRead(arg.ResolvedPath)))
             {
                 var metadataReader = peReader.GetMetadataReader();
 
                 var definition = metadataReader.GetAssemblyDefinition();
-                
+
                 var identity = new AssemblyIdentity(
                     metadataReader.GetString(definition.Name),
                     definition.Version,
@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        private string GetPublicKeyToken(byte[] bytes)
+        private static string GetPublicKeyToken(byte[] bytes)
         {
             if (bytes.Length == 0)
             {
@@ -183,7 +183,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             else
             {
                 token = new byte[TokenLength];
-                var sha1 = _sha1.ComputeHash(bytes);
+                var sha1 = Sha1.ComputeHash(bytes);
                 Array.Copy(sha1, sha1.Length - TokenLength, token, 0, TokenLength);
                 Array.Reverse(token);
             }
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 Name = name;
                 Version = version;
-                Culture = string.IsNullOrEmpty(culture)? "neutral" : culture;
+                Culture = string.IsNullOrEmpty(culture) ? "neutral" : culture;
                 PublicKeyToken = publicKeyToken;
             }
 
