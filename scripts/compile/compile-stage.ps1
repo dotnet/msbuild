@@ -90,7 +90,7 @@ $BinariesForCoreHost | ForEach-Object {
 header "Crossgening Roslyn compiler ..."
 _cmd "$RepoRoot\scripts\crossgen\crossgen_roslyn.cmd ""$OutputDir"""
 
-# Copy dnx into stage 2
+# Copy dnx into stage OutputDir
 cp -rec "$DnxRoot\" "$OutputDir\bin\dnx\"
 
 # Copy in the dotnet-restore script
