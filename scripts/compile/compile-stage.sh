@@ -24,6 +24,7 @@ source "$DIR/../common/_common.sh"
 
 PROJECTS=( \
     Microsoft.DotNet.Cli \
+    Microsoft.DotNet.ProjectModel.Server \
     Microsoft.DotNet.Tools.Builder \
     Microsoft.DotNet.Tools.Compiler \
     Microsoft.DotNet.Tools.Compiler.Csc \

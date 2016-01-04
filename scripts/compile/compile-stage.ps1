@@ -13,6 +13,7 @@ param(
 
 $Projects = @(
     "Microsoft.DotNet.Cli",
+    "Microsoft.DotNet.ProjectModel.Server",
     "Microsoft.DotNet.Tools.Builder",
     "Microsoft.DotNet.Tools.Compiler",
     "Microsoft.DotNet.Tools.Compiler.Csc",
@@ -25,7 +26,7 @@ $Projects = @(
     "Microsoft.DotNet.Tools.Repl.Csi",
     "Microsoft.DotNet.Tools.Resgen",
     "Microsoft.DotNet.Tools.Run",
-    "Microsoft.DotNet.Tools.Test"    
+    "Microsoft.DotNet.Tools.Test"
 )
 
 $BinariesForCoreHost = @(
