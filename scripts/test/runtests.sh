@@ -42,7 +42,7 @@ failCount=0
 
 for project in ${TestProjects[@]}
 do
-    ./corerun  "xunit.console.netcore.exe" "$project.dll" -xml "project.xml" -notrait category=failing
+    ./corerun  "xunit.console.netcore.exe" "$project.dll" -xml "${project}-testResults.xml" -notrait category=failing
     exitCode=$?
     failCount+=$exitCode
     if [ $exitCode -ne 0 ]; then
@@ -52,7 +52,7 @@ done
 
 for test in ${failedTests[@]}
 do
-    error "$test.dll failed. Logs in '$TestBinRoot/$test.xml'"
+    error "$test.dll failed. Logs in '$TestBinRoot/${test}-testResults.xml'"
 done
 
 popd

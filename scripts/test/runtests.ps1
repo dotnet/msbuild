@@ -44,7 +44,7 @@ pushd "$TestBinRoot"
 
 # Run each test project
 $TestProjects | ForEach-Object {
-    & "corerun.exe"  "xunit.console.netcore.exe" "$_.dll" -xml "$_.xml" -notrait category=failing
+    & "corerun.exe"  "xunit.console.netcore.exe" "$_.dll" -xml "$_-testResults.xml" -notrait category=failing
     $exitCode = $LastExitCode
     if ($exitCode -ne 0) {
         $failingTests += "$_"
@@ -58,7 +58,7 @@ popd
 if ($failCount -ne 0) {
     Write-Host -ForegroundColor Red "The following tests failed."
     $failingTests | ForEach-Object {
-        Write-Host -ForegroundColor Red "$_.dll failed. Logs in '$TestBinRoot\$_.xml'"
+        Write-Host -ForegroundColor Red "$_.dll failed. Logs in '$TestBinRoot\$_-testResults.xml'"
     }
 }
 else {

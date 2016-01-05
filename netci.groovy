@@ -66,6 +66,7 @@ def static getBuildJobName(def configuration, def os) {
 
 
             Utilities.standardJobSetup(newJob, project, isPR)
+            Utilities.addXUnitDotNETResults(newJob, '**/*-testResults.xml')
             if (isPR) {
                 Utilities.addGithubPRTrigger(newJob, "${os} ${configuration} Build")
             }
