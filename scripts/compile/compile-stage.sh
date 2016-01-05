@@ -92,3 +92,29 @@ cd $OUTPUT_DIR
 # Fix up permissions. Sometimes they get dropped with the wrong info
 find . -type f | xargs chmod 644
 $REPOROOT/scripts/build/fix-mode-flags.sh
+
+info "Crossgenning Roslyn compiler ..."
+$REPOROOT/scripts/crossgen/crossgen_roslyn.sh "$OUTPUT_DIR/bin"
+
+# Make OUTPUT_DIR Folder Accessible
+chmod -R a+r $OUTPUT_DIR
+
+# Copy DNX in to OUTPUT_DIR
+cp -R $DNX_ROOT $OUTPUT_DIR/bin/dnx
+
+# Copy and CHMOD the dotnet-restore script
+cp $REPOROOT/scripts/dotnet-restore.sh $OUTPUT_DIR/bin/dotnet-restore
+chmod a+x $OUTPUT_DIR/bin/dotnet-restore
+
+# No compile native support in centos yet
+# https://github.com/dotnet/cli/issues/453
+if [ "$OSNAME" != "centos"  ]; then
+    # Copy in AppDeps
+    header "Acquiring Native App Dependencies"
+    DOTNET_HOME=$OUTPUT_DIR DOTNET_TOOLS=$OUTPUT_DIR $REPOROOT/scripts/build/build_appdeps.sh "$OUTPUT_DIR/bin"
+fi
+
+# Stamp the output with the commit metadata
+COMMIT=$(git rev-parse HEAD)
+echo $COMMIT > $OUTPUT_DIR/.version
+echo $DOTNET_BUILD_VERSION >> $OUTPUT_DIR/.version

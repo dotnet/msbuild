@@ -85,3 +85,18 @@ $BinariesForCoreHost | ForEach-Object {
     mv $OutputDir\bin\$_.exe $OutputDir\bin\$_.dll
     cp $OutputDir\bin\corehost.exe $OutputDir\bin\$_.exe
 }
+
+# Crossgen Roslyn
+header "Crossgening Roslyn compiler ..."
+_cmd "$RepoRoot\scripts\crossgen\crossgen_roslyn.cmd ""$OutputDir"""
+
+# Copy dnx into stage OutputDir
+cp -rec "$DnxRoot\" "$OutputDir\bin\dnx\"
+
+# Copy in the dotnet-restore script
+cp "$RepoRoot\scripts\dotnet-restore.cmd" "$OutputDir\bin\dotnet-restore.cmd"
+
+# Copy in AppDeps
+$env:PATH = "$OutputDir\bin;$StartPath"
+header "Acquiring Native App Dependencies"
+_cmd "$RepoRoot\scripts\build\build_appdeps.cmd ""$OutputDir""" 
