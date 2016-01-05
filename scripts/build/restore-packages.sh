@@ -17,9 +17,9 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/../common/_common.sh"
 
 header "Restoring packages"
-$DNX_ROOT/dnu restore "$REPOROOT/src" --quiet --runtime "$RID" --no-cache --parallel
-$DNX_ROOT/dnu restore "$REPOROOT/test" --quiet --runtime "$RID" --no-cache --parallel
-$DNX_ROOT/dnu restore "$REPOROOT/tools" --quiet --runtime "$RID" --no-cache --parallel
+$DNX_ROOT/dnu restore "$REPOROOT/src" --quiet --runtime "$RID" "$NOCACHE" --parallel
+$DNX_ROOT/dnu restore "$REPOROOT/test" --quiet --runtime "$RID" "$NOCACHE" --parallel
+$DNX_ROOT/dnu restore "$REPOROOT/tools" --quiet --runtime "$RID" "$NOCACHE" --parallel
 set +e
-$DNX_ROOT/dnu restore "$REPOROOT/testapp" --quiet --runtime "$RID" --no-cache --parallel >/dev/null 2>&1
+$DNX_ROOT/dnu restore "$REPOROOT/testapp" --quiet --runtime "$RID" "$NOCACHE" --parallel >/dev/null 2>&1
 set -e

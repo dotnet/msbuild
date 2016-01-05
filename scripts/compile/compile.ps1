@@ -3,8 +3,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-param([string]$Configuration = "Debug",
-      [switch]$Offline)
+param([string]$Configuration = "Debug")
 
 $ErrorActionPreference="Stop"
 

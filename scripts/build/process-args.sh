@@ -20,6 +20,9 @@ do
     nopackage)
         export NOPACKAGE=true
         ;;
+    nocache)
+        export NOCACHE=--No-Cache
+        ;;
     *)
     esac
 done

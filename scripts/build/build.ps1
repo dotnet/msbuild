@@ -5,7 +5,8 @@
 
 param(
     [string]$Configuration="Debug",
-    [switch]$Offline)
+    [switch]$Offline,
+    [switch]$NoCache)
 
 $ErrorActionPreference="Stop"
 
@@ -25,8 +26,8 @@ if ($Offline){
 }
 else {
     _ "$RepoRoot\scripts\obtain\install-tools.ps1"
-    
-    _ "$RepoRoot\scripts\build\restore-packages.ps1"
+
+    _ "$RepoRoot\scripts\build\restore-packages.ps1" @("$NoCache")
 }
 
 header "Compiling"
