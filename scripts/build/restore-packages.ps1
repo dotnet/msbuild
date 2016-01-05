@@ -18,7 +18,7 @@ else {
 
 # Restore packages
 header "Restoring packages"
-& "$DnxRoot\dnu" restore "$RepoRoot\src"  --runtime "$Rid" "$NoCacheArg" --parallel
+& "$DnxRoot\dnu" restore "$RepoRoot\src" --quiet --runtime "$Rid" "$NoCacheArg" --parallel
 & "$DnxRoot\dnu" restore "$RepoRoot\test" --quiet --runtime "$Rid" "$NoCacheArg" --parallel
 & "$DnxRoot\dnu" restore "$RepoRoot\tools" --quiet --runtime "$Rid" "$NoCacheArg" --parallel
 
