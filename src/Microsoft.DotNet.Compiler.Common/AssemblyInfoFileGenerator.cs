@@ -11,7 +11,7 @@ using System.IO;
 using System.Runtime.Versioning;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Microsoft.Dotnet.Cli.Compiler.Common
+namespace Microsoft.DotNet.Cli.Compiler.Common
 {
     public class AssemblyInfoFileGenerator
     {

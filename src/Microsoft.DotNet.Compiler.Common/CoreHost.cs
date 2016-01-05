@@ -1,7 +1,8 @@
 using System.IO;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.Compiler.Common
 {
     internal static class CoreHost
     {

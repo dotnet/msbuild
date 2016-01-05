@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Dotnet.Cli.Compiler.Common;
+using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Resgen

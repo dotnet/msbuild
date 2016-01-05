@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Microsoft.DotNet.ProjectModel.Compilation;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Compilation;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.Compiler.Common
 {
     internal static class LibraryExporterExtensions
     {
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static IEnumerable<string> GenerateLines(LibraryExport export, IEnumerable<LibraryAsset> items, string type)
         {
-            return items.Select(i => CsvFormatter.EscapeRow(new[]
+            return items.Select(i => DepsFormatter.EscapeRow(new[]
             {
                 export.Library.Identity.Type.Value,
                 export.Library.Identity.Name,

@@ -7,14 +7,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.Tools.Common;
 using NuGet.Frameworks;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.Compiler.Common
 {
-    internal static class ProjectContextExtensions
+    public static class ProjectContextExtensions
     {
         public static string ProjectName(this ProjectContext context) => context.RootProject.Identity.Name;
 
@@ -60,7 +62,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static string GetDefaultRootOutputPath(ProjectContext context, string currentOutputPath)
         {
-            string rootOutputPath = string.Empty;
+            var rootOutputPath = string.Empty;
 
             if (string.IsNullOrEmpty(currentOutputPath))
             {
@@ -70,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return rootOutputPath;
         }
         
-        internal static void MakeCompilationOutputRunnable(this ProjectContext context, string outputPath, string configuration)
+        public static void MakeCompilationOutputRunnable(this ProjectContext context, string outputPath, string configuration)
         {
             context
                 .ProjectFile
@@ -88,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     .SelectMany(e => e.RuntimeAssets())
                     .CopyTo(outputPath);
 
-                GenerateBindingRedirects(context, outputPath, configuration);
+                GenerateBindingRedirects(context, exporter, outputPath);
             }
             else
             {
@@ -151,7 +153,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
 
-        private static void GenerateBindingRedirects(this ProjectContext context, string outputPath, string configuration)
+        private static void GenerateBindingRedirects(this ProjectContext context, LibraryExporter exporter, string outputPath)
         {
             var existingConfig = new DirectoryInfo(context.ProjectDirectory)
                 .EnumerateFiles()
@@ -167,7 +169,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
             }
 
-            var appConfig = context.CreateExporter(configuration).GetAllExports().GenerateBindingRedirects(baseAppConfig);
+            var appConfig = exporter.GetAllExports().GenerateBindingRedirects(baseAppConfig);
 
             if (appConfig == null) return;
 

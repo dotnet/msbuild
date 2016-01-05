@@ -12,9 +12,9 @@ using System.Text;
 using System.Xml.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.Compiler.Common
 {
-    internal static class BindingRedirectGenerator
+    public static class BindingRedirectGenerator
     {
         private const int TokenLength = 8;
         private const string Namespace = "urn:schemas-microsoft-com:asm.v1";
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private static readonly XName OldVersionAttributeName = XName.Get("oldVersion");
         private static readonly XName NewVersionAttributeName = XName.Get("newVersion");
 
-        internal static SHA1 Sha1 { get; } = SHA1.Create();
+        private static SHA1 Sha1 { get; } = SHA1.Create();
 
         internal static XDocument GenerateBindingRedirects(this IEnumerable<LibraryExport> dependencies, XDocument document)
         {
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Utils
                    (string)identity.Attribute(CultureAttributeName) == redirect.From.Culture;
         }
 
-        public static XElement GetOrAddElement(XContainer parent, XName elementName)
+        private static XElement GetOrAddElement(XContainer parent, XName elementName)
         {
             XElement element;
             if (parent.Element(elementName) != null)
