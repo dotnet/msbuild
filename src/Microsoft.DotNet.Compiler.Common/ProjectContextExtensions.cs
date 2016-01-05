@@ -113,10 +113,13 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 throw new ArgumentNullException(nameof(sourceFiles));
             }
 
+            sourceDirectory = EnsureTrailingSlash(sourceDirectory);
+            targetDirectory = EnsureTrailingSlash(targetDirectory);
+
             var pathMap = sourceFiles
-                .ToDictionary(s => s, s => Path.Combine(
-                    targetDirectory,
-                    PathUtility.GetRelativePath(sourceDirectory, s)));
+                .ToDictionary(s => s, 
+                    s => Path.Combine(targetDirectory,
+                        PathUtility.GetRelativePath(sourceDirectory, s)));
 
             foreach (var targetDir in pathMap.Values
                 .Select(Path.GetDirectoryName)
@@ -137,6 +140,26 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return pathMap.Values;
         }
 
+        private static string EnsureTrailingSlash(string path)
+        {
+            return EnsureTrailingCharacter(path, Path.DirectorySeparatorChar);
+        }
+
+        private static string EnsureTrailingCharacter(string path, char trailingCharacter)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            // if the path is empty, we want to return the original string instead of a single trailing character.
+            if (path.Length == 0 || path[path.Length - 1] == trailingCharacter)
+            {
+                return path;
+            }
+
+            return path + trailingCharacter;
+        }
 
         private static IEnumerable<string> RemoveAttribute(this IEnumerable<string> files, FileAttributes attribute)
         {
