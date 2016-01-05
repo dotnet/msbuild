@@ -102,9 +102,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
             // ILC SDK Libs
             var SDKLibs = IlcSdkLibMap[config.NativeMode];
+            var IlcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
             foreach (var lib in SDKLibs)
             {
-                var sdkLibPath = Path.Combine(config.IlcSdkPath, lib);
+                var sdkLibPath = Path.Combine(IlcSdkLibPath, lib);
                 argsList.Add($"\"{sdkLibPath}\"");
             }
 

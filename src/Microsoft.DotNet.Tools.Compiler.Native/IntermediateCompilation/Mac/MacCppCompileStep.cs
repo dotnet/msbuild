@@ -67,9 +67,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Flags
             argsList.Add(cflags);
 
-            // TODO: Enable this when https://github.com/dotnet/cli/pull/469 goes through.
-            // var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
-            var ilcSdkIncPath = config.IlcSdkPath;
+            var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
             argsList.Add("-I");
             argsList.Add($"\"{ilcSdkIncPath}\"");
 
@@ -87,9 +85,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
             
             // ILC SDK Libs
+            var IlcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
             foreach (var lib in IlcSdkLibs)
             {
-                var libPath = Path.Combine(config.IlcSdkPath, lib);
+                var libPath = Path.Combine(IlcSdkLibPath, lib);
 
                 // Forward the library to linked to the linker
                 argsList.Add("-Xlinker");

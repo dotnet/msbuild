@@ -68,10 +68,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             argsList.Add("/c");
             
             // Add Includes
-            // 
-            // TODO: Enable this when https://github.com/dotnet/cli/pull/469 goes through.
-            // var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
-            var ilcSdkIncPath = config.IlcSdkPath;
+            var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
             argsList.Add("/I");
             argsList.Add($"\"{ilcSdkIncPath}\"");
             
