@@ -2,13 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.ProjectModel;
-using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.Linq;
 using NuGet.Frameworks;
 
-namespace Microsoft.Dotnet.Cli.Compiler.Common
+namespace Microsoft.DotNet.Cli.Compiler.Common
 {
     public class AssemblyInfoOptions
     {

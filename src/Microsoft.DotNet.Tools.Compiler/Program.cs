@@ -6,12 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
-using Microsoft.Dotnet.Cli.Compiler.Common;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Compiler.Common;
-using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Utilities;
@@ -348,9 +344,9 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (success && !args.NoHostValue && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
-                MakeRunnable(runtimeContext,
-                             outputPath,
-                             libraryExporter);
+                var projectContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
+                projectContext
+                    .MakeCompilationOutputRunnable(outputPath, args.ConfigValue);
             }
 
             return PrintSummary(diagnostics, sw, success);
@@ -380,133 +376,11 @@ namespace Microsoft.DotNet.Tools.Compiler
             return Path.Combine(outputPath, project.Name + outputExtension);
         }
 
-        private static void CleanOrCreateDirectory(string path)
-        {
-            if (Directory.Exists(path))
-            {
-                try
-                {
-                    Directory.Delete(path, recursive: true);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Unable to remove directory: " + path);
-                    Console.WriteLine(e.Message);
-                }
-            }
-
-            Directory.CreateDirectory(path);
-        }
-
-        private static void MakeRunnable(ProjectContext runtimeContext, string outputPath, LibraryExporter exporter)
-        {
-            CopyContents(runtimeContext, outputPath);
-
-            if (runtimeContext.TargetFramework.IsDesktop())
-            {
-                // On desktop we need to copy dependencies since we don't own the host
-                foreach (var export in exporter.GetDependencies())
-                {
-                    CopyExport(outputPath, export);
-                }
-
-                GenerateBindingRedirects(runtimeContext, outputPath, exporter);
-            }
-            else
-            {
-                EmitHost(runtimeContext, outputPath, exporter);
-            }
-        }
-
-        private static void GenerateBindingRedirects(ProjectContext runtimeContext, string outputPath, LibraryExporter exporter)
-        {
-            var appConfigNames = new[] { "app.config", "App.config" };
-            XDocument baseAppConfig = null;
-
-            foreach (var appConfigName in appConfigNames)
-            {
-                var baseAppConfigPath = Path.Combine(runtimeContext.ProjectDirectory, appConfigName);
-
-                if (File.Exists(baseAppConfigPath))
-                {
-                    using (var fileStream = File.OpenRead(baseAppConfigPath))
-                    {
-                        baseAppConfig = XDocument.Load(fileStream);
-                        break;
-                    }
-                }
-            }
-
-            var generator = new BindingRedirectGenerator();
-            var appConfig = generator.Generate(exporter.GetAllExports(), baseAppConfig);
-
-            if (appConfig != null)
-            {
-                var path = Path.Combine(outputPath, runtimeContext.ProjectFile.Name + ".exe.config");
-                using (var stream = File.Create(path))
-                {
-                    appConfig.Save(stream);
-                }
-            }
-        }
-
+        
         private static void CopyExport(string outputPath, LibraryExport export)
         {
             CopyFiles(export.RuntimeAssemblies, outputPath);
             CopyFiles(export.NativeLibraries, outputPath);
-        }
-
-        private static void EmitHost(ProjectContext runtimeContext, string outputPath, LibraryExporter exporter)
-        {
-            // Write the Host information file (basically a simplified form of the lock file)
-            var lines = new List<string>();
-            foreach (var export in exporter.GetAllExports())
-            {
-                if (export.Library == runtimeContext.RootProject)
-                {
-                    continue;
-                }
-
-                if (export.Library is ProjectDescription)
-                {
-                    // Copy project dependencies to the output folder
-                    CopyFiles(export.RuntimeAssemblies, outputPath);
-                    CopyFiles(export.NativeLibraries, outputPath);
-                }
-                else
-                {
-                    lines.AddRange(GenerateLines(export, export.RuntimeAssemblies, "runtime"));
-                    lines.AddRange(GenerateLines(export, export.NativeLibraries, "native"));
-                }
-            }
-
-            File.WriteAllLines(Path.Combine(outputPath, runtimeContext.ProjectFile.Name + ".deps"), lines);
-
-            // Copy the host in
-            CopyHost(Path.Combine(outputPath, runtimeContext.ProjectFile.Name + Constants.ExeSuffix));
-        }
-
-        private static void CopyHost(string target)
-        {
-            var hostPath = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
-            File.Copy(hostPath, target, overwrite: true);
-        }
-
-        private static IEnumerable<string> GenerateLines(LibraryExport export, IEnumerable<LibraryAsset> items, string type)
-        {
-            return items.Select(item =>
-                EscapeCsv(export.Library.Identity.Type.Value) + "," +
-                EscapeCsv(export.Library.Identity.Name) + "," +
-                EscapeCsv(export.Library.Identity.Version.ToNormalizedString()) + "," +
-                EscapeCsv(export.Library.Hash) + "," +
-                EscapeCsv(type) + "," +
-                EscapeCsv(item.Name) + "," +
-                EscapeCsv(item.RelativePath) + ",");
-        }
-
-        private static string EscapeCsv(string input)
-        {
-            return "\"" + input.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
         }
 
         private static bool PrintSummary(List<DiagnosticMessage> diagnostics, Stopwatch sw, bool success = true)
@@ -660,49 +534,6 @@ namespace Microsoft.DotNet.Tools.Compiler
             foreach (var file in files)
             {
                 File.Copy(file.ResolvedPath, Path.Combine(outputPath, Path.GetFileName(file.ResolvedPath)), overwrite: true);
-            }
-        }
-
-        private static void CopyContents(ProjectContext context, string outputPath)
-        {
-            var sourceFiles = context.ProjectFile.Files.GetCopyToOutputFiles();
-            Copy(sourceFiles, context.ProjectDirectory, outputPath);
-        }
-
-        private static void Copy(IEnumerable<string> sourceFiles, string sourceDirectory, string targetDirectory)
-        {
-            if (sourceFiles == null)
-            {
-                throw new ArgumentNullException(nameof(sourceFiles));
-            }
-
-            sourceDirectory = EnsureTrailingSlash(sourceDirectory);
-            targetDirectory = EnsureTrailingSlash(targetDirectory);
-
-            foreach (var sourceFilePath in sourceFiles)
-            {
-                var fileName = Path.GetFileName(sourceFilePath);
-
-                var targetFilePath = sourceFilePath.Replace(sourceDirectory, targetDirectory);
-                var targetFileParentFolder = Path.GetDirectoryName(targetFilePath);
-
-                // Create directory before copying a file
-                if (!Directory.Exists(targetFileParentFolder))
-                {
-                    Directory.CreateDirectory(targetFileParentFolder);
-                }
-
-                File.Copy(
-                    sourceFilePath,
-                    targetFilePath,
-                    overwrite: true);
-
-                // clear read-only bit if set
-                var fileAttributes = File.GetAttributes(targetFilePath);
-                if ((fileAttributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-                {
-                    File.SetAttributes(targetFilePath, fileAttributes & ~FileAttributes.ReadOnly);
-                }
             }
         }
 

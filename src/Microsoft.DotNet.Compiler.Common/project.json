@@ -14,7 +14,7 @@
         "Microsoft.DotNet.Cli.Utils": {
             "type": "build",
             "version": "1.0.0-*"
-        },
+        }
     },
     "frameworks": {
         "dnxcore50": { }

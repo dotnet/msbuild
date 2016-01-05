@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
             get { return SharedPatternsGroup.SearchFiles(_projectDirectory).Distinct(); }
         }
 
-        public IEnumerable<string> GetCopyToOutputFiles(IEnumerable<string> additionalExcludePatterns = null)
+        public IEnumerable<string> GetContentFiles(IEnumerable<string> additionalExcludePatterns = null)
         {
             var patternGroup = new PatternGroup(ContentPatternsGroup.IncludePatterns,
                                                 ContentPatternsGroup.ExcludePatterns.Concat(additionalExcludePatterns ?? new List<string>()),

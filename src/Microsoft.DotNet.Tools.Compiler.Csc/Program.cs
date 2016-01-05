@@ -4,7 +4,6 @@
 using System;
 using System.CommandLine;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -13,7 +12,6 @@ using System.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.Dotnet.Cli.Compiler.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler.Csc
 {

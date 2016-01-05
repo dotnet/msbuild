@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
                     return fileNames.Contains(commandName + FileNameSuffixes.DotNet.Exe) &&
                            fileNames.Contains(commandName + FileNameSuffixes.DotNet.DynamicLib) &&
-                           fileNames.Contains(commandName + FileNameSuffixes.DotNet.Deps);
+                           fileNames.Contains(commandName + FileNameSuffixes.Deps);
                 });
 
             if (commandPackage == null) return null;
