@@ -47,7 +47,9 @@ namespace Microsoft.DotNet.Cli.Utils
         public static string GetCommandPath(string commandName, params string[] extensions)
         {
             if (!extensions.Any())
+            {
                 extensions = Env.ExecutableExtensions.ToArray();
+            }
 
             var commandPath = Env.SearchPaths.Join(
                 extensions,

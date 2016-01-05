@@ -11,9 +11,9 @@ namespace Microsoft.DotNet.ProjectModel
         {
             get
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return Windows;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return Linux;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return OSX;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { return Windows; }
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { return Linux; }
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) { return OSX; }
 
                 throw new InvalidOperationException("Unknown Platform");
             }

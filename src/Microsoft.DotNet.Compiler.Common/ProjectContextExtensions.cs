@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
             var appConfig = exporter.GetAllExports().GenerateBindingRedirects(baseAppConfig);
 
-            if (appConfig == null) return;
+            if (appConfig == null) { return; }
 
             var path = Path.Combine(outputPath, context.ProjectFile.Name + ".exe.config");
             using (var stream = File.Create(path))
