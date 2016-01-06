@@ -37,15 +37,9 @@ fi
 header "Compiling"
 $REPOROOT/scripts/compile/compile.sh
 
-# Skipping tests for centos
-# tracked by issue - https://github.com/dotnet/corefx/issues/5066
-if [ "$OSNAME" != "centos"  ]; then
-    # Run tests on the stage2 output
-    header "Testing stage2..."
-    DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $REPOROOT/scripts/test/runtests.sh
-else
-    header "Skipping tests on CentOS due to corefx issue 5066"
-fi
+# Run tests on the stage2 output
+header "Testing stage2..."
+DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $REPOROOT/scripts/test/runtests.sh
 
 header "Validating Dependencies"
 $REPOROOT/scripts/test/validate-dependencies.sh

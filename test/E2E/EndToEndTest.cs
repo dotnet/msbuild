@@ -50,6 +50,12 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [ActiveIssue(712, PlatformID.Windows | PlatformID.OSX | PlatformID.Linux)]
         public void TestDotnetBuildNativeRyuJit()
         {
+            if(IsCentOS())
+            {
+                Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
+                return;
+            }
+
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true);
 
             buildCommand.Execute().Should().Pass();
@@ -61,6 +67,12 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuildNativeCpp()
         {
+            if(IsCentOS())
+            {
+                Console.WriteLine("Skipping native compilation tests on CentOS - https://github.com/dotnet/cli/issues/453");
+                return;
+            }
+
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true);
 
             buildCommand.Execute().Should().Pass();
@@ -131,6 +143,21 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             result.Should().HaveStdOut(s_expectedOutput);
             result.Should().NotHaveStdErr();
             result.Should().Pass();
+        }
+
+        private bool IsCentOS()
+        {
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                const string OSIDFILE = "/etc/os-release";
+
+                if(File.Exists(OSIDFILE))
+                {
+                    return File.ReadAllText(OSIDFILE).ToLower().Contains("centos");
+                }
+            }
+
+            return false;
         }
     }
 }
