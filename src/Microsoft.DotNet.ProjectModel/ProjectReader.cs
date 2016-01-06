@@ -69,6 +69,7 @@ namespace Microsoft.DotNet.ProjectModel
         public static Project GetProject(string projectFile, ICollection<DiagnosticMessage> diagnostics, ProjectReaderSettings settings = null)
         {
             var name = Path.GetFileName(Path.GetDirectoryName(projectFile));
+
             using (var stream = new FileStream(projectFile, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 return new ProjectReader().ReadProject(stream, name, projectFile, diagnostics, settings);
@@ -156,6 +157,7 @@ namespace Microsoft.DotNet.ProjectModel
             project.EmbedInteropTypes = rawProject.ValueAsBoolean("embedInteropTypes", defaultValue: false);
 
             project.Dependencies = new List<LibraryRange>();
+            project.Tools = new List<LibraryRange>();
 
             // Project files
             project.Files = new ProjectFilesCollection(rawProject, project.ProjectDirectory, project.ProjectFilePath);
@@ -206,6 +208,13 @@ namespace Microsoft.DotNet.ProjectModel
                 project.Dependencies,
                 rawProject,
                 "dependencies",
+                isGacOrFrameworkReference: false);
+
+            PopulateDependencies(
+                project.ProjectFilePath,
+                project.Tools,
+                rawProject,
+                "tools",
                 isGacOrFrameworkReference: false);
 
             return project;

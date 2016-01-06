@@ -22,6 +22,7 @@ $Projects = @(
     "Microsoft.DotNet.Tools.New",
     "Microsoft.DotNet.Tools.Pack",
     "Microsoft.DotNet.Tools.Publish",
+    "dotnet-restore",
     "Microsoft.DotNet.Tools.Repl",
     "Microsoft.DotNet.Tools.Repl.Csi",
     "Microsoft.DotNet.Tools.Resgen",
@@ -92,8 +93,8 @@ _cmd "$RepoRoot\scripts\crossgen\crossgen_roslyn.cmd ""$OutputDir"""
 # Copy dnx into stage OutputDir
 cp -rec "$DnxRoot\" "$OutputDir\bin\dnx\"
 
-# Copy in the dotnet-restore script
-cp "$RepoRoot\scripts\dotnet-restore.cmd" "$OutputDir\bin\dotnet-restore.cmd"
+# Copy in the dotnet-dnx script
+cp "$RepoRoot\scripts\dotnet-dnx.cmd" "$OutputDir\bin\dotnet-dnx.cmd"
 
 # Copy in AppDeps
 $env:PATH = "$OutputDir\bin;$StartPath"

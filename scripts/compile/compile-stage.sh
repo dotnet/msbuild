@@ -35,6 +35,7 @@ PROJECTS=( \
     Microsoft.DotNet.Tools.Publish \
     Microsoft.DotNet.Tools.Repl \
     Microsoft.DotNet.Tools.Repl.Csi \
+    dotnet-restore \
     Microsoft.DotNet.Tools.Resgen \
     Microsoft.DotNet.Tools.Run \
     Microsoft.DotNet.Tools.Test \
@@ -102,9 +103,9 @@ chmod -R a+r $OUTPUT_DIR
 # Copy DNX in to OUTPUT_DIR
 cp -R $DNX_ROOT $OUTPUT_DIR/bin/dnx
 
-# Copy and CHMOD the dotnet-restore script
-cp $REPOROOT/scripts/dotnet-restore.sh $OUTPUT_DIR/bin/dotnet-restore
-chmod a+x $OUTPUT_DIR/bin/dotnet-restore
+# Copy and CHMOD the dotnet-dnx script
+cp $REPOROOT/scripts/dotnet-dnx.sh $OUTPUT_DIR/bin/dotnet-dnx
+chmod a+x $OUTPUT_DIR/bin/dotnet-dnx
 
 # No compile native support in centos yet
 # https://github.com/dotnet/cli/issues/453
