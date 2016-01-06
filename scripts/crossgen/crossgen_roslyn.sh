@@ -22,7 +22,7 @@ if [ -z "$RID" ]; then
 fi
 
 # Replace with a robust method for finding the right crossgen.exe
-CROSSGEN_UTIL=$HOME/.dnx/packages/runtime.$RID.Microsoft.NETCore.Runtime.CoreCLR/1.0.1-rc2-23616/tools/crossgen
+CROSSGEN_UTIL=$HOME/.dnx/packages/runtime.$RID.Microsoft.NETCore.Runtime.CoreCLR/1.0.1-rc2-23704/tools/crossgen
 
 cd $BIN_DIR
 

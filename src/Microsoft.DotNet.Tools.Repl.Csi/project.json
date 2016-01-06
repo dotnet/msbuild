@@ -5,7 +5,7 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23616",
+        "NETStandard.Library": "1.0.0-rc2-23704",
         
         "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta1-20151228-02",
 

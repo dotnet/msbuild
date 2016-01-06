@@ -5,7 +5,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23616",
+    "NETStandard.Library": "1.0.0-rc2-23704",
     "System.IO.Compression.ZipFile": "4.0.1-rc2-23616",
     
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",

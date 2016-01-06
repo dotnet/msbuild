@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 if(IsCentOS())
                 {
-                    return "centos.7.1-x64";
+                    return "centos.7-x64";
                 }
                 else if(IsUbuntu())
                 {
