@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal static class Env
+    public static class Env
     {
         private static IEnumerable<string> _searchPaths;
         private static IEnumerable<string> _executableExtensions;

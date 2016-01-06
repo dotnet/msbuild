@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Cli.Utils.CommandParsing
 {
-    internal struct Cursor
+    public struct Cursor
     {
         private readonly string _text;
         private readonly int _start;

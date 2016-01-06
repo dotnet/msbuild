@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal class AnsiConsole
+    public class AnsiConsole
     {
         private AnsiConsole(TextWriter writer, bool useConsoleColor)
         {

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils.CommandParsing
 {
-    internal class CommandGrammar : Grammar
+    public class CommandGrammar : Grammar
     {
         private CommandGrammar(Func<string, string> variable, bool preserveSurroundingQuotes)
         {

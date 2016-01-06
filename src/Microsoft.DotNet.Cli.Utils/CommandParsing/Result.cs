@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Cli.Utils.CommandParsing
 {
-    internal struct Result<TValue>
+    public struct Result<TValue>
     {
         public Result(TValue value, Cursor remainder)
             : this()

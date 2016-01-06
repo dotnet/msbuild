@@ -8,7 +8,7 @@ using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal static class ScriptExecutor
+    public static class ScriptExecutor
     {
         public static Command CreateCommandForScript(Project project, string scriptCommandLine, IDictionary<string, string> variables)
         {

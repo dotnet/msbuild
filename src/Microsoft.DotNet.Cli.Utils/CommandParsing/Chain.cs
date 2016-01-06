@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Cli.Utils.CommandParsing
 {
-    internal struct Chain<TLeft, TDown>
+    public struct Chain<TLeft, TDown>
     {
         public Chain(TLeft left, TDown down)
             : this()

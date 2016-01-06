@@ -11,10 +11,7 @@
         "System.CommandLine": "0.1.0-*",
         "Microsoft.CodeAnalysis.CSharp":  "1.1.1",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "Microsoft.DotNet.Cli.Utils": {
-            "type": "build",
-            "version": "1.0.0-*"
-        }
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*"
     },
     "frameworks": {
         "dnxcore50": { }

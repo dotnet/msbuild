@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Tools.Common
 {
-    internal static class PathUtility
+    public static class PathUtility
     {
         public static bool IsPlaceholderFile(string path)
         {

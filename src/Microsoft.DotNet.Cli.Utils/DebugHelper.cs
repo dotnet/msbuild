@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal static class DebugHelper
+    public static class DebugHelper
     {
         [Conditional("DEBUG")]
         public static void HandleDebugSwitch(ref string[] args)
