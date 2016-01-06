@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.ProjectModel;
 

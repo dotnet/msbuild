@@ -50,11 +50,6 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [ActiveIssue(712, PlatformID.Windows | PlatformID.OSX | PlatformID.Linux)]
         public void TestDotnetBuildNativeRyuJit()
         {
-            if(SkipForOS(OSPlatform.Linux, "https://github.com/dotnet/cli/issues/527"))
-            {
-                return;
-            }
-
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true);
 
             buildCommand.Execute().Should().Pass();
@@ -123,16 +118,6 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             new RestoreCommand().Execute("--quiet").Should().Pass();
 
             Directory.SetCurrentDirectory(currentDirectory);
-        }
-
-        private bool SkipForOS(OSPlatform os, string reason)
-        {
-            if (RuntimeInformation.IsOSPlatform(os))
-            {
-                Console.WriteLine("Skipping Test for reason: " + reason);
-                return true;
-            }
-            return false;
         }
 
         private void TestOutputExecutable(string outputDir, string executableName)
