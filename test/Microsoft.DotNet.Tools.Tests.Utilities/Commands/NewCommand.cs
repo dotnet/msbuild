@@ -5,17 +5,17 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class RestoreCommand : TestCommand
+    public sealed class NewCommand : TestCommand
     {
-        public RestoreCommand()
+        public NewCommand()
             : base("dotnet")
         {
 
         }
 
-        public override CommandResult Execute(string args="")
+        public override CommandResult Execute(string args = "")
         {
-            args = $"restore {args}";
+            args = $"new {args}";
             return base.Execute(args);
         }
     }

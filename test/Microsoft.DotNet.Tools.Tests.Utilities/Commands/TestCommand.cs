@@ -26,5 +26,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             return commandResult;
         }
+
+        public virtual CommandResult ExecuteWithCapturedOutput(string args)
+        {
+            Console.WriteLine($"Executing (Captured Output) - {_command} {args}");
+            var commandResult = Command.Create(_command, args)
+                .CaptureStdErr()
+                .CaptureStdOut()
+                .Execute();
+
+            return commandResult;
+        }
     }
 }

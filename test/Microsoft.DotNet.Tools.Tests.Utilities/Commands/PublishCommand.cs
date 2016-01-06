@@ -11,7 +11,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
 
-namespace Microsoft.DotNet.Tools.Publish.Tests
+namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public sealed class PublishCommand : TestCommand
     {

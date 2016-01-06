@@ -9,157 +9,128 @@ using System.Text;
 using Xunit;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Tools.Test.Utilities;
 
-namespace ConsoleApplication
+namespace Microsoft.DotNet.Tests.EndToEnd
 {
-    public class E2ETest
+    public class EndToEndTest : TestBase
     {
-        private static readonly string EXPECTED_OUTPUT = "Hello World!" + Environment.NewLine;
-        private static readonly string TESTDIR_NAME = "hellotest";
-        private static readonly string OUTPUTDIR_NAME = "testbin";
-
-        private static string RootPath { get; set; }
-        private string TestDirectory { get; set; }
-        private string OutputDirectory { get; set; }
+        private static readonly string s_expectedOutput = "Hello World!" + Environment.NewLine;
+        private static readonly string s_testdirName = "e2etestroot";
+        private static readonly string s_outputdirName = "testbin";
+        
         private string Rid { get; set; }
+        private string TestDirectory { get; set; }
+        private string TestProject { get; set; }
+        private string OutputDirectory { get; set; }
 
         public static void Main()
         {
             Console.WriteLine("Dummy Entrypoint.");
         }
        
-        public E2ETest()
+        public EndToEndTest()
         {
-            if (RootPath == null)
-            {
-                RootPath = Directory.GetCurrentDirectory();
-            }
-
-            TestDirectory = Path.Combine(RootPath, TESTDIR_NAME);
-            OutputDirectory = Path.Combine(RootPath, OUTPUTDIR_NAME);
+            TestSetup();
 
             Rid = RuntimeIdentifier.Current;
         }
 
         [Fact]
-        public void TestDotnetCompile()
+        public void TestDotnetBuild()
         {
-            TestSetup();
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory);
 
-            TestRunCommand("dotnet", $"build -o {OutputDirectory}");
-            TestOutputExecutable(OutputDirectory);
+            buildCommand.Execute().Should().Pass();
+
+            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
         }
 
         [Fact]
-        public void TestDotnetCompileNativeRyuJit()
+        [ActiveIssue(712, PlatformID.Windows | PlatformID.OSX | PlatformID.Linux)]
+        public void TestDotnetBuildNativeRyuJit()
         {
-            if(SkipForOS(OSPlatform.Linux, "https://github.com/dotnet/cli/issues/527"))
-            {
-                return;
-            }
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true);
 
-            TestSetup();
-
-            TestRunCommand("dotnet", $"build --native -o {OutputDirectory}");
+            buildCommand.Execute().Should().Pass();
 
             var nativeOut = Path.Combine(OutputDirectory, "native");
-            TestOutputExecutable(nativeOut);
+            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName());
         }
 
         [Fact]
-        public void TestDotnetCompileNativeCpp()
+        public void TestDotnetBuildNativeCpp()
         {
-            TestSetup();
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true);
 
-            TestRunCommand("dotnet", $"build --native --cpp -o {OutputDirectory}");
-            
+            buildCommand.Execute().Should().Pass();
+
             var nativeOut = Path.Combine(OutputDirectory, "native");
-            TestOutputExecutable(nativeOut);
+            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName());
         }
 
         [Fact]
         public void TestDotnetRun()
         {
-            TestSetup();
+            var runCommand = new RunCommand(TestProject);
 
-            TestRunCommand("dotnet", $"run");
+            runCommand.Execute()
+                .Should()
+                .Pass();
         }
         
         [Fact]
         public void TestDotnetPack()
         {
-            TestSetup();
+            var packCommand = new PackCommand(TestDirectory, output: OutputDirectory);
 
-            TestRunCommand("dotnet", $"pack");
+            packCommand.Execute()
+                .Should()
+                .Pass();
         }
 
         [Fact]
         public void TestDotnetPublish()
         {
-            TestSetup();
+            var publishCommand = new PublishCommand(TestProject, output: OutputDirectory);
+            publishCommand.Execute().Should().Pass();
 
-            TestRunCommand("dotnet", $"publish --framework dnxcore50 --runtime {Rid} -o {OutputDirectory}");
-            TestOutputExecutable(OutputDirectory);    
+            TestOutputExecutable(OutputDirectory, publishCommand.GetOutputExecutable());    
         }
 
         private void TestSetup()
         {
-            Directory.SetCurrentDirectory(RootPath);
+            var root = Temp.CreateDirectory();
 
-            CleanOrCreateDirectory(TestDirectory);
-            CleanOrCreateDirectory(OutputDirectory);
+            TestDirectory = root.CreateDirectory(s_testdirName).Path;
+            TestProject = Path.Combine(TestDirectory, "project.json");
+            OutputDirectory = Path.Combine(TestDirectory, s_outputdirName);
 
+            InitializeTestDirectory();   
+        }
+
+        private void InitializeTestDirectory()
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
             Directory.SetCurrentDirectory(TestDirectory);
 
-            TestRunCommand("dotnet", "new");
-            TestRunCommand("dotnet", "restore --quiet");
+            new NewCommand().Execute().Should().Pass();
+            new RestoreCommand().Execute("--quiet").Should().Pass();
+
+            Directory.SetCurrentDirectory(currentDirectory);
         }
 
-        private bool SkipForOS(OSPlatform os, string reason)
+        private void TestOutputExecutable(string outputDir, string executableName)
         {
-            if (RuntimeInformation.IsOSPlatform(os))
-            {
-                Console.WriteLine("Skipping Test for reason: " + reason);
-                return true;
-            }
-            return false;
-        }
-
-        private void TestRunCommand(string command, string args)
-        {
-            var result = Command.Create(command, args)
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .Execute();
-
-            Assert.Equal(0, result.ExitCode);
-        }
-
-        private void TestOutputExecutable(string outputDir)
-        {
-            var executableName = TESTDIR_NAME + Constants.ExeSuffix;
-
             var executablePath = Path.Combine(outputDir, executableName);
 
-            var result = Command.Create(executablePath, "")
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .Execute();
+            var executableCommand = new TestCommand(executablePath);
 
-            var outText = result.StdOut;
-            var errText = result.StdErr;
-            
-            Assert.Equal("", errText);
-            Assert.Equal(EXPECTED_OUTPUT, outText);
-        }
+            var result = executableCommand.ExecuteWithCapturedOutput("");
 
-        private void CleanOrCreateDirectory(string path)
-        {
-            if (Directory.Exists(path))
-            {
-                Directory.Delete(path, true);
-            }
-            Directory.CreateDirectory(path);
+            result.Should().HaveStdOut(s_expectedOutput);
+            result.Should().NotHaveStdErr();
+            result.Should().Pass();
         }
     }
 }
