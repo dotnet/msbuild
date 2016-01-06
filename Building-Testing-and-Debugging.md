@@ -22,6 +22,8 @@ To run the unit tests from Visual Studio:
 2. Open the Test menu -> Windows -> Test Explorer.
 3. Click Run All.
 
+To build MSBuild and run all unit tests, use `RebuildWithLocalMSBuild.cmd` as described in "Build and verify MSBuild" below. That is usually the best way to ensure that a change is ready to go.
+
 # Contributing
 Please see [Contributing Code](https://github.com/Microsoft/msbuild/wiki/Contributing-Code) for details on contributing changes back to the code. Please read this carefully and engage with us early to ensure work is not wasted.
 
