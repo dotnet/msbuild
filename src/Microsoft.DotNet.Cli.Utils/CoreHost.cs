@@ -1,10 +1,9 @@
 using System.IO;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 
-namespace Microsoft.DotNet.Cli.Compiler.Common
+namespace Microsoft.DotNet.Cli.Utils
 {
-    internal static class CoreHost
+    public static class CoreHost
     {
         internal static string _path;
 

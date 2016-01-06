@@ -59,6 +59,13 @@ $TestProjects | ForEach-Object {
 
 popd
 
+& $RepoRoot\scripts\test\package-command-test.ps1
+$exitCode = $LastExitCode
+if ($exitCode -ne 0) {
+    $failCount += 1
+    $failingTests += "package-command-test"
+}
+
 if ($failCount -ne 0) {
     Write-Host -ForegroundColor Red "The following tests failed."
     $failingTests | ForEach-Object {

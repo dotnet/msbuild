@@ -1,0 +1,21 @@
+﻿{
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23616",
+        "dotnet-hello": { "version": "1.0.0", "target": "package" }
+    },
+
+    "frameworks": {
+        "dnxcore50": { }
+    },
+
+    "testRunner": "must-be-specified-to-generate-deps",
+
+    "tools": {
+        "dotnet-hello": { "version": "2.0.0", "target": "package" }
+    }
+}

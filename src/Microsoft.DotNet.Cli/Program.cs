@@ -44,9 +44,25 @@ Common Commands:
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
+            try
+            {
+                return ProcessArgs(args);
+            }
+            catch (CommandUnknownException e)
+            {
+                Console.WriteLine(e.Message);
+
+                return 1;
+            }
+            
+        }
+
+        private static int ProcessArgs(string[] args)
+        {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
+
             var verbose = false;
-            var success = true;    
+            var success = true;
             var command = string.Empty;
             var lastArg = 0;
             for (; lastArg < args.Length; lastArg++)
@@ -77,7 +93,8 @@ Common Commands:
                     break;
                 }
             }
-            if (!success) {
+            if (!success)
+            {
                 PrintHelp();
                 return 1;
             }
@@ -89,7 +106,7 @@ Common Commands:
                 return RunHelpCommand(appArgs);
             }
 
-            return Command.Create("dotnet-" + command, appArgs, new NuGetFramework("DNXCore", Version.Parse("5.0")))
+            return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.DnxCore50)
                 .EnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString())
                 .EnvironmentVariable(CommandContext.Variables.AnsiPassThru, bool.TrueString)
                 .ForwardStdErr()

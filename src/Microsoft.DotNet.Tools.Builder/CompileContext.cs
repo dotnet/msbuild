@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Tools.Build
         {
             var pathCommands = CompilerUtil.GetCommandsInvokedByCompile(project)
                 .Select(commandName => Command.Create(commandName, "", project.TargetFramework))
-                .Where(c => Command.CommandResolutionStrategy.Path.Equals(c.ResolutionStrategy));
+                .Where(c => c.ResolutionStrategy.Equals(CommandResolutionStrategy.Path));
 
             foreach (var pathCommand in pathCommands)
             {

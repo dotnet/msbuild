@@ -9,6 +9,12 @@
     },
 
     "frameworks": {
-        "dnxcore50": { }
+      "dnxcore50": { }
+  },
+    "scripts": {
+        "postcompile": [
+            "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
+            "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
+        ]
     }
 }

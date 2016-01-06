@@ -6,7 +6,7 @@ using Microsoft.DotNet.ProjectModel.Compilation;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
-    internal static class LibraryExporterExtensions
+    public static class LibraryExporterExtensions
     {
         internal static void CopyProjectDependenciesTo(this LibraryExporter exporter, string path, params ProjectDescription[] except)
         {
@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 .CopyTo(path);
         }
 
-        internal static void WriteDepsTo(this IEnumerable<LibraryExport> exports, string path)
+        public static void WriteDepsTo(this IEnumerable<LibraryExport> exports, string path)
         {
             File.WriteAllLines(path, exports.SelectMany(GenerateLines));
         }

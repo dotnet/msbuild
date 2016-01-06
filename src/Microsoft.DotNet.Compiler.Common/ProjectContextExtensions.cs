@@ -202,10 +202,5 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 appConfig.Save(stream);
             }
         }
-        
-        public static string GetDepsPath(this ProjectContext context, string buildConfiguration)
-        {
-            return Path.Combine(context.GetOutputDirectoryPath(buildConfiguration), context.ProjectFile.Name + ".deps");
-        }
     }
 }

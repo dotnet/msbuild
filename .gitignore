@@ -262,3 +262,4 @@ _Pvt_Extensions
 # Exceptions
 # Build Scripts
 !scripts/build/
+test/PackagedCommands/Consumers/*/project.json

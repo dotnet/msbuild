@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
 using Microsoft.Extensions.DependencyModel;
@@ -349,6 +351,17 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, rids);
                 runtimeContext
                     .MakeCompilationOutputRunnable(outputPath, args.ConfigValue);
+            }
+            else if (!string.IsNullOrEmpty(context.ProjectFile.TestRunner))
+            {
+                var projectContext =
+                    ProjectContext.Create(context.ProjectDirectory, context.TargetFramework,
+                        new[] {RuntimeIdentifier.Current});
+                
+                projectContext
+                    .CreateExporter(args.ConfigValue)
+                    .GetDependencies(LibraryType.Package)
+                    .WriteDepsTo(Path.Combine(outputPath, projectContext.ProjectFile.Name + FileNameSuffixes.Deps));
             }
 
             return PrintSummary(diagnostics, sw, success);
