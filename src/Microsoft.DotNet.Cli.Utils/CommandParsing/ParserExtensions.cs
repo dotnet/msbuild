@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils.CommandParsing
 {
-    internal static class ParserExtensions
+    public static class ParserExtensions
     {
         public static Parser<Chain<T1, T2>> And<T1, T2>(this Parser<T1> parser1,
             Parser<T2> parser2)

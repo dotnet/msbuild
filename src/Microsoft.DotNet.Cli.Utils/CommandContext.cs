@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    internal static class CommandContext
+    public static class CommandContext
     {
-        internal static class Variables
+        public static class Variables
         {
             private static readonly string Prefix = "DOTNET_CLI_CONTEXT_";
-            internal static readonly string Verbose = Prefix + "VERBOSE";
-            internal static readonly string AnsiPassThru = Prefix + "ANSI_PASS_THRU";
+            public static readonly string Verbose = Prefix + "VERBOSE";
+            public static readonly string AnsiPassThru = Prefix + "ANSI_PASS_THRU";
         }
 
         private static Lazy<bool> _verbose = new Lazy<bool>(() => GetBool(Variables.Verbose));

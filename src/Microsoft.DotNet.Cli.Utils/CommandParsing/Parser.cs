@@ -3,5 +3,5 @@
 
 namespace Microsoft.DotNet.Cli.Utils.CommandParsing
 {
-    internal delegate Result<TValue> Parser<TValue>(Cursor cursor);
+    public delegate Result<TValue> Parser<TValue>(Cursor cursor);
 }

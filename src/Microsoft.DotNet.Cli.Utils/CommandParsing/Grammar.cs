@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils.CommandParsing
 {
-    internal class Grammar
+    public class Grammar
     {
         protected static Parser<IList<TValue>> Rep1<TValue>(Parser<TValue> parser)
         {
