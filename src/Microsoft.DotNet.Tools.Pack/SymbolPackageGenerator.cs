@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.Tools.Common;
 using NuGet;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.DotNet.Tools.Pack;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
     public class SymbolPackageGenerator: PackageGenerator
     {
-        public SymbolPackageGenerator(Project project, string configuration, string outputPath) : base(project, configuration, outputPath)
+        public SymbolPackageGenerator(Project project, string configuration, ArtifactPathsCalculator artifactPathsCalculator) 
+            : base(project, configuration, artifactPathsCalculator)
         {
         }
 
@@ -24,18 +25,21 @@ namespace Microsoft.DotNet.Tools.Compiler
         {
             base.ProcessContext(context);
 
-            var outputPath = GetOutputPath(context);
-            TryAddOutputFile(context, outputPath, $"{Project.Name}.pdb");
-            TryAddOutputFile(context, outputPath, $"{Project.Name}.mdb");
+            var inputFolder = ArtifactPathsCalculator.InputPathForContext(context);
+            TryAddOutputFile(context, inputFolder, $"{Project.Name}.pdb");
+            TryAddOutputFile(context, inputFolder, $"{Project.Name}.mdb");
         }
 
         protected override bool GeneratePackage(string nupkg, List<DiagnosticMessage> packDiagnostics)
         {
             foreach (var path in Project.Files.SourceFiles)
             {
-                var srcFile = new PhysicalPackageFile();
-                srcFile.SourcePath = path;
-                srcFile.TargetPath = Path.Combine("src", Common.PathUtility.GetRelativePath(Project.ProjectDirectory, path));
+                var srcFile = new PhysicalPackageFile
+                {
+                    SourcePath = path,
+                    TargetPath = Path.Combine("src", Common.PathUtility.GetRelativePath(Project.ProjectDirectory, path))
+                };
+
                 PackageBuilder.Files.Add(srcFile);
             }
             return base.GeneratePackage(nupkg, packDiagnostics);
