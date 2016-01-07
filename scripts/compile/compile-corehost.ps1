@@ -26,11 +26,16 @@ try {
     if (!(Test-Path $HostDir)) {
         mkdir $HostDir | Out-Null
     }
-    cp "$RepoRoot\src\corehost\cmake\$Rid\$Configuration\corehost.exe" $HostDir
+    cp "$RepoRoot\src\corehost\cmake\$Rid\cli\$Configuration\corehost.exe" $HostDir
+    cp "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$Configuration\clihost.dll" $HostDir
 
-    if (Test-Path "$RepoRoot\src\corehost\cmake\$Rid\$Configuration\corehost.pdb")
+    if (Test-Path "$RepoRoot\src\corehost\cmake\$Rid\cli\$Configuration\corehost.pdb")
     {
-        cp "$RepoRoot\src\corehost\cmake\$Rid\$Configuration\corehost.pdb" $HostDir
+        cp "$RepoRoot\src\corehost\cmake\$Rid\cli\$Configuration\corehost.pdb" $HostDir
+    }
+    if (Test-Path "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$Configuration\clihost.pdb")
+    {
+        cp "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$Configuration\clihost.pdb" $HostDir
     }
 } finally {
     popd
