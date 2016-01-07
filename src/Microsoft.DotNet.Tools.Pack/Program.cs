@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             app.Description = "Packager for the .NET Platform";
             app.HelpOption("-h|--help");
 
-            var input = app.Option("-i|--input <INPUT_DIR>", "Directory from where the assets to be packages are going to be picked up", CommandOptionType.SingleValue);
+            var basePath = app.Option("-b|--basepath <BASE_PATH>", "Directory from where the assets to be packaged are going to be picked up", CommandOptionType.SingleValue);
             var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
             var intermediateOutput = app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
@@ -63,13 +63,13 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var contexts = ProjectContext.CreateContextForEachFramework(pathValue, settings);
 
                 var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
-                var inputValue = input.Value();
+                var basePathValue = basePath.Value();
                 var outputValue = output.Value();
                 var intermediateOutputValue = intermediateOutput.Value();
 
                 var project = contexts.First().ProjectFile;
 
-                var artifactPathsCalculator = new ArtifactPathsCalculator(project, inputValue, outputValue, configValue);
+                var artifactPathsCalculator = new ArtifactPathsCalculator(project, basePathValue, outputValue, configValue);
                 var buildProjectCommand = new BuildProjectCommand(project, artifactPathsCalculator, intermediateOutputValue, configValue);
                 var packageBuilder = new PackagesGenerator(contexts, artifactPathsCalculator, configValue);
 
