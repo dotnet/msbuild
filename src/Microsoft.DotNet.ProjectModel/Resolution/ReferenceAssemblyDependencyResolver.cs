@@ -38,19 +38,14 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 return null;
             }
 
-            if (version == null || version.Version == assemblyVersion)
-            {
-                return new LibraryDescription(
-                    new LibraryIdentity(libraryRange.Name, new NuGetVersion(assemblyVersion), LibraryType.ReferenceAssembly),
-                    string.Empty, // Framework assemblies don't have hashes
-                    path,
-                    Enumerable.Empty<LibraryRange>(),
-                    targetFramework,
-                    resolved: true,
-                    compatible: true);
-            }
-
-            return null;
+            return new LibraryDescription(
+                new LibraryIdentity(libraryRange.Name, new NuGetVersion(assemblyVersion), LibraryType.ReferenceAssembly),
+                string.Empty, // Framework assemblies don't have hashes
+                path,
+                Enumerable.Empty<LibraryRange>(),
+                targetFramework,
+                resolved: true,
+                compatible: true);
         }
     }
 }
