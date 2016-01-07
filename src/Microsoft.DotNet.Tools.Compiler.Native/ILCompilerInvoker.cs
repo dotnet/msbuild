@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             argsList.Add($"\"{inputFilePath}\"");
             
             // System.Private.CoreLib Reference
-            var coreLibPath = Path.Combine(config.IlcSdkPath, "sdk", "System.Private.CoreLib.dll");
+            var coreLibPath = Path.Combine(config.IlcSdkPath, "sdk", "*.dll");
             argsList.Add($"-r \"{coreLibPath}\"");
             
             // AppDep References
