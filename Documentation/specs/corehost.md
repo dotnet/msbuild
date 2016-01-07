@@ -29,31 +29,9 @@ Paths in this file are **always** specified using `/`, even on Windows. They mus
 
 This index is loaded when needed during the Resolution Process (see below).
 
-### Dependencies File
+### Runtime Configuration File
 
-The `.deps` file is a file located alongside the native host. It is stored in a CSV format, with header, of the following format:
-
-```
-LibraryType,LibraryName,LibraryVersion,LibraryHash,AssetType,AssetName,AssetRelativePath,AssetServicable
-"Package","Microsoft.CodeAnalysis.Common","1.2.0-beta-20151117-04","sha512-4O3f1iRswbWDz70AGTk0tBA1ivslJUuq37FSx4d0+ZuoBFxNO4oY7ReJgndOJYefaxeTMsCVHSVHJMYOJJphtQ==","runtime","Microsoft.CodeAnalysis","lib/portable-net45+win8/Microsoft.CodeAnalysis.dll","true"
-"Package","Microsoft.CodeAnalysis.Common","1.2.0-beta-20151117-04","sha512-4O3f1iRswbWDz70AGTk0tBA1ivslJUuq37FSx4d0+ZuoBFxNO4oY7ReJgndOJYefaxeTMsCVHSVHJMYOJJphtQ==","resources","Microsoft.CodeAnalysis","lib/portable-net45+win8/fr-FR/Microsoft.CodeAnalysis.resources.dll","false"
-```
-
-Fields:
-
-* `LibraryType` -> The type of Library that provides the Asset. Currently always `Package` (other Library types include Projects and Framework Assemblies but these aren't relevant to `corehost`)
-* `LibraryName` -> The name of the Library that provides the Asset. For a Package, this is the Package ID
-* `LibraryVersion` -> The version of the Library that provides the Asset. For a Package, this is the Package Version
-* `LibraryHash` -> The hash of the Library that provides the Asset. For a Package, this is a hash of the `.nupkg` file. The format is `[algorithm]-[base64-encoded hash]` where `[algorithm]` must always be `sha512` (in the current version)
-* `AssetType` -> The type of the Asset within the Library. `corehost` recognizes two types: `runtime` and `native`, representing Managed Assemblies and Native Libraries respectively. These names are designed to mirror the names in `project.lock.json`.
-* `AssetName` -> The base name of the Asset. This is generally just the file name, without the extension (also removing "sub-extensions" like `ni` for native images of managed assemblies)
-* `AssetRelativePath` -> The relative path to the Asset file within the root of the package in the packages cache. Entries for localized resources will have the culture specific folder as the last directory in the relative path (i.e. `fr-FR/Foo.resources.dll`). See "Satellite Assemblies" below for more details. As with the servicing file, paths in this file **always** use `/` as a directory separator.
-* `AssetServicable` -> Indicates if the asset is servicable. `true` indicates that it is servicable, `false` indicates that it is not
-
-A few notes about the format:
-
-* The current code does not include the header, this is being changed.
-* All fields MUST be quoted (for simplicity), even if they don't contain a ','
+The runtime configuration file is used to determine settings to apply to the runtime during initialization and for building the TPA and Native Library Search Path lists. See the [spec for the runtime configuration file](runtime-configuration-file.md) for more information.
 
 ### Files in the application folder
 
@@ -66,7 +44,7 @@ Only assemblies listed in the dependencies file can be resolved from a package c
 * `DOTNET_PACKAGES` - The primary package cache. If not set, defaults to `$HOME/.nuget/packages` on Unix or `%LOCALAPPDATA%\NuGet\Packages` (TBD) on Windows. **NOTE**: Currently the host uses different folders as we are still coordinating with NuGet to get the directories right (there are compat considerations). Currently we always use `$HOME/.dnx/packages`(Unix)/`%USERPROFILE%\.dnx\packages`(Win).
 * `DOTNET_PACKAGES_CACHE` - The secondary cache. This is used by shared hosters (such as Azure) to provide a cache of pre-downloaded common packages on a faster disk. If not set, it is not used.
 
-Given the Package ID, Package Version, Package Hash and Asset Relative Path provided in the dependencies file, **and the assembly is not serviced** (see the full resolution algorithm below) resolution proceeds as follows (Unix-style paths will be used for convenience but these variables and paths all apply to Windows as well):
+Given the Package ID, Package Version, Package Hash and Asset Relative Path provided in the runtime configuration file, **and the assembly is not serviced** (see the full resolution algorithm below) resolution proceeds as follows (Unix-style paths will be used for convenience but these variables and paths all apply to Windows as well):
 
 1. If `DOTNET_PACKAGES_CACHE` is non-empty, read the file `$DOTNET_PACKAGES_CACHE/[Package ID]/[Package Version]/[Package Id].[Package Version].nupkg.sha512` if present. If the file is present and the content matches the `[Package Hash]` value from the dependencies file. Use that location as the Package Root and go to 3
 2. Using `DOTNET_PACKAGES`, or it's default value, use `$DOTNET_PACKAGES/[Package ID]/[Package Version]` as the Package Root
@@ -74,19 +52,19 @@ Given the Package ID, Package Version, Package Hash and Asset Relative Path prov
 
 ## Assembly Resolution
 
-During host start-up, the host identifies if a `.deps` file is present and loads it. It also scans the files located in the Application Base and determines the assembly name for each (using the file name). It builds a set of assembly names to be loaded by the union of the assembly names listed in `.deps` file and the assemblies located in the Application Base.
+During host start-up, the host identifies if a runtime configuration file is present and loads it. It also scans the files located in the Application Base and determines the assembly name for each (using the file name). It builds a set of assembly names to be loaded by the union of the assembly names listed in runtime configuration file and the assemblies located in the Application Base.
 
-A `.deps` file is **not** required to successfully launch an application, but without it, all the dependent assemblies must be located within the same folder as the application. Also, since servicing is performed on the basis of packages, an application without a `.deps` file cannot use the servicing index to override the location of assemblies.
+A runtime configuration file is **not** required to successfully launch an application, but without it, all the dependent assemblies must be located within the same folder as the application. Also, since servicing is performed on the basis of packages, an application without a runtime configuration file file cannot use the servicing index to override the location of assemblies.
 
 The host looks for the `.deps` file in the Application Base with the file name `[AssemblyName].deps`. The path to the deps file can be overriden by specifying `--depsfile:{path to deps file}` as the first parameter to the application.
 
 Given the set of assembly names, the host performs the following resolution. In some steps, the Package ID/Version/Relative Path data is required. This is only available if the assembly was listed in the deps file. If the assembly comes from the app-local folder, these resolution steps are skipped.
 
-1. If there is an entry in the servicing index for the Package ID/Version/Relative Path associated with the assembly, the Servicing Root is concatenated with the New Asset Path from the index and used as the Assembly Path. This occurs **even if the assembly is also located app-local**, as long as it is also in the `.deps` file.
+1. If there is an entry in the servicing index for the Package ID/Version/Relative Path associated with the assembly, the Servicing Root is concatenated with the New Asset Path from the index and used as the Assembly Path. This occurs **even if the assembly is also located app-local**, as long as it is also in the runtime configuration file.
 2. If there is a file in the Application Base with the file name `[AssemblyName].dll`, `[AssemblyName].ni.dll`, `[AssemblyName].exe`, or `[AssemblyName].ni.exe` (in that order), it its full path is used as the Assembly Path
 3. The Assembly Path is resolved out of the Package Caches using the algorithm above (in 'Files from package caches').
 
-A similar process is used to produce a list of Native Library Paths. Native libraries are listed in the `.deps` file (marked with a special `native` type token) and searched in the same way as managed assemblies (Servicing, then app-local, then package caches). The main exception is that the app-local file extensions vary by platform (`.dll` on Windows, `.so` on Linux, `.dylib` on Mac OS X)
+A similar process is used to produce a list of Native Library Paths. Native libraries are listed in the runtime configuration file (under the `native` asset section) and searched in the same way as managed assemblies (Servicing, then app-local, then package caches). The main exception is that the app-local file extensions vary by platform (`.dll` on Windows, `.so` on Linux, `.dylib` on Mac OS X)
 
 Once a the list of assemblies and native libraries is produced, the host will check for duplicates. If both an `.ni.dll`/`.ni.exe` image and a `.dll`/`.exe` assembly are found for an assembly, the native image will be preferred and the IL-only assembly will be removed. The presence of two different paths for the same assembly name will be considered an error. The managed assemblies are provided in the Trusted Platform Assemblies (TPA) list for the CoreCLR during startup. The folder paths for each native library are deduplicated and provided in the Native Search Paths list for the CoreCLR during startup.
 
