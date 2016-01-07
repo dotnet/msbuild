@@ -12,7 +12,7 @@ $ErrorActionPreference="Stop"
 
 . "$PSScriptRoot\..\common\_common.ps1"
 
-_ "$RepoRoot\scripts\build\generate-version.ps1"
+. "$RepoRoot\scripts\build\generate-version.ps1"
 
 header "Building dotnet tools version $($env:DOTNET_BUILD_VERSION) - $Configuration"
 header "Checking Pre-Reqs"
