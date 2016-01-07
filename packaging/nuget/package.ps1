@@ -26,7 +26,8 @@ $Projects = @(
     "Microsoft.DotNet.ProjectModel.Workspaces",
     "Microsoft.DotNet.Runtime",
     "Microsoft.Extensions.Testing.Abstractions",
-    "Microsoft.DotNet.ProjectModel.Loader"
+    "Microsoft.DotNet.ProjectModel.Loader",
+    "Microsoft.Extensions.DependencyModel"
 )
 
 foreach ($ProjectName in $Projects) {
