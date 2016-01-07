@@ -1,7 +1,8 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
@@ -26,8 +27,8 @@ namespace Microsoft.Extensions.DependencyModel
 
             return new DependencyContext(target.DotNetFrameworkName, runtime,
                 GetCompilationOptions(compilerOptions),
-                GetLibraries(dependencies, dependencyLookup, target, configuration, export => export.CompilationAssemblies),
-                GetLibraries(dependencies, dependencyLookup, target, configuration, export => export.RuntimeAssemblies));
+                GetLibraries(dependencies, dependencyLookup, target, configuration, runtime: false).Cast<CompilationLibrary>().ToArray(),
+                GetLibraries(dependencies, dependencyLookup, target, configuration, runtime: true).Cast<RuntimeLibrary>().ToArray());
         }
 
         private static CompilationOptions GetCompilationOptions(CommonCompilerOptions compilerOptions)
@@ -44,25 +45,27 @@ namespace Microsoft.Extensions.DependencyModel
                 compilerOptions.EmitEntryPoint);
         }
 
-        private static Library[] GetLibraries(IEnumerable<LibraryExport> dependencies,
+        private static IEnumerable<Library> GetLibraries(IEnumerable<LibraryExport> dependencies,
             IDictionary<string, Dependency> dependencyLookup,
             NuGetFramework target,
             string configuration,
-            Func<LibraryExport, IEnumerable<LibraryAsset>> assemblySelector)
+            bool runtime)
         {
-            return dependencies.Select(export => GetLibrary(export, target, configuration, assemblySelector(export), dependencyLookup)).ToArray();
+            return dependencies.Select(export => GetLibrary(export, target, configuration, runtime, dependencyLookup));
         }
 
         private static Library GetLibrary(LibraryExport export,
             NuGetFramework target,
             string configuration,
-            IEnumerable<LibraryAsset> libraryAssets,
+            bool runtime,
             IDictionary<string, Dependency> dependencyLookup)
         {
             var type = export.Library.Identity.Type.Value.ToLowerInvariant();
 
             var serviceable = (export.Library as PackageDescription)?.Library.IsServiceable ?? false;
             var libraryDependencies = new List<Dependency>();
+
+            var libraryAssets = runtime ? export.RuntimeAssemblies : export.CompilationAssemblies;
 
             foreach (var libraryDependency in export.Library.Dependencies)
             {
@@ -89,15 +92,30 @@ namespace Microsoft.Extensions.DependencyModel
                 assemblies = libraryAssets.Select(libraryAsset => libraryAsset.RelativePath).ToArray();
             }
 
-            return new Library(
-                type,
-                export.Library.Identity.Name,
-                export.Library.Identity.Version.ToString(),
-                export.Library.Hash,
-                assemblies,
-                libraryDependencies.ToArray(),
-                serviceable
-                );
+            if (runtime)
+            {
+                return new RuntimeLibrary(
+                    type,
+                    export.Library.Identity.Name,
+                    export.Library.Identity.Version.ToString(),
+                    export.Library.Hash,
+                    assemblies,
+                    libraryDependencies.ToArray(),
+                    serviceable
+                    );
+            }
+            else
+            {
+                return new CompilationLibrary(
+                    type,
+                    export.Library.Identity.Name,
+                    export.Library.Identity.Version.ToString(),
+                    export.Library.Hash,
+                    assemblies,
+                    libraryDependencies.ToArray(),
+                    serviceable
+                   );
+            }
         }
     }
 }
