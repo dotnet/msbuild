@@ -18,12 +18,12 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-if [ "$UNAME" != "Linux" ]; then
-    error "Debian Package build only supported on Linux"
+if [ "$OSNAME" != "ubuntu" ]; then
+    error "Debian Package build only supported on Ubuntu"
     exit 1
 fi
 
-PACKAGING_ROOT=$REPOROOT/packaging/debian
+PACKAGING_ROOT="$REPOROOT/packaging/debian"
 
 OUTPUT_DIR="$REPOROOT/artifacts"
 PACKAGE_LAYOUT_DIR="$OUTPUT_DIR/deb_intermediate"
@@ -32,10 +32,26 @@ TEST_STAGE_DIR="$PACKAGE_OUTPUT_DIR/test"
 REPO_BINARIES_DIR="$REPOROOT/artifacts/ubuntu.14.04-x64/stage2"
 MANPAGE_DIR="$REPOROOT/Documentation/manpages"
 
+NIGHTLY_PACKAGE_NAME="dotnet-nightly"
+RELEASE_PACKAGE_NAME="dotnet"
+
 execute_build(){
+    determine_package_name
     create_empty_debian_layout
     copy_files_to_debian_layout
     create_debian_package
+}
+
+determine_package_name(){
+    if [[ "$RELEASE_SUFFIX" == "dev" ]]; then
+        DOTNET_DEB_PACKAGE_NAME=$NIGHTLY_PACKAGE_NAME
+    elif [[ "beta rc1 rc2 rtm" =~ (^| )"$RELEASE_SUFFIX"($| ) ]]; then
+        DOTNET_DEB_PACKAGE_NAME=$RELEASE_PACKAGE_NAME
+    elif [[ "$RELEASE_SUFFIX" == "" ]]; then
+        DOTNET_DEB_PACKAGE_NAME=$RELEASE_PACKAGE_NAME
+    else
+        DOTNET_DEB_PACKAGE_NAME=$NIGHTLY_PACKAGE_NAME
+    fi
 }
 
 execute_test(){
@@ -45,8 +61,8 @@ execute_test(){
 create_empty_debian_layout(){
     header "Creating empty debian package layout"
 
-    rm -rf $PACKAGE_LAYOUT_DIR
-    mkdir -p $PACKAGE_LAYOUT_DIR
+    rm -rf "$PACKAGE_LAYOUT_DIR"
+    mkdir -p "$PACKAGE_LAYOUT_DIR"
 
     mkdir "$PACKAGE_LAYOUT_DIR/\$"
     mkdir "$PACKAGE_LAYOUT_DIR/package_root"
@@ -61,7 +77,7 @@ copy_files_to_debian_layout(){
     cp -a "$REPO_BINARIES_DIR/." "$PACKAGE_LAYOUT_DIR/package_root"
 
     # Copy config file
-    cp "$PACKAGING_ROOT/debian_config.json" "$PACKAGE_LAYOUT_DIR"
+    cp "$PACKAGING_ROOT/$DOTNET_DEB_PACKAGE_NAME-debian_config.json" "$PACKAGE_LAYOUT_DIR/debian_config.json"
 
     # Copy Manpages
     cp -a "$MANPAGE_DIR/." "$PACKAGE_LAYOUT_DIR/docs"
@@ -70,9 +86,9 @@ copy_files_to_debian_layout(){
 create_debian_package(){
     header "Packing .deb"
 
-    mkdir -p $PACKAGE_OUTPUT_DIR
+    mkdir -p "$PACKAGE_OUTPUT_DIR"
 
-    $PACKAGING_ROOT/package_tool/package_tool $PACKAGE_LAYOUT_DIR $PACKAGE_OUTPUT_DIR $DOTNET_BUILD_VERSION
+    "$PACKAGING_ROOT/package_tool/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_BUILD_VERSION -n $DOTNET_DEB_PACKAGE_NAME
 }
 
 test_debian_package(){
@@ -85,7 +101,7 @@ test_debian_package(){
 
     # E2E Testing of package surface area
     # Disabled: https://github.com/dotnet/cli/issues/381
-    #run_e2e_test
+    # run_e2e_test
 }
 
 run_e2e_test(){

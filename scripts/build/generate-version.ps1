@@ -3,17 +3,15 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-#. "$PSScriptRoot\..\common\_common.ps1"
+$ReleaseSuffix = "dev"
+$MajorVersion = 1
+$MinorVersion = 0
+$PatchVersion = 0
 
-# Get the timestamp of the most recent commit
-$timestamp = git log -1 --format=%ct
-$commitTime = [timespan]::FromSeconds($timestamp)
+#TODO @krwq is working on this
+$CommitCountVersion = 0
 
-$majorVersion = 1
-$minorVersion = 0
-$buildnumber = 0
-$revnumber = $commitTime.TotalSeconds
+# Zero Padded Suffix for use with Nuget
+$VersionSuffix = "$ReleaseSuffix-{0:D6}" -f $CommitCountVersion
 
-$VersionSuffix = "dev-$revnumber"
-
-$env:DOTNET_BUILD_VERSION = "$majorVersion.$minorVersion.$buildnumber.$revnumber"
+$env:DOTNET_BUILD_VERSION = "$MajorVersion.$MinorVersion.$PatchVersion.$CommitCountVersion"

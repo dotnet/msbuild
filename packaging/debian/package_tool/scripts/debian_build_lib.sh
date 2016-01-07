@@ -14,7 +14,6 @@
 # Summary: Writes the contents of the "install_placement" array to the debian/install
 #   This array is populated by calls to the "add_system_file_placement" function
 # Usage: write_debian_install_file
-
 write_debian_install_file(){
     # Remove any existing install file, we need to overwrite it
     rm -f ${PACKAGE_SOURCE_DIR}/debian/install

@@ -1,0 +1,54 @@
+{
+    "maintainer_name":"Microsoft",
+    "maintainer_email": "dotnetcore@microsoft.com",        
+
+    "package_name": "dotnet-nightly",                           
+
+    "short_description": "Unstable Developer Build of .NET Core & command line tools",              
+    "long_description": "Unstable Developer Build of .NET Core is a cross-platform implementation of .NET Framework, a modern, modular platform\n for building diverse kinds of applications, from command-line applications to microservices and \n modern websites.\n This package contains the tools you will need to start writing applications for .NET Core. It includes \n compilers, package managers and other utilities that developers need.", 
+    "homepage": "https://dotnet.github.io/core",                        
+
+    "release":{
+        "package_version":"0.0.0.0",                               
+        "package_revision":"1",                                 
+        "urgency" : "low",                                      
+        "changelog_message" : "Bootstrap loop package"                
+    },
+
+    "control": {                                               
+        "priority":"standard",                                  
+        "section":"devel",                                      
+        "architecture":"any"                                    
+    },
+
+    "copyright": "2015 Microsoft",                              
+    "license": {                                                
+        "type": "MIT",                                 
+        "full_text": "Copyright (c) 2015 Microsoft\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE."
+    },
+
+    "debian_dependencies":{
+        "libssl-dev" : {},
+        "clang-3.5" : {},
+        "libcurl3" : {}
+    },
+
+    "package_conflicts" : [
+        "dotnet"
+    ],
+
+    "symlinks": {
+        "bin/dotnet" : "usr/bin/dotnet",
+        "bin/dotnet-compile" : "usr/bin/dotnet-compile",
+        "bin/dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
+        "bin/dotnet-compile-fsc" : "usr/bin/dotnet-compile-fsc",
+        "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native",
+        "bin/dotnet-new": "usr/bin/dotnet-new",
+        "bin/dotnet-publish" : "usr/bin/dotnet-publish",
+        "bin/dotnet-repl" : "usr/bin/dotnet-repl",
+        "bin/dotnet-repl-csi" : "usr/bin/dotnet-repl-csi",
+        "bin/dotnet-restore" : "usr/bin/dotnet-restore",
+        "bin/dotnet-test" : "usr/bin/dotnet-test",
+        "bin/dotnet-resgen" : "usr/bin/dotnet-resgen"
+    }
+}

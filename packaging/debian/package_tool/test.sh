@@ -24,7 +24,7 @@ run_integration_tests(){
     mkdir -p $output_dir
 
     # Build the actual package
-    $DIR/package_tool $input_dir $output_dir
+    $DIR/package_tool -i $input_dir -o $output_dir
 
     # Integration Test Entrypoint placed by package_tool
     bats $output_dir/test_package.bats
