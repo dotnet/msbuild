@@ -5,7 +5,7 @@ Incremental compilation is unsafe when compilation relies on tools with potentia
 
 The presence of such cases will turn off incremental compilation.
 
-Warning codes for project structures that are unsafe:
+The following represent warning codes printed by CLI when the project structure is unsafe for incremental build and advice on how to address them:
 
 - __[Pre / Post scripts]__: Scripts that run before and after each compiler invocation can introduce side effects that could cause incremental compilation to output corrupt builds (not building when it should have built) or to over-build. Consider modifying the project structure to run these scripts before / after the entire compile process, not between compiler invocations.
 
