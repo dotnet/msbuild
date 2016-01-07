@@ -1,5 +1,5 @@
 % DOTNET-RUN(1)
-% Zlatko Knezevic
+% Zlatko Knezevic zlakne@microsoft.com
 % January 2016
 
 # NAME 
@@ -25,7 +25,7 @@ Output files, are written to the child `bin` folder, which will be created if it
 
 `DOTNET_HOME`
 
-    Points to the runtime that will be used to run the executable file that is dropped after compiling. Not needed for native compilation.  
+    Points to the base directory that contains the runtime and the binaries directories. The runtime will be used to run the executable file that is dropped after compiling. Not needed for native compilation.   
 
 # SEE ALSO
 

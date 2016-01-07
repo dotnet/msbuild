@@ -1,5 +1,5 @@
 % DOTNET-COMPILE(1)
-% Zlatko Knezevic
+% Zlatko Knezevic zlakne@microsoft.com
 % January 2016
 
 # NAME 
@@ -79,7 +79,7 @@ This command relies on the following artifacts: source files, project.json proje
 
 `DOTNET_HOME`
 
-    Points to the runtime that will be used to run the executable file that is dropped after compiling. Not needed for native compilation.  
-
+    Points to the base directory that contains the runtime and the binaries directories. The runtime will be used to run the executable file that is dropped after compiling. Not needed for native compilation.  
+    
 # SEE ALSO
 dotnet-restore(1), dotnet-publish(1), dotnet(1)

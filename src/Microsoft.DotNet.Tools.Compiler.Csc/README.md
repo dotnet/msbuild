@@ -5,7 +5,7 @@ dotnet-compile
 dotnet-compile -- Compiles source files for a single project to a binary format and saves to a target file.
 
 # SYNOPSIS
-`dotnet compile [--native] [--output] [--temp-output] [--framework] [--configuration] [--output] [--arch] [--cpp] [-ilc-args] [--verbose]`
+dotnet compile [--output] [--temp-output] [--framework] [--configuration] [--output] [--arch] [--verbose]
 
 # DESCRIPTION
 The compile command compiles source files from a single project to a binary file, either intermmediate language (IL) byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future. Users who want to benefit from incremental builds and who want to compile both the project and its dependencies should use the dotnet-build(1) command.

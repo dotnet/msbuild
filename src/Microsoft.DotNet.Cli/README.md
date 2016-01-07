@@ -1,5 +1,5 @@
 % DOTNET(1)
-% Zlatko Knezevic
+% Zlatko Knezevic zlakne@microsoft.com
 % January 2016
 
 # NAME
@@ -75,7 +75,7 @@ The following commands exist for dotnet.
 
 `DOTNET_HOME`
 
-    Points to the runtime that will be used to run the executable file that is dropped after compiling. Not needed for native compilation.  
+    Points to the base directory that contains the runtime and the binaries directories. The runtime will be used to run the executable file that is dropped after compiling. Not needed for native compilation.  
 
 `DOTNET_PACKAGES`
 
