@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
         private static int Run(string script, string targetFramework, string buildConfiguration, bool preserveTemporaryOutput, string projectPath, IEnumerable<string> remainingArguments)
         {
             var corerun = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
-            var csiExe = Path.Combine(AppContext.BaseDirectory, "csi.exe");
+            var csiExe = Path.Combine(AppContext.BaseDirectory, $"csi{Constants.ExeSuffix}");
             var csiArgs = new StringBuilder();
 
             if (buildConfiguration == null)
