@@ -17,25 +17,27 @@ using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using Microsoft.DotNet.Cli.Compiler.Common;
+using Microsoft.DotNet.Tools.Pack;
+using PackageBuilder = NuGet.PackageBuilder;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
     public class PackageGenerator
     {
+        protected ArtifactPathsCalculator ArtifactPathsCalculator { get; }
+        
         protected Project Project { get; }
 
         protected string Configuration { get; }
 
-        protected string OutputPath { get; }
-
         protected PackageBuilder PackageBuilder { get; private set; }
 
-        public PackageGenerator(Project project, string configuration, string outputPath)
+        public PackageGenerator(Project project, string configuration, ArtifactPathsCalculator artifactPathsCalculator)
         {
+            ArtifactPathsCalculator = artifactPathsCalculator;
             Project = project;
             Configuration = configuration;
-            OutputPath = outputPath;
-        }
+        }        
 
         public bool BuildPackage(IEnumerable<ProjectContext> contexts, List<DiagnosticMessage> packDiagnostics)
         {
@@ -55,7 +57,9 @@ namespace Microsoft.DotNet.Tools.Compiler
                 Reporter.Verbose.WriteLine("");
             }
 
-            var packageOutputPath = Path.Combine(GetOutputPath(), GetPackageName() + NuGet.Constants.PackageExtension);
+            var packageOutputPath = Path.Combine(
+                ArtifactPathsCalculator.PackageArtifactsPath, 
+                GetPackageName() + NuGet.Constants.PackageExtension);
 
             if (GeneratePackage(packageOutputPath, packDiagnostics))
             {
@@ -69,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         {
             PopulateDependencies(context);
 
-            var outputPath = GetOutputPath(context);
+            var inputFolder = ArtifactPathsCalculator.InputPathForContext(context);
             var outputName = GetProjectOutputName(context.TargetFramework);
 
             var resourceCultures = context.ProjectFile.Files.ResourceFiles
@@ -84,11 +88,11 @@ namespace Microsoft.DotNet.Tools.Compiler
                 }
 
                 var resourceFilePath = Path.Combine(culture, $"{Project.Name}.resources.dll");
-                TryAddOutputFile(context, outputPath, resourceFilePath);
+                TryAddOutputFile(context, inputFolder, resourceFilePath);
             }
 
-            TryAddOutputFile(context, outputPath, outputName);
-            TryAddOutputFile(context, outputPath, $"{Project.Name}.xml");
+            TryAddOutputFile(context, inputFolder, outputName);
+            TryAddOutputFile(context, inputFolder, $"{Project.Name}.xml");
         }
 
         protected virtual bool GeneratePackage(string nupkg, List<DiagnosticMessage> packDiagnostics)
@@ -317,46 +321,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             return Project.Name + outputExtension;
-        }
-
-        protected string GetOutputPath()
-        {
-            var outputPath = string.Empty;
-
-            if (string.IsNullOrEmpty(OutputPath))
-            {
-                outputPath = Path.Combine(
-                    GetDefaultRootOutputPath(Project, OutputPath),
-                    Cli.Utils.Constants.BinDirectoryName,
-                    Configuration);
-            }
-            else
-            {
-                outputPath = OutputPath;
-            }
-
-            return outputPath;
-        }
-
-        protected string GetOutputPath(ProjectContext context)
-        {
-            var outputPath = string.Empty;
-
-            if (string.IsNullOrEmpty(OutputPath))
-            {
-                outputPath = Path.Combine(
-                    GetDefaultRootOutputPath(context.ProjectFile, OutputPath),
-                    Cli.Utils.Constants.BinDirectoryName,
-                    Configuration,
-                    context.TargetFramework.GetTwoDigitShortFolderName());
-            }
-            else
-            {
-                outputPath = OutputPath;
-            }
-
-            return outputPath;
-        }
+        }                
 
         private static string GetDefaultRootOutputPath(Project project, string outputOptionValue)
         {

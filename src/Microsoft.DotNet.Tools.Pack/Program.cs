@@ -2,13 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Pack;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -24,29 +23,30 @@ namespace Microsoft.DotNet.Tools.Compiler
             app.Description = "Packager for the .NET Platform";
             app.HelpOption("-h|--help");
 
+            var basePath = app.Option("-b|--basepath <BASE_PATH>", "Directory from where the assets to be packaged are going to be picked up", CommandOptionType.SingleValue);
             var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
             var intermediateOutput = app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var versionSuffix = app.Option("--version-suffix <VERSION_SUFFIX>", "Defines what `*` should be replaced with in version field in project.json", CommandOptionType.SingleValue);
-            var project = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
+            var path = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             app.OnExecute(() =>
             {
                 // Locate the project and get the name and full path
-                var path = project.Value;
-                if (string.IsNullOrEmpty(path))
+                var pathValue = path.Value;
+                if (string.IsNullOrEmpty(pathValue))
                 {
-                    path = Directory.GetCurrentDirectory();
+                    pathValue = Directory.GetCurrentDirectory();
                 }
 
-                if(!path.EndsWith(Project.FileName))
+                if(!pathValue.EndsWith(Project.FileName))
                 {
-                    path = Path.Combine(path, Project.FileName);
+                    pathValue = Path.Combine(pathValue, Project.FileName);
                 }
 
-                if(!File.Exists(path))
+                if(!File.Exists(pathValue))
                 {
-                    Reporter.Error.WriteLine($"Unable to find a project.json in {path}");
+                    Reporter.Error.WriteLine($"Unable to find a project.json in {pathValue}");
                     return 1;
                 }
 
@@ -60,10 +60,21 @@ namespace Microsoft.DotNet.Tools.Compiler
                     settings.VersionSuffix = versionSuffix.Value();
                 }
 
-                var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
-                var outputValue = output.Value();
+                var contexts = ProjectContext.CreateContextForEachFramework(pathValue, settings);
 
-                return TryBuildPackage(path, configValue, outputValue, intermediateOutput.Value(), settings) ? 0 : 1;
+                var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
+                var basePathValue = basePath.Value();
+                var outputValue = output.Value();
+                var intermediateOutputValue = intermediateOutput.Value();
+
+                var project = contexts.First().ProjectFile;
+
+                var artifactPathsCalculator = new ArtifactPathsCalculator(project, basePathValue, outputValue, configValue);
+                var buildProjectCommand = new BuildProjectCommand(project, artifactPathsCalculator, intermediateOutputValue, configValue);
+                var packageBuilder = new PackagesGenerator(contexts, artifactPathsCalculator, configValue);
+
+                var buildResult = buildProjectCommand.Execute();
+                return buildResult != 0 ? buildResult : packageBuilder.Build();
             });
 
             try
@@ -79,48 +90,6 @@ namespace Microsoft.DotNet.Tools.Compiler
 #endif
                 return 1;
             }
-        }
-
-        private static bool TryBuildPackage(string path, string configuration, string outputValue, string intermediateOutputValue, ProjectReaderSettings settings = null)
-        {
-            var contexts = ProjectContext.CreateContextForEachFramework(path, settings);
-            var project = contexts.First().ProjectFile;
-
-            if (project.Files.SourceFiles.Any())
-            {
-                var argsBuilder = new StringBuilder();
-                argsBuilder.Append($"--configuration {configuration}");
-
-                if (!string.IsNullOrEmpty(outputValue))
-                {
-                    argsBuilder.Append($" --output \"{outputValue}\"");
-                }
-
-                if (!string.IsNullOrEmpty(intermediateOutputValue))
-                {
-                    argsBuilder.Append($" --temp-output \"{intermediateOutputValue}\"");
-                }
-
-                argsBuilder.Append($" \"{path}\"");
-
-                var result = Command.Create("dotnet-build", argsBuilder.ToString())
-                       .ForwardStdOut()
-                       .ForwardStdErr()
-                       .Execute();
-
-                if (result.ExitCode != 0)
-                {
-                    return false;
-                }
-            }
-
-            var packDiagnostics = new List<DiagnosticMessage>();
-
-            var mainPackageGenerator = new PackageGenerator(project, configuration, outputValue);
-            var symbolsPackageGenerator = new SymbolPackageGenerator(project, configuration, outputValue);
-
-            return mainPackageGenerator.BuildPackage(contexts, packDiagnostics) &&
-                symbolsPackageGenerator.BuildPackage(contexts, packDiagnostics);
-        }
+        }                
     }
 }
