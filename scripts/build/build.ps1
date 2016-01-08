@@ -6,7 +6,8 @@
 param(
     [string]$Configuration="Debug",
     [switch]$Offline,
-    [switch]$NoCache)
+    [switch]$NoCache,
+    [switch]$NoPackage)
 
 $ErrorActionPreference="Stop"
 
@@ -39,11 +40,9 @@ _ "$RepoRoot\scripts\test\runtests.ps1"
 header "Validating Dependencies"
 _ "$RepoRoot\scripts\test\validate-dependencies.ps1"
 
-header "Generating zip package"
-_ "$RepoRoot\scripts\package\package.ps1"
-
-header "Generating dotnet MSI"
-_ "$RepoRoot\packaging\windows\generatemsi.ps1" @("$Stage2Dir")
-
-header "Generating NuGet packages"
-_ "$RepoRoot\packaging\nuget\package.ps1" @("$Stage2Dir\bin", "$VersionSuffix")
+if ($NoPackage){
+    info "Skipping Packaging"
+}
+else {
+    _ "$RepoRoot\scripts\package\package.ps1"
+}
