@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
         private static string CreateResponseFile(ProjectContext projectContext, string buildConfiguration, string tempOutputDir)
         {
             var outputFileName = projectContext.ProjectFile.Name;
-            var outputFilePath = Path.Combine(tempOutputDir, $"{outputFileName}{Constants.DynamicLibSuffix}");
+            var outputFilePath = Path.Combine(tempOutputDir, $"{outputFileName}.dll");
             var projectResponseFilePath = Path.Combine(tempOutputDir, $"dotnet-repl.{outputFileName}{Constants.ResponseFileSuffix}");
 
             var runtimeDependencies = GetRuntimeDependencies(projectContext, buildConfiguration);
@@ -120,9 +120,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
         private static int Run(string script, string targetFramework, string buildConfiguration, bool preserveTemporaryOutput, string projectPath, IEnumerable<string> remainingArguments)
         {
-            var corerun = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
-            var csiExe = Path.Combine(AppContext.BaseDirectory, $"csi{Constants.ExeSuffix}");
-            var csiArgs = new StringBuilder();
+            var csiArgs = new List<string>();
 
             if (buildConfiguration == null)
             {
@@ -150,24 +148,21 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
                     }
 
                     string responseFile = CreateResponseFile(projectContext, buildConfiguration, tempOutputDir);
-                    csiArgs.Append($"@\"{responseFile}\" ");
+                    csiArgs.Add($"@\"{responseFile}\"");
                 }
 
                 if (string.IsNullOrEmpty(script) && !remainingArguments.Any())
                 {
-                    csiArgs.Append("-i");
+                    csiArgs.Add("-i");
                 }
                 else
                 {
-                    csiArgs.Append(script);
+                    csiArgs.Add(script);
                 }
 
-                foreach (string remainingArgument in remainingArguments)
-                {
-                    csiArgs.Append($" {remainingArgument}");
-                }
+                csiArgs.AddRange(remainingArguments);
 
-                return Command.Create(csiExe, csiArgs.ToString())
+                return Command.Create("csi", csiArgs)
                     .ForwardStdOut()
                     .ForwardStdErr()
                     .Execute()
