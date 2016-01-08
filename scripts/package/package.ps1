@@ -4,41 +4,13 @@
 #
 
 . "$PSScriptRoot\..\common\_common.ps1"
+. "$RepoRoot\scripts\build\generate-version.ps1"
 
-if(!(Test-Path $PackageDir)) {
-    mkdir $PackageDir | Out-Null
-}
+header "Generating zip package"
+_ "$RepoRoot\scripts\package\package-zip.ps1"
 
-if(![string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION)) {
-    $PackageVersion = $env:DOTNET_BUILD_VERSION
-} else {
-    $Timestamp = [DateTime]::Now.ToString("yyyyMMddHHmmss")
-    $PackageVersion = "0.0.1-alpha-t$Timestamp"
-}
+header "Generating dotnet MSI"
+_ "$RepoRoot\packaging\windows\generatemsi.ps1" @("$Stage2Dir")
 
-# Stamp the output with the commit metadata and version number
-$Commit = git rev-parse HEAD
-
-$VersionContent = @"
-$Commit
-$PackageVersion
-"@
-
-$VersionContent | Out-File -Encoding UTF8 "$Stage2Dir\.version"
-
-$PackageName = Join-Path $PackageDir "dotnet-win-x64.$PackageVersion.zip"
-
-if (Test-Path $PackageName)
-{
-    del $PackageName
-}
-
-Add-Type -Assembly System.IO.Compression.FileSystem
-[System.IO.Compression.ZipFile]::CreateFromDirectory($Stage2Dir, $PackageName, "Optimal", $false)
-
-Write-Host "Packaged stage2 to $PackageName"
-
-$PublishScript = Join-Path $PSScriptRoot "..\publish\publish.ps1"
-& $PublishScript -file $PackageName
-
-exit $LastExitCode
+header "Generating NuGet packages"
+_ "$RepoRoot\packaging\nuget\package.ps1" @("$Stage2Dir\bin", "$VersionSuffix")

@@ -13,6 +13,7 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
+source "$DIR/../common/_clang.sh"
 
 header "Building corehost"
 
