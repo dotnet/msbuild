@@ -43,13 +43,3 @@ DOTNET_HOME=$STAGE2_DIR DOTNET_TOOLS=$STAGE2_DIR $REPOROOT/scripts/test/runtests
 
 header "Validating Dependencies"
 $REPOROOT/scripts/test/validate-dependencies.sh
-
-header "Generating tarball"
-$REPOROOT/scripts/package/package.sh
-
-if [ ! -z "$NOPACKAGE" ]; then
-    header "Generating Native Installer"
-    $REPOROOT/scripts/package/package-native.sh
-else
-    header "Skipping packaging"
-fi

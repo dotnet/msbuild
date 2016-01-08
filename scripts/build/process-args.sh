@@ -4,24 +4,30 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-for i in "$@"
+params=("$@")
+
+for i in "${!params[@]}"
 do
-    lowerI="$(echo $i | awk '{print tolower($0)}')"
+    lowerI="$(echo ${params[$i]} | awk '{print tolower($0)}')"
     case $lowerI in
-    release)
+    "release" | "-release")
         export CONFIGURATION=Release
         ;;
-    debug)
+    "debug" | "-debug")
         export CONFIGURATION=Debug
         ;;
-    offline)
+    "offline" | "-offline")
         export OFFLINE=true
         ;;
-    nopackage)
+    "nopackage" | "-nopackage")
         export NOPACKAGE=true
         ;;
-    nocache)
+    "nocache" | "-nocache")
         export NOCACHE=--No-Cache
+        ;;
+    "--buildindocker")
+        export BUILD_IN_DOCKER=true
+        export DOCKER_OS=${params[i+1]}
         ;;
     *)
     esac

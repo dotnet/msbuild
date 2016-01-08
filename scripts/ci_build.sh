@@ -28,18 +28,18 @@ if [ -z "$HOME" ]; then
     mkdir -p $HOME
 fi
 
+# Set Docker Container name to be unique
+container_name=""
+
+#Jenkins
+[ ! -z "$BUILD_TAG" ] && container_name="$BUILD_TAG"
+#VSO
+[ ! -z "$BUILD_BUILDID" ] && container_name="$BUILD_BUILDID"
+
+export DOTNET_BUILD_CONTAINER_NAME="$container_name"
 
 
 if [[ "$OSNAME" == "ubuntu" ]]; then
-    # Set Docker Container name to be unique
-    container_name=""
-
-    #Jenkins
-    [ ! -z "$BUILD_TAG" ] && container_name="$BUILD_TAG"
-    #VSO
-    [ ! -z "$BUILD_BUILDID" ] && container_name="$BUILD_BUILDID"
-
-    export DOTNET_BUILD_CONTAINER_NAME="$container_name"
     export PACKAGE_IN_DOCKER="true"
     export NOCACHE="--no-cache"
     unset BUILD_IN_DOCKER

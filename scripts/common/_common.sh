@@ -11,7 +11,6 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 COMMONDIR="$( cd -P "$( dirname "$COMMONSOURCE" )" && pwd )"
 
-source "$COMMONDIR/_clang.sh"
 source "$COMMONDIR/_prettyprint.sh"
 source "$COMMONDIR/_rid.sh"
 

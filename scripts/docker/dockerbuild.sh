@@ -21,11 +21,12 @@ cd $REPOROOT
 [ -z "$DOTNET_BUILD_CONTAINER_TAG" ] && DOTNET_BUILD_CONTAINER_TAG="dotnetcli-build"
 [ -z "$DOTNET_BUILD_CONTAINER_NAME" ] && DOTNET_BUILD_CONTAINER_NAME="dotnetcli-build-container"
 [ -z "$DOCKER_HOST_SHARE_DIR" ] && DOCKER_HOST_SHARE_DIR=$(pwd)
-[ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="/opt/code/build.sh"
+[ -z "$DOCKER_OS" ] && DOCKER_OS=$OSNAME
+[ -z "$BUILD_COMMAND" ] && BUILD_COMMAND="/opt/code/scripts/build/build.sh"
 
 # Build the docker container (will be fast if it is already built)
 header "Building Docker Container"
-docker build --build-arg USER_ID=$(id -u) -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/ 
+docker build --build-arg USER_ID=$(id -u) -t $DOTNET_BUILD_CONTAINER_TAG scripts/docker/$DOCKER_OS
 
 # Run the build in the container
 header "Launching build in Docker Container"
@@ -43,4 +44,5 @@ docker run -t --rm --sig-proxy=true \
     -e REPO_USER \
     -e REPO_PASS \
     -e REPO_SERVER \
-    $DOTNET_BUILD_CONTAINER_TAG $BUILD_COMMAND $1
+    $DOTNET_BUILD_CONTAINER_TAG \
+    bash -c "${BUILD_COMMAND}"
