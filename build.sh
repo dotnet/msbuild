@@ -33,7 +33,7 @@ if [ ! -z "$NOPACKAGE" ]; then
     header "Skipping packaging"
 else
     if [ ! -z "$PACKAGE_IN_DOCKER" ]; then
-        export BUILD_COMMAND="$REPOROOT/scripts/package/package.sh"
+        export BUILD_COMMAND="/opt/code/scripts/package/package.sh"
         $REPOROOT/scripts/docker/dockerbuild.sh
     else
         $REPOROOT/scripts/package/package.sh
