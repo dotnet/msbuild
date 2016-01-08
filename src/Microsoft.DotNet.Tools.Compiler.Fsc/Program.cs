@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 return returnCode;
             }
 
-            var translated = TranslateCommonOptions(commonOptions);
+            var translated = TranslateCommonOptions(commonOptions, outputName);
 
             var allArgs = new List<string>(translated);
             allArgs.AddRange(GetDefaultOptions());
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             return args;
         }
 
-        private static IEnumerable<string> TranslateCommonOptions(CommonCompilerOptions options)
+        private static IEnumerable<string> TranslateCommonOptions(CommonCompilerOptions options, string outputName)
         {
             List<string> commonArgs = new List<string>();
 
@@ -168,6 +168,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 commonArgs.Add("--optimize");
             }
 
+            if(options.GenerateXmlDocumentation == true)
+            {
+                commonArgs.Add($"--doc:{Path.ChangeExtension(outputName, "xml")}");
+            }
+
             if (options.EmitEntryPoint != true)
             {
                 commonArgs.Add("--target:library");
@@ -183,6 +188,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                     commonArgs.Add($"--win32manifest:\"{win32manifestPath}\"");
                 }
             }
+
             return commonArgs;
         }
 

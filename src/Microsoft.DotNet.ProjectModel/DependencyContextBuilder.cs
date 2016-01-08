@@ -42,7 +42,8 @@ namespace Microsoft.Extensions.DependencyModel
                 compilerOptions.KeyFile,
                 compilerOptions.DelaySign,
                 compilerOptions.PublicSign,
-                compilerOptions.EmitEntryPoint);
+                compilerOptions.EmitEntryPoint,
+                compilerOptions.GenerateXmlDocumentation);
         }
 
         private static IEnumerable<Library> GetLibraries(IEnumerable<LibraryExport> dependencies,

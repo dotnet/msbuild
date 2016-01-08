@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 return returnCode;
             }
 
-            var translated = TranslateCommonOptions(commonOptions);
+            var translated = TranslateCommonOptions(commonOptions, outputName);
 
             var allArgs = new List<string>(translated);
             allArgs.AddRange(GetDefaultOptions());
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             return args;
         }
 
-        private static IEnumerable<string> TranslateCommonOptions(CommonCompilerOptions options)
+        private static IEnumerable<string> TranslateCommonOptions(CommonCompilerOptions options, string outputName)
         {
             List<string> commonArgs = new List<string>();
 
@@ -187,6 +187,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             if (options.PublicSign == true)
             {
                 commonArgs.Add("-publicsign");
+            }
+
+            if (options.GenerateXmlDocumentation == true)
+            {
+                commonArgs.Add($"-doc:{Path.ChangeExtension(outputName, "xml")}");
             }
 
             if (options.EmitEntryPoint != true)

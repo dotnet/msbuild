@@ -1,5 +1,8 @@
 ﻿{
     "version": "1.0.0-*",
+    "compilationOptions": {
+        "xmlDoc": true
+    },
     "dependencies": {
         "System.Runtime": "4.0.21-beta-23428",
         "System.Console": "4.0.0-beta-23428"

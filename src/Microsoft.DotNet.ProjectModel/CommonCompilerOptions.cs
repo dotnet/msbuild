@@ -31,6 +31,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public bool? PreserveCompilationContext { get; set; }
 
+        public bool? GenerateXmlDocumentation { get; set; }
+
         public override bool Equals(object obj)
         {
             var other = obj as CommonCompilerOptions;
@@ -44,6 +46,7 @@ namespace Microsoft.DotNet.ProjectModel
                    DelaySign == other.DelaySign &&
                    PublicSign == other.PublicSign &&
                    EmitEntryPoint == other.EmitEntryPoint &&
+                   GenerateXmlDocumentation == other.GenerateXmlDocumentation &&
                    PreserveCompilationContext == other.PreserveCompilationContext &&
                    Enumerable.SequenceEqual(Defines ?? Enumerable.Empty<string>(), other.Defines ?? Enumerable.Empty<string>());
         }
@@ -119,6 +122,11 @@ namespace Microsoft.DotNet.ProjectModel
                 if (option.PreserveCompilationContext != null)
                 {
                     result.PreserveCompilationContext = option.PreserveCompilationContext;
+                }
+
+                if (option.GenerateXmlDocumentation != null)
+                {
+                    result.GenerateXmlDocumentation = option.GenerateXmlDocumentation;
                 }
             }
 

@@ -535,6 +535,7 @@ namespace Microsoft.DotNet.ProjectModel
                 DelaySign = rawOptions.ValueAsNullableBoolean("delaySign"),
                 PublicSign = rawOptions.ValueAsNullableBoolean("publicSign"),
                 EmitEntryPoint = rawOptions.ValueAsNullableBoolean("emitEntryPoint"),
+                GenerateXmlDocumentation = rawOptions.ValueAsNullableBoolean("xmlDoc"),
                 PreserveCompilationContext = rawOptions.ValueAsNullableBoolean("preserveCompilationContext")
             };
         }

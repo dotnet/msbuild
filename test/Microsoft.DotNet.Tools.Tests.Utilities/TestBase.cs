@@ -40,10 +40,20 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public virtual void Dispose()
         {
-            if (_temp != null)
-            {                
+            if (_temp != null && !PreserveTemp())
+            {
                 _temp.Dispose();
             }
+        }
+
+        // Quick-n-dirty way to allow the temp output to be preserved when running tests
+        private bool PreserveTemp()
+        {
+            var val = Environment.GetEnvironmentVariable("DOTNET_TEST_PRESERVE_TEMP");
+            return !string.IsNullOrEmpty(val) && (
+                string.Equals("true", val, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals("1", val, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals("on", val, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

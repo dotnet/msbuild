@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _command = command;
         }
 
-        public virtual CommandResult Execute(string args)
+        public virtual CommandResult Execute(string args = "")
         {
             Console.WriteLine($"Executing - {_command} {args}");
             var commandResult = Command.Create(_command, args)
@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return commandResult;
         }
 
-        public virtual CommandResult ExecuteWithCapturedOutput(string args)
+        public virtual CommandResult ExecuteWithCapturedOutput(string args = "")
         {
             Console.WriteLine($"Executing (Captured Output) - {_command} {args}");
             var commandResult = Command.Create(_command, args)

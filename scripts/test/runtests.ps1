@@ -13,6 +13,7 @@ $TestProjects = @(
     "E2E",
     "StreamForwarderTests"
     "Microsoft.DotNet.Tools.Publish.Tests"
+    "Microsoft.DotNet.Tools.Compiler.Tests"
 )
 
 # Publish each test project

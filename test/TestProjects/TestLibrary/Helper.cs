@@ -7,6 +7,10 @@ namespace TestLibrary
 {
     public static class Helper
     {
+        /// <summary>
+        /// Gets the message from the helper. This comment is here to help test XML documentation file generation, please do not remove it.
+        /// </summary>
+        /// <returns>A message</returns>
         public static string GetMessage()
         {
             return "This string came from the test library!";
