@@ -44,10 +44,6 @@ $FilesToClean = @(
     "Microsoft.DotNet.Runtime.pdb"
 )
 
-if (Test-Path $OutputDir) {
-    del -rec -for $OutputDir
-}
-
 $RuntimeOutputDir = "$OutputDir\runtime\coreclr"
 
 # Publish each project
@@ -83,21 +79,29 @@ cp "$HostDir\clihost.dll" "$OutputDir\bin"
 
 # corehostify externally-provided binaries (csc, vbc, etc.)
 $BinariesForCoreHost | ForEach-Object {
-    mv $OutputDir\bin\$_.exe $OutputDir\bin\$_.dll
-    cp $OutputDir\bin\corehost.exe $OutputDir\bin\$_.exe
+    mv $OutputDir\bin\$_.exe $OutputDir\bin\$_.dll -Force
+    cp $OutputDir\bin\corehost.exe $OutputDir\bin\$_.exe -Force
 }
 
 # Crossgen Roslyn
-header "Crossgening Roslyn compiler ..."
-_cmd "$RepoRoot\scripts\crossgen\crossgen_roslyn.cmd ""$OutputDir"""
+if (-not (Test-Path "$OutputDir\bin\csc.ni.exe")) {
+    header "Crossgening Roslyn compiler ..."
+    _cmd "$RepoRoot\scripts\crossgen\crossgen_roslyn.cmd ""$OutputDir"""
+}
 
 # Copy dnx into stage OutputDir
-cp -rec "$DnxRoot\" "$OutputDir\bin\dnx\"
+if (-not (Test-Path "$OutputDir\bin\dnx\")) {
+    cp -rec "$DnxRoot\" "$OutputDir\bin\dnx\"
+}
 
 # Copy in the dotnet-dnx script
-cp "$RepoRoot\scripts\dotnet-dnx.cmd" "$OutputDir\bin\dotnet-dnx.cmd"
+if (-not (Test-Path "$OutputDir\bin\dotnet-dnx.cmd")) {
+    cp "$RepoRoot\scripts\dotnet-dnx.cmd" "$OutputDir\bin\dotnet-dnx.cmd"
+}
 
 # Copy in AppDeps
-$env:PATH = "$OutputDir\bin;$StartPath"
-header "Acquiring Native App Dependencies"
-_cmd "$RepoRoot\scripts\build\build_appdeps.cmd ""$OutputDir""" 
+if (-not (Test-Path "$OutputDir\bin\appdepsdk\")) {
+    $env:PATH = "$OutputDir\bin;$StartPath"
+	header "Acquiring Native App Dependencies"
+	_cmd "$RepoRoot\scripts\build\build_appdeps.cmd ""$OutputDir""" 
+}
