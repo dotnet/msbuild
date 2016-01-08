@@ -85,6 +85,8 @@ namespace Microsoft.Extensions.DependencyModel
                     .EmitEntryPoint
                     .GetValueOrDefault(false);
 
+                isExe &= target.IsDesktop();
+
                 assemblies = new[] { export.Library.Identity.Name + (isExe ? ".exe": ".dll") };
             }
             else

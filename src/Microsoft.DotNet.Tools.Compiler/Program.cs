@@ -250,13 +250,10 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             compilerArgs.AddRange(references.Select(r => $"--reference:{r}"));
 
-            var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, new[] { RuntimeIdentifier.Current });
-            var libraryExporter = runtimeContext.CreateExporter(args.ConfigValue);
-
             if (compilationOptions.PreserveCompilationContext == true)
             {
                 var dependencyContext = DependencyContextBuilder.Build(compilationOptions,
-                    libraryExporter,
+                    exporter,
                     args.ConfigValue,
                     context.TargetFramework,
                     context.RuntimeIdentifier);
