@@ -24,7 +24,6 @@ TestProjects=( \
     Microsoft.DotNet.Tools.Publish.Tests \
 )
 
-
 for project in ${TestProjects[@]}
 do
     dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$TestBinRoot" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
@@ -43,7 +42,7 @@ failCount=0
 
 for project in ${TestProjects[@]}
 do
-    ./corerun  "xunit.console.netcore.exe" "$project.dll" -xml "${project}-testResults.xml" -notrait category=failing
+    ./corerun "xunit.console.netcore.exe" "$project.dll" -xml "${project}-testResults.xml" -notrait category=failing
     exitCode=$?
     failCount+=$exitCode
     if [ $exitCode -ne 0 ]; then

@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Loader;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace LoadContextTest
@@ -23,7 +24,8 @@ namespace LoadContextTest
 
             // Load the project load context
             Console.WriteLine($"Creating load context for {project}");
-            var context = ProjectContext.Create(project, FrameworkConstants.CommonFrameworks.DnxCore50, new[] { RuntimeIdentifier.Current });
+            var rid = PlatformServices.Default.Runtime.GetRuntimeIdentifier();
+            var context = ProjectContext.Create(project, FrameworkConstants.CommonFrameworks.DnxCore50, new[] { rid });
             var loadContext = context.CreateLoadContext();
 
             // Load the project assembly

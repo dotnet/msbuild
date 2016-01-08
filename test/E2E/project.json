@@ -14,7 +14,6 @@
 
         "Microsoft.DotNet.ProjectModel": { "target": "project" },
         "Microsoft.DotNet.Cli.Utils": { "target": "project" },
-
         "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" }
     },
 

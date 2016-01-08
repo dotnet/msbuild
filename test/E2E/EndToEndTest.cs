@@ -10,6 +10,7 @@ using Xunit;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tests.EndToEnd
 {
@@ -33,7 +34,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
             TestSetup();
 
-            Rid = RuntimeIdentifier.Current;
+            Rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
         }
 
         [Fact]

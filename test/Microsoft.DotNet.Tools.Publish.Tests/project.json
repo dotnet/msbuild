@@ -10,8 +10,11 @@
     "xunit.netcore.extensions": "1.0.0-prerelease-*",
     "xunit.runner.utility": "2.1.0",
 
-    "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" }
-
+    "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
+    "Microsoft.DotNet.Cli.Utils": {
+        "target": "project",
+        "type": "build"
+    }
   },
 
     "frameworks": {

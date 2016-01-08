@@ -142,7 +142,7 @@ package_absolute_placement(){
     abs_files=( $(_get_files_in_dir_tree $ABSOLUTE_PLACEMENT_DIR) )
 
     # For each file add a a system placement
-    for abs_file in $abs_files
+    for abs_file in ${abs_files[@]}
     do
         parent_dir=$(dirname $abs_file)
         filename=$(basename $abs_file)
@@ -189,7 +189,7 @@ generate_manpage_manifest(){
     # Remove any existing manifest
     rm -f ${DEBIAN_DIR}/${PACKAGE_NAME}.manpages
 
-    for manpage in $generated_manpages
+    for manpage in ${generated_manpages[@]}
     do
         echo "${docs_rel_path}/${manpage}" >> "${DEBIAN_DIR}/${PACKAGE_NAME}.manpages"
     done
@@ -200,7 +200,7 @@ generate_sample_manifest(){
         generated_manpages=( $(_get_files_in_dir_tree $INPUT_SAMPLES_DIR) )
 
         rm -f sample_manifest
-        for sample in $samples
+        for sample in ${samples[@]}
         do
             echo "$sample" >> "${DEBIAN_DIR}/${PACKAGE_NAME}.examples"
         done

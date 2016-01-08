@@ -12,11 +12,14 @@ using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Restore
 {
     public class Program
     {
+        private static readonly string DefaultRid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -130,7 +133,7 @@ namespace Microsoft.DotNet.Tools.Restore
         private static void CreateDepsInPackageCache(LibraryRange toolLibrary, string projectPath)
         {
             var context = ProjectContext.Create(projectPath,
-                FrameworkConstants.CommonFrameworks.DnxCore50, new[] { RuntimeIdentifier.Current });
+                FrameworkConstants.CommonFrameworks.DnxCore50, new[] { DefaultRid });
 
             var toolDescription = context.LibraryManager.GetLibraries()
                 .Select(l => l as PackageDescription)
@@ -155,7 +158,7 @@ namespace Microsoft.DotNet.Tools.Restore
             var projectPath = Path.Combine(tempPath, Project.FileName);
             File.WriteAllText(projectPath, GenerateProjectJsonContents(new[] {"dnxcore50"}));
             Dnx.RunPackageInstall(tooldep, projectPath, args);
-            Dnx.RunRestore(new [] { $"\"{projectPath}\"", "--runtime", $"{RuntimeIdentifier.Current}"}.Concat(args));
+            Dnx.RunRestore(new [] { $"\"{projectPath}\"", "--runtime", $"{DefaultRid}"}.Concat(args));
         }
 
         private static string GenerateProjectJsonContents(IEnumerable<string> frameworks = null)
