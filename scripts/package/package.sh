@@ -13,6 +13,7 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
+source "$REPOROOT/scripts/build/generate-version.sh"
 
 if [ -z "$DOTNET_BUILD_VERSION" ]; then
     TIMESTAMP=$(date "+%Y%m%d%H%M%S")

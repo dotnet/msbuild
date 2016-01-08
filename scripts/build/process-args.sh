@@ -10,24 +10,28 @@ for i in "${!params[@]}"
 do
     lowerI="$(echo ${params[$i]} | awk '{print tolower($0)}')"
     case $lowerI in
-    "release" | "-release")
+    "release" | "--release")
         export CONFIGURATION=Release
         ;;
-    "debug" | "-debug")
+    "debug" | "--debug")
         export CONFIGURATION=Debug
         ;;
-    "offline" | "-offline")
+    "offline" | "--offline")
         export OFFLINE=true
         ;;
-    "nopackage" | "-nopackage")
+    "nopackage" | "--nopackage")
         export NOPACKAGE=true
         ;;
-    "nocache" | "-nocache")
+    "nocache" | "--nocache")
         export NOCACHE=--No-Cache
         ;;
-    "--buildindocker")
+    "--buildindocker-ubuntu")
         export BUILD_IN_DOCKER=true
-        export DOCKER_OS=${params[i+1]}
+        export DOCKER_OS=ubuntu
+        ;;
+    "--buildindocker-centos")
+        export BUILD_IN_DOCKER=true
+        export DOCKER_OS=centos
         ;;
     *)
     esac
