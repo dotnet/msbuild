@@ -12,11 +12,12 @@ namespace Microsoft.DotNet.ProjectModel.Files
     public class ProjectFilesCollection
     {
         public static readonly string[] DefaultCompileBuiltInPatterns = new[] { @"**/*.cs" };
-        public static readonly string[] DefaultPublishExcludePatterns = new[] { @"obj/**/*.*", @"bin/**/*.*", @"**/.*/**", @"**/global.json", @"**/project.json", @"**/project.lock.json" };
         public static readonly string[] DefaultPreprocessPatterns = new[] { @"compiler/preprocess/**/*.cs" };
         public static readonly string[] DefaultSharedPatterns = new[] { @"compiler/shared/**/*.cs" };
         public static readonly string[] DefaultResourcesBuiltInPatterns = new[] { @"compiler/resources/**/*", "**/*.resx" };
-        public static readonly string[] DefaultContentsBuiltInPatterns = new[] { @"**/*" };
+
+        public static readonly string[] DefaultPublishExcludePatterns = new string[0];
+        public static readonly string[] DefaultContentsBuiltInPatterns = new string[0];
 
         public static readonly string[] DefaultBuiltInExcludePatterns = new[] { "bin/**", "obj/**", "**/*.xproj", "packages/**" };
 
@@ -73,11 +74,7 @@ namespace Microsoft.DotNet.ProjectModel.Files
                 .ExcludeGroup(_preprocessPatternsGroup)
                 .ExcludeGroup(_resourcePatternsGroup);
 
-            _contentPatternsGroup = PatternGroup.Build(_rawProject, _projectDirectory, _projectFilePath, "content", additionalIncluding: contentBuiltIns, additionalExcluding: excludePatterns.Concat(_publishExcludePatterns))
-                .ExcludeGroup(_compilePatternsGroup)
-                .ExcludeGroup(_preprocessPatternsGroup)
-                .ExcludeGroup(_sharedPatternsGroup)
-                .ExcludeGroup(_resourcePatternsGroup);
+            _contentPatternsGroup = PatternGroup.Build(_rawProject, _projectDirectory, _projectFilePath, "content", additionalIncluding: contentBuiltIns, additionalExcluding: _publishExcludePatterns);
 
             _namedResources = NamedResourceReader.ReadNamedResources(_rawProject, _projectFilePath);
 

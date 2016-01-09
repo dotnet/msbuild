@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -127,6 +128,8 @@ namespace Microsoft.DotNet.Tools.Publish
                 PublishFiles(export.RuntimeAssemblies, outputPath, false);
                 PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories);
             }
+
+            CopyContents(context, outputPath);
 
             // Publish a host if this is an application
             if (options.EmitEntryPoint.GetValueOrDefault())
@@ -247,6 +250,51 @@ namespace Microsoft.DotNet.Tools.Publish
                     {
                         yield return context;
                     }
+                }
+            }
+        }
+
+        private static void CopyContents(ProjectContext context, string outputPath)
+        {
+            var contentFiles = context.ProjectFile.Files.GetContentFiles();
+            Copy(contentFiles, context.ProjectDirectory, outputPath);
+        }
+
+        private static void Copy(IEnumerable<string> contentFiles, string sourceDirectory, string targetDirectory)
+        {
+            if (contentFiles == null)
+            {
+                throw new ArgumentNullException(nameof(contentFiles));
+            }
+
+            sourceDirectory = PathUtility.EnsureTrailingSlash(sourceDirectory);
+            targetDirectory = PathUtility.EnsureTrailingSlash(targetDirectory);
+
+            foreach (var contentFilePath in contentFiles)
+            {
+                Reporter.Verbose.WriteLine($"Publishing {contentFilePath.Green().Bold()} ...");
+
+                var fileName = Path.GetFileName(contentFilePath);
+
+                var targetFilePath = contentFilePath.Replace(sourceDirectory, targetDirectory);
+                var targetFileParentFolder = Path.GetDirectoryName(targetFilePath);
+
+                // Create directory before copying a file
+                if (!Directory.Exists(targetFileParentFolder))
+                {
+                    Directory.CreateDirectory(targetFileParentFolder);
+                }
+
+                File.Copy(
+                    contentFilePath,
+                    targetFilePath,
+                    overwrite: true);
+
+                // clear read-only bit if set
+                var fileAttributes = File.GetAttributes(targetFilePath);
+                if ((fileAttributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                {
+                    File.SetAttributes(targetFilePath, fileAttributes & ~FileAttributes.ReadOnly);
                 }
             }
         }
