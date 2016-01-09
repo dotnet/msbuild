@@ -409,7 +409,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             Reporter.Output.WriteLine();
 
-            Reporter.Output.Write($"Time elapsed {sw.Elapsed}");
+            Reporter.Output.WriteLine($"Time elapsed {sw.Elapsed}");
 
             return success;
         }
