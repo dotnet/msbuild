@@ -356,7 +356,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 var projectContext =
                     ProjectContext.Create(context.ProjectDirectory, context.TargetFramework,
-                        new[] {RuntimeIdentifier.Current});
+                        new[] { PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier()});
                 
                 projectContext
                     .CreateExporter(args.ConfigValue)

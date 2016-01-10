@@ -47,14 +47,13 @@ foreach {
     $testName = "test\PackagedCommands\Consumers\$_" 
     pushd "$RepoRoot\$testName"
     $outputArray = dotnet hello | Out-String
-    $output = [string]::Join('\n', $outputArray)
+    $output = [string]::Join('\n', $outputArray).Trim("`r", "`n")
     
     del "project.json"
     if ($output -ne "hello") {
         error "Test Failed: $testName\dotnet hello"
         error "             printed $output"
         Exit 1
-    }
     }
     
     info "Test passed: $testName"
