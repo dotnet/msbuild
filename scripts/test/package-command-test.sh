@@ -21,7 +21,7 @@ dotnet pack --output "$REPOROOT/artifacts/packages" "$REPOROOT/test/PackagedComm
 dotnet pack --output "$REPOROOT/artifacts/packages" "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello"
 
 # enable restore for test projects
-for test in `ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' |
+for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "AppWith") 
 do
     pushd "$REPOROOT/test/PackagedCommands/Consumers/$test"
     cp "project.json.template" "project.json"
@@ -34,7 +34,7 @@ dotnet restore -s "$REPOROOT/artifacts/packages" --no-cache --ignore-failed-sour
 popd
 
 #compile tests with direct dependencies
-for test in `ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "Direct"`
+for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "Direct") 
 do
     pushd "$REPOROOT/test/PackagedCommands/Consumers/$test"
     dotnet compile
@@ -42,7 +42,7 @@ do
 done
 
 #run test
-for test in `ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "AppWith"`
+for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "AppWith")
 do
     testName="test/PackagedCommands/Consumers/$test" 
     
@@ -52,13 +52,13 @@ do
     
     rm "project.json"
     
-    if [ $testOutput != "hello" ] 
+    if [ "$output" == "Hello" ] ;
     then
-        error "Test Failed: $testName/dotnet hello"
-        error "             printed $testOutput"
-        exit 1
-    else
         echo "Test Passed: $testName"
+    else
+        error "Test Failed: $testName/dotnet hello"
+        error "             printed $output"
+        exit 1
     fi
     
     popd
