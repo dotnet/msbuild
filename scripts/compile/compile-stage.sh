@@ -79,7 +79,13 @@ done
 cp -R $RUNTIME_OUTPUT_DIR/* $OUTPUT_DIR/bin
 
 # Deploy CLR host to the output
+if [[ "$OSNAME" == "osx" ]]; then
+   COREHOST_LIBNAME=libclihost.dylib
+else
+   COREHOST_LIBNAME=libclihost.so
+fi
 cp "$HOST_DIR/corehost" "$OUTPUT_DIR/bin"
+cp "$HOST_DIR/${COREHOST_LIBNAME}" "$OUTPUT_DIR/bin"
 
 # corehostify externally-provided binaries (csc, vbc, etc.)
 for binary in ${BINARIES_FOR_COREHOST[@]}

@@ -149,17 +149,20 @@ namespace Microsoft.DotNet.Tools.Publish
                 return 0;
             }
 
-            var hostPath = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
-            if (!File.Exists(hostPath))
+            foreach (var binaryName in Constants.HostBinaryNames)
             {
-                Reporter.Error.WriteLine($"Cannot find {Constants.HostExecutableName} in the dotnet directory.".Red());
-                return 1;
+                var hostBinaryPath = Path.Combine(AppContext.BaseDirectory, binaryName);
+                if (!File.Exists(hostBinaryPath))
+                {
+                    Reporter.Error.WriteLine($"Cannot find {binaryName} in the dotnet directory.".Red());
+                    return 1;
+                }
+
+                var outputBinaryName = binaryName.Equals(Constants.HostExecutableName) ? (context.ProjectFile.Name + Constants.ExeSuffix) : binaryName;
+                var outputBinaryPath = Path.Combine(outputPath, outputBinaryName);
+
+                File.Copy(hostBinaryPath, outputBinaryPath, overwrite: true);
             }
-
-            var outputExe = Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
-
-            // Copy the host
-            File.Copy(hostPath, outputExe, overwrite: true);
 
             return 0;
         }

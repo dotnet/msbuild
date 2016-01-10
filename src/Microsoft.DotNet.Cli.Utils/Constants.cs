@@ -9,8 +9,12 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         public static readonly string ProjectFileName = "project.json";
         public static readonly string ExeSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
-        
-        public static readonly string HostExecutableName = "corehost" + ExeSuffix;
+
+        // Priority order of runnable suffixes to look for and run
+        public static readonly string[] RunnableSuffixes = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                                                         ? new string[] { ".exe", ".cmd", ".bat" }
+                                                         : new string[] { string.Empty };
+
         public static readonly string DefaultConfiguration = "Debug";
         public static readonly string BinDirectoryName = "bin";
         public static readonly string ObjDirectoryName = "obj";
@@ -26,5 +30,11 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string StaticLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".lib" : ".a" ;
 
         public static readonly string ResponseFileSuffix = ".rsp";
+
+        public static readonly string HostExecutableName = "corehost" + ExeSuffix;
+        public static readonly string[] HostBinaryNames = new string[] {
+            HostExecutableName,
+            (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "clihost" : "libclihost") + DynamicLibSuffix 
+        };
     }
 }
