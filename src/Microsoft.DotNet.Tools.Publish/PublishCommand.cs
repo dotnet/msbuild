@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.ProjectModel.Utilities;
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -56,6 +57,7 @@ namespace Microsoft.DotNet.Tools.Publish
         {
             NumberOfPublishedProjects = 0;
             NumberOfProjects = 0;
+
             foreach (var project in ProjectContexts)
             {
                 if (PublishProjectContext(project, OutputPath, Configuration, NativeSubdirectories))
@@ -90,6 +92,17 @@ namespace Microsoft.DotNet.Tools.Publish
                     context.TargetFramework.GetTwoDigitShortFolderName(),
                     context.RuntimeIdentifier);
             }
+
+            var contextVariables = new Dictionary<string, string>
+            {
+                { "publish:ProjectPath", context.ProjectDirectory },
+                { "publish:Configuration", configuration },
+                { "publish:OutputPath", outputPath },
+                { "publish:Framework", context.TargetFramework.Framework },
+                { "publish:Runtime", context.RuntimeIdentifier },
+            };
+
+            RunScripts(context, ScriptNames.PrePublish, contextVariables);
 
             if (!Directory.Exists(outputPath))
             {
@@ -138,7 +151,10 @@ namespace Microsoft.DotNet.Tools.Publish
                 PublishHost(context, outputPath);
             }
 
+            RunScripts(context, ScriptNames.PostPublish, contextVariables);
+
             Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
+
             return true;
         }
 
@@ -296,6 +312,17 @@ namespace Microsoft.DotNet.Tools.Publish
                 {
                     File.SetAttributes(targetFilePath, fileAttributes & ~FileAttributes.ReadOnly);
                 }
+            }
+        }
+
+        private static void RunScripts(ProjectContext context, string name, Dictionary<string, string> contextVariables)
+        {
+            foreach (var script in context.ProjectFile.Scripts.GetOrEmpty(name))
+            {
+                ScriptExecutor.CreateCommandForScript(context.ProjectFile, script, contextVariables)
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .Execute();
             }
         }
     }
