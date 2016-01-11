@@ -172,12 +172,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
                 fileName = CoreHost.Path;
 
+                var depsArg = string.Empty;
+
                 if (depsPath != null)
                 {
-                    args = $"--tpaFile:\"{depsPath}\" {args}";
+                    depsArg = $"\"--depsFile:{depsPath}\" ";
                 }
 
-                args = $"\"{dllPath}\" {args}";
+                args = $"\"{dllPath}\" {depsArg}{args}";
             }
             else
             {
