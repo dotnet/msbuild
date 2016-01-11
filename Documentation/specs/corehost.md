@@ -78,7 +78,7 @@ During host start-up, the host identifies if a `.deps` file is present and loads
 
 A `.deps` file is **not** required to successfully launch an application, but without it, all the dependent assemblies must be located within the same folder as the application. Also, since servicing is performed on the basis of packages, an application without a `.deps` file cannot use the servicing index to override the location of assemblies.
 
-The host looks for the `.deps` file in the Application Base with the file name `[AssemblyName].deps`. The path to the deps file can be overriden by specifying `--corehost-depsfile:{path to deps file}` as the first parameter to the application.
+The host looks for the `.deps` file in the Application Base with the file name `[AssemblyName].deps`. The path to the deps file can be overriden by specifying `--depsfile:{path to deps file}` as the first parameter to the application.
 
 Given the set of assembly names, the host performs the following resolution. In some steps, the Package ID/Version/Relative Path data is required. This is only available if the assembly was listed in the deps file. If the assembly comes from the app-local folder, these resolution steps are skipped.
 

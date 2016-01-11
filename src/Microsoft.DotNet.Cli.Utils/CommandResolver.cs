@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
                 if (depsPath != null)
                 {
-                    depsArg = $"\"--corehost-depsfile:{depsPath}\" ";
+                    depsArg = $"\"--depsfile:{depsPath}\" ";
                 }
 
                 args = $"\"{dllPath}\" {depsArg}{args}";
