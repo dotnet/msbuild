@@ -1,8 +1,9 @@
-dotnet-new
-===========
+% DOTNET-NEW(1)
+% Zlatko Knezevic zlakne@microsoft.com
+% January 2016
 
 # NAME
-dotnet-new -- Create a new sample project
+dotnet-new -- Create a new sample .NET Core project
 
 # SYNOPSIS
 dotnet new
@@ -20,6 +21,7 @@ After this, the project is ready to be compiled and/or edited further.
 # EXAMPLES
 
 `dotnet new`
+    
     Drops a sample in the current directory.
 
 # SEE ALSO

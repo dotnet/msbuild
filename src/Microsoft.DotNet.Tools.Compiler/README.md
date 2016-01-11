@@ -1,20 +1,21 @@
-dotnet-compile
-===========
+% DOTNET-COMPILE(1)
+% Zlatko Knezevic zlakne@microsoft.com
+% January 2016
 
 # NAME 
 dotnet-compile -- Compiles source files for a single project to a binary format and saves to a target file.
 
 # SYNOPSIS
-dotnet compile [options]
+dotnet compile [--native] [--output] 
+    [--temp-output] [--framework] [--configuration] 
+    [--output] [--arch] [--cpp] [-ilc-args] [--verbose]
 
 # DESCRIPTION
-The compile command compiles source files from a single project to a binary file, either IL byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future.
+The compile command compiles source files from a single project to a binary file, either intermmediate language (IL) byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future. Users who want to benefit from incremental builds and who want to compile both the project and its dependencies should use the dotnet-build(1) command.
 
-Users who want to benefit from incremental builds and who want to compile both the project and its dependencies should use the Build command.
-
-The default IL [--il] output is a PE32 exe [exe], with the default extension of ".exe" on all OSes. The exe must include a public static void or public static int main entry point, or it is an error. The dll [dll] output option has the default extension of ".dll".
-
-The IL exe output type needs a runtime host to execute. The IL exe output type also copies a host to the output directory. The host is renamed to the name of the exe. For example, if the file is intended to be "foo" (`-o foo`), then the host will be called foo, with the appropriate default native file extension fo the OS (see the native file extensions, below). The PE32 exe will be called "[filename]"-app.exe". In this case, it would be called "foo-app.exe". The executables also require a special configuration section in project.json:
+The result of compilation is by default an executable file that can be ran. Output files, are written to the child `bin` folder, which will be created if it doesn't exist. Files will be overwritten as needed. The temporary files that are created during compilation are placed in the child `obj` folder. 
+ 
+The executables also require a special configuration section in project.json:
 
 ```json
 { 
@@ -26,28 +27,59 @@ The IL exe output type needs a runtime host to execute. The IL exe output type a
 
 The default native [--native] output is a native exe that conforms to the architecture of the underlying operating system (i.e. running on 64-bit OS will produce a native 64-bit exe). This can be overriden via the --arch switch and specifying the wanted architecture. The executable has a default extension of "" on Linux and OS X and ".exe" on Windows. The source must include a static void main entry point, or it is an error, unless otherwise specified in the project.json. The dynamic library [dylib] output option has the default extension of ".so" on Linux/UNIX, ".dynlib" on OS X and ".dll" on Windows. The static library [staticlib] option has the default extension of ".a" on Linux, UNIX and OS X and ".lib" on Windows.
 
-This command relies on the following artifacts: source files, project.json project file, project.lock.json temporary file and restored NuGet dependencies. 
+This command relies on the following artifacts: source files, project.json project file and the "lock" file (project.lock.json). Prior to invoking dotnet-compile, dotnet-restore(1) should be run to restore any dependencies that are needed for the application.  
 
-The project.json file represents and describes the project. It can contain several setting, which are described in the [Build](https://docs.asp.net/en/latest/dnx/projects.html#building). The most important information in the project.json file are the root (not transitive) NuGet dependencies and the files to be compiled. By default, this is a wildcard -- "*.cs". It supports both inclusion and exclusion semantics.
+# OPTIONS 
 
-The project.lock.json file is expanded form of the project.json file. It includes the transitive closure of the project, per framework. It is produced by a NuGet client, typically by using the `dotnet restore` command. The project.lock.json file can be used by tools to safely determine the closure of dependencies, without having to manually calculate them. This file is only intended for tools, is temporary and should not be checked into source control. It should be present in .gitignore files.
+`-n, --native`
+    
+    Compiles source to native machine code, for the local machine. The default is a native executable. The default executable extension is no extension and ".exe" on Windows.
 
-It is important to know that a project.lock.json is invalid given that a project.json has been changed. The project.lock.json has enough information to determine this state given a project.json. The compile command validates this state and will error if the project.lock.json is invalid.
+`-t, --temp-output <PATH>`
+    
+    Path where to drop the temporary binaries that are produced during compile. By default, the temporary binaries are dropped in the `obj` directory in the directory where `project.json` files lives, that is, where the application lives.  
 
-The compile command relies on NuGet dependencies for compilation, as references. These are expected to be found in the user-local NuGet cache (typically location here). It is an error state if a given NuGet package is not found.
+`-f, --framework <FID>`
+    
+    Compile the application for the specified framework. If the framework is not specified, one specified in `project.json` will be used. 
 
-Output files, are written to the child `bin` folder, which will be created if it doesn't exist. Files will be overwritten as needed. The temporary files that are created during compilation are placed in the child `obj` folder. 
+`-c, --configuration <CONFIGURATION>`
+    
+    Compile the application under the specified configuration. If not specified, the configuration will default to "Debug".  
 
-# Options
+`-o, --output filename`
+    
+    Specifies the filename to be used. By default, the resulting filename will be the same as the project name specified in `project.json`, if one exists, or the directory in which the source files reside. 
 
--n, --native [exe | dynlib | lib]
-Compiles source to native machine code, for the local machine. The default is a native executable. The default exe extension is no extension and ".exe" on Windows. The default dynlib extension is ".a", ".dynlib" on OS X and ".dll" on Windows.
+`--no-project-dependencies`
+    
+    Skips building cross-project references. The effect of this is that only the current project will be built. 
 
---il [exe | dll]
-Compiles source to IL byte code, which is (typically) portable across machine types. The default output is a PE32 exe, with the default extension of ".exe" on all OSes. The exe must include a static main entry point, or it is an error. The DLL output option has the default extension of ".dll".
+`-a, --arch`
+    
+    The architecture for which to compile. x64 only currently supported.
 
--o, --output filename
-Specifies the filename to be used. It is an error not to specify an output filename. If no extension is provided, the default one is provided for the output type.
+`--ilc-args <ARGS>`
+    
+    Specified parameters are passed through to ILC and are used by the engine when doing native compilation. 
 
--v, --verbose
-Prints verbose logging information, to follow the flow of execution of the command.
+`--cpp`
+    
+    Specify the C++ code generator to do native compilation of code instead of the default RyuJIT.       
+
+`-v, --verbose`
+    
+    Prints verbose logging information, to follow the flow of execution of the command.
+
+`-h, --help`
+    
+    Show short help. 
+
+# ENVIRONMENT 
+
+`DOTNET_HOME`
+
+    Points to the base directory that contains the runtime and the binaries directories. The runtime will be used to run the executable file that is dropped after compiling. Not needed for native compilation.  
+    
+# SEE ALSO
+dotnet-restore(1), dotnet-publish(1), dotnet(1)

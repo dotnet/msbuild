@@ -1,11 +1,15 @@
-dotnet-compile
-===========
+% DOTNET-COMPILE-NATIVE(1)
+% Zlatko Knezevic zlakne@microsoft.com
+% January 2016
 
 # NAME 
 dotnet-compile-native -- Compiles IL binaries to native binaries.
 
 # SYNOPSIS
-dotnet compile [options]
+dotnet compile [--appdepsdk] [--configuration] 
+        [--ilcargs] [--linklib] [--logpath] 
+        [--mode] [--out] [--reference] 
+        [--temp-out] [--verbose]
 
 # DESCRIPTION
 The `compile-native` command compiles IL assemblies to native machine code. It is used by `dotnet-compile --native`.
@@ -14,37 +18,51 @@ The output is a native exe that conforms to the architecture of the underlying o
 
 Output files are written to the child `bin` folder, which will be created if it doesn't exist. Files will be overwritten as needed.
 
-# Options
+# OPTIONS
 
---appdepsdk <SDK_PATH>
-Path to custom AppDepSDK
+`--appdepsdk <SDK_PATH>`
+    
+    Path to custom AppDepSDK
 
--c, --configuration [debug|release]
-Build configuration. Defaults to `debug`.
+`-c, --configuration [debug|release]`
+    
+    Build configuration. Defaults to `debug`.
 
---ilcargs <args>
-Custom arguments for the IL Compiler.
+`--ilcargs <args>`
+    
+    Custom arguments for the IL Compiler.
 
---ilcpath <ILC_PATH>
-Path to a custom ilc.exe
+`--ilcpath <ILC_PATH>`
+    
+    Path to a custom ilc.exe
 
---linklib <LIB_PATH>
-Path to static lib to link
+`--linklib <LIB_PATH>`
+    
+    Path to static lib to link
 
---logpath <LOG_PATH>
-Enables logging and writes native compilation logs to the given path.
+`--logpath <LOG_PATH>`
+    
+    Enables logging and writes native compilation logs to the given path.
 
--m, --mode [cpp|ryujit|custom]
-Code generation mode. Defaults to ryujit.
+`-m, --mode [cpp|ryujit|custom]`
+    
+    Code generation mode. Defaults to ryujit.
 
--o, --out directoryname
-Output directory for the native executable.
+`-o, --out directoryname`
+    
+    Output directory for the native executable.
 
--r, --reference
-Path to a managed dll reference for the app.
+`-r, --reference`
+    
+    Path to a managed dll reference for the app.
 
--t, --temp-out
-Specifies temporary directory for intermediate files.
+`-t, --temp-out`
+    
+    Specifies temporary directory for intermediate files.
 
--v, --verbose
-Prints verbose logging information, to follow the flow of execution of the command.
+`-v, --verbose`
+    
+    Prints verbose logging information, to follow the flow of execution of the command.
+
+# SEE ALSO
+dotnet-compile(1), dotnet(1), dotnet-restore(1)
