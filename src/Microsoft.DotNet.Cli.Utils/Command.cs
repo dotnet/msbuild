@@ -5,12 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using Microsoft.DotNet.ProjectModel;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -21,179 +16,48 @@ namespace Microsoft.DotNet.Cli.Utils
         private readonly StreamForwarder _stdOut;
         private readonly StreamForwarder _stdErr;
 
-        public enum CommandResolutionStrategy
-        {
-            //command loaded from a nuget package
-            NugetPackage,
-
-            //command loaded from the same directory as the executing assembly
-            BaseDirectory,
-
-            //command loaded from path
-            Path,
-
-            //command not found
-            None
-        }
-
         private bool _running = false;
 
-        private Command(string executable, string args, CommandResolutionStrategy resolutionStrategy)
+        private Command(CommandSpec commandSpec)
         {
-            // Set the things we need
-            var psi = new ProcessStartInfo()
+            var psi = new ProcessStartInfo
             {
-                FileName = executable,
-                Arguments = args,
+                FileName = commandSpec.Path,
+                Arguments = commandSpec.Args,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
             };
 
-            _process = new Process()
+            _stdOut = new StreamForwarder();
+            _stdErr = new StreamForwarder();
+        
+            _process = new Process
             {
                 StartInfo = psi
             };
 
-            _stdOut = new StreamForwarder();
-            _stdErr = new StreamForwarder();
-
-            ResolutionStrategy = resolutionStrategy;
+            ResolutionStrategy = commandSpec.ResolutionStrategy;
         }
 
-        public static Command Create(string executable, IEnumerable<string> args, NuGetFramework framework = null)
+        public static Command Create(string commandName, IEnumerable<string> args, NuGetFramework framework = null)
         {
-            return Create(executable, string.Join(" ", args), framework);
+            return Create(commandName, string.Join(" ", args), framework);
         }
 
-        public static Command Create(string executable, string args, NuGetFramework framework = null)
+        public static Command Create(string commandName, string args, NuGetFramework framework = null)
         {
+            var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, args, framework);
 
-            var resolutionStrategy = CommandResolutionStrategy.None;
-
-            ResolveExecutablePath(ref executable, ref args, ref resolutionStrategy, framework);
-
-            return new Command(executable, args, resolutionStrategy);
-        }
-
-        private static void ResolveExecutablePath(ref string executable, ref string args, ref CommandResolutionStrategy resolutionStrategy, NuGetFramework framework = null)
-        {
-            executable = 
-                ResolveExecutablePathFromProject(executable, framework, ref resolutionStrategy) ??
-                ResolveExecutableFromPath(executable, ref args, ref resolutionStrategy);
-        }
-
-        private static string ResolveExecutableFromPath(string executable, ref string args, ref CommandResolutionStrategy resolutionStrategy)
-        {
-            resolutionStrategy = CommandResolutionStrategy.Path;
-
-            foreach (string suffix in Constants.RunnableSuffixes)
+            if (commandSpec == null)
             {
-                var fullExecutable = Path.GetFullPath(Path.Combine(
-                                        AppContext.BaseDirectory, executable + suffix));
-
-                if (File.Exists(fullExecutable))
-                {
-                    executable = fullExecutable;
-                    
-                    resolutionStrategy = CommandResolutionStrategy.BaseDirectory;
-
-                    // In priority order we've found the best runnable extension, so break.
-                    break;
-                }
+                throw new CommandUnknownException(commandName);
             }
+            
+            var command = new Command(commandSpec);
 
-            // On Windows, we want to avoid using "cmd" if possible (it mangles the colors, and a bunch of other things)
-            // So, do a quick path search to see if we can just directly invoke it
-            var useCmd = ShouldUseCmd(executable);
-
-            if (useCmd)
-            {
-                var comSpec = Environment.GetEnvironmentVariable("ComSpec");
-                // wrap 'executable' within quotes to deal woth space in its path.
-                args = $"/S /C \"\"{executable}\" {args}\"";
-                executable = comSpec;
-            }
-
-            return executable;
+            return command;
         }
-
-        private static string ResolveExecutablePathFromProject(string executable, NuGetFramework framework, ref CommandResolutionStrategy resolutionStrategy)
-        {
-            if (framework == null) return null;
-
-            var projectRootPath = Directory.GetCurrentDirectory();
-
-            if (!File.Exists(Path.Combine(projectRootPath, Project.FileName))) return null;
-
-            var commandName = Path.GetFileNameWithoutExtension(executable);
-
-            var projectContext = ProjectContext.Create(projectRootPath, framework);
-
-            var commandPackage = projectContext.LibraryManager.GetLibraries()
-                .Where(l => l.GetType() == typeof (PackageDescription))
-                .Select(l => l as PackageDescription)
-                .FirstOrDefault(p =>
-                {
-                    var fileNames = p.Library.Files
-                        .Select(Path.GetFileName)
-                        .Where(n => Path.GetFileNameWithoutExtension(n) == commandName)
-                        .ToList();
-
-                    return fileNames.Contains(commandName + FileNameSuffixes.DotNet.Exe) &&
-                           fileNames.Contains(commandName + FileNameSuffixes.DotNet.DynamicLib) &&
-                           fileNames.Contains(commandName + FileNameSuffixes.Deps);
-                });
-
-            if (commandPackage == null) return null;
-
-            var commandPath = commandPackage.Library.Files
-                .First(f => Path.GetFileName(f) == commandName + FileNameSuffixes.DotNet.Exe);
-
-            resolutionStrategy = CommandResolutionStrategy.NugetPackage;
-
-            return Path.Combine(projectContext.PackagesDirectory, commandPackage.Path, commandPath);
-        }
-
-        private static bool ShouldUseCmd(string executable)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var extension = Path.GetExtension(executable);
-                if (!string.IsNullOrEmpty(extension))
-                {
-                    return !string.Equals(extension, ".exe", StringComparison.Ordinal);
-                }
-                else if (executable.Contains(Path.DirectorySeparatorChar))
-                {
-                    // It's a relative path without an extension
-                    if (File.Exists(executable + ".exe"))
-                    {
-                        // It refers to an exe!
-                        return false;
-                    }
-                }
-                else
-                {
-                    // Search the path to see if we can find it 
-                    foreach (var path in Environment.GetEnvironmentVariable("PATH").Split(Path.PathSeparator))
-                    {
-                        var candidate = Path.Combine(path, executable + ".exe");
-                        if (File.Exists(candidate))
-                        {
-                            // We found an exe!
-                            return false;
-                        }
-                    }
-                }
-
-                // It's a non-exe :(
-                return true;
-            }
-
-            // Non-windows never uses cmd
-            return false;
-        }
-
+        
         public CommandResult Execute()
         {
             Reporter.Verbose.WriteLine($"Running {_process.StartInfo.FileName} {_process.StartInfo.Arguments}");
@@ -331,149 +195,6 @@ namespace Microsoft.DotNet.Cli.Utils
             if (_running)
             {
                 throw new InvalidOperationException($"Unable to invoke {memberName} after the command has been run");
-            }
-        }
-    }
-
-    public sealed class StreamForwarder
-    {
-        private const int DefaultBufferSize = 256;
-
-        private readonly int _bufferSize;
-        private StringBuilder _builder;
-        private StringWriter _capture;
-        private Action<string> _write;
-        private Action<string> _writeLine;
-
-        public StreamForwarder(int bufferSize = DefaultBufferSize)
-        {
-            _bufferSize = bufferSize;
-        }
-
-        public void Capture()
-        {
-            if (_capture != null)
-            {
-                throw new InvalidOperationException("Already capturing stream!");
-            }
-            _capture = new StringWriter();
-        }
-
-        public string GetCapturedOutput()
-        {
-            return _capture?.GetStringBuilder()?.ToString();
-        }
-
-        public void ForwardTo(Action<string> write, Action<string> writeLine)
-        {
-            if (writeLine == null)
-            {
-                throw new ArgumentNullException(nameof(writeLine));
-            }
-            if (_writeLine != null)
-            {
-                throw new InvalidOperationException("Already handling stream!");
-            }
-            _write = write;
-            _writeLine = writeLine;
-        }
-
-        public Thread BeginRead(TextReader reader)
-        {
-            var thread = new Thread(() => Read(reader)) { IsBackground = true };
-            thread.Start();
-            return thread;
-        }
-
-        public void Read(TextReader reader)
-        {
-            _builder = new StringBuilder();
-            var buffer = new char[_bufferSize];
-            int n;
-            while ((n = reader.Read(buffer, 0, _bufferSize)) > 0)
-            {
-                _builder.Append(buffer, 0, n);
-                WriteBlocks();
-            }
-            WriteRemainder();
-        }
-
-        private void WriteBlocks()
-        {
-            int n = _builder.Length;
-            if (n == 0)
-            {
-                return;
-            }
-
-            int offset = 0;
-            bool sawReturn = false;
-            for (int i = 0; i < n; i++)
-            {
-                char c = _builder[i];
-                switch (c)
-                {
-                    case '\r':
-                        sawReturn = true;
-                        continue;
-                    case '\n':
-                        WriteLine(_builder.ToString(offset, i - offset - (sawReturn ? 1 : 0)));
-                        offset = i + 1;
-                        break;
-                }
-                sawReturn = false;
-            }
-
-            // If the buffer contains no line breaks and _write is
-            // supported, send the buffer content.
-            if (!sawReturn &&
-                (offset == 0) &&
-                ((_write != null) || (_writeLine == null)))
-            {
-                WriteRemainder();
-            }
-            else
-            {
-                _builder.Remove(0, offset);
-            }
-        }
-
-        private void WriteRemainder()
-        {
-            if (_builder.Length == 0)
-            {
-                return;
-            }
-            Write(_builder.ToString());
-            _builder.Clear();
-        }
-
-        private void WriteLine(string str)
-        {
-            if (_capture != null)
-            {
-                _capture.WriteLine(str);
-            }
-            // If _write is supported, so is _writeLine.
-            if (_writeLine != null)
-            {
-                _writeLine(str);
-            }
-        }
-
-        private void Write(string str)
-        {
-            if (_capture != null)
-            {
-                _capture.Write(str);
-            }
-            if (_write != null)
-            {
-                _write(str);
-            }
-            else if (_writeLine != null)
-            {
-                _writeLine(str);
             }
         }
     }

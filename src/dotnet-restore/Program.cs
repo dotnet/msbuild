@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Restore
                     {
                         var project = ProjectReader.GetProject(restoreTask.ProjectPath);
 
-                        RestoreTools(project, restoreTask.Arguments);
+                        RestoreTools(project, restoreTask);
                     }
 
                     return projectRestoreResult;
@@ -60,7 +60,6 @@ namespace Microsoft.DotNet.Tools.Restore
 
                     return -2;
                 }
-
             });
 
             return app.Execute(args);
@@ -101,33 +100,39 @@ namespace Microsoft.DotNet.Tools.Restore
             return firstArg.EndsWith(Project.FileName) && File.Exists(firstArg);
         }
 
-        private static void RestoreTools(Project project, IEnumerable<string> args)
+        private static void RestoreTools(Project project, RestoreTask restoreTask)
         {
             foreach (var tooldep in project.Tools)
             {
-                RestoreTool(tooldep, args);
+                RestoreTool(tooldep, restoreTask);
             }
         }
 
-        private static void RestoreTool(LibraryRange tooldep, IEnumerable<string> args)
+        private static void RestoreTool(LibraryRange tooldep, RestoreTask restoreTask)
         {
-            var tempPath = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString(), "bin");
+            var tempPath = Path.Combine(restoreTask.ProjectDirectory, Guid.NewGuid().ToString(), "bin");
 
-            RestoreToolToPath(tooldep, args, tempPath);
+            RestoreToolToPath(tooldep, restoreTask.Arguments, tempPath);
 
             CreateDepsInPackageCache(tooldep, tempPath);
 
-            PersistLockFile(tooldep, tempPath);
+            PersistLockFile(tooldep, tempPath, restoreTask.ProjectDirectory);
 
             Directory.Delete(tempPath, true);
         }
 
-        private static void PersistLockFile(LibraryRange tooldep, string tempPath)
+        private static void PersistLockFile(LibraryRange tooldep, string tempPath, string projectPath)
         {
-            var targetPath = Path.Combine(Directory.GetCurrentDirectory(), "artifacts", "Tools", tooldep.Name);
-            if (Directory.Exists(targetPath)) Directory.Delete(targetPath, true);
-            Directory.CreateDirectory(targetPath);
-            File.Move(Path.Combine(tempPath, "project.lock.json"), Path.Combine(targetPath, "project.lock.json"));
+            var sourcePath = Path.Combine(tempPath, "project.lock.json");
+            var targetDir = Path.Combine(projectPath, "artifacts", "Tools", tooldep.Name);
+            var targetPath = Path.Combine(targetDir, "project.lock.json");
+
+            if (Directory.Exists(targetDir)) Directory.Delete(targetDir, true);
+            Directory.CreateDirectory(targetDir);
+
+            Console.WriteLine($"Writing '{sourcePath}' to '{targetPath}'");
+
+            File.Move(sourcePath, targetPath);
         }
 
         private static void CreateDepsInPackageCache(LibraryRange toolLibrary, string projectPath)
@@ -156,6 +161,9 @@ namespace Microsoft.DotNet.Tools.Restore
         {
             Directory.CreateDirectory(tempPath);
             var projectPath = Path.Combine(tempPath, Project.FileName);
+
+            Console.WriteLine($"Restoring Tool '{tooldep.Name}' for '{projectPath}' in '{tempPath}'");
+
             File.WriteAllText(projectPath, GenerateProjectJsonContents(new[] {"dnxcore50"}));
             Dnx.RunPackageInstall(tooldep, projectPath, args);
             Dnx.RunRestore(new [] { $"\"{projectPath}\"", "--runtime", $"{DefaultRid}"}.Concat(args));

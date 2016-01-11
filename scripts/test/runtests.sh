@@ -12,6 +12,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   SOURCE="$(readlink "$SOURCE")"
   [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
+
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
@@ -50,6 +51,12 @@ do
         failedTests+=($project)
     fi
 done
+
+"$REPOROOT/scripts/test/package-command-test.sh"
+if [ $? -ne 0 ]; then
+    failCount+=1
+    failedTests+=("package-command-test.sh")
+fi
 
 for test in ${failedTests[@]}
 do
