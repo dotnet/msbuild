@@ -80,7 +80,7 @@ namespace Microsoft.Extensions.DependencyModel
             string[] assemblies;
             if (type == "project")
             {
-                var isExe = ((ProjectDescription) export.Library)
+                var isExe = ((ProjectDescription)export.Library)
                     .Project
                     .GetCompilerOptions(target, configuration)
                     .EmitEntryPoint
@@ -88,7 +88,7 @@ namespace Microsoft.Extensions.DependencyModel
 
                 isExe &= target.IsDesktop();
 
-                assemblies = new[] { export.Library.Identity.Name + (isExe ? ".exe": ".dll") };
+                assemblies = new[] { export.Library.Identity.Name + (isExe ? ".exe" : ".dll") };
             }
             else
             {

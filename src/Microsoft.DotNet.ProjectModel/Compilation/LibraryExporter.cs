@@ -79,43 +79,38 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                 var compilationAssemblies = new List<LibraryAsset>();
                 var sourceReferences = new List<string>();
-
                 var libraryExport = GetExport(library);
 
-                if (libraryExport != null)
+                // We need to filter out source references from non-root libraries,
+                // so we rebuild the library export
+                foreach (var reference in libraryExport.CompilationAssemblies)
                 {
-                    // We need to filter out source references from non-root libraries,
-                    //  so we rebuild the library export
-                    foreach (var reference in libraryExport.CompilationAssemblies)
+                    if (seenMetadataReferences.Add(reference.Name))
                     {
-                        if (seenMetadataReferences.Add(reference.Name))
-                        {
-                            compilationAssemblies.Add(reference);
-                        }
+                        compilationAssemblies.Add(reference);
                     }
-
-                    if (library.Parents.Contains(_rootProject))
-                    {
-                        // Only process source references for direct dependencies
-                        foreach (var sourceReference in libraryExport.SourceReferences)
-                        {
-                            sourceReferences.Add(sourceReference);
-                        }
-                    }
-
-                    yield return new LibraryExport(library, compilationAssemblies, sourceReferences, libraryExport.RuntimeAssemblies, libraryExport.NativeLibraries);
                 }
+
+                if (library.Parents.Contains(_rootProject))
+                {
+                    // Only process source references for direct dependencies
+                    foreach (var sourceReference in libraryExport.SourceReferences)
+                    {
+                        sourceReferences.Add(sourceReference);
+                    }
+                }
+
+                yield return new LibraryExport(library, compilationAssemblies, sourceReferences, libraryExport.RuntimeAssemblies, libraryExport.NativeLibraries);
             }
         }
 
+        /// <summary>
+        /// Create a LibraryExport from LibraryDescription. 
+        /// 
+        /// When the library is not resolved the LibraryExport is created nevertheless.
+        /// </summary>
         private LibraryExport GetExport(LibraryDescription library)
         {
-            // Don't even try to export unresolved libraries
-            if (!library.Resolved)
-            {
-                return null;
-            }
-
             if (Equals(LibraryType.Package, library.Identity.Type))
             {
                 return ExportPackage((PackageDescription)library);
@@ -191,16 +186,13 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private LibraryExport ExportFrameworkLibrary(LibraryDescription library)
         {
-            if (string.IsNullOrEmpty(library.Path))
-            {
-                return null;
-            }
-
             // We assume the path is to an assembly. Framework libraries only export compile-time stuff
             // since they assume the runtime library is present already
             return new LibraryExport(
                 library,
-                new[] { new LibraryAsset(library.Identity.Name, library.Path, library.Path) },
+                string.IsNullOrEmpty(library.Path) ?
+                    Enumerable.Empty<LibraryAsset>() :
+                    new[] { new LibraryAsset(library.Identity.Name, library.Path, library.Path) },
                 Enumerable.Empty<string>(),
                 Enumerable.Empty<LibraryAsset>(),
                 Enumerable.Empty<LibraryAsset>());
