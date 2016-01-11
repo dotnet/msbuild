@@ -8,10 +8,9 @@ $MajorVersion = 1
 $MinorVersion = 0
 $PatchVersion = 0
 
-#TODO @krwq is working on this
-$CommitCountVersion = 0
+$CommitCountVersion = (git rev-list --count HEAD).PadLeft(6, "0")
 
 # Zero Padded Suffix for use with Nuget
-$VersionSuffix = "$ReleaseSuffix-{0:D6}" -f $CommitCountVersion
+$VersionSuffix = "$ReleaseSuffix-$CommitCountVersion"
 
 $env:DOTNET_BUILD_VERSION = "$MajorVersion.$MinorVersion.$PatchVersion.$CommitCountVersion"

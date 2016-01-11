@@ -9,7 +9,6 @@ export MAJOR_VERSION=1
 export MINOR_VERSION=0
 export PATCH_VERSION=0
 
-#TODO @krwq is working on this
-export COMMIT_COUNT_VERSION=0
+export COMMIT_COUNT_VERSION=$(printf "%06d" $(git rev-list --count HEAD))
 
 export DOTNET_BUILD_VERSION=$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION.$COMMIT_COUNT_VERSION
