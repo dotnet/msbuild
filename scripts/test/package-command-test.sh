@@ -17,8 +17,10 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-dotnet pack --output "$REPOROOT/artifacts/packages" "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello"
-dotnet pack --output "$REPOROOT/artifacts/packages" "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello"
+dotnet pack "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello"
+cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello/bin/Debug/"*.nupkg "$REPOROOT/artifacts/packages" 
+dotnet pack "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello"
+cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello/bin/Debug/"*.nupkg "$REPOROOT/artifacts/packages"
 
 # enable restore for test projects
 for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "AppWith") 
@@ -63,5 +65,3 @@ do
     
     popd
 done
-
-exit 0

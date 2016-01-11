@@ -9,7 +9,8 @@
 
 "v1", "v2" |
 foreach {
-    dotnet pack --output "$RepoRoot\artifacts\packages" "$RepoRoot\test\PackagedCommands\Commands\dotnet-hello\$_\dotnet-hello"
+    dotnet pack "$RepoRoot\test\PackagedCommands\Commands\dotnet-hello\$_\dotnet-hello"
+    cp "$RepoRoot\test\PackagedCommands\Commands\dotnet-hello\$_\dotnet-hello\bin\Debug\*.nupkg" -Destination "$RepoRoot\artifacts\packages" 
     if (!$?) {
         error "Command failed: dotnet pack"
         Exit 1
