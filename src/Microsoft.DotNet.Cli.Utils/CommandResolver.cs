@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return ResolveFromRootedCommand(commandName, args) ??
                    ResolveFromProjectDependencies(commandName, args, framework) ??
                    ResolveFromProjectTools(commandName, args) ??
+                   ResolveFromAppBase(commandName, args) ??
                    ResolveFromPath(commandName, args);
         }
 
@@ -24,22 +25,18 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             var commandPath = Env.GetCommandPath(commandName);
 
-            if (commandPath == null) return null;
+            return commandPath == null 
+                ? null 
+                : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.Path);
+        }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-                Path.GetExtension(commandPath).Equals(".cmd", StringComparison.OrdinalIgnoreCase))
-            {
-                var preferredCommandPath = Env.GetCommandPath(commandName, ".exe");
+        private static CommandSpec ResolveFromAppBase(string commandName, string args)
+        {
+            var commandPath = Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, commandName);
 
-                if (preferredCommandPath != null)
-                {
-                    commandPath = Environment.GetEnvironmentVariable("ComSpec");
-
-                    args = $"/S /C \"\"{preferredCommandPath}\" {args}\"";
-                }
-            }
-
-            return new CommandSpec(commandPath, args, CommandResolutionStrategy.Path);
+            return commandPath == null 
+                ? null 
+                : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.BaseDirectory);
         }
 
         private static CommandSpec ResolveFromRootedCommand(string commandName, string args)
@@ -193,6 +190,25 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return Path.Combine(context.GetOutputDirectoryPath(buildConfiguration),
                 context.ProjectFile.Name + FileNameSuffixes.Deps);
+        }
+
+        private static CommandSpec CreateCommandSpecPreferringExe(string commandName, string args, string commandPath,
+            CommandResolutionStrategy resolutionStrategy)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                Path.GetExtension(commandPath).Equals(".cmd", StringComparison.OrdinalIgnoreCase))
+            {
+                var preferredCommandPath = Env.GetCommandPath(commandName, ".exe");
+
+                if (preferredCommandPath != null)
+                {
+                    commandPath = Environment.GetEnvironmentVariable("ComSpec");
+
+                    args = $"/S /C \"\"{preferredCommandPath}\" {args}\"";
+                }
+            }
+
+            return new CommandSpec(commandPath, args, resolutionStrategy);
         }
     }
 }
