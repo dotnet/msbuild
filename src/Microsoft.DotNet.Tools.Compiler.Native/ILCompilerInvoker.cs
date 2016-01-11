@@ -45,9 +45,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var inputFilePath = config.InputManagedAssemblyPath;
             argsList.Add($"\"{inputFilePath}\"");
             
-            // System.Private.CoreLib Reference
-            var coreLibPath = Path.Combine(config.IlcSdkPath, "sdk", "*.dll");
-            argsList.Add($"-r \"{coreLibPath}\"");
+            // System.Private.* References
+            var coreLibsPath = Path.Combine(config.IlcSdkPath, "sdk");
+            foreach (var reference in Directory.EnumerateFiles(coreLibsPath, "*.dll"))
+            {
+                argsList.Add($"-r \"{reference}\"");
+            }
             
             // AppDep References
             foreach (var reference in config.ReferencePaths)
