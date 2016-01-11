@@ -5,12 +5,17 @@
 
 . "$PSScriptRoot\..\common\_common.ps1"
 
+$TestPackagesPath = "$RepoRoot\tests\packages"
 
+if((Test-Path $TestPackagesPath) -eq 0)
+{
+    mkdir $TestPackagesPath;
+}
 
 "v1", "v2" |
 foreach {
     dotnet pack "$RepoRoot\test\PackagedCommands\Commands\dotnet-hello\$_\dotnet-hello"
-    cp "$RepoRoot\test\PackagedCommands\Commands\dotnet-hello\$_\dotnet-hello\bin\Debug\*.nupkg" -Destination "$RepoRoot\artifacts\packages" 
+    cp "$RepoRoot\test\PackagedCommands\Commands\dotnet-hello\$_\dotnet-hello\bin\Debug\*.nupkg" -Destination $TestPackagesPath
     if (!$?) {
         error "Command failed: dotnet pack"
         Exit 1
@@ -27,7 +32,7 @@ foreach {
 
 #restore test projects
 pushd "$RepoRoot\test\PackagedCommands\Consumers"
-dotnet restore -s "$RepoRoot\artifacts\packages" --no-cache --ignore-failed-sources --parallel
+dotnet restore -s "$TestPackagesPath" --no-cache --ignore-failed-sources --parallel
 if (!$?) {
     error "Command failed: dotnet restore"
     Exit 1

@@ -17,10 +17,15 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
+TestPackagesPath="$REPOROOT/tests/packages" 
+
+mkdir "$REPOROOT/tests"
+mkdir "$TestPackagesPath"
+
 dotnet pack "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello"
-cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello/bin/Debug/"*.nupkg "$REPOROOT/artifacts/packages" 
+cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello/bin/Debug/"*.nupkg "$TestPackagesPath"
 dotnet pack "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello"
-cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello/bin/Debug/"*.nupkg "$REPOROOT/artifacts/packages"
+cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello/bin/Debug/"*.nupkg "$TestPackagesPath"
 
 # enable restore for test projects
 for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "AppWith") 
@@ -32,7 +37,7 @@ done
 
 # restore test projects
 pushd "$REPOROOT/test/PackagedCommands/Consumers"
-dotnet restore -s "$REPOROOT/artifacts/packages" --no-cache --ignore-failed-sources --parallel
+dotnet restore -s "$TestPackagesPath" --no-cache --ignore-failed-sources --parallel
 popd
 
 #compile tests with direct dependencies
