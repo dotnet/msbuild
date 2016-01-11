@@ -44,4 +44,4 @@ foreach ($ProjectName in $Projects) {
     }
 }
 
-Get-ChildItem $IntermediatePackagesDir -Filter *.nupkg | Copy-Item -Destination $PackagesDir
+Get-ChildItem $IntermediatePackagesDir -Filter *.nupkg | ? {$_.Name -NotLike "*.symbols.nupkg"} | Copy-Item -Destination $PackagesDir
