@@ -15,10 +15,10 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string BinDirectoryName = "bin";
         public static readonly string ObjDirectoryName = "obj";
 
-        public static readonly string LibCoreClrName = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "coreclr" : "libcoreclr") + DynamicLibSuffix;
-
         public static readonly string DynamicLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll"   : 
                                                          RuntimeInformation.IsOSPlatform(OSPlatform.OSX)     ? ".dylib" : ".so";
+
+        public static readonly string LibCoreClrName = (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "coreclr" : "libcoreclr") + DynamicLibSuffix;
 
         public static readonly string RuntimeIdentifier = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win7-x64" :
                                                           RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx.10.10-x64" : "ubuntu.14.04-x64";
