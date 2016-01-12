@@ -45,6 +45,7 @@ _ "$RepoRoot\scripts\test\validate-dependencies.ps1"
 
 if ($NoPackage){
     info "Skipping Packaging"
+    exit 0
 }
 else {
     _ "$RepoRoot\scripts\package\package.ps1"
