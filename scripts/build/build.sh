@@ -24,6 +24,15 @@ header "Checking Pre-Reqs"
 
 $REPOROOT/scripts/test/check-prereqs.sh
 
+header "Adjusting file descriptors limit, if necessary"
+# Increases the file descriptors limit for this bash. It prevents an issue we were hitting during restore
+FILE_DESCRIPTOR_LIMIT=$( ulimit -n )
+if [ $FILE_DESCRIPTOR_LIMIT -lt 512 ]
+then
+    info "Increasing file description limit to 512"
+    ulimit -n 512
+fi
+
 header "Restoring Tools and Packages"
 
 if [ ! -z "$OFFLINE" ]; then
