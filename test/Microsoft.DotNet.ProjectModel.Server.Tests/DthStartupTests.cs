@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             }
         }
 
-        [Theory]
+        [Fact]
         public void DthStartup_ProtocolNegotiation_ZeroIsNoAllowed()
         {
             using (var server = new DthTestServer(_testHelper.LoggerFactory))

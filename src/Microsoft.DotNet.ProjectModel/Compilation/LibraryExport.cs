@@ -1,10 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Microsoft.DotNet.ProjectModel.Compilation
 {
@@ -45,12 +43,6 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             NativeLibraries = nativeLibraries;
         }
 
-        private string DebuggerDisplay
-        {
-            get
-            {
-                return Library.Identity.ToString();
-            }
-        }
+        private string DebuggerDisplay => Library.Identity.ToString();
     }
 }

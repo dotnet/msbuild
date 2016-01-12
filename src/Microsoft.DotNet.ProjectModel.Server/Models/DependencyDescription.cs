@@ -3,7 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Server.Helpers;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Models
 {
@@ -51,37 +52,29 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
             return base.GetHashCode();
         }
 
-        public static DependencyDescription Create(LibraryDescription library, IEnumerable<DiagnosticMessage> diagnostics)
+        public static DependencyDescription Create(LibraryDescription library,
+                                                   List<DiagnosticMessage> diagnostics,
+                                                   Dictionary<string, LibraryExport> allExports)
         {
+            var name = library.GetUniqueName();
             return new DependencyDescription
             {
-                Name = library.Identity.Name,
-                DisplayName = GetLibraryDisplayName(library),
-                Version = library.Identity.Version?.ToString(),
+                Name = name,
+                DisplayName = library.Identity.Name,
+                Version = library.Identity.Version?.ToNormalizedString(),
                 Type = library.Identity.Type.Value,
                 Resolved = library.Resolved,
                 Path = library.Path,
                 Dependencies = library.Dependencies.Select(dependency => new DependencyItem
                 {
-                    Name = dependency.Name,
-                    Version = dependency.VersionRange?.ToString() // TODO: review
+                    Name = dependency.GetUniqueName(),
+                    Version = allExports[dependency.GetUniqueName()].Library.Identity.Version?.ToNormalizedString()
                 }),
                 Errors = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Error)
                                     .Select(d => new DiagnosticMessageView(d)),
                 Warnings = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Warning)
                                       .Select(d => new DiagnosticMessageView(d))
             };
-        }
-
-        private static string GetLibraryDisplayName(LibraryDescription library)
-        {
-            var name = library.Identity.Name;
-            if (library.Identity.Type == LibraryType.ReferenceAssembly && name.StartsWith("fx/"))
-            {
-                name = name.Substring(3);
-            }
-
-            return name;
         }
     }
 }

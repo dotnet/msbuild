@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Runtime.Loader;
 using System.Text;
 using NuGet.Versioning;
@@ -10,10 +9,16 @@ namespace Microsoft.DotNet.ProjectModel.Utilities
 {
     public static class VersionUtility
     {
+        public static readonly string DnxCoreFrameworkIdentifier = "DNXCore";
+        public static readonly string DnxFrameworkIdentifier = "DNX";
+        public static readonly string NetPlatformFrameworkIdentifier = ".NETPlatform";
+        public static readonly string NetFrameworkIdentifier = ".NETFramework";
+
         internal static NuGetVersion GetAssemblyVersion(string path)
         {
             return new NuGetVersion(AssemblyLoadContext.GetAssemblyName(path).Version);
         }
+
         public static string RenderVersion(VersionRange range)
         {
             if (range == null)

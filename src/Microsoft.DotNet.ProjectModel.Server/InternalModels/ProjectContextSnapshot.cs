@@ -11,7 +11,7 @@ using NuGet.Frameworks;
 namespace Microsoft.DotNet.ProjectModel.Server
 {
     internal class ProjectContextSnapshot
-    {        
+    {
         public string RootDependency { get; set; }
         public NuGetFramework TargetFramework { get; set; }
         public IReadOnlyList<string> SourceFiles { get; set; }
@@ -24,31 +24,36 @@ namespace Microsoft.DotNet.ProjectModel.Server
         public static ProjectContextSnapshot Create(ProjectContext context, string configuration, IEnumerable<string> currentSearchPaths)
         {
             var snapshot = new ProjectContextSnapshot();
-            
+
             var allDependencyDiagnostics = new List<DiagnosticMessage>();
             allDependencyDiagnostics.AddRange(context.LibraryManager.GetAllDiagnostics());
             allDependencyDiagnostics.AddRange(DependencyTypeChangeFinder.Diagnose(context, currentSearchPaths));
 
             var diagnosticsLookup = allDependencyDiagnostics.ToLookup(d => d.Source);
 
+            var allExports = context.CreateExporter(configuration)
+                                    .GetAllExports()
+                                    .ToDictionary(export => export.Library.GetUniqueName());
             var allSourceFiles = new List<string>(context.ProjectFile.Files.SourceFiles);
             var allFileReferences = new List<string>();
             var allProjectReferences = new List<ProjectReferenceDescription>();
             var allDependencies = new Dictionary<string, DependencyDescription>();
-            
-            foreach (var export in context.CreateExporter(configuration).GetDependencies())
+
+            // All exports are returned. When the same library name have a ReferenceAssembly type export and a Package type export
+            // both will be listed as dependencies. Prefix "fx/" will be added to ReferenceAssembly type dependency.
+            foreach (var pair in allExports)
             {
+                var export = pair.Value;
+
                 allSourceFiles.AddRange(export.SourceReferences);
                 allFileReferences.AddRange(export.CompilationAssemblies.Select(asset => asset.ResolvedPath));
 
-                var library = export.Library;
-                var diagnostics = diagnosticsLookup[library].ToList();
-                var description = DependencyDescription.Create(library, diagnostics);
+                var diagnostics = diagnosticsLookup[export.Library].ToList();
+                var description = DependencyDescription.Create(export.Library, diagnostics, allExports);
                 allDependencies[description.Name] = description;
 
-                var projectDescription = library as ProjectDescription;
-
-                if (projectDescription != null)
+                var projectDescription = export.Library as ProjectDescription;
+                if (projectDescription != null && projectDescription.Identity.Name != context.ProjectFile.Name)
                 {
                     allProjectReferences.Add(ProjectReferenceDescription.Create(projectDescription));
                 }

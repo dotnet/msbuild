@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
             {
                 ShortName = framework.GetShortFolderName(),
                 FrameworkName = framework.DotNetFrameworkName,
-                FriendlyName = framework.Framework,
+                FriendlyName = FrameworkReferenceResolver.Default.GetFriendlyFrameworkName(framework),
                 RedistListPath = FrameworkReferenceResolver.Default.GetFrameworkRedistListPath(framework)
             };
         }

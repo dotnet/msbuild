@@ -142,6 +142,38 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
             return information.RedistListPath;
         }
+
+        public string GetFriendlyFrameworkName(NuGetFramework targetFramework)
+        {
+            var frameworkName = new FrameworkName(targetFramework.DotNetFrameworkName);
+
+            // We don't have a friendly name for this anywhere on the machine so hard code it
+            if (string.Equals(frameworkName.Identifier, VersionUtility.DnxCoreFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+            {
+                return "DNX Core 5.0";
+            }
+            else if (string.Equals(frameworkName.Identifier, VersionUtility.DnxFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+            {
+                return "DNX " + targetFramework.Version.ToString();
+            }
+            else if (string.Equals(frameworkName.Identifier, VersionUtility.NetPlatformFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+            {
+                var version = targetFramework.Version > Constants.Version50 ?
+                    (" " + targetFramework.Version.ToString()) :
+                    string.Empty;
+                return ".NET Platform" + version;
+            }
+
+            var information = _cache.GetOrAdd(targetFramework, GetFrameworkInformation);
+
+            if (information == null)
+            {
+                return SynthesizeFrameworkFriendlyName(targetFramework);
+            }
+
+            return information.Name;
+        }
+
         private FrameworkInformation GetFrameworkInformation(NuGetFramework targetFramework)
         {
             string referenceAssembliesPath = ReferenceAssembliesPath;
