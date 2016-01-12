@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "NETStandard.Library": "1.0.0-rc2-23704",
-    "System.Linq": "4.0.1-rc2-23608",
+    "System.Linq": "4.0.1-rc2-23704",
     "System.Reflection.Metadata": "1.1.0",
     
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
@@ -22,9 +22,5 @@
     "dnxcore50": { }
   },
   "scripts": {
-    "postcompile": [
-        "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.dll\"",
-        "../../scripts/build/place-binary \"%compile:OutputDir%/%project:Name%.pdb\""
-    ]
   }
 }

@@ -55,9 +55,6 @@ FILES_TO_CLEAN=( \
     Microsoft.DotNet.Runtime.pdb \
 )
 
-# Clean up output
-[ -d "$OUTPUT_DIR" ] && rm -Rf "$OUTPUT_DIR"
-
 RUNTIME_OUTPUT_DIR="$OUTPUT_DIR/runtime/coreclr"
 
 for project in ${PROJECTS[@]}
@@ -100,25 +97,33 @@ cd $OUTPUT_DIR
 find . -type f | xargs chmod 644
 $REPOROOT/scripts/build/fix-mode-flags.sh
 
-info "Crossgenning Roslyn compiler ..."
-$REPOROOT/scripts/crossgen/crossgen_roslyn.sh "$OUTPUT_DIR/bin"
+if [ ! -f "$OUTPUT_DIR/bin/csc.ni.exe" ]; then
+    info "Crossgenning Roslyn compiler ..."
+    $REPOROOT/scripts/crossgen/crossgen_roslyn.sh "$OUTPUT_DIR/bin"
+fi
 
 # Make OUTPUT_DIR Folder Accessible
 chmod -R a+r $OUTPUT_DIR
 
 # Copy DNX in to OUTPUT_DIR
-cp -R $DNX_ROOT $OUTPUT_DIR/bin/dnx
+if [ ! -d $OUTPUT_DIR/bin/dnx ]; then
+    cp -R $DNX_ROOT $OUTPUT_DIR/bin/dnx
+fi
 
 # Copy and CHMOD the dotnet-dnx script
-cp $REPOROOT/scripts/dotnet-dnx.sh $OUTPUT_DIR/bin/dotnet-dnx
-chmod a+x $OUTPUT_DIR/bin/dotnet-dnx
+if [ ! -f $OUTPUT_DIR/bin/dotnet-dnx ]; then
+    cp $REPOROOT/scripts/dotnet-dnx.sh $OUTPUT_DIR/bin/dotnet-dnx
+    chmod a+x $OUTPUT_DIR/bin/dotnet-dnx
+fi
 
 # No compile native support in centos yet
 # https://github.com/dotnet/cli/issues/453
-if [ "$OSNAME" != "centos"  ]; then
+if [ "$OSNAME" != "centos" ]; then
     # Copy in AppDeps
-    header "Acquiring Native App Dependencies"
-    DOTNET_HOME=$OUTPUT_DIR DOTNET_TOOLS=$OUTPUT_DIR $REPOROOT/scripts/build/build_appdeps.sh "$OUTPUT_DIR/bin"
+    if [ ! -d "$OUTPUT_DIR/bin/appdepsdk" ]; then
+        header "Acquiring Native App Dependencies"
+        DOTNET_HOME=$OUTPUT_DIR DOTNET_TOOLS=$OUTPUT_DIR $REPOROOT/scripts/build/build_appdeps.sh "$OUTPUT_DIR/bin"
+    fi
 fi
 
 # Stamp the output with the commit metadata

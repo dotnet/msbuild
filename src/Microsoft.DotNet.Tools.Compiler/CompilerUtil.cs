@@ -2,18 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.Tools.Common;
+using NuGet.Frameworks;
 
-//This class is responsible with defining the arguments for the Compile verb.
-//It knows how to interpret them and set default values
+// This class is responsible with defining the arguments for the Compile verb.
+// It knows how to interpret them and set default values
 
 namespace Microsoft.DotNet.Tools.Compiler
 {
@@ -32,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             public readonly string InputFile;
             public readonly string MetadataName;
 
-            //is non-null only when resgen needs to be invoked (inputFile is .resx)
+            // is non-null only when resgen needs to be invoked (inputFile is .resx)
             public readonly string OutputFile;
 
             public NonCultureResgenIO(string inputFile, string outputFile, string metadataName)
@@ -43,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        //used in incremental compilation
+        // used in incremental compilation
         public static List<NonCultureResgenIO> GetNonCultureResources(Project project, string intermediateOutputPath)
         {
             return 
@@ -70,7 +71,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
         }
 
-        //used in incremental compilation
+        // used in incremental compilation
         public static List<CultureResgenIO> GetCultureResources(Project project, string outputPath)
         {
             return
@@ -84,7 +85,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     ).ToList();
         }
 
-        //used in incremental compilation
+        // used in incremental compilation
         public static IList<string> GetReferencePathsForCultureResgen(List<LibraryExport> dependencies)
         {
             return dependencies.SelectMany(libraryExport => libraryExport.CompilationAssemblies).Select(r => r.ResolvedPath).ToList();
@@ -99,7 +100,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             string resourcePath = resourceFile.Key;
             if (string.IsNullOrEmpty(resourceFile.Value))
             {
-                // No logical name, so use the file name
+                //  No logical name, so use the file name
                 resourceName = ResourceUtility.GetResourceName(root, resourcePath);
                 rootNamespace = project.Name;
             }
@@ -111,6 +112,44 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var name = ResourceManifestName.CreateManifestName(resourceName, rootNamespace);
             return name;
+        }
+
+        // used in incremental compilation
+        public static IEnumerable<string> GetCompilationSources(ProjectContext project) => project.ProjectFile.Files.SourceFiles;
+
+        // used in incremental compilation
+        public static string GetCompilationOutput(Project project, NuGetFramework framework, string configuration, string outputPath)
+        {
+            var compilationOptions = project.GetCompilerOptions(framework, configuration);
+            var outputExtension = ".dll";
+
+            if (framework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
+            {
+                outputExtension = ".exe";
+            }
+
+            return Path.Combine(outputPath, project.Name + outputExtension);
+        }
+
+        // used in incremental compilation for the key file
+        public static CommonCompilerOptions ResolveCompilationOptions(ProjectContext context, string configuration)
+        {
+            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+
+            // Path to strong naming key in environment variable overrides path in project.json
+            var environmentKeyFile = Environment.GetEnvironmentVariable(EnvironmentNames.StrongNameKeyFile);
+
+            if (!string.IsNullOrWhiteSpace(environmentKeyFile))
+            {
+                compilationOptions.KeyFile = environmentKeyFile;
+            }
+            else if (!string.IsNullOrWhiteSpace(compilationOptions.KeyFile))
+            {
+                // Resolve full path to key file
+                compilationOptions.KeyFile =
+                    Path.GetFullPath(Path.Combine(context.ProjectFile.ProjectDirectory, compilationOptions.KeyFile));
+            }
+            return compilationOptions;
         }
 
         public static IEnumerable<string> GetCommandsInvokedByCompile(ProjectContext project)
