@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     .Select(f => Path.Combine(packageDir, f))
                     .FirstOrDefault();
 
-                fileName = CoreHost.Path;
+                fileName = CoreHost.HostExePath;
 
                 var depsArg = string.Empty;
 

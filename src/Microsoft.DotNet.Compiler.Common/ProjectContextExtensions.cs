@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                     .SelectMany(e => e.RuntimeAssets())
                     .CopyTo(outputPath);
 
-                CoreHost.CopyTo(Path.Combine(outputPath, context.ProjectFile.Name + Constants.ExeSuffix));
+                CoreHost.CopyTo(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
             }
         }
 

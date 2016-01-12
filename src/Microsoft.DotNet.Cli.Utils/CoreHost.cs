@@ -5,26 +5,45 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public static class CoreHost
     {
-        internal static string _path;
+        internal static string _hostDir;
+        internal static string _hostExePath;
 
-        public static string FileName = "corehost" + FileNameSuffixes.CurrentPlatform.Exe;
-
-        public static string Path
+        public static string HostExePath
         {
             get
             {
-                if (_path == null)
+                if (_hostExePath == null)
                 {
-                    _path = Env.GetCommandPath(FileName, new[] {string.Empty});
+                    _hostExePath = Path.Combine(HostDir, Constants.HostExecutableName);
                 }
-
-                return _path;
+                return _hostExePath;
             }
         }
 
-        public static void CopyTo(string destinationPath)
+        private static string HostDir
         {
-            File.Copy(Path, destinationPath, overwrite: true);
+            get
+            {
+                if (_hostDir == null)
+                {
+                    _hostDir = Path.GetDirectoryName(Env.GetCommandPath(
+                        Constants.HostExecutableName, new[] {string.Empty}));
+                }
+
+                return _hostDir;
+            }
+        }
+
+        public static void CopyTo(string destinationPath, string hostExeName)
+        {
+            foreach (var binaryName in Constants.HostBinaryNames)
+            {
+                var outputBinaryName = binaryName.Equals(Constants.HostExecutableName)
+                                     ? hostExeName : binaryName;
+                var outputBinaryPath = Path.Combine(destinationPath, outputBinaryName);
+                var hostBinaryPath = Path.Combine(HostDir, binaryName);
+                File.Copy(hostBinaryPath, outputBinaryPath, overwrite: true);
+            }
         }
     }
 }
