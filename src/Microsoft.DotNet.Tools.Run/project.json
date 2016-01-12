@@ -7,7 +7,7 @@
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23704",
         
-        "Microsoft.Net.Compilers.netcore": "1.2.0-beta1-20151228-02",
+        "Microsoft.Net.Compilers.netcore": "1.2.0-beta1-20160108-01",
         "System.CommandLine" : "0.1.0-d111815-3",
 
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
