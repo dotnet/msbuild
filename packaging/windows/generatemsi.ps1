@@ -63,7 +63,7 @@ function RunCandle
     Write-Host Running candle..
     $AuthWsxRoot =  Join-Path $RepoRoot "packaging\windows"
 
-    .\candle.exe -dDotnetSrc="$inputDir" -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" -dBuildVersion="$env:DOTNET_BUILD_VERSION" -arch x64 `
+    .\candle.exe -dDotnetSrc="$inputDir" -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" -dBuildVersion="$env:DOTNET_CLI_VERSION" -arch x64 `
         -ext WixDependencyExtension.dll `
         "$AuthWsxRoot\dotnet.wxs" `
         "$AuthWsxRoot\provider.wxs" `
@@ -115,7 +115,7 @@ if(!(Test-Path $PackageDir))
     mkdir $PackageDir | Out-Null
 }
 
-$DotnetMSIOutput = Join-Path $PackageDir "dotnet-win-x64.$env:DOTNET_BUILD_VERSION.msi"
+$DotnetMSIOutput = Join-Path $PackageDir "dotnet-win-x64.$env:DOTNET_CLI_VERSION.msi"
 
 Write-Host "Creating dotnet MSI at $DotnetMSIOutput"
 

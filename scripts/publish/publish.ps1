@@ -9,7 +9,7 @@ param(
 
 function CheckRequiredVariables 
 {
-    if([string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION))
+    if([string]::IsNullOrEmpty($env:DOTNET_CLI_VERSION))
     {
         return $false
     }
@@ -71,7 +71,7 @@ function UploadBinaries($zipFile)
 {
     $result = -1
     $fileName = [System.IO.Path]::GetFileName($zipFile)
-    $zipBlob = "$env:CHANNEL/Binaries/$env:DOTNET_BUILD_VERSION/$fileName"
+    $zipBlob = "$env:CHANNEL/Binaries/$env:DOTNET_CLI_VERSION/$fileName"
 
     if(-Not (UploadFile $zipBlob $zipFile))
     {
@@ -88,7 +88,7 @@ function UploadBinaries($zipFile)
 
 
     # update the index file too
-    $indexContent = "Binaries/$env:DOTNET_BUILD_VERSION/$fileName"
+    $indexContent = "Binaries/$env:DOTNET_CLI_VERSION/$fileName"
     $indexFile = "$env:TEMP\latest.win.index"
     $indexContent | Out-File -FilePath $indexFile
 
@@ -115,7 +115,7 @@ function UploadBinaries($zipFile)
 function UploadInstallers($msiFile)
 {
     $fileName = [System.IO.Path]::GetFileName($msiFile)
-    $msiBlob = "$env:CHANNEL/Installers/$env:DOTNET_BUILD_VERSION/$fileName"
+    $msiBlob = "$env:CHANNEL/Installers/$env:DOTNET_CLI_VERSION/$fileName"
 
     if(-Not (UploadFile $msiBlob $msiFile))
     {

@@ -3,12 +3,6 @@
 # Copyright (c) .NET Foundation and contributors. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
-
-# Takes Parameters:
-#   $1 = Input Directory
-#   $2 = Output Directory
-#   $3 = Package Version
-
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -18,7 +12,7 @@ source $SCRIPT_DIR/scripts/debian_build_lib.sh
 
 ## Debian Package Creation Functions ##
 execute(){
-    if ! parse_args_and_set_env_vars $@; then
+    if ! parse_args_and_set_env_vars "$@"; then
         exit 1
     fi
 
@@ -45,16 +39,16 @@ parse_args_and_set_env_vars(){
     while getopts ":n:v:i:o:h" opt; do
       case $opt in
         n)
-          PACKAGE_NAME="$OPTARG"
+          export PACKAGE_NAME="$OPTARG"
           ;;
         v)
-          PACKAGE_VERSION="$OPTARG"
+          export PACKAGE_VERSION="$OPTARG"
           ;;
         i)
-          INPUT_DIR="$OPTARG"
+          export INPUT_DIR="$OPTARG"
           ;;
         o)
-          OUTPUT_DIR="$OPTARG"
+          export OUTPUT_DIR="$OPTARG"
           ;;
         h)
           print_help
@@ -70,6 +64,11 @@ parse_args_and_set_env_vars(){
           ;;
       esac
     done
+    
+     # Special Input Directories + Paths
+    ABSOLUTE_PLACEMENT_DIR="${INPUT_DIR}/\$"
+    PACKAGE_ROOT_PLACEMENT_DIR="${INPUT_DIR}/package_root"
+    CONFIG="$INPUT_DIR/debian_config.json"
 
     return 0
 }
@@ -95,34 +94,28 @@ print_help(){
 
 validate_inputs(){
     local ret=0
-    if [[ ! -d $ABSOLUTE_PLACEMENT_DIR ]]; then
-        echo "ERROR: $ directory does not exist"
-        echo $ABSOLUTE_PLACEMENT_DIR
+    if [[ -z "$INPUT_DIR" ]]; then
+        echo "ERROR: -i <INPUT_DIRECTORY> Not Specified"
         ret=1
     fi
 
-    if [[ ! -d $PACKAGE_ROOT_PLACEMENT_DIR ]]; then
+    if [[ -z "$OUTPUT_DIR" ]]; then
+        echo "ERROR: -o <OUTPUT_DIRECTORY> Not Specified."
+        ret=1
+    fi
+
+    if [[ ! -d "$PACKAGE_ROOT_PLACEMENT_DIR" ]]; then
         echo "ERROR: package_root directory does not exist"
         echo $PACKAGE_ROOT_PLACEMENT_DIR
         ret=1
     fi
 
-    if [[ ! -f $CONFIG ]]; then
+    if [[ ! -f "$CONFIG" ]]; then
         echo "ERROR: debian_config.json file does not exist"
         echo $CONFIG
         ret=1
     fi
-
-    if [[ -z "$INPUT_DIR" ]];
-        echo "ERROR: -i <INPUT_DIRECTORY> Not Specified"
-        ret=1
-    fi
-
-    if [[ -z "$OUTPUT_DIR" ]];
-        echo "ERROR: -o <OUTPUT_DIRECTORY> Not Specified."
-        ret=1
-    fi
-
+    
     return $ret
 }
 
@@ -133,15 +126,10 @@ parse_config_and_set_env_vars(){
     [ -z "$PACKAGE_VERSION" ] && PACKAGE_VERSION="$($extract_base_cmd $CONFIG "release.package_version")"
     [ -z "$PACKAGE_NAME" ] && PACKAGE_NAME="$($extract_base_cmd $CONFIG "package_name")"
 
-    # Special Input Directories + Paths
-    ABSOLUTE_PLACEMENT_DIR="${INPUT_DIR}/\$"
-    PACKAGE_ROOT_PLACEMENT_DIR="${INPUT_DIR}/package_root"
-
     # Inputs
     INPUT_SAMPLES_DIR="$INPUT_DIR/samples"
     INPUT_DOCS_DIR="$INPUT_DIR/docs"
     DOCS_JSON_PATH="$INPUT_DIR/docs.json"
-    CONFIG="$INPUT_DIR/debian_config.json"
 
     PACKAGE_SOURCE_DIR="${OUTPUT_DIR}/${PACKAGE_NAME}-${PACKAGE_VERSION}"
     INSTALL_ROOT="/usr/share/${PACKAGE_NAME}"
@@ -193,21 +181,23 @@ package_package_root_placement(){
 }
 
 package_absolute_placement(){
-    abs_in_package_dir="\$"
-
-    add_dir_to_install ${ABSOLUTE_PLACEMENT_DIR} $abs_in_package_dir
-
-    # Get List of all files in directory tree, relative to ABSOLUTE_PLACEMENT_DIR
-    abs_files=( $(_get_files_in_dir_tree $ABSOLUTE_PLACEMENT_DIR) )
-
-    # For each file add a a system placement
-    for abs_file in ${abs_files[@]}
-    do
-        parent_dir=$(dirname $abs_file)
-        filename=$(basename $abs_file)
-
-        add_system_file_placement "$abs_in_package_dir/$abs_file" "/$parent_dir"
-    done
+    if [[ -d "$ABSOLUTE_PLACEMENT_DIR" ]]; then
+        abs_in_package_dir="\$"
+    
+        add_dir_to_install ${ABSOLUTE_PLACEMENT_DIR} $abs_in_package_dir
+    
+        # Get List of all files in directory tree, relative to ABSOLUTE_PLACEMENT_DIR
+        abs_files=( $(_get_files_in_dir_tree $ABSOLUTE_PLACEMENT_DIR) )
+    
+        # For each file add a a system placement
+        for abs_file in ${abs_files[@]}
+        do
+            parent_dir=$(dirname $abs_file)
+            filename=$(basename $abs_file)
+    
+            add_system_file_placement "$abs_in_package_dir/$abs_file" "/$parent_dir"
+        done
+    fi
 }
 
 package_samples(){
@@ -268,4 +258,4 @@ generate_sample_manifest(){
     fi
 }
 
-execute
+execute "$@"

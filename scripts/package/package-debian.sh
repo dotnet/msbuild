@@ -87,8 +87,8 @@ create_debian_package(){
     header "Packing .deb"
 
     mkdir -p "$PACKAGE_OUTPUT_DIR"
-
-    "$PACKAGING_ROOT/package_tool/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_BUILD_VERSION -n $DOTNET_DEB_PACKAGE_NAME
+    
+    "$PACKAGING_ROOT/package_tool/package_tool" -i "$PACKAGE_LAYOUT_DIR" -o "$PACKAGE_OUTPUT_DIR" -v $DOTNET_CLI_VERSION -n $DOTNET_DEB_PACKAGE_NAME
 }
 
 test_debian_package(){

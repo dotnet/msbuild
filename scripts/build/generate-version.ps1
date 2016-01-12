@@ -3,14 +3,14 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-$ReleaseSuffix = "dev"
-$MajorVersion = 1
-$MinorVersion = 0
-$PatchVersion = 0
+$env:ReleaseSuffix = "dev"
+$env:MajorVersion = 1
+$env:MinorVersion = 0
+$env:PatchVersion = 0
 
-$CommitCountVersion = (git rev-list --count HEAD).PadLeft(6, "0")
+$env:CommitCountVersion = (git rev-list --count HEAD).PadLeft(6, "0")
 
 # Zero Padded Suffix for use with Nuget
-$VersionSuffix = "$ReleaseSuffix-$CommitCountVersion"
+$env:VersionSuffix = "$env:ReleaseSuffix-$env:CommitCountVersion"
 
-$env:DOTNET_BUILD_VERSION = "$MajorVersion.$MinorVersion.$PatchVersion.$CommitCountVersion"
+$env:DOTNET_CLI_VERSION = "$env:MajorVersion.$env:MinorVersion.$env:PatchVersion.$env:CommitCountVersion"

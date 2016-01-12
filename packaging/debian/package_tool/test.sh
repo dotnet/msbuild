@@ -18,7 +18,7 @@ run_unit_tests(){
 
 run_integration_tests(){
     input_dir=$DIR/test/test_assets/test_package_layout
-    output_dir=$DIR/p_out
+    output_dir=$DIR/bin
 
     # Create output dir
     mkdir -p $output_dir

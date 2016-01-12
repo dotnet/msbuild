@@ -25,7 +25,7 @@ export STAGE2_DIR=$OUTPUT_ROOT/stage2
 export HOST_DIR=$OUTPUT_ROOT/corehost
 
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$RID
-[ -z "$DOTNET_BUILD_VERSION" ] && export DOTNET_BUILD_VERSION=0.1.0.0
+[ -z "$DOTNET_CLI_VERSION" ] && export DOTNET_CLI_VERSION=0.1.0.0
 [ -z "$DOTNET_HOME" ] && export DOTNET_HOME=$STAGE2_DIR && export PATH=$STAGE2_DIR/bin:$PATH
 [ -z "$CONFIGURATION" ] && export CONFIGURATION=Debug
 [ -z "$NOCACHE" ] && export NOCACHE=""

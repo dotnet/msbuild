@@ -13,4 +13,4 @@ header "Generating dotnet MSI"
 _ "$RepoRoot\packaging\windows\generatemsi.ps1" @("$Stage2Dir")
 
 header "Generating NuGet packages"
-_ "$RepoRoot\packaging\nuget\package.ps1" @("$Stage2Dir\bin", "$VersionSuffix")
+_ "$RepoRoot\packaging\nuget\package.ps1" @("$Stage2Dir\bin", "$env:VersionSuffix")
