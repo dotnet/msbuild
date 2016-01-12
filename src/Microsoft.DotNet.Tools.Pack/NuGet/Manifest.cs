@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -23,6 +25,8 @@ namespace NuGet
         }
 
         public ManifestMetadata Metadata { get; }
+
+        public ICollection<ManifestFile> Files { get; } = new List<ManifestFile>();
 
         /// <summary>
         /// Saves the current manifest to the specified stream.
@@ -53,9 +57,37 @@ namespace NuGet
             int version = Math.Max(minimumManifestVersion, ManifestVersionUtility.GetManifestVersion(Metadata));
             var schemaNamespace = (XNamespace)ManifestSchemaUtility.GetSchemaNamespace(version);
 
-            new XDocument(
+            var document = new XDocument(
                 new XElement(schemaNamespace + "package",
-                    Metadata.ToXElement(schemaNamespace))).Save(stream);
+                    Metadata.ToXElement(schemaNamespace)));
+
+            var fileElement = Files.ToXElement(schemaNamespace);
+
+            if (fileElement != null)
+            {
+                document.Root.Add(fileElement);
+            }
+            
+            document.Save(stream);
+        }
+
+        public static Manifest ReadFrom(Stream stream)
+        {
+            XDocument document = XDocument.Load(stream);
+            var schemaNamespace = GetSchemaNamespace(document);
+
+            return document.Root.ReadManifest(schemaNamespace);
+        }
+
+        private static string GetSchemaNamespace(XDocument document)
+        {
+            string schemaNamespace = ManifestSchemaUtility.SchemaVersionV1;
+            var rootNameSpace = document.Root.Name.Namespace;
+            if (rootNameSpace != null && !String.IsNullOrEmpty(rootNameSpace.NamespaceName))
+            {
+                schemaNamespace = rootNameSpace.NamespaceName;
+            }
+            return schemaNamespace;
         }
 
         public static Manifest Create(PackageBuilder copy)

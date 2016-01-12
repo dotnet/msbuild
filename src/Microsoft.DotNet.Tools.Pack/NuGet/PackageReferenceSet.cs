@@ -11,7 +11,12 @@ namespace NuGet
     public class PackageReferenceSet
     {
         public PackageReferenceSet(IEnumerable<string> references)
-            : this(null, references)
+            : this((NuGetFramework)null, references)
+        {
+        }
+
+        public PackageReferenceSet(string targetFramework, IEnumerable<string> references)
+            : this(targetFramework != null ? NuGetFramework.Parse(targetFramework) : null, references)
         {
         }
 
