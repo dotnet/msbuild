@@ -23,21 +23,16 @@ New-Item -ItemType Directory -Force -Path $IntermediatePackagesDir
 $Projects = @(
     "Microsoft.DotNet.Cli.Utils",
     "Microsoft.DotNet.ProjectModel",
-    "Microsoft.DotNet.ProjectModel.Workspaces",
-    "Microsoft.DotNet.Runtime",
-    "Microsoft.Extensions.Testing.Abstractions",
     "Microsoft.DotNet.ProjectModel.Loader",
-    "Microsoft.Extensions.DependencyModel"
+    "Microsoft.DotNet.ProjectModel.Workspaces",
+    "Microsoft.Extensions.DependencyModel",
+    "Microsoft.Extensions.Testing.Abstractions"
 )
 
 foreach ($ProjectName in $Projects) {
     $ProjectFile = "$RepoRoot\src\$ProjectName\project.json"
-    & $toolsDir\dotnet restore "$ProjectFile"
-    if (!$?) {
-        Write-Host "$toolsDir\dotnet restore failed for: $ProjectFile"
-        Exit 1
-    }
-    & $toolsDir\dotnet pack "$ProjectFile" --basepath "Stage2Dir\bin" --output "$IntermediatePackagesDir" $versionArg
+
+    & $toolsDir\dotnet pack "$ProjectFile" --basepath "$Stage2Dir\bin" --output "$IntermediatePackagesDir" $versionArg
     if (!$?) {
         Write-Host "$toolsDir\dotnet pack failed for: $ProjectFile"
         Exit 1
