@@ -332,8 +332,10 @@ namespace Microsoft.DotNet.Tools.Compiler
                 success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, outputPath);
             }
 
+            bool generateBindingRedirects = false;
             if (success && !args.NoHostValue && compilationOptions.EmitEntryPoint.GetValueOrDefault())
             {
+                generateBindingRedirects = true;
                 var rids = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
                 var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, rids);
                 runtimeContext
@@ -341,14 +343,20 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
             else if (!string.IsNullOrEmpty(context.ProjectFile.TestRunner))
             {
+                generateBindingRedirects = true;
                 var projectContext =
                     ProjectContext.Create(context.ProjectDirectory, context.TargetFramework,
                         new[] { PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier()});
-                
+
                 projectContext
                     .CreateExporter(args.ConfigValue)
                     .GetDependencies(LibraryType.Package)
                     .WriteDepsTo(Path.Combine(outputPath, projectContext.ProjectFile.Name + FileNameSuffixes.Deps));
+            }
+
+            if (generateBindingRedirects)
+            {
+                context.GenerateBindingRedirects(exporter, outputName);
             }
 
             return PrintSummary(diagnostics, sw, success);

@@ -1,0 +1,12 @@
+﻿{
+    "version": "1.0.0-*",
+    "testRunner": "xunit",
+    "dependencies": {
+        "Microsoft.AspNet.Mvc.Formatters.Json": "6.0.0-rc1-final",
+        "Newtonsoft.Json": "3.5.8"
+    },
+
+    "frameworks": {
+        "dnx451": { }
+    }
+}
