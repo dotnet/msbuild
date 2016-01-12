@@ -17,10 +17,9 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-TestPackagesPath="$REPOROOT/tests/packages" 
+TestPackagesPath="$REPOROOT/artifacts/tests/package-command-test/packages" 
 
-mkdir "$REPOROOT/tests"
-mkdir "$TestPackagesPath"
+mkdir -p "$TestPackagesPath"
 
 dotnet pack "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello"
 cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello/bin/Debug/"*.nupkg "$TestPackagesPath"
@@ -52,13 +51,13 @@ done
 for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "AppWith")
 do
     testName="test/PackagedCommands/Consumers/$test" 
-    
+
     pushd "$REPOROOT/$testName"
-    
-    output=$(dotnet hello) 
-    
+
+    output=$(dotnet hello)
+
     rm "project.json"
-    
+
     if [ "$output" == "Hello" ] ;
     then
         echo "Test Passed: $testName"
@@ -67,6 +66,6 @@ do
         error "             printed $output"
         exit 1
     fi
-    
+
     popd
 done

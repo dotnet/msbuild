@@ -59,12 +59,12 @@ RUNTIME_OUTPUT_DIR="$OUTPUT_DIR/runtime/coreclr"
 
 for project in ${PROJECTS[@]}
 do
-echo dotnet publish --framework "$TFM" --runtime "$RID" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project" 
-    dotnet publish --native-subdirectory --framework "$TFM" --runtime "$RID" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
+    echo dotnet publish --native-subdirectory --framework "$TFM" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project" 
+    dotnet publish --native-subdirectory --framework "$TFM" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
 done
 
 # Bring in the runtime
-dotnet publish --framework "$TFM" --runtime "$RID" --output "$RUNTIME_OUTPUT_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Runtime"
+dotnet publish --output "$RUNTIME_OUTPUT_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Runtime"
 
 # Clean up bogus additional files
 for file in ${FILES_TO_CLEAN[@]}

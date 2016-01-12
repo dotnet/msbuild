@@ -5,7 +5,7 @@
 
 . "$PSScriptRoot\..\common\_common.ps1"
 
-$TestPackagesPath = "$RepoRoot\tests\packages"
+$TestPackagesPath = "$RepoRoot\artifacts\tests\package-command-test\packages"
 
 if((Test-Path $TestPackagesPath) -eq 0)
 {

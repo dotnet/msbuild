@@ -28,7 +28,7 @@ TestProjects=( \
 
 for project in ${TestProjects[@]}
 do
-    dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$TestBinRoot" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
+    dotnet publish --framework "dnxcore50" --output "$TestBinRoot" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
 done
 
 # copy TestProjects folder which is used by the test cases
@@ -48,7 +48,7 @@ do
     exitCode=$?
     failCount+=$exitCode
     if [ $exitCode -ne 0 ]; then
-        failedTests+=($project)
+        failedTests+=("${project}.dll")
     fi
 done
 
@@ -60,7 +60,7 @@ fi
 
 for test in ${failedTests[@]}
 do
-    error "$test.dll failed. Logs in '$TestBinRoot/${test}-testResults.xml'"
+    error "$test failed. Logs in '$TestBinRoot/${test}-testResults.xml'"
 done
 
 popd

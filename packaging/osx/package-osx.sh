@@ -12,18 +12,10 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-REPOROOT="$( cd -P "$DIR/../../" && pwd )"
+source "$DIR/../../scripts/common/_common.sh"
 
 if [ -z "$DOTNET_CLI_VERSION" ]; then
     echo "Provide a version number (DOTNET_CLI_VERSION) $DOTNET_CLI_VERSION" && exit 1
-fi
-
-if [ "$(uname)" == "Darwin" ]; then
-    OSNAME=osx
-    RID=osx.10.10-x64
-else
-    echo "Package (OSX) only runs on Darwin"
-    exit 0
 fi
 
 STAGE2_DIR=$REPOROOT/artifacts/$RID/stage2

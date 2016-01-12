@@ -18,10 +18,9 @@ source "$DIR/../common/_common.sh"
 
 header "Restoring packages"
 
-#Temporarily restore for ALL THE RIDS! This solves a bootstrapping problem in this fix
-$DNX_ROOT/dnu restore "$REPOROOT/src" --quiet --runtime win7-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.10-x64 --runtime osx.10.11-x64 --runtime centos.7.1-x64 "$NOCACHE" --parallel
-$DNX_ROOT/dnu restore "$REPOROOT/test" --quiet --runtime win7-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.10-x64 --runtime osx.10.11-x64 --runtime centos.7.1-x64 "$NOCACHE" --parallel
-$DNX_ROOT/dnu restore "$REPOROOT/tools" --quiet --runtime win7-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.10-x64 --runtime osx.10.11-x64 --runtime centos.7.1-x64 "$NOCACHE" --parallel
+$DNX_ROOT/dnu restore "$REPOROOT/src" --quiet "$NOCACHE" --parallel
+$DNX_ROOT/dnu restore "$REPOROOT/test" --quiet "$NOCACHE" --parallel
+$DNX_ROOT/dnu restore "$REPOROOT/tools" --quiet "$NOCACHE" --parallel
 set +e
-$DNX_ROOT/dnu restore "$REPOROOT/testapp" --quiet --runtime win7-x64 --runtime ubuntu.14.04-x64 --runtime osx.10.10-x64 --runtime osx.10.11-x64 --runtime centos.7.1-x64 "$NOCACHE" --parallel >/dev/null 2>&1
+$DNX_ROOT/dnu restore "$REPOROOT/testapp" --quiet "$NOCACHE" --parallel >/dev/null 2>&1
 set -e
