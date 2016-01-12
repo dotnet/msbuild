@@ -16,13 +16,16 @@ namespace Microsoft.DotNet.Tools.Pack
 
         private bool PackageArtifactsPathSet => !string.IsNullOrWhiteSpace(PackageArtifactsPathParameter);
 
+        private bool ShouldCombinePathWithFramework => !CompiledArtifactsPathSet && !PackageArtifactsPathSet;
+
         public string CompiledArtifactsPathParameter { get; }
 
         public string PackageArtifactsPathParameter { get; }
 
         public bool CompiledArtifactsPathSet => !string.IsNullOrWhiteSpace(CompiledArtifactsPathParameter);        
 
-        public string CompiledArtifactsPath => CompiledArtifactsPathSet ? CompiledArtifactsPathParameter : PackageArtifactsPath;
+        public string CompiledArtifactsPath => 
+            CompiledArtifactsPathSet ? CompiledArtifactsPathParameter : PackageArtifactsPath;
 
         public string PackageArtifactsPath
         {
@@ -42,7 +45,11 @@ namespace Microsoft.DotNet.Tools.Pack
             }
         }        
 
-        public ArtifactPathsCalculator(Project project, string compiledArtifactsPath, string packageArtifactsPath, string configuration)
+        public ArtifactPathsCalculator(
+            Project project, 
+            string compiledArtifactsPath, 
+            string packageArtifactsPath, 
+            string configuration)
         {
             _project = project;
             CompiledArtifactsPathParameter = compiledArtifactsPath;
@@ -52,7 +59,9 @@ namespace Microsoft.DotNet.Tools.Pack
 
         public string InputPathForContext(ProjectContext context)
         {
-            return CompiledArtifactsPathSet ? CompiledArtifactsPath : Path.Combine(CompiledArtifactsPath, context.TargetFramework.GetTwoDigitShortFolderName());
-        }
+            return ShouldCombinePathWithFramework ? 
+                Path.Combine(CompiledArtifactsPath, context.TargetFramework.GetTwoDigitShortFolderName()) : 
+                CompiledArtifactsPath;
+        }        
     }
 }
