@@ -27,6 +27,7 @@ namespace NuGet
             DependencySets = new List<PackageDependencySet>();
             FrameworkAssemblies = new List<FrameworkAssemblyReference>();
             PackageAssemblyReferences = new List<PackageReferenceSet>();
+            ContentFiles = new List<ManifestContentFiles>();
             Authors = new List<string>();
             Owners = new List<string>();
             Tags = new List<string>();
@@ -147,6 +148,12 @@ namespace NuGet
         }
 
         public List<PackageReferenceSet> PackageAssemblyReferences
+        {
+            get;
+            private set;
+        }
+
+        public List<ManifestContentFiles> ContentFiles
         {
             get;
             private set;
@@ -292,6 +299,7 @@ namespace NuGet
             AppendIfNotNull(DependencySets, manifestMetadata.DependencySets);
             AppendIfNotNull(FrameworkAssemblies, manifestMetadata.FrameworkAssemblies);
             AppendIfNotNull(PackageAssemblyReferences, manifestMetadata.PackageAssemblyReferences);
+            AppendIfNotNull(ContentFiles, manifestMetadata.ContentFiles);
         }
 
         public void PopulateFiles(string basePath, IEnumerable<ManifestFile> files)

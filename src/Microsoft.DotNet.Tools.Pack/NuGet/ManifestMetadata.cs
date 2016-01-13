@@ -82,5 +82,7 @@ namespace NuGet
         public ICollection<PackageReferenceSet> PackageAssemblyReferences { get; set; } = new List<PackageReferenceSet>();
 
         public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies { get; set; } = new List<FrameworkAssemblyReference>();
+        
+        public ICollection<ManifestContentFiles> ContentFiles { get; set; } = new List<ManifestContentFiles>();
     }
 }

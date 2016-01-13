@@ -70,6 +70,7 @@ namespace NuGet
                 TargetFramework));
 
             elem.Add(GetXElementFromFrameworkAssemblies(ns, metadata.FrameworkAssemblies));
+            elem.Add(GetXElementFromManifestContentFiles(ns, metadata.ContentFiles));
 
             return elem;
         }
@@ -126,6 +127,8 @@ namespace NuGet
                 (tfm, refs) => new PackageReferenceSet(tfm, refs)).ToArray();
 
             metadata.FrameworkAssemblies = GetFrameworkAssembliesFromXElement(ns, metadataElement);
+
+            metadata.ContentFiles = GetManifestContentFilesFromXElement(ns, metadataElement);
 
             Manifest manifest = new Manifest(metadata);
 
@@ -246,13 +249,17 @@ namespace NuGet
         {
             return new XElement(ns + "dependency",
                 new XAttribute("id", dependency.Id),
-                dependency.VersionRange != null ? new XAttribute("version", dependency.VersionRange.ToString()) : null);
+                dependency.VersionRange != null ? new XAttribute("version", dependency.VersionRange.ToString()) : null,
+                dependency.Include != null && dependency.Include.Any() ? new XAttribute("include", string.Join(",", dependency.Include)) : null,
+                dependency.Exclude != null && dependency.Exclude.Any() ? new XAttribute("exclude", string.Join(",", dependency.Exclude)) : null);
         }
 
         private static PackageDependency GetPackageDependencyFromXElement(XElement element)
         {
             return new PackageDependency(element.Attribute("id").Value,
-                ConvertIfNotNull(element.Attribute("version")?.Value, s => VersionRange.Parse(s)));
+                ConvertIfNotNull(element.Attribute("version")?.Value, s => VersionRange.Parse(s)),
+                ConvertIfNotNull(element.Attribute("include")?.Value, s => s.Split(',')),
+                ConvertIfNotNull(element.Attribute("exclude")?.Value, s => s.Split(',')));
         }
 
         private static XElement GetXElementFromFrameworkAssemblies(XNamespace ns, IEnumerable<FrameworkAssemblyReference> references)
@@ -316,7 +323,45 @@ namespace NuGet
             return filesElement.Elements(ns + File).Select(f => 
                 new ManifestFile(f.Attribute("src").Value,
                     f.Attribute("target").Value,
-                    f.Attribute("exclude").Value));
+                    f.Attribute("exclude")?.Value));
+        }
+
+        private static XElement GetXElementFromManifestContentFiles(XNamespace ns, IEnumerable<ManifestContentFiles> contentFiles)
+        {
+            if (contentFiles == null || !contentFiles.Any())
+            {
+                return null;
+            }
+
+            return new XElement(ns + "contentFiles",
+                contentFiles.Select(file =>
+                new XElement(ns + File,
+                    new XAttribute("include", file.Include),
+                    new XAttribute("exclude", file.Exclude),
+                    new XAttribute("buildAction", file.BuildAction),
+                    new XAttribute("copyToOutput", file.CopyToOutput),
+                    new XAttribute("flatten", file.Flatten)
+                )));
+        }
+        
+        private static ICollection<ManifestContentFiles> GetManifestContentFilesFromXElement(XNamespace ns, XElement parent)
+        {
+            var contentFilesElement = parent.Element(ns + "contentFiles");
+
+            if (contentFilesElement == null)
+            {
+                return null;
+            }
+
+            return contentFilesElement.Elements(ns + File).Select(cf =>
+                new ManifestContentFiles()
+                {
+                    Include = cf.Attribute("include")?.Value,
+                    Exclude = cf.Attribute("exclude")?.Value,
+                    BuildAction = cf.Attribute("buildAction")?.Value,
+                    CopyToOutput = cf.Attribute("copyToOutput")?.Value,
+                    Flatten = cf.Attribute("flatten")?.Value,
+                }).ToArray();
         }
 
         private static void AddElementIfNotNull<T>(XElement parent, XNamespace ns, string name, T value)
