@@ -30,7 +30,6 @@ $Projects = @(
     "Microsoft.DotNet.Tools.Resgen",
     "Microsoft.DotNet.Tools.Run",
     "Microsoft.DotNet.Tools.Test",
-    "Microsoft.Extensions.DependencyModel",
     "Microsoft.Extensions.Testing.Abstractions"
 )
 
