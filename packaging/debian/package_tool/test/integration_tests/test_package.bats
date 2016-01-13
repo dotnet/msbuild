@@ -38,11 +38,11 @@ purge_package(){
 }
 
 install_last_version(){
-	$SUDO_PREFIX dpkg -i last_version.deb
+	$SUDO_PREFIX dpkg -i "$DIR/last_version.deb"
 }
 
 download_and_install_last_version(){
-	curl -O "$LAST_VERSION_URL" -o last_version.deb
+	curl "$LAST_VERSION_URL" -o "$DIR/last_version.deb"
 	
 	install_last_version
 }
