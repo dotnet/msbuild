@@ -63,7 +63,7 @@ The following command will perform native compilation using the C++ Codegenerato
 
     dotnet build --native --cpp
 
-This will drop a native single binary in `./bin/[configuration]/[framework]/native/[binary name]` that you can run.
+If you are in Windows, make sure that you run the above command inside the *VS 2015 x64 Native Tools* prompt, otherwise you will get errors. This command will drop a native single binary in `./bin/[configuration]/[framework]/native/[binary name]` that you can run.
 
 **Note:** At this point, only the `helloworld` and `dotnetbot` samples will work with native compilation.
 
