@@ -807,7 +807,7 @@ namespace Microsoft.Build.Tasks
                                     OutputResources = outputResources;
                                 }
 
-#if FEATURE_APPDOMAIN
+#if FEATURE_BINARY_SERIALIZATION
                                 // Get portable library cache info (and if needed, marshal it to this AD).
                                 List<ResGenDependencies.PortableLibraryFile> portableLibraryCacheInfo = process.PortableLibraryCacheInfo;
                                 for (int i = 0; i < portableLibraryCacheInfo.Count; i++)
