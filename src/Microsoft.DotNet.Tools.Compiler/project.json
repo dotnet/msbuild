@@ -10,7 +10,7 @@
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-*",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530",
 
         "Microsoft.Extensions.CommandLineUtils.Sources": {
             "type": "build",
