@@ -9,8 +9,8 @@ if(!(Test-Path $PackageDir)) {
     mkdir $PackageDir | Out-Null
 }
 
-if(![string]::IsNullOrEmpty($env:DOTNET_BUILD_VERSION)) {
-    $PackageVersion = $env:DOTNET_BUILD_VERSION
+if(![string]::IsNullOrEmpty($env:DOTNET_CLI_VERSION)) {
+    $PackageVersion = $env:DOTNET_CLI_VERSION
 } else {
     $Timestamp = [DateTime]::Now.ToString("yyyyMMddHHmmss")
     $PackageVersion = "0.0.1-dev-t$Timestamp"

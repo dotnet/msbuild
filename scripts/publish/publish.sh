@@ -54,8 +54,8 @@ execute(){
 validate_env_variables(){
     local ret=0
 
-    if [[ -z "$DOTNET_BUILD_VERSION" ]]; then
-        warning "DOTNET_BUILD_VERSION environment variable not set"
+    if [[ -z "$DOTNET_CLI_VERSION" ]]; then
+        warning "DOTNET_CLI_VERSION environment variable not set"
         ret=1
     fi
 
@@ -128,7 +128,7 @@ update_file_in_blob_storage(){
 upload_binaries_to_blob_storage(){
     local tarfile=$1
     local filename=$(basename $tarfile)
-    local blob="$CHANNEL/Binaries/$DOTNET_BUILD_VERSION/$filename"
+    local blob="$CHANNEL/Binaries/$DOTNET_CLI_VERSION/$filename"
 
     if ! upload_file_to_blob_storage_azure_cli $blob $tarfile; then
         return 1
@@ -143,7 +143,7 @@ upload_binaries_to_blob_storage(){
     fi
 
     # update the index file
-    local indexContent="Binaries/$DOTNET_BUILD_VERSION/$filename"
+    local indexContent="Binaries/$DOTNET_CLI_VERSION/$filename"
     local indexfile="latest.$OSNAME.index"
     local index_URL="https://$STORAGE_ACCOUNT.blob.core.windows.net/$STORAGE_CONTAINER/$CHANNEL/dnvm/$indexfile$SASTOKEN"
     update_file_in_blob_storage $index_URL $indexfile $indexContent
@@ -161,7 +161,7 @@ upload_binaries_to_blob_storage(){
 upload_installers_to_blob_storage(){
     local installfile=$1
     local filename=$(basename $installfile)
-    local blob="$CHANNEL/Installers/$DOTNET_BUILD_VERSION/$filename"
+    local blob="$CHANNEL/Installers/$DOTNET_CLI_VERSION/$filename"
 
     if ! upload_file_to_blob_storage_azure_cli $blob $installfile; then
         return 1

@@ -15,7 +15,7 @@ $ErrorActionPreference="Stop"
 
 . "$RepoRoot\scripts\build\generate-version.ps1"
 
-header "Building dotnet tools version $($env:DOTNET_BUILD_VERSION) - $Configuration"
+header "Building dotnet tools version $($env:DOTNET_CLI_VERSION) - $Configuration"
 header "Checking Pre-Reqs"
 
 _ "$RepoRoot\scripts\test\check-prereqs.ps1"

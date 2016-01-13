@@ -18,13 +18,13 @@ run_unit_tests(){
 
 run_integration_tests(){
     input_dir=$DIR/test/test_assets/test_package_layout
-    output_dir=$DIR/p_out
+    output_dir=$DIR/bin
 
     # Create output dir
     mkdir -p $output_dir
 
     # Build the actual package
-    $DIR/package_tool $input_dir $output_dir
+    $DIR/package_tool -i $input_dir -o $output_dir
 
     # Integration Test Entrypoint placed by package_tool
     bats $output_dir/test_package.bats

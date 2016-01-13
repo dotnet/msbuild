@@ -2,14 +2,14 @@
     "maintainer_name":"Microsoft",
     "maintainer_email": "dotnetcore@microsoft.com",        
 
-    "package_name": "dotnet-dev",                           
+    "package_name": "dotnet",                           
 
     "short_description": ".NET Core & command line tools",              
     "long_description": ".NET Core is a cross-platform implementation of .NET Framework, a modern, modular platform\n for building diverse kinds of applications, from command-line applications to microservices and \n modern websites.\n This package contains the tools you will need to start writing applications for .NET Core. It includes \n compilers, package managers and other utilities that developers need.", 
     "homepage": "https://dotnet.github.io/core",                        
 
     "release":{
-        "package_version":"0.201",                               
+        "package_version":"0.0.0.0",                               
         "package_revision":"1",                                 
         "urgency" : "low",                                      
         "changelog_message" : "Bootstrap loop package"                
@@ -33,6 +33,10 @@
         "libcurl3" : {}
     },
 
+    "package_conflicts" : [
+        "dotnet-nightly"
+    ],
+
     "symlinks": {
         "bin/dotnet" : "usr/bin/dotnet",
         "bin/dotnet-build" : "usr/bin/dotnet-build",
@@ -40,7 +44,7 @@
         "bin/dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
         "bin/dotnet-compile-fsc" : "usr/bin/dotnet-compile-fsc",
         "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native",
-        "bin/dotnet-init":"usr/bin/dotnet-new",
+        "bin/dotnet-new": "usr/bin/dotnet-new",
         "bin/dotnet-publish" : "usr/bin/dotnet-publish",
         "bin/dotnet-repl" : "usr/bin/dotnet-repl",
         "bin/dotnet-repl-csi" : "usr/bin/dotnet-repl-csi",

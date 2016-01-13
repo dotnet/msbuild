@@ -19,7 +19,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/../common/_common.sh"
 source "$REPOROOT/scripts/build/generate-version.sh"
 
-header "Building dotnet tools version $DOTNET_BUILD_VERSION - $CONFIGURATION"
+header "Building dotnet tools version $DOTNET_CLI_VERSION - $CONFIGURATION"
 header "Checking Pre-Reqs"
 
 $REPOROOT/scripts/test/check-prereqs.sh

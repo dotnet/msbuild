@@ -15,9 +15,9 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/../common/_common.sh"
 source "$REPOROOT/scripts/build/generate-version.sh"
 
-if [ -z "$DOTNET_BUILD_VERSION" ]; then
+if [ -z "$DOTNET_CLI_VERSION" ]; then
     TIMESTAMP=$(date "+%Y%m%d%H%M%S")
-    DOTNET_BUILD_VERSION=0.0.1-dev-t$TIMESTAMP
+    DOTNET_CLI_VERSION=0.0.1-dev-t$TIMESTAMP
 fi
 
 header "Generating tarball"

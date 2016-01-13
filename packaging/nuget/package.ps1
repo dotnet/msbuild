@@ -10,7 +10,7 @@ param(
 $toolsDir = $toolsDir.TrimEnd('\')
 $versionArg = ""
 if ($versionSuffix -ne "") {
-    $versionArg = "--version-suffix $VersionSuffix"
+    $versionArg = "--version-suffix $versionSuffix"
 }
 
 . "$PSScriptRoot\..\..\scripts\common\_common.ps1"

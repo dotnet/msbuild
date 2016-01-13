@@ -3,12 +3,6 @@
 # Copyright (c) .NET Foundation and contributors. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
-
-# Takes Parameters:
-#   $1 = Input Directory
-#   $2 = Output Directory
-#   $3 = Package Version
-
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -16,22 +10,12 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ## Load Functions ##
 source $SCRIPT_DIR/scripts/debian_build_lib.sh
 
-INPUT_DIR="$1"
-OUTPUT_DIR="$2"
-INPUT_PACKAGE_VERSION="$3"
-
-# Special Input Directories + Paths
-ABSOLUTE_PLACEMENT_DIR="${INPUT_DIR}/\$"
-PACKAGE_ROOT_PLACEMENT_DIR="${INPUT_DIR}/package_root"
-
-# Inputs
-INPUT_SAMPLES_DIR="$INPUT_DIR/samples"
-INPUT_DOCS_DIR="$INPUT_DIR/docs"
-DOCS_JSON_PATH="$INPUT_DIR/docs.json"
-CONFIG="$INPUT_DIR/debian_config.json"
-
 ## Debian Package Creation Functions ##
 execute(){
+    if ! parse_args_and_set_env_vars "$@"; then
+        exit 1
+    fi
+
     # Exit if required validation fails
     if ! validate_inputs; then
         exit 1
@@ -49,40 +33,103 @@ execute(){
     copy_files_to_output
 }
 
+parse_args_and_set_env_vars(){
+    OPTIND=1 # Reset in case getopts has been used previously in the shell.
+
+    while getopts ":n:v:i:o:h" opt; do
+      case $opt in
+        n)
+          export PACKAGE_NAME="$OPTARG"
+          ;;
+        v)
+          export PACKAGE_VERSION="$OPTARG"
+          ;;
+        i)
+          export INPUT_DIR="$OPTARG"
+          ;;
+        o)
+          export OUTPUT_DIR="$OPTARG"
+          ;;
+        h)
+          print_help
+          return 1
+          ;;
+        \?)
+          echo "Invalid option: -$OPTARG" >&2
+          return 1
+          ;;
+        :)
+          echo "Option -$OPTARG requires an argument." >&2
+          return 1
+          ;;
+      esac
+    done
+    
+     # Special Input Directories + Paths
+    ABSOLUTE_PLACEMENT_DIR="${INPUT_DIR}/\$"
+    PACKAGE_ROOT_PLACEMENT_DIR="${INPUT_DIR}/package_root"
+    CONFIG="$INPUT_DIR/debian_config.json"
+
+    return 0
+}
+
+print_help(){
+    echo "Usage: package_tool [-i <INPUT_DIR>] [-o <OUTPUT_DIRECTORY>] 
+    [-n <PACKAGE_NAME>] [-v <PACKAGE_VERSION>] [-h]
+
+    REQUIRED:
+        -i <INPUT_DIR>: Input directory conforming to package_tool conventions and debian_config.json
+        -o <OUTPUT_DIR>: Output directory for debian package and other artifacts
+
+    OPTIONAL:
+        -n <PACKAGE_NAME>: name of created package, will override value in debian_config.json
+        -v <PACKAGE_VERSION>: version of created package, will override value in debian_config.json
+        -h: Show this message
+
+    NOTES:
+        See Readme for more information on package_tool conventions and debian_config.json format
+        https://github.com/dotnet/cli/tree/master/packaging/debian/package_tool
+    "
+}
+
 validate_inputs(){
     local ret=0
-    if [[ ! -d $ABSOLUTE_PLACEMENT_DIR ]]; then
-        echo "ERROR: $ directory does not exist"
-        echo $ABSOLUTE_PLACEMENT_DIR
+    if [[ -z "$INPUT_DIR" ]]; then
+        echo "ERROR: -i <INPUT_DIRECTORY> Not Specified"
         ret=1
     fi
 
-    if [[ ! -d $PACKAGE_ROOT_PLACEMENT_DIR ]]; then
+    if [[ -z "$OUTPUT_DIR" ]]; then
+        echo "ERROR: -o <OUTPUT_DIRECTORY> Not Specified."
+        ret=1
+    fi
+
+    if [[ ! -d "$PACKAGE_ROOT_PLACEMENT_DIR" ]]; then
         echo "ERROR: package_root directory does not exist"
         echo $PACKAGE_ROOT_PLACEMENT_DIR
         ret=1
     fi
 
-    if [[ ! -f $CONFIG ]]; then
+    if [[ ! -f "$CONFIG" ]]; then
         echo "ERROR: debian_config.json file does not exist"
         echo $CONFIG
         ret=1
     fi
-
+    
     return $ret
 }
 
 parse_config_and_set_env_vars(){
     extract_base_cmd="python $SCRIPT_DIR/scripts/extract_json_value.py"
-
-    PACKAGE_NAME=$($extract_base_cmd $CONFIG "package_name")
     
-    # Override JSON Defined Version w/ Cmd Line ARG
-    if [ -z $INPUT_PACKAGE_VERSION ]; then
-        PACKAGE_VERSION=$($extract_base_cmd $CONFIG "release.package_version")
-    else
-        PACKAGE_VERSION=$INPUT_PACKAGE_VERSION
-    fi
+    # Arguments Take Precedence over Config
+    [ -z "$PACKAGE_VERSION" ] && PACKAGE_VERSION="$($extract_base_cmd $CONFIG "release.package_version")"
+    [ -z "$PACKAGE_NAME" ] && PACKAGE_NAME="$($extract_base_cmd $CONFIG "package_name")"
+
+    # Inputs
+    INPUT_SAMPLES_DIR="$INPUT_DIR/samples"
+    INPUT_DOCS_DIR="$INPUT_DIR/docs"
+    DOCS_JSON_PATH="$INPUT_DIR/docs.json"
 
     PACKAGE_SOURCE_DIR="${OUTPUT_DIR}/${PACKAGE_NAME}-${PACKAGE_VERSION}"
     INSTALL_ROOT="/usr/share/${PACKAGE_NAME}"
@@ -134,21 +181,23 @@ package_package_root_placement(){
 }
 
 package_absolute_placement(){
-    abs_in_package_dir="\$"
-
-    add_dir_to_install ${ABSOLUTE_PLACEMENT_DIR} $abs_in_package_dir
-
-    # Get List of all files in directory tree, relative to ABSOLUTE_PLACEMENT_DIR
-    abs_files=( $(_get_files_in_dir_tree $ABSOLUTE_PLACEMENT_DIR) )
-
-    # For each file add a a system placement
-    for abs_file in ${abs_files[@]}
-    do
-        parent_dir=$(dirname $abs_file)
-        filename=$(basename $abs_file)
-
-        add_system_file_placement "$abs_in_package_dir/$abs_file" "/$parent_dir"
-    done
+    if [[ -d "$ABSOLUTE_PLACEMENT_DIR" ]]; then
+        abs_in_package_dir="\$"
+    
+        add_dir_to_install ${ABSOLUTE_PLACEMENT_DIR} $abs_in_package_dir
+    
+        # Get List of all files in directory tree, relative to ABSOLUTE_PLACEMENT_DIR
+        abs_files=( $(_get_files_in_dir_tree $ABSOLUTE_PLACEMENT_DIR) )
+    
+        # For each file add a a system placement
+        for abs_file in ${abs_files[@]}
+        do
+            parent_dir=$(dirname $abs_file)
+            filename=$(basename $abs_file)
+    
+            add_system_file_placement "$abs_in_package_dir/$abs_file" "/$parent_dir"
+        done
+    fi
 }
 
 package_samples(){
@@ -209,4 +258,4 @@ generate_sample_manifest(){
     fi
 }
 
-execute
+execute "$@"

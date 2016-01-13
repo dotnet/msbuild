@@ -86,6 +86,9 @@ def generate_control(config_data, template_dir):
     dependency_data = config_data.get("debian_dependencies", None)
     dependency_str = get_dependendent_packages_string(dependency_data)
 
+    conflict_data = config_data.get("package_conflicts", [])
+    conflict_str = ', '.join(conflict_data)
+
     # Default to empty dict, so we don't explode on nested optional values
     control_data = config_data.get("control", dict())
 
@@ -99,6 +102,7 @@ def generate_control(config_data, template_dir):
         ARCH=control_data.get("architecture", "all"),
 
         DEPENDENT_PACKAGES=dependency_str,
+        CONFLICT_PACKAGES=conflict_str,
 
         PACKAGE_NAME=config_data["package_name"],
         MAINTAINER_NAME=config_data["maintainer_name"],

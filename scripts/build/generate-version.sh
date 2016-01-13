@@ -4,9 +4,11 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-# UTC Timestamp of the last commit is used as the build number. This is for easy synchronization of build number between Windows, OSX and Linux builds.
-LAST_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
-export DOTNET_BUILD_VERSION=1.0.0-dev-$LAST_COMMIT_TIMESTAMP
-echo "Version: $DOTNET_BUILD_VERSION"
+export RELEASE_SUFFIX=dev
+export MAJOR_VERSION=1
+export MINOR_VERSION=0
+export PATCH_VERSION=0
 
-unset LAST_COMMIT_TIMESTAMP
+export COMMIT_COUNT_VERSION=$(printf "%06d" $(git rev-list --count HEAD))
+
+export DOTNET_CLI_VERSION=$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION.$COMMIT_COUNT_VERSION
