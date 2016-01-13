@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class EnvironmentNames
     {
-        public static readonly string PackagesCache = "NUGET_PACKAGES";
+        public static readonly string PackagesStore = "NUGET_PACKAGES";
         public static readonly string StrongNameKeyFile = "DOTNET_BUILD_STRONG_NAME_KEYFILE";
     }
 }

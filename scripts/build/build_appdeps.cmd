@@ -1,4 +1,5 @@
-@echo off
+REM TEMPORARILY disable @echo off to debug CI.
+REM @echo off
 
 REM This file encapsulates the temporary steps to build the dotnet-compile-native command successfully
 REM The AppDepSDK package is a temporary artifact until we have CoreRT assemblies published to Nuget
@@ -13,17 +14,17 @@ set __OutputPath=%CD%\bin
 popd
 
 
-rmdir /S /Q %AppDepsProjectDir%\packages
-
 pushd %__AppDepsProjectDir%
-dotnet restore --packages %AppDepsProjectDir%\packages
-set __AppDepSDK=%AppDepsProjectDir%\packages\toolchain*\
+rmdir /S /Q packages
+dotnet restore --packages %__AppDepsProjectDir%\packages
+set __AppDepSDK=%__AppDepsProjectDir%\packages\toolchain*\
 popd
 
 mkdir %__OutputPath%\appdepsdk
 cd %__AppDepSDK%
 FOR /D %%a IN (*) DO (
   CD %%a
+  TREE
   GOTO :Copy
 )
 

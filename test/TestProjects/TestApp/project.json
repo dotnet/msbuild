@@ -5,12 +5,10 @@
     },
 
     "dependencies": {
-        "TestLibrary": { "target": "project" },
-        "System.IO": "4.0.11-beta-23428",
-        "System.Console": "4.0.0-beta-23428",
-        "System.Runtime": "4.0.21-beta-23428",
-        "System.Diagnostics.Process": "4.1.0-beta-23428",
-        "Microsoft.NETCore.Runtime": "1.0.1-beta-23428"
+        "TestLibrary": "1.0.0-*",
+
+        "NETStandard.Library": "1.0.0-rc2-23704",
+        "Microsoft.NETCore.Platforms": "1.0.1-rc2-23704"
     },
 
     "frameworks": {

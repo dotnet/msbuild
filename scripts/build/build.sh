@@ -19,6 +19,11 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/../common/_common.sh"
 source "$REPOROOT/scripts/build/generate-version.sh"
 
+## Temporarily redirect to the NuGet package installation location
+export NUGET_PACKAGES=~/.nuget/packages
+export DOTNET_PACKAGES=$NUGET_PACKAGES
+export DNX_PACKAGES=$NUGET_PACKAGES
+
 header "Building dotnet tools version $DOTNET_CLI_VERSION - $CONFIGURATION"
 header "Checking Pre-Reqs"
 

@@ -32,7 +32,7 @@ foreach {
 
 #restore test projects
 pushd "$RepoRoot\test\PackagedCommands\Consumers"
-dotnet restore -s "$TestPackagesPath" --no-cache --ignore-failed-sources --parallel
+dotnet restore -s "$TestPackagesPath"
 if (!$?) {
     error "Command failed: dotnet restore"
     Exit 1

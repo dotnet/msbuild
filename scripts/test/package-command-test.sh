@@ -36,7 +36,7 @@ done
 
 # restore test projects
 pushd "$REPOROOT/test/PackagedCommands/Consumers"
-dotnet restore -s "$TestPackagesPath" --no-cache --ignore-failed-sources --parallel
+dotnet restore -s "$TestPackagesPath"
 popd
 
 #compile tests with direct dependencies
@@ -50,7 +50,7 @@ done
 #run test
 for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "AppWith")
 do
-    testName="test/PackagedCommands/Consumers/$test" 
+    testName="test/PackagedCommands/Consumers/$test"
 
     pushd "$REPOROOT/$testName"
 

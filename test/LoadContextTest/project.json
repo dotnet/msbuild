@@ -15,7 +15,7 @@
 
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530",
 
-        "Microsoft.DotNet.ProjectModel.Loader": { "target": "project" }
+        "Microsoft.DotNet.ProjectModel.Loader": "1.0.0-*"
     },
 
     "frameworks": {

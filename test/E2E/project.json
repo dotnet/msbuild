@@ -12,9 +12,9 @@
         "xunit.netcore.extensions": "1.0.0-prerelease-*",
         "xunit.runner.utility": "2.1.0",
 
-        "Microsoft.DotNet.ProjectModel": { "target": "project" },
-        "Microsoft.DotNet.Cli.Utils": { "target": "project" },
-        "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" }
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.DotNet.Tools.Tests.Utilities": "1.0.0-*"
     },
 
     "frameworks": {

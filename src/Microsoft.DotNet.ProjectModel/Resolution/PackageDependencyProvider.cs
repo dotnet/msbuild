@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         {
             // Order
             // 1. global.json { "packages": "..." }
-            // 2. EnvironmentNames.Packages environment variable
+            // 2. EnvironmentNames.PackagesStore environment variable
             // 3. NuGet.config repositoryPath (maybe)?
             // 4. {DefaultLocalRuntimeHomeDir}\packages
 
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 return Path.Combine(rootDirectory, settings.PackagesPath);
             }
 
-            var runtimePackages = Environment.GetEnvironmentVariable(EnvironmentNames.PackagesCache);
+            var runtimePackages = Environment.GetEnvironmentVariable(EnvironmentNames.PackagesStore);
 
             if (!string.IsNullOrEmpty(runtimePackages))
             {
@@ -94,8 +94,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 profileDirectory = Environment.GetEnvironmentVariable("HOME");
             }
 
-            // TODO(anurse): This should migrate to the NuGet packages directory
-            return Path.Combine(profileDirectory, ".dnx", "packages");
+            return Path.Combine(profileDirectory, ".nuget", "packages");
         }
     }
 }

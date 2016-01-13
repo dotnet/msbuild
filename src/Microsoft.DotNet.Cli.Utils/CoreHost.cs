@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Microsoft.DotNet.ProjectModel;
 
@@ -7,6 +8,11 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         internal static string _hostDir;
         internal static string _hostExePath;
+
+        /// <summary>
+        /// Gets the path to the version of corehost that was shipped with this command
+        /// </summary>
+        public static string LocalHostExePath => Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
 
         public static string HostExePath
         {

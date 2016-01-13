@@ -11,6 +11,20 @@ namespace Microsoft.Extensions.PlatformAbstractions
     // We should clean this up. Filed #619 to track.
     public static class RuntimeEnvironmentRidExtensions
     {
+        // Work around NuGet/Home#1941
+        public static IEnumerable<string> GetOverrideRestoreRuntimeIdentifiers(this IRuntimeEnvironment env)
+        {
+            if (env.OperatingSystemPlatform != Platform.Windows)
+            {
+                yield return env.GetRuntimeIdentifier();
+            }
+            else
+            {
+                yield return "win7-x86";
+                yield return "win7-x64";
+            }
+        }
+
         // Gets the identfier that is used for restore by default (this is different from the actual RID, but only on Windows)
         public static string GetLegacyRestoreRuntimeIdentifier(this IRuntimeEnvironment env)
         {

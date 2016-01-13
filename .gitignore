@@ -1,5 +1,9 @@
 ### Repo-specific things ###
 
+# NuGet v3 restore drops these even though we don't use MSBuild :(
+*.nuget.targets
+*.nuget.props
+
 # Debian and python stuff
 *.dsc
 *.tar.gz
