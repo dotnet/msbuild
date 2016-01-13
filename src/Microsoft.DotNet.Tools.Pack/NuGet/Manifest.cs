@@ -14,14 +14,24 @@ namespace NuGet
     {
         private const string SchemaVersionAttributeName = "schemaVersion";
 
-        public Manifest(ManifestMetadata metadata)
+        public Manifest(ManifestMetadata metadata) : this(metadata, null)
         {
+        }
+
+        public Manifest(ManifestMetadata metadata, ICollection<ManifestFile> files)
+        {
+
             if (metadata == null)
             {
                 throw new ArgumentNullException(nameof(metadata));
             }
 
             Metadata = metadata;
+
+            if (files != null)
+            {
+                Files = files;
+            }
         }
 
         public ManifestMetadata Metadata { get; }
@@ -76,7 +86,7 @@ namespace NuGet
             XDocument document = XDocument.Load(stream);
             var schemaNamespace = GetSchemaNamespace(document);
 
-            return document.Root.ReadManifest(schemaNamespace);
+            return ManifestReader.ReadManifest(document);
         }
 
         private static string GetSchemaNamespace(XDocument document)

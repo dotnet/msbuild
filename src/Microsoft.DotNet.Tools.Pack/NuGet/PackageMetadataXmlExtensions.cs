@@ -75,78 +75,48 @@ namespace NuGet
             return elem;
         }
 
-        public static Manifest ReadManifest(this XElement element, XNamespace ns)
-        {
-            if (element.Name != ns + "package")
-            {
-                return null;
-            }
-
-            var metadataElement = element.Element(ns + "metadata");
-            if (metadataElement == null)
-            {
-                return null;
-            }
-
-            ManifestMetadata metadata = new ManifestMetadata();
-
-            metadata.MinClientVersionString = metadataElement.Attribute("minClientVersion")?.Value;
-            metadata.Id = metadataElement.Element(ns + "id")?.Value;
-            metadata.Version = ConvertIfNotNull(metadataElement.Element(ns + "version")?.Value, s => new NuGetVersion(s));
-            metadata.Title = metadataElement.Element(ns + "title")?.Value;
-            metadata.RequireLicenseAcceptance = ConvertIfNotNull(metadataElement.Element(ns + "requireLicenseAcceptance")?.Value, s => bool.Parse(s));
-            metadata.DevelopmentDependency = ConvertIfNotNull(metadataElement.Element(ns + "developmentDependency")?.Value, s => bool.Parse(s));
-            metadata.Authors = ConvertIfNotNull(metadataElement.Element(ns + "authors")?.Value, s => s.Split(','));
-            metadata.Owners = ConvertIfNotNull(metadataElement.Element(ns + "owners")?.Value, s => s.Split(','));
-            metadata.LicenseUrl = ConvertIfNotNull(metadataElement.Element(ns + "licenseUrl")?.Value, s => new Uri(s));
-            metadata.ProjectUrl = ConvertIfNotNull(metadataElement.Element(ns + "projectUrl")?.Value, s => new Uri(s));
-            metadata.IconUrl = ConvertIfNotNull(metadataElement.Element(ns + "iconUrl")?.Value, s => new Uri(s));
-            metadata.Description = metadataElement.Element(ns + "description")?.Value;
-            metadata.Summary = metadataElement.Element(ns + "summary")?.Value;
-            metadata.ReleaseNotes = metadataElement.Element(ns + "releaseNotes")?.Value;
-            metadata.Copyright = metadataElement.Element(ns + "copyright")?.Value;
-            metadata.Language = metadataElement.Element(ns + "language")?.Value;
-            metadata.Tags = metadataElement.Element(ns + "tags")?.Value;
-            
-            metadata.DependencySets = GetItemSetsFromGroupableXElements(
-                ns,
-                metadataElement,
-                Dependencies,
-                "dependency",
-                TargetFramework,
-                GetPackageDependencyFromXElement,
-                (tfm, deps) => new PackageDependencySet(tfm, deps));
-
-            metadata.PackageAssemblyReferences = GetItemSetsFromGroupableXElements(
-                ns,
-                metadataElement,
-                References,
-                Reference,
-                TargetFramework,
-                GetPackageReferenceFromXElement,
-                (tfm, refs) => new PackageReferenceSet(tfm, refs)).ToArray();
-
-            metadata.FrameworkAssemblies = GetFrameworkAssembliesFromXElement(ns, metadataElement);
-
-            metadata.ContentFiles = GetManifestContentFilesFromXElement(ns, metadataElement);
-
-            Manifest manifest = new Manifest(metadata);
-
-            var files = GetManifestFilesFromXElement(ns, element);
-            if (files != null)
-            {
-                foreach(var file in files)
-                {
-                    manifest.Files.Add(file);
-                }
-            }
-
-            return manifest;
-        }
 
         public static XElement ToXElement(this IEnumerable<ManifestFile> fileList, XNamespace ns)
         {
             return GetXElementFromManifestFiles(ns, fileList);
+        }
+
+        public static string GetOptionalAttributeValue(this XElement element, string localName, string namespaceName = null)
+        {
+            XAttribute attr;
+            if (string.IsNullOrEmpty(namespaceName))
+            {
+                attr = element.Attribute(localName);
+            }
+            else
+            {
+                attr = element.Attribute(XName.Get(localName, namespaceName));
+            }
+            return attr != null ? attr.Value : null;
+        }
+
+        public static string GetOptionalElementValue(this XContainer element, string localName, string namespaceName = null)
+        {
+            XElement child;
+            if (string.IsNullOrEmpty(namespaceName))
+            {
+                child = element.ElementsNoNamespace(localName).FirstOrDefault();
+            }
+            else
+            {
+                child = element.Element(XName.Get(localName, namespaceName));
+            }
+            return child != null ? child.Value : null;
+        }
+
+        public static IEnumerable<XElement> ElementsNoNamespace(this XContainer container, string localName)
+        {
+            return container.Elements().Where(e => e.Name.LocalName == localName);
+        }
+
+        public static IEnumerable<XElement> ElementsNoNamespace(this IEnumerable<XContainer> source, string localName)
+        {
+            return source.Elements().Where(e => e.Name.LocalName == localName);
         }
 
         private static XElement GetXElementFromGroupableItemSets<TSet, TItem>(
@@ -206,43 +176,9 @@ namespace NuGet
             return new XElement(ns + parentName, childElements.ToArray());
         }
 
-        private static IEnumerable<TSet> GetItemSetsFromGroupableXElements<TSet, TItem>(
-            XNamespace ns,
-            XElement parent,
-            string rootName,
-            string elementName,
-            string identifierAttributeName,
-            Func<XElement, TItem> getItemFromXElement,
-            Func<string, IEnumerable<TItem>, TSet> getItemSet)
-        {
-            XElement rootElement = parent.Element(ns + rootName);
-            
-            if (rootElement == null)
-            {
-                return Enumerable.Empty<TSet>();
-            }
-
-            var groups = rootElement.Elements(ns + Group);
-
-            if (groups == null || !groups.Any())
-            {
-                // no groupable sets, all are ungroupable
-                return new[] { getItemSet(null, rootElement.Elements(ns + elementName).Select(e => getItemFromXElement(e))) };
-            }
-
-            return groups.Select(g => 
-                getItemSet(g.Attribute(identifierAttributeName)?.Value,
-                    g.Elements(ns + elementName).Select(e => getItemFromXElement(e))));
-        }
-
         private static XElement GetXElementFromPackageReference(XNamespace ns, string reference)
         {
             return new XElement(ns + Reference, new XAttribute(File, reference));
-        }
-
-        private static string GetPackageReferenceFromXElement(XElement element)
-        {
-            return element.Attribute(File)?.Value;
         }
 
         private static XElement GetXElementFromPackageDependency(XNamespace ns, PackageDependency dependency)
@@ -252,14 +188,6 @@ namespace NuGet
                 dependency.VersionRange != null ? new XAttribute("version", dependency.VersionRange.ToString()) : null,
                 dependency.Include != null && dependency.Include.Any() ? new XAttribute("include", string.Join(",", dependency.Include)) : null,
                 dependency.Exclude != null && dependency.Exclude.Any() ? new XAttribute("exclude", string.Join(",", dependency.Exclude)) : null);
-        }
-
-        private static PackageDependency GetPackageDependencyFromXElement(XElement element)
-        {
-            return new PackageDependency(element.Attribute("id").Value,
-                ConvertIfNotNull(element.Attribute("version")?.Value, s => VersionRange.Parse(s)),
-                ConvertIfNotNull(element.Attribute("include")?.Value, s => s.Split(',')),
-                ConvertIfNotNull(element.Attribute("exclude")?.Value, s => s.Split(',')));
         }
 
         private static XElement GetXElementFromFrameworkAssemblies(XNamespace ns, IEnumerable<FrameworkAssemblyReference> references)
@@ -279,22 +207,6 @@ namespace NuGet
                             null)));
         }
 
-        private static IEnumerable<FrameworkAssemblyReference> GetFrameworkAssembliesFromXElement(XNamespace ns, XElement parent)
-        {
-            var frameworkAssembliesElement = parent.Element(ns + FrameworkAssemblies);
-
-            if (frameworkAssembliesElement == null)
-            {
-                return null;
-            }
-
-            return frameworkAssembliesElement.Elements(ns + FrameworkAssembly).Select(e =>
-                new FrameworkAssemblyReference(e.Attribute(AssemblyName).Value,
-                    e.Attribute("targetFramework")?.Value?.Split(',')?
-                        .Select(tf => NuGetFramework.Parse(tf)) ?? Enumerable.Empty<NuGetFramework>()));
-            
-        }
-
         private static XElement GetXElementFromManifestFiles(XNamespace ns, IEnumerable<ManifestFile> files)
         {
             if (files == null || !files.Any())
@@ -309,21 +221,6 @@ namespace NuGet
                     new XAttribute("target", file.Source),
                     new XAttribute("exclude", file.Exclude)
                 )));
-        }
-
-        private static IEnumerable<ManifestFile> GetManifestFilesFromXElement(XNamespace ns, XElement parent)
-        {
-            var filesElement = parent.Element(ns + Files);
-
-            if (filesElement == null)
-            {
-                return null;
-            }
-
-            return filesElement.Elements(ns + File).Select(f => 
-                new ManifestFile(f.Attribute("src").Value,
-                    f.Attribute("target").Value,
-                    f.Attribute("exclude")?.Value));
         }
 
         private static XElement GetXElementFromManifestContentFiles(XNamespace ns, IEnumerable<ManifestContentFiles> contentFiles)
@@ -342,26 +239,6 @@ namespace NuGet
                     new XAttribute("copyToOutput", file.CopyToOutput),
                     new XAttribute("flatten", file.Flatten)
                 )));
-        }
-        
-        private static ICollection<ManifestContentFiles> GetManifestContentFilesFromXElement(XNamespace ns, XElement parent)
-        {
-            var contentFilesElement = parent.Element(ns + "contentFiles");
-
-            if (contentFilesElement == null)
-            {
-                return null;
-            }
-
-            return contentFilesElement.Elements(ns + File).Select(cf =>
-                new ManifestContentFiles()
-                {
-                    Include = cf.Attribute("include")?.Value,
-                    Exclude = cf.Attribute("exclude")?.Value,
-                    BuildAction = cf.Attribute("buildAction")?.Value,
-                    CopyToOutput = cf.Attribute("copyToOutput")?.Value,
-                    Flatten = cf.Attribute("flatten")?.Value,
-                }).ToArray();
         }
 
         private static void AddElementIfNotNull<T>(XElement parent, XNamespace ns, string name, T value)
@@ -384,17 +261,6 @@ namespace NuGet
                     parent.Add(new XElement(ns + name, processed));
                 }
             }
-        }
-        private static TDest ConvertIfNotNull<TDest, TSource>(TSource value, Func<TSource, TDest> convert)
-        {
-            if (value != null)
-            {
-                var converted = convert(value);
-
-                return converted;
-            }
-
-            return default(TDest);
         }
     }
 }
