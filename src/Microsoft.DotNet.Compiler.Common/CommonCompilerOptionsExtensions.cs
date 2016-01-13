@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
     {
         internal static readonly OptionTemplate s_definesTemplate = new OptionTemplate("define");
 
+        internal static readonly OptionTemplate s_suppressWarningTemplate = new OptionTemplate("suppress-warning");
+
         internal static readonly OptionTemplate s_languageVersionTemplate = new OptionTemplate("language-version");
 
         internal static readonly OptionTemplate s_platformTemplate = new OptionTemplate("platform");
@@ -37,6 +39,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         public static CommonCompilerOptions Parse(ArgumentSyntax syntax)
         {
             IReadOnlyList<string> defines = null;
+            IReadOnlyList<string> suppressWarnings = null;
             string languageVersion = null;
             string platform = null;
             bool? allowUnsafe = null;
@@ -51,6 +54,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             Func<string, bool?> nullableBoolConverter = v => bool.Parse(v);
 
             syntax.DefineOptionList(s_definesTemplate.LongName, ref defines, "Preprocessor definitions");
+
+            syntax.DefineOptionList(s_suppressWarningTemplate.LongName, ref suppressWarnings, "Suppresses the specified warning");
 
             syntax.DefineOption(s_languageVersionTemplate.LongName, ref languageVersion,
                     "The version of the language used to compile");
@@ -85,6 +90,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return new CommonCompilerOptions
             {
                 Defines = defines,
+                SuppressWarnings = suppressWarnings,
                 LanguageVersion = languageVersion,
                 Platform = platform,
                 AllowUnsafe = allowUnsafe,
@@ -101,6 +107,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
         public static IEnumerable<string> SerializeToArgs(this CommonCompilerOptions options)
         {
             var defines = options.Defines;
+            var suppressWarnings = options.SuppressWarnings;
             var languageVersion = options.LanguageVersion;
             var platform = options.Platform;
             var allowUnsafe = options.AllowUnsafe;
@@ -117,6 +124,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             if (defines != null)
             {
                 args.AddRange(defines.Select(def => s_definesTemplate.ToLongArg(def)));
+            }
+
+            if (suppressWarnings != null)
+            {
+                args.AddRange(suppressWarnings.Select(def => s_suppressWarningTemplate.ToLongArg(def)));
             }
 
             if (languageVersion != null)

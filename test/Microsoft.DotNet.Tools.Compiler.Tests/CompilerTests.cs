@@ -29,9 +29,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var result = buildCommand.ExecuteWithCapturedOutput();
             result.Should().Pass();
 
-            // Should have triggered some compiler warnings about missing XML doc comments
-            Assert.True(result.StdErr.Contains("warning CS1591"));
-
             // verify the output xml file
             var outputXml = Path.Combine(outputDir, "TestLibrary.xml");
             Assert.True(File.Exists(outputXml));

@@ -140,6 +140,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 commonArgs.AddRange(options.Defines.Select(def => $"-d:{def}"));
             }
 
+            if (options.SuppressWarnings != null)
+            {
+                commonArgs.AddRange(options.SuppressWarnings.Select(w => $"-nowarn:{w}"));
+            }
+
             if (options.LanguageVersion != null)
             {
                 commonArgs.Add($"-langversion:{GetLanguageVersion(options.LanguageVersion)}");

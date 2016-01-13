@@ -1,6 +1,7 @@
 ﻿{
     "version": "1.0.0-*",
     "compilationOptions": {
+        "nowarn": [ "CS1591" ],
         "xmlDoc": true
     },
     "dependencies": {

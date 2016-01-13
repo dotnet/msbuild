@@ -526,6 +526,7 @@ namespace Microsoft.DotNet.ProjectModel
             return new CommonCompilerOptions
             {
                 Defines = rawOptions.ValueAsStringArray("define"),
+                SuppressWarnings = rawOptions.ValueAsStringArray("nowarn"),
                 LanguageVersion = rawOptions.ValueAsString("languageVersion"),
                 AllowUnsafe = rawOptions.ValueAsNullableBoolean("allowUnsafe"),
                 Platform = rawOptions.ValueAsString("platform"),

@@ -33,6 +33,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public bool? GenerateXmlDocumentation { get; set; }
 
+        public IEnumerable<string> SuppressWarnings { get; set; }
+
         public override bool Equals(object obj)
         {
             var other = obj as CommonCompilerOptions;
@@ -48,7 +50,8 @@ namespace Microsoft.DotNet.ProjectModel
                    EmitEntryPoint == other.EmitEntryPoint &&
                    GenerateXmlDocumentation == other.GenerateXmlDocumentation &&
                    PreserveCompilationContext == other.PreserveCompilationContext &&
-                   Enumerable.SequenceEqual(Defines ?? Enumerable.Empty<string>(), other.Defines ?? Enumerable.Empty<string>());
+                   Enumerable.SequenceEqual(Defines ?? Enumerable.Empty<string>(), other.Defines ?? Enumerable.Empty<string>()) &&
+                   Enumerable.SequenceEqual(SuppressWarnings ?? Enumerable.Empty<string>(), other.SuppressWarnings ?? Enumerable.Empty<string>());
         }
 
         public override int GetHashCode()
@@ -67,11 +70,17 @@ namespace Microsoft.DotNet.ProjectModel
                     continue;
                 }
 
-                // Defines are always combined
+                // Defines and suppressions are always combined
                 if (option.Defines != null)
                 {
                     var existing = result.Defines ?? Enumerable.Empty<string>();
                     result.Defines = existing.Concat(option.Defines).Distinct();
+                }
+
+                if (option.SuppressWarnings != null)
+                {
+                    var existing = result.SuppressWarnings ?? Enumerable.Empty<string>();
+                    result.SuppressWarnings = existing.Concat(option.SuppressWarnings).Distinct();
                 }
 
                 if (option.LanguageVersion != null)
