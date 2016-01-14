@@ -144,6 +144,10 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 _initializedContext.Transmit(message);
                 _remote.GlobalErrorMessage = error;
             }
+            finally
+            {
+                Monitor.Exit(_processingLock);
+            }
         }
 
         private void DoProcessLoop()
@@ -151,7 +155,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             while (true)
             {
                 DrainInbox();
-                
+
                 UpdateProject();
                 SendOutgingMessages();
 
@@ -287,7 +291,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             {
                 _remote.ProjectContexts.Remove(framework);
             }
-            
+
             _globalErrorMessenger.UpdateRemote(_local, _remote);
         }
 
