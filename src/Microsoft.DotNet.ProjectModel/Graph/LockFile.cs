@@ -15,11 +15,18 @@ namespace Microsoft.DotNet.ProjectModel.Graph
         public static readonly int CurrentVersion = 2;
         public static readonly string FileName = "project.lock.json";
 
+        public string LockFilePath { get; }
+
         public int Version { get; set; }
         public IList<ProjectFileDependencyGroup> ProjectFileDependencyGroups { get; set; } = new List<ProjectFileDependencyGroup>();
         public IList<LockFilePackageLibrary> PackageLibraries { get; set; } = new List<LockFilePackageLibrary>();
         public IList<LockFileProjectLibrary> ProjectLibraries { get; set; } = new List<LockFileProjectLibrary>();
         public IList<LockFileTarget> Targets { get; set; } = new List<LockFileTarget>();
+
+        public LockFile(string lockFilePath)
+        {
+            LockFilePath = lockFilePath;
+        }
 
         public bool IsValidForProject(Project project)
         {

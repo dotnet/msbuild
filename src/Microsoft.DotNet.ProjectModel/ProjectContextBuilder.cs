@@ -259,7 +259,8 @@ namespace Microsoft.DotNet.ProjectModel
                 TargetFramework,
                 target?.RuntimeIdentifier,
                 PackagesDirectory,
-                libraryManager);
+                libraryManager,
+                LockFile);
         }
 
         private void ResolveDependencies(Dictionary<LibraryKey, LibraryDescription> libraries,
