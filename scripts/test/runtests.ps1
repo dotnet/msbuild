@@ -11,9 +11,10 @@ $TestBinRoot = "$RepoRoot\artifacts\tests"
 
 $TestProjects = @(
     "E2E",
-    "StreamForwarderTests"
-    "Microsoft.DotNet.Tools.Publish.Tests"
-    "Microsoft.DotNet.Tools.Compiler.Tests"
+    "StreamForwarderTests",
+    "Microsoft.DotNet.Tools.Publish.Tests",
+    "Microsoft.DotNet.Tools.Compiler.Tests",
+    "Microsoft.DotNet.Tools.Builder.Tests"
 )
 
 # Publish each test project

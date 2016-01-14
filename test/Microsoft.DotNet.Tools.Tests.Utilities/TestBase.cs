@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
@@ -54,6 +56,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 string.Equals("true", val, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("1", val, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals("on", val, StringComparison.OrdinalIgnoreCase));
+        }
+
+        protected void TestOutputExecutable(string outputDir, string executableName, string expectedOutput)
+        {
+            var executablePath = Path.Combine(outputDir, executableName);
+
+            var executableCommand = new TestCommand(executablePath);
+
+            var result = executableCommand.ExecuteWithCapturedOutput("");
+
+            result.Should().HaveStdOut(expectedOutput);
+            result.Should().NotHaveStdErr();
+            result.Should().Pass();
         }
     }
 }

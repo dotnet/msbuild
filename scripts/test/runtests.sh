@@ -24,6 +24,7 @@ TestProjects=( \
     StreamForwarderTests \
     Microsoft.DotNet.Tools.Publish.Tests \
     Microsoft.DotNet.Tools.Compiler.Tests \
+    Microsoft.DotNet.Tools.Builder.Tests \
 )
 
 for project in ${TestProjects[@]}
