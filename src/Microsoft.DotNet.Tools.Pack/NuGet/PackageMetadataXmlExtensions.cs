@@ -7,6 +7,7 @@ using System.Linq;
 using System.Xml.Linq;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
+using NuGet.Versioning;
 
 namespace NuGet
 {
@@ -21,6 +22,7 @@ namespace NuGet
         private const string FrameworkAssembly = "frameworkAssembly";
         private const string AssemblyName = "assemblyName";
         private const string Dependencies = "dependencies";
+        private const string Files = "files";
 
         public static XElement ToXElement(this ManifestMetadata metadata, XNamespace ns)
         {
@@ -34,6 +36,7 @@ namespace NuGet
             elem.Add(new XElement(ns + "version", metadata.Version.ToString()));
             AddElementIfNotNull(elem, ns, "title", metadata.Title);
             elem.Add(new XElement(ns + "requireLicenseAcceptance", metadata.RequireLicenseAcceptance));
+            elem.Add(new XElement(ns + "developmentDependency", metadata.DevelopmentDependency));
             AddElementIfNotNull(elem, ns, "authors", metadata.Authors, authors => string.Join(",", authors));
             AddElementIfNotNull(elem, ns, "owners", metadata.Owners, owners => string.Join(",", owners));
             AddElementIfNotNull(elem, ns, "licenseUrl", metadata.LicenseUrl);
@@ -67,8 +70,53 @@ namespace NuGet
                 TargetFramework));
 
             elem.Add(GetXElementFromFrameworkAssemblies(ns, metadata.FrameworkAssemblies));
+            elem.Add(GetXElementFromManifestContentFiles(ns, metadata.ContentFiles));
 
             return elem;
+        }
+
+
+        public static XElement ToXElement(this IEnumerable<ManifestFile> fileList, XNamespace ns)
+        {
+            return GetXElementFromManifestFiles(ns, fileList);
+        }
+
+        public static string GetOptionalAttributeValue(this XElement element, string localName, string namespaceName = null)
+        {
+            XAttribute attr;
+            if (string.IsNullOrEmpty(namespaceName))
+            {
+                attr = element.Attribute(localName);
+            }
+            else
+            {
+                attr = element.Attribute(XName.Get(localName, namespaceName));
+            }
+            return attr != null ? attr.Value : null;
+        }
+
+        public static string GetOptionalElementValue(this XContainer element, string localName, string namespaceName = null)
+        {
+            XElement child;
+            if (string.IsNullOrEmpty(namespaceName))
+            {
+                child = element.ElementsNoNamespace(localName).FirstOrDefault();
+            }
+            else
+            {
+                child = element.Element(XName.Get(localName, namespaceName));
+            }
+            return child != null ? child.Value : null;
+        }
+
+        public static IEnumerable<XElement> ElementsNoNamespace(this XContainer container, string localName)
+        {
+            return container.Elements().Where(e => e.Name.LocalName == localName);
+        }
+
+        public static IEnumerable<XElement> ElementsNoNamespace(this IEnumerable<XContainer> source, string localName)
+        {
+            return source.Elements().Where(e => e.Name.LocalName == localName);
         }
 
         private static XElement GetXElementFromGroupableItemSets<TSet, TItem>(
@@ -137,7 +185,9 @@ namespace NuGet
         {
             return new XElement(ns + "dependency",
                 new XAttribute("id", dependency.Id),
-                dependency.VersionRange != null ? new XAttribute("version", dependency.VersionRange.ToString()) : null);
+                dependency.VersionRange != null ? new XAttribute("version", dependency.VersionRange.ToString()) : null,
+                dependency.Include != null && dependency.Include.Any() ? new XAttribute("include", string.Join(",", dependency.Include)) : null,
+                dependency.Exclude != null && dependency.Exclude.Any() ? new XAttribute("exclude", string.Join(",", dependency.Exclude)) : null);
         }
 
         private static XElement GetXElementFromFrameworkAssemblies(XNamespace ns, IEnumerable<FrameworkAssemblyReference> references)
@@ -155,6 +205,40 @@ namespace NuGet
                         reference.SupportedFrameworks != null && reference.SupportedFrameworks.Any() ?
                             new XAttribute("targetFramework", string.Join(", ", reference.SupportedFrameworks.Select(f => f.GetFrameworkString()))) :
                             null)));
+        }
+
+        private static XElement GetXElementFromManifestFiles(XNamespace ns, IEnumerable<ManifestFile> files)
+        {
+            if (files == null || !files.Any())
+            {
+                return null;
+            }
+
+            return new XElement(ns + Files,
+                files.Select(file =>
+                new XElement(ns + File,
+                    new XAttribute("src", file.Source),
+                    new XAttribute("target", file.Source),
+                    new XAttribute("exclude", file.Exclude)
+                )));
+        }
+
+        private static XElement GetXElementFromManifestContentFiles(XNamespace ns, IEnumerable<ManifestContentFiles> contentFiles)
+        {
+            if (contentFiles == null || !contentFiles.Any())
+            {
+                return null;
+            }
+
+            return new XElement(ns + "contentFiles",
+                contentFiles.Select(file =>
+                new XElement(ns + File,
+                    new XAttribute("include", file.Include),
+                    new XAttribute("exclude", file.Exclude),
+                    new XAttribute("buildAction", file.BuildAction),
+                    new XAttribute("copyToOutput", file.CopyToOutput),
+                    new XAttribute("flatten", file.Flatten)
+                )));
         }
 
         private static void AddElementIfNotNull<T>(XElement parent, XNamespace ns, string name, T value)

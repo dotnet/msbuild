@@ -19,6 +19,7 @@ namespace NuGet
     {
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
+        private bool _includeEmptyDirectories = false;
 
         public PackageBuilder()
         {
@@ -26,6 +27,7 @@ namespace NuGet
             DependencySets = new List<PackageDependencySet>();
             FrameworkAssemblies = new List<FrameworkAssemblyReference>();
             PackageAssemblyReferences = new List<PackageReferenceSet>();
+            ContentFiles = new List<ManifestContentFiles>();
             Authors = new List<string>();
             Owners = new List<string>();
             Tags = new List<string>();
@@ -151,6 +153,12 @@ namespace NuGet
             private set;
         }
 
+        public List<ManifestContentFiles> ContentFiles
+        {
+            get;
+            private set;
+        }
+
         public Version MinClientVersion
         {
             get;
@@ -264,6 +272,44 @@ namespace NuGet
             }
         }
 
+        public void Populate(ManifestMetadata manifestMetadata)
+        {
+            Id = manifestMetadata.Id;
+            Version = manifestMetadata.Version;
+            Title = manifestMetadata.Title;
+            AppendIfNotNull(Authors, manifestMetadata.Authors);
+            AppendIfNotNull(Owners, manifestMetadata.Owners);
+            IconUrl = manifestMetadata.IconUrl;
+            LicenseUrl = manifestMetadata.LicenseUrl;
+            ProjectUrl = manifestMetadata.ProjectUrl;
+            RequireLicenseAcceptance = manifestMetadata.RequireLicenseAcceptance;
+            DevelopmentDependency = manifestMetadata.DevelopmentDependency;
+            Description = manifestMetadata.Description;
+            Summary = manifestMetadata.Summary;
+            ReleaseNotes = manifestMetadata.ReleaseNotes;
+            Language = manifestMetadata.Language;
+            Copyright = manifestMetadata.Copyright;
+            MinClientVersion = manifestMetadata.MinClientVersion;
+
+            if (manifestMetadata.Tags != null)
+            {
+                Tags.AddRange(ParseTags(manifestMetadata.Tags));
+            }
+
+            AppendIfNotNull(DependencySets, manifestMetadata.DependencySets);
+            AppendIfNotNull(FrameworkAssemblies, manifestMetadata.FrameworkAssemblies);
+            AppendIfNotNull(PackageAssemblyReferences, manifestMetadata.PackageAssemblyReferences);
+            AppendIfNotNull(ContentFiles, manifestMetadata.ContentFiles);
+        }
+
+        public void PopulateFiles(string basePath, IEnumerable<ManifestFile> files)
+        {
+            foreach (var file in files)
+            {
+                AddFiles(basePath, file.Source, file.Target, file.Exclude);
+            }
+        }
+
         private void WriteManifest(ZipArchive package, int minimumManifestVersion)
         {
             string path = Id + Constants.ManifestExtension;
@@ -310,6 +356,39 @@ namespace NuGet
             return extensions;
         }
 
+        private void AddFiles(string basePath, string source, string destination, string exclude = null)
+        {
+            List<PhysicalPackageFile> searchFiles = PathResolver.ResolveSearchPattern(basePath, source, destination, _includeEmptyDirectories).ToList();
+
+            ExcludeFiles(searchFiles, basePath, exclude);
+
+            if (!PathResolver.IsWildcardSearch(source) && !PathResolver.IsDirectoryPath(source) && !searchFiles.Any())
+            {
+                // TODO: Resources
+                throw new FileNotFoundException(
+                    String.Format(CultureInfo.CurrentCulture, "NuGetResources.PackageAuthoring_FileNotFound {0}", source));
+            }
+
+
+            Files.AddRange(searchFiles);
+        }
+
+        private static void ExcludeFiles(List<PhysicalPackageFile> searchFiles, string basePath, string exclude)
+        {
+            if (String.IsNullOrEmpty(exclude))
+            {
+                return;
+            }
+
+            // One or more exclusions may be specified in the file. Split it and prepend the base path to the wildcard provided.
+            var exclusions = exclude.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var item in exclusions)
+            {
+                string wildCard = PathResolver.NormalizeWildcardForExcludedFiles(basePath, item);
+                PathResolver.FilterPackageFiles(searchFiles, p => p.SourcePath, new[] { wildCard });
+            }
+        }
+
         private static void CreatePart(ZipArchive package, string path, Stream sourceStream)
         {
             if (PackageHelper.IsManifest(path))
@@ -322,6 +401,15 @@ namespace NuGet
             {
                 sourceStream.CopyTo(stream);
             }
+        }
+
+        /// <summary>
+        /// Tags come in this format. tag1 tag2 tag3 etc..
+        /// </summary>
+        private static IEnumerable<string> ParseTags(string tags)
+        {
+            return from tag in tags.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                   select tag.Trim();
         }
 
         private static bool IsPrereleaseDependency(PackageDependency dependency)
@@ -340,7 +428,7 @@ namespace NuGet
             return version == null || version.Release.Length <= 20;
         }
 
-        private void WriteOpcManifestRelationship(ZipArchive package, string path)
+        private static void WriteOpcManifestRelationship(ZipArchive package, string path)
         {
             ZipArchiveEntry relsEntry = package.CreateEntry("_rels/.rels", CompressionLevel.Optimal);
 
@@ -374,9 +462,17 @@ namespace NuGet
         }
 
         // Generate a relationship id for compatibility
-        private string GenerateRelationshipId()
+        private static string GenerateRelationshipId()
         {
             return "R" + Guid.NewGuid().ToString("N").Substring(0, 16);
+        }
+
+        private static void AppendIfNotNull<T>(List<T> collection, IEnumerable<T> toAdd)
+        {
+            if (toAdd != null)
+            {
+                collection.AddRange(toAdd);
+            }
         }
     }
 }

@@ -61,6 +61,8 @@ namespace NuGet
 
         public bool RequireLicenseAcceptance { get; set; }
 
+        public bool DevelopmentDependency { get; set; }
+
         public string Description { get; set; }
 
         public string Summary { get; set; }
@@ -80,5 +82,7 @@ namespace NuGet
         public ICollection<PackageReferenceSet> PackageAssemblyReferences { get; set; } = new List<PackageReferenceSet>();
 
         public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies { get; set; } = new List<FrameworkAssemblyReference>();
+        
+        public ICollection<ManifestContentFiles> ContentFiles { get; set; } = new List<ManifestContentFiles>();
     }
 }
