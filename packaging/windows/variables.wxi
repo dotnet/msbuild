@@ -7,12 +7,13 @@
   <?define Dotnet_DisplayVersion   =   "1.0" ?>
   <?define Dotnet_BuildVersion   =   "$(var.BuildVersion)" ?>
   <?define Manufacturer     =   "Microsoft Corporation" ?>
-  <?define ProductName      =   "Microsoft Dotnet CLI for Windows" ?>
+  <?define ProductName      =   "Microsoft Dotnet CLI for Windows ($(var.DisplayVersion))" ?>
   <?define ProductLanguage  =   "1033" ?>
   <?define ProductVersion   =   "$(var.Dotnet_ProductVersion)" ?>
   <?define ProductFamily    =   "dotnet" ?>
   <?define ProductEdition   =   "001dotnet" ?>
   <?define LCID  = "$(var.ProductLanguage)"?>
+  <?define DowngradeErrorMessage  = "A newer version is already installed; please uninstall it and re-run setup."?>
   
   <?define Platform   =   "$(sys.BUILDARCH)" ?>
   <?if $(var.Platform)=x86?>  

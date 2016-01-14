@@ -3,13 +3,9 @@
     <?include "Variables.wxi" ?>
     <Product Id="*" Name="$(var.ProductName)" Language="$(var.ProductLanguage)" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
         <Package Compressed="yes" InstallerVersion="200" />
-        <Upgrade Id="$(var.UpgradeCode)">
-          <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" Property="NEWERVERSIONDETECTED" Language="$(var.LCID)" />
-          <UpgradeVersion Minimum="0.0.0.0" Maximum="$(var.ProductVersion)" IncludeMinimum="no" IncludeMaximum="no" Property="WIX_DOWNGRADE_DETECTED" Language="$(var.LCID)" />
-        </Upgrade>
-        <InstallExecuteSequence>
-            <RemoveExistingProducts Before="InstallInitialize" />
-        </InstallExecuteSequence>
+
+        <MajorUpgrade DowngradeErrorMessage="$(var.DowngradeErrorMessage)" Schedule="afterInstallInitialize"/>
+
         <MediaTemplate CompressionLevel="mszip" EmbedCab="yes"/>
         <Feature Id="MainFeature" Title="Main Feature" Level="1">
             <ComponentGroupRef Id="InstallFiles" />
@@ -22,7 +18,6 @@
         <Property Id="ProductEdition" Value="$(var.ProductEdition)" />
         <Property Id="ProductCPU" Value="$(var.Platform)" />
         <Property Id="RTM_ProductVersion" Value="$(var.Dotnet_ProductVersion)" />
-        <!--Property Id="ARPNOMODIFY" Value="1" /-->
 
         <WixVariable Id="WixUILicenseRtf" Value="$(var.MicrosoftEula)" />
 
