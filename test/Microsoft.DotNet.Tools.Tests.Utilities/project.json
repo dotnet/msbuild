@@ -12,8 +12,11 @@
     "System.Runtime.InteropServices": "4.0.21-*",
     "System.Text.RegularExpressions": "4.0.11-*",
     "FluentAssertions": "4.0.0",
+    "xunit": "2.1.0",
 
-    "Microsoft.DotNet.Cli.Utils": { "target": "project" }
+    "Microsoft.DotNet.Cli.Utils": { "target": "project" },
+    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
+
   },
 
 

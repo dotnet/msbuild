@@ -89,8 +89,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                     .GetDependencies()
                     .SelectMany(e => e.RuntimeAssets())
                     .CopyTo(outputPath);
-
-                GenerateBindingRedirects(context, exporter, outputPath);
             }
             else
             {
@@ -175,8 +173,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             return files;
         }
 
-
-        private static void GenerateBindingRedirects(this ProjectContext context, LibraryExporter exporter, string outputPath)
+        public static void GenerateBindingRedirects(this ProjectContext context, LibraryExporter exporter, string outputName)
         {
             var existingConfig = new DirectoryInfo(context.ProjectDirectory)
                 .EnumerateFiles()
@@ -196,7 +193,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
             if (appConfig == null) { return; }
 
-            var path = Path.Combine(outputPath, context.ProjectFile.Name + ".exe.config");
+            var path = outputName + ".config";
             using (var stream = File.Create(path))
             {
                 appConfig.Save(stream);

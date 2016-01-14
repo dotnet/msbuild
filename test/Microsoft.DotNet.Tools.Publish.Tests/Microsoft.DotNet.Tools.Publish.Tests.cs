@@ -129,6 +129,30 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             publishCommand.GetOutputDirectory().Should().HaveFile("System.Runtime.dll");
         }
 
+        [WindowsOnlyFact]
+        public void TestLibraryPublishTest()
+        {
+            // create unique directories in the 'temp' folder
+            var root = Temp.CreateDirectory();
+            var testLibDir = root.CreateDirectory("TestLibraryWithRunner");
+
+            //copy projects to the temp dir
+            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibraryWithRunner"), testLibDir);
+
+            RunRestore(testLibDir.Path);
+
+            var testProject = GetProjectPath(testLibDir);
+            var publishCommand = new PublishCommand(testProject);
+            publishCommand.Execute().Should().Pass();
+
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.pdb");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.deps");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll.config");
+            // dependencies should also be copied
+            publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
+        }
+
         [Fact]
         public void CompilationFailedTest()
         {
