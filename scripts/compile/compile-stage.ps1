@@ -78,7 +78,7 @@ cp -rec "$RuntimeOutputDir\*" "$OutputDir\bin"
 
 # Deploy the CLR host to the output
 cp "$HostDir\corehost.exe" "$OutputDir\bin"
-cp "$HostDir\clihost.dll" "$OutputDir\bin"
+cp "$HostDir\hostpolicy.dll" "$OutputDir\bin"
 
 # corehostify externally-provided binaries (csc, vbc, etc.)
 $BinariesForCoreHost | ForEach-Object {

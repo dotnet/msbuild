@@ -17,25 +17,29 @@ try {
     if (Test-Path "env:\ProgramFiles(x86)") {
         $pf = (cat "env:\ProgramFiles(x86)")
     }
-    & "$pf\MSBuild\14.0\Bin\MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration="$Configuration"
+    $BuildConfiguration = $Configuration
+    if ($Configuration -eq "Release") {
+        $BuildConfiguration = "RelWithDebInfo"
+    }
+    & "$pf\MSBuild\14.0\Bin\MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration="$BuildConfiguration"
     if (!$?) {
-        Write-Host "Command failed: $pf\MSBuild\14.0\Bin\MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration="$Configuration"
+        Write-Host "Command failed: $pf\MSBuild\14.0\Bin\MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration="$BuildConfiguration"
         Exit 1
     }
 
     if (!(Test-Path $HostDir)) {
         mkdir $HostDir | Out-Null
     }
-    cp "$RepoRoot\src\corehost\cmake\$Rid\cli\$Configuration\corehost.exe" $HostDir
-    cp "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$Configuration\clihost.dll" $HostDir
+    cp "$RepoRoot\src\corehost\cmake\$Rid\cli\$BuildConfiguration\corehost.exe" $HostDir
+    cp "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$BuildConfiguration\hostpolicy.dll" $HostDir
 
-    if (Test-Path "$RepoRoot\src\corehost\cmake\$Rid\cli\$Configuration\corehost.pdb")
+    if (Test-Path "$RepoRoot\src\corehost\cmake\$Rid\cli\$BuildConfiguration\corehost.pdb")
     {
-        cp "$RepoRoot\src\corehost\cmake\$Rid\cli\$Configuration\corehost.pdb" $HostDir
+        cp "$RepoRoot\src\corehost\cmake\$Rid\cli\$BuildConfiguration\corehost.pdb" $HostDir
     }
-    if (Test-Path "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$Configuration\clihost.pdb")
+    if (Test-Path "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$BuildConfiguration\hostpolicy.pdb")
     {
-        cp "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$Configuration\clihost.pdb" $HostDir
+        cp "$RepoRoot\src\corehost\cmake\$Rid\cli\dll\$BuildConfiguration\hostpolicy.pdb" $HostDir
     }
 } finally {
     popd
