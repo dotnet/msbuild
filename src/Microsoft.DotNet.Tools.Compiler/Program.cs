@@ -354,7 +354,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     .WriteDepsTo(Path.Combine(outputPath, projectContext.ProjectFile.Name + FileNameSuffixes.Deps));
             }
 
-            if (generateBindingRedirects)
+            if (generateBindingRedirects && context.TargetFramework.IsDesktop())
             {
                 context.GenerateBindingRedirects(exporter, outputName);
             }
