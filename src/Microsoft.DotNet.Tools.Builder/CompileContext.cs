@@ -58,9 +58,9 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 if (incremental)
                 {
-                    var dependencyContext = ProjectContext.Create(dependency.Path, dependency.Framework);
+                    var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework);
 
-                    if (!NeedsRebuilding(dependencyContext, new ProjectDependenciesFacade(dependencyContext, _args.ConfigValue)))
+                    if (!NeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue)))
                     {
                         continue;
                     }
@@ -342,11 +342,13 @@ namespace Microsoft.DotNet.Tools.Build
             // input: project.json
             compilerIO.Inputs.Add(project.ProjectFile.ProjectFilePath);
 
+            // input: lock file; find when dependencies change
+            AddLockFile(project, compilerIO);
+
             // input: source files
             compilerIO.Inputs.AddRange(CompilerUtil.GetCompilationSources(project));
 
             // todo: Factor out dependency resolution between Build and Compile. Ideally Build injects the dependencies into Compile
-            // todo: use lock file insteaf of dependencies. One file vs many
             // input: dependencies
             AddDependencies(dependencies, compilerIO);
 
@@ -365,13 +367,24 @@ namespace Microsoft.DotNet.Tools.Build
             return compilerIO;
         }
 
+        private static void AddLockFile(ProjectContext project, CompilerIO compilerIO)
+        {
+            if(project.LockFile == null)
+            {
+                var errorMessage = $"Project {project.ProjectName()} does not have a lock file.";
+                Reporter.Error.WriteLine(errorMessage);
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            compilerIO.Inputs.Add(project.LockFile.LockFilePath);
+        }
+
         private static void AddDependencies(ProjectDependenciesFacade dependencies, CompilerIO compilerIO)
         {
             // add dependency sources that need compilation
             compilerIO.Inputs.AddRange(dependencies.ProjectDependenciesWithSources.Values.SelectMany(p => p.Project.Files.SourceFiles));
 
-            // add compilation binaries
-            compilerIO.Inputs.AddRange(dependencies.Dependencies.SelectMany(d => d.CompilationAssemblies.Select(ca => ca.ResolvedPath)));
+            // non project dependencies get captured by changes in the lock file
         }
 
         private static void AddKeyFile(ProjectContext project, string config, CompilerIO compilerIO)
