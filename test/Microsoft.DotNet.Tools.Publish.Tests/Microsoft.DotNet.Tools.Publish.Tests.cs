@@ -138,6 +138,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         {
             // create unique directories in the 'temp' folder
             var root = Temp.CreateDirectory();
+            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
             var testLibDir = root.CreateDirectory("TestLibraryWithRunner");
 
             //copy projects to the temp dir
@@ -146,13 +147,24 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             RunRestore(testLibDir.Path);
 
             var testProject = GetProjectPath(testLibDir);
-            var publishCommand = new PublishCommand(testProject);
+            var publishCommand = new PublishCommand(testProject, "net451");
             publishCommand.Execute().Should().Pass();
 
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.pdb");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.deps");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll.config");
+            // dependencies should also be copied
+            publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
+            publishCommand.GetOutputDirectory().Delete(true);
+
+            publishCommand = new PublishCommand(testProject, "dnxcore50", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier());
+            publishCommand.Execute().Should().Pass();
+
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.pdb");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.deps");
+            publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryWithRunner.dll.config");
             // dependencies should also be copied
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
         }
