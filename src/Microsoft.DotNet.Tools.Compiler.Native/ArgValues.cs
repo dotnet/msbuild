@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Microsoft.DotNet.Tools.Compiler.Native
 {
@@ -56,8 +57,20 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
             if (!string.IsNullOrEmpty(IlcPath))
             {
-                config.IlcPath = IlcPath;
-                config.IlcSdkPath = IlcPath;
+                // We want a directory path. If the user gave us the exact path to the executable
+                // then we can be helpful and convert that to the directory rather than forcing
+                // the command to be re-typed.
+                string ilcDir = IlcPath;
+                if (File.Exists(IlcPath) && !Directory.Exists(IlcPath))
+                {
+                    string potentialIlcDir = Path.GetDirectoryName(IlcPath);
+                    if (Directory.Exists(potentialIlcDir))
+                    {
+                        ilcDir = potentialIlcDir;
+                    }
+                }
+                config.IlcPath = ilcDir;
+                config.IlcSdkPath = ilcDir;
             }
 
             if (!string.IsNullOrEmpty(IlcSdkPath))
