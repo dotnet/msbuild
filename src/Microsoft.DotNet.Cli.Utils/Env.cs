@@ -19,7 +19,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
 
                     _executableExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                        ? Environment.GetEnvironmentVariable("PATHEXT").Split(';').Select(e => e.ToLower())
+                        ? Environment.GetEnvironmentVariable("PATHEXT")
+                            .Split(';')
+                            .Select(e => e.ToLower().Trim('"'))
                         : new [] { string.Empty };
                 }
 
