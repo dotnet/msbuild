@@ -21,8 +21,8 @@
         <dependency id="Microsoft.Build" />
         <dependency id="Microsoft.Build.Utilities.Core" />
         <dependency id="Microsoft.Build.Tasks.Core" />
-        <dependency id="Microsoft.Win32.Primitives" version="4.0.1-beta-23516" />
         <dependency id="Microsoft.Win32.Registry" version="4.0.0-beta-23516" />
+        <dependency id="Microsoft.Win32.Primitives" version="4.0.1-beta-23516" />
         <dependency id="System.AppContext" version="4.0.1-beta-23516" />
         <dependency id="System.Collections" version="4.0.11-beta-23516" />
         <dependency id="System.Collections.Concurrent" version="4.0.11-beta-23516" />

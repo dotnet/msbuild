@@ -18,8 +18,8 @@
     <dependencies>
       <group targetFramework="dotnet">
         <dependency id="Microsoft.Build.Framework" />
-        <dependency id="Microsoft.Win32.Primitives" version="4.0.1-beta-23516" />
         <dependency id="Microsoft.Win32.Registry" version="4.0.0-beta-23516" />
+        <dependency id="Microsoft.Win32.Primitives" version="4.0.1-beta-23516" />
         <dependency id="System.Collections" version="4.0.11-beta-23516" />
         <dependency id="System.Collections.Concurrent" version="4.0.11-beta-23516" />
         <dependency id="System.Collections.NonGeneric" version="4.0.1-beta-23516" />

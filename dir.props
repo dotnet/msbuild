@@ -264,6 +264,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_XMLTEXTREADER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -282,10 +283,6 @@
   <!-- Change define constants as needed -->
   <PropertyGroup Condition="'$(MsbuildDebugger)' == 'true' AND '$(MonoBuild)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_MSBUILD_DEBUGGER</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'Windows_NT' or '$(MonoBuild)' == 'true'">
-    <DefineConstants>$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
   </PropertyGroup>
 
   <!-- Setup some common paths -->
