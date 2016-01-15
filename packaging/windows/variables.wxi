@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?if $(var.ReleaseSuffix) ~= "beta" OR $(var.ReleaseSuffix) ~= "rc1" OR $(var.ReleaseSuffix) ~= "rtm" OR $(var.ReleaseSuffix) ~= ""?>
+  <?define BuildType="Release"?>
+  <?else?>
+  <?define BuildType="Nightly"?>
+  <?endif?>
+
   <?define Servicing_Key_SP   =   "0" ?>
   <?define Servicing_Key_SPIndex   =   "0" ?>
   <?define Servicing_Key_SPName   =   "Beta" ?>
@@ -7,13 +13,14 @@
   <?define Dotnet_DisplayVersion   =   "1.0" ?>
   <?define Dotnet_BuildVersion   =   "$(var.BuildVersion)" ?>
   <?define Manufacturer     =   "Microsoft Corporation" ?>
-  <?define ProductName      =   "Microsoft Dotnet CLI for Windows ($(var.DisplayVersion))" ?>
+  <?define ProductName      =   "Microsoft Dotnet CLI for Windows ($(var.DisplayVersion) $(var.ReleaseSuffix))" ?>
   <?define ProductLanguage  =   "1033" ?>
   <?define ProductVersion   =   "$(var.Dotnet_ProductVersion)" ?>
   <?define ProductFamily    =   "dotnet" ?>
   <?define ProductEdition   =   "001dotnet" ?>
   <?define LCID  = "$(var.ProductLanguage)"?>
   <?define DowngradeErrorMessage  = "A newer version is already installed; please uninstall it and re-run setup."?>
+  <?define IncompatibleBuildTypeError = "You have installed '[INSTALLEDCLIBUILDTYPE]' build of Dotnet CLI. It cannot be upgraded to a '[EXPECTEDCLIBUILDTYPE]' build of Dotnet CLI. Please uninstall it and re-run setup."?>
   
   <?define Platform   =   "$(sys.BUILDARCH)" ?>
   <?if $(var.Platform)=x86?>  

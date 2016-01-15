@@ -67,11 +67,13 @@ function RunCandle
         -dMicrosoftEula="$RepoRoot\packaging\osx\resources\en.lproj\eula.rtf" `
         -dBuildVersion="$env:DOTNET_MSI_VERSION" `
         -dDisplayVersion="$env:DOTNET_CLI_VERSION" `
+        -dReleaseSuffix="$env:ReleaseSuffix" `
         -arch x64 `
         -ext WixDependencyExtension.dll `
         "$AuthWsxRoot\dotnet.wxs" `
         "$AuthWsxRoot\provider.wxs" `
         "$AuthWsxRoot\registrykeys.wxs" `
+        "$AuthWsxRoot\checkbuildtype.wxs" `
         $InstallFileswsx | Out-Host
 
     if($LastExitCode -ne 0)
@@ -96,6 +98,7 @@ function RunLight
         dotnet.wixobj `
         provider.wixobj `
         registrykeys.wixobj `
+        checkbuildtype.wixobj `
         $InstallFilesWixobj `
         -out $DotnetMSIOutput | Out-Host
 
