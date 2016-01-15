@@ -11,25 +11,8 @@ INSTALL_DESTINATION=$2
 # A temporary fix for the permissions issue(s)
 chmod -R 755 $INSTALL_DESTINATION
 
-ln -s $INSTALL_DESTINATION/bin/dotnet /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-compile /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-build /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-compile-csc /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-compile-fsc /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-new /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-pack /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-publish /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-repl /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-restore /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-resgen /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-run /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-test /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/dotnet-dnx /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/csc /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/libhostpolicy.dylib /usr/local/bin/
-
-# A temporary solution to unblock dotnet compile
-cp $INSTALL_DESTINATION/bin/corehost /usr/local/bin/
+# Add the installation bin directory to the system-wide paths
+echo $INSTALL_DESTINATION/bin | tee -a /etc/paths.d/dotnet
 
 
 exit 0
