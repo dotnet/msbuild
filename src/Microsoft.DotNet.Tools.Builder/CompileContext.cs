@@ -338,6 +338,7 @@ namespace Microsoft.DotNet.Tools.Build
         public static CompilerIO GetCompileIO(ProjectContext project, string config, string outputPath, string intermediaryOutputPath, ProjectDependenciesFacade dependencies)
         {
             var compilerIO = new CompilerIO(new List<string>(), new List<string>());
+            var compilationOutput = CompilerUtil.GetCompilationOutput(project.ProjectFile, project.TargetFramework, config, outputPath);
 
             // input: project.json
             compilerIO.Inputs.Add(project.ProjectFile.ProjectFilePath);
@@ -352,11 +353,11 @@ namespace Microsoft.DotNet.Tools.Build
             // input: dependencies
             AddDependencies(dependencies, compilerIO);
 
-            // input: key file
-            AddKeyFile(project, config, compilerIO);
-
             // output: compiler output
-            compilerIO.Outputs.Add(CompilerUtil.GetCompilationOutput(project.ProjectFile, project.TargetFramework, config, outputPath));
+            compilerIO.Outputs.Add(compilationOutput);
+
+            // input / output: compilation options files
+            AddFilesFromCompilationOptions(project, config, compilationOutput, compilerIO);
 
             // input / output: resources without culture
             AddCultureResources(project, intermediaryOutputPath, compilerIO);
@@ -387,13 +388,23 @@ namespace Microsoft.DotNet.Tools.Build
             // non project dependencies get captured by changes in the lock file
         }
 
-        private static void AddKeyFile(ProjectContext project, string config, CompilerIO compilerIO)
+        private static void AddFilesFromCompilationOptions(ProjectContext project, string config, string compilationOutput, CompilerIO compilerIO)
         {
-            var keyFile = CompilerUtil.ResolveCompilationOptions(project, config).KeyFile;
+            var compilerOptions = CompilerUtil.ResolveCompilationOptions(project, config);
 
-            if (keyFile != null)
+            // output: pdb file. They are always emitted (see compiler.csc)
+            compilerIO.Outputs.Add(Path.ChangeExtension(compilationOutput, "pdb"));
+
+            // output: documentation file
+            if (compilerOptions.GenerateXmlDocumentation == true)
             {
-                compilerIO.Inputs.Add(keyFile);
+                compilerIO.Outputs.Add(Path.ChangeExtension(compilationOutput, "xml"));
+            }
+
+            // input: key file
+            if (compilerOptions.KeyFile != null)
+            {
+                compilerIO.Inputs.Add(compilerOptions.KeyFile);
             }
         }
 
