@@ -16,6 +16,7 @@ $Projects = @(
     "Microsoft.DotNet.Cli.Utils",
     "Microsoft.DotNet.ProjectModel.Loader",
     "Microsoft.DotNet.ProjectModel.Server",
+    "Microsoft.DotNet.ProjectModel.Workspaces",
     "Microsoft.DotNet.Tools.Builder",
     "Microsoft.DotNet.Tools.Compiler",
     "Microsoft.DotNet.Tools.Compiler.Csc",
