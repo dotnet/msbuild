@@ -11,11 +11,11 @@ using Xunit;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Tests
 {
-    public class DthStartupTests : IClassFixture<TestHelper>
+    public class DthTests : IClassFixture<TestHelper>
     {
         private readonly TestHelper _testHelper;
 
-        public DthStartupTests(TestHelper helper)
+        public DthTests(TestHelper helper)
         {
             _testHelper = helper;
         }
@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             {
                 // After restore the project is copied to another place so that
                 // the relative path in project lock file is invalid.
-                var movedProjectPath = _testHelper.MoveProject("BrokenProjectPathSample");
+                var movedProjectPath = _testHelper.BuildProjectCopy("BrokenProjectPathSample");
 
                 client.Initialize(movedProjectPath);
 
@@ -229,6 +229,31 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                       .AssertJArrayCount(1)
                       .RetrieveArraryElementAs<JObject>(0)
                       .AssertProperty("ErrorCode", "NU1010");
+            }
+        }
+
+        [Fact]
+        public void DthStartup_OpenProjectBeforeRestore()
+        {
+            var projectPath = _testHelper.BuildProjectCopy("EmptyConsoleApp");
+            _testHelper.DeleteLockFile(projectPath);
+
+            using (var server = new DthTestServer(_testHelper.LoggerFactory))
+            using (var client = new DthTestClient(server))
+            {
+                client.Initialize(projectPath);
+                var messages = client.DrainAllMessages();
+                Assert.False(messages.Any(msg => msg.MessageType == MessageTypes.Error));
+
+                var dependencyDiagnostics = messages.Where(msg => msg.MessageType == MessageTypes.DependencyDiagnostics);
+                Assert.Equal(2, dependencyDiagnostics.Count());
+
+                foreach (var message in dependencyDiagnostics)
+                {
+                    message.RetrievePayloadAs<JObject>()
+                           .RetrievePropertyAs<JArray>("Errors")
+                           .AssertJArrayContains<JObject>(error => error["ErrorCode"].Value<string>() == ErrorCodes.NU1009);
+                }
             }
         }
     }

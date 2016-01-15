@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Tests.Helpers
@@ -11,7 +12,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests.Helpers
         public TestHelper()
         {
             LoggerFactory = new LoggerFactory();
-            
+
             var testVerbose = Environment.GetEnvironmentVariable("DOTNET_TEST_VERBOSE");
             if (testVerbose == "2")
             {
@@ -63,13 +64,22 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests.Helpers
             return target;
         }
 
-        public string MoveProject(string projectName)
+        public string BuildProjectCopy(string projectName)
         {
             var projectPath = FindSampleProject(projectName);
             var movedProjectPath = Path.Combine(CreateTempFolder(), projectName);
             CopyFiles(projectPath, movedProjectPath);
 
             return movedProjectPath;
+        }
+
+        public void DeleteLockFile(string folder)
+        {
+            var lockFilePath = Path.Combine(folder, LockFile.FileName);
+            if (File.Exists(lockFilePath))
+            {
+                File.Delete(lockFilePath);
+            }
         }
 
         private static string FindRoot()

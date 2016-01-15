@@ -193,17 +193,21 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 currentEntry = new FileModelEntry<LockFile>();
             }
-            else if (!File.Exists(Path.Combine(projectDirectory, LockFile.FileName)))
-            {
-                currentEntry.Reset();
-                return currentEntry;
-            }
 
             if (currentEntry.IsInvalid)
             {
-                currentEntry.FilePath = Path.Combine(projectDirectory, LockFile.FileName);
-                currentEntry.Model = LockFileReader.Read(currentEntry.FilePath);
-                currentEntry.UpdateLastWriteTime();
+                currentEntry.Reset();
+
+                if (!File.Exists(Path.Combine(projectDirectory, LockFile.FileName)))
+                {
+                    return currentEntry;
+                }
+                else
+                {
+                    currentEntry.FilePath = Path.Combine(projectDirectory, LockFile.FileName);
+                    currentEntry.Model = LockFileReader.Read(currentEntry.FilePath);
+                    currentEntry.UpdateLastWriteTime();
+                }
             }
 
             return currentEntry;
@@ -241,7 +245,7 @@ namespace Microsoft.DotNet.ProjectModel
 
                     currentEntry.ProjectContexts.Add(builder.Build());
                 }
- 
+
                 currentEntry.Project = project;
                 currentEntry.ProjectFilePath = project.ProjectFilePath;
                 currentEntry.LastProjectFileWriteTime = File.GetLastWriteTime(currentEntry.ProjectFilePath);
