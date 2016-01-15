@@ -55,9 +55,9 @@ namespace Microsoft.DotNet.ProjectModel.Server
             _messengers = new List<Messenger<ProjectContextSnapshot>>
             {
                 new DependencyDiagnosticsMessenger(Transmit),
+                new ReferencesMessenger(Transmit),
                 new DependenciesMessenger(Transmit),
                 new CompilerOptionsMessenger(Transmit),
-                new ReferencesMessenger(Transmit),
                 new SourcesMessenger(Transmit)
             };
 

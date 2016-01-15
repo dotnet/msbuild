@@ -100,27 +100,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             {
                 client.Initialize(projectPath);
 
-                var unresolveDependency = client.DrainTillFirst("Dependencies")
-                                                .EnsureSource(server, client)
-                                                .RetrieveDependency(expectedUnresolvedDependency);
-
-                unresolveDependency.AssertProperty("Name", expectedUnresolvedDependency)
-                                   .AssertProperty("DisplayName", expectedUnresolvedDependency)
-                                   .AssertProperty("Resolved", false)
-                                   .AssertProperty("Type", expectedUnresolvedType);
-
-                if (expectedUnresolvedType == "Project")
-                {
-                    unresolveDependency.AssertProperty("Path", Path.Combine(Path.GetDirectoryName(projectPath),
-                                                                            expectedUnresolvedDependency,
-                                                                            Project.FileName));
-                }
-                else
-                {
-                    Assert.False(unresolveDependency["Path"].HasValues);
-                }
-
-                var referencesMessage = client.DrainTillFirst("References", TimeSpan.FromDays(1))
+                var referencesMessage = client.DrainTillFirst(MessageTypes.References, TimeSpan.FromDays(1))
                                               .EnsureSource(server, client);
 
                 if (referenceType == "Project")
@@ -142,6 +122,26 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
                     referencesMessage.RetrievePayloadAs<JObject>()
                                      .RetrievePropertyAs<JArray>("ProjectReferences")
                                      .AssertJArrayCount(0);
+                }
+
+                var unresolveDependency = client.DrainTillFirst(MessageTypes.Dependencies)
+                                                .EnsureSource(server, client)
+                                                .RetrieveDependency(expectedUnresolvedDependency);
+
+                unresolveDependency.AssertProperty("Name", expectedUnresolvedDependency)
+                                   .AssertProperty("DisplayName", expectedUnresolvedDependency)
+                                   .AssertProperty("Resolved", false)
+                                   .AssertProperty("Type", expectedUnresolvedType);
+
+                if (expectedUnresolvedType == "Project")
+                {
+                    unresolveDependency.AssertProperty("Path", Path.Combine(Path.GetDirectoryName(projectPath),
+                                                                            expectedUnresolvedDependency,
+                                                                            Project.FileName));
+                }
+                else
+                {
+                    Assert.False(unresolveDependency["Path"].HasValues);
                 }
             }
         }
