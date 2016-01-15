@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string HostExecutableName = "corehost" + ExeSuffix;
         public static readonly string[] HostBinaryNames = new string[] {
             HostExecutableName,
-            (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "clihost" : "libclihost") + DynamicLibSuffix 
+            (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "hostpolicy" : "libhostpolicy") + DynamicLibSuffix 
         };
     }
 }

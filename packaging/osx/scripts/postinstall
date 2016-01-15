@@ -26,7 +26,7 @@ ln -s $INSTALL_DESTINATION/bin/dotnet-run /usr/local/bin/
 ln -s $INSTALL_DESTINATION/bin/dotnet-test /usr/local/bin/
 ln -s $INSTALL_DESTINATION/bin/dotnet-dnx /usr/local/bin/
 ln -s $INSTALL_DESTINATION/bin/csc /usr/local/bin/
-ln -s $INSTALL_DESTINATION/bin/libclihost.dylib /usr/local/bin/
+ln -s $INSTALL_DESTINATION/bin/libhostpolicy.dylib /usr/local/bin/
 
 # A temporary solution to unblock dotnet compile
 cp $INSTALL_DESTINATION/bin/corehost /usr/local/bin/
