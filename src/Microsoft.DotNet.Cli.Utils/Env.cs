@@ -35,7 +35,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
                     var searchPaths = new List<string> {AppContext.BaseDirectory};
 
-                    searchPaths.AddRange(Environment.GetEnvironmentVariable("PATH").Split(Path.PathSeparator));
+                    searchPaths.AddRange(Environment
+                        .GetEnvironmentVariable("PATH")
+                        .Split(Path.PathSeparator)
+                        .Select(p => p.Trim('"')));
 
                     _searchPaths = searchPaths;
                 }
