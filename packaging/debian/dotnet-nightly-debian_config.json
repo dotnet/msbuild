@@ -38,6 +38,7 @@
     ],
 
     "symlinks": {
+        "/usr/share/dotnet-nightly" : "/usr/share/dotnet",
         "bin/dotnet" : "usr/bin/dotnet",
         "bin/dotnet-build" : "usr/bin/dotnet-build",
         "bin/dotnet-compile" : "usr/bin/dotnet-compile",
