@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "System.Reflection.Metadata": "1.0.23-beta-23516",
+    "System.Reflection.Metadata": "1.1.0",
     "System.Threading.Tasks.Dataflow": "4.5.26-beta-23516"
   },
   "frameworks": {
