@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Tools.Build
             // rebuild if empty inputs / outputs
             if (!(compilerIO.Outputs.Any() && compilerIO.Inputs.Any()))
             {
-                Reporter.Verbose.WriteLine($"\nProject {project.ProjectName()} will be compiled because it either has empty inputs or outputs");
+                Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because it either has empty inputs or outputs");
                 return true;
             }
 
@@ -123,11 +123,11 @@ namespace Microsoft.DotNet.Tools.Build
 
             if (!newInputs.Any())
             {
-                Reporter.Verbose.WriteLine($"\nSkipped compilation for project {project.ProjectName()}. All the input files were older than the output files.");
+                Reporter.Output.WriteLine($"\nProject {project.ProjectName()} was previoulsy compiled. Skipping compilation.");
                 return false;
             }
 
-            Reporter.Verbose.WriteLine($"\nProject {project.ProjectName()} was compiled because some of its inputs were newer than its oldest output:");
+            Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because some of its inputs were newer than its oldest output.");
             Reporter.Verbose.WriteLine($"Oldest output item was written at {minDate} : {minOutputPath}");
             Reporter.Verbose.WriteLine($"Inputs newer than the oldest output item:");
 
@@ -148,14 +148,14 @@ namespace Microsoft.DotNet.Tools.Build
                 return false;
             }
 
-            Reporter.Verbose.WriteLine($"\nProject {project.ProjectName()} will be compiled because expected {itemsType} are missing: ");
+            Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because expected {itemsType} are missing. ");
 
             foreach (var missing in missingItems)
             {
                 Reporter.Verbose.WriteLine($"\t {missing}");
             }
 
-            Reporter.Verbose.WriteLine();
+            Reporter.Output.WriteLine();
 
             return true;
         }
