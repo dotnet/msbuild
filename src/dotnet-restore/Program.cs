@@ -110,15 +110,21 @@ namespace Microsoft.DotNet.Tools.Restore
 
         private static void RestoreTool(LibraryRange tooldep, RestoreTask restoreTask)
         {
-            var tempPath = Path.Combine(restoreTask.ProjectDirectory, Guid.NewGuid().ToString(), "bin");
+            var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            try
+            {
+                var tempPath = Path.Combine(tempRoot, "bin");
 
-            RestoreToolToPath(tooldep, restoreTask.Arguments, tempPath);
+                RestoreToolToPath(tooldep, restoreTask.Arguments, tempPath);
 
-            CreateDepsInPackageCache(tooldep, tempPath);
+                CreateDepsInPackageCache(tooldep, tempPath);
 
-            PersistLockFile(tooldep, tempPath, restoreTask.ProjectDirectory);
-
-            Directory.Delete(tempPath, true);
+                PersistLockFile(tooldep, tempPath, restoreTask.ProjectDirectory);
+            }
+            finally
+            {
+                Directory.Delete(tempRoot, true);
+            }
         }
 
         private static void PersistLockFile(LibraryRange tooldep, string tempPath, string projectPath)
