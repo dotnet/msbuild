@@ -49,7 +49,7 @@ function GetMSIVersionFromCLIVersion([uint32]$Major, [uint32]$Minor, [uint32]$Pa
     return $MSIVersion
 }
 
-$env:ReleaseSuffix = "dev"
+$env:ReleaseSuffix = "beta"
 $env:MajorVersion = 1
 $env:MinorVersion = 0
 $env:PatchVersion = 0
