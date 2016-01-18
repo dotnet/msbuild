@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             IReadOnlyList<string> references = Array.Empty<string>();
             IReadOnlyList<string> resources = Array.Empty<string>();
             IReadOnlyList<string> sources = Array.Empty<string>();
+            IReadOnlyList<string> analyzers = Array.Empty<string>();
             string outputName = null;
             var help = false;
             var returnCode = 0;
@@ -50,6 +51,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                     syntax.DefineOption("out", ref outputName, "Name of the output assembly");
 
                     syntax.DefineOptionList("reference", ref references, "Path to a compiler metadata reference");
+                    
+                    syntax.DefineOptionList("analyzer", ref analyzers, "Path to an analyzer assembly");
 
                     syntax.DefineOptionList("resource", ref resources, "Resources to embed");
 
@@ -96,6 +99,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 allArgs.Add($"-out:\"{outputName.Trim('"')}\"");
             }
 
+            allArgs.AddRange(analyzers.Select(a => $"-a:\"{a.Trim('"')}\""));
             allArgs.AddRange(references.Select(r => $"-r:\"{r.Trim('"')}\""));
             allArgs.AddRange(resources.Select(resource => $"-resource:{resource.Trim('"')}"));
             allArgs.AddRange(sources.Select(s => $"\"{s.Trim('"')}\""));

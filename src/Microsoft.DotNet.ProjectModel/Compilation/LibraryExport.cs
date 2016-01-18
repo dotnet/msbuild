@@ -33,15 +33,26 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         /// Gets a list of fully-qualified paths to source code file references
         /// </summary>
         public IEnumerable<string> SourceReferences { get; }
+        
+       /// <summary>
+       /// Get a list of analyzers provided by this export.
+       /// </summary>
+       public IEnumerable<AnalyzerReference> AnalyzerReferences { get; }
 
-        public LibraryExport(LibraryDescription library, IEnumerable<LibraryAsset> compileAssemblies, IEnumerable<string> sourceReferences, IEnumerable<LibraryAsset> runtimeAssemblies, IEnumerable<LibraryAsset> nativeLibraries)
-        {
-            Library = library;
-            CompilationAssemblies = compileAssemblies;
-            SourceReferences = sourceReferences;
-            RuntimeAssemblies = runtimeAssemblies;
-            NativeLibraries = nativeLibraries;
-        }
+       public LibraryExport(LibraryDescription library,
+                            IEnumerable<LibraryAsset> compileAssemblies,
+                            IEnumerable<string> sourceReferences,
+                            IEnumerable<LibraryAsset> runtimeAssemblies,
+                            IEnumerable<LibraryAsset> nativeLibraries,
+                            IEnumerable<AnalyzerReference> analyzers)
+       {
+           Library = library;
+           CompilationAssemblies = compileAssemblies;
+           SourceReferences = sourceReferences;
+           RuntimeAssemblies = runtimeAssemblies;
+           NativeLibraries = nativeLibraries;
+           AnalyzerReferences = analyzers;
+       }
 
         private string DebuggerDisplay => Library.Identity.ToString();
     }

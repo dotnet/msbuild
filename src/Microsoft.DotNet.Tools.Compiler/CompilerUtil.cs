@@ -27,6 +27,14 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             return compilerName;
         }
+        
+        public static string ResolveLanguageId(ProjectContext context)
+        {
+            var languageId = context.ProjectFile.AnalyzerOptions?.LanguageId;
+            languageId = languageId ?? "cs";
+            
+            return languageId;
+        }
 
         public struct NonCultureResgenIO
         {
