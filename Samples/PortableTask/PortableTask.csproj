@@ -10,6 +10,7 @@
     <AssemblyName>PortableTask</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <UseProductOutputPath>true</UseProductOutputPath>
+	<CopyNuGetImplementations>false</CopyNuGetImplementations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetCoreBuild)' == 'true'">
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
