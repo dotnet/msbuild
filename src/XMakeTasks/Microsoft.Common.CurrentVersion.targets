@@ -55,7 +55,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup Condition="'$(TargetRuntime)' == 'Managed'">
     <TargetFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == ''">.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion Condition=" '$(TargetFrameworkVersion)' == '' ">v4.0</TargetFrameworkVersion>
-  </PropertyGroup>  
+  </PropertyGroup>
 
   <!-- AvailablePlatforms is the list of platform targets available. -->
   <PropertyGroup>
@@ -85,7 +85,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == ''">Windows</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">7.0</TargetPlatformVersion>
-    <TargetPlatformSdkPath Condition=" '$(TargetPlatformIdentifier)' == 'Windows' and '$(OS)' == 'Windows_NT'">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\Software\Microsoft\Microsoft SDKs\Windows\v$(TargetPlatformVersion)', InstallationFolder, null, RegistryView.Registry32, RegistryView.Default))</TargetPlatformSdkPath>
+    <TargetPlatformSdkPath Condition=" '$(TargetPlatformIdentifier)' == 'Windows' and '$(OS)' == 'Windows_NT' and '$(MSBuildRuntimeType)' != 'Core'">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\Software\Microsoft\Microsoft SDKs\Windows\v$(TargetPlatformVersion)', InstallationFolder, null, RegistryView.Registry32, RegistryView.Default))</TargetPlatformSdkPath>
     <TargetPlatformSdkPath Condition=" '$(TargetPlatformSdkPath)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation($(TargetPlatformIdentifier), $(TargetPlatformVersion)))</TargetPlatformSdkPath>
     <TargetPlatformSdkMetadataLocation Condition="'$(TargetPlatformSdkMetadataLocation)' == '' and Exists('$(TargetPlatformSdkPath)')">$(TargetPlatformSdkPath)Windows Metadata</TargetPlatformSdkMetadataLocation>
     <TargetPlatformSdkMetadataLocation Condition="Exists('$(TargetPlatformSdkPath)') and ('$(TargetPlatformSdkMetadataLocation)' == '' or !Exists('$(TargetPlatformSdkMetadataLocation)'))">$(TargetPlatformSdkPath)References\CommonConfiguration\Neutral</TargetPlatformSdkMetadataLocation>
@@ -202,7 +202,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <WinMDExpOutputWindowsMetadataFilename Condition="'$(WinMDExpOutputWindowsMetadataFilename)' == '' and '$(OutputType)' == 'winmdobj'">$(TargetName).winmd</WinMDExpOutputWindowsMetadataFilename>
     <TargetFileName Condition=" '$(TargetFileName)' == '' and '$(OutputType)' == 'winmdobj'">$(WinMDExpOutputWindowsMetadataFilename)</TargetFileName>
     <TargetFileName Condition=" '$(TargetFileName)' == '' ">$(TargetName)$(TargetExt)</TargetFileName>
-    
+
     <!-- Example, MyAssembly.dll -->
   </PropertyGroup>
 
@@ -368,7 +368,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_IntermediateWindowsMetadataPath>$(IntermediateOutputPath)$(WinMDExpOutputWindowsMetadataFilename)</_IntermediateWindowsMetadataPath>
     <_WindowsMetadataOutputPath>$(OutDir)$(WinMDExpOutputWindowsMetadataFilename)</_WindowsMetadataOutputPath>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <!-- Create an item for entry point of the ClickOnce application (Example: WindowsApplication1.exe) -->
     <_DeploymentManifestEntryPoint Include="@(IntermediateAssembly)">
@@ -476,7 +476,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch Condition="'$(ProcessorArchitecture)'==''">None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <ProcessorArchitecture Condition="'$(ProcessorArchitecture)'==''">$(PROCESSOR_ARCHITECTURE)</ProcessorArchitecture>
   </PropertyGroup>
- 
+
 
   <!-- Sensible defaults for the most-commonly-desired MSBuildRuntime and MSBuildArchitecture values -->
   <PropertyGroup Condition="'$(DisableOutOfProcTaskHost)' == ''">
@@ -665,7 +665,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Context>ProjectSubscriptionService;BrowseObject</Context>
     </PropertyPageSchema>
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(DefineCommonCapabilities)' == 'true' ">
     <ProjectCapability Include="
                           AssemblyReferences;
@@ -734,8 +734,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Error Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" Text="The BaseIntermediateOutputPath must end with a trailing slash." />
     <Error Condition="'$(IntermediateOutputPath)' != '' and !HasTrailingSlash('$(IntermediateOutputPath)')" Text="The IntermediateOutputPath must end with a trailing slash." />
 
-    <!-- Also update the value of PlatformTargetAsMSBuildArchitecture per the value of Prefer32Bit.  We are doing 
-         this here because Prefer32Bit may be set anywhere in the targets, so we can't depend on it having the 
+    <!-- Also update the value of PlatformTargetAsMSBuildArchitecture per the value of Prefer32Bit.  We are doing
+         this here because Prefer32Bit may be set anywhere in the targets, so we can't depend on it having the
          correct value when we're trying to figure out PlatformTargetAsMSBuildArchitecture -->
     <PropertyGroup Condition="'$(Prefer32Bit)' == 'true' and ('$(PlatformTarget)' == 'AnyCPU' or '$(PlatformTarget)' == '') and '$(PlatformTargetAsMSBuildArchitectureExplicitlySet)' != 'true'">
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
@@ -1158,8 +1158,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         AssignLinkMetadata
 
        For items of a certain set of whitelisted types, make sure that
-       if they are defined in a file other than the project file, that 
-       they have "Link" metadata set to an appropriate default. 
+       if they are defined in a file other than the project file, that
+       they have "Link" metadata set to an appropriate default.
     ============================================================
     -->
   <Target Name="AssignLinkMetadata" Condition=" '$(SynthesizeLinkMetadata)' == 'true' ">
@@ -1287,12 +1287,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(TargetFrameworkAsMSBuildRuntime)' != '' and '$(UnregisterAssemblyMSBuildArchitecture)' != ''">
-      <!-- Falling back to the current runtime if we are targeting CLR2 and the task host doesn't exist will lead to 
+      <!-- Falling back to the current runtime if we are targeting CLR2 and the task host doesn't exist will lead to
            incorrect behavior in some cases, but it's the same incorrect behavior as Visual Studio 2010, and thus better
-           than causing build breaks on upgrade to Win8 the way not doing so would.  For more details, see the 
+           than causing build breaks on upgrade to Win8 the way not doing so would.  For more details, see the
            corresponding comment in GenerateResource. -->
-      <UnregisterAssemblyMSBuildRuntime 
-          Condition="'$(UnregisterAssemblyMSBuildRuntime)' == '' and 
+      <UnregisterAssemblyMSBuildRuntime
+          Condition="'$(UnregisterAssemblyMSBuildRuntime)' == '' and
                      $([MSBuild]::DoesTaskHostExist(`$(TargetFrameworkAsMSBuildRuntime)`, `$(UnregisterAssemblyMSBuildArchitecture)`))">$(TargetFrameworkAsMSBuildRuntime)</UnregisterAssemblyMSBuildRuntime>
 
       <!-- If the targeted runtime doesn't exist, fall back to current -->
@@ -1395,9 +1395,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration Condition="'$(OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)' == ''">true</OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration>
       <ShouldUnsetParentConfigurationAndPlatform Condition="'$(ShouldUnsetParentConfigurationAndPlatform)' == '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildingSolutionFile)' == 'true')">true</ShouldUnsetParentConfigurationAndPlatform>
       <ShouldUnsetParentConfigurationAndPlatform Condition="'$(ShouldUnsetParentConfigurationAndPlatform)' == ''">false</ShouldUnsetParentConfigurationAndPlatform>
-      
-      <!-- Web Application projects can "secretly" reference Silverlight projects, which can take project dependencies on that same Web Application.  If the project 
-           dependencies are promoted to project references, this ends up creating a situation where we have a circular reference between the two projects.  We don't 
+
+      <!-- Web Application projects can "secretly" reference Silverlight projects, which can take project dependencies on that same Web Application.  If the project
+           dependencies are promoted to project references, this ends up creating a situation where we have a circular reference between the two projects.  We don't
            want this to happen, so just turn off synthetic project reference generation for Silverlight projects. -->
       <AddSyntheticProjectReferencesForSolutionDependencies Condition="'$(AddSyntheticProjectReferencesForSolutionDependencies)' == '' and '$(TargetFrameworkIdentifier)' == 'Silverlight'">false</AddSyntheticProjectReferencesForSolutionDependencies>
 
@@ -1477,7 +1477,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_MSBuildProjectReference Include="@(ProjectReferenceWithConfiguration)" Condition="'$(BuildingInsideVisualStudio)'!='true' and '@(ProjectReferenceWithConfiguration)'!=''"/>
     </ItemGroup>
-     
+
     <!-- Break the project list into two lists: those that exist on disk and those that don't. -->
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Include="@(_MSBuildProjectReference)" Condition="Exists('%(Identity)')"/>
@@ -1541,14 +1541,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         QUIRKING FOR DEV10
 
-        In the 4.0 version of the targets, we built the targets specified in the Targets metadata in addition to 
-        GetTargetPath when building in the IDE.  In 4.5, we changed this to just GetTargetPath because it was 
-        causing performance trouble with certain systems that specified targets that did a significant amount of 
-        work in the Targets metadata, expecting them to only build when doing a real build.  
+        In the 4.0 version of the targets, we built the targets specified in the Targets metadata in addition to
+        GetTargetPath when building in the IDE.  In 4.5, we changed this to just GetTargetPath because it was
+        causing performance trouble with certain systems that specified targets that did a significant amount of
+        work in the Targets metadata, expecting them to only build when doing a real build.
 
-        However, that change broke C++ unit testing in Dev10 + 4.5 scenarios, because they required use of the 
-        Targets metadata in order to get design time builds to work properly.  Thus, we need to make sure we 
-        restore the Dev10 behavior when building on Dev10. 
+        However, that change broke C++ unit testing in Dev10 + 4.5 scenarios, because they required use of the
+        Targets metadata in order to get design time builds to work properly.  Thus, we need to make sure we
+        restore the Dev10 behavior when building on Dev10.
         -->
 
     <MSBuild
@@ -1634,7 +1634,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    Name="ExpandSDKReferencesDesignTime"
    Returns="@(ReferencesFromSDK)"
    DependsOnTargets="ExpandSDKReferences"/>
-  
+
   <!--
     ============================================================
                                         GetTargetPath
@@ -1677,7 +1677,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="GetTargetPathWithTargetPlatformMoniker"
       DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
       Returns="@(TargetPathWithTargetPlatformMoniker)" />
-  
+
   <!--
     ============================================================
                                         GetNativeManifest
@@ -1889,7 +1889,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
         [OUT]
         @(OutputAppConfigFile) -     Path to the output app config file in the intermediate directory.
-        
+
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirects"
@@ -1914,7 +1914,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
 
                                         GenerateBindingRedirectsUpdateAppConfig
-    Updates the project to use the generated app.config content.  This needs to run regardless of 
+    Updates the project to use the generated app.config content.  This needs to run regardless of
     inputs/outputs so it is seperate from GenerateBindingRedirects.
     ====================================================================================================
   -->
@@ -2008,7 +2008,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         ResolveSDKReferences
 
     Given a list of SDKReference items and a list of resolved winmd files which may contain metadata as to which sdk they came from
-    we need to find the sdk root folders on disk and populate a ResolvedSDKReference item which has the full path to the SDK ROOT 
+    we need to find the sdk root folders on disk and populate a ResolvedSDKReference item which has the full path to the SDK ROOT
     and the sdk identity as a piece of metadata.
 
         [IN]
@@ -2077,12 +2077,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
                                         FindInvalidProjectReferences
 
-    Find project to project references with target platform version higher than the one used by the current project and 
+    Find project to project references with target platform version higher than the one used by the current project and
     creates a list of invalid references to be unresolved. It issues a warning for each invalid reference.
 
         [IN]
         $(TargetPlatformVersion) - Project's target platform version
-        @(_ProjectReferenceTargetPlatformMonikers) - List of monikers of all referenced projects gathered by the helper 
+        @(_ProjectReferenceTargetPlatformMonikers) - List of monikers of all referenced projects gathered by the helper
                                                      target GetTargetPlatformMonikers.
 
         [OUT]
@@ -2090,13 +2090,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     ============================================================
     -->
-  
+
   <PropertyGroup>
     <FindInvalidProjectReferencesDependsOn>
       GetReferenceTargetPlatformMonikers
     </FindInvalidProjectReferencesDependsOn>
   </PropertyGroup>
-  
+
    <Target
       Name="FindInvalidProjectReferences"
       Condition ="'$(FindInvalidProjectReferences)' == 'true'"
@@ -2122,11 +2122,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
       RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
-      
+
       <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
     </MSBuild>
   </Target>
-  
+
    <!--
     ============================================================
 
@@ -2175,7 +2175,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        <Output TaskParameter="RedistFiles" ItemName="ResolvedRedistFiles"/>
      </GetSDKReferenceFiles>
    </Target>
-    
+
   <!--
     ============================================================
 
@@ -2198,7 +2198,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- Will be copied by the "copy WinMD artifacts" step instead -->
         <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
         <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
-        
+
         <WinMdExpToolPath Condition="'$(WinMdExpToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</WinMdExpToolPath>
         <WinMdExpUTF8Ouput Condition="'$(WinMdExpUTF8Ouput)' == ''">true</WinMdExpUTF8Ouput>
       </PropertyGroup>
@@ -2231,7 +2231,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="ResolveAssemblyReferencesDesignTime"
       Returns="@(_ReferencesFromRAR)"
       DependsOnTargets="ResolveProjectReferences;ResolveAssemblyReferences">
-    
+
     <!-- We need to do this here because we only want references which have been passed into rar but are not project to project references. -->
     <ItemGroup>
       <_ReferencesFromRAR Include="@(ReferencePath->WithMetadataValue('ReferenceSourceTarget', 'ResolveAssemblyReference'))"/>
@@ -2393,11 +2393,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         -->
     <PropertyGroup>
       <ResolveComReferenceMSBuildArchitecture Condition="'$(ResolveComReferenceMSBuildArchitecture)' == ''">$(PlatformTargetAsMSBuildArchitecture)</ResolveComReferenceMSBuildArchitecture>
-      
+
       <ResolveComReferenceToolPath Condition="'$(ResolveComReferenceToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</ResolveComReferenceToolPath>
       <ResolveComReferenceSilent Condition="'$(ResolveComReferenceSilent)' == ''">false</ResolveComReferenceSilent>
     </PropertyGroup>
-    
+
     <ResolveComReference
           TypeLibNames="@(COMReference)"
           TypeLibFiles="@(COMFileReference)"
@@ -2699,24 +2699,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup Condition="'$(TargetFrameworkAsMSBuildRuntime)' != '' and '$(GenerateResourceMSBuildArchitecture)' != ''">
       <!-- In the general case, we want to fail to run the task if the task host it's requesting doesn't exist, because we'd rather let the
-           user know there's something wrong than just silently generate something that's probably not quite right. However, in a few 
-           circumstances, there are tasks that are already aware of runtime / bitness concerns, in which case even if we go ahead and run 
-           the more recent version of the task, it should be able to generate something correct.  GenerateResource is one such task, so 
-           we check for the existence of the targeted task host so that we can use it preferentially, but if it can't be found, we'll fall 
+           user know there's something wrong than just silently generate something that's probably not quite right. However, in a few
+           circumstances, there are tasks that are already aware of runtime / bitness concerns, in which case even if we go ahead and run
+           the more recent version of the task, it should be able to generate something correct.  GenerateResource is one such task, so
+           we check for the existence of the targeted task host so that we can use it preferentially, but if it can't be found, we'll fall
            back to the current task since it's still mostly correct.
 
-           In particular, we need to do this because otherwise people with Dev10 on a machine that they upgrade to Win8 will be broken: 
-           they'll have ResGen from the 7.0A SDK installed, so launching ResGen will still work, but the CLR2 task host is only installed by 
-           the 8.0A SDK, which they won't have installed, and thus without this fallback mechanism, their projects targeting v3.5 will 
+           In particular, we need to do this because otherwise people with Dev10 on a machine that they upgrade to Win8 will be broken:
+           they'll have ResGen from the 7.0A SDK installed, so launching ResGen will still work, but the CLR2 task host is only installed by
+           the 8.0A SDK, which they won't have installed, and thus without this fallback mechanism, their projects targeting v3.5 will
            suddenly start failing to build.-->
-      <GenerateResourceMSBuildRuntime 
-          Condition="'$(GenerateResourceMSBuildRuntime)' == '' and 
+      <GenerateResourceMSBuildRuntime
+          Condition="'$(GenerateResourceMSBuildRuntime)' == '' and
                      $([MSBuild]::DoesTaskHostExist(`$(TargetFrameworkAsMSBuildRuntime)`, `$(GenerateResourceMSBuildArchitecture)`))">$(TargetFrameworkAsMSBuildRuntime)</GenerateResourceMSBuildRuntime>
 
       <!-- If the targeted runtime doesn't exist, fall back to current -->
       <GenerateResourceMSBuildRuntime Condition="'$(GenerateResourceMSBuildRuntime)' == ''">CurrentRuntime</GenerateResourceMSBuildRuntime>
     </PropertyGroup>
-      
+
     <!-- 4.0 task has some new parameters that we want to make use of if we're targeting 4.0 -->
     <GenerateResource
         Sources="@(EmbeddedResource)"
@@ -3124,8 +3124,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     So, we always run the CoreCompile target if we're in the IDE, and either we're in design-time or
     we're delegating to the host compiler for the actual build.
 
-    We compare against BuildOutOfProcess != true because we cannot assume that the build process will 
-    have set BuildOutOfProcess to true or false. Therefore the default behavior should be to do the 
+    We compare against BuildOutOfProcess != true because we cannot assume that the build process will
+    have set BuildOutOfProcess to true or false. Therefore the default behavior should be to do the
     legacy behavior seen before BuildingOutOfProcess was introduced if the property is not set.
     ================================================================
     -->
@@ -3629,7 +3629,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <Output TaskParameter="DestinationFiles" ItemName="_DeploymentClickOnceApplicationExecutable" />
     </Copy>
-    
+
     <!-- Sign the application executable located in app.publish folder.  Signing this file is done to comply with SmartScreen. -->
     <SignFile
       CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
@@ -3941,7 +3941,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="DestinationFiles" ItemName="FileWritesShareable"/>
 
     </Copy>
-    
+
     <!-- Copy the build product of WinMDExp. -->
     <Copy
         SourceFiles="@(WinMDExpArtifacts)"
@@ -4035,7 +4035,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       DependsOnTargets="$(GetCopyToOutputDirectoryItemsDependsOn)">
 
 
-    <!-- In the general case, clients need very little of the metadata which is generated by invoking this target on this project and its children.  For those 
+    <!-- In the general case, clients need very little of the metadata which is generated by invoking this target on this project and its children.  For those
          cases, we can immediately discard the unwanted metadata, reducing memory usage, particularly in very large and interconnected systems of projects.
          However, if some client does require the original functionality, it is sufficient to set MSBuildDisableGetCopyToOutputDirectoryItemsOptimization to
          a non-empty value and the original behavior will be restored. -->
@@ -4280,7 +4280,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <FileWrites Include="@(_DebugSymbolsIntermediatePathPDB)" Condition="'$(_DebugSymbolsProducedPDB)'!='false'"/>
     </ItemGroup>
-    
+
     <!-- Record the .mdb if one was produced. -->
     <PropertyGroup>
       <_DebugSymbolsProducedMDB Condition="!Exists('@(_DebugSymbolsIntermediatePathMDB)')">false</_DebugSymbolsProducedMDB>
@@ -4351,12 +4351,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(TargetFrameworkAsMSBuildRuntime)' != '' and '$(RegisterAssemblyMSBuildArchitecture)' != ''">
-      <!-- Falling back to the current runtime if we are targeting CLR2 and the task host doesn't exist will lead to 
+      <!-- Falling back to the current runtime if we are targeting CLR2 and the task host doesn't exist will lead to
            incorrect behavior in some cases, but it's the same incorrect behavior as Visual Studio 2010, and thus better
-           than causing build breaks on upgrade to Win8 the way not doing so would.  For more details, see the 
+           than causing build breaks on upgrade to Win8 the way not doing so would.  For more details, see the
            corresponding comment in GenerateResource. -->
-      <RegisterAssemblyMSBuildRuntime 
-          Condition="'$(RegisterAssemblyMSBuildRuntime)' == '' and 
+      <RegisterAssemblyMSBuildRuntime
+          Condition="'$(RegisterAssemblyMSBuildRuntime)' == '' and
                      $([MSBuild]::DoesTaskHostExist(`$(TargetFrameworkAsMSBuildRuntime)`, `$(RegisterAssemblyMSBuildArchitecture)`))">$(TargetFrameworkAsMSBuildRuntime)</RegisterAssemblyMSBuildRuntime>
 
       <!-- If the targeted runtime doesn't exist, fall back to current -->
@@ -4987,7 +4987,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
       Name="_DeploymentSignClickOnceDeployment">
-    
+
     <!-- Sign manifests and the bootstrapper -->
     <SignFile
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
@@ -5084,7 +5084,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPath>$(TargetFileName)</TargetPath>
     </BuiltProjectOutputGroupKeyOutput>
   </ItemGroup>
-  
+
   <!--
     ============================================================
                                         BuiltProjectOutputGroup
@@ -5498,12 +5498,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <ImportXamlTargets Condition="'$(ImportXamlTargets)'=='' and ('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.Xaml.targets')">true</ImportXamlTargets>
   </PropertyGroup>
-  
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.Xaml.targets" Condition="('$(ImportXamlTargets)' == 'true')" />
 
   <!-- imports Microsoft.WorkflowBuildExtensions.targets only if TargetFrameworkVersion is v4.5 or above or TargetFrameworkfVersion specified does not conform to the format of vX.X[.X.X] -->
   <!-- Underlying assumption is that there shouldn't be any other versions between v4.0.* and v4.5 -->
-  <Import Project="$(MSBuildToolsPath)\Microsoft.WorkflowBuildExtensions.targets" 
+  <Import Project="$(MSBuildToolsPath)\Microsoft.WorkflowBuildExtensions.targets"
           Condition="('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.5' and (!$([System.String]::IsNullOrEmpty('$(TargetFrameworkVersion)')) and !$(TargetFrameworkVersion.StartsWith('v4.0')))) and Exists('$(MSBuildToolsPath)\Microsoft.WorkflowBuildExtensions.targets')"/>
 
   <!-- This import is temporary and will be removed once it is moved into the silverlight targets -->
@@ -5517,7 +5517,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!-- App packaging support -->
 
-  <!-- 
+  <!--
     Following two targets are needed to be present in every project being built
     because the app packaging targets recursively scan all projects referenced
     from projects that generate app packages for them.
@@ -5530,7 +5530,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(MsAppxPackageTargets)" Condition="'$(WindowsAppContainer)' == 'true' and Exists('$(MsAppxPackageTargets)')" />
-    
+
   <!-- This import is temporary and will be removed once it is moved into the silverlight targets -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.Data.Entity.targets" Condition="'$(TargetFrameworkIdentifier)' == 'Silverlight' and Exists('$(MSBuildToolsPath)\Microsoft.Data.Entity.targets')"/>
 
