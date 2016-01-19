@@ -11,8 +11,14 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NuGet.CommandLine.XPlat": "3.4.0-*",
-    "NuGet.Common": "3.4.0-*",
+    "NuGet.CommandLine.XPlat": "3.4.0-beta-*",
+    "NuGet.Common": "3.4.0-beta-*",
+    "NuGet.Frameworks": "3.4.0-beta-*",
+    "NuGet.Logging": "3.4.0-beta-*",
+    "NuGet.Packaging": "3.4.0-beta-*",
+    "NuGet.Packaging.Core": "3.4.0-beta-*",
+    "NuGet.Packaging.Core.Types": "3.4.0-beta-*",
+    "NuGet.Versioning": "3.4.0-beta-*",
     "Microsoft.NETCore.Platforms": "1.0.1-rc2-23608",
     "NETStandard.Library": "1.0.0-rc2-23608",
     "System.Linq": "4.0.1-beta-23504",
