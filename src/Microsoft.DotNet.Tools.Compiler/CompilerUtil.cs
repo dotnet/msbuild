@@ -152,9 +152,10 @@ namespace Microsoft.DotNet.Tools.Compiler
             return compilationOptions;
         }
 
+        //used in incremental precondition checks
         public static IEnumerable<string> GetCommandsInvokedByCompile(ProjectContext project)
         {
-            return new List<string> {ResolveCompilerName(project)};
+            return new List<string> {ResolveCompilerName(project), "dotnet-compile"};
         }
     }
 }
