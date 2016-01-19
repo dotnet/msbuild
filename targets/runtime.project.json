@@ -45,11 +45,11 @@
         "System.Xml.ReaderWriter": "4.0.11-beta-23516",
         "Microsoft.NETCore.Runtime": "1.0.1-beta-23516",
         "Microsoft.NETCore.TestHost": "1.0.0-beta-23516",
-        "Microsoft.Net.Compilers.NetCore": "1.1.0-beta-1",
+        "Microsoft.Net.Compilers.NetCore": "1.2.0-beta1-20160108-01",
         "Microsoft.Win32.Registry": "4.0.0-beta-23516",
         "Microsoft.Win32.Primitives":  "4.0.1-beta-23516",
         "Newtonsoft.Json": "7.0.1",
-        "xunit.console.netcore": "1.0.2-prerelease-00096"
+        "xunit.console.netcore": "1.0.2-prerelease-00101"
       },
       "imports": "portable-net451+win81"
     }
