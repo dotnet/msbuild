@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "System.Dynamic.Runtime": "4.0.11-*",
+    "Microsoft.NETCore.Platforms": "1.0.1-rc2-23704",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.ProjectModel.Server": "1.0.0-*",
     "Newtonsoft.Json": "7.0.1",

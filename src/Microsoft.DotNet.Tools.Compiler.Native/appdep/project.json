@@ -5,6 +5,7 @@
         "emitEntryPoint": true
     },
     "dependencies": {
+        "Microsoft.NETCore.Platforms": "1.0.1-*",
         "Microsoft.DotNet.AppDep":"1.0.4-*"
     },
     "frameworks": {

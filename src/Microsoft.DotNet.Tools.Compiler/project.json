@@ -6,7 +6,6 @@
     },
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23704",
-        "System.Reflection.Metadata": "1.1.0",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
@@ -22,7 +21,9 @@
         }
     },
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": { 
+            "imports": "portable-net451+win8"
+        }
     },
     "scripts": {
     }

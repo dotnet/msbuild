@@ -6,7 +6,6 @@
     },
 
     "dependencies": {
-        "System.Reflection": "4.0.10-rc2-23616",
         "NETStandard.Library": "1.0.0-rc2-23704",
         "System.CommandLine": "0.1.0-*",
         "Microsoft.CodeAnalysis.CSharp":  "1.2.0-beta1-20160108-01",
@@ -14,7 +13,9 @@
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*"
     },
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": { 
+            "imports": "portable-win8+net45"
+        }
     },
     "scripts": {
     }

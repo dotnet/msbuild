@@ -11,6 +11,9 @@
     "emitEntryPoint": true
   },
   "dependencies": {
+    "NETStandard.Library": "1.0.0-rc2-23704",
+    "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-23704",
+    "System.Diagnostics.TraceSource": "4.0.0-rc2-23704",
     "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23616",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-23616",
     "Microsoft.Extensions.Compilation.Abstractions": "1.0.0-*",
@@ -36,13 +39,6 @@
   },
   "frameworks": {
     "dnxcore50": {
-      "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23704",
-        "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-23616",
-        "System.Diagnostics.TraceSource": "4.0.0-rc2-23616",
-        "System.Dynamic.Runtime": "4.0.11-rc2-23616",
-        "System.Threading.Thread": "4.0.0-rc2-23616"
-      }
     }
   },
   "scripts": {
