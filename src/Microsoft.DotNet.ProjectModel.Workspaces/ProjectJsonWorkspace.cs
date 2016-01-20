@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.Cli.Compiler.Common;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Workspaces
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             // TODO: ctor argument?
             var configuration = "Debug";
 
-            var compilationOptions = project.ProjectFile.GetCompilerOptions(project.TargetFramework, configuration);
+            var compilationOptions = project.GetLanguageSpecificCompilerOptions(project.TargetFramework, configuration);
 
             var compilationSettings = ToCompilationSettings(compilationOptions, project.TargetFramework, project.ProjectFile.ProjectDirectory);
 
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
                     _cache[path] = assemblyMetadata;
                 }
             }
-            
+
             return assemblyMetadata.GetReference();
         }
 
@@ -146,13 +146,8 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
         {
             var options = GetCompilationOptions(compilerOptions, projectDirectory);
 
-            // Disable 1702 until roslyn turns this off by default
-            options = options.WithSpecificDiagnosticOptions(new Dictionary<string, ReportDiagnostic>
-            {
-                { "CS1701", ReportDiagnostic.Suppress }, // Binding redirects
-                { "CS1702", ReportDiagnostic.Suppress },
-                { "CS1705", ReportDiagnostic.Suppress }
-            });
+            options = options.WithSpecificDiagnosticOptions(compilerOptions.SuppressWarnings.ToDictionary(
+                suppress => suppress, _ => ReportDiagnostic.Suppress));
 
             AssemblyIdentityComparer assemblyIdentityComparer =
                 targetFramework.IsDesktop() ?

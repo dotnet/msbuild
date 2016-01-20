@@ -374,9 +374,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                     .Execute();
             }
         }
-
-
-
         
         private static void CopyExport(string outputPath, LibraryExport export)
         {

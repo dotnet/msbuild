@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
             return rootOutputPath;
         }
-        
+
         public static void MakeCompilationOutputRunnable(this ProjectContext context, string outputPath, string configuration)
         {
             context
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             targetDirectory = EnsureTrailingSlash(targetDirectory);
 
             var pathMap = sourceFiles
-                .ToDictionary(s => s, 
+                .ToDictionary(s => s,
                     s => Path.Combine(targetDirectory,
                         PathUtility.GetRelativePath(sourceDirectory, s)));
 
@@ -198,6 +198,20 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             {
                 appConfig.Save(stream);
             }
+        }
+
+        public static CommonCompilerOptions GetLanguageSpecificCompilerOptions(this ProjectContext context, NuGetFramework framework, string configurationName)
+        {
+            var baseOption = context.ProjectFile.GetCompilerOptions(framework, configurationName);
+
+            IReadOnlyList<string> defaultSuppresses;
+            var compilerName = context.ProjectFile.CompilerName ?? "csc";
+            if (DefaultCompilerWarningSuppresses.Suppresses.TryGetValue(compilerName, out defaultSuppresses))
+            {
+                baseOption.SuppressWarnings = (baseOption.SuppressWarnings ?? Enumerable.Empty<string>()).Concat(defaultSuppresses).Distinct();
+            }
+
+            return baseOption;
         }
     }
 }
