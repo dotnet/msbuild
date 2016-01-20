@@ -1802,7 +1802,9 @@ namespace Microsoft.Build.CommandLine
                         preprocessWriter = ProcessPreprocessSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Preprocess]);
                     }
 
+#if FEATURE_MSBUILD_DEBUGGER
                     debugger = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Debugger);
+#endif
                     detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
 
                     // figure out which loggers are going to listen to build events
