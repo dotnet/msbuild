@@ -49,6 +49,8 @@ $FilesToClean = @(
 )
 
 $RuntimeOutputDir = "$OutputDir\runtime\coreclr"
+$binariesOutputDir = "$OutputDir\bin\$Configuration\$Tfm"
+$runtimeBinariesOutputDir = "$RuntimeOutputDir\$Configuration\$Tfm"
 
 # Publish each project
 $Projects | ForEach-Object {
@@ -59,11 +61,21 @@ $Projects | ForEach-Object {
     }
 }
 
+if (Test-Path $binariesOutputDir) {
+    cp $binariesOutputDir\* $OutputDir\bin -force -recurse
+    Remove-Item $binariesOutputDir -recurse
+}
+
 # Publish the runtime
 dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
 if (!$?) {
     Write-Host Command failed: dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
     Exit 1
+}
+
+if (Test-Path $runtimeBinariesOutputDir) {
+    cp $runtimeBinariesOutputDir\* $RuntimeOutputDir -force -recurse
+    Remove-Item $runtimeBinariesOutputDir -recurse
 }
 
 # Clean up bogus additional files
@@ -75,7 +87,13 @@ $FilesToClean | ForEach-Object {
 }
 
 # Copy the runtime app-local for the tools
-cp -rec "$RuntimeOutputDir\*" "$OutputDir\bin"
+cp -rec "$RuntimeOutputDir\*" "$OutputDir\bin" -ErrorVariable capturedErrors -ErrorAction SilentlyContinue
+$capturedErrors | foreach-object {
+    if ($_ -notmatch "already exists") {
+        write-error $_
+        Exit 1
+    }
+}
 
 # Deploy the CLR host to the output
 cp "$HostDir\corehost.exe" "$OutputDir\bin"
@@ -96,6 +114,6 @@ if (-not (Test-Path "$OutputDir\bin\csc.ni.exe")) {
 # Copy in AppDeps
 if (-not (Test-Path "$OutputDir\bin\appdepsdk\")) {
     $env:PATH = "$OutputDir\bin;$StartPath"
-    header "Acquiring Native App Dependencies"
-    _cmd "$RepoRoot\scripts\build\build_appdeps.cmd ""$OutputDir""" 
+	header "Acquiring Native App Dependencies"
+	_cmd "$RepoRoot\scripts\build\build_appdeps.cmd ""$OutputDir"""
 }

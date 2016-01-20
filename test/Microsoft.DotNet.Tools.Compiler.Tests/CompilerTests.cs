@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -32,7 +33,8 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             result.Should().Pass();
 
             // verify the output xml file
-            var outputXml = Path.Combine(outputDir, "TestLibrary.xml");
+            var outputXml = Path.Combine(outputDir, "Debug", "dnxcore50", "TestLibrary.xml");
+            Console.WriteLine("OUTPUT XML PATH: " + outputXml);
             Assert.True(File.Exists(outputXml));
             Assert.Contains("Gets the message from the helper", File.ReadAllText(outputXml));
         }

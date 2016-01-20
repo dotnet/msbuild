@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tools.Build
             _args = (BuilderCommandApp) args.ShallowCopy();
 
             // Set up Output Paths. They are unique per each CompileContext
-            _args.OutputValue = _rootProject.GetOutputPath(_args.ConfigValue, _args.OutputValue);
+            _args.OutputValue = _rootProject.GetOutputPathCalculator(_args.OutputValue).BaseRootOutputPath;
             _args.IntermediateValue = _rootProject.GetIntermediateOutputPath(_args.ConfigValue, _args.IntermediateValue, _args.OutputValue);
 
             // Set up dependencies
@@ -338,7 +338,8 @@ namespace Microsoft.DotNet.Tools.Build
         public static CompilerIO GetCompileIO(ProjectContext project, string config, string outputPath, string intermediaryOutputPath, ProjectDependenciesFacade dependencies)
         {
             var compilerIO = new CompilerIO(new List<string>(), new List<string>());
-            var compilationOutput = CompilerUtil.GetCompilationOutput(project.ProjectFile, project.TargetFramework, config, outputPath);
+            var binariesOutputPath = project.GetOutputPathCalculator(outputPath).GetOutputDirectoryPath(config);
+            var compilationOutput = CompilerUtil.GetCompilationOutput(project.ProjectFile, project.TargetFramework, config, binariesOutputPath);
 
             // input: project.json
             compilerIO.Inputs.Add(project.ProjectFile.ProjectFilePath);
@@ -363,7 +364,7 @@ namespace Microsoft.DotNet.Tools.Build
             AddCultureResources(project, intermediaryOutputPath, compilerIO);
 
             // input / output: resources with culture
-            AddNonCultureResources(project, outputPath, compilerIO);
+            AddNonCultureResources(project, binariesOutputPath, compilerIO);
 
             return compilerIO;
         }

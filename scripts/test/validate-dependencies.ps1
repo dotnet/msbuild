@@ -7,7 +7,13 @@
 
 # Run Validation for Project.json dependencies
 dotnet publish $RepoRoot\tools\MultiProjectValidator -o $Stage2Dir\..\tools
-& "$Stage2Dir\..\tools\pjvalidate" "$RepoRoot\src"
+
+$pjvalidatePath = "$Stage2Dir\..\tools\$Configuration\$Tfm"
+if (! (Test-Path $pjvalidatePath)) {
+	$pjvalidatePath = "$Stage2Dir\..\tools"
+}
+
+& "$pjvalidatePath\pjvalidate" "$RepoRoot\src"
 # TODO For release builds, this should be uncommented and fail.
 # if (!$?) {
 #     Write-Host "Project Validation Failed"

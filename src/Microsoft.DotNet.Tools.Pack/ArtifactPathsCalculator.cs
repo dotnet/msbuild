@@ -14,9 +14,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
         private readonly string _configuration;
 
-        private bool PackageArtifactsPathSet => !string.IsNullOrWhiteSpace(PackageArtifactsPathParameter);
-
-        private bool ShouldCombinePathWithFramework => !CompiledArtifactsPathSet && !PackageArtifactsPathSet;
+        public bool PackageArtifactsPathSet => !string.IsNullOrWhiteSpace(PackageArtifactsPathParameter);
 
         public string CompiledArtifactsPathParameter { get; }
 
@@ -38,8 +36,7 @@ namespace Microsoft.DotNet.Tools.Pack
 
                 var outputPath = Path.Combine(
                     _project.ProjectDirectory,
-                    Constants.BinDirectoryName,
-                    _configuration);
+                    Constants.BinDirectoryName);
 
                 return outputPath;
             }
@@ -59,9 +56,10 @@ namespace Microsoft.DotNet.Tools.Pack
 
         public string InputPathForContext(ProjectContext context)
         {
-            return ShouldCombinePathWithFramework ? 
-                Path.Combine(CompiledArtifactsPath, context.TargetFramework.GetTwoDigitShortFolderName()) : 
-                CompiledArtifactsPath;
+            return Path.Combine(
+                CompiledArtifactsPath,
+                _configuration,
+                context.TargetFramework.GetTwoDigitShortFolderName());
         }        
     }
 }

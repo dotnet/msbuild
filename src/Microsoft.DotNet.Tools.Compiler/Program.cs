@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             ProjectContext context, 
             CompilerCommandApp args)
         {
-            var outputPath = context.GetOutputPath(args.ConfigValue, args.OutputValue);
+            var outputPath = context.GetOutputPathCalculator(args.OutputValue).GetOutputDirectoryPath(args.ConfigValue);
             var nativeOutputPath = Path.Combine(outputPath, "native");
             var intermediateOutputPath = 
                 context.GetIntermediateOutputPath(args.ConfigValue, args.IntermediateValue, outputPath);
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         private static bool CompileProject(ProjectContext context, CompilerCommandApp args)
         {
             // Set up Output Paths
-            string outputPath = context.GetOutputPath(args.ConfigValue, args.OutputValue);
+            var outputPath = context.GetOutputPathCalculator(args.OutputValue).GetOutputDirectoryPath(args.ConfigValue);
             string intermediateOutputPath = context.GetIntermediateOutputPath(args.ConfigValue, args.IntermediateValue, outputPath);
 
             Directory.CreateDirectory(outputPath);

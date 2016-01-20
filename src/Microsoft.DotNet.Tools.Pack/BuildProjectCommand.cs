@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Pack
                 var argsBuilder = new StringBuilder();
                 argsBuilder.Append($"--configuration {_configuration}");
 
-                if (!string.IsNullOrEmpty(_artifactPathsCalculator.PackageArtifactsPathParameter))
+                if (_artifactPathsCalculator.PackageArtifactsPathSet)
                 {
                     argsBuilder.Append($" --output \"{_artifactPathsCalculator.PackageArtifactsPathParameter}\"");
                 }
