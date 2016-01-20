@@ -6,7 +6,7 @@
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23704",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "System.Runtime.Loader": "4.0.0-rc2-23616"
+        "System.Runtime.Loader": "4.0.0-rc2-23704"
     },
     "frameworks": {
         "dnxcore50": { }

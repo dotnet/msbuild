@@ -5,10 +5,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23704",
-    "System.Linq": "4.0.1-rc2-23704",
-    "System.Reflection.Metadata": "1.1.0",
-    
+    "NETStandard.Library": "1.0.0-rc2-23704",    
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.DotNet.Tools.Compiler": "1.0.0-*",
@@ -19,7 +16,9 @@
     }
   },
   "frameworks": {
-    "dnxcore50": { }
+    "dnxcore50": { 
+        "imports": "portable-win8+net45"
+    }
   },
   "scripts": {
   }
