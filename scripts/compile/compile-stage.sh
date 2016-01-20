@@ -56,6 +56,8 @@ FILES_TO_CLEAN=( \
 )
 
 RUNTIME_OUTPUT_DIR="$OUTPUT_DIR/runtime/coreclr"
+BINARIES_OUTPUT_DIR="$OUTPUT_DIR/bin/$CONFIGURATION/$TFM"
+RUNTIME_BINARIES_OUTPUT_DIR="$RUNTIME_OUTPUT_DIR/$CONFIGURATION/$TFM"
 
 for project in ${PROJECTS[@]}
 do
@@ -63,8 +65,20 @@ do
     dotnet publish --native-subdirectory --framework "$TFM" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
 done
 
+if [ -d "$BINARIES_OUTPUT_DIR" ]
+then
+    cp -R -f $BINARIES_OUTPUT_DIR/* $OUTPUT_DIR/bin
+fi
+rm -rf $OUTPUT_DIR/bin/$CONFIGURATION
+
 # Bring in the runtime
 dotnet publish --output "$RUNTIME_OUTPUT_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Runtime"
+
+if [ -d "$RUNTIME_BINARIES_OUTPUT_DIR" ]
+then
+    cp -R -f $RUNTIME_BINARIES_OUTPUT_DIR/* $RUNTIME_OUTPUT_DIR
+fi
+rm -rf "$RUNTIME_OUTPUT_DIR/$CONFIGURATION"
 
 # Clean up bogus additional files
 for file in ${FILES_TO_CLEAN[@]}
