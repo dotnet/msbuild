@@ -12,9 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-#if FEATURE_ASSEMBLY_LOCATION
 using System.Reflection;
-#endif
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Build.Shared
