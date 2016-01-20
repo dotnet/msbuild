@@ -35,7 +35,7 @@ MANPAGE_DIR="$REPOROOT/Documentation/manpages"
 NIGHTLY_PACKAGE_NAME="dotnet-nightly"
 RELEASE_PACKAGE_NAME="dotnet"
 
-[ -z "$CHANNEL" ] && CHANNEL="dev"
+[ -z "$RELEASE_SUFFIX" ] && RELEASE_SUFFIX="dev"
 
 execute_build(){
     determine_package_name
@@ -97,7 +97,7 @@ test_debian_package(){
     header "Testing debian package"
     
     # Set LAST_VERSION_URL to enable upgrade tests
-    export LAST_VERSION_URL="https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/Installers/Latest/dotnet-ubuntu-x64.latest.deb"
+    export LAST_VERSION_URL="https://dotnetcli.blob.core.windows.net/dotnet/$RELEASE_SUFFIX/Installers/Latest/dotnet-ubuntu-x64.latest.deb"
 
     rm -rf $TEST_STAGE_DIR
     git clone https://github.com/sstephenson/bats.git $TEST_STAGE_DIR
