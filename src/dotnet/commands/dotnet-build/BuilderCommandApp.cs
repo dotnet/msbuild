@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Tools.Build
     internal class BuilderCommandApp : CompilerCommandApp
     {
         public const string BuildProfileFlag = "--build-profile";
-        public const string ForceUnsafeFlag = "--force-incremental-unsafe";
+        public const string ForceUnsafeFlag = "--no-incremental";
 
         public bool BuildProfileValue => OptionHasValue(BuildProfileFlag);
         public bool ForceUnsafeValue => OptionHasValue(ForceUnsafeFlag);
@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Build
         public BuilderCommandApp(string name, string fullName, string description) : base(name, fullName, description)
         {
             AddNoValueOption(BuildProfileFlag, "Set this flag to print the incremental safety checks that prevent incremental compilation");
-            AddNoValueOption(ForceUnsafeFlag, "Set this flag to mark the entire build as not safe for incrementality");
+            AddNoValueOption(ForceUnsafeFlag, "Set this flag to turn off incremental build");
         }
     }
 }

@@ -14,4 +14,4 @@ The following represent warning codes printed by CLI when the project structure 
 - __[Unknown Compiler]__: csc, vbc, and fsc have known side effects (which files and directories they read, write, and what they are not reading/writing).
 We don’t know this for other compilers. So we choose to be safe and disable incremental compilation for now. We are planning to enable specification of tool side effects in a future version, so that they can participate in incremental compilation as well.
 
-- __[Forced Unsafe]__: The build was marked unsafe using the `--force-incremental-unsafe` flag. Remove this flag to enable incremental compilation.
+- __[Forced Unsafe]__: The build was not incremental because the `--no-incremental` flag was used. Remove this flag to enable incremental compilation.
