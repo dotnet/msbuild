@@ -54,9 +54,10 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         protected CommandResult BuildProject(bool forceIncrementalUnsafe = false, bool expectBuildFailure = false)
         {
             var outputDir = GetBinDirectory();
-            var mainProject = GetProjectFile(_mainProject);
+            var intermediateOutputDir = Path.Combine(Directory.GetParent(outputDir).FullName, "obj", _mainProject);
+            var mainProjectFile = GetProjectFile(_mainProject);
 
-            var buildCommand = new BuildCommand(mainProject, output: outputDir, forceIncrementalUnsafe : forceIncrementalUnsafe);
+            var buildCommand = new BuildCommand(mainProjectFile, output: outputDir, tempOutput: intermediateOutputDir ,forceIncrementalUnsafe : forceIncrementalUnsafe);
             var result = buildCommand.ExecuteWithCapturedOutput();
 
             if (!expectBuildFailure)
