@@ -58,9 +58,9 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 if (incremental)
                 {
-                    var dependencyContext = ProjectContext.Create(dependency.Path, dependency.Framework);
+                    var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework);
 
-                    if (!NeedsRebuilding(dependencyContext, new ProjectDependenciesFacade(dependencyContext, _args.ConfigValue)))
+                    if (!NeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue)))
                     {
                         continue;
                     }
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Tools.Build
             // rebuild if empty inputs / outputs
             if (!(compilerIO.Outputs.Any() && compilerIO.Inputs.Any()))
             {
-                Reporter.Verbose.WriteLine($"\nProject {project.ProjectName()} will be compiled because it either has empty inputs or outputs");
+                Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because it either has empty inputs or outputs");
                 return true;
             }
 
@@ -123,11 +123,11 @@ namespace Microsoft.DotNet.Tools.Build
 
             if (!newInputs.Any())
             {
-                Reporter.Verbose.WriteLine($"\nSkipped compilation for project {project.ProjectName()}. All the input files were older than the output files.");
+                Reporter.Output.WriteLine($"\nProject {project.ProjectName()} was previoulsy compiled. Skipping compilation.");
                 return false;
             }
 
-            Reporter.Verbose.WriteLine($"\nProject {project.ProjectName()} was compiled because some of its inputs were newer than its oldest output:");
+            Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because some of its inputs were newer than its oldest output.");
             Reporter.Verbose.WriteLine($"Oldest output item was written at {minDate} : {minOutputPath}");
             Reporter.Verbose.WriteLine($"Inputs newer than the oldest output item:");
 
@@ -148,14 +148,14 @@ namespace Microsoft.DotNet.Tools.Build
                 return false;
             }
 
-            Reporter.Verbose.WriteLine($"\nProject {project.ProjectName()} will be compiled because expected {itemsType} are missing: ");
+            Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because expected {itemsType} are missing. ");
 
             foreach (var missing in missingItems)
             {
                 Reporter.Verbose.WriteLine($"\t {missing}");
             }
 
-            Reporter.Verbose.WriteLine();
+            Reporter.Output.WriteLine();
 
             return true;
         }
@@ -338,23 +338,26 @@ namespace Microsoft.DotNet.Tools.Build
         public static CompilerIO GetCompileIO(ProjectContext project, string config, string outputPath, string intermediaryOutputPath, ProjectDependenciesFacade dependencies)
         {
             var compilerIO = new CompilerIO(new List<string>(), new List<string>());
+            var compilationOutput = CompilerUtil.GetCompilationOutput(project.ProjectFile, project.TargetFramework, config, outputPath);
 
             // input: project.json
             compilerIO.Inputs.Add(project.ProjectFile.ProjectFilePath);
+
+            // input: lock file; find when dependencies change
+            AddLockFile(project, compilerIO);
 
             // input: source files
             compilerIO.Inputs.AddRange(CompilerUtil.GetCompilationSources(project));
 
             // todo: Factor out dependency resolution between Build and Compile. Ideally Build injects the dependencies into Compile
-            // todo: use lock file insteaf of dependencies. One file vs many
             // input: dependencies
             AddDependencies(dependencies, compilerIO);
 
-            // input: key file
-            AddKeyFile(project, config, compilerIO);
-
             // output: compiler output
-            compilerIO.Outputs.Add(CompilerUtil.GetCompilationOutput(project.ProjectFile, project.TargetFramework, config, outputPath));
+            compilerIO.Outputs.Add(compilationOutput);
+
+            // input / output: compilation options files
+            AddFilesFromCompilationOptions(project, config, compilationOutput, compilerIO);
 
             // input / output: resources without culture
             AddCultureResources(project, intermediaryOutputPath, compilerIO);
@@ -365,22 +368,43 @@ namespace Microsoft.DotNet.Tools.Build
             return compilerIO;
         }
 
+        private static void AddLockFile(ProjectContext project, CompilerIO compilerIO)
+        {
+            if(project.LockFile == null)
+            {
+                var errorMessage = $"Project {project.ProjectName()} does not have a lock file.";
+                Reporter.Error.WriteLine(errorMessage);
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            compilerIO.Inputs.Add(project.LockFile.LockFilePath);
+        }
+
         private static void AddDependencies(ProjectDependenciesFacade dependencies, CompilerIO compilerIO)
         {
             // add dependency sources that need compilation
             compilerIO.Inputs.AddRange(dependencies.ProjectDependenciesWithSources.Values.SelectMany(p => p.Project.Files.SourceFiles));
 
-            // add compilation binaries
-            compilerIO.Inputs.AddRange(dependencies.Dependencies.SelectMany(d => d.CompilationAssemblies.Select(ca => ca.ResolvedPath)));
+            // non project dependencies get captured by changes in the lock file
         }
 
-        private static void AddKeyFile(ProjectContext project, string config, CompilerIO compilerIO)
+        private static void AddFilesFromCompilationOptions(ProjectContext project, string config, string compilationOutput, CompilerIO compilerIO)
         {
-            var keyFile = CompilerUtil.ResolveCompilationOptions(project, config).KeyFile;
+            var compilerOptions = CompilerUtil.ResolveCompilationOptions(project, config);
 
-            if (keyFile != null)
+            // output: pdb file. They are always emitted (see compiler.csc)
+            compilerIO.Outputs.Add(Path.ChangeExtension(compilationOutput, "pdb"));
+
+            // output: documentation file
+            if (compilerOptions.GenerateXmlDocumentation == true)
             {
-                compilerIO.Inputs.Add(keyFile);
+                compilerIO.Outputs.Add(Path.ChangeExtension(compilationOutput, "xml"));
+            }
+
+            // input: key file
+            if (compilerOptions.KeyFile != null)
+            {
+                compilerIO.Inputs.Add(compilerOptions.KeyFile);
             }
         }
 

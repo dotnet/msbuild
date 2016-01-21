@@ -69,6 +69,31 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             File.Copy(originalPath, filePath);
             return _root.AddFile(new DisposableFile(filePath));
         }
+
+        /// <summary>
+        /// Recursively copy the provided directory into this TempDirectory.
+        /// Does not handle links.
+        /// </summary>
+        /// <param name="sourceDirectory"></param>
+        /// <returns></returns>
+        public TempDirectory CopyDirectory(string sourceDirectory)
+        {
+            Debug.Assert(Directory.Exists(sourceDirectory));
+             
+            var tempCopy = CreateDirectory(new DirectoryInfo(sourceDirectory).Name);
+
+            foreach(var file in Directory.EnumerateFiles(sourceDirectory))
+            {
+                tempCopy.CopyFile(file);
+            }
+
+            foreach(var directory in Directory.EnumerateDirectories(sourceDirectory))
+            {
+                tempCopy.CopyDirectory(directory);
+            }
+
+            return tempCopy;
+        }
  
         /// <summary>
         /// Creates a subdirectory in this directory.

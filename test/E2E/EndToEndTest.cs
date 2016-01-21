@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             buildCommand.Execute().Should().Pass();
 
-            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
+            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
         }
 
         [Fact]
@@ -56,13 +56,13 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             // first build
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory);
             buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
+            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
             var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
 
             // second build; should get skipped (incremental because no inputs changed)
             buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
+            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
             var latestWriteTimeSecondBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
             Assert.Equal(latestWriteTimeFirstBuild, latestWriteTimeSecondBuild);
@@ -71,66 +71,10 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             // third build; should get compiled because the source file got touched
             buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
+            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
             var latestWriteTimeThirdBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
             Assert.NotEqual(latestWriteTimeSecondBuild, latestWriteTimeThirdBuild);
-        }
-
-        [Fact]
-        public void TestDotnetForceIncrementalUnsafe()
-        {
-            TestSetup();
-
-            // first build
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory);
-            buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
-
-            var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
-
-            // second build; will get recompiled due to force unsafe flag
-            buildCommand = new BuildCommand(TestProject, output: OutputDirectory, forceIncrementalUnsafe:true);
-            buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
-
-            var latestWriteTimeSecondBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
-            Assert.NotEqual(latestWriteTimeFirstBuild, latestWriteTimeSecondBuild);
-        }
-
-        [Fact]
-        public void TestDotnetIncrementalBuildDeleteOutputFile()
-        {
-            TestSetup();
-
-            // first build
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory);
-            buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
-
-            var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
-
-            Reporter.Verbose.WriteLine($"Files in {OutputDirectory}");
-            foreach (var file in Directory.EnumerateFiles(OutputDirectory))
-            {
-                Reporter.Verbose.Write($"\t {file}");
-            }
-
-            // delete output files
-            foreach (var outputFile in Directory.EnumerateFiles(OutputDirectory).Where(f => Path.GetFileName(f).StartsWith(s_testdirName, StringComparison.OrdinalIgnoreCase)))
-            {
-                Reporter.Verbose.WriteLine($"Delete {outputFile}");
-
-                File.Delete(outputFile);
-                Assert.False(File.Exists(outputFile));
-            }
-
-            // second build; should get rebuilt since we deleted output items
-            buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName());
-
-            var latestWriteTimeSecondBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
-            Assert.NotEqual(latestWriteTimeFirstBuild, latestWriteTimeSecondBuild);
         }
 
         [Fact]
@@ -148,7 +92,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             buildCommand.Execute().Should().Pass();
 
             var nativeOut = Path.Combine(OutputDirectory, "native");
-            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName());
+            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName(), s_expectedOutput);
         }
 
         [Fact]
@@ -165,7 +109,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             buildCommand.Execute().Should().Pass();
 
             var nativeOut = Path.Combine(OutputDirectory, "native");
-            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName());
+            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName(), s_expectedOutput);
         }
 
         [Fact]
@@ -182,13 +126,13 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             // first build
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true);
             buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName());
+            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
             var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
 
             // second build; should be skipped because nothing changed
             buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName());
+            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
             var latestWriteTimeSecondBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
             Assert.Equal(latestWriteTimeFirstBuild, latestWriteTimeSecondBuild);
@@ -220,7 +164,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             var publishCommand = new PublishCommand(TestProject, output: OutputDirectory);
             publishCommand.Execute().Should().Pass();
 
-            TestOutputExecutable(OutputDirectory, publishCommand.GetOutputExecutable());    
+            TestOutputExecutable(OutputDirectory, publishCommand.GetOutputExecutable(), s_expectedOutput);    
         }
 
         private void TestSetup()
@@ -243,19 +187,6 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             new RestoreCommand().Execute("--quiet").Should().Pass();
 
             Directory.SetCurrentDirectory(currentDirectory);
-        }
-
-        private void TestOutputExecutable(string outputDir, string executableName)
-        {
-            var executablePath = Path.Combine(outputDir, executableName);
-
-            var executableCommand = new TestCommand(executablePath);
-
-            var result = executableCommand.ExecuteWithCapturedOutput("");
-
-            result.Should().HaveStdOut(s_expectedOutput);
-            result.Should().NotHaveStdErr();
-            result.Should().Pass();
         }
 
         private bool IsCentOS()

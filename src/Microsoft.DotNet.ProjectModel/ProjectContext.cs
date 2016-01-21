@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Resolution;
 using NuGet.Frameworks;
 
@@ -22,6 +23,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public Project ProjectFile => RootProject.Project;
 
+        public LockFile LockFile { get; }
+
         public string RootDirectory => GlobalSettings.DirectoryPath;
 
         public string ProjectDirectory => ProjectFile.ProjectDirectory;
@@ -36,7 +39,8 @@ namespace Microsoft.DotNet.ProjectModel
             NuGetFramework targetFramework,
             string runtimeIdentifier,
             string packagesDirectory,
-            LibraryManager libraryManager)
+            LibraryManager libraryManager,
+            LockFile lockfile)
         {
             GlobalSettings = globalSettings;
             RootProject = rootProject;
@@ -44,6 +48,7 @@ namespace Microsoft.DotNet.ProjectModel
             RuntimeIdentifier = runtimeIdentifier;
             PackagesDirectory = packagesDirectory;
             LibraryManager = libraryManager;
+            LockFile = lockfile;
         }
 
         public LibraryExporter CreateExporter(string configuration)

@@ -201,7 +201,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public override CommandResult ExecuteWithCapturedOutput(string args = "")
         {
-            args = $"build {BuildArgs()} {args}";
+            args = $"--verbose build {BuildArgs()} {args}";
             return base.ExecuteWithCapturedOutput(args);
         }
 

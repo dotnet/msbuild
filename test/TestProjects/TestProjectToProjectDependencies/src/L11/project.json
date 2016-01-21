@@ -1,0 +1,14 @@
+﻿{
+    "version": "1.0.0-*",
+
+    "dependencies": {
+		"L12": "1.0.0-*",
+		"L21": "1.0.0-*",
+
+        "NETStandard.Library": "1.0.0-rc2-23704"
+    },
+
+    "frameworks": {
+        "dnxcore50": { }
+    }
+}

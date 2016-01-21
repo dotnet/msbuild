@@ -15,26 +15,26 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public static class LockFileReader
     {
-        public static LockFile Read(string filePath)
+        public static LockFile Read(string lockFilePath)
         {
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var stream = new FileStream(lockFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 try
                 {
-                    return Read(stream);
+                    return Read(lockFilePath, stream);
                 }
                 catch (FileFormatException ex)
                 {
-                    throw ex.WithFilePath(filePath);
+                    throw ex.WithFilePath(lockFilePath);
                 }
                 catch (Exception ex)
                 {
-                    throw FileFormatException.Create(ex, filePath);
+                    throw FileFormatException.Create(ex, lockFilePath);
                 }
             }
         }
 
-        internal static LockFile Read(Stream stream)
+        internal static LockFile Read(string lockFilePath, Stream stream)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 
                 if (jobject != null)
                 {
-                    return ReadLockFile(jobject);
+                    return ReadLockFile(lockFilePath, jobject);
                 }
                 else
                 {
@@ -53,16 +53,16 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             catch
             {
                 // Ran into parsing errors, mark it as unlocked and out-of-date
-                return new LockFile
+                return new LockFile(lockFilePath)
                 {
                     Version = int.MinValue
                 };
             }
         }
 
-        private static LockFile ReadLockFile(JsonObject cursor)
+        private static LockFile ReadLockFile(string lockFilePath, JsonObject cursor)
         {
-            var lockFile = new LockFile();
+            var lockFile = new LockFile(lockFilePath);
             lockFile.Version = ReadInt(cursor, "version", defaultValue: int.MinValue);
             lockFile.Targets = ReadObject(cursor.ValueAsJsonObject("targets"), ReadTarget);
             lockFile.ProjectFileDependencyGroups = ReadObject(cursor.ValueAsJsonObject("projectFileDependencyGroups"), ReadProjectFileDependencyGroup);
