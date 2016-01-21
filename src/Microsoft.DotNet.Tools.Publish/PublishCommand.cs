@@ -83,28 +83,28 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var options = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
             var outputPathCalculator = context.GetOutputPathCalculator(baseOutputPath);
-            var outputPath = outputPathCalculator.GetOutputDirectoryPath(configuration);
+            var outputPath = outputPathCalculator.GetCompilationOutputPath(configuration);
 
             var contextVariables = new Dictionary<string, string>
             {
                 { "publish:ProjectPath", context.ProjectDirectory },
                 { "publish:Configuration", configuration },
-                { "publish:OutputPath", outputPathCalculator.BaseRootOutputPath },
+                { "publish:OutputPath", outputPathCalculator.BaseCompilationOutputPath },
                 { "publish:Framework", context.TargetFramework.Framework },
                 { "publish:Runtime", context.RuntimeIdentifier },
             };
 
             RunScripts(context, ScriptNames.PrePublish, contextVariables);
 
-            if (!Directory.Exists(outputPathCalculator.BaseRootOutputPath))
+            if (!Directory.Exists(outputPathCalculator.BaseCompilationOutputPath))
             {
-                Directory.CreateDirectory(outputPathCalculator.BaseRootOutputPath);
+                Directory.CreateDirectory(outputPathCalculator.BaseCompilationOutputPath);
             }
 
             // Compile the project (and transitively, all it's dependencies)
             var result = Command.Create("dotnet-build",
                 $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" " +
-                $"--output \"{outputPathCalculator.BaseRootOutputPath}\" " +
+                $"--output \"{outputPathCalculator.BaseCompilationOutputPath}\" " +
                 $"--configuration \"{configuration}\" " +
                 "--no-host " +
                 $"\"{context.ProjectFile.ProjectDirectory}\"")

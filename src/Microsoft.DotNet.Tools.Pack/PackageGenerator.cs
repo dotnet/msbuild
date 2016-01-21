@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             var packageOutputPath = Path.Combine(
-                ArtifactPathsCalculator.PackageArtifactsPath, 
+                ArtifactPathsCalculator.PackageOutputPath,
                 Configuration,
                 GetPackageName() + NuGet.Constants.PackageExtension);
 

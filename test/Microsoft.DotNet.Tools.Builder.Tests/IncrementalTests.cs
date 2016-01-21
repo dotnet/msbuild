@@ -102,14 +102,14 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var buildResult = BuildProject();
             AssertProjectCompiled(_mainProject, buildResult);
 
-            Reporter.Verbose.WriteLine($"Files in {GetBinDirectory()}");
-            foreach (var file in Directory.EnumerateFiles(GetBinDirectory()))
+            Reporter.Verbose.WriteLine($"Files in {GetCompilationOutputPath()}");
+            foreach (var file in Directory.EnumerateFiles(GetCompilationOutputPath()))
             {
                 Reporter.Verbose.Write($"\t {file}");
             }
 
             // delete output files with extensions
-            foreach (var outputFile in Directory.EnumerateFiles(GetBinDirectory()).Where(f =>
+            foreach (var outputFile in Directory.EnumerateFiles(GetCompilationOutputPath()).Where(f =>
             {
                 var fileName = Path.GetFileName(f);
                 return fileName.StartsWith(_mainProject, StringComparison.OrdinalIgnoreCase) &&

@@ -21,6 +21,7 @@ source "$DIR/../common/_common.sh"
 [ ! -z "$CONFIGURATION" ] || die "Missing required environment variable CONFIGURATION"
 [ ! -z "$OUTPUT_DIR" ] || die "Missing required environment variable OUTPUT_DIR"
 [ ! -z "$HOST_DIR" ] || die "Missing required environment variable HOST_DIR"
+[ ! -z "$COMPILATION_OUTPUT_DIR" ] || die "Missing required environment variable COMPILATION_OUTPUT_DIR"
 
 PROJECTS=( \
     Microsoft.DotNet.Cli \
@@ -56,29 +57,32 @@ FILES_TO_CLEAN=( \
 )
 
 RUNTIME_OUTPUT_DIR="$OUTPUT_DIR/runtime/coreclr"
-BINARIES_OUTPUT_DIR="$OUTPUT_DIR/bin/$CONFIGURATION/$TFM"
-RUNTIME_BINARIES_OUTPUT_DIR="$RUNTIME_OUTPUT_DIR/$CONFIGURATION/$TFM"
+BINARIES_OUTPUT_DIR="$COMPILATION_OUTPUT_DIR/bin/$CONFIGURATION/$TFM"
+RUNTIME_BINARIES_OUTPUT_DIR="$COMPILATION_OUTPUT_DIR/runtime/coreclr/$CONFIGURATION/$TFM"
+
+mkdir -p "$OUTPUT_DIR/bin"
+mkdir -p "$RUNTIME_OUTPUT_DIR"
 
 for project in ${PROJECTS[@]}
 do
-    echo dotnet publish --native-subdirectory --framework "$TFM" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project" 
-    dotnet publish --native-subdirectory --framework "$TFM" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
+    echo dotnet publish --native-subdirectory --framework "$TFM" --output "$COMPILATION_OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
+    dotnet publish --native-subdirectory --framework "$TFM" --output "$COMPILATION_OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
 done
 
-if [ -d "$BINARIES_OUTPUT_DIR" ]
+if [ ! -d "$BINARIES_OUTPUT_DIR" ]
 then
-    cp -R -f $BINARIES_OUTPUT_DIR/* $OUTPUT_DIR/bin
+    BINARIES_OUTPUT_DIR="$COMPILATION_OUTPUT_DIR/bin"
 fi
-rm -rf $OUTPUT_DIR/bin/$CONFIGURATION
+cp -R -f $BINARIES_OUTPUT_DIR/* $OUTPUT_DIR/bin
 
 # Bring in the runtime
-dotnet publish --output "$RUNTIME_OUTPUT_DIR" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Runtime"
+dotnet publish --output "$COMPILATION_OUTPUT_DIR/runtime/coreclr" --configuration "$CONFIGURATION" "$REPOROOT/src/Microsoft.DotNet.Runtime"
 
-if [ -d "$RUNTIME_BINARIES_OUTPUT_DIR" ]
+if [ ! -d "$RUNTIME_BINARIES_OUTPUT_DIR" ]
 then
-    cp -R -f $RUNTIME_BINARIES_OUTPUT_DIR/* $RUNTIME_OUTPUT_DIR
+    RUNTIME_BINARIES_OUTPUT_DIR="$COMPILATION_OUTPUT_DIR/runtime/coreclr"
 fi
-rm -rf "$RUNTIME_OUTPUT_DIR/$CONFIGURATION"
+cp -R -f $RUNTIME_BINARIES_OUTPUT_DIR/* $RUNTIME_OUTPUT_DIR
 
 # Clean up bogus additional files
 for file in ${FILES_TO_CLEAN[@]}

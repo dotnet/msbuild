@@ -28,7 +28,6 @@ $TestProjects | ForEach-Object {
 
 if (Test-Path $TestBinRoot\$Configuration\dnxcore50) {
     cp $TestBinRoot\$Configuration\dnxcore50\* $TestBinRoot -force -recurse
-    Remove-Item $TestBinRoot\$Configuration\dnxcore50 -recurse
 }
 
 ## Temporary Workaround for Native Compilation

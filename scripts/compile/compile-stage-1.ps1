@@ -9,6 +9,6 @@ header "Compiling stage1 dotnet using downloaded stage0 ..."
 $StartPath = $env:PATH
 $env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$StartPath"
 
-_ "$RepoRoot\scripts\compile\compile-stage.ps1" @("$Tfm","$Rid","$Configuration","$Stage1Dir","$RepoRoot","$HostDir")
+_ "$RepoRoot\scripts\compile\compile-stage.ps1" @("$Tfm","$Rid","$Configuration","$Stage1Dir","$RepoRoot","$HostDir", "$Stage1CompilationDir")
 
 $env:PATH=$StartPath

@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             buildCommand.Execute().Should().Pass();
             TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
-            var binariesOutputDirectory = GetBinariesOutputDirectory(OutputDirectory, false);
+            var binariesOutputDirectory = GetCompilationOutputPath(OutputDirectory, false);
             var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(
                 binariesOutputDirectory);
 
@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             // first build
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true);
-            var binariesOutputDirectory = GetBinariesOutputDirectory(OutputDirectory, false);
+            var binariesOutputDirectory = GetCompilationOutputPath(OutputDirectory, false);
 
             buildCommand.Execute().Should().Pass();
 

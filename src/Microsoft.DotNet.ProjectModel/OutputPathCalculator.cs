@@ -8,33 +8,58 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class OutputPathCalculator
     {
+        private const string ObjDirectoryName = "obj";
+
         private readonly ProjectContext _project;
 
-        public string BaseRootOutputPath { get; }
+        /// <summary>
+        /// Unaltered output path. Either what is passed in in the constructor, or the project directory.
+        /// </summary>
+        private string BaseOutputPath { get; }
+
+        public string BaseCompilationOutputPath { get; }
 
         public OutputPathCalculator(
             ProjectContext project,
-            string rootOutputPath)
+            string baseOutputPath)
         {
             _project = project;
-            BaseRootOutputPath = string.IsNullOrWhiteSpace(rootOutputPath)
+
+            BaseOutputPath = string.IsNullOrWhiteSpace(baseOutputPath) ? _project.ProjectDirectory : baseOutputPath;
+
+            BaseCompilationOutputPath = string.IsNullOrWhiteSpace(baseOutputPath)
                 ? Path.Combine(_project.ProjectDirectory, DirectoryNames.Bin)
-                : rootOutputPath;
+                : baseOutputPath;
         }
 
-        public string GetOutputDirectoryPath(string buildConfiguration)
+        public string GetCompilationOutputPath(string buildConfiguration)
         {
             var outDir = Path.Combine(
-                BaseRootOutputPath,
+                BaseCompilationOutputPath,
                 buildConfiguration,
                 _project.TargetFramework.GetTwoDigitShortFolderName());
 
-//            if (!string.IsNullOrEmpty(_project.RuntimeIdentifier))
-//            {
-//                outDir = Path.Combine(outDir, _project.RuntimeIdentifier);
-//            }
-
             return outDir;
+        }
+
+        public string GetIntermediateOutputPath(string buildConfiguration, string intermediateOutputValue)
+        {
+            string intermediateOutputPath;
+
+            if (string.IsNullOrEmpty(intermediateOutputValue))
+            {
+                intermediateOutputPath = Path.Combine(
+                    BaseOutputPath,
+                    ObjDirectoryName,
+                    buildConfiguration,
+                    _project.TargetFramework.GetTwoDigitShortFolderName());
+            }
+            else
+            {
+                intermediateOutputPath = intermediateOutputValue;
+            }
+
+            return intermediateOutputPath;
         }
     }
 }

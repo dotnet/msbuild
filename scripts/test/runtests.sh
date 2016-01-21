@@ -36,7 +36,6 @@ if [ -d "$TestBinRoot/$CONFIGURATION/dnxcore50" ]
 then
     cp -R -f $TestBinRoot/$CONFIGURATION/dnxcore50/* $TestBinRoot
 fi
-rm -rf $TestBinRoot/$CONFIGURATION/dnxcore50
 
 # copy TestProjects folder which is used by the test cases
 mkdir -p "$TestBinRoot/TestProjects"

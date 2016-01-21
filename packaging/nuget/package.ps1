@@ -19,7 +19,6 @@ $IntermediatePackagesDir = "$RepoRoot\artifacts\packages\intermediate"
 $PackagesDir = "$RepoRoot\artifacts\packages"
 
 New-Item -ItemType Directory -Force -Path $IntermediatePackagesDir
-New-Item -ItemType Directory -Force -Path $PackagesDir\$Configuration\$Tfm
 
 $Projects = @(
     "Microsoft.DotNet.Cli.Utils",
@@ -30,12 +29,10 @@ $Projects = @(
     "Microsoft.Extensions.Testing.Abstractions"
 )
 
-cp $Stage2Dir\bin\* $PackagesDir\$Configuration\$Tfm -force -recurse
-
 foreach ($ProjectName in $Projects) {
     $ProjectFile = "$RepoRoot\src\$ProjectName\project.json"
 
-    & $toolsDir\dotnet pack "$ProjectFile" --basepath "$PackagesDir" --output "$IntermediatePackagesDir" --configuration "$Configuration" $versionArg
+    & $toolsDir\dotnet pack "$ProjectFile" --basepath "$Stage2CompilationDir\bin" --output "$IntermediatePackagesDir" --configuration "$Configuration" $versionArg
     if (!$?) {
         Write-Host "$toolsDir\dotnet pack failed for: $ProjectFile"
         Exit 1

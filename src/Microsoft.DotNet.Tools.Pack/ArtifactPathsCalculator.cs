@@ -14,24 +14,24 @@ namespace Microsoft.DotNet.Tools.Pack
 
         private readonly string _configuration;
 
-        public bool PackageArtifactsPathSet => !string.IsNullOrWhiteSpace(PackageArtifactsPathParameter);
+        public bool PackageOutputPathSet => !string.IsNullOrWhiteSpace(PackageOutputPathParameter);
 
         public string CompiledArtifactsPathParameter { get; }
 
-        public string PackageArtifactsPathParameter { get; }
+        public string PackageOutputPathParameter { get; }
 
         public bool CompiledArtifactsPathSet => !string.IsNullOrWhiteSpace(CompiledArtifactsPathParameter);        
 
         public string CompiledArtifactsPath => 
-            CompiledArtifactsPathSet ? CompiledArtifactsPathParameter : PackageArtifactsPath;
+            CompiledArtifactsPathSet ? CompiledArtifactsPathParameter : PackageOutputPath;
 
-        public string PackageArtifactsPath
+        public string PackageOutputPath
         {
             get
             {
-                if (PackageArtifactsPathSet)
+                if (PackageOutputPathSet)
                 {
-                    return PackageArtifactsPathParameter;
+                    return PackageOutputPathParameter;
                 }
 
                 var outputPath = Path.Combine(
@@ -45,12 +45,12 @@ namespace Microsoft.DotNet.Tools.Pack
         public ArtifactPathsCalculator(
             Project project, 
             string compiledArtifactsPath, 
-            string packageArtifactsPath, 
+            string packageOutputPath,
             string configuration)
         {
             _project = project;
             CompiledArtifactsPathParameter = compiledArtifactsPath;
-            PackageArtifactsPathParameter = packageArtifactsPath;
+            PackageOutputPathParameter = packageOutputPath;
             _configuration = configuration;
         }
 

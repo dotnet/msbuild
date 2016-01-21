@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string expectedOutput,
             bool native = false)
         {
-            var executablePath = Path.Combine(GetBinariesOutputDirectory(outputDir, native), executableName);
+            var executablePath = Path.Combine(GetCompilationOutputPath(outputDir, native), executableName);
 
             var executableCommand = new TestCommand(executablePath);
 
@@ -75,12 +75,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             result.Should().Pass();
         }
 
-        private void TestNativeOutputExecutable(string outputDir, string executableName, string expectedOutput)
+        protected void TestNativeOutputExecutable(string outputDir, string executableName, string expectedOutput)
         {
             TestOutputExecutable(outputDir, executableName, expectedOutput, true);
         }
 
-        private string GetBinariesOutputDirectory(string outputDir, bool native)
+        protected string GetCompilationOutputPath(string outputDir, bool native)
         {
             var executablePath = Path.Combine(outputDir, "Debug", "dnxcore50");
             if (native)
