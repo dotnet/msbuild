@@ -7,6 +7,8 @@ param(
     [Parameter(Mandatory=$true)][string]$file
 )
 
+. "$PSScriptRoot\..\common\_common.ps1"
+
 function CheckRequiredVariables 
 {
     if([string]::IsNullOrEmpty($env:DOTNET_CLI_VERSION))

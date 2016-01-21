@@ -3,6 +3,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+. "$PSScriptRoot\..\common\_common.ps1"
+
 # MSI versioning
 # Encode the CLI version to fit into the MSI versioning scheme - https://msdn.microsoft.com/en-us/library/windows/desktop/aa370859(v=vs.85).aspx
 # MSI versions are 3 part
@@ -49,7 +51,6 @@ function GetMSIVersionFromCLIVersion([uint32]$Major, [uint32]$Minor, [uint32]$Pa
     return $MSIVersion
 }
 
-$env:ReleaseSuffix = "beta"
 $env:MajorVersion = 1
 $env:MinorVersion = 0
 $env:PatchVersion = 0

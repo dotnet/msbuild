@@ -13,7 +13,7 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR))
 
 # Install a stage 0
 header "Installing dotnet stage 0"
-_ "$RepoRoot\scripts\obtain\install.ps1"
+_ "$RepoRoot\scripts\obtain\install.ps1" @("$env:Channel")
 
 # Put stage0 on the PATH
 $env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$env:PATH"
