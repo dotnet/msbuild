@@ -15,6 +15,8 @@ $Stage1Dir = "$OutputDir\stage1"
 $Stage2Dir = "$OutputDir\stage2"
 $HostDir = "$OutputDir\corehost"
 $PackageDir = "$RepoRoot\artifacts\packages\dnvm"
+$env:ReleaseSuffix = "beta"
+$env:Channel = "$env:ReleaseSuffix"
 
 # Set reasonable defaults for unset variables
 setEnvIfDefault "DOTNET_INSTALL_DIR"  "$(Convert-Path "$PSScriptRoot\..")\.dotnet_stage0\win7-x64"

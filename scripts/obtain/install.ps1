@@ -3,11 +3,13 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
+param([string]$Channel="dev")
+
+
 $ErrorActionPreference="Stop"
 $ProgressPreference="SilentlyContinue"
 
 $Feed="https://dotnetcli.blob.core.windows.net/dotnet"
-$Channel="dev"
 $DotNetFileName="dotnet-win-x64.latest.zip"
 $DotNetUrl="$Feed/$Channel/Binaries/Latest"
 

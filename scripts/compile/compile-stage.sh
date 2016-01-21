@@ -118,4 +118,4 @@ fi
 # Stamp the output with the commit metadata
 COMMIT=$(git rev-parse HEAD)
 echo $COMMIT > $OUTPUT_DIR/.version
-echo $DOTNET_BUILD_VERSION >> $OUTPUT_DIR/.version
+echo $DOTNET_CLI_VERSION >> $OUTPUT_DIR/.version

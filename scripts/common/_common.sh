@@ -23,6 +23,8 @@ export DNX_ROOT=$DNX_DIR/bin
 export STAGE1_DIR=$OUTPUT_ROOT/stage1
 export STAGE2_DIR=$OUTPUT_ROOT/stage2
 export HOST_DIR=$OUTPUT_ROOT/corehost
+export RELEASE_SUFFIX=beta
+export CHANNEL=$RELEASE_SUFFIX
 
 [ -z "$DOTNET_INSTALL_DIR" ] && export DOTNET_INSTALL_DIR=$REPOROOT/.dotnet_stage0/$RID
 [ -z "$DOTNET_CLI_VERSION" ] && export DOTNET_CLI_VERSION=0.1.0.0
