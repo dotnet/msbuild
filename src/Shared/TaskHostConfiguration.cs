@@ -345,7 +345,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
-#if FEATURE_APPDOMAIN
+#if FEATURE_BINARY_SERIALIZATION
             translator.TranslateDotNet(ref _appDomainSetup);
 #endif
             translator.Translate(ref _lineNumberOfTask);

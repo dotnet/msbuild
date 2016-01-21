@@ -807,7 +807,7 @@ namespace Microsoft.Build.Tasks
                                     OutputResources = outputResources;
                                 }
 
-#if FEATURE_APPDOMAIN
+#if FEATURE_BINARY_SERIALIZATION
                                 // Get portable library cache info (and if needed, marshal it to this AD).
                                 List<ResGenDependencies.PortableLibraryFile> portableLibraryCacheInfo = process.PortableLibraryCacheInfo;
                                 for (int i = 0; i < portableLibraryCacheInfo.Count; i++)
@@ -1794,6 +1794,7 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
+#if FEATURE_BINARY_SERIALIZATION
                     catch (SerializationException e)
                     {
                         Log.LogMessageFromResources
@@ -1808,6 +1809,7 @@ namespace Microsoft.Build.Tasks
 
                         return true;
                     }
+#endif
                     catch (Exception e)
                     {
                         // DDB#9819
@@ -1858,6 +1860,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool NeedSeparateAppDomainBasedOnSerializedType(XmlReader reader)
         {
+#if FEATURE_BINARY_SERIALIZATION
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.Element)
@@ -1881,6 +1884,7 @@ namespace Microsoft.Build.Tasks
 
             // We didn't find any element at all -- the .resx is malformed.
             // Return true to err on the side of caution. Error will appear later.
+#endif
             return true;
         }
 #endif
