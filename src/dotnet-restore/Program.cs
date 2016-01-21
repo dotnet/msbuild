@@ -124,10 +124,10 @@ namespace Microsoft.DotNet.Tools.Restore
 
         private static void RestoreTool(LibraryRange tooldep, RestoreTask restoreTask, bool quiet)
         {
-            var tempRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var tempRoot = Path.Combine(restoreTask.ProjectDirectory, "obj");
             try
             {
-                var tempPath = Path.Combine(tempRoot, "bin");
+                var tempPath = Path.Combine(tempRoot, Guid.NewGuid().ToString(), "bin");
 
                 RestoreToolToPath(tooldep, restoreTask.Arguments, tempPath, quiet);
 
