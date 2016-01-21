@@ -6,7 +6,7 @@
 . "$PSScriptRoot\..\common\_common.ps1"
 
 # Run Validation for Project.json dependencies
-dotnet publish $RepoRoot\tools\MultiProjectValidator -o $Stage2Dir\..\tools
+dotnet publish $RepoRoot\tools\MultiProjectValidator -o $Stage2Dir\..\tools -c "$Configuration"
 
 $pjvalidatePath = "$Stage2Dir\..\tools\$Configuration\$Tfm"
 if (! (Test-Path $pjvalidatePath)) {
