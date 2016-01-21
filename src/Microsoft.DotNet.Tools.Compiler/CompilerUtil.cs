@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         // used in incremental compilation for the key file
         public static CommonCompilerOptions ResolveCompilationOptions(ProjectContext context, string configuration)
         {
-            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
+            var compilationOptions = context.GetLanguageSpecificCompilerOptions(context.TargetFramework, configuration);
 
             // Path to strong naming key in environment variable overrides path in project.json
             var environmentKeyFile = Environment.GetEnvironmentVariable(EnvironmentNames.StrongNameKeyFile);

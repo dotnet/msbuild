@@ -9,6 +9,7 @@
     "System.Threading.ThreadPool": "4.0.10-beta-23704",
     "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23704",
     "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "type": "build",
       "version": "1.0.0-*"

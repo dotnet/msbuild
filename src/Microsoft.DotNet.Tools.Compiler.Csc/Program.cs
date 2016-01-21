@@ -124,10 +124,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 ? "-debug:full"
                 : "-debug:portable");
 
-            args.Add("-nowarn:CS1701");
-            args.Add("-nowarn:CS1702");
-            args.Add("-nowarn:CS1705");
-
             return args;
         }
 
