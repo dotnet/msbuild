@@ -54,6 +54,8 @@ exec "$MY_TARGET" "$@"
 EOF
 )
 
+[ -z "$CHANNEL" ] && CHANNEL="dev"
+
 #set default prefix (PREFIX is a fairly standard env-var, but we also want to allow the use the specific "DOTNET_INSTALL_DIR" one)
 if [ ! -z "$DOTNET_INSTALL_DIR" ]; then
     PREFIX=$DOTNET_INSTALL_DIR
@@ -171,13 +173,13 @@ install_dotnet()
     fi
     local os=$(current_os)
     local installLocation="$PREFIX/share/dotnet"
-    local dotnet_url="https://dotnetcli.blob.core.windows.net/dotnet/dev/Binaries/Latest"
+    local dotnet_url="https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/Binaries/Latest"
     local dotnet_filename="dotnet-$os-x64.latest.tar.gz"
 
     if [ "$RELINK" = "0" ]; then
         if [ "$FORCE" = "0" ]; then
             # Check if we need to bother
-            local remoteData="$(curl -s https://dotnetcli.blob.core.windows.net/dotnet/dev/dnvm/latest.$os.version)"
+            local remoteData="$(curl -s https://dotnetcli.blob.core.windows.net/dotnet/$CHANNEL/dnvm/latest.$os.version)"
             [ $? != 0 ] && say_err "Unable to determine latest version." && return 1
 
             local remoteVersion=$(IFS="\n" && echo $remoteData | tail -n 1)
