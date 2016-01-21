@@ -19,11 +19,10 @@
     "NuGet.Packaging.Core": "3.4.0-beta-*",
     "NuGet.Packaging.Core.Types": "3.4.0-beta-*",
     "NuGet.Versioning": "3.4.0-beta-*",
-    "Microsoft.NETCore.Platforms": "1.0.1-rc2-23608",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23608",
-    "NETStandard.Library": "1.0.0-rc2-23608",
-    "System.Linq": "4.0.1-beta-23504",
-    "System.Collections": "4.0.11-beta-23504",
+    "Microsoft.NETCore.Platforms": "1.0.1-rc2-23704",
+    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23704",
+    "NETStandard.Library": "1.0.0-rc2-23704",
+    "System.Linq.Expressions": "4.0.11-rc2-23704",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
     "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
@@ -38,7 +37,9 @@
     "Newtonsoft.Json": "7.0.1"
   },
   "frameworks": {
-    "dnxcore50": {}
+    "dnxcore50": {
+      "imports": "portable-net45+win8"
+    }
   },
   "scripts": {
   }
