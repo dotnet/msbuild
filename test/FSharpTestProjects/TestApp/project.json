@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
@@ -8,16 +8,14 @@
         "Program.fs"
     ],
     "dependencies": {
-        "TestLibrary": { "target": "project" },
+        "TestLibrary": "1.0.0-*",
+        "NETStandard.Library": "1.0.0-rc3-23722",
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
-        "System.IO": "4.0.11-beta-23428",
-        "System.Console": "4.0.0-beta-23428",
-        "System.Runtime": "4.0.21-beta-23428",
-        "System.Diagnostics.Process": "4.1.0-beta-23428",
-        "Microsoft.NETCore.Runtime": "1.0.1-beta-23428"
     },
 
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     }
 }

@@ -1,11 +1,11 @@
-﻿{
+{
     "name": "dotnet-new",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23704",
+        "NETStandard.Library": "1.0.0-rc3-23722",
 
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
@@ -17,7 +17,9 @@
     "compileExclude": [ "CSharp_Console/**", "FSharp_Console/**" ],
     "resource": [ "CSharp_Console/**", "FSharp_Console/**" ],
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     },
     "scripts": {
     }

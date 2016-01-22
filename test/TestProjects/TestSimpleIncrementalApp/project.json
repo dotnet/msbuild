@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true,
@@ -6,7 +6,7 @@
     },
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23704"
+        "NETStandard.Library": "1.0.0-rc3-23722"
     },
 
     "frameworks": {

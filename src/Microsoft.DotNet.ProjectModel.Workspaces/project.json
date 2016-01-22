@@ -1,17 +1,17 @@
 {
-  "version": "1.0.0-*",
-  "compilationOptions": {
-    "keyFile": "../../tools/Key.snk"
-  },
-  "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23704",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
-    "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.2.0-beta1-20160108-01"
-  },
-  "frameworks": {
-    "dnxcore50": {
-      "imports": "portable-net45+win8"
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "keyFile": "../../tools/Key.snk"
+    },
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc3-23722",
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
+        "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.2.0-beta1-20160108-01"
+    },
+    "frameworks": {
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     }
-  }
 }

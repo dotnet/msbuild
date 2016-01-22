@@ -1,12 +1,12 @@
-﻿{
+{
     "name": "dotnet-repl-csi",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23704",
-        
+        "NETStandard.Library": "1.0.0-rc3-23722",
+
         "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta1-20160108-01",
 
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",

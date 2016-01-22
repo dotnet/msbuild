@@ -4,11 +4,13 @@
         "keyFile": "../../tools/Key.snk"
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23704",
+        "NETStandard.Library": "1.0.0-rc3-23722",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "System.Runtime.Loader": "4.0.0-rc2-23704"
+        "System.Runtime.Loader": "4.0.0-rc3-23722"
     },
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     }
 }

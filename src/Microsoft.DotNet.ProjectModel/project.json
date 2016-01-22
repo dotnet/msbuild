@@ -1,17 +1,17 @@
-﻿{
+{
     "version": "1.0.0-*",
     "compilationOptions": {
         "keyFile": "../../tools/Key.snk"
     },
     "description": "Types to model a .NET Project",
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23704",
+        "NETStandard.Library": "1.0.0-rc3-23722",
         "System.Reflection.Metadata": "1.2.0-rc2-23608",
-        "System.Runtime.Loader": "4.0.0-rc2-23704",
-        "System.Dynamic.Runtime": "4.0.11-rc2-23704",
-        "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23704",
-        "Microsoft.CSharp": "4.0.1-rc2-23704",
-        "System.Xml.XDocument": "4.0.11-rc2-23704",
+        "System.Runtime.Loader": "4.0.0-rc3-23722",
+        "System.Dynamic.Runtime": "4.0.11-rc3-23722",
+        "System.Security.Cryptography.Algorithms": "4.0.0-rc3-23722",
+        "Microsoft.CSharp": "4.0.1-rc3-23722",
+        "System.Xml.XDocument": "4.0.11-rc3-23722",
         "NuGet.Packaging": "3.4.0-beta-536",
 
         "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15975",
@@ -24,13 +24,15 @@
             "version": "1.0.0-*"
         },
         "Microsoft.Extensions.DependencyModel": {
-          "type": "build",
-          "version": "1.0.0-*"
+            "type": "build",
+            "version": "1.0.0-*"
         }
     },
 
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     },
     "scripts": {
     }

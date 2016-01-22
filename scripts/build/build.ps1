@@ -39,6 +39,9 @@ if ($Offline){
 else {
     _ "$RepoRoot\scripts\obtain\install-tools.ps1"
 
+    # Put the stage0 on the path
+    $env:PATH = "$env:DOTNET_INSTALL_DIR\cli\bin;$env:PATH"
+
     _ "$RepoRoot\scripts\build\restore-packages.ps1"
 }
 
