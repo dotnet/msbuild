@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 return _outputDirectory == string.Empty ?
                                            "" :
-                                           $"-o {_outputDirectory}";
+                                           $"-o \"{_outputDirectory}\"";
             }
         }
 

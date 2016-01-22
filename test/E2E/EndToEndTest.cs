@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
     {
         private static readonly string s_expectedOutput = "Hello World!" + Environment.NewLine;
         private static readonly string s_testdirName = "e2etestroot";
-        private static readonly string s_outputdirName = "testbin";
+        private static readonly string s_outputdirName = "test space/bin";
         
         private string Rid { get; set; }
         private string TestDirectory { get; set; }
@@ -51,8 +51,6 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetIncrementalBuild()
         {
-            TestSetup();
-
             // first build
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory);
             buildCommand.Execute().Should().Pass();

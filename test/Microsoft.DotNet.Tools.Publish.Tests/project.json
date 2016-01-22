@@ -2,9 +2,9 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23704",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-*",
-    "System.Text.RegularExpressions": "4.0.11-*",
+    "NETStandard.Library": "1.0.0-rc2-23706",
+    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23706",
+    "System.Text.RegularExpressions": "4.0.11-rc2-23706",
 
     "xunit": "2.1.0",
     "xunit.console.netcore": "1.0.2-prerelease-00101",
