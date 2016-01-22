@@ -95,8 +95,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             
             //Output
             var outFile = DetermineOutputFile(config);
-            argsList.Add($"/out");
-            argsList.Add($"{outFile}");
+            argsList.Add($"/out:{outFile}");
             
             // Constant Libs
             foreach (var lib in ConstantLinkLibs)

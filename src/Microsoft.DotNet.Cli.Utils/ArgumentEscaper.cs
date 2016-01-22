@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static IEnumerable<string> EscapeArgArray(IEnumerable<string> args)
+        private static IEnumerable<string> EscapeArgArray(IEnumerable<string> args)
         {
             var escapedArgs = new List<string>();
 
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static IEnumerable<string> EscapeArgArrayForCmd(IEnumerable<string> arguments)
+        private static IEnumerable<string> EscapeArgArrayForCmd(IEnumerable<string> arguments)
         {
             var escapedArgs = new List<string>();
 

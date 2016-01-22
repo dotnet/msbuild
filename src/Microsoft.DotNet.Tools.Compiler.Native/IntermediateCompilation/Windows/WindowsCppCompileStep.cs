@@ -83,8 +83,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
             // Output
             var objOut = DetermineOutputFile(config);
-            argsList.Add($"/Fo");
-            argsList.Add($"{objOut}");
+            argsList.Add($"/Fo{objOut}");
             
             // Input File
             var inCppFile = DetermineInFile(config);

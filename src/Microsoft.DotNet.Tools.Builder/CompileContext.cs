@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Tools.Build
         private void CollectCheckPathProbingPreconditions(ProjectContext project, IncrementalPreconditions preconditions)
         {
             var pathCommands = CompilerUtil.GetCommandsInvokedByCompile(project)
-                .Select(commandName => Command.Create(commandName, new string[] { }, project.TargetFramework))
+                .Select(commandName => Command.Create(commandName, Enumerable.Empty<string>(), project.TargetFramework))
                 .Where(c => c.ResolutionStrategy.Equals(CommandResolutionStrategy.Path));
 
             foreach (var pathCommand in pathCommands)
@@ -257,37 +257,21 @@ namespace Microsoft.DotNet.Tools.Build
 
         private bool InvokeCompileOnDependency(ProjectDescription projectDependency)
         {
-            string[] args;
+            var args = new List<string>();
+
+            args.Add("--framework");
+            args.Add($"{projectDependency.Framework}");
+            args.Add("--configuration");
+            args.Add($"{_args.ConfigValue}");
+            args.Add("--output");
+            args.Add($"{_args.OutputValue}");
+            args.Add("--temp-output");
+            args.Add($"{_args.IntermediateValue}");
+            args.Add($"{projectDependency.Project.ProjectDirectory}");
+
             if (_args.NoHostValue)
             {
-                args = new string[]
-                {
-                    $"--framework",
-                    $"{projectDependency.Framework}",
-                    $"--configuration",
-                    $"{_args.ConfigValue}",
-                    $"--output",
-                    $"{_args.OutputValue}",
-                    $"--temp-output",
-                    $"{_args.IntermediateValue}",
-                    "--no-host",
-                    $"{projectDependency.Project.ProjectDirectory}"
-                };
-            }
-            else
-            {
-                args = new string[]
-               {
-                    $"--framework",
-                    $"{projectDependency.Framework}",
-                    $"--configuration",
-                    $"{_args.ConfigValue}",
-                    $"--output",
-                    $"{_args.OutputValue}",
-                    $"--temp-output",
-                    $"{_args.IntermediateValue}",
-                    $"{projectDependency.Project.ProjectDirectory}"
-               };
+                args.Add("--no-host");
             }
 
             var compileResult = Command.Create("dotnet-compile", args)
@@ -301,7 +285,7 @@ namespace Microsoft.DotNet.Tools.Build
         private bool InvokeCompileOnRootProject()
         {
             // todo: add methods to CompilerCommandApp to generate the arg string?
-            List<string> args = new List<string>();
+            var args = new List<string>();
             args.Add("--framework");
             args.Add(_rootProject.TargetFramework.ToString());
             args.Add("--configuration");
@@ -311,26 +295,40 @@ namespace Microsoft.DotNet.Tools.Build
             args.Add("--temp-output");
             args.Add(_args.IntermediateValue);
 
-            if (_args.NoHostValue) args.Add("--no-host");
+            if (_args.NoHostValue) 
+            { 
+                args.Add("--no-host"); 
+            }
 
             //native args
-            if (_args.IsNativeValue) args.Add("--native");
-            if (_args.IsCppModeValue) args.Add("--cpp");
+            if (_args.IsNativeValue) 
+            { 
+                args.Add("--native"); 
+            }
+
+            if (_args.IsCppModeValue) 
+            { 
+                args.Add("--cpp"); 
+            }
+
             if (!string.IsNullOrWhiteSpace(_args.ArchValue))
             {
                 args.Add("--arch");
                 args.Add(_args.ArchValue);
             }
+
             if (!string.IsNullOrWhiteSpace(_args.IlcArgsValue))
             {
                 args.Add("--ilcargs");
                 args.Add(_args.IlcArgsValue);
             }
+
             if (!string.IsNullOrWhiteSpace(_args.IlcPathValue))
             {
                 args.Add("--ilcpath");
                 args.Add(_args.IlcPathValue);
             }
+
             if (!string.IsNullOrWhiteSpace(_args.IlcSdkPathValue))
             {
                 args.Add("--ilcsdkpath");
@@ -339,7 +337,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             args.Add(_rootProject.ProjectDirectory);
 
-            var compileResult = Command.Create("dotnet-compile",args.ToArray())
+            var compileResult = Command.Create("dotnet-compile",args)
                 .ForwardStdOut()
                 .ForwardStdErr()
                 .Execute();

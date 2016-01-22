@@ -49,11 +49,9 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
                     useComSpec=true;
 
-                    List<string> concatenatedArgs = new List<string>();
-                    concatenatedArgs.Add(comSpec);
-                    concatenatedArgs.AddRange(scriptArguments);
-
-                    scriptArguments = concatenatedArgs.ToArray();
+                    scriptArguments = new string[] { comSpec }
+                        .Concat(scriptArguments)
+                        .ToArray();
                 }
             }
             else
