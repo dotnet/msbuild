@@ -79,8 +79,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 return returnCode;
             }
 
-            sources = sources.Select(s => s.Trim('"')).ToList();
-
             var translated = TranslateCommonOptions(commonOptions, outputName);
 
             var allArgs = new List<string>(translated);
@@ -96,9 +94,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 allArgs.Add($"-out:\"{outputName}\"");
             }
 
-            allArgs.AddRange(references.Select(r => $"-r:\"{r}\""));
-            allArgs.AddRange(resources.Select(resource => $"-resource:{resource}"));
-            allArgs.AddRange(sources.Select(s => $"\"{s}\""));
+            allArgs.AddRange(references.Select(r => $"-r:\"{r.Trim('"')}\""));
+            allArgs.AddRange(resources.Select(resource => $"-resource:{resource.Trim('"')}"));
+            allArgs.AddRange(sources.Select(s => $"\"{s.Trim('"')}\""));
 
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-csc.rsp");
 

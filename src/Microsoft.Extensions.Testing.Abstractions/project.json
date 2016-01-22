@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "Newtonsoft.Json": "7.0.1",
-    "Microsoft.DotNet.ProjectModel": {"target":"project"},
-    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc2-15935",
+    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc2-16023",
     "NETStandard.Library": "1.0.0-rc2-23704",
     "System.Resources.ResourceManager": "4.0.1-rc2-23704",
     "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23704"
@@ -20,7 +20,5 @@
   "frameworks": {
     "dnxcore50": {
     }
-  },
-  "scripts": {
   }
 }

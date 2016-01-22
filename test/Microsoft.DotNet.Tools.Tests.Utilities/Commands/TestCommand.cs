@@ -4,6 +4,7 @@
 using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.Diagnostics;
+using System.IO;
 
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
@@ -19,10 +20,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public virtual CommandResult Execute(string args = "")
         {
-            Console.WriteLine($"Executing - {_command} {args}");
+            var commandPath = _command;
+            if (!Path.IsPathRooted(_command))
+            {
+                _command = Env.GetCommandPath(_command) ??
+                           Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, _command);
+            }
 
-            var commandPath = Env.GetCommandPath(_command) ??
-                Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, _command);
+            Console.WriteLine($"Executing - {_command} {args}");
 
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
