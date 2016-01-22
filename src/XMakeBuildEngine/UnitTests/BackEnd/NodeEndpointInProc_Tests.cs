@@ -245,6 +245,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // The following should not throw
             endpoints.ManagerEndpoint.Listen(_host);
             endpoints.NodeEndpoint.Connect(_host);
+
+            endpoints.ManagerEndpoint.Disconnect();
         }
 
         [Fact]
@@ -350,6 +352,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             Assert.Equal(_host.DataReceivedContext.packet, nodePacket);
             Assert.NotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+
+            endpoints.ManagerEndpoint.Disconnect();
         }
 
         public NodeEndpointInProc_Tests()

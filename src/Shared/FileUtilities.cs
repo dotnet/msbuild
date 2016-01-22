@@ -54,12 +54,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void GetTestExecutionInfo()
         {
-#if FEATURE_GET_COMMANDLINE
             // Get the executable we are running
             var program = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
-#else
-            var program = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName);
-#endif
 
             // Check if it matches the pattern
             s_runningTests = program != null
@@ -566,10 +562,9 @@ namespace Microsoft.Build.Shared
         {
             get
             {
-#if FEATURE_ASSEMBLY_LOCATION
                 try
                 {
-                    return Path.GetFullPath(new Uri(typeof(FileUtilities).GetTypeInfo().Assembly.EscapedCodeBase).LocalPath);
+                    return Path.GetFullPath(typeof(FileUtilities).GetTypeInfo().Assembly.Location);
                 }
                 catch (InvalidOperationException e)
                 {
@@ -578,26 +573,6 @@ namespace Microsoft.Build.Shared
                     ExceptionHandling.DumpExceptionToFile(e);
                     return typeof(FileUtilities).GetTypeInfo().Assembly.Location;
                 }
-#else
-                //  If we can't get the path to an assembly (ie on .NET Core), then assume that this assembly has been
-                //  loaded from the same directory as the main application
-                var appPath = Process.GetCurrentProcess().MainModule.FileName;
-                var appDirectory = Path.GetDirectoryName(appPath);
-
-                string extension = ".dll";
-                string assemblySimpleName = typeof(FileUtilities).GetTypeInfo().Assembly.GetName().Name;
-                if (assemblySimpleName.Equals("msbuild", StringComparison.OrdinalIgnoreCase))
-                {
-                    extension = ".exe";
-                }
-                var assemblyPath = Path.Combine(appDirectory, assemblySimpleName + extension);
-                assemblyPath = Path.GetFullPath(assemblyPath);
-                if (!File.Exists(assemblyPath))
-                {
-                    throw new FileNotFoundException(assemblyPath);
-                }
-                return assemblyPath;
-#endif
             }
         }
 
