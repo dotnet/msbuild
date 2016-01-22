@@ -561,16 +561,9 @@ namespace Microsoft.Build.Shared
             {
                 if (s_frameworkCurrentPath == null)
                 {
-#if FEATURE_ASSEMBLY_LOCATION
                     s_frameworkCurrentPath =
                         Path.GetDirectoryName(typeof(string).GetTypeInfo().Assembly.Location)
                         ?? string.Empty;
-#else
-                    //  There isn't really a concept of a framework path on .NET Core.  Try using the app folder
-                    s_frameworkCurrentPath =
-                        Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
-                        ?? string.Empty;
-#endif
                 }
 
                 return s_frameworkCurrentPath;

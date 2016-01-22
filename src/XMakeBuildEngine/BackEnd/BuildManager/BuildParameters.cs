@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
             path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MSBuild.exe");
 #else
-            path = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 #endif
             if (path != null && CheckMSBuildExeExistsAt(path))
             {
