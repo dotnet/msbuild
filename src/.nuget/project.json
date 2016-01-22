@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "Microsoft.NETCore.TestHost": "1.0.0-beta-23516"
+    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23712"
   },
   "runtimes": {
     "Ubuntu.14.04-x64": { }
