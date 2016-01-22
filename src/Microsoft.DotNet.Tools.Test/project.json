@@ -34,7 +34,7 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.Extensions.Logging": "1.0.0-*",
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-15935",
     "Newtonsoft.Json": "7.0.1"
   },
   "frameworks": {
