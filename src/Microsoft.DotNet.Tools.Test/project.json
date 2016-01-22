@@ -16,7 +16,6 @@
     "System.Diagnostics.TraceSource": "4.0.0-rc2-23704",
     "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23616",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-23616",
-    "Microsoft.Extensions.Compilation.Abstractions": "1.0.0-*",
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
     "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
       "version": "1.0.0-*",
