@@ -133,6 +133,11 @@ namespace Microsoft.DotNet.Tools.Publish
                 PublishFiles(export.RuntimeAssemblies, outputPath, nativeSubdirectories: false);
                 PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories);
                 PublishFiles(export.RuntimeAssets, outputPath);
+
+                if (options.PreserveCompilationContext.GetValueOrDefault())
+                {
+                    PublishRefs(export, outputPath);
+                }
             }
 
             CopyContents(context, outputPath);
@@ -149,6 +154,26 @@ namespace Microsoft.DotNet.Tools.Publish
             Reporter.Output.WriteLine($"Published to {outputPath}".Green().Bold());
 
             return true;
+        }
+
+        private static void PublishRefs(LibraryExport export, string outputPath)
+        {
+            var refsPath = Path.Combine(outputPath, "refs");
+            if (!Directory.Exists(refsPath))
+            {
+                Directory.CreateDirectory(refsPath);
+            }
+
+            // Do not copy compilation assembly if it's in runtime assemblies
+            var runtimeAssemblies = new HashSet<LibraryAsset>(export.RuntimeAssemblies);
+            foreach (var compilationAssembly in export.CompilationAssemblies)
+            {
+                if (!runtimeAssemblies.Contains(compilationAssembly))
+                {
+                    var destFileName = Path.Combine(refsPath, Path.GetFileName(compilationAssembly.ResolvedPath));
+                    File.Copy(compilationAssembly.ResolvedPath, destFileName, overwrite: true);
+                }
+            }
         }
 
         private static int PublishHost(ProjectContext context, string outputPath)
