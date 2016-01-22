@@ -12,34 +12,32 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 {
     public class MacCppCompileStep : IPlatformNativeStep
     {
-        private readonly string CompilerName = "clang";
-        private readonly string InputExtension = ".cpp";
+        private const string CompilerName = "clang";
+        public const string InputExtension = ".cpp";
 
         // TODO: debug/release support
-        private readonly string cflags = "-g -lstdc++ -Wno-invalid-offsetof -pthread";
+        private readonly string [] _cflags = { "-g", "-lstdc++", "-Wno-invalid-offsetof", "-pthread"};
         
         // Link to iconv APIs
-        private readonly string libFlags = "-liconv";
+        private const string LibFlags = "-liconv";
 
-        private readonly string[] IlcSdkLibs = new string[]
-        {
-            "libbootstrappercpp.a",
-            "libPortableRuntime.a",
-            "libSystem.Private.CoreLib.Native.a"
-        };
+        private readonly string[] _ilcSdkLibs = 
+            {
+                "libbootstrappercpp.a",
+                "libPortableRuntime.a",
+                "libSystem.Private.CoreLib.Native.a"
+            };
 
-        private readonly string[] appdeplibs = new string[]
-        {
-            "libSystem.Native.a"
-        };
+        private readonly string[] _appdeplibs = 
+            {
+                "libSystem.Native.a"
+            };
 
         
-        private string CompilerArgStr { get; set; }
-        private NativeCompileSettings config;
+        private List<string> CompilerArgs { get; set; }
 
         public MacCppCompileStep(NativeCompileSettings config)
         {
-            this.config = config;
             InitializeArgs(config);
         }
 
@@ -65,18 +63,18 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var argsList = new List<string>();
             
             // Flags
-            argsList.Add(cflags);
+            argsList.AddRange(_cflags);
 
             var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
             argsList.Add("-I");
-            argsList.Add($"\"{ilcSdkIncPath}\"");
+            argsList.Add($"{ilcSdkIncPath}");
 
             // Input File
             var inCppFile = DetermineInFile(config);
             argsList.Add(inCppFile);
 
             // Lib flags
-            argsList.Add(libFlags);
+            argsList.Add(LibFlags);
 
             // Pass the optional native compiler flags if specified
             if (!string.IsNullOrWhiteSpace(config.CppCompilerFlags))
@@ -85,11 +83,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
             
             // ILC SDK Libs
-            var IlcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
-            foreach (var lib in IlcSdkLibs)
+            var ilcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
+            foreach (var libPath in _ilcSdkLibs.Select(lib => Path.Combine(ilcSdkLibPath, lib)))
             {
-                var libPath = Path.Combine(IlcSdkLibPath, lib);
-
                 // Forward the library to linked to the linker
                 argsList.Add("-Xlinker");
                 argsList.Add(libPath);
@@ -97,23 +93,23 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
             // AppDep Libs
             var baseAppDeplibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10/x64");
-            foreach (var lib in appdeplibs)
+            foreach (var appDeplibPath in _appdeplibs.Select(lib => Path.Combine(baseAppDeplibPath, lib)))
             {
-                var appDeplibPath = Path.Combine(baseAppDeplibPath, lib);
                 argsList.Add("-Xlinker");
                 argsList.Add(appDeplibPath);
             }
 
             // Output
             var libOut = DetermineOutputFile(config);
-            argsList.Add($"-o \"{libOut}\"");
+            argsList.Add($"-o");
+            argsList.Add($"{libOut}");
 
-            this.CompilerArgStr = string.Join(" ", argsList);
+            CompilerArgs = argsList;
         }
 
         private int InvokeCompiler()
         {
-            var result = Command.Create(CompilerName, CompilerArgStr)
+            var result = Command.Create(CompilerName, CompilerArgs)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();

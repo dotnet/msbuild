@@ -79,6 +79,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 return returnCode;
             }
 
+            sources = sources.Select(s => s.Trim('"')).ToList();
+
             var translated = TranslateCommonOptions(commonOptions, outputName);
 
             var allArgs = new List<string>(translated);
@@ -103,7 +105,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
 
             // Execute CSC!
-            var result = RunCsc($"-noconfig @\"{rsp}\"")
+            var result = RunCsc(new string[] { $"-noconfig", "@" + $"{rsp}" })
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
@@ -214,7 +216,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             return languageVersion;
         }
 
-        private static Command RunCsc(string cscArgs)
+        private static Command RunCsc(string[] cscArgs)
         {
             // Locate CoreRun
             return Command.Create("csc", cscArgs);

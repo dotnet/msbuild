@@ -1,11 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler.Native
 {
@@ -13,15 +8,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
     {
         private readonly string ExecutableName = "corerun" + Constants.ExeSuffix;
         private readonly string ILCompiler = "ilc.exe";
+        private IEnumerable<string> Args;
+        private NativeCompileSettings config;
 
         private static readonly Dictionary<NativeIntermediateMode, string> ModeOutputExtensionMap = new Dictionary<NativeIntermediateMode, string>
         {
             { NativeIntermediateMode.cpp, ".cpp" },
             { NativeIntermediateMode.ryujit, ".obj" }
         };
-
-        private string ArgStr { get; set; }
-        private NativeCompileSettings config;
         
         public ILCompilerInvoker(NativeCompileSettings config)
         {
@@ -39,28 +33,31 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 throw new FileNotFoundException("Unable to find ILCompiler at " + managedPath);
             }
 
-            argsList.Add($"\"{managedPath}\"");
+            argsList.Add($"{managedPath}");
             
             // Input File 
             var inputFilePath = config.InputManagedAssemblyPath;
-            argsList.Add($"\"{inputFilePath}\"");
+            argsList.Add($"{inputFilePath}");
             
             // System.Private.* References
             var coreLibsPath = Path.Combine(config.IlcSdkPath, "sdk");
             foreach (var reference in Directory.EnumerateFiles(coreLibsPath, "*.dll"))
             {
-                argsList.Add($"-r \"{reference}\"");
+                argsList.Add($"-r");
+                argsList.Add($"{reference}");
             }
             
             // AppDep References
             foreach (var reference in config.ReferencePaths)
             {
-                argsList.Add($"-r \"{reference}\"");
+                argsList.Add($"-r");
+                argsList.Add($"{reference}");
             }
             
             // Set Output DetermineOutFile
             var outFile = DetermineOutputFile(config);
-            argsList.Add($"-out \"{outFile}\"");
+            argsList.Add($"-out");
+            argsList.Add($"{outFile}");
             
             // Add Mode Flag TODO
             if (config.NativeMode == NativeIntermediateMode.cpp)
@@ -74,14 +71,14 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 argsList.Add(config.IlcArgs);
             }
                         
-            this.ArgStr = string.Join(" ", argsList);
+            Args = argsList;
         }
-        
+
         public int Invoke()
         {
             var executablePath = Path.Combine(config.IlcPath, ExecutableName);
             
-            var result = Command.Create(executablePath, ArgStr)
+            var result = Command.Create(executablePath, Args)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();

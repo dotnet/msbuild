@@ -90,7 +90,18 @@ namespace Microsoft.DotNet.Tools.Run
             var tempDir = Path.Combine(_context.ProjectDirectory, "bin", ".dotnetrun", Guid.NewGuid().ToString("N"));
 
             // Compile to that directory
-            var result = Command.Create($"dotnet-build", $"--output \"{tempDir}\" --temp-output \"{tempDir}\" --framework \"{_context.TargetFramework}\" --configuration \"{Configuration}\" {_context.ProjectFile.ProjectDirectory}")
+            var result = Command.Create($"dotnet-build", new []
+                {
+                    $"--output",
+                    $"{tempDir}",
+                    $"--temp-output",
+                    $"{tempDir}",
+                    $"--framework",
+                    $"{_context.TargetFramework}",
+                    $"--configuration",
+                    $"{Configuration}",
+                    $"{_context.ProjectFile.ProjectDirectory}"
+                })
                 .ForwardStdOut(onlyIfVerbose: true)
                 .ForwardStdErr()
                 .Execute();
@@ -134,7 +145,7 @@ namespace Microsoft.DotNet.Tools.Run
                 }
             }
 
-            result = Command.Create(outputName, string.Join(" ", _args))
+            result = Command.Create(outputName, _args)
                 .ForwardStdOut()
                 .ForwardStdErr()
                 .EnvironmentVariable("DOTNET_HOME", runtime)
@@ -151,7 +162,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         private static int RunInteractive(string scriptName)
         {
-            var command = Command.Create($"dotnet-repl-csi", scriptName)
+            var command = Command.Create($"dotnet-repl-csi", new [] {scriptName})
                 .ForwardStdOut()
                 .ForwardStdErr();
             var result = command.Execute();

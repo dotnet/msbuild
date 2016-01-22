@@ -185,7 +185,7 @@ namespace Microsoft.DotNet.Tools.Restore
             Console.WriteLine($"Restoring Tool '{tooldep.Name}' for '{projectPath}' in '{tempPath}'");
 
             File.WriteAllText(projectPath, GenerateProjectJsonContents(new[] {"dnxcore50"}, tooldep));
-            NuGet3.Restore(new [] { $"\"{projectPath}\"", "--runtime", $"{DefaultRid}"}.Concat(args), quiet);
+            NuGet3.Restore(new [] { $"{projectPath}", "--runtime", $"{DefaultRid}"}.Concat(args), quiet);
         }
 
         private static string GenerateProjectJsonContents(IEnumerable<string> frameworks, LibraryRange tooldep)

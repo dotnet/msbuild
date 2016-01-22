@@ -6,16 +6,16 @@
   },
   "dependencies": {
     "NETStandard.Library": "1.0.0-rc2-23704",
-    "System.Threading.ThreadPool": "4.0.10-beta-23704",
+    "System.Threading.ThreadPool": "4.0.10-rc2-23704",
     "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23704",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
+    "Microsoft.DotNet.ProjectModel": {"target":"project"},
+    "Microsoft.DotNet.Compiler.Common": {"target":"project"},
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "type": "build",
       "version": "1.0.0-*"
     },
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-15935",
-    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15935",
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-16011",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16011",
     "Newtonsoft.Json": "7.0.1"
   },
   "frameworks": {

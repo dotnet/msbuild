@@ -119,7 +119,7 @@ Common Commands:
         {
             if (appArgs.Any())
             {
-                return Command.Create("dotnet-" + appArgs.First(), "--help")
+                return Command.Create("dotnet-" + appArgs.First(), new string[] { "--help" })
                     .ForwardStdErr()
                     .ForwardStdOut()
                     .Execute()

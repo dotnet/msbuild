@@ -1,43 +1,35 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
-using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Compiler.Native
 {
     public class LinuxCppCompileStep : IPlatformNativeStep
     {
-        private readonly string CompilerName = "clang-3.5";
-        private readonly string InputExtension = ".cpp";
+        private const string CompilerName = "clang-3.5";
+        private const string InputExtension = ".cpp";
 
         // TODO: debug/release support
-        private readonly string cLibsFlags = "-lm -ldl";
-        private readonly string cflags = "-g -lstdc++ -lrt -Wno-invalid-offsetof -pthread";
+        private readonly string [] _cLibsFlags = { "-lm", "-ldl"};
+        private readonly string [] _cflags = { "-g", "-lstdc++", "-lrt", "-Wno-invalid-offsetof", "-pthread"};
 
-        private readonly string[] IlcSdkLibs = new string[]
-        {
-            "libbootstrappercpp.a",
-            "libPortableRuntime.a",
-            "libSystem.Private.CoreLib.Native.a"
-        };
+        public IEnumerable<string> CompilerArgs { get; set; }
 
-        private readonly string[] appdeplibs = new string[]
-        {
-            "libSystem.Native.a"
-        };
+        private readonly string[] _ilcSdkLibs = 
+            {
+                "libbootstrappercpp.a",
+                "libPortableRuntime.a",
+                "libSystem.Private.CoreLib.Native.a"
+            };
 
-        
-        private string CompilerArgStr { get; set; }
-        private NativeCompileSettings config;
+        private readonly string[] _appdeplibs = 
+            {
+                "libSystem.Native.a"
+            };
 
         public LinuxCppCompileStep(NativeCompileSettings config)
         {
-            this.config = config;
             InitializeArgs(config);
         }
 
@@ -63,11 +55,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var argsList = new List<string>();
             
             // Flags
-            argsList.Add(cflags);
+            argsList.AddRange(_cflags);
 
             var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
             argsList.Add("-I");
-            argsList.Add($"\"{ilcSdkIncPath}\"");
+            argsList.Add($"{ilcSdkIncPath}");
 
             // Input File
             var inCppFile = DetermineInFile(config);
@@ -80,33 +72,26 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
             
             // ILC SDK Libs
-            var IlcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
-            foreach (var lib in IlcSdkLibs)
-            {
-                var libPath = Path.Combine(IlcSdkLibPath, lib);
-                argsList.Add(libPath);
-            }
+            var ilcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
+            argsList.AddRange(_ilcSdkLibs.Select(lib => Path.Combine(ilcSdkLibPath, lib)));
 
             // AppDep Libs
             var baseAppDeplibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04/x64");
-            foreach (var lib in appdeplibs)
-            {
-                var appDeplibPath = Path.Combine(baseAppDeplibPath, lib);
-                argsList.Add(appDeplibPath);
-            }
+            argsList.AddRange(_appdeplibs.Select(lib => Path.Combine(baseAppDeplibPath, lib)));
 
-            argsList.Add(cLibsFlags);
+            argsList.AddRange(_cLibsFlags);
             
             // Output
             var libOut = DetermineOutputFile(config);
-            argsList.Add($"-o \"{libOut}\"");
+            argsList.Add($"-o");
+            argsList.Add($"{libOut}");
 
-            this.CompilerArgStr = string.Join(" ", argsList);
+            CompilerArgs = argsList;
         }
 
         private int InvokeCompiler()
         {
-            var result = Command.Create(CompilerName, CompilerArgStr)
+            var result = Command.Create(CompilerName, CompilerArgs)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
