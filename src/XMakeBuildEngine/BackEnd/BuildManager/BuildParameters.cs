@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Globalization;
@@ -1008,7 +1009,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
             path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MSBuild.exe");
 #else
-            path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            path = Path.GetDirectoryName(typeof(BuildParameters).GetTypeInfo().Assembly.Location);
 #endif
             if (path != null && CheckMSBuildExeExistsAt(path))
             {
