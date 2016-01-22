@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static string EscapeAndConcatenateArgArray(IEnumerable<string> args)
+        public static string EscapeAndConcatenateArgArrayForProcessStart(IEnumerable<string> args)
         { 
             return string.Join(" ", EscapeArgArray(args));
         }

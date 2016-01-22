@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 command = args.FirstOrDefault();
                 args = args.Skip(1);
             }
-            var cmdEscapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForCmd(args);
+            var cmdEscapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForCmdProcessStart(args);
 
             if (ArgumentEscaper.ShouldSurroundWithQuotes(command))
             {

@@ -3,14 +3,14 @@
   "description": "Microsoft.DotNet.Tools.Tests.Utilities Class Library",
 
   "dependencies": {
-    "System.Collections": "4.0.11-rc2-*",
-    "System.Collections.Immutable": "1.1.38-rc2-*",
-    "System.Linq": "4.0.1-rc2-*",
-    "System.Threading": "4.0.11-rc2-*",
-    "System.IO.FileSystem": "4.0.1-rc2-*",
-    "System.IO": "4.0.11-rc2-*",
-    "System.Runtime.InteropServices": "4.0.21-rc2-*",
-    "System.Text.RegularExpressions": "4.0.11-rc2-*",
+    "System.Collections": "4.0.11-rc2-23714",
+    "System.Collections.Immutable": "1.1.38-rc2-23714",
+    "System.Linq": "4.0.1-rc2-23714",
+    "System.Threading": "4.0.11-rc2-23714",
+    "System.IO.FileSystem": "4.0.1-rc2-23714",
+    "System.IO": "4.0.11-rc2-23714",
+    "System.Runtime.InteropServices": "4.0.21-rc2-23714",
+    "System.Text.RegularExpressions": "4.0.11-rc2-23714",
     "FluentAssertions": "4.0.0",
     "xunit": "2.1.0",
 
