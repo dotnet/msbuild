@@ -60,7 +60,9 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                 // If the framework name is empty, the associated dependencies are shared by all frameworks
                 if (group.FrameworkName == null)
                 {
-                    actualDependencies = project.Dependencies.Select(RenderDependency).OrderBy(x => x);
+                    actualDependencies = project.Dependencies
+                        .Select(RenderDependency)
+                        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
                 }
                 else
                 {
@@ -71,7 +73,9 @@ namespace Microsoft.DotNet.ProjectModel.Graph
                         return false;
                     }
 
-                    actualDependencies = framework.Dependencies.Select(RenderDependency).OrderBy(x => x);
+                    actualDependencies = framework.Dependencies
+                        .Select(RenderDependency)
+                        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase);
                 }
 
                 if (!actualDependencies.SequenceEqual(expectedDependencies))
@@ -84,16 +88,6 @@ namespace Microsoft.DotNet.ProjectModel.Graph
             return true;
         }
 
-        private string RenderDependency(LibraryRange arg)
-        {
-            var name = arg.Name;
-
-            if (arg.Target == LibraryType.ReferenceAssembly)
-            {
-                name = $"fx/{name}";
-            }
-
-            return $"{name} {VersionUtility.RenderVersion(arg.VersionRange)}";
-        }
+        private string RenderDependency(LibraryRange arg) => $"{arg.Name} {VersionUtility.RenderVersion(arg.VersionRange)}";
     }
 }
