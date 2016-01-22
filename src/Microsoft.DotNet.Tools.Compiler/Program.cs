@@ -207,8 +207,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Assemble args
             var compilerArgs = new List<string>()
             {
-                $"--temp-output:{intermediateOutputPath}",
-                $"--out:{outputName}"
+                $"--temp-output:\"{intermediateOutputPath}\"",
+                $"--out:\"{outputName}\""
             };
 
             var compilationOptions = CompilerUtil.ResolveCompilationOptions(context, args.ConfigValue);
@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                     writer.Write(dependencyContext, fileStream);
                 }
 
-                compilerArgs.Add($"--resource:\"{depsJsonFile}\",{context.ProjectFile.Name}.deps.json");
+                compilerArgs.Add($"--resource:\"{depsJsonFile},{context.ProjectFile.Name}.deps.json\"");
 
                 var refsFolder = Path.Combine(outputPath, "refs");
                 if (Directory.Exists(refsFolder))
@@ -440,11 +440,11 @@ namespace Microsoft.DotNet.Tools.Compiler
                         return false;
                     }
 
-                    compilerArgs.Add($"--resource:\"{resgenFile.OutputFile}\",{Path.GetFileName(resgenFile.MetadataName)}");
+                    compilerArgs.Add($"--resource:\"{resgenFile.OutputFile},{Path.GetFileName(resgenFile.MetadataName)}\"");
                 }
                 else
                 {
-                    compilerArgs.Add($"--resource:\"{resgenFile.InputFile}\",{Path.GetFileName(resgenFile.MetadataName)}");
+                    compilerArgs.Add($"--resource:\"{resgenFile.InputFile},{Path.GetFileName(resgenFile.MetadataName)}\"");
                 }
             }
 

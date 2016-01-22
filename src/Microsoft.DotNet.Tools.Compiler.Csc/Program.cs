@@ -79,26 +79,28 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                 return returnCode;
             }
 
-            var translated = TranslateCommonOptions(commonOptions, outputName);
+            var translated = TranslateCommonOptions(commonOptions, outputName.Trim('"'));
 
             var allArgs = new List<string>(translated);
             allArgs.AddRange(GetDefaultOptions());
 
             // Generate assembly info
-            var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.cs");
+            var tempOutputStrippedSpaces = tempOutDir.Trim('"');
+            var assemblyInfo = Path.Combine(tempOutputStrippedSpaces, $"dotnet-compile.assemblyinfo.cs");
+            
             File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.Generate(assemblyInfoOptions, sources));
             allArgs.Add($"\"{assemblyInfo}\"");
 
             if (outputName != null)
             {
-                allArgs.Add($"-out:\"{outputName}\"");
+                allArgs.Add($"-out:\"{outputName.Trim('"')}\"");
             }
 
             allArgs.AddRange(references.Select(r => $"-r:\"{r.Trim('"')}\""));
             allArgs.AddRange(resources.Select(resource => $"-resource:{resource.Trim('"')}"));
             allArgs.AddRange(sources.Select(s => $"\"{s.Trim('"')}\""));
 
-            var rsp = Path.Combine(tempOutDir, "dotnet-compile-csc.rsp");
+            var rsp = Path.Combine(tempOutputStrippedSpaces, "dotnet-compile-csc.rsp");
 
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
 
@@ -192,7 +194,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
 
             if (options.GenerateXmlDocumentation == true)
             {
-                commonArgs.Add($"-doc:{Path.ChangeExtension(outputName, "xml")}");
+                commonArgs.Add($"-doc:\"{Path.ChangeExtension(outputName.Trim('"'), "xml")}\"");
             }
 
             if (options.EmitEntryPoint != true)

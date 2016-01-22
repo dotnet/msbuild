@@ -24,7 +24,6 @@ namespace Microsoft.DotNet.Cli.Utils
         private static CommandSpec ResolveFromPath(string commandName, IEnumerable<string> args, bool useComSpec = false)
         {
             var commandPath = Env.GetCommandPath(commandName);
-            if (commandPath != null) Console.WriteLine("path?");
             return commandPath == null 
                 ? null 
                 : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.Path, useComSpec);
@@ -33,7 +32,6 @@ namespace Microsoft.DotNet.Cli.Utils
         private static CommandSpec ResolveFromAppBase(string commandName, IEnumerable<string> args, bool useComSpec = false)
         {
             var commandPath = Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, commandName);
-            if (commandPath != null) Console.WriteLine("appbase?");
             return commandPath == null 
                 ? null 
                 : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.BaseDirectory, useComSpec);
@@ -43,8 +41,6 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (Path.IsPathRooted(commandName))
             {
-                Console.WriteLine("rooted?");
-
                 if (useComSpec)
                 {
                     return CreateComSpecCommandSpec(commandName, args, CommandResolutionStrategy.Path);
@@ -196,8 +192,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 fileName = Path.Combine(packageDir, commandPath);
             }
 
-            
-
             if (useComSpec)
             {
                 return CreateComSpecCommandSpec(fileName, args, CommandResolutionStrategy.NugetPackage);
@@ -256,7 +250,6 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> args, 
             CommandResolutionStrategy resolutionStrategy)
         {
-
             // To prevent Command Not Found, comspec gets passed in as
             // the command already in some cases
             var comSpec = Environment.GetEnvironmentVariable("ComSpec");
@@ -266,7 +259,13 @@ namespace Microsoft.DotNet.Cli.Utils
                 args = args.Skip(1);
             }
             var cmdEscapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForCmd(args);
-            var escapedArgString = $"/s /c \"\"{command}\" {cmdEscapedArgs}\"";
+
+            if (ArgumentEscaper.ShouldSurroundWithQuotes(command))
+            {
+                command = $"\"{command}\"";
+            }
+
+            var escapedArgString = $"/s /c \"{command} {cmdEscapedArgs}\"";
 
             return new CommandSpec(comSpec, escapedArgString, resolutionStrategy);
         }

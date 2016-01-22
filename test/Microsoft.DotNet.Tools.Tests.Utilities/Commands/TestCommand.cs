@@ -44,10 +44,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             var commandPath = Env.GetCommandPath(_command, ".exe", ".cmd", "") ??
                 Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, _command, ".exe", ".cmd", "");
-
-            Console.Write("command");
-            Console.WriteLine(commandPath);
-
+                
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
 

@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var scriptArguments = CommandGrammar.Process(
                 scriptCommandLine,
                 GetScriptVariable(project, getVariable),
-                preserveSurroundingQuotes: false);
+                preserveSurroundingQuotes: true);
 
             // Ensure the array won't be empty and the elements won't be null or empty strings.
             scriptArguments = scriptArguments.Where(argument => !string.IsNullOrEmpty(argument)).ToArray();
@@ -59,12 +59,14 @@ namespace Microsoft.DotNet.Cli.Utils
             else
             {
                 // Special-case a script name that, perhaps with added .sh, matches an existing file.
+                var surroundWithQuotes = false;
                 var scriptCandidate = scriptArguments[0];
                 if (scriptCandidate.StartsWith("\"", StringComparison.Ordinal) &&
                     scriptCandidate.EndsWith("\"", StringComparison.Ordinal))
                 {
                     // Strip surrounding quotes; they were required in project.json to keep the script name
                     // together but confuse File.Exists() e.g. "My Script", lacking ./ prefix and .sh suffix.
+                    surroundWithQuotes = true;
                     scriptCandidate = scriptCandidate.Substring(1, scriptCandidate.Length - 2);
                 }
 
@@ -78,22 +80,16 @@ namespace Microsoft.DotNet.Cli.Utils
                     // scriptCandidate may be a path relative to the project root. If so, likely will not be found
                     // in the $PATH; add ./ to let bash know where to look.
                     var prefix = Path.IsPathRooted(scriptCandidate) ? string.Empty : "./";
-                    scriptArguments[0] = $"{prefix}{scriptCandidate}";
+                    var quote = surroundWithQuotes ? "\"" : string.Empty;
+                    scriptArguments[0] = $"{ quote }{ prefix }{ scriptCandidate }{ quote }";
                 }
 
                 // Always use /usr/bin/env bash -c in order to support redirection and so on; similar to Windows case.
                 // Unlike Windows, must escape quotation marks within the newly-quoted string.
-                
-                // TODO change this back to original, not doing anything special for bash
-                var bashArgs = ArgumentEscaper.EscapeArgArrayForBash(scriptArguments);
-
-                List<string> concatenatedArgs = new List<string>();
-                concatenatedArgs.Add("/usr/bin/env");
-                concatenatedArgs.Add("bash");
-                concatenatedArgs.Add("-c");
-                concatenatedArgs.AddRange(bashArgs);
-                    
-                scriptArguments = concatenatedArgs.ToArray();
+                scriptArguments = new[] { "/usr/bin/env", "bash", "-c", "\"" }
+                    .Concat(scriptArguments.Select(argument => argument.Replace("\"", "\\\"")))
+                    .Concat(new[] { "\"" })
+                    .ToArray();
             }
 
             return Command.Create(scriptArguments.FirstOrDefault(), scriptArguments.Skip(1), useComSpec: useComSpec)
