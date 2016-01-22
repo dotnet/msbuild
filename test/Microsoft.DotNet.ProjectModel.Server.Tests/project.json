@@ -1,10 +1,10 @@
 {
   "dependencies": {
     "Microsoft.NETCore.Platforms": "1.0.1-rc2-23704",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.ProjectModel.Server": "1.0.0-*",
+    "Microsoft.DotNet.ProjectModel": {"target":"project"},
+    "Microsoft.DotNet.ProjectModel.Server": {"target":"project"},
     "Newtonsoft.Json": "7.0.1",
-    "xunit.runner.aspnet": "2.0.0-aspnet-*"
+    "xunit.runner.aspnet": "2.0.0-aspnet-rc2-16068"
   },
   "frameworks": {
     "dnxcore50": { }
