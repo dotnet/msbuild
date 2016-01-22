@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests
         /// Ensures that calling the Exec task does not leave any extra TEMP files
         /// lying around.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "Unreliable when run on a shared machine.")]
         public void NoTempFileLeaks()
         {
             // Get a count of how many temp files there are right now.
