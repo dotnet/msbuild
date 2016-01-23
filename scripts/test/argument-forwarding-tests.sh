@@ -21,8 +21,8 @@ ArgTestRoot="$REPOROOT/test/ArgumentForwardingTests"
 ArgTestOutputRoot="$REPOROOT/artifacts/tests/arg-forwarding"
 ArgTestBin="$ArgTestOutputRoot/$CONFIGURATION/dnxcore50"
 
-dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$ArgTestOutputRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/Reflector"
-dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$ArgTestOutputRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/ArgumentForwardingTests"
+dotnet publish --framework "dnxcore50" --output "$ArgTestOutputRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/Reflector"
+dotnet publish --framework "dnxcore50" --output "$ArgTestOutputRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/ArgumentForwardingTests"
 
 
 
