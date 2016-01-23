@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         protected static void AssertProjectSkipped(string skippedProject, CommandResult buildResult)
         {
-            Assert.Contains($"Project {skippedProject} was previoulsy compiled. Skipping compilation.", buildResult.StdOut);
+            Assert.Contains($"Project {skippedProject} was previoulsy compiled. Skipping compilation.", buildResult.StdOut, StringComparison.OrdinalIgnoreCase);
         }
 
         protected static void AssertProjectCompiled(string rebuiltProject, CommandResult buildResult)

@@ -13,9 +13,6 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class IncrementalTests : IncrementalTestBase
     {
-        private string _testProjectsRoot = @"TestProjects";
-        private string _testProject = "TestProjectToProjectDependencies";
-        private TempDirectory tempProjectRoot;
 
         public IncrementalTests() : base(
             Path.Combine("TestProjects", "TestSimpleIncrementalApp"),

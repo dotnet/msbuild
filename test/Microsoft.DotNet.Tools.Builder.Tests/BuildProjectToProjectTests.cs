@@ -15,10 +15,6 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
     {
         private string[] _projects = new[] { "L0", "L11", "L12", "L21", "L22" };
 
-        private string _testProjectsRoot = @"TestProjects";
-        private string _testProject = "TestProjectToProjectDependencies";
-        private TempDirectory tempProjectRoot;
-
         public ProjectToProjectDependenciesIncrementalTest() : base(
             Path.Combine("TestProjects", "TestProjectToProjectDependencies"),
             "L0",
