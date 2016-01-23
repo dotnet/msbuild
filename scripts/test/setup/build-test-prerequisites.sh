@@ -12,11 +12,14 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   SOURCE="$(readlink "$SOURCE")"
   [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
+
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/../common/_common.sh"
+source "$DIR/../../common/_common.sh"
 
-header "Restoring packages"
+mkdir -p "$TEST_PACKAGE_DIR"
 
-dotnet restore "$REPOROOT/src" --runtime "$RID"
-dotnet restore "$REPOROOT/tools" --runtime "$RID"
+for project in loadTestPackageList()
+do
+    dotnet pack "$REPOROOT/test/TestPackages/$project" --output "$TEST_PACKAGE_DIR"
+done

@@ -22,24 +22,7 @@ source "$DIR/../common/_common.sh"
 [ ! -z "$OUTPUT_DIR" ] || die "Missing required environment variable OUTPUT_DIR"
 [ ! -z "$HOST_DIR" ] || die "Missing required environment variable HOST_DIR"
 
-PROJECTS=( \
-    dotnet \
-    dotnet-build \
-    dotnet-compile \
-    dotnet-compile-csc \
-    dotnet-compile-fsc \
-    dotnet-compile-native \
-    dotnet-new \
-    dotnet-pack \
-    dotnet-projectmodel-server \
-    dotnet-publish \
-    dotnet-repl \
-    dotnet-repl-csi \
-    dotnet-restore \
-    dotnet-resgen \
-    dotnet-run \
-    dotnet-test \
-)
+PROJECTS=$(loadBuildProjectList)
 
 BINARIES_FOR_COREHOST=( \
     csi \
@@ -57,7 +40,7 @@ FILES_TO_CLEAN=( \
 
 RUNTIME_OUTPUT_DIR="$OUTPUT_DIR/runtime/coreclr"
 
-for project in ${PROJECTS[@]}
+for project in $PROJECTS
 do
     echo dotnet publish --native-subdirectory --framework "$TFM" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"
     dotnet publish --native-subdirectory --framework "$TFM" --output "$OUTPUT_DIR/bin" --configuration "$CONFIGURATION" "$REPOROOT/src/$project"

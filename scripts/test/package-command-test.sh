@@ -17,28 +17,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-TestPackagesPath="$REPOROOT/artifacts/tests/package-command-test/packages" 
-
-mkdir -p "$TestPackagesPath"
-
-dotnet pack "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello"
-cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v1/dotnet-hello/bin/Debug/"*.nupkg "$TestPackagesPath"
-dotnet pack "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello"
-cp "$REPOROOT/test/PackagedCommands/Commands/dotnet-hello/v2/dotnet-hello/bin/Debug/"*.nupkg "$TestPackagesPath"
-
-# enable restore for test projects
-for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "AppWith") 
-do
-    pushd "$REPOROOT/test/PackagedCommands/Consumers/$test"
-    cp "project.json.template" "project.json"
-    popd
-done
-
-# restore test projects
-pushd "$REPOROOT/test/PackagedCommands/Consumers"
-dotnet restore -s "$TestPackagesPath"
-popd
-
 #compile tests with direct dependencies
 for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "Direct") 
 do

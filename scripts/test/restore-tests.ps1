@@ -5,9 +5,8 @@
 
 . $PSScriptRoot\..\common\_common.ps1
 
-# Restore packages
-# NOTE(anurse): I had to remove --quiet, because NuGet3 is too quiet when that's provided :(
-header "Restoring packages"
+info "Restoring Test Projects"
 
-& dotnet restore "$RepoRoot\src" --runtime "$Rid"
-& dotnet restore "$RepoRoot\tools" --runtime "$Rid"
+# Restore packages
+& dotnet restore "$RepoRoot\test" -f "$TestPackageDir"
+

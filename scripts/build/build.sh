@@ -19,11 +19,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/../common/_common.sh"
 source "$REPOROOT/scripts/build/generate-version.sh"
 
-## Temporarily redirect to the NuGet package installation location
-export NUGET_PACKAGES=~/.nuget/packages
-export DOTNET_PACKAGES=$NUGET_PACKAGES
-export DNX_PACKAGES=$NUGET_PACKAGES
-
 header "Building dotnet tools version $DOTNET_CLI_VERSION - $CONFIGURATION"
 header "Checking Pre-Reqs"
 
@@ -55,8 +50,8 @@ $REPOROOT/scripts/compile/compile.sh
 header "Setting Stage2 as PATH, DOTNET_HOME, and DOTNET_TOOLS"
 export DOTNET_HOME=$STAGE2_DIR && export DOTNET_TOOLS=$STAGE2DIR && export PATH=$STAGE2_DIR/bin:$PATH 
 
-header "Running Tests"
-$REPOROOT/scripts/test/runtests.sh
+header "Testing"
+$REPOROOT/scripts/test/test.sh
 
 header "Validating Dependencies"
 $REPOROOT/scripts/test/validate-dependencies.sh

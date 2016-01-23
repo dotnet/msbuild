@@ -1,0 +1,5 @@
+E2E
+StreamForwarderTests
+dotnet-publish.Tests
+dotnet-compile.Tests
+dotnet-build.Tests

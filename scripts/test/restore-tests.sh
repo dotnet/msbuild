@@ -16,7 +16,10 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-header "Restoring packages"
+header "Restoring Test Packages"
 
-dotnet restore "$REPOROOT/src" --runtime "$RID"
-dotnet restore "$REPOROOT/tools" --runtime "$RID"
+dotnet restore "$REPOROOT/test" -f "$TEST_PACKAGE_DIR"
+
+set +e
+dotnet restore "$REPOROOT/testapp" >/dev/null 2>&1
+set -e

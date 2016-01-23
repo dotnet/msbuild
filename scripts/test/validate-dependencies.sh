@@ -14,7 +14,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/../common/_common.sh"
+. "$DIR/../common/_common.sh"
 
 # Run Validation for Project.json dependencies
 dotnet publish "$REPOROOT/tools/MultiProjectValidator" -o "$STAGE2_DIR/../tools" -c "$CONFIGURATION"

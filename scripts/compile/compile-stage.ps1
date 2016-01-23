@@ -12,30 +12,10 @@ param(
     [Parameter(Mandatory=$true)][string]$HostDir,
     [Parameter(Mandatory=$true)][string]$CompilationOutputDir)
 
+. $PSScriptRoot\..\common\_common.ps1
 . $REPOROOT\scripts\package\projectsToPack.ps1
 
-$Projects = @(
-    "dotnet",
-    "dotnet-build",
-    "dotnet-compile",
-    "dotnet-compile-csc",
-    "dotnet-compile-fsc",
-    "dotnet-compile-native",
-    "dotnet-new",
-    "dotnet-pack",
-    "dotnet-projectmodel-server",
-    "dotnet-publish",
-    "dotnet-restore",
-    "dotnet-repl",
-    "dotnet-repl-csi",
-    "dotnet-resgen",
-    "dotnet-run",
-    "dotnet-test",
-    "Microsoft.DotNet.Cli.Utils",
-    "Microsoft.DotNet.ProjectModel.Loader",
-    "Microsoft.DotNet.ProjectModel.Workspaces",
-    "Microsoft.Extensions.Testing.Abstractions"
-)
+$Projects = loadBuildProjectList
 
 $BinariesForCoreHost = @(
     "csi"
@@ -55,9 +35,9 @@ $RuntimeOutputDir = "$OutputDir\runtime\coreclr"
 
 # Publish each project
 $Projects | ForEach-Object {
-    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$($_.ProjectName)"
     if (!$?) {
-        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$($_.ProjectName)"
         exit 1
     }
 }

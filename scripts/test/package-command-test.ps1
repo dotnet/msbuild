@@ -5,40 +5,6 @@
 
 . "$PSScriptRoot\..\common\_common.ps1"
 
-$TestPackagesPath = "$RepoRoot\artifacts\tests\package-command-test\packages"
-
-if((Test-Path $TestPackagesPath) -eq 0)
-{
-    mkdir $TestPackagesPath;
-}
-
-"v1", "v2" |
-foreach {
-    dotnet pack "$RepoRoot\test\PackagedCommands\Commands\dotnet-hello\$_\dotnet-hello"
-    cp "$RepoRoot\test\PackagedCommands\Commands\dotnet-hello\$_\dotnet-hello\bin\Debug\*.nupkg" -Destination $TestPackagesPath
-    if (!$?) {
-        error "Command failed: dotnet pack"
-        Exit 1
-    }
-}
-
-# workaround for dotnet-restore from the root failing for these tests since their dependencies aren't built yet
-dir "$RepoRoot\test\PackagedCommands\Consumers" | where {$_.PsIsContainer} |
-foreach {
-    pushd "$RepoRoot\test\PackagedCommands\Consumers\$_"
-    copy project.json.template project.json
-    popd
-}
-
-#restore test projects
-pushd "$RepoRoot\test\PackagedCommands\Consumers"
-dotnet restore -s "$TestPackagesPath"
-if (!$?) {
-    error "Command failed: dotnet restore"
-    Exit 1
-}
-popd
-
 #compile apps
 dir "$RepoRoot\test\PackagedCommands\Consumers" | where {$_.PsIsContainer} | where {$_.Name.Contains("Direct")} |
 foreach {
