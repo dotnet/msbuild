@@ -12,6 +12,8 @@ param(
     [Parameter(Mandatory=$true)][string]$HostDir,
     [Parameter(Mandatory=$true)][string]$CompilationOutputDir)
 
+. $REPOROOT\scripts\package\projectsToPack.ps1
+
 $Projects = @(
     "Microsoft.DotNet.Cli",
     "Microsoft.DotNet.Cli.Utils",
@@ -32,16 +34,6 @@ $Projects = @(
     "Microsoft.DotNet.Tools.Resgen",
     "Microsoft.DotNet.Tools.Run",
     "Microsoft.DotNet.Tools.Test",
-    "Microsoft.Extensions.Testing.Abstractions"
-)
-
-# We need to keep the building of these projects in a separate step so that they can be signed.
-$ProjectsToPack = @(
-    "Microsoft.DotNet.Cli.Utils",
-    "Microsoft.DotNet.ProjectModel",
-    "Microsoft.DotNet.ProjectModel.Loader",
-    "Microsoft.DotNet.ProjectModel.Workspaces",
-    "Microsoft.Extensions.DependencyModel",
     "Microsoft.Extensions.Testing.Abstractions"
 )
 
