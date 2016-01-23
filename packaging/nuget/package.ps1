@@ -14,22 +14,14 @@ if ($versionSuffix -ne "") {
 }
 
 . "$PSScriptRoot\..\..\scripts\common\_common.ps1"
+. "$REPOROOT\scripts\package\projectsToPack.ps1"
 
 $IntermediatePackagesDir = "$RepoRoot\artifacts\packages\intermediate"
 $PackagesDir = "$RepoRoot\artifacts\packages"
 
 New-Item -ItemType Directory -Force -Path $IntermediatePackagesDir
 
-$Projects = @(
-    "Microsoft.DotNet.Cli.Utils",
-    "Microsoft.DotNet.ProjectModel",
-    "Microsoft.DotNet.ProjectModel.Loader",
-    "Microsoft.DotNet.ProjectModel.Workspaces",
-    "Microsoft.Extensions.DependencyModel",
-    "Microsoft.Extensions.Testing.Abstractions"
-)
-
-foreach ($ProjectName in $Projects) {
+foreach ($ProjectName in $ProjectsToPack) {
     $ProjectFile = "$RepoRoot\src\$ProjectName\project.json"
 
     & $toolsDir\dotnet pack "$ProjectFile" --basepath "$Stage2CompilationDir\bin" --output "$IntermediatePackagesDir" --configuration "$Configuration" $versionArg

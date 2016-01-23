@@ -12,6 +12,8 @@ param(
     [Parameter(Mandatory=$true)][string]$HostDir,
     [Parameter(Mandatory=$true)][string]$CompilationOutputDir)
 
+. $REPOROOT\scripts\package\projectsToPack.ps1
+
 $Projects = @(
     "Microsoft.DotNet.Cli",
     "Microsoft.DotNet.Cli.Utils",
@@ -90,6 +92,15 @@ if (! (Test-Path $runtimeBinariesOutputDir)) {
 }
 
 cp $runtimeBinariesOutputDir\* $RuntimeOutputDir -force -recurse
+
+# Build the projects that we are going to ship as nuget packages
+$ProjectsToPack | ForEach-Object {
+    dotnet build --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+    if (!$?) {
+        Write-Host Command failed: dotnet build --native-subdirectory --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+        exit 1
+    }
+}
 
 # Clean up bogus additional files
 $FilesToClean | ForEach-Object {
