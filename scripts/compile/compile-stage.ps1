@@ -35,6 +35,16 @@ $Projects = @(
     "Microsoft.Extensions.Testing.Abstractions"
 )
 
+# We need to keep the building of these projects in a separate step so that they can be signed.
+$ProjectsToPack = @(
+    "Microsoft.DotNet.Cli.Utils",
+    "Microsoft.DotNet.ProjectModel",
+    "Microsoft.DotNet.ProjectModel.Loader",
+    "Microsoft.DotNet.ProjectModel.Workspaces",
+    "Microsoft.Extensions.DependencyModel",
+    "Microsoft.Extensions.Testing.Abstractions"
+)
+
 $BinariesForCoreHost = @(
     "csi"
     "csc"
@@ -90,6 +100,15 @@ if (! (Test-Path $runtimeBinariesOutputDir)) {
 }
 
 cp $runtimeBinariesOutputDir\* $RuntimeOutputDir -force -recurse
+
+# Build the projects that we are going to ship as nuget packages
+$ProjectsToPack | ForEach-Object {
+    dotnet build --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+    if (!$?) {
+        Write-Host Command failed: dotnet build --native-subdirectory --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+        exit 1
+    }
+}
 
 # Clean up bogus additional files
 $FilesToClean | ForEach-Object {
