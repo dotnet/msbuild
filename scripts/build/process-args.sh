@@ -22,9 +22,6 @@ do
     "nopackage" | "--nopackage")
         export NOPACKAGE=true
         ;;
-    "nocache" | "--nocache")
-        export NOCACHE=--No-Cache
-        ;;
     "--buildindocker-ubuntu")
         export BUILD_IN_DOCKER=true
         export DOCKER_OS=ubuntu

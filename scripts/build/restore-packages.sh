@@ -18,9 +18,9 @@ source "$DIR/../common/_common.sh"
 
 header "Restoring packages"
 
-$DNX_ROOT/dnu restore "$REPOROOT/src" --quiet "$NOCACHE"
-$DNX_ROOT/dnu restore "$REPOROOT/test" --quiet "$NOCACHE"
-$DNX_ROOT/dnu restore "$REPOROOT/tools" --quiet "$NOCACHE"
+$DNX_ROOT/dnu restore "$REPOROOT/src" --quiet
+$DNX_ROOT/dnu restore "$REPOROOT/test" --quiet
+$DNX_ROOT/dnu restore "$REPOROOT/tools" --quiet
 set +e
-$DNX_ROOT/dnu restore "$REPOROOT/testapp" --quiet "$NOCACHE" >/dev/null 2>&1
+$DNX_ROOT/dnu restore "$REPOROOT/testapp" --quiet >/dev/null 2>&1
 set -e

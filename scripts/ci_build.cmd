@@ -5,6 +5,6 @@ REM Licensed under the MIT license. See LICENSE file in the project root for ful
 
 set CI_BUILD=1
 
-CALL %~dp0..\build.cmd -NoCache %*
+CALL %~dp0..\build.cmd %*
 
 exit /b %errorlevel%
