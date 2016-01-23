@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
 {
     public class ArgumentForwardingTests : TestBase
     {
-        private static readonly string s_reflectorExeName = "reflector" + Constants.ExeSuffix;
+        private static readonly string s_reflectorExeName = "Reflector" + Constants.ExeSuffix;
         private static readonly string s_reflectorCmdName = "reflector_cmd";
 
         private string ReflectorPath { get; set; }
@@ -106,6 +106,11 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         [InlineData(@"a\""b \\ cd ""\e f\"" \\""\\\")]
         public void TestArgumentForwardingCmd(string testUserArgument)
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
             // Get Baseline Argument Evaluation via Reflector
             // This does not need to be different for cmd because
             // it only establishes what the string[] args should be
@@ -247,6 +252,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             };
 
             proc.Start();
+            proc.WaitForExit();
             var stdOut = proc.StandardOutput.ReadToEnd();
 
             Assert.Equal(0, proc.ExitCode);

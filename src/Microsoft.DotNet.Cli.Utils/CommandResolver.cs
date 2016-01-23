@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
                 else
                 {
-                    var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArray(args);
+                    var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
                     return new CommandSpec(commandName, escapedArgs, CommandResolutionStrategy.Path);
                 }
                 
@@ -198,7 +198,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             else
             {
-                var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArray(args);
+                var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
                 return new CommandSpec(fileName, escapedArgs, CommandResolutionStrategy.NugetPackage);
             }
 
@@ -240,7 +240,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             else
             {
-                var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArray(args);
+                var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
                 return new CommandSpec(commandPath, escapedArgs, resolutionStrategy);
             }
         }

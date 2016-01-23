@@ -17,14 +17,15 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-ArgTestRoot = "$REPOROOT/test/ArgumentForwardingTests"
-ArgTestBinRoot="$REPOROOT/artifacts/tests/arg-forwarding"
+ArgTestRoot="$REPOROOT/test/ArgumentForwardingTests"
+ArgTestOutputRoot="$REPOROOT/artifacts/tests/arg-forwarding"
+ArgTestBin="$ArgTestOutputRoot/$CONFIGURATION/dnxcore50"
 
-dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$ArgTestBinRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/Reflector"
-dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$ArgTestBinRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/ArgumentForwardingTests"
+dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$ArgTestOutputRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/Reflector"
+dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$ArgTestOutputRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/ArgumentForwardingTests"
 
-cp "$ArgTestRoot/Reflector/reflector_cmd.cmd" "$ArgTestBinRoot"
 
-pushd $TestBinRoot
-./corerun "xunit.console.netcore.exe" "ArgumentForwardingTests.dll" -xml "ArgumentForwardingTests-testResults.xml" -notrait category=failing
+
+pushd "$ArgTestBin"
+    ./corerun "xunit.console.netcore.exe" "ArgumentForwardingTests.dll" -xml "ArgumentForwardingTests-testResults.xml" -notrait category=failing
 popd

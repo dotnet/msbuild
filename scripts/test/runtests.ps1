@@ -74,9 +74,8 @@ $TestScripts | ForEach-Object {
     $exitCode = $LastExitCode
     if ($exitCode -ne 0) {
         $failingTests += "$_"
+        $failCount += 1
     }
-
-    $failCount += 1
 }
 
 if ($failCount -ne 0) {

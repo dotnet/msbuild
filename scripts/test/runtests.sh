@@ -67,9 +67,9 @@ for script in ${TestScripts[@]}
 do
     "$REPOROOT/scripts/test/$script"
     exitCode=$?
-    failCount+=1
     if [ $exitCode -ne 0 ]; then
         failedTests+=($script)
+        failCount+=1
     fi
 done
 

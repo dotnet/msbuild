@@ -175,6 +175,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
+        [ActiveIssue(982)]
         public void PublishScriptsRun()
         {
             // create unique directories in the 'temp' folder

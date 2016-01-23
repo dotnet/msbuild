@@ -8,23 +8,24 @@
 $TestPackagesPath = "$RepoRoot\tests\packages"
 
 $ArgTestRoot = "$RepoRoot\test\ArgumentForwardingTests"
-$ArgTestBinRoot = "$RepoRoot\artifacts\tests\arg-forwarding"
+$ArgTestOutputRoot = "$RepoRoot\artifacts\tests\arg-forwarding"
+$ArgTestBin = "$ArgTestOutputRoot\$Configuration\dnxcore50"
 
-dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestBinRoot" --configuration "$Configuration" "$ArgTestRoot\Reflector"
+dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestOutputRoot" --configuration "$Configuration" "$ArgTestRoot\Reflector"
 if (!$?) {
-    Write-Host Command failed: dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestBinRoot" --configuration "$Configuration" "$ArgTestRoot\Reflector"
+    Write-Host Command failed: dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestOutputRoot" --configuration "$Configuration" "$ArgTestRoot\Reflector"
     Exit 1
 }
 
-dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestBinRoot" --configuration "$Configuration" "$ArgTestRoot\ArgumentForwardingTests"
+dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestOutputRoot" --configuration "$Configuration" "$ArgTestRoot\ArgumentForwardingTests"
 if (!$?) {
-    Write-Host Command failed: dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestBinRoot" --configuration "$Configuration" "$ArgTestRoot\ArgumentForwardingTests"
+    Write-Host Command failed: dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestOutputRoot" --configuration "$Configuration" "$ArgTestRoot\ArgumentForwardingTests"
     Exit 1
 }
 
-cp "$ArgTestRoot\Reflector\reflector_cmd.cmd" "$ArgTestBinRoot"
+cp "$ArgTestRoot\Reflector\reflector_cmd.cmd" "$ArgTestBin"
 
-pushd $ArgTestBinRoot
+pushd "$ArgTestBin"
 
 & ".\corerun" "xunit.console.netcore.exe" "ArgumentForwardingTests.dll" -xml "$_-testResults.xml" -notrait category=failing
 $exitCode = $LastExitCode

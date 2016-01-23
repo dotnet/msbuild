@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static string EscapeAndConcatenateArgArrayForCmd(IEnumerable<string> args)
+        public static string EscapeAndConcatenateArgArrayForCmdProcessStart(IEnumerable<string> args)
         {
             return string.Join(" ", EscapeArgArrayForCmd(args));
         }

@@ -3,9 +3,6 @@
   
   "dependencies": {
     "NETStandard.Library": "1.0.0-rc2-23704",
-    "Microsoft.NETCore.TestHost" : "1.0.0-*",
-
-    "NETStandard.Library": "1.0.0-rc2-23704",
     "Microsoft.NETCore.TestHost" : "1.0.0-rc2-23704",
 
     "xunit": "2.1.0",
