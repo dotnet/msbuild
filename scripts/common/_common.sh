@@ -32,7 +32,6 @@ export CHANNEL=$RELEASE_SUFFIX
 [ -z "$DOTNET_CLI_VERSION" ] && export DOTNET_CLI_VERSION=0.1.0.0
 [ -z "$DOTNET_HOME" ] && export DOTNET_HOME=$STAGE2_DIR && export PATH=$STAGE2_DIR/bin:$PATH
 [ -z "$CONFIGURATION" ] && export CONFIGURATION=Debug
-[ -z "$NOCACHE" ] && export NOCACHE=""
 
 unset COMMONSOURCE
 unset COMMONDIR

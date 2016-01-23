@@ -3,24 +3,13 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-param(
-    [string]$NoCache="")
-
 . $PSScriptRoot\..\common\_common.ps1
-
-if ($NoCache -eq "True") {
-    $NoCacheArg = "--no-cache"
-    info "Bypassing NuGet Cache"
-}
-else {
-    $NoCacheArg = ""
-}
 
 # Restore packages
 header "Restoring packages"
-& "$DnxRoot\dnu" restore "$RepoRoot\src" --quiet --runtime "$Rid" "$NoCacheArg"
-& "$DnxRoot\dnu" restore "$RepoRoot\test" --quiet --runtime "$Rid" "$NoCacheArg"
-& "$DnxRoot\dnu" restore "$RepoRoot\tools" --quiet --runtime "$Rid" "$NoCacheArg"
+& "$DnxRoot\dnu" restore "$RepoRoot\src" --quiet --runtime "$Rid"
+& "$DnxRoot\dnu" restore "$RepoRoot\test" --quiet --runtime "$Rid"
+& "$DnxRoot\dnu" restore "$RepoRoot\tools" --quiet --runtime "$Rid"
 
 $oldErrorAction=$ErrorActionPreference
 $ErrorActionPreference="SilentlyContinue"

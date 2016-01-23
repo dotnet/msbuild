@@ -41,7 +41,6 @@ export DOTNET_BUILD_CONTAINER_NAME="$container_name"
 
 if [[ "$OSNAME" == "ubuntu" ]]; then
     export PACKAGE_IN_DOCKER="true"
-    export NOCACHE="--no-cache"
     unset BUILD_IN_DOCKER
 
     $SCRIPT_DIR/../build.sh $@
