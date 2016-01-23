@@ -10,6 +10,6 @@ $StartPath = $env:PATH
 $env:PATH = "$Stage1Dir\bin;$env:PATH"
 
 # Compile
-_ "$RepoRoot\scripts\compile\compile-stage.ps1" @("$Tfm","$Rid","$Configuration","$Stage2Dir","$RepoRoot","$HostDir")
+_ "$RepoRoot\scripts\compile\compile-stage.ps1" @("$Tfm","$Rid","$Configuration","$Stage2Dir","$RepoRoot","$HostDir", "$Stage2CompilationDir")
 
 $env:PATH=$StartPath

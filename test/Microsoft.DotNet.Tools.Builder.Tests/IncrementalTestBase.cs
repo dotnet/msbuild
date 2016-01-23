@@ -100,13 +100,20 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         private string GetOutputFileForProject(string projectName)
         {
-            return Path.Combine(GetBinDirectory(), projectName + ".dll");
+            return Path.Combine(GetCompilationOutputPath(), projectName + ".dll");
         }
 
         private IEnumerable<string> GetSourceFilesForProject(string projectName)
         {
             return Directory.EnumerateFiles(GetProjectDirectory(projectName)).
                 Where(f => f.EndsWith(".cs"));
+        }
+
+        protected string GetCompilationOutputPath()
+        {
+            var executablePath = Path.Combine(GetBinDirectory(), "Debug", "dnxcore50");
+
+            return executablePath;
         }
 
         private void RunRestore(string args)

@@ -58,9 +58,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 string.Equals("on", val, StringComparison.OrdinalIgnoreCase));
         }
 
-        protected void TestOutputExecutable(string outputDir, string executableName, string expectedOutput)
+        protected void TestOutputExecutable(
+            string outputDir,
+            string executableName,
+            string expectedOutput,
+            bool native = false)
         {
-            var executablePath = Path.Combine(outputDir, executableName);
+            var executablePath = Path.Combine(GetCompilationOutputPath(outputDir, native), executableName);
 
             var executableCommand = new TestCommand(executablePath);
 
@@ -69,6 +73,22 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             result.Should().HaveStdOut(expectedOutput);
             result.Should().NotHaveStdErr();
             result.Should().Pass();
+        }
+
+        protected void TestNativeOutputExecutable(string outputDir, string executableName, string expectedOutput)
+        {
+            TestOutputExecutable(outputDir, executableName, expectedOutput, true);
+        }
+
+        protected string GetCompilationOutputPath(string outputDir, bool native)
+        {
+            var executablePath = Path.Combine(outputDir, "Debug", "dnxcore50");
+            if (native)
+            {
+                executablePath = Path.Combine(outputDir, "Debug", "dnxcore50", "native");
+            }
+
+            return executablePath;
         }
     }
 }

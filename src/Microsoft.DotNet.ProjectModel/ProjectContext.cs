@@ -147,5 +147,10 @@ namespace Microsoft.DotNet.ProjectModel
             }
             return outDir;
         }
+
+        public OutputPathCalculator GetOutputPathCalculator(string rootOutputPath)
+        {
+            return new OutputPathCalculator(this, rootOutputPath);
+        }
     }
 }

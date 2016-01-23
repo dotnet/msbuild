@@ -32,11 +32,11 @@ $Projects = @(
 foreach ($ProjectName in $Projects) {
     $ProjectFile = "$RepoRoot\src\$ProjectName\project.json"
 
-    & $toolsDir\dotnet pack "$ProjectFile" --basepath "$Stage2Dir\bin" --output "$IntermediatePackagesDir" $versionArg
+    & $toolsDir\dotnet pack "$ProjectFile" --basepath "$Stage2CompilationDir\bin" --output "$IntermediatePackagesDir" --configuration "$Configuration" $versionArg
     if (!$?) {
         Write-Host "$toolsDir\dotnet pack failed for: $ProjectFile"
         Exit 1
     }
 }
 
-Get-ChildItem $IntermediatePackagesDir -Filter *.nupkg | ? {$_.Name -NotLike "*.symbols.nupkg"} | Copy-Item -Destination $PackagesDir
+Get-ChildItem $IntermediatePackagesDir\$Configuration -Filter *.nupkg | ? {$_.Name -NotLike "*.symbols.nupkg"} | Copy-Item -Destination $PackagesDir

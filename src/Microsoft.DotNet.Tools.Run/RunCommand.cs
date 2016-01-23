@@ -101,7 +101,9 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             // Now launch the output and give it the results
-            var outputName = Path.Combine(tempDir, _context.ProjectFile.Name + Constants.ExeSuffix);
+            var outputName = Path.Combine(
+                _context.GetOutputPathCalculator(tempDir).GetCompilationOutputPath(Configuration),
+                _context.ProjectFile.Name + Constants.ExeSuffix);
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (_context.TargetFramework.IsDesktop())

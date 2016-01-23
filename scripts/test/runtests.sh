@@ -32,6 +32,11 @@ do
     dotnet publish --framework "dnxcore50" --output "$TestBinRoot" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
 done
 
+if [ -d "$TestBinRoot/$CONFIGURATION/dnxcore50" ]
+then
+    cp -R -f $TestBinRoot/$CONFIGURATION/dnxcore50/* $TestBinRoot
+fi
+
 # copy TestProjects folder which is used by the test cases
 mkdir -p "$TestBinRoot/TestProjects"
 cp -a $REPOROOT/test/TestProjects/* $TestBinRoot/TestProjects

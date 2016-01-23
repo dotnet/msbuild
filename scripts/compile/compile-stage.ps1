@@ -9,7 +9,8 @@ param(
     [Parameter(Mandatory=$true)][string]$Configuration,
     [Parameter(Mandatory=$true)][string]$OutputDir,
     [Parameter(Mandatory=$true)][string]$RepoRoot,
-    [Parameter(Mandatory=$true)][string]$HostDir)
+    [Parameter(Mandatory=$true)][string]$HostDir,
+    [Parameter(Mandatory=$true)][string]$CompilationOutputDir)
 
 $Projects = @(
     "Microsoft.DotNet.Cli",
@@ -49,22 +50,46 @@ $FilesToClean = @(
 )
 
 $RuntimeOutputDir = "$OutputDir\runtime\coreclr"
+$binariesOutputDir = "$CompilationOutputDir\bin\$Configuration\$Tfm"
+$runtimeBinariesOutputDir = "$CompilationOutputDir\runtime\coreclr\$Configuration\$Tfm"
+
+if(!(Test-Path $OutputDir\bin))
+{
+    mkdir $OutputDir\bin | Out-Null
+}
+
+if(!(Test-Path $RuntimeOutputDir))
+{
+    mkdir $RuntimeOutputDir | Out-Null
+}
 
 # Publish each project
 $Projects | ForEach-Object {
-    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
     if (!$?) {
-        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
         exit 1
     }
 }
 
+if (! (Test-Path $binariesOutputDir)) {
+    $binariesOutputDir = "$CompilationOutputDir\bin"
+}
+
+cp $binariesOutputDir\* $OutputDir\bin -force -recurse
+
 # Publish the runtime
-dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
+dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\runtime\coreclr" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
 if (!$?) {
-    Write-Host Command failed: dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
+    Write-Host Command failed: dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\runtime\coreclr" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
     Exit 1
 }
+
+if (! (Test-Path $runtimeBinariesOutputDir)) {
+    $runtimeBinariesOutputDir = "$CompilationOutputDir\runtime\coreclr"
+}
+
+cp $runtimeBinariesOutputDir\* $RuntimeOutputDir -force -recurse
 
 # Clean up bogus additional files
 $FilesToClean | ForEach-Object {
@@ -75,7 +100,13 @@ $FilesToClean | ForEach-Object {
 }
 
 # Copy the runtime app-local for the tools
-cp -rec "$RuntimeOutputDir\*" "$OutputDir\bin"
+cp -rec "$RuntimeOutputDir\*" "$OutputDir\bin" -ErrorVariable capturedErrors -ErrorAction SilentlyContinue
+$capturedErrors | foreach-object {
+    if ($_ -notmatch "already exists") {
+        write-error $_
+        Exit 1
+    }
+}
 
 # Deploy the CLR host to the output
 cp "$HostDir\corehost.exe" "$OutputDir\bin"
@@ -96,6 +127,6 @@ if (-not (Test-Path "$OutputDir\bin\csc.ni.exe")) {
 # Copy in AppDeps
 if (-not (Test-Path "$OutputDir\bin\appdepsdk\")) {
     $env:PATH = "$OutputDir\bin;$StartPath"
-    header "Acquiring Native App Dependencies"
-    _cmd "$RepoRoot\scripts\build\build_appdeps.cmd ""$OutputDir""" 
+	header "Acquiring Native App Dependencies"
+	_cmd "$RepoRoot\scripts\build\build_appdeps.cmd ""$OutputDir"""
 }

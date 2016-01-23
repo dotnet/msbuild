@@ -26,6 +26,10 @@ $TestProjects | ForEach-Object {
     }
 }
 
+if (Test-Path $TestBinRoot\$Configuration\dnxcore50) {
+    cp $TestBinRoot\$Configuration\dnxcore50\* $TestBinRoot -force -recurse
+}
+
 ## Temporary Workaround for Native Compilation
 ## Need x64 Native Tools Dev Prompt Env Vars
 ## Tracked Here: https://github.com/dotnet/cli/issues/301

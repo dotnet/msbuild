@@ -58,13 +58,16 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             buildCommand.Execute().Should().Pass();
             TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
-            var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
+            var binariesOutputDirectory = GetCompilationOutputPath(OutputDirectory, false);
+            var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(
+                binariesOutputDirectory);
 
             // second build; should get skipped (incremental because no inputs changed)
             buildCommand.Execute().Should().Pass();
             TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
-            var latestWriteTimeSecondBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
+            var latestWriteTimeSecondBuild = GetLastWriteTimeOfDirectoryFiles(
+                binariesOutputDirectory);
             Assert.Equal(latestWriteTimeFirstBuild, latestWriteTimeSecondBuild);
 
             TouchSourceFileInDirectory(TestDirectory);
@@ -73,7 +76,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             buildCommand.Execute().Should().Pass();
             TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
-            var latestWriteTimeThirdBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
+            var latestWriteTimeThirdBuild = GetLastWriteTimeOfDirectoryFiles(
+                binariesOutputDirectory);
             Assert.NotEqual(latestWriteTimeSecondBuild, latestWriteTimeThirdBuild);
         }
 
@@ -91,8 +95,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             buildCommand.Execute().Should().Pass();
 
-            var nativeOut = Path.Combine(OutputDirectory, "native");
-            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName(), s_expectedOutput);
+            TestNativeOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
         }
 
         [Fact]
@@ -108,8 +111,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             buildCommand.Execute().Should().Pass();
 
-            var nativeOut = Path.Combine(OutputDirectory, "native");
-            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName(), s_expectedOutput);
+            TestNativeOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
         }
 
         [Fact]
@@ -121,20 +123,22 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 return;
             }
 
-            var nativeOut = Path.Combine(OutputDirectory, "native");
-
             // first build
             var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true);
-            buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName(), s_expectedOutput);
+            var binariesOutputDirectory = GetCompilationOutputPath(OutputDirectory, false);
 
-            var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
+            buildCommand.Execute().Should().Pass();
+
+            TestNativeOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
+
+            var latestWriteTimeFirstBuild = GetLastWriteTimeOfDirectoryFiles(binariesOutputDirectory);
 
             // second build; should be skipped because nothing changed
             buildCommand.Execute().Should().Pass();
-            TestOutputExecutable(nativeOut, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
-            var latestWriteTimeSecondBuild = GetLastWriteTimeOfDirectoryFiles(OutputDirectory);
+            TestNativeOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
+
+            var latestWriteTimeSecondBuild = GetLastWriteTimeOfDirectoryFiles(binariesOutputDirectory);
             Assert.Equal(latestWriteTimeFirstBuild, latestWriteTimeSecondBuild);
         }
 

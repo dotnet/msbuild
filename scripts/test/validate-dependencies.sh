@@ -17,8 +17,14 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/../common/_common.sh"
 
 # Run Validation for Project.json dependencies
-dotnet publish "$REPOROOT/tools/MultiProjectValidator" -o "$STAGE2_DIR/../tools"
+dotnet publish "$REPOROOT/tools/MultiProjectValidator" -o "$STAGE2_DIR/../tools" -c "$CONFIGURATION"
 #TODO for release builds this should fail
 set +e
-"$STAGE2_DIR/../tools/pjvalidate" "$REPOROOT/src"
+PJ_VALIDATE_PATH="$STAGE2_DIR/../tools/$CONFIGURATION/$TFM"
+if [ ! -d "$PJ_VALIDATE_PATH" ]
+then
+	PJ_VALIDATE_PATH="$STAGE2_DIR/../tools"
+fi
+
+"$PJ_VALIDATE_PATH/pjvalidate" "$REPOROOT/src"
 set -e

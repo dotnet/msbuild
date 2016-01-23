@@ -20,58 +20,6 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
     {
         public static string ProjectName(this ProjectContext context) => context.RootProject.Identity.Name;
 
-        public static string GetOutputPath(this ProjectContext context, string configuration, string currentOutputPath)
-        {
-            var outputPath = string.Empty;
-
-            if (string.IsNullOrEmpty(currentOutputPath))
-            {
-                outputPath = Path.Combine(
-                    GetDefaultRootOutputPath(context, currentOutputPath),
-                    Constants.BinDirectoryName,
-                    configuration,
-                    context.TargetFramework.GetTwoDigitShortFolderName());
-            }
-            else
-            {
-                outputPath = currentOutputPath;
-            }
-
-            return outputPath;
-        }
-
-        public static string GetIntermediateOutputPath(this ProjectContext context, string configuration, string intermediateOutputValue, string currentOutputPath)
-        {
-            var intermediateOutputPath = string.Empty;
-
-            if (string.IsNullOrEmpty(intermediateOutputValue))
-            {
-                intermediateOutputPath = Path.Combine(
-                    GetDefaultRootOutputPath(context, currentOutputPath),
-                    Constants.ObjDirectoryName,
-                    configuration,
-                    context.TargetFramework.GetTwoDigitShortFolderName());
-            }
-            else
-            {
-                intermediateOutputPath = intermediateOutputValue;
-            }
-
-            return intermediateOutputPath;
-        }
-
-        public static string GetDefaultRootOutputPath(ProjectContext context, string currentOutputPath)
-        {
-            var rootOutputPath = string.Empty;
-
-            if (string.IsNullOrEmpty(currentOutputPath))
-            {
-                rootOutputPath = context.ProjectFile.ProjectDirectory;
-            }
-
-            return rootOutputPath;
-        }
-
         public static void MakeCompilationOutputRunnable(this ProjectContext context, string outputPath, string configuration)
         {
             context
