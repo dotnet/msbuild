@@ -109,8 +109,6 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             {
                 var metadataReader = peReader.GetMetadataReader();
 
-                var references = new List<string>(metadataReader.AssemblyReferences.Count);
-
                 foreach (var assemblyReferenceHandle in metadataReader.AssemblyReferences)
                 {
                     var assemblyReference = metadataReader.GetAssemblyReference(assemblyReferenceHandle);
