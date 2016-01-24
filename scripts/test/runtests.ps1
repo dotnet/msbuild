@@ -17,6 +17,11 @@ $TestProjects = @(
     "Microsoft.DotNet.Tools.Builder.Tests"
 )
 
+$TestScripts = @(
+    "package-command-test.ps1",
+    "argument-forwarding-tests.ps1"
+)
+
 # Publish each test project
 $TestProjects | ForEach-Object {
     dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$TestBinRoot" --configuration "$Configuration" "$RepoRoot\test\$_"
@@ -64,11 +69,13 @@ $TestProjects | ForEach-Object {
 
 popd
 
-& $RepoRoot\scripts\test\package-command-test.ps1
-$exitCode = $LastExitCode
-if ($exitCode -ne 0) {
-    $failCount += 1
-    $failingTests += "package-command-test"
+$TestScripts | ForEach-Object {
+    & "$RepoRoot\scripts\test\$_"
+    $exitCode = $LastExitCode
+    if ($exitCode -ne 0) {
+        $failingTests += "$_"
+        $failCount += 1
+    }
 }
 
 if ($failCount -ne 0) {

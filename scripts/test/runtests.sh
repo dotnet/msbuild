@@ -27,6 +27,11 @@ TestProjects=( \
     Microsoft.DotNet.Tools.Builder.Tests \
 )
 
+TestScripts=( \
+    "package-command-test.sh" \
+    "argument-forwarding-tests.sh" \
+)
+
 for project in ${TestProjects[@]}
 do
     dotnet publish --framework "dnxcore50" --output "$TestBinRoot" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
@@ -58,11 +63,15 @@ do
     fi
 done
 
-"$REPOROOT/scripts/test/package-command-test.sh"
-if [ $? -ne 0 ]; then
-    failCount+=1
-    failedTests+=("package-command-test.sh")
-fi
+for script in ${TestScripts[@]}
+do
+    "$REPOROOT/scripts/test/$script"
+    exitCode=$?
+    if [ $exitCode -ne 0 ]; then
+        failedTests+=($script)
+        failCount+=1
+    fi
+done
 
 for test in ${failedTests[@]}
 do

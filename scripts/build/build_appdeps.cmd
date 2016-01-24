@@ -5,17 +5,18 @@ REM This file encapsulates the temporary steps to build the dotnet-compile-nativ
 REM The AppDepSDK package is a temporary artifact until we have CoreRT assemblies published to Nuget
 
 set __ScriptDir=%~dp0
-set __RepoRoot=%__ScriptDir%\..\..
+set __RepoRoot=%__ScriptDir%..\..
 set __AppDepsProjectDir=%__RepoRoot%\src\Microsoft.DotNet.Tools.Compiler.Native\appdep
 
 REM Get absolute path
 pushd %1
-set __OutputPath=%CD%\bin
+set __OutputPath=%__RepoRoot%\artifacts\win7-x64\stage2\bin
 popd
 
 
 pushd %__AppDepsProjectDir%
 rmdir /S /Q packages
+mkdir packages
 dotnet restore --packages %__AppDepsProjectDir%\packages
 set __AppDepSDK=%__AppDepsProjectDir%\packages\toolchain*\
 popd

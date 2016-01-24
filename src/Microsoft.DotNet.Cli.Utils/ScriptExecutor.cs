@@ -31,6 +31,8 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
+            var useComSpec = false;
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Only forward slashes are used in script blocks. Replace with backslashes to correctly
@@ -45,10 +47,10 @@ namespace Microsoft.DotNet.Cli.Utils
                 var comSpec = Environment.GetEnvironmentVariable("ComSpec");
                 if (!string.IsNullOrEmpty(comSpec))
                 {
-                    scriptArguments =
-                        new[] { comSpec, "/S", "/C", "\"" }
+                    useComSpec=true;
+
+                    scriptArguments = new string[] { comSpec }
                         .Concat(scriptArguments)
-                        .Concat(new[] { "\"" })
                         .ToArray();
                 }
             }
@@ -88,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     .ToArray();
             }
 
-            return Command.Create(scriptArguments.FirstOrDefault(), string.Join(" ", scriptArguments.Skip(1)))
+            return Command.Create(scriptArguments.FirstOrDefault(), scriptArguments.Skip(1), useComSpec: useComSpec)
                 .WorkingDirectory(project.ProjectDirectory);
         }
         private static Func<string, string> WrapVariableDictionary(IDictionary<string, string> contextVariables)

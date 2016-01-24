@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 return _projectPath == string.Empty ?
                                        "" :
-                                       $"-p {_projectPath}";
+                                       $"-p \"{_projectPath}\"";
             }
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             get
             {
                 return _preserveTemporary ?
-                                       $"-t {_projectPath}" :
+                                       $"-t \"{_projectPath}\"" :
                                        "";
             }
         }

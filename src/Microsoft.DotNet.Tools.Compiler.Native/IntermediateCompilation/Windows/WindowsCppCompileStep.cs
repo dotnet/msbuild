@@ -20,13 +20,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         
         private readonly string CompilerOutputExtension = ".obj";
         
-        private static readonly Dictionary<BuildConfiguration, string> ConfigurationCompilerOptionsMap = new Dictionary<BuildConfiguration, string>
+        private static readonly Dictionary<BuildConfiguration, string[]> ConfigurationCompilerOptionsMap = new Dictionary<BuildConfiguration, string[]>
         {
-            { BuildConfiguration.debug, "/ZI /nologo /W3 /WX- /sdl /Od /D CPPCODEGEN /D WIN32 /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Gd /TP /wd4477 /errorReport:prompt" },
-            { BuildConfiguration.release, "/Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D CPPCODEGEN /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Gd /TP /wd4477 /errorReport:prompt" }
+            { BuildConfiguration.debug, new string[] {"/ZI", "/nologo", "/W3", "/WX-", "/sdl", "/Od", "/D", "CPPCODEGEN", "/D", "WIN32", "/D", "_CONSOLE", "/D", "_LIB", "/D", "_UNICODE", "/D", "UNICODE", "/Gm", "/EHsc", "/RTC1", "/MD", "/GS", "/fp:precise", "/Zc:wchar_t", "/Zc:forScope", "/Zc:inline", "/Gd", "/TP", "/wd4477", "/errorReport:prompt"} },
+            { BuildConfiguration.release, new string[] {"/Zi", "/nologo", "/W3", "/WX-", "/sdl", "/O2", "/Oi", "/GL", "/D", "CPPCODEGEN", "/D", "WIN32", "/D", "NDEBUG", "/D", "_CONSOLE", "/D", "_LIB", "/D", "_UNICODE", "/D", "UNICODE", "/Gm-", "/EHsc", "/MD", "/GS", "/Gy", "/fp:precise", "/Zc:wchar_t", "/Zc:forScope", "/Zc:inline", "/Gd", "/TP", "/wd4477", "/errorReport:prompt"} }
         };
         
-        private string CompilerArgStr { get; set; }
+        private IEnumerable<string> CompilerArgs { get; set; }
 
         private NativeCompileSettings config;
         
@@ -70,10 +70,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             // Add Includes
             var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
             argsList.Add("/I");
-            argsList.Add($"\"{ilcSdkIncPath}\"");
+            argsList.Add($"{ilcSdkIncPath}");
             
             // Configuration Based Compiler Options 
-            argsList.Add(ConfigurationCompilerOptionsMap[config.BuildType]);
+            argsList.AddRange(ConfigurationCompilerOptionsMap[config.BuildType]);
             
             // Pass the optional native compiler flags if specified
             if (!string.IsNullOrWhiteSpace(config.CppCompilerFlags))
@@ -83,13 +83,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
             // Output
             var objOut = DetermineOutputFile(config);
-            argsList.Add($"/Fo\"{objOut}\"");
+            argsList.Add($"/Fo{objOut}");
             
             // Input File
             var inCppFile = DetermineInFile(config);
-            argsList.Add($"\"{inCppFile}\"");
-            
-            this.CompilerArgStr = string.Join(" ", argsList);
+            argsList.Add($"{inCppFile}");
+
+            this.CompilerArgs = argsList;
         }
         
         private int InvokeCompiler()
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var vcInstallDir = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
             var compilerPath = Path.Combine(vcInstallDir, VSBin, CompilerName);
             
-            var result = Command.Create(compilerPath, CompilerArgStr)
+            var result = Command.Create(compilerPath, CompilerArgs.ToArray())
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();

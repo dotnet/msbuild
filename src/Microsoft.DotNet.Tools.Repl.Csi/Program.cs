@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Text;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
@@ -60,10 +59,21 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             Reporter.Output.WriteLine($"Compiling {projectContext.RootProject.Identity.Name.Yellow()} for {projectContext.TargetFramework.DotNetFrameworkName.Yellow()} to use with the {"C# REPL".Yellow()} environment.");
 
             // --temp-output is actually the intermediate output folder and can be the same as --output for our temporary compilation (`dotnet run` can be seen doing the same)
-            return Command.Create($"dotnet-build", $"--output \"{tempOutputDir}\" --temp-output \"{tempOutputDir}\" --framework \"{projectContext.TargetFramework}\" --configuration \"{configuration}\" \"{projectContext.ProjectDirectory}\"")
-                                .ForwardStdOut(onlyIfVerbose: true)
-                                .ForwardStdErr()
-                                .Execute();
+            return Command.Create($"dotnet-build", new [] 
+                {
+                    $"--output",
+                    $"{tempOutputDir}",
+                    $"--temp-output",
+                    $"{tempOutputDir}",
+                    $"--framework",
+                    $"{projectContext.TargetFramework}",
+                    $"--configuration",
+                    $"{configuration}",
+                    $"{projectContext.ProjectDirectory}"
+                })
+                .ForwardStdOut(onlyIfVerbose: true)
+                .ForwardStdErr()
+                .Execute();
         }
 
         private static IEnumerable<string> GetRuntimeDependencies(ProjectContext projectContext, string buildConfiguration)
@@ -148,7 +158,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
                     }
 
                     string responseFile = CreateResponseFile(projectContext, buildConfiguration, tempOutputDir);
-                    csiArgs.Add($"@\"{responseFile}\"");
+                    csiArgs.Add($"@{responseFile}");
                 }
 
                 if (string.IsNullOrEmpty(script) && !remainingArguments.Any())

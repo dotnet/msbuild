@@ -13,7 +13,7 @@
         "System.Xml.XDocument": "4.0.11-rc2-23704",
         "NuGet.Packaging": "3.4.0-beta-*",
 
-        "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15964",
+        "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15975",
         "Microsoft.Extensions.JsonParser.Sources": {
             "type": "build",
             "version": "1.0.0-*"

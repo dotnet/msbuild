@@ -14,9 +14,12 @@
     "NETStandard.Library": "1.0.0-rc2-23704",
     "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-23704",
     "System.Diagnostics.TraceSource": "4.0.0-rc2-23704",
+
     "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23616",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-23616",
+    
     "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+    "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
     "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
       "version": "1.0.0-*",
       "type": "build"
@@ -25,21 +28,14 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.Extensions.Testing.Abstractions": {
-      "version": "1.0.0-*",
-      "type": "build"
-    },
     "Microsoft.Extensions.CommandLineUtils.Sources": {
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-15935",
-    "Newtonsoft.Json": "7.0.1"
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-16023"
   },
   "frameworks": {
     "dnxcore50": {
     }
-  },
-  "scripts": {
   }
 }

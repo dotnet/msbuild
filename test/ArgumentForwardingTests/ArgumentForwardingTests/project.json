@@ -5,7 +5,8 @@
     },
 
     "dependencies": {
-        "NETStandard.Library" : "1.0.0-rc2-23706",
+        "NETStandard.Library" : "1.0.0-rc2-23714",
+        "Microsoft.NETCore.TestHost": "1.0.0-rc2-23714",
 
         "xunit": "2.1.0",
         "xunit.console.netcore": "1.0.2-prerelease-00101",
@@ -14,7 +15,6 @@
 
         "Microsoft.DotNet.ProjectModel": { "target": "project" },
         "Microsoft.DotNet.Cli.Utils": { "target": "project" },
-
         "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" }
     },
 

@@ -3,6 +3,8 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using System;
+using System.Diagnostics;
+using System.IO;
 
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
@@ -18,24 +20,71 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public virtual CommandResult Execute(string args = "")
         {
-            Console.WriteLine($"Executing - {_command} {args}");
-            var commandResult = Command.Create(_command, args)
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .Execute();
+            var commandPath = _command;
+            if (!Path.IsPathRooted(_command))
+            {
+                _command = Env.GetCommandPath(_command) ??
+                           Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, _command);
+            }
 
-            return commandResult;
+            Console.WriteLine($"Executing - {_command} {args}");
+
+            var stdOut = new StreamForwarder();
+            var stdErr = new StreamForwarder();
+
+            stdOut.ForwardTo(write: Reporter.Output.Write, writeLine: Reporter.Output.WriteLine);
+            stdErr.ForwardTo(write: Reporter.Error.Write, writeLine: Reporter.Output.WriteLine);
+
+            return RunProcess(commandPath, args, stdOut, stdErr);
         }
 
         public virtual CommandResult ExecuteWithCapturedOutput(string args = "")
         {
             Console.WriteLine($"Executing (Captured Output) - {_command} {args}");
-            var commandResult = Command.Create(_command, args)
-                .CaptureStdErr()
-                .CaptureStdOut()
-                .Execute();
 
-            return commandResult;
+            var commandPath = Env.GetCommandPath(_command, ".exe", ".cmd", "") ??
+                Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, _command, ".exe", ".cmd", "");
+                
+            var stdOut = new StreamForwarder();
+            var stdErr = new StreamForwarder();
+
+            stdOut.Capture();
+            stdErr.Capture();
+
+            return RunProcess(commandPath, args, stdOut, stdErr);
+        }
+
+        private CommandResult RunProcess(string executable, string args, StreamForwarder stdOut, StreamForwarder stdErr)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = executable,
+                Arguments = args,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            };
+
+            var process = new Process
+            {
+                StartInfo = psi
+            };
+
+            process.EnableRaisingEvents = true;
+            process.Start();
+
+            var threadOut = stdOut.BeginRead(process.StandardOutput);
+            var threadErr = stdErr.BeginRead(process.StandardError);
+
+            process.WaitForExit();
+            threadOut.Join();
+            threadErr.Join();
+
+            var result = new CommandResult(
+                process.ExitCode, 
+                stdOut.GetCapturedOutput(), 
+                stdErr.GetCapturedOutput());
+
+            return result;
         }
     }
 }

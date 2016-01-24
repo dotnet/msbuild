@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 return _outputDirectory == string.Empty ?
                                            "" :
-                                           $"-o {_outputDirectory}";
+                                           $"-o \"{_outputDirectory}\"";
             }
         }
 
@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string BuildArgs()
         {
-            return $"{BuildProfile} {ForceIncrementalUnsafe} {_projectPath} {OutputOption} {TempOutputOption} {ConfigurationOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
+            return $"{BuildProfile} {ForceIncrementalUnsafe} \"{_projectPath}\" {OutputOption} {TempOutputOption} {ConfigurationOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
         }
     }
 }

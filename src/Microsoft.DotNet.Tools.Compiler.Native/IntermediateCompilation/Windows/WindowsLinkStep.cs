@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             { BuildConfiguration.release , new string[] { "msvcrt.lib" } }
         };
         
-        private string ArgStr { get; set; }
+        private IEnumerable<string> Args { get; set; }
         private NativeCompileSettings config;
         
         public WindowsLinkStep(NativeCompileSettings config)
@@ -95,10 +95,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             
             //Output
             var outFile = DetermineOutputFile(config);
-            argsList.Add($"/out:\"{outFile}\"");
+            argsList.Add($"/out:{outFile}");
             
             // Constant Libs
-            argsList.Add(string.Join(" ", ConstantLinkLibs));
+            foreach (var lib in ConstantLinkLibs)
+            {
+                argsList.Add(lib);
+            }
 
             // ILC SDK Libs
             var SDKLibs = IlcSdkLibMap[config.NativeMode];
@@ -106,19 +109,19 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             foreach (var lib in SDKLibs)
             {
                 var sdkLibPath = Path.Combine(IlcSdkLibPath, lib);
-                argsList.Add($"\"{sdkLibPath}\"");
+                argsList.Add($"{sdkLibPath}");
             }
 
             // Configuration Based Libs
             var configLibs = ConfigurationLinkLibMap[config.BuildType];
             foreach (var lib in configLibs)
             {
-                argsList.Add($"\"{lib}\"");
+                argsList.Add($"{lib}");
             }
 
             // Link Libs
             foreach(var path in config.LinkLibPaths){
-                argsList.Add($"\"{path}\"");
+                argsList.Add($"{path}");
             }
             
             //arch
@@ -126,9 +129,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
 
             //Input Obj file
             var inputFile = DetermineInputFile(config);
-            argsList.Add($"\"{inputFile}\"");
-            
-            this.ArgStr = string.Join(" ", argsList);
+            argsList.Add($"{inputFile}");
+
+            this.Args = argsList;
         }
         
         private int InvokeLinker()
@@ -136,7 +139,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var vcInstallDir = Environment.GetEnvironmentVariable("VS140COMNTOOLS");
             var linkerPath = Path.Combine(vcInstallDir, VSBin, LinkerName);
             
-            var result = Command.Create(linkerPath, ArgStr)
+            var result = Command.Create(linkerPath, Args.ToArray())
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();

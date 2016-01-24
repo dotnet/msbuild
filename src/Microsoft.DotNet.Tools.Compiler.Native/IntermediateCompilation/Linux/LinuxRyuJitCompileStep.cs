@@ -1,44 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-
-using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
+using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Compiler.Native
 {
     public class LinuxRyuJitCompileStep : IPlatformNativeStep
     {
-        private readonly string CompilerName = "clang-3.5";
-        private readonly string InputExtension = ".obj";
+        private const string CompilerName = "clang-3.5";
+        private const string InputExtension = ".obj";
+        private const string CompilerOutputExtension = "";
 
-        private readonly string CompilerOutputExtension = "";
+        public List<string> CompilerArgs { get; set; }
 
         // TODO: debug/release support
-        private readonly string cflags = "-lstdc++ -lpthread -ldl -lm -lrt";
+        private readonly string[] _cflags = {"-lstdc++", "-lpthread", "-ldl", "-lm", "-lrt"};
+        private readonly string[] _ilcSdkLibs = 
+            {
+                "libbootstrapper.a",
+                "libRuntime.a",
+                "libSystem.Private.CoreLib.Native.a"
+            };
 
-        private readonly string[] IlcSdkLibs = new string[]
-        {
-            "libbootstrapper.a",
-            "libRuntime.a",
-            "libSystem.Private.CoreLib.Native.a"
-        };
-
-        private readonly string[] appdeplibs = new string[]
-        {
-            "libSystem.Native.a"
-        };
-
-
-        private string CompilerArgStr { get; set; }
-        private NativeCompileSettings config;
+        private readonly string[] _appdeplibs = 
+            {
+                "libSystem.Native.a"
+            };
 
         public LinuxRyuJitCompileStep(NativeCompileSettings config)
         {
-            this.config = config;
             InitializeArgs(config);
         }
 
@@ -64,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var argsList = new List<string>();
 
             // Flags
-            argsList.Add(cflags);
+            argsList.AddRange(_cflags);
             
             // Input File
             var inLibFile = DetermineInFile(config);
@@ -77,31 +67,24 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             }
             
             // ILC SDK Libs
-            var IlcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
-            foreach (var lib in IlcSdkLibs)
-            {
-                var libPath = Path.Combine(IlcSdkLibPath, lib);
-                argsList.Add(libPath);
-            }
+            var ilcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
+            argsList.AddRange(_ilcSdkLibs.Select(lib => Path.Combine(ilcSdkLibPath, lib)));
 
             // AppDep Libs
             var baseAppDepLibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/ubuntu.14.04", config.Architecture.ToString());
-            foreach (var lib in appdeplibs)
-            {
-                var appDepLibPath = Path.Combine(baseAppDepLibPath, lib);
-                argsList.Add(appDepLibPath);
-            }
+            argsList.AddRange(_appdeplibs.Select(lib => Path.Combine(baseAppDepLibPath, lib)));
 
             // Output
             var libOut = DetermineOutputFile(config);
-            argsList.Add($"-o \"{libOut}\"");
+            argsList.Add($"-o");
+            argsList.Add($"{libOut}");
 
-            this.CompilerArgStr = string.Join(" ", argsList);
+            CompilerArgs = argsList;
         }
 
         private int InvokeCompiler()
         {
-            var result = Command.Create(CompilerName, CompilerArgStr)
+            var result = Command.Create(CompilerName, CompilerArgs)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();

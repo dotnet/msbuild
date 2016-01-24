@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Tools.Pack
 {
@@ -39,22 +40,25 @@ namespace Microsoft.DotNet.Tools.Pack
 
             if (_project.Files.SourceFiles.Any())
             {
-                var argsBuilder = new StringBuilder();
-                argsBuilder.Append($"--configuration {_configuration}");
+                var argsBuilder = new List<string>();
+                argsBuilder.Add("--configuration");
+                argsBuilder.Add($"{_configuration}");
 
                 if (_artifactPathsCalculator.PackageOutputPathSet)
                 {
-                    argsBuilder.Append($" --output \"{_artifactPathsCalculator.PackageOutputPathParameter}\"");
+                    argsBuilder.Add("--output");
+                    argsBuilder.Add($"{_artifactPathsCalculator.PackageOutputPathParameter}");
                 }
 
                 if (!string.IsNullOrEmpty(_intermediateOutputPath))
                 {
-                    argsBuilder.Append($" --temp-output \"{_intermediateOutputPath}\"");
+                    argsBuilder.Add("--temp-output");
+                    argsBuilder.Add($"{_intermediateOutputPath}");
                 }
 
-                argsBuilder.Append($" \"{_project.ProjectFilePath}\"");
+                argsBuilder.Add($"{_project.ProjectFilePath}");
 
-                var result = Command.Create("dotnet-build", argsBuilder.ToString())
+                var result = Command.Create("dotnet-build", argsBuilder)
                        .ForwardStdOut()
                        .ForwardStdErr()
                        .Execute();

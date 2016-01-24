@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                     new object[] { "", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "", "" },
                     new object[] { "", "", "Release", "" },
                     new object[] { "", "", "", "some/dir"},
-                    //new object[] { "", "", "", "\"some/dir/with spaces\"" }, // issue - https://github.com/dotnet/cli/issues/525
+                    new object[] { "", "", "", "some/dir/with spaces" }, 
                     new object[] { "dnxcore50", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier(), "Debug", "some/dir" },
                 };
             }
@@ -175,6 +175,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
+        [ActiveIssue(982)]
         public void PublishScriptsRun()
         {
             // create unique directories in the 'temp' folder

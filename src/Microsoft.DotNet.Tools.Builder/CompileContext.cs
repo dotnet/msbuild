@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             if (!newInputs.Any())
             {
-                Reporter.Output.WriteLine($"\nProject {project.ProjectName()} was previoulsy compiled. Skipping compilation.");
+                Reporter.Output.WriteLine($"\nProject {project.ProjectName()} was previously compiled. Skipping compilation.");
                 return false;
             }
 
@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Tools.Build
         private void CollectCheckPathProbingPreconditions(ProjectContext project, IncrementalPreconditions preconditions)
         {
             var pathCommands = CompilerUtil.GetCommandsInvokedByCompile(project)
-                .Select(commandName => Command.Create(commandName, "", project.TargetFramework))
+                .Select(commandName => Command.Create(commandName, Enumerable.Empty<string>(), project.TargetFramework))
                 .Where(c => c.ResolutionStrategy.Equals(CommandResolutionStrategy.Path));
 
             foreach (var pathCommand in pathCommands)
@@ -257,13 +257,24 @@ namespace Microsoft.DotNet.Tools.Build
 
         private bool InvokeCompileOnDependency(ProjectDescription projectDependency)
         {
-            var compileResult = Command.Create("dotnet-compile",
-                $"--framework {projectDependency.Framework} " +
-                $"--configuration {_args.ConfigValue} " +
-                $"--output \"{_args.OutputValue}\" " +
-                $"--temp-output \"{_args.IntermediateValue}\" " +
-                (_args.NoHostValue ? "--no-host " : string.Empty) +
-                $"\"{projectDependency.Project.ProjectDirectory}\"")
+            var args = new List<string>();
+
+            args.Add("--framework");
+            args.Add($"{projectDependency.Framework}");
+            args.Add("--configuration");
+            args.Add($"{_args.ConfigValue}");
+            args.Add("--output");
+            args.Add($"{_args.OutputValue}");
+            args.Add("--temp-output");
+            args.Add($"{_args.IntermediateValue}");
+            args.Add($"{projectDependency.Project.ProjectDirectory}");
+
+            if (_args.NoHostValue)
+            {
+                args.Add("--no-host");
+            }
+
+            var compileResult = Command.Create("dotnet-compile", args)
                 .ForwardStdOut()
                 .ForwardStdErr()
                 .Execute();
@@ -274,20 +285,59 @@ namespace Microsoft.DotNet.Tools.Build
         private bool InvokeCompileOnRootProject()
         {
             // todo: add methods to CompilerCommandApp to generate the arg string?
-            var compileResult = Command.Create("dotnet-compile",
-                $"--framework {_rootProject.TargetFramework} " +
-                $"--configuration {_args.ConfigValue} " +
-                $"--output \"{_args.OutputValue}\" " +
-                $"--temp-output \"{_args.IntermediateValue}\" " +
-                (_args.NoHostValue ? "--no-host " : string.Empty) +
-                //nativeArgs
-                (_args.IsNativeValue ? "--native " : string.Empty) +
-                (_args.IsCppModeValue ? "--cpp " : string.Empty) +
-                (!string.IsNullOrWhiteSpace(_args.ArchValue) ? $"--arch {_args.ArchValue} " : string.Empty) +
-                (!string.IsNullOrWhiteSpace(_args.IlcArgsValue) ? $"--ilcargs \"{_args.IlcArgsValue}\" " : string.Empty) +
-                (!string.IsNullOrWhiteSpace(_args.IlcPathValue) ? $"--ilcpath \"{_args.IlcPathValue}\" " : string.Empty) +
-                (!string.IsNullOrWhiteSpace(_args.IlcSdkPathValue) ? $"--ilcsdkpath \"{_args.IlcSdkPathValue}\" " : string.Empty) +
-                $"\"{_rootProject.ProjectDirectory}\"")
+            var args = new List<string>();
+            args.Add("--framework");
+            args.Add(_rootProject.TargetFramework.ToString());
+            args.Add("--configuration");
+            args.Add(_args.ConfigValue);
+            args.Add("--output");
+            args.Add(_args.OutputValue);
+            args.Add("--temp-output");
+            args.Add(_args.IntermediateValue);
+
+            if (_args.NoHostValue) 
+            { 
+                args.Add("--no-host"); 
+            }
+
+            //native args
+            if (_args.IsNativeValue) 
+            { 
+                args.Add("--native"); 
+            }
+
+            if (_args.IsCppModeValue) 
+            { 
+                args.Add("--cpp"); 
+            }
+
+            if (!string.IsNullOrWhiteSpace(_args.ArchValue))
+            {
+                args.Add("--arch");
+                args.Add(_args.ArchValue);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_args.IlcArgsValue))
+            {
+                args.Add("--ilcargs");
+                args.Add(_args.IlcArgsValue);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_args.IlcPathValue))
+            {
+                args.Add("--ilcpath");
+                args.Add(_args.IlcPathValue);
+            }
+
+            if (!string.IsNullOrWhiteSpace(_args.IlcSdkPathValue))
+            {
+                args.Add("--ilcsdkpath");
+                args.Add(_args.IlcSdkPathValue);
+            }
+
+            args.Add(_rootProject.ProjectDirectory);
+
+            var compileResult = Command.Create("dotnet-compile",args)
                 .ForwardStdOut()
                 .ForwardStdErr()
                 .Execute();

@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string GetOutputOption()
         {
-            return string.IsNullOrEmpty(_output) ? "" : $"-o {_output}";
+            return string.IsNullOrEmpty(_output) ? "" : $"-o \"{_output}\"";
         }
 
         private string GetConfigOption()

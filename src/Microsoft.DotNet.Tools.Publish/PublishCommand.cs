@@ -102,12 +102,17 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-build",
-                $"--framework \"{context.TargetFramework.DotNetFrameworkName}\" " +
-                $"--output \"{outputPathCalculator.BaseCompilationOutputPath}\" " +
-                $"--configuration \"{configuration}\" " +
-                "--no-host " +
-                $"\"{context.ProjectFile.ProjectDirectory}\"")
+            var result = Command.Create("dotnet-build", 
+                new string[] {
+                    "--framework", 
+                    $"{context.TargetFramework.DotNetFrameworkName}",
+                    "--output", 
+                    $"{outputPathCalculator.BaseCompilationOutputPath}",
+                    "--configuration", 
+                    $"{configuration}",
+                    "--no-host",
+                    $"{context.ProjectFile.ProjectDirectory}"
+                })
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();

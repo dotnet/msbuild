@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             // Generate assembly info
             var assemblyInfo = Path.Combine(tempOutDir, $"dotnet-compile.assemblyinfo.fs");
             File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateFSharp(assemblyInfoOptions));
-            allArgs.Add($"\"{assemblyInfo}\"");
+            allArgs.Add($"{assemblyInfo}");
 
             //HACK fsc raise error FS0208 if target exe doesnt have extension .exe
             bool hackFS0208 = commonOptions.EmitEntryPoint == true;
@@ -100,18 +100,32 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                     outputName = Path.ChangeExtension(outputName, ".exe");
                 }
 
-                allArgs.Add($"--out:\"{outputName}\"");
+                allArgs.Add($"--out:");
+                allArgs.Add($"{outputName}");
             }
 
-            allArgs.AddRange(references.Select(r => $"-r:\"{r}\""));
-            allArgs.AddRange(resources.Select(resource => $"--resource:{resource}"));
-            allArgs.AddRange(sources.Select(s => $"\"{s}\""));
+            foreach (var reference in references)
+            {
+                allArgs.Add("-r");
+                allArgs.Add($"{reference}");
+            }
+
+            foreach (var resource in resources)
+            {
+                allArgs.Add("--resource");
+                allArgs.Add($"{resource}");
+            }
+
+            foreach (var source in sources)
+            {
+                allArgs.Add($"{source}");
+            }
 
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-fsc.rsp");
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
 
             // Execute FSC!
-            var result = RunFsc(string.Join(" ", allArgs))
+            var result = RunFsc(allArgs)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute();
@@ -192,11 +206,16 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             return commonArgs;
         }
 
-        private static Command RunFsc(string fscArgs)
+        private static Command RunFsc(List<string> fscArgs)
         {
             var corerun = Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
             var fscExe = Path.Combine(AppContext.BaseDirectory, "fsc.exe");
-            return Command.Create(corerun, $"\"{fscExe}\" {fscArgs}");
+
+            List<string> args = new List<string>();
+            args.Add(fscExe);
+            args.AddRange(fscArgs);
+            
+            return Command.Create(corerun, args.ToArray());
         }
     }
 }
