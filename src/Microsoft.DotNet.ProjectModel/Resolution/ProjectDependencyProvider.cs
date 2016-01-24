@@ -48,17 +48,17 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
 
             if (targetFramework != null && targetFramework.IsDesktop())
             {
-                targetFrameworkDependencies.Add(new LibraryRange("mscorlib", LibraryType.ReferenceAssembly));
+                targetFrameworkDependencies.Add(new LibraryRange("mscorlib", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
 
-                targetFrameworkDependencies.Add(new LibraryRange("System", LibraryType.ReferenceAssembly));
+                targetFrameworkDependencies.Add(new LibraryRange("System", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
 
                 if (targetFramework.Version >= new Version(3, 5))
                 {
-                    targetFrameworkDependencies.Add(new LibraryRange("System.Core", LibraryType.ReferenceAssembly));
+                    targetFrameworkDependencies.Add(new LibraryRange("System.Core", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
 
                     if (targetFramework.Version >= new Version(4, 0))
                     {
-                        targetFrameworkDependencies.Add(new LibraryRange("Microsoft.CSharp", LibraryType.ReferenceAssembly));
+                        targetFrameworkDependencies.Add(new LibraryRange("Microsoft.CSharp", LibraryType.ReferenceAssembly, LibraryDependencyType.Build));
                     }
                 }
             }
