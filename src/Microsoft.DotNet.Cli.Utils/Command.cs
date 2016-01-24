@@ -103,6 +103,7 @@ namespace Microsoft.DotNet.Cli.Utils
 #endif
 
             return new CommandResult(
+                this._process.StartInfo,
                 exitCode,
                 _stdOut.GetCapturedOutput(),
                 _stdErr.GetCapturedOutput());

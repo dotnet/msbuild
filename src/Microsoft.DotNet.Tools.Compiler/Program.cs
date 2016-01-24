@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             };
             RunScripts(context, ScriptNames.PreCompile, contextVariables);
 
-            var result = Command.Create($"dotnet-compile-{compilerName}", new string[] {"@" + $"{rsp}" })
+            var result = Command.Create($"dotnet-compile-{compilerName}", new [] {"@" + $"{rsp}" })
                 .OnErrorLine(line =>
                 {
                     var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
@@ -334,6 +334,11 @@ namespace Microsoft.DotNet.Tools.Compiler
             RunScripts(context, ScriptNames.PostCompile, contextVariables);
 
             var success = result.ExitCode == 0;
+
+            if (!success)
+            {
+                Reporter.Error.WriteLine($"{result.StartInfo.FileName} {result.StartInfo.Arguments} returned Exit Code {result.ExitCode}");
+            }
 
             if (success)
             {

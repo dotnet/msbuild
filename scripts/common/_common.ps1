@@ -7,7 +7,7 @@
 
 $Rid = "win7-x64"
 $Tfm = "dnxcore50"
-$RepoRoot = Convert-Path "$PSScriptRoot\..\.."
+$RepoRoot = Resolve-Path "$PSScriptRoot\..\.."
 $OutputDir = "$RepoRoot\artifacts\$Rid"
 $DnxDir = "$OutputDir\dnx"
 $DnxRoot = "$DnxDir\bin"
@@ -19,6 +19,8 @@ $HostDir = "$OutputDir\corehost"
 $PackageDir = "$RepoRoot\artifacts\packages\dnvm"
 $env:ReleaseSuffix = "beta"
 $env:Channel = "$env:ReleaseSuffix"
+$env:TEST_ROOT = "$OutputDir\tests"
+$env:TEST_ARTIFACTS = "$env:TEST_ROOT\artifacts"
 
 # Set reasonable defaults for unset variables
 setEnvIfDefault "DOTNET_INSTALL_DIR"  "$(Convert-Path "$PSScriptRoot\..")\.dotnet_stage0\win7-x64"

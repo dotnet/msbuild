@@ -10,22 +10,34 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public sealed class TempRoot : IDisposable
     {
+        private static readonly bool DoDispose;
         private readonly List<IDisposable> _temps = new List<IDisposable>();
         public static readonly string Root;
  
         static TempRoot()
         {
-            Root = Path.Combine(Path.GetTempPath(), "DotnetCLITests");
+            var persistedRoot = Environment.GetEnvironmentVariable("TEST_ARTIFACTS");
+
+            if (string.IsNullOrWhiteSpace(persistedRoot))
+            {
+                Root = Path.Combine(Path.GetTempPath(), "DotnetCLITests");
+                DoDispose = true;
+            }
+            else
+            {
+                Root = persistedRoot;
+                DoDispose = false;
+            }
+
             Directory.CreateDirectory(Root);
         }
  
         public void Dispose()
         {
-            if (_temps != null)
-            {
-                DisposeAll(_temps);
-                _temps.Clear();
-            }
+            if (!DoDispose || _temps == null) return;
+
+            DisposeAll(_temps);
+            _temps.Clear();
         }
  
         private static void DisposeAll(IEnumerable<IDisposable> temps)
@@ -34,10 +46,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 try
                 {
-                    if (temp != null)
-                    {
-                        temp.Dispose();
-                    }
+                    temp?.Dispose();
                 }
                 catch
                 {
