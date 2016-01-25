@@ -212,21 +212,11 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         {
             foreach (var assemblyPath in section)
             {
-                if (IsPlaceholderFile(assemblyPath))
-                {
-                    continue;
-                }
-
                 assets.Add(new LibraryAsset(
                     Path.GetFileNameWithoutExtension(assemblyPath),
                     assemblyPath,
                     Path.Combine(package.Path, assemblyPath)));
             }
-        }
-
-        private static bool IsPlaceholderFile(string path)
-        {
-            return string.Equals(Path.GetFileName(path), "_._", StringComparison.Ordinal);
         }
 
         private static bool LibraryIsOfType(LibraryType type, LibraryDescription library)

@@ -7,13 +7,15 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 {
     public struct LibraryDependencyType
     {
-        private readonly LibraryDependencyTypeFlag _flags;
-
         public static LibraryDependencyType Default = LibraryDependencyType.Parse("default");
+
+        public static LibraryDependencyType Build = LibraryDependencyType.Parse("build");
+
+        public LibraryDependencyTypeFlag Flags { get; private set; }
 
         private LibraryDependencyType(LibraryDependencyTypeFlag flags)
         {
-            _flags = flags;
+            Flags = flags;
         }
 
         public static LibraryDependencyType Parse(string keyword)
@@ -41,7 +43,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 
         public bool HasFlag(LibraryDependencyTypeFlag flag)
         {
-            return (_flags & flag) != 0;
+            return (Flags & flag) != 0;
         }
     }
 }

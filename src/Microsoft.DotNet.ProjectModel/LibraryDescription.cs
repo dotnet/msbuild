@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public override string ToString()
         {
-            return $"{Identity} = {Path}";
+            return $"{Identity} ({Identity.Type}) = {Path}";
         }
 
         // For diagnostics, we don't want to duplicate requested dependencies so we 
