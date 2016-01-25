@@ -2,12 +2,17 @@
     "version": "1.0.0-*",
     "testRunner": "xunit",
     "dependencies": {
-        "Microsoft.AspNet.Mvc.Formatters.Json": "6.0.0-rc1-final",
-        "Newtonsoft.Json": "3.5.8",
-        "System.Runtime": "4.0.0"
+        "Microsoft.Extensions.DependencyModel": "1.0.0-*",
+        "Newtonsoft.Json": "6.0.0",
     },
 
     "frameworks": {
-        "dnx451": { }
+        "net451": { },
+        "dnxcore50": {
+            "imports" : "portable-net45+wp80+win8",
+            "dependencies": {  
+                "NETStandard.Library": "1.0.0-rc2-23704"
+            }
+        }
     }
 }
