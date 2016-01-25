@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Reflection;
 using System.Text;
 
 using Microsoft.Build.Shared;
@@ -839,6 +840,25 @@ namespace Microsoft.Build.UnitTests
                 Shared.FileUtilities.GetTemporaryFile("|", ".tmp");
             }
            );
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.AnyUnix)]
+        public void AbsolutePathLooksLikeUnixPathOnUnix()
+        {
+            var absolutePathToThisAssembly = Path.GetFullPath(typeof (FileUtilities_Tests).GetTypeInfo().Assembly.Location);
+
+            Assert.True(FileUtilities.LooksLikeUnixFilePath(absolutePathToThisAssembly));
+        }
+
+        [Fact]
+        [PlatformSpecific(PlatformID.Windows)]
+        public void PathDoesNotLookLikeUnixPathOnWindows()
+        {
+            var absolutePathToThisAssembly = Path.GetFullPath(typeof(FileUtilities_Tests).GetTypeInfo().Assembly.Location);
+
+            Assert.False(FileUtilities.LooksLikeUnixFilePath(absolutePathToThisAssembly));
+            Assert.False(FileUtilities.LooksLikeUnixFilePath("/path/that/looks/unixy"));
         }
     }
 }

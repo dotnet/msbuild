@@ -611,8 +611,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string FixFrameworkPath(string path)
         {
-            // Only valid for Linux/Mono
-            if (!IsUnix || !IsMono)
+            // Only valid for Mono
+            if (!IsUnixLike || !IsMono)
             {
                 return null;
             }

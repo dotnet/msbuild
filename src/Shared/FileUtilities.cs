@@ -482,7 +482,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool LooksLikeUnixFilePath(string value)
         {
-            if (!NativeMethodsShared.IsUnix)
+            if (!NativeMethodsShared.IsUnixLike)
             {
                 return false;
             }
