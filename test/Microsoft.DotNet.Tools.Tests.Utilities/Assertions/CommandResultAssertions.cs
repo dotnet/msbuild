@@ -90,5 +90,19 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                        $"StdOut:{Environment.NewLine}{_commandResult.StdOut}{Environment.NewLine}" +
                        $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}"; ;
         }
+		
+		public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject)
+        {
+            _commandResult.StdOut.Should().Contain($"Project {skippedProject} (DNXCore,Version=v5.0) was previously compiled. Skipping compilation.");
+
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> HaveCompiledProject(string compiledProject)
+        {
+            _commandResult.StdOut.Should().Contain($"Project {compiledProject} (DNXCore,Version=v5.0) will be compiled");
+
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
     }
 }

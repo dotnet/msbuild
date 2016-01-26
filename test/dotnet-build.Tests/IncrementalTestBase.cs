@@ -13,26 +13,24 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class IncrementalTestBase : TestBase
     {
-        protected readonly TempDirectory _tempProjectRoot;
+        protected readonly TempDirectory TempProjectRoot;
 
-        private readonly string _testProjectsRoot;
-        protected readonly string _mainProject;
-        protected readonly string _expectedOutput;
+        protected readonly string MainProject;
+        protected readonly string ExpectedOutput;
 
         public IncrementalTestBase(string testProjectsRoot, string mainProject, string expectedOutput)
         {
-            _testProjectsRoot = testProjectsRoot;
-            _mainProject = mainProject;
-            _expectedOutput = expectedOutput;
+            MainProject = mainProject;
+            ExpectedOutput = expectedOutput;
 
             var root = Temp.CreateDirectory();
 
-            _tempProjectRoot = root.CopyDirectory(testProjectsRoot);
+            TempProjectRoot = root.CopyDirectory(testProjectsRoot);
         }
 
         protected void TouchSourcesOfProject()
         {
-            TouchSourcesOfProject(_mainProject);
+            TouchSourcesOfProject(MainProject);
         }
 
         protected void TouchSourcesOfProject(string projectToTouch)
@@ -50,9 +48,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         protected CommandResult BuildProject(bool forceIncrementalUnsafe = false, bool expectBuildFailure = false)
         {
-            var outputDir = GetBinDirectory();
-            var intermediateOutputDir = Path.Combine(Directory.GetParent(outputDir).FullName, "obj", _mainProject);
-            var mainProjectFile = GetProjectFile(_mainProject);
+            var outputDir = GetBinRoot();
+            var intermediateOutputDir = Path.Combine(Directory.GetParent(outputDir).FullName, "obj", MainProject);
+            var mainProjectFile = GetProjectFile(MainProject);
 
             var buildCommand = new BuildCommand(mainProjectFile, output: outputDir, tempOutput: intermediateOutputDir ,forceIncrementalUnsafe : forceIncrementalUnsafe);
             var result = buildCommand.ExecuteWithCapturedOutput();
@@ -60,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             if (!expectBuildFailure)
             {
                 result.Should().Pass();
-                TestOutputExecutable(outputDir, buildCommand.GetOutputExecutableName(), _expectedOutput);
+                TestOutputExecutable(outputDir, buildCommand.GetOutputExecutableName(), ExpectedOutput);
             }
             else
             {
@@ -70,24 +68,14 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             return result;
         }
 
-        protected static void AssertProjectSkipped(string skippedProject, CommandResult buildResult)
+        protected string GetBinRoot()
         {
-            Assert.Contains($"Project {skippedProject} (DNXCore,Version=v5.0) was previously compiled. Skipping compilation.", buildResult.StdOut, StringComparison.OrdinalIgnoreCase);
-        }
-
-        protected static void AssertProjectCompiled(string rebuiltProject, CommandResult buildResult)
-        {
-            Assert.Contains($"Project {rebuiltProject} (DNXCore,Version=v5.0) will be compiled", buildResult.StdOut, StringComparison.OrdinalIgnoreCase);
-        }
-
-        protected string GetBinDirectory()
-        {
-            return Path.Combine(_tempProjectRoot.Path, "bin");
+            return Path.Combine(TempProjectRoot.Path, "bin");
         }
 
         protected virtual string GetProjectDirectory(string projectName)
         {
-            return Path.Combine(_tempProjectRoot.Path);
+            return Path.Combine(TempProjectRoot.Path);
         }
 
         protected string GetProjectFile(string projectName)
@@ -108,7 +96,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         protected string GetCompilationOutputPath()
         {
-            var executablePath = Path.Combine(GetBinDirectory(), "Debug", "dnxcore50");
+            var executablePath = Path.Combine(GetBinRoot(), "Debug", "dnxcore50");
 
             return executablePath;
         }
