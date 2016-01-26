@@ -6,12 +6,13 @@
     "description": "Types to model a .NET Project",
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23704",
+        "System.Reflection.Metadata": "1.2.0-rc2-23608",
         "System.Runtime.Loader": "4.0.0-rc2-23704",
         "System.Dynamic.Runtime": "4.0.11-rc2-23704",
         "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23704",
         "Microsoft.CSharp": "4.0.1-rc2-23704",
         "System.Xml.XDocument": "4.0.11-rc2-23704",
-        "NuGet.Packaging": "3.4.0-beta-*",
+        "NuGet.Packaging": "3.4.0-beta-531",
 
         "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15975",
         "Microsoft.Extensions.JsonParser.Sources": {

@@ -89,7 +89,8 @@ namespace Microsoft.DotNet.Tools.Publish
             {
                 { "publish:ProjectPath", context.ProjectDirectory },
                 { "publish:Configuration", configuration },
-                { "publish:OutputPath", outputPathCalculator.BaseCompilationOutputPath },
+                { "publish:OutputPath", outputPath },
+                { "publish:PublishOutputPath", outputPathCalculator.BaseCompilationOutputPath },
                 { "publish:Framework", context.TargetFramework.Framework },
                 { "publish:Runtime", context.RuntimeIdentifier },
             };

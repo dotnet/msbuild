@@ -154,6 +154,7 @@ namespace Microsoft.DotNet.ProjectModel
             RootDirectory = GlobalSettings?.DirectoryPath ?? RootDirectory;
             PackagesDirectory = PackagesDirectory ?? PackageDependencyProvider.ResolvePackagesPath(RootDirectory, GlobalSettings);
             ReferenceAssembliesPath = ReferenceAssembliesPath ?? FrameworkReferenceResolver.GetDefaultReferenceAssembliesPath();
+            var frameworkReferenceResolver = new FrameworkReferenceResolver(ReferenceAssembliesPath);
 
             LockFileLookup lockFileLookup = null;
 
@@ -185,12 +186,11 @@ namespace Microsoft.DotNet.ProjectModel
                 target = SelectTarget(LockFile);
                 if (target != null)
                 {
-                    var packageResolver = new PackageDependencyProvider(PackagesDirectory);
+                    var packageResolver = new PackageDependencyProvider(PackagesDirectory, frameworkReferenceResolver);
                     ScanLibraries(target, lockFileLookup, libraries, packageResolver, projectResolver);
                 }
             }
 
-            var frameworkReferenceResolver = new FrameworkReferenceResolver(ReferenceAssembliesPath);
             var referenceAssemblyDependencyResolver = new ReferenceAssemblyDependencyResolver(frameworkReferenceResolver);
             bool requiresFrameworkAssemblies;
 
@@ -269,13 +269,36 @@ namespace Microsoft.DotNet.ProjectModel
         {
             requiresFrameworkAssemblies = false;
 
-            foreach (var library in libraries.Values.ToList())
+            foreach (var pair in libraries.ToList())
             {
+                var library = pair.Value;
+
                 if (Equals(library.Identity.Type, LibraryType.Package) &&
                     !Directory.Exists(library.Path))
                 {
                     // If the package path doesn't exist then mark this dependency as unresolved
                     library.Resolved = false;
+                }
+
+                // The System.* packages provide placeholders on any non netstandard platform 
+                // To make them work seamlessly on those platforms, we fill the gap with a reference
+                // assembly (if available)
+                var package = library as PackageDescription;
+                if (package != null && package.Resolved && !package.Target.CompileTimeAssemblies.Any())
+                {
+                    var replacement = referenceAssemblyDependencyResolver.GetDescription(new LibraryRange(library.Identity.Name, LibraryType.ReferenceAssembly), TargetFramework);
+                    if (replacement?.Resolved == true)
+                    {
+                        requiresFrameworkAssemblies = true;
+
+                        // Remove the original package reference
+                        libraries.Remove(pair.Key);
+
+                        // Add the reference to the refernce assembly.  
+                        libraries[new LibraryKey(replacement.Identity.Name)] = replacement;
+
+                        continue;
+                    }
                 }
 
                 library.Framework = library.Framework ?? TargetFramework;
@@ -335,7 +358,7 @@ namespace Microsoft.DotNet.ProjectModel
 
                     if (packageEntry != null)
                     {
-                        description = packageResolver.GetDescription(packageEntry, library);
+                        description = packageResolver.GetDescription(TargetFramework, packageEntry, library);
                     }
 
                     type = LibraryType.Package;
