@@ -11,7 +11,7 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "NuGet.CommandLine.XPlat": "3.4.0-beta-517",
+    "NuGet.CommandLine.XPlat": "3.4.0-beta-531",
     "Microsoft.NETCore.Platforms": "1.0.1-rc2-23704",
     "Microsoft.NETCore.TestHost": "1.0.0-rc2-23704",
     "NETStandard.Library": "1.0.0-rc2-23704",
