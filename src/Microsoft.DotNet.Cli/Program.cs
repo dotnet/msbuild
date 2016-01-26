@@ -27,7 +27,7 @@ Common Options (passed before the command):
 Common Commands:
   new           Initialize a basic .NET project
   restore       Restore dependencies specified in the .NET project
-  compile       Compiles a .NET project
+  build         Builds a .NET project
   publish       Publishes a .NET project for deployment (including the runtime)
   run           Compiles and immediately executes a .NET project
   repl          Launch an interactive session (read, eval, print, loop)
