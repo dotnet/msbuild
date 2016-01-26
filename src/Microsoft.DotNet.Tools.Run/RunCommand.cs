@@ -112,15 +112,14 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             // Now launch the output and give it the results
-            var outputName = Path.Combine(
-                _context.GetOutputPathCalculator(tempDir).GetCompilationOutputPath(Configuration),
-                _context.ProjectFile.Name + Constants.ExeSuffix);
+            var outputName = _context.GetOutputPathCalculator(tempDir).GetExecutablePath(Configuration);
+
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 if (_context.TargetFramework.IsDesktop())
                 {
                     // Run mono if we're running a desktop target on non windows
-                    _args.Insert(0, outputName + ".exe");
+                    _args.Insert(0, outputName);
 
                     if (string.Equals(Configuration, "Debug", StringComparison.OrdinalIgnoreCase))
                     {

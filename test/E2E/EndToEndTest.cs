@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             var publishCommand = new PublishCommand(TestProject, output: OutputDirectory);
             publishCommand.Execute().Should().Pass();
 
-            TestOutputExecutable(OutputDirectory, publishCommand.GetOutputExecutable(), s_expectedOutput);    
+            TestExecutable(OutputDirectory, publishCommand.GetOutputExecutable(), s_expectedOutput);    
         }
 
         private void TestSetup()

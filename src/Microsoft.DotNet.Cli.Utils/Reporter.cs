@@ -20,8 +20,8 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         public static Reporter Output { get; } = Create(AnsiConsole.GetOutput);
-        public static Reporter Error { get; } = Create(AnsiConsole.GetError);
-        public static Reporter Verbose { get; } = CommandContext.IsVerbose() ? Create(AnsiConsole.GetError) : Null;
+        public static Reporter Error { get; } = Create(AnsiConsole.GetOutput);
+        public static Reporter Verbose { get; } = CommandContext.IsVerbose() ? Create(AnsiConsole.GetOutput) : Null;
 
         public static Reporter Create(Func<bool, AnsiConsole> getter)
         {

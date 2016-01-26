@@ -163,6 +163,11 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                     assemblyPath,
                     Path.Combine(project.Project.ProjectDirectory, assemblyPath)));
             }
+            else
+            {
+                var assemblyPath = project.GetOutputPathCalculator().GetAssemblyPath(_configuration);
+                compileAssemblies.Add(new LibraryAsset(project.Identity.Name, null, assemblyPath));
+            }
 
             // Add shared sources
             foreach (var sharedFile in project.Project.Files.SharedFiles)

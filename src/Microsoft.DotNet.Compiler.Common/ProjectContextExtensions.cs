@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
     public static class ProjectContextExtensions
     {
         public static string ProjectName(this ProjectContext context) => context.RootProject.Identity.Name;
+        public static string GetDisplayName(this ProjectContext context) => $"{context.RootProject.Identity.Name} ({context.TargetFramework})";
 
         public static void MakeCompilationOutputRunnable(this ProjectContext context, string outputPath, string configuration)
         {

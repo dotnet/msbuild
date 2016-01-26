@@ -61,17 +61,16 @@ namespace Microsoft.DotNet.Tools.Compiler
             CompilerCommandApp args)
         {
             var outputPathCalculator = context.GetOutputPathCalculator(args.OutputValue);
-            var outputPath = outputPathCalculator.GetCompilationOutputPath(args.ConfigValue);
+            var outputPath = outputPathCalculator.GetOutputDirectoryPath(args.ConfigValue);
             var nativeOutputPath = Path.Combine(outputPath, "native");
             var intermediateOutputPath =
-                outputPathCalculator.GetIntermediateOutputPath(args.ConfigValue, args.IntermediateValue);
+                outputPathCalculator.GetIntermediateOutputDirectoryPath(args.ConfigValue, args.IntermediateValue);
             var nativeIntermediateOutputPath = Path.Combine(intermediateOutputPath, "native");
             Directory.CreateDirectory(nativeOutputPath);
             Directory.CreateDirectory(nativeIntermediateOutputPath);
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, args.ConfigValue);
-            var managedOutput = 
-                CompilerUtil.GetCompilationOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
+            var managedOutput = outputPathCalculator.GetAssemblyPath(args.ConfigValue);
             
             var nativeArgs = new List<string>();
 
@@ -161,9 +160,9 @@ namespace Microsoft.DotNet.Tools.Compiler
         {
             // Set up Output Paths
             var outputPathCalculator = context.GetOutputPathCalculator(args.OutputValue);
-            var outputPath = outputPathCalculator.GetCompilationOutputPath(args.ConfigValue);
+            var outputPath = outputPathCalculator.GetOutputDirectoryPath(args.ConfigValue);
             var intermediateOutputPath =
-                outputPathCalculator.GetIntermediateOutputPath(args.ConfigValue, args.IntermediateValue);
+                outputPathCalculator.GetIntermediateOutputDirectoryPath(args.ConfigValue, args.IntermediateValue);
 
             Directory.CreateDirectory(outputPath);
             Directory.CreateDirectory(intermediateOutputPath);
@@ -201,7 +200,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Get compilation options
-            var outputName = CompilerUtil.GetCompilationOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
+            var outputName = outputPathCalculator.GetAssemblyPath(args.ConfigValue);
 
             // Assemble args
             var compilerArgs = new List<string>()
@@ -223,21 +222,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             foreach (var dependency in dependencies)
             {
-                var projectDependency = dependency.Library as ProjectDescription;
-
-                if (projectDependency != null)
-                {
-                    if (projectDependency.Project.Files.SourceFiles.Any())
-                    {
-                        var projectOutputPath = CompilerUtil.GetCompilationOutput(projectDependency.Project, projectDependency.Framework, args.ConfigValue, outputPath);
-                        references.Add(projectOutputPath);
-                    }
-                }
-                else
-                {
-                    references.AddRange(dependency.CompilationAssemblies.Select(r => r.ResolvedPath));
-                }
-
+                references.AddRange(dependency.CompilationAssemblies.Select(r => r.ResolvedPath));
                 compilerArgs.AddRange(dependency.SourceReferences.Select(s => $"\"{s}\""));
 
                 // Add analyzer references
@@ -289,7 +274,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var compilerName = CompilerUtil.ResolveCompilerName(context);
 
             // Write RSP file
-            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{context.ProjectFile.Name}.rsp");
+            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
             // Run pre-compile event

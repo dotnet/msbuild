@@ -58,13 +58,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 string.Equals("on", val, StringComparison.OrdinalIgnoreCase));
         }
 
-        protected void TestOutputExecutable(
-            string outputDir,
+        protected void TestExecutable(string outputDir,
             string executableName,
-            string expectedOutput,
-            bool native = false)
+            string expectedOutput)
         {
-            var executablePath = Path.Combine(GetCompilationOutputPath(outputDir, native), executableName);
+            var executablePath = Path.Combine(outputDir, executableName);
 
             var executableCommand = new TestCommand(executablePath);
 
@@ -72,7 +70,16 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             result.Should().HaveStdOut(expectedOutput);
             result.Should().NotHaveStdErr();
-            result.Should().Pass();
+            result.Should().Pass();            
+        }
+        
+        protected void TestOutputExecutable(
+            string outputDir,
+            string executableName,
+            string expectedOutput,
+            bool native = false)
+        {
+            TestExecutable(GetCompilationOutputPath(outputDir, native), executableName, expectedOutput);
         }
 
         protected void TestNativeOutputExecutable(string outputDir, string executableName, string expectedOutput)

@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static string GetDepsPath(ProjectContext context, string buildConfiguration)
         {
-            return Path.Combine(context.GetOutputDirectoryPath(buildConfiguration),
+            return Path.Combine(context.GetOutputPathCalculator().GetOutputDirectoryPath(buildConfiguration),
                 context.ProjectFile.Name + FileNameSuffixes.Deps);
         }
 

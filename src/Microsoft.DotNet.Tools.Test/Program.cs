@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Test
             var parentProcessIdOption = app.Option("--parentProcessId", "Used by IDEs to specify their process ID. Test will exit if the parent process does.", CommandOptionType.SingleValue);
             var portOption = app.Option("--port", "Used by IDEs to specify a port number to listen for a connection.", CommandOptionType.SingleValue);
             var projectPath = app.Argument("<PROJECT>", "The project to test, defaults to the current directory. Can be a path to a project.json or a project directory.");
-            
+
             app.OnExecute(() =>
             {
                 try
@@ -51,17 +51,17 @@ namespace Microsoft.DotNet.Tools.Test
 
                         RegisterForParentProcessExit(processId);
                     }
-                    
+
                     var projectContexts = CreateProjectContexts(projectPath.Value);
 
                     var projectContext = projectContexts.First();
 
                     var testRunner = projectContext.ProjectFile.TestRunner;
-                    
+
                     if (portOption.HasValue())
                     {
                         int port;
-                        
+
                         if (!Int32.TryParse(portOption.Value(), out port))
                         {
                             throw new InvalidOperationException($"{portOption.Value()} is not a valid port number.");
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         private static int RunConsole(ProjectContext projectContext, CommandLineApplication app, string testRunner)
         {
-            var commandArgs = new List<string> {projectContext.GetAssemblyPath(Constants.DefaultConfiguration)};
+            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(Constants.DefaultConfiguration) };
             commandArgs.AddRange(app.RemainingArguments);
 
             return Command.Create($"{GetCommandName(testRunner)}", commandArgs, projectContext.TargetFramework)
@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.Tools.Test
         {
             TestHostTracing.Source.TraceInformation("Starting Discovery");
 
-            var commandArgs = new List<string> { projectContext.GetAssemblyPath(Constants.DefaultConfiguration) };
+            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(Constants.DefaultConfiguration) };
 
             commandArgs.AddRange(new[]
             {
@@ -193,7 +193,7 @@ namespace Microsoft.DotNet.Tools.Test
         {
             TestHostTracing.Source.TraceInformation("Starting Execution");
 
-            var commandArgs = new List<string> { projectContext.GetAssemblyPath(Constants.DefaultConfiguration) };
+            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(Constants.DefaultConfiguration) };
 
             commandArgs.AddRange(new[]
             {
@@ -230,7 +230,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             throw new InvalidOperationException(error);
         }
-        
+
         private static void ExecuteRunnerCommand(string testRunner, ReportingChannel channel, List<string> commandArgs)
         {
             var result = Command.Create(GetCommandName(testRunner), commandArgs, new NuGetFramework("DNXCore", Version.Parse("5.0")))

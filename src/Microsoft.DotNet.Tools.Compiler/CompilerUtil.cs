@@ -125,20 +125,6 @@ namespace Microsoft.DotNet.Tools.Compiler
         // used in incremental compilation
         public static IEnumerable<string> GetCompilationSources(ProjectContext project) => project.ProjectFile.Files.SourceFiles;
 
-        // used in incremental compilation
-        public static string GetCompilationOutput(Project project, NuGetFramework framework, string configuration, string outputPath)
-        {
-            var compilationOptions = project.GetCompilerOptions(framework, configuration);
-            var outputExtension = ".dll";
-
-            if (framework.IsDesktop() && compilationOptions.EmitEntryPoint.GetValueOrDefault())
-            {
-                outputExtension = ".exe";
-            }
-
-            return Path.Combine(outputPath, project.Name + outputExtension);
-        }
-
         // used in incremental compilation for the key file
         public static CommonCompilerOptions ResolveCompilationOptions(ProjectContext context, string configuration)
         {

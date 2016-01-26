@@ -75,12 +75,12 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         protected static void AssertProjectSkipped(string skippedProject, CommandResult buildResult)
         {
-            Assert.Contains($"Project {skippedProject} was previously compiled. Skipping compilation.", buildResult.StdOut, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains($"Project {skippedProject} (DNXCore,Version=v5.0) was previously compiled. Skipping compilation.", buildResult.StdOut, StringComparison.OrdinalIgnoreCase);
         }
 
         protected static void AssertProjectCompiled(string rebuiltProject, CommandResult buildResult)
         {
-            Assert.Contains($"Project {rebuiltProject} will be compiled", buildResult.StdOut, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains($"Project {rebuiltProject} (DNXCore,Version=v5.0) will be compiled", buildResult.StdOut, StringComparison.OrdinalIgnoreCase);
         }
 
         protected string GetBinDirectory()

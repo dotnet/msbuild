@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ProjectModel.Loader
                 dllImports,
 
                 // Add the project's output directory path to ensure project-to-project references get located
-                new[] { context.GetOutputDirectoryPath(configuration) });
+                new[] { context.GetOutputPathCalculator().GetOutputDirectoryPath(configuration) });
         }
     }
 }
