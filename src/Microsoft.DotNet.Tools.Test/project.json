@@ -11,11 +11,11 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc3-23722",
-        "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc3-23722",
-        "System.Diagnostics.TraceSource": "4.0.0-rc3-23722",
-        "Microsoft.NETCore.ConsoleHost": "1.0.0-rc3-23722",
-        "Microsoft.NETCore.TestHost": "1.0.0-rc3-23722",
+        "NETStandard.Library": "1.0.0-rc3-23727",
+        "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc3-23727",
+        "System.Diagnostics.TraceSource": "4.0.0-rc3-23727",
+        "Microsoft.NETCore.ConsoleHost": "1.0.0-rc3-23727",
+        "Microsoft.NETCore.TestHost": "1.0.0-rc3-23727",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
         "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
             "version": "1.0.0-*",
