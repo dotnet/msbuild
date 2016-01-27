@@ -37,7 +37,6 @@
         "Newtonsoft.Json": "7.0.1"
     },
     "frameworks": {
-        "dnxcore50": {
-        }
+        "dnxcore50": { }
     }
 }
