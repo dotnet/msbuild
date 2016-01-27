@@ -26,6 +26,7 @@ downloadMSBuild(){
         curl -sL -o $MSBUILD_ZIP "$MSBUILD_DOWNLOAD_URL"
 
         unzip -q $MSBUILD_ZIP -d $PACKAGES_DIR
+        find "$PACKAGES_DIR/mono-msbuild/bin/Unix/Debug-MONO" -name "*.exe" -exec chmod "+x" '{}' ';'
         rm $MSBUILD_ZIP
     fi
 }
