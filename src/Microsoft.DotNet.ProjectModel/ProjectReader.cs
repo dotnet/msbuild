@@ -510,7 +510,6 @@ namespace Microsoft.DotNet.ProjectModel
             if (binNode != null)
             {
                 targetFrameworkInformation.AssemblyPath = binNode.ValueAsString("assembly");
-                targetFrameworkInformation.PdbPath = binNode.ValueAsString("pdb");
             }
 
             project._targetFrameworks[frameworkName] = targetFrameworkInformation;

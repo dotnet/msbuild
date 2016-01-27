@@ -185,16 +185,8 @@ namespace Microsoft.DotNet.Tools.Publish
                 {
                     Directory.CreateDirectory(destinationDirectory);
                 }
-
-                File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, Path.GetFileName(file.ResolvedPath)), overwrite: true);
                 
-                // Copy pdbs
-                var pdbPath = Path.ChangeExtension(file.ResolvedPath, FileNameSuffixes.DotNet.ProgramDatabase);
-
-                if (File.Exists(pdbPath))
-                {
-                    File.Copy(pdbPath, Path.Combine(destinationDirectory, Path.GetFileName(pdbPath)), overwrite: true);
-                }
+                File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
         }
 

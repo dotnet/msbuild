@@ -152,21 +152,47 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         private LibraryExport ExportProject(ProjectDescription project)
         {
             var compileAssemblies = new List<LibraryAsset>();
+            var runtimeAssemblies = new List<LibraryAsset>();
             var sourceReferences = new List<string>();
 
             if (!string.IsNullOrEmpty(project.TargetFrameworkInfo?.AssemblyPath))
             {
                 // Project specifies a pre-compiled binary. We're done!
                 var assemblyPath = ResolvePath(project.Project, _configuration, project.TargetFrameworkInfo.AssemblyPath);
-                compileAssemblies.Add(new LibraryAsset(
+                var pdbPath = Path.ChangeExtension(assemblyPath, "pdb");
+                
+                var compileAsset = new LibraryAsset(
                     project.Project.Name,
-                    assemblyPath,
-                    Path.Combine(project.Project.ProjectDirectory, assemblyPath)));
+                    null,
+                    Path.GetFullPath(Path.Combine(project.Project.ProjectDirectory, assemblyPath)));
+
+                var pdbAsset = new LibraryAsset(
+                    project.Project.Name + "/pdb",
+                    null,
+                    Path.GetFullPath(Path.Combine(project.Project.ProjectDirectory, pdbPath)));
+
+                compileAssemblies.Add(compileAsset);
+                
+                runtimeAssemblies.Add(compileAsset);
+                runtimeAssemblies.Add(pdbAsset);
             }
             else
             {
-                var assemblyPath = project.GetOutputPathCalculator().GetAssemblyPath(_configuration);
+                var outputCalculator = project.GetOutputPathCalculator();
+                var assemblyPath = outputCalculator.GetAssemblyPath(_configuration);
                 compileAssemblies.Add(new LibraryAsset(project.Identity.Name, null, assemblyPath));
+                
+                foreach (var path in outputCalculator.GetBuildOutputs(_configuration))
+                {
+                    if (Path.GetFileNameWithoutExtension(path) == project.Identity.Name)
+                    {
+                        continue;
+                    }
+
+                    // We're going to call this asset 
+                    var extension = Path.GetExtension(path).Substring(1);
+                    runtimeAssemblies.Add(new LibraryAsset(project.Identity.Name + "/" + extension, null, path));
+                }
             }
 
             // Add shared sources
@@ -179,7 +205,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             // just the same as compileAssemblies and nativeLibraries are empty
             // Also no support for analyzer projects
             return new LibraryExport(project, compileAssemblies, sourceReferences,
-                compileAssemblies, Array.Empty<LibraryAsset>(), Array.Empty<AnalyzerReference>());
+                runtimeAssemblies, Array.Empty<LibraryAsset>(), Array.Empty<AnalyzerReference>());
         }
 
         private static string ResolvePath(Project project, string configuration, string path)

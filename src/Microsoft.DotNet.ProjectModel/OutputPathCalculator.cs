@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using NuGet.Frameworks;
@@ -87,6 +88,21 @@ namespace Microsoft.DotNet.ProjectModel
             return Path.Combine(
                 GetOutputDirectoryPath(buildConfiguration),
                 _project.Name + outputExtension);
+        }
+        
+        public IEnumerable<string> GetBuildOutputs(string buildConfiguration)
+        {
+            var assemblyPath = GetAssemblyPath(buildConfiguration);
+            
+            yield return assemblyPath;
+            yield return Path.ChangeExtension(assemblyPath, "pdb");
+
+            var compilationOptions = _project.GetCompilerOptions(_framework, buildConfiguration);
+            
+            if (compilationOptions.GenerateXmlDocumentation == true)
+            {
+                yield return Path.ChangeExtension(assemblyPath, "xml");
+            }
         }
         
         public string GetExecutablePath(string buildConfiguration)
