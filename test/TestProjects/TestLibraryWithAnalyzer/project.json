@@ -1,0 +1,15 @@
+﻿{
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23704",
+        "System.Runtime.Analyzers": { "version": "1.1.0", "type": "build" }
+    },
+
+    "frameworks": {
+        "dnxcore50": { }
+    }
+}

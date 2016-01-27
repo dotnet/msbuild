@@ -35,6 +35,8 @@ namespace Microsoft.DotNet.ProjectModel
                 return Path.GetDirectoryName(ProjectFilePath);
             }
         }
+        
+        public AnalyzerOptions AnalyzerOptions { get; set; }
 
         public string Name { get; set; }
 

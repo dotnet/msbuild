@@ -38,6 +38,24 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             Assert.True(File.Exists(outputXml));
             Assert.Contains("Gets the message from the helper", File.ReadAllText(outputXml));
         }
+        
+        [Fact]
+        public void LibraryWithAnalyzer()
+        {
+            var root = Temp.CreateDirectory();
+            var testLibDir = root.CreateDirectory("TestLibraryWithAnalyzer");
+            
+            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibraryWithAnalyzer"), testLibDir);
+            RunRestore(testLibDir.Path);
+            
+            // run compile
+            var outputDir = Path.Combine(testLibDir.Path, "bin");
+            var testProject = GetProjectPath(testLibDir);
+            var buildCmd = new BuildCommand(testProject, output: outputDir);
+            var result = buildCmd.ExecuteWithCapturedOutput();
+            result.Should().Pass();
+            Assert.Contains("CA1018", result.StdErr);
+        }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
         {

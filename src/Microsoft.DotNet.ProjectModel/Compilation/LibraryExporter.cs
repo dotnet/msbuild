@@ -79,7 +79,9 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
                 var compilationAssemblies = new List<LibraryAsset>();
                 var sourceReferences = new List<string>();
+                var analyzerReferences = new List<AnalyzerReference>();
                 var libraryExport = GetExport(library);
+                
 
                 // We need to filter out source references from non-root libraries,
                 // so we rebuild the library export
@@ -91,16 +93,15 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                     }
                 }
 
+                // Source and analyzer references are not transitive
                 if (library.Parents.Contains(_rootProject))
                 {
-                    // Only process source references for direct dependencies
-                    foreach (var sourceReference in libraryExport.SourceReferences)
-                    {
-                        sourceReferences.Add(sourceReference);
-                    }
+                    sourceReferences.AddRange(libraryExport.SourceReferences);
+                    analyzerReferences.AddRange(libraryExport.AnalyzerReferences);
                 }
 
-                yield return new LibraryExport(library, compilationAssemblies, sourceReferences, libraryExport.RuntimeAssemblies, libraryExport.NativeLibraries);
+                yield return new LibraryExport(library, compilationAssemblies, sourceReferences,
+                    libraryExport.RuntimeAssemblies, libraryExport.NativeLibraries, analyzerReferences);
             }
         }
 
@@ -141,8 +142,11 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             {
                 sourceReferences.Add(sharedSource);
             }
+            
+            var analyzers = GetAnalyzerReferences(package);
 
-            return new LibraryExport(package, compileAssemblies, sourceReferences, runtimeAssemblies, nativeLibraries);
+            return new LibraryExport(package, compileAssemblies,
+                sourceReferences, runtimeAssemblies, nativeLibraries, analyzers);
         }
 
         private LibraryExport ExportProject(ProjectDescription project)
@@ -166,8 +170,11 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 sourceReferences.Add(sharedFile);
             }
 
-            // No support for ref or native in projects, so runtimeAssemblies is just the same as compileAssemblies and nativeLibraries are empty
-            return new LibraryExport(project, compileAssemblies, sourceReferences, compileAssemblies, Enumerable.Empty<LibraryAsset>());
+            // No support for ref or native in projects, so runtimeAssemblies is
+            // just the same as compileAssemblies and nativeLibraries are empty
+            // Also no support for analyzer projects
+            return new LibraryExport(project, compileAssemblies, sourceReferences,
+                compileAssemblies, Array.Empty<LibraryAsset>(), Array.Empty<AnalyzerReference>());
         }
 
         private static string ResolvePath(Project project, string configuration, string path)
@@ -191,11 +198,12 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             return new LibraryExport(
                 library,
                 string.IsNullOrEmpty(library.Path) ?
-                    Enumerable.Empty<LibraryAsset>() :
+                    Array.Empty<LibraryAsset>() :
                     new[] { new LibraryAsset(library.Identity.Name, library.Path, library.Path) },
-                Enumerable.Empty<string>(),
-                Enumerable.Empty<LibraryAsset>(),
-                Enumerable.Empty<LibraryAsset>());
+                Array.Empty<string>(),
+                Array.Empty<LibraryAsset>(),
+                Array.Empty<LibraryAsset>(),
+                Array.Empty<AnalyzerReference>());
         }
 
         private IEnumerable<string> GetSharedSources(PackageDescription package)
@@ -205,6 +213,74 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 .Files
                 .Where(path => path.StartsWith("shared" + Path.DirectorySeparatorChar))
                 .Select(path => Path.Combine(package.Path, path));
+        }
+        
+        private IEnumerable<AnalyzerReference> GetAnalyzerReferences(PackageDescription package)
+        {
+            var analyzers = package
+                .Library
+                .Files
+                .Where(path => path.StartsWith("analyzers" + Path.DirectorySeparatorChar) &&
+                               path.EndsWith(".dll"));
+                               
+            var analyzerRefs = new List<AnalyzerReference>();
+            // See https://docs.nuget.org/create/analyzers-conventions for the analyzer
+            // NuGet specification
+            foreach (var analyzer in analyzers)
+            {
+                var specifiers = analyzer.Split(Path.DirectorySeparatorChar);
+                
+                var assemblyPath = Path.Combine(package.Path, analyzer);
+                
+                // $/analyzers/{Framework Name}{Version}/{Supported Architecture}/{Supported Programming Language}/{Analyzer}.dll 
+                switch (specifiers.Length)
+                {
+                    // $/analyzers/{analyzer}.dll
+                    case 2:
+                        analyzerRefs.Add(new AnalyzerReference(
+                            assembly: assemblyPath,
+                            framework: null,
+                            language: null,
+                            runtimeIdentifier: null
+                        ));
+                        break;
+                        
+                    // $/analyzers/{framework}/{analyzer}.dll
+                    case 3:
+                        analyzerRefs.Add(new AnalyzerReference(
+                            assembly: assemblyPath,
+                            framework: NuGetFramework.Parse(specifiers[1]),
+                            language: null,
+                            runtimeIdentifier: null
+                        ));
+                        break;
+                        
+                    // $/analyzers/{framework}/{language}/{analyzer}.dll
+                    case 4:
+                        analyzerRefs.Add(new AnalyzerReference(
+                            assembly: assemblyPath,
+                            framework: NuGetFramework.Parse(specifiers[1]),
+                            language: specifiers[2],
+                            runtimeIdentifier: null
+                        ));
+                        break;
+                    
+                    // $/analyzers/{framework}/{runtime}/{language}/{analyzer}.dll
+                    case 5:
+                        analyzerRefs.Add(new AnalyzerReference(
+                            assembly: assemblyPath,
+                            framework: NuGetFramework.Parse(specifiers[1]),
+                            language: specifiers[3],
+                            runtimeIdentifier: specifiers[2]
+                        ));
+                        break;
+                        
+                    // Anything less than 2 specifiers or more than 4 is
+                    // illegal according to the specification and will be
+                    // ignored
+                }
+            }
+            return analyzerRefs;
         }
 
 

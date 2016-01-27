@@ -355,7 +355,9 @@ namespace Microsoft.DotNet.ProjectModel
         private void BuildTargetFrameworksAndConfigurations(Project project, JsonObject projectJsonObject, ICollection<DiagnosticMessage> diagnostics)
         {
             // Get the shared compilationOptions
-            project._defaultCompilerOptions = GetCompilationOptions(projectJsonObject) ?? new CommonCompilerOptions();
+            project._defaultCompilerOptions = GetCompilationOptions(projectJsonObject,
+                                                                    project)
+                ?? new CommonCompilerOptions();
 
             project._defaultTargetFrameworkConfiguration = new TargetFrameworkInformation
             {
@@ -392,7 +394,8 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 foreach (var configKey in configurationsSection.Keys)
                 {
-                    var compilerOptions = GetCompilationOptions(configurationsSection.ValueAsJsonObject(configKey));
+                    var compilerOptions = GetCompilationOptions(configurationsSection.ValueAsJsonObject(configKey),
+                                                                project);
 
                     // Only use this as a configuration if it's not a target framework
                     project._compilerOptionsByConfiguration[configKey] = compilerOptions;
@@ -449,7 +452,7 @@ namespace Microsoft.DotNet.ProjectModel
         private bool BuildTargetFrameworkNode(Project project, string frameworkKey, JsonObject frameworkValue)
         {
             // If no compilation options are provided then figure them out from the node
-            var compilerOptions = GetCompilationOptions(frameworkValue) ??
+            var compilerOptions = GetCompilationOptions(frameworkValue, project) ??
                                   new CommonCompilerOptions();
 
             var frameworkName = NuGetFramework.Parse(frameworkKey);
@@ -515,12 +518,43 @@ namespace Microsoft.DotNet.ProjectModel
             return true;
         }
 
-        private static CommonCompilerOptions GetCompilationOptions(JsonObject rawObject)
+        private static CommonCompilerOptions GetCompilationOptions(JsonObject rawObject, Project project)
         {
             var rawOptions = rawObject.ValueAsJsonObject("compilationOptions");
             if (rawOptions == null)
             {
                 return null;
+            }
+
+            var analyzerOptionsJson = rawOptions.Value("analyzerOptions") as JsonObject;
+            if (analyzerOptionsJson != null)
+            {
+                var analyzerOptions = new AnalyzerOptions();
+
+                foreach (var key in analyzerOptionsJson.Keys)
+                {
+                    switch (key)
+                    {
+                        case "languageId":
+                            var languageId = analyzerOptionsJson.ValueAsString(key);
+                            if (languageId == null)
+                            {
+                                throw FileFormatException.Create(
+                                    "The analyzer languageId must be a string",
+                                    analyzerOptionsJson.Value(key),
+                                    project.ProjectFilePath);
+                            }
+                            analyzerOptions.LanguageId = languageId;
+                            break;
+
+                        default:;
+                            throw FileFormatException.Create(
+                               $"Unrecognized analyzerOption key: {key}",
+                               project.ProjectFilePath);
+                    }
+                }
+
+                project.AnalyzerOptions = analyzerOptions;
             }
 
             return new CommonCompilerOptions
