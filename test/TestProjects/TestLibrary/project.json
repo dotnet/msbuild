@@ -1,13 +1,11 @@
-﻿{
+{
     "version": "1.0.0-*",
     "compilationOptions": {
         "nowarn": [ "CS1591" ],
         "xmlDoc": true
     },
     "dependencies": {
-        "System.Runtime": "4.0.21-rc2-23704",
-        "System.Console": "4.0.0-rc2-23704",
-        "Microsoft.NETCore.Platforms": "1.0.1-rc2-23704"
+        "NETStandard.Library": "1.0.0-rc3-23727"
     },
 
     "frameworks": {

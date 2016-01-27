@@ -80,6 +80,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             threadErr.Join();
 
             var result = new CommandResult(
+                process.StartInfo,
                 process.ExitCode, 
                 stdOut.GetCapturedOutput(), 
                 stdErr.GetCapturedOutput());

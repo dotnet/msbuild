@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
@@ -9,12 +9,12 @@
     ],
     "dependencies": {
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
-        "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23704",
-        "Microsoft.NETCore.Runtime": "1.0.1-rc2-23704",
-        "System.Console": "4.0.0-rc2-23704"
+        "NETStandard.Library": "1.0.0-rc3-23722"
     },
 
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     }
 }

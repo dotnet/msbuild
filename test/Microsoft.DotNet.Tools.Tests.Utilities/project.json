@@ -1,26 +1,22 @@
-﻿{
-  "version": "1.0.0-*",
-  "description": "Microsoft.DotNet.Tools.Tests.Utilities Class Library",
+{
+    "version": "1.0.0-*",
+    "description": "Microsoft.DotNet.Tools.Tests.Utilities Class Library",
 
-  "dependencies": {
-    "System.Collections": "4.0.11-rc2-23714",
-    "System.Collections.Immutable": "1.1.38-rc2-23714",
-    "System.Linq": "4.0.1-rc2-23714",
-    "System.Threading": "4.0.11-rc2-23714",
-    "System.IO.FileSystem": "4.0.1-rc2-23714",
-    "System.IO": "4.0.11-rc2-23714",
-    "System.Runtime.InteropServices": "4.0.21-rc2-23714",
-    "System.Text.RegularExpressions": "4.0.11-rc2-23714",
-    "FluentAssertions": "4.0.0",
-    "xunit": "2.1.0",
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc3-23727",
+        "System.Collections.Immutable": "1.2.0-rc3-23727",
+        "FluentAssertions": "4.0.0",
+        "xunit": "2.1.0",
 
-    "Microsoft.DotNet.Cli.Utils": {"target":"project"},
-    "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
-  },
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
+    },
 
 
-  "frameworks": {
-    "dnxcore50": { }
-  }
+    "frameworks": {
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
+    }
 }
 

@@ -21,64 +21,74 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public AndConstraint<CommandResultAssertions> ExitWith(int expectedExitCode)
         {
             Execute.Assertion.ForCondition(_commandResult.ExitCode == expectedExitCode)
-                .FailWith("Expected command to exit with {0} but it exited with {1}.", expectedExitCode, _commandResult.ExitCode);
+                .FailWith(AppendDiagnosticsTo($"Expected command to exit with {expectedExitCode} but it did not."));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> Pass()
         {
             Execute.Assertion.ForCondition(_commandResult.ExitCode == 0)
-                .FailWith("Expected command to pass but it exited with {0}.", _commandResult.ExitCode);
+                .FailWith(AppendDiagnosticsTo($"Expected command to pass but it did not."));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> Fail()
         {
             Execute.Assertion.ForCondition(_commandResult.ExitCode != 0)
-                .FailWith("Expected command to fail but it exited with {0}.", _commandResult.ExitCode);
+                .FailWith(AppendDiagnosticsTo($"Expected command to fail but it did not."));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> HaveStdOut()
         {
             Execute.Assertion.ForCondition(!string.IsNullOrEmpty(_commandResult.StdOut))
-                .FailWith("Command did not output anything to stdout");
+                .FailWith(AppendDiagnosticsTo("Command did not output anything to stdout"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> HaveStdOut(string expectedOutput)
         {
             Execute.Assertion.ForCondition(_commandResult.StdOut.Equals(expectedOutput, StringComparison.Ordinal))
-                .FailWith($"Command did not output with Expected Output. Expected: {expectedOutput} Actual: {_commandResult.StdOut}");
+                .FailWith(AppendDiagnosticsTo($"Command did not output with Expected Output. Expected: {expectedOutput}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> StdOutMatchPattern(string pattern, RegexOptions options = RegexOptions.None)
         {
             Execute.Assertion.ForCondition(Regex.Match(_commandResult.StdOut, pattern, options).Success)
-                .FailWith($"Matching the command output failed. Pattern: {pattern}{Environment.NewLine} input: {_commandResult.StdOut}");
+                .FailWith(AppendDiagnosticsTo($"Matching the command output failed. Pattern: {pattern}{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> HaveStdErr()
         {
             Execute.Assertion.ForCondition(!string.IsNullOrEmpty(_commandResult.StdErr))
-                .FailWith("Command did not output anything to stderr");
+                .FailWith(AppendDiagnosticsTo("Command did not output anything to stderr."));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> NotHaveStdOut()
         {
             Execute.Assertion.ForCondition(string.IsNullOrEmpty(_commandResult.StdOut))
-                .FailWith("Expected command to not output to stdout but found - {0}{1}", Environment.NewLine, _commandResult.StdOut);
+                .FailWith(AppendDiagnosticsTo($"Expected command to not output to stdout but it was not:"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
         public AndConstraint<CommandResultAssertions> NotHaveStdErr()
         {
             Execute.Assertion.ForCondition(string.IsNullOrEmpty(_commandResult.StdErr))
-                .FailWith("Expected command to not output to stderr but found - {0}{1}", Environment.NewLine, _commandResult.StdErr);
+                .FailWith(AppendDiagnosticsTo("Expected command to not output to stderr but it was not:"));
             return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        private string AppendDiagnosticsTo(string s)
+        {
+            return s + $"{Environment.NewLine}" +
+                       $"File Name: {_commandResult.StartInfo.FileName}{Environment.NewLine}" +
+                       $"Arguments: {_commandResult.StartInfo.Arguments}{Environment.NewLine}" +
+                       $"Exit Code: {_commandResult.ExitCode}{Environment.NewLine}" +
+                       $"StdOut:{Environment.NewLine}{_commandResult.StdOut}{Environment.NewLine}" +
+                       $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}"; ;
         }
     }
 }

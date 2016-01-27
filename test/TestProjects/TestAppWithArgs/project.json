@@ -1,14 +1,11 @@
-﻿{
+{
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
     },
 
     "dependencies": {
-        "Microsoft.NETCore.Runtime": "1.0.1-rc2-23714",
-        "System.IO": "4.0.10-rc2-23714",
-        "System.Console": "4.0.0-rc2-23714",
-        "System.Runtime": "4.0.21-rc2-23714"
+        "NETStandard.Library": "1.0.0-rc3-23727"
     },
 
     "frameworks": {

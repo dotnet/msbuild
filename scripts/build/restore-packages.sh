@@ -18,9 +18,9 @@ source "$DIR/../common/_common.sh"
 
 header "Restoring packages"
 
-$DNX_ROOT/dnu restore "$REPOROOT/src" --quiet
-$DNX_ROOT/dnu restore "$REPOROOT/test" --quiet
-$DNX_ROOT/dnu restore "$REPOROOT/tools" --quiet
+dotnet restore "$REPOROOT/src" --runtime $RID
+dotnet restore "$REPOROOT/test" --runtime $RID
+dotnet restore "$REPOROOT/tools" --runtime $RID
 set +e
-$DNX_ROOT/dnu restore "$REPOROOT/testapp" --quiet >/dev/null 2>&1
+dotnet restore "$REPOROOT/testapp" --runtime $RID >/dev/null 2>&1
 set -e

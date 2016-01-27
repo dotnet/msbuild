@@ -1,25 +1,25 @@
-﻿{
-  "name": "dotnet-build",
-  "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
-  "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23704",    
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
-    "Microsoft.DotNet.Tools.Compiler": "1.0.0-*",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils.Sources": {
-      "type": "build",
-      "version": "1.0.0-*"
+{
+    "name": "dotnet-build",
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc3-23727",
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
+        "Microsoft.DotNet.Tools.Compiler": "1.0.0-*",
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        }
+    },
+    "frameworks": {
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
+    },
+    "scripts": {
     }
-  },
-  "frameworks": {
-    "dnxcore50": { 
-        "imports": "portable-win8+net45"
-    }
-  },
-  "scripts": {
-  }
 }

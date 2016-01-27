@@ -1,41 +1,43 @@
 {
-  "name": "dotnet-test",
-  "description": "Test host for discovering and running unit tests at design time, such as in Visual Studio.",
-  "version": "1.0.0-*",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/dotnet/cli"
-  },
-  "compilationOptions": {
-    "warningsAsErrors": true,
-    "emitEntryPoint": true
-  },
-  "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23704",
-    "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-23704",
-    "System.Diagnostics.TraceSource": "4.0.0-rc2-23704",
-
-    "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23616",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23616",
-    
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.Extensions.Testing.Abstractions": "1.0.0-*",
-    "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+    "name": "dotnet-test",
+    "description": "Test host for discovering and running unit tests at design time, such as in Visual Studio.",
+    "version": "1.0.0-*",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/dotnet/cli"
     },
-    "Microsoft.Dnx.Runtime.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+    "compilationOptions": {
+        "warningsAsErrors": true,
+        "emitEntryPoint": true
     },
-    "Microsoft.Extensions.CommandLineUtils.Sources": {
-      "version": "1.0.0-*",
-      "type": "build"
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc3-23727",
+        "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc3-23727",
+        "System.Diagnostics.TraceSource": "4.0.0-rc3-23727",
+        "Microsoft.NETCore.ConsoleHost": "1.0.0-rc3-23727",
+        "Microsoft.NETCore.TestHost": "1.0.0-rc3-23727",
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
+            "version": "1.0.0-*",
+            "type": "build"
+        },
+        "Microsoft.Dnx.Runtime.Sources": {
+            "version": "1.0.0-*",
+            "type": "build"
+        },
+        "Microsoft.Extensions.Testing.Abstractions": {
+            "version": "1.0.0-*",
+            "type": "build"
+        },
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+            "version": "1.0.0-*",
+            "type": "build"
+        },
+        "Microsoft.Extensions.Logging": "1.0.0-rc2-16011",
+        "Newtonsoft.Json": "7.0.1"
     },
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-16023"
-  },
-  "frameworks": {
-    "dnxcore50": {
+    "frameworks": {
+        "dnxcore50": {
+        }
     }
-  }
 }

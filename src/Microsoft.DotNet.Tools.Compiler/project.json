@@ -1,11 +1,11 @@
-﻿{
+{
     "name": "dotnet-compile",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23704",
+        "NETStandard.Library": "1.0.0-rc3-23727",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
@@ -21,7 +21,7 @@
         }
     },
     "frameworks": {
-        "dnxcore50": { 
+        "dnxcore50": {
             "imports": "portable-net451+win8"
         }
     },

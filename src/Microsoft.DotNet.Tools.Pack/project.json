@@ -1,27 +1,27 @@
 {
-  "name": "dotnet-pack",
-  "version": "1.0.0-*",
-  "compilationOptions": {
-    "emitEntryPoint": true
-  },
-  "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23704",
-    "System.IO.Compression.ZipFile": "4.0.1-rc2-23704",
-    
-    "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-    "Microsoft.Extensions.CommandLineUtils.Sources": {
-      "type": "build",
-      "version": "1.0.0-*"
+    "name": "dotnet-pack",
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc3-23727",
+        "System.IO.Compression.ZipFile": "4.0.1-rc3-23727",
+
+        "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        }
+    },
+    "frameworks": {
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
+    },
+    "scripts": {
     }
-  },
-  "frameworks": {
-    "dnxcore50": { 
-        "imports": "portable-net451+win8"
-    }
-  },
-  "scripts": {
-  }
 }
 

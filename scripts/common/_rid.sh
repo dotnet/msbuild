@@ -23,7 +23,7 @@ if [ -z "$RID" ]; then
             export RID=ubuntu.14.04-x64
         elif [ "$(cat /etc/*-release | grep -cim1 centos)" -eq 1 ]; then
             export OSNAME=centos
-            export RID=centos.7.1-x64
+            export RID=centos.7-x64
         else
             error "unknown Linux Distro" 1>&2
         fi

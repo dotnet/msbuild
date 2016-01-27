@@ -1,9 +1,9 @@
-﻿{
+{
     "version": "1.0.0-*",
     "testRunner": "xunit",
     "dependencies": {
         "Microsoft.Extensions.DependencyModel": "1.0.0-*",
-        "Newtonsoft.Json": "6.0.0",
+        "Newtonsoft.Json": "6.0.0"
     },
 
     "frameworks": {
@@ -11,7 +11,7 @@
         "dnxcore50": {
             "imports" : "portable-net45+wp80+win8",
             "dependencies": {  
-                "NETStandard.Library": "1.0.0-rc2-23704"
+                "NETStandard.Library": "1.0.0-rc3-23722"
             }
         }
     }

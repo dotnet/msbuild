@@ -1,24 +1,27 @@
 {
-  "description": "Abstractions for test runners to communicate to a tool, such as Visual Studio.",
-  "version": "1.0.0-*",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/dotnet/cli"
-  },
-  "compilationOptions": {
-    "warningsAsErrors": true,
-    "keyFile": "../../tools/Key.snk"
-  },
-  "dependencies": {
-    "Newtonsoft.Json": "7.0.1",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc2-16011",
-    "NETStandard.Library": "1.0.0-rc2-23704",
-    "System.Resources.ResourceManager": "4.0.1-rc2-23704",
-    "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23704"
-  },
-  "frameworks": {
-    "dnxcore50": {
+    "description": "Abstractions for test runners to communicate to a tool, such as Visual Studio.",
+    "version": "1.0.0-*",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/dotnet/cli"
+    },
+    "compilationOptions": {
+        "warningsAsErrors": true,
+        "keyFile": "../../tools/Key.snk"
+    },
+    "dependencies": {
+        "Newtonsoft.Json": "7.0.1",
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc2-15935",
+        "NETStandard.Library": "1.0.0-rc3-23727",
+        "System.Resources.ResourceManager": "4.0.1-rc3-23727",
+        "System.Runtime.Serialization.Primitives": "4.1.0-rc3-23727"
+    },
+    "frameworks": {
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
+    },
+    "scripts": {
     }
-  }
 }

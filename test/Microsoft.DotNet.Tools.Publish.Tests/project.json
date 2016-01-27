@@ -1,24 +1,25 @@
-﻿{
-  "version": "1.0.0-*",
+{
+    "version": "1.0.0-*",
 
-  "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23706",
-    "Microsoft.NETCore.TestHost": "1.0.0-rc2-23706",
-    "System.Text.RegularExpressions": "4.0.11-rc2-23706",
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc3-23727",
+        "Microsoft.NETCore.TestHost": "1.0.0-rc2-*",
 
-    "xunit": "2.1.0",
-    "xunit.console.netcore": "1.0.2-prerelease-00101",
-    "xunit.netcore.extensions": "1.0.0-prerelease-00153",
-    "xunit.runner.utility": "2.1.0",
+        "xunit": "2.1.0",
+        "xunit.console.netcore": "1.0.2-prerelease-00101",
+        "xunit.netcore.extensions": "1.0.0-prerelease-*",
+        "xunit.runner.utility": "2.1.0",
 
-    "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
-    "Microsoft.DotNet.Cli.Utils": {
-        "target": "project",
-        "type": "build"
-    }
-  },
+        "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
+        "Microsoft.DotNet.Cli.Utils": {
+            "target": "project",
+            "type": "build"
+        }
+    },
 
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     }
 }

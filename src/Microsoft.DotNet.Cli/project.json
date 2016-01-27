@@ -5,8 +5,8 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23704",
-        
+        "NETStandard.Library": "1.0.0-rc3-23727",
+
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
         "Microsoft.Extensions.CommandLineUtils.Sources": {
             "type": "build",
@@ -14,7 +14,9 @@
         }
     },
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     },
     "scripts": {
     }

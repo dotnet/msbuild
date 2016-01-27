@@ -1,15 +1,17 @@
 {
-  "dependencies": {
-    "Microsoft.NETCore.Platforms": "1.0.1-rc2-23706",
-    "Microsoft.DotNet.ProjectModel": {"target":"project"},
-    "Microsoft.DotNet.ProjectModel.Server": {"target":"project"},
-    "Newtonsoft.Json": "7.0.1",
-    "xunit.runner.aspnet": "2.0.0-aspnet-rc2-16068"
-  },
-  "frameworks": {
-    "dnxcore50": { }
-  },
-  "commands": {
-    "test": "xunit.runner.aspnet"
-  }
+    "dependencies": {
+        "Microsoft.NETCore.Platforms": "1.0.1-rc3-23727",
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.DotNet.ProjectModel.Server": "1.0.0-*",
+        "Newtonsoft.Json": "7.0.1",
+        "xunit.runner.aspnet": "2.0.0-aspnet-rc2-16068"
+    },
+    "frameworks": {
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
+    },
+    "commands": {
+        "test": "xunit.runner.aspnet"
+    }
 }

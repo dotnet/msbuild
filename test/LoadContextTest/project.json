@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
     "description": "LoadContextTest Console Application",
 
@@ -7,18 +7,14 @@
     },
 
     "dependencies": {
-        "Microsoft.CSharp": "4.0.1-beta-23516",
-        "System.Collections": "4.0.11-beta-23516",
-        "System.Console": "4.0.0-beta-23516",
-        "System.Linq": "4.0.1-beta-23516",
-        "System.Threading": "4.0.11-beta-23516",
-
+        "NETStandard.Library" : "1.0.0-rc3-23727",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530",
-
-        "Microsoft.DotNet.ProjectModel.Loader": {"target":"project"}
+        "Microsoft.DotNet.ProjectModel.Loader": "1.0.0-*"
     },
 
     "frameworks": {
-        "dnxcore50": { }
+        "dnxcore50": {
+            "imports": "portable-net451+win8"
+        }
     }
 }

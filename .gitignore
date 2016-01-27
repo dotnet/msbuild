@@ -1,5 +1,8 @@
 ### Repo-specific things ###
 
+# NuGet keeps dropping
+Library/
+
 # NuGet v3 restore drops these even though we don't use MSBuild :(
 *.nuget.targets
 *.nuget.props
