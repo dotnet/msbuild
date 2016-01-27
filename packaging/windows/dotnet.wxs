@@ -27,9 +27,6 @@
         <CustomActionRef Id="WixBroadcastEnvironmentChange" />
 
         <PropertyRef Id="INSTALLEDCLIBUILDTYPE"/>
-        <Condition Message="$(var.IncompatibleBuildTypeError)">
-            <![CDATA[NOT INSTALLEDCLIBUILDTYPE OR INSTALLEDCLIBUILDTYPE ~= EXPECTEDCLIBUILDTYPE]]>
-        </Condition>
     </Product>
     <Fragment>
         <Directory Id="TARGETDIR" Name="SourceDir">
