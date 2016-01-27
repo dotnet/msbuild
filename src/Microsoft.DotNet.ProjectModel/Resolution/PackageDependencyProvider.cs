@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 !containsAssembly;
 
             var dependencies = new List<LibraryRange>(targetLibrary.Dependencies.Count + targetLibrary.FrameworkAssemblies.Count);
-            PopulateDependencies(dependencies, targetLibrary);
+            PopulateDependencies(dependencies, targetLibrary, targetFramework);
 
             var path = _packagePathResolver.GetInstallPath(package.Name, package.Version);
 
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
         private void PopulateLegacyPortableDependencies(NuGetFramework targetFramework, List<LibraryRange> dependencies, string packagePath, LockFileTargetLibrary targetLibrary)
         {
             var seen = new HashSet<string>();
-            
+
             foreach (var assembly in targetLibrary.CompileTimeAssemblies)
             {
                 // (ref/lib)/{tfm}/{assembly}
@@ -75,34 +75,34 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 }
 
                 var assemblyTargetFramework = NuGetFramework.Parse(pathParts[1]);
-                
+
                 if (!assemblyTargetFramework.IsPCL)
                 {
                     continue;
                 }
 
                 var assemblyPath = Path.Combine(packagePath, assembly.Path);
-                
+
                 foreach (var dependency in GetDependencies(assemblyPath))
                 {
                     if (seen.Add(dependency))
                     {
                         string path;
                         Version version;
-                        
+
                         // If there exists a reference assembly on the requested framework with the same name then turn this into a
                         // framework assembly dependency
                         if (_frameworkReferenceResolver.TryGetAssembly(dependency, targetFramework, out path, out version))
                         {
-                            dependencies.Add(new LibraryRange(dependency, 
-                                LibraryType.ReferenceAssembly, 
+                            dependencies.Add(new LibraryRange(dependency,
+                                LibraryType.ReferenceAssembly,
                                 LibraryDependencyType.Build));
                         }
                     }
                 }
             }
         }
-        
+
         private static IEnumerable<string> GetDependencies(string path)
         {
             using (var peReader = new PEReader(File.OpenRead(path)))
@@ -118,7 +118,10 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             }
         }
 
-        private void PopulateDependencies(List<LibraryRange> dependencies, LockFileTargetLibrary targetLibrary)
+        private void PopulateDependencies(
+            List<LibraryRange> dependencies,
+            LockFileTargetLibrary targetLibrary,
+            NuGetFramework targetFramework)
         {
             foreach (var dependency in targetLibrary.Dependencies)
             {
@@ -129,12 +132,16 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                     LibraryDependencyType.Default));
             }
 
-            foreach (var frameworkAssembly in targetLibrary.FrameworkAssemblies)
+            if (!targetFramework.IsPackageBased)
             {
-                dependencies.Add(new LibraryRange(
-                    frameworkAssembly, 
-                    LibraryType.ReferenceAssembly, 
-                    LibraryDependencyType.Default));
+                // Only add framework assemblies for non-package based frameworks.
+                foreach (var frameworkAssembly in targetLibrary.FrameworkAssemblies)
+                {
+                    dependencies.Add(new LibraryRange(
+                        frameworkAssembly,
+                        LibraryType.ReferenceAssembly,
+                        LibraryDependencyType.Default));
+                }
             }
         }
 
