@@ -3,31 +3,29 @@
   <?include "Variables.wxi" ?>
   <Fragment>
     <ComponentGroup Id="AuthoredRegistryKeys">
-	  <!--Need this to set the reg keys for both x64 and x86 from the x64 installer-->
-	  <?if $(var.Platform) = x64?>
-      <Component Id="SetupRegistry_x64" Directory="TARGETDIR" Guid="*" Win64="yes">
+      <!-- Include the 64-bit registry keys only in the 64-bit installer -->
+      <?if $(var.Platform) = x64?>
+      <Component Id="SetupRegistry_x64" Directory="TARGETDIR" Win64="yes">
         <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\Setup">
           <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
           <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[DOTNETHOME]" />
           <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
           <RegistryValue Action="write" Name="BuildType" Type="string" Value="$(var.BuildType)" />
         </RegistryKey>
-        <Environment Id="E_PATH" Name="PATH" Value="[DOTNETHOME]bin" Permanent="no" Part="last" Action="set" System="yes" />
-        <Environment Id="E_DOTNET_HOME" Name="DOTNET_HOME" Value="[DOTNETHOME]" Permanent="no" Part="all" Action="set" System="yes" />
       </Component>
-	  <?endif?>
-	  <Component Id="SetupRegistry_x86" Directory="TARGETDIR" Guid="*" Win64="no">
+      <?endif?>
+
+      <!-- Always install the 32-bit registry keys and env vars -->
+      <Component Id="SetupRegistry_x86" Directory="TARGETDIR" Win64="no">
         <RegistryKey Root="HKLM" Key="SOFTWARE\dotnet\Setup">
           <RegistryValue Action="write" Name="Install" Type="integer" Value="1" KeyPath="yes"/>
           <RegistryValue Action="write" Name="InstallDir" Type="string" Value="[DOTNETHOME]" />
           <RegistryValue Action="write" Name="Version" Type="string" Value="$(var.Dotnet_ProductVersion)" />
           <RegistryValue Action="write" Name="BuildType" Type="string" Value="$(var.BuildType)" />
         </RegistryKey>
-		<!--In case of x64 installer these env vars are already set above-->
-		<?if $(var.Platform) = x86?>
-        <Environment Id="E_PATH" Name="PATH" Value="[DOTNETHOME]bin" Permanent="no" Part="last" Action="set" System="yes" />
-        <Environment Id="E_DOTNET_HOME" Name="DOTNET_HOME" Value="[DOTNETHOME]" Permanent="no" Part="all" Action="set" System="yes" />
-		<?endif?>
+
+        <Environment Id="E_PATH" Name="PATH" Value="[DOTNETHOME]bin" Part="last" Action="set" System="yes" />
+        <Environment Id="E_DOTNET_HOME" Name="DOTNET_HOME" Value="[DOTNETHOME]" Part="all" Action="set" System="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
