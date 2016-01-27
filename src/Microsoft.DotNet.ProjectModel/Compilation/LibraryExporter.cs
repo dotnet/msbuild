@@ -184,14 +184,14 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 
                 foreach (var path in outputCalculator.GetBuildOutputs(_configuration))
                 {
-                    if (Path.GetFileNameWithoutExtension(path) == project.Identity.Name)
+                    var assetName = project.Identity.Name;
+                    if (Path.GetFileNameWithoutExtension(path) != project.Identity.Name)
                     {
-                        continue;
+                        assetName += "/" + Path.GetExtension(path).Substring(1);
                     }
 
                     // We're going to call this asset 
-                    var extension = Path.GetExtension(path).Substring(1);
-                    runtimeAssemblies.Add(new LibraryAsset(project.Identity.Name + "/" + extension, null, path));
+                    runtimeAssemblies.Add(new LibraryAsset(assetName, null, path));
                 }
             }
 
