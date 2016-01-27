@@ -8,7 +8,7 @@
     </Property>
 
     <Condition Message="$(var.IncompatibleBuildTypeError)">
-        NOT INSTALLEDCLIBUILDTYPE OR INSTALLEDCLIBUILDTYPE ~= "$(var.BuildType)"
+        Installed OR NOT INSTALLEDCLIBUILDTYPE OR INSTALLEDCLIBUILDTYPE ~= "$(var.BuildType)"
     </Condition>
   </Fragment>
 </Wix>
