@@ -6,7 +6,8 @@
 
         <MajorUpgrade DowngradeErrorMessage="$(var.DowngradeErrorMessage)" Schedule="afterInstallInitialize"/>
 
-        <MediaTemplate CompressionLevel="mszip" EmbedCab="yes"/>
+        <MediaTemplate CompressionLevel="high" EmbedCab="yes"/>
+
         <Feature Id="MainFeature" Title="Main Feature" Level="1">
             <ComponentGroupRef Id="InstallFiles" />
             <ComponentGroupRef Id="AuthoredRegistryKeys"/>
