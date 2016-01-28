@@ -15,13 +15,27 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source "$DIR/../common/_common.sh"
 source "$REPOROOT/scripts/build/generate-version.sh"
 
+
 if [ -z "$DOTNET_CLI_VERSION" ]; then
     TIMESTAMP=$(date "+%Y%m%d%H%M%S")
     DOTNET_CLI_VERSION=0.0.1-dev-t$TIMESTAMP
 fi
+
+$VERSION_BADGE="$REPOROOT/artifacts/version_badge.svg"
 
 header "Generating tarball"
 $DIR/package-dnvm.sh
 
 header "Generating Native Installer"
 $DIR/package-native.sh
+
+header "Downloading version badge"
+status_code=$(curl -w "%{http_code}" -s -o $VERSION_BADGE "https://img.shields.io/badge/version-$DOTNET_CLI_VERSION-blue.svg")
+
+if [ "$status_code" -eq "200"]; then 
+    header "Publishing version badge"
+    $REPOROOT/scripts/publish/publish.sh $VERSION_BADGE
+else
+    info "Downloading the badge failed - $status_code"
+fi
+

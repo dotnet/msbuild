@@ -156,5 +156,10 @@ elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".msi")
 {
     $result = UploadInstallers $file
 }
+elseif ([System.IO.Path]::GetExtension($file).ToLower() -eq ".svg")
+{
+    UploadFile "dev/Binaries/Latest/$([System.IO.Path]::GetFileName($file))" $file
+    $result = $true
+}
 
 exit $result

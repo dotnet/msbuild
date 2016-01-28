@@ -46,6 +46,9 @@ execute(){
     elif [[ $UPLOAD_FILE == *.tar.gz ]]; then
         upload_binaries_to_blob_storage $UPLOAD_FILE
         result=$?
+    elif [[ $UPLOAD_FILE == *.svg ]]; then
+        upload_file_to_blob_storage_azure_cli "dev/Binaries/Latest/$(basename $UPLOAD_FILE)" $UPLOAD_FILE
+        result=0
     fi
 
     exit $result
