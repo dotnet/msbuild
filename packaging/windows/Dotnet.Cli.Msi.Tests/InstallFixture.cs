@@ -14,6 +14,10 @@ namespace Dotnet.Cli.Msi.Tests
         public InstallFixture()
         {
             string msiFile = Environment.GetEnvironmentVariable("CLI_MSI");
+            if(string.IsNullOrEmpty(msiFile))
+            {
+                throw new InvalidOperationException("%CLI_MSI% must point to the msi that is to be tested");
+            }
 
             _msiMgr = new MsiManager(msiFile);
 
