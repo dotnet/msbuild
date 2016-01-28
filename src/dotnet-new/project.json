@@ -17,7 +17,7 @@
     "resource": [ "CSharp_Console/NuGet.Config", "CSharp_Console/Program.cs", "CSharp_Console/project.json", "FSharp_Console/NuGet.config", "FSharp_Console/Program.fs", "FSharp_Console/project.json"],
     "frameworks": {
         "dnxcore50": {
-            "imports": "portable-net451+win8"
+            "imports": "portable-net45+win8"
         }
     },
     "scripts": {
