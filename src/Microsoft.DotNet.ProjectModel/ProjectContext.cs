@@ -120,37 +120,9 @@ namespace Microsoft.DotNet.ProjectModel
                         .BuildAllTargets();
         }
 
-        public string GetAssemblyPath(string buildConfiguration)
+        public OutputPathCalculator GetOutputPathCalculator(string baseOutputPath = null)
         {
-            return Path.Combine(
-                GetOutputDirectoryPath(buildConfiguration),
-                ProjectFile.Name + FileNameSuffixes.DotNet.DynamicLib);
-        }
-
-        public string GetPdbPath(string buildConfiguration)
-        {
-            return Path.Combine(
-                GetOutputDirectoryPath(buildConfiguration),
-                ProjectFile.Name + FileNameSuffixes.DotNet.ProgramDatabase);
-        }
-
-        public string GetOutputDirectoryPath(string buildConfiguration)
-        {
-            var outDir = Path.Combine(
-                ProjectDirectory,
-                DirectoryNames.Bin,
-                buildConfiguration,
-                TargetFramework.GetShortFolderName());
-            if (!string.IsNullOrEmpty(RuntimeIdentifier))
-            {
-                outDir = Path.Combine(outDir, RuntimeIdentifier);
-            }
-            return outDir;
-        }
-
-        public OutputPathCalculator GetOutputPathCalculator(string rootOutputPath)
-        {
-            return new OutputPathCalculator(this, rootOutputPath);
+            return new OutputPathCalculator(ProjectFile, TargetFramework, RuntimeIdentifier, baseOutputPath);
         }
     }
 }

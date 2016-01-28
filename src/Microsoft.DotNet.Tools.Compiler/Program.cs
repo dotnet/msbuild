@@ -57,22 +57,21 @@ namespace Microsoft.DotNet.Tools.Compiler
         }
 
         private static bool CompileNative(
-            ProjectContext context, 
+            ProjectContext context,
             CompilerCommandApp args)
         {
             var outputPathCalculator = context.GetOutputPathCalculator(args.OutputValue);
-            var outputPath = outputPathCalculator.GetCompilationOutputPath(args.ConfigValue);
+            var outputPath = outputPathCalculator.GetOutputDirectoryPath(args.ConfigValue);
             var nativeOutputPath = Path.Combine(outputPath, "native");
             var intermediateOutputPath =
-                outputPathCalculator.GetIntermediateOutputPath(args.ConfigValue, args.IntermediateValue);
+                outputPathCalculator.GetIntermediateOutputDirectoryPath(args.ConfigValue, args.IntermediateValue);
             var nativeIntermediateOutputPath = Path.Combine(intermediateOutputPath, "native");
             Directory.CreateDirectory(nativeOutputPath);
             Directory.CreateDirectory(nativeIntermediateOutputPath);
 
             var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, args.ConfigValue);
-            var managedOutput = 
-                CompilerUtil.GetCompilationOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
-            
+            var managedOutput = outputPathCalculator.GetAssemblyPath(args.ConfigValue);
+
             var nativeArgs = new List<string>();
 
             // Input Assembly
@@ -83,8 +82,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 nativeArgs.Add("--ilcargs");
                 nativeArgs.Add($"{args.IlcArgsValue}");
-            }            
-            
+            }
+
             // ILC Path
             if (!string.IsNullOrWhiteSpace(args.IlcPathValue))
             {
@@ -107,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // CodeGen Mode
-            if(args.IsCppModeValue)
+            if (args.IsCppModeValue)
             {
                 nativeArgs.Add("--mode");
                 nativeArgs.Add("cpp");
@@ -139,7 +138,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             // Output Path
             nativeArgs.Add("--output");
-            nativeArgs.Add($"{nativeOutputPath}");            
+            nativeArgs.Add($"{nativeOutputPath}");
 
             // Write Response File
             var rsp = Path.Combine(nativeIntermediateOutputPath, $"dotnet-compile-native.{context.ProjectFile.Name}.rsp");
@@ -161,9 +160,9 @@ namespace Microsoft.DotNet.Tools.Compiler
         {
             // Set up Output Paths
             var outputPathCalculator = context.GetOutputPathCalculator(args.OutputValue);
-            var outputPath = outputPathCalculator.GetCompilationOutputPath(args.ConfigValue);
+            var outputPath = outputPathCalculator.GetOutputDirectoryPath(args.ConfigValue);
             var intermediateOutputPath =
-                outputPathCalculator.GetIntermediateOutputPath(args.ConfigValue, args.IntermediateValue);
+                outputPathCalculator.GetIntermediateOutputDirectoryPath(args.ConfigValue, args.IntermediateValue);
 
             Directory.CreateDirectory(outputPath);
             Directory.CreateDirectory(intermediateOutputPath);
@@ -201,7 +200,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Get compilation options
-            var outputName = CompilerUtil.GetCompilationOutput(context.ProjectFile, context.TargetFramework, args.ConfigValue, outputPath);
+            var outputName = outputPathCalculator.GetAssemblyPath(args.ConfigValue);
 
             // Assemble args
             var compilerArgs = new List<string>()
@@ -223,21 +222,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             foreach (var dependency in dependencies)
             {
-                var projectDependency = dependency.Library as ProjectDescription;
-
-                if (projectDependency != null)
-                {
-                    if (projectDependency.Project.Files.SourceFiles.Any())
-                    {
-                        var projectOutputPath = CompilerUtil.GetCompilationOutput(projectDependency.Project, projectDependency.Framework, args.ConfigValue, outputPath);
-                        references.Add(projectOutputPath);
-                    }
-                }
-                else
-                {
-                    references.AddRange(dependency.CompilationAssemblies.Select(r => r.ResolvedPath));
-                }
-
+                references.AddRange(dependency.CompilationAssemblies.Select(r => r.ResolvedPath));
                 compilerArgs.AddRange(dependency.SourceReferences.Select(s => $"\"{s}\""));
 
                 // Add analyzer references
@@ -289,7 +274,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             var compilerName = CompilerUtil.ResolveCompilerName(context);
 
             // Write RSP file
-            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.{context.ProjectFile.Name}.rsp");
+            var rsp = Path.Combine(intermediateOutputPath, $"dotnet-compile.rsp");
             File.WriteAllLines(rsp, compilerArgs);
 
             // Run pre-compile event
@@ -303,7 +288,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             };
             RunScripts(context, ScriptNames.PreCompile, contextVariables);
 
-            var result = Command.Create($"dotnet-compile-{compilerName}", new [] {"@" + $"{rsp}" })
+            var result = Command.Create($"dotnet-compile-{compilerName}", new[] { "@" + $"{rsp}" })
                 .OnErrorLine(line =>
                 {
                     var diagnostic = ParseDiagnostic(context.ProjectDirectory, line);
@@ -359,12 +344,16 @@ namespace Microsoft.DotNet.Tools.Compiler
                 generateBindingRedirects = true;
                 var projectContext =
                     ProjectContext.Create(context.ProjectDirectory, context.TargetFramework,
-                        new[] { PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier()});
+                        new[] { PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier() });
 
-                projectContext
-                    .CreateExporter(args.ConfigValue)
-                    .GetDependencies(LibraryType.Package)
-                    .WriteDepsTo(Path.Combine(outputPath, projectContext.ProjectFile.Name + FileNameSuffixes.Deps));
+                // Don't generate a deps file if we're on desktop
+                if (!context.TargetFramework.IsDesktop())
+                {
+                    projectContext
+                        .CreateExporter(args.ConfigValue)
+                        .GetDependencies(LibraryType.Package)
+                        .WriteDepsTo(Path.Combine(outputPath, projectContext.ProjectFile.Name + FileNameSuffixes.Deps));
+                }
             }
 
             if (generateBindingRedirects && context.TargetFramework.IsDesktop())
@@ -386,12 +375,6 @@ namespace Microsoft.DotNet.Tools.Compiler
                     .ForwardStdOut()
                     .Execute();
             }
-        }
-        
-        private static void CopyExport(string outputPath, LibraryExport export)
-        {
-            CopyFiles(export.RuntimeAssemblies, outputPath);
-            CopyFiles(export.NativeLibraries, outputPath);
         }
 
         private static bool PrintSummary(List<DiagnosticMessage> diagnostics, Stopwatch sw, bool success = true)

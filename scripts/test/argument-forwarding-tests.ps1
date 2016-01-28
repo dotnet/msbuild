@@ -9,7 +9,6 @@ $TestPackagesPath = "$RepoRoot\tests\packages"
 
 $ArgTestRoot = "$RepoRoot\test\ArgumentForwardingTests"
 $ArgTestOutputRoot = "$RepoRoot\artifacts\tests\arg-forwarding"
-$ArgTestBin = "$ArgTestOutputRoot\$Configuration\dnxcore50"
 
 dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$ArgTestOutputRoot" --configuration "$Configuration" "$ArgTestRoot\Reflector"
 if (!$?) {
@@ -23,9 +22,9 @@ if (!$?) {
     Exit 1
 }
 
-cp "$ArgTestRoot\Reflector\reflector_cmd.cmd" "$ArgTestBin"
+cp "$ArgTestRoot\Reflector\reflector_cmd.cmd" "$ArgTestOutputRoot"
 
-pushd "$ArgTestBin"
+pushd "$ArgTestOutputRoot"
 
 & ".\corerun" "xunit.console.netcore.exe" "ArgumentForwardingTests.dll" -xml "$_-testResults.xml" -notrait category=failing
 $exitCode = $LastExitCode

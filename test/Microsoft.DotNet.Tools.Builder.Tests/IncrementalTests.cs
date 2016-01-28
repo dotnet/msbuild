@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             Assert.False(File.Exists(lockFile));
 
             buildResult = BuildProject(expectBuildFailure : true);
-            Assert.Contains("does not have a lock file", buildResult.StdErr);
+            Assert.Contains("does not have a lock file", buildResult.StdOut);
         }
 
         [Fact(Skip="https://github.com/dotnet/cli/issues/980")]

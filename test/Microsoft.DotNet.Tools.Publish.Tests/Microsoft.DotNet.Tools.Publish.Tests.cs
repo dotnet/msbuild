@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
 
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.pdb");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.deps");
+            publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryWithRunner.deps");
             publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll.config");
             // dependencies should also be copied
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");

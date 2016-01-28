@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -20,7 +19,6 @@ namespace Microsoft.DotNet.Tools.Build
     // Collects icnremental safety checks and transitively compiles a project context
     internal class CompileContext
     {
-
         public static readonly string[] KnownCompilers = { "csc", "vbc", "fsc" };
 
         private readonly ProjectContext _rootProject;
@@ -36,13 +34,13 @@ namespace Microsoft.DotNet.Tools.Build
 
             // Cleaner to clone the args and mutate the clone than have separate CompileContext fields for mutated args 
             // and then reasoning which ones to get from args and which ones from fields.
-            _args = (BuilderCommandApp) args.ShallowCopy();
+            _args = (BuilderCommandApp)args.ShallowCopy();
 
             // Set up Output Paths. They are unique per each CompileContext
             var outputPathCalculator = _rootProject.GetOutputPathCalculator(_args.OutputValue);
             _args.OutputValue = outputPathCalculator.BaseCompilationOutputPath;
             _args.IntermediateValue =
-                outputPathCalculator.GetIntermediateOutputPath(_args.ConfigValue, _args.IntermediateValue);
+                outputPathCalculator.GetIntermediateOutputDirectoryPath(_args.ConfigValue, _args.IntermediateValue);
 
             // Set up dependencies
             _dependencies = new ProjectDependenciesFacade(_rootProject, _args.ConfigValue);
@@ -62,7 +60,7 @@ namespace Microsoft.DotNet.Tools.Build
                 {
                     var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework);
 
-                    if (!NeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue)))
+                    if (!DependencyNeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue)))
                     {
                         continue;
                     }
@@ -88,14 +86,24 @@ namespace Microsoft.DotNet.Tools.Build
             return success;
         }
 
+        private bool DependencyNeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies)
+        {
+            return NeedsRebuilding(project, dependencies, buildOutputPath: null, intermediateOutputPath: null);
+        }
+
         private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies)
         {
-            var compilerIO = GetCompileIO(project, _args.ConfigValue, _args.OutputValue, _args.IntermediateValue, dependencies);
+            return NeedsRebuilding(project, dependencies, _args.OutputValue, _args.IntermediateValue);
+        }
+
+        private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies, string buildOutputPath, string intermediateOutputPath)
+        {
+            var compilerIO = GetCompileIO(project, _args.ConfigValue, buildOutputPath, intermediateOutputPath, dependencies);
 
             // rebuild if empty inputs / outputs
             if (!(compilerIO.Outputs.Any() && compilerIO.Inputs.Any()))
             {
-                Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because it either has empty inputs or outputs");
+                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because it either has empty inputs or outputs");
                 return true;
             }
 
@@ -125,18 +133,24 @@ namespace Microsoft.DotNet.Tools.Build
 
             if (!newInputs.Any())
             {
-                Reporter.Output.WriteLine($"\nProject {project.ProjectName()} was previously compiled. Skipping compilation.");
+                Reporter.Output.WriteLine($"Project {project.GetDisplayName()} was previously compiled. Skipping compilation.");
                 return false;
             }
 
-            Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because some of its inputs were newer than its oldest output.");
-            Reporter.Verbose.WriteLine($"Oldest output item was written at {minDate} : {minOutputPath}");
-            Reporter.Verbose.WriteLine($"Inputs newer than the oldest output item:");
+            Reporter.Output.WriteLine($"Project {project.GetDisplayName()} will be compiled because some of its inputs were newer than its oldest output.");
+            Reporter.Verbose.WriteLine();
+            Reporter.Verbose.WriteLine($" Oldest output item:");
+            Reporter.Verbose.WriteLine($"  {minDate}: {minOutputPath}");
+            Reporter.Verbose.WriteLine();
+
+            Reporter.Verbose.WriteLine($" Inputs newer than the oldest output item:");
 
             foreach (var newInput in newInputs)
             {
-                Reporter.Verbose.WriteLine($"\t{File.GetLastWriteTime(newInput)}\t:\t{newInput}");
+                Reporter.Verbose.WriteLine($"  {File.GetLastWriteTime(newInput)}: {newInput}");
             }
+
+            Reporter.Verbose.WriteLine();
 
             return true;
         }
@@ -150,14 +164,14 @@ namespace Microsoft.DotNet.Tools.Build
                 return false;
             }
 
-            Reporter.Output.WriteLine($"\nProject {project.ProjectName()} will be compiled because expected {itemsType} are missing. ");
+            Reporter.Verbose.WriteLine($"Project {project.GetDisplayName()} will be compiled because expected {itemsType} are missing.");
 
             foreach (var missing in missingItems)
             {
-                Reporter.Verbose.WriteLine($"\t {missing}");
+                Reporter.Verbose.WriteLine($" {missing}");
             }
 
-            Reporter.Output.WriteLine();
+            Reporter.Verbose.WriteLine(); ;
 
             return true;
         }
@@ -205,7 +219,7 @@ namespace Microsoft.DotNet.Tools.Build
         private List<ProjectContext> GetProjectsToCheck()
         {
             // include initial root project
-            var contextsToCheck = new List<ProjectContext>(1 + _dependencies.ProjectDependenciesWithSources.Count) {_rootProject};
+            var contextsToCheck = new List<ProjectContext>(1 + _dependencies.ProjectDependenciesWithSources.Count) { _rootProject };
 
             // convert ProjectDescription to ProjectContext
             var dependencyContexts = _dependencies.ProjectDependenciesWithSources.Select
@@ -262,12 +276,8 @@ namespace Microsoft.DotNet.Tools.Build
             args.Add("--framework");
             args.Add($"{projectDependency.Framework}");
             args.Add("--configuration");
-            args.Add($"{_args.ConfigValue}");
-            args.Add("--output");
-            args.Add($"{_args.OutputValue}");
-            args.Add("--temp-output");
-            args.Add($"{_args.IntermediateValue}");
-            args.Add($"{projectDependency.Project.ProjectDirectory}");
+            args.Add(_args.ConfigValue);
+            args.Add(projectDependency.Project.ProjectDirectory);
 
             if (_args.NoHostValue)
             {
@@ -295,20 +305,20 @@ namespace Microsoft.DotNet.Tools.Build
             args.Add("--temp-output");
             args.Add(_args.IntermediateValue);
 
-            if (_args.NoHostValue) 
-            { 
-                args.Add("--no-host"); 
+            if (_args.NoHostValue)
+            {
+                args.Add("--no-host");
             }
 
             //native args
-            if (_args.IsNativeValue) 
-            { 
-                args.Add("--native"); 
+            if (_args.IsNativeValue)
+            {
+                args.Add("--native");
             }
 
-            if (_args.IsCppModeValue) 
-            { 
-                args.Add("--cpp"); 
+            if (_args.IsCppModeValue)
+            {
+                args.Add("--cpp");
             }
 
             if (!string.IsNullOrWhiteSpace(_args.ArchValue))
@@ -337,7 +347,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             args.Add(_rootProject.ProjectDirectory);
 
-            var compileResult = Command.Create("dotnet-compile",args)
+            var compileResult = Command.Create("dotnet-compile", args)
                 .ForwardStdOut()
                 .ForwardStdErr()
                 .Execute();
@@ -387,11 +397,16 @@ namespace Microsoft.DotNet.Tools.Build
         // computes all the inputs and outputs that would be used in the compilation of a project
         // ensures that all paths are files
         // ensures no missing inputs
-        public static CompilerIO GetCompileIO(ProjectContext project, string config, string outputPath, string intermediaryOutputPath, ProjectDependenciesFacade dependencies)
+        public static CompilerIO GetCompileIO(
+            ProjectContext project,
+            string buildConfiguration,
+            string outputPath,
+            string intermediaryOutputPath,
+            ProjectDependenciesFacade dependencies)
         {
             var compilerIO = new CompilerIO(new List<string>(), new List<string>());
-            var binariesOutputPath = project.GetOutputPathCalculator(outputPath).GetCompilationOutputPath(config);
-            var compilationOutput = CompilerUtil.GetCompilationOutput(project.ProjectFile, project.TargetFramework, config, binariesOutputPath);
+            var calculator = project.GetOutputPathCalculator(outputPath);
+            var binariesOutputPath = calculator.GetOutputDirectoryPath(buildConfiguration);
 
             // input: project.json
             compilerIO.Inputs.Add(project.ProjectFile.ProjectFilePath);
@@ -406,11 +421,14 @@ namespace Microsoft.DotNet.Tools.Build
             // input: dependencies
             AddDependencies(dependencies, compilerIO);
 
-            // output: compiler output
-            compilerIO.Outputs.Add(compilationOutput);
-
-            // input / output: compilation options files
-            AddFilesFromCompilationOptions(project, config, compilationOutput, compilerIO);
+            // output: compiler outputs
+            foreach (var path in calculator.GetBuildOutputs(buildConfiguration))
+            {
+                compilerIO.Outputs.Add(path);
+            }
+            
+            // input compilation options files
+            AddCompilationOptions(project, buildConfiguration, compilerIO);
 
             // input / output: resources without culture
             AddCultureResources(project, intermediaryOutputPath, compilerIO);
@@ -423,7 +441,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         private static void AddLockFile(ProjectContext project, CompilerIO compilerIO)
         {
-            if(project.LockFile == null)
+            if (project.LockFile == null)
             {
                 var errorMessage = $"Project {project.ProjectName()} does not have a lock file.";
                 Reporter.Error.WriteLine(errorMessage);
@@ -441,18 +459,9 @@ namespace Microsoft.DotNet.Tools.Build
             // non project dependencies get captured by changes in the lock file
         }
 
-        private static void AddFilesFromCompilationOptions(ProjectContext project, string config, string compilationOutput, CompilerIO compilerIO)
+        private static void AddCompilationOptions(ProjectContext project, string config, CompilerIO compilerIO)
         {
             var compilerOptions = CompilerUtil.ResolveCompilationOptions(project, config);
-
-            // output: pdb file. They are always emitted (see compiler.csc)
-            compilerIO.Outputs.Add(Path.ChangeExtension(compilationOutput, "pdb"));
-
-            // output: documentation file
-            if (compilerOptions.GenerateXmlDocumentation == true)
-            {
-                compilerIO.Outputs.Add(Path.ChangeExtension(compilationOutput, "xml"));
-            }
 
             // input: key file
             if (compilerOptions.KeyFile != null)

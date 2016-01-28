@@ -1,22 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 
 namespace Microsoft.DotNet.Cli.Compiler.Common
 {
     public static class LibraryExporterExtensions
     {
-        internal static void CopyProjectDependenciesTo(this LibraryExporter exporter, string path, params ProjectDescription[] except)
-        {
-            exporter.GetAllExports()
-                .Where(e => !except.Contains(e.Library))
-                .Where(e => e.Library is ProjectDescription)
-                .SelectMany(e => e.NativeLibraries.Union(e.RuntimeAssemblies))
-                .CopyTo(path);
-        }
-
         public static void WriteDepsTo(this IEnumerable<LibraryExport> exports, string path)
         {
             File.WriteAllLines(path, exports.SelectMany(GenerateLines));
@@ -42,16 +32,18 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }));
         }
 
-        internal static IEnumerable<LibraryAsset> RuntimeAssets(this LibraryExport export)
+        internal static IEnumerable<string> RuntimeAssets(this LibraryExport export)
         {
-            return export.RuntimeAssemblies.Union(export.NativeLibraries);
+            return export.RuntimeAssemblies.Union(export.NativeLibraries)
+                .Select(e => e.ResolvedPath)
+                .Union(export.RuntimeAssets);
         }
 
-        internal static void CopyTo(this IEnumerable<LibraryAsset> assets, string destinationPath)
+        internal static void CopyTo(this IEnumerable<string> assets, string destinationPath)
         {
             foreach (var asset in assets)
             {
-                File.Copy(asset.ResolvedPath, Path.Combine(destinationPath, Path.GetFileName(asset.ResolvedPath)),
+                File.Copy(asset, Path.Combine(destinationPath, Path.GetFileName(asset)),
                     overwrite: true);
             }
         }

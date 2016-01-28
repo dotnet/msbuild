@@ -77,39 +77,39 @@ namespace Microsoft.DotNet.Tools.Publish
         /// <param name="configuration">Debug or Release</param>
         /// <param name="nativeSubdirectories"></param>
         /// <returns>Return 0 if successful else return non-zero</returns>
-        private static bool PublishProjectContext(ProjectContext context, string baseOutputPath, string configuration, bool nativeSubdirectories)
+        private static bool PublishProjectContext(ProjectContext context, string outputPath, string configuration, bool nativeSubdirectories)
         {
             Reporter.Output.WriteLine($"Publishing {context.RootProject.Identity.Name.Yellow()} for {context.TargetFramework.DotNetFrameworkName.Yellow()}/{context.RuntimeIdentifier.Yellow()}");
 
             var options = context.ProjectFile.GetCompilerOptions(context.TargetFramework, configuration);
-            var outputPathCalculator = context.GetOutputPathCalculator(baseOutputPath);
-            var outputPath = outputPathCalculator.GetCompilationOutputPath(configuration);
+            
+            if (string.IsNullOrEmpty(outputPath))
+            {
+                outputPath = context.GetOutputPathCalculator().GetOutputDirectoryPath(configuration);
+            }
 
             var contextVariables = new Dictionary<string, string>
             {
                 { "publish:ProjectPath", context.ProjectDirectory },
                 { "publish:Configuration", configuration },
                 { "publish:OutputPath", outputPath },
-                { "publish:PublishOutputPath", outputPathCalculator.BaseCompilationOutputPath },
                 { "publish:Framework", context.TargetFramework.Framework },
                 { "publish:Runtime", context.RuntimeIdentifier },
             };
 
             RunScripts(context, ScriptNames.PrePublish, contextVariables);
 
-            if (!Directory.Exists(outputPathCalculator.BaseCompilationOutputPath))
+            if (!Directory.Exists(outputPath))
             {
-                Directory.CreateDirectory(outputPathCalculator.BaseCompilationOutputPath);
+                Directory.CreateDirectory(outputPath);
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.Create("dotnet-build", 
+            var result = Command.Create("dotnet-build",
                 new string[] {
-                    "--framework", 
+                    "--framework",
                     $"{context.TargetFramework.DotNetFrameworkName}",
-                    "--output", 
-                    $"{outputPathCalculator.BaseCompilationOutputPath}",
-                    "--configuration", 
+                    "--configuration",
                     $"{configuration}",
                     "--no-host",
                     $"{context.ProjectFile.ProjectDirectory}"
@@ -128,16 +128,11 @@ namespace Microsoft.DotNet.Tools.Publish
 
             foreach (var export in exporter.GetAllExports())
             {
-                // Skip copying project references
-                if (export.Library is ProjectDescription)
-                {
-                    continue;
-                }
-
                 Reporter.Verbose.WriteLine($"Publishing {export.Library.Identity.ToString().Green().Bold()} ...");
 
-                PublishFiles(export.RuntimeAssemblies, outputPath, false);
+                PublishFiles(export.RuntimeAssemblies, outputPath, nativeSubdirectories: false);
                 PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories);
+                PublishFiles(export.RuntimeAssets, outputPath);
             }
 
             CopyContents(context, outputPath);
@@ -180,6 +175,14 @@ namespace Microsoft.DotNet.Tools.Publish
 
             return 0;
         }
+        private static void PublishFiles(IEnumerable<string> files, string outputPath)
+        {
+            foreach (var file in files)
+            {
+                var targetPath = Path.Combine(outputPath, Path.GetFileName(file));
+                File.Copy(file, targetPath, overwrite: true);
+            }
+        }
 
         private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath, bool nativeSubdirectories)
         {
@@ -191,7 +194,7 @@ namespace Microsoft.DotNet.Tools.Publish
                 {
                     Directory.CreateDirectory(destinationDirectory);
                 }
-
+                
                 File.Copy(file.ResolvedPath, Path.Combine(destinationDirectory, Path.GetFileName(file.ResolvedPath)), overwrite: true);
             }
         }

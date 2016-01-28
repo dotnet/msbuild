@@ -24,16 +24,16 @@ namespace Microsoft.DotNet.Cli.Utils
         private static CommandSpec ResolveFromPath(string commandName, IEnumerable<string> args, bool useComSpec = false)
         {
             var commandPath = Env.GetCommandPath(commandName);
-            return commandPath == null 
-                ? null 
+            return commandPath == null
+                ? null
                 : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.Path, useComSpec);
         }
 
         private static CommandSpec ResolveFromAppBase(string commandName, IEnumerable<string> args, bool useComSpec = false)
         {
             var commandPath = Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, commandName);
-            return commandPath == null 
-                ? null 
+            return commandPath == null
+                ? null
                 : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.BaseDirectory, useComSpec);
         }
 
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
                     return new CommandSpec(commandName, escapedArgs, CommandResolutionStrategy.Path);
                 }
-                
+
             }
 
             return null;
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (commandPackage == null) return null;
 
-            var depsPath = GetDepsPath(projectContext, Constants.DefaultConfiguration);
+            var depsPath = projectContext.GetOutputPathCalculator().GetDepsPath(Constants.DefaultConfiguration);
 
             return ConfigureCommandFromPackage(commandName, args, commandPackage, projectContext, depsPath, useComSpec);
         }
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private static PackageDescription GetCommandPackage(ProjectContext projectContext, string commandName)
         {
             return projectContext.LibraryManager.GetLibraries()
-                .Where(l => l.GetType() == typeof (PackageDescription))
+                .Where(l => l.GetType() == typeof(PackageDescription))
                 .Select(l => l as PackageDescription)
                 .FirstOrDefault(p => p.Library.Files
                     .Select(Path.GetFileName)
@@ -201,21 +201,13 @@ namespace Microsoft.DotNet.Cli.Utils
                 var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
                 return new CommandSpec(fileName, escapedArgs, CommandResolutionStrategy.NugetPackage);
             }
-
-            
-        }
-
-        private static string GetDepsPath(ProjectContext context, string buildConfiguration)
-        {
-            return Path.Combine(context.GetOutputDirectoryPath(buildConfiguration),
-                context.ProjectFile.Name + FileNameSuffixes.Deps);
         }
 
         private static CommandSpec CreateCommandSpecPreferringExe(
-            string commandName, 
-            IEnumerable<string> args, 
+            string commandName,
+            IEnumerable<string> args,
             string commandPath,
-            CommandResolutionStrategy resolutionStrategy, 
+            CommandResolutionStrategy resolutionStrategy,
             bool useComSpec = false)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
@@ -226,7 +218,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 // Use cmd if we can't find an exe
                 if (preferredCommandPath == null)
                 {
-                    useComSpec = true;   
+                    useComSpec = true;
                 }
                 else
                 {
@@ -246,8 +238,8 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private static CommandSpec CreateComSpecCommandSpec(
-            string command, 
-            IEnumerable<string> args, 
+            string command,
+            IEnumerable<string> args,
             CommandResolutionStrategy resolutionStrategy)
         {
             // To prevent Command Not Found, comspec gets passed in as

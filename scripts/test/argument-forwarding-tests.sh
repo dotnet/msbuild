@@ -19,13 +19,12 @@ source "$DIR/../common/_common.sh"
 
 ArgTestRoot="$REPOROOT/test/ArgumentForwardingTests"
 ArgTestOutputRoot="$REPOROOT/artifacts/tests/arg-forwarding"
-ArgTestBin="$ArgTestOutputRoot/$CONFIGURATION/dnxcore50"
 
 dotnet publish --framework "dnxcore50" --output "$ArgTestOutputRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/Reflector"
 dotnet publish --framework "dnxcore50" --output "$ArgTestOutputRoot" --configuration "$CONFIGURATION" "$ArgTestRoot/ArgumentForwardingTests"
 
 
 
-pushd "$ArgTestBin"
+pushd "$ArgTestOutputRoot"
     ./corerun "xunit.console.netcore.exe" "ArgumentForwardingTests.dll" -xml "ArgumentForwardingTests-testResults.xml" -notrait category=failing
 popd
