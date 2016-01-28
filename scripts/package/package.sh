@@ -21,6 +21,7 @@ if [ -z "$DOTNET_CLI_VERSION" ]; then
 fi
 
 $VERSION_BADGE="$REPOROOT/resources/images/version_badge.svg"
+$BADGE_DESTINATION="$REPOROOT/artifacts/version_badge.svg"
 
 header "Generating tarball"
 $DIR/package-dnvm.sh
@@ -29,8 +30,8 @@ header "Generating Native Installer"
 $DIR/package-native.sh
 
 header "Generating version badge"
-sed -i "s/ver_number/$DOTNET_CLI_VERSION/g" $VERSION_BADGE
+sed "s/ver_number/$DOTNET_CLI_VERSION/g" $VERSION_BADGE > $BADGE_DESTINATION
 
 header "Publishing version badge"
-$REPOROOT/scripts/publish/publish.sh $VERSION_BADGE
+$REPOROOT/scripts/publish/publish.sh $BADGE_DESTINATION
 

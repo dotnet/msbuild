@@ -144,6 +144,8 @@ function UploadVersionBadge($badgeFile)
     
     Write-Host "Uploading the version badge to $env:DOTNET_CLI_VERSION"
     UploadFile "dev/Binaries/$env:DOTNET_CLI_VERSION/$filename" $badgeFile
+
+    return 0
 }
 
 if(!(CheckRequiredVariables))
@@ -169,8 +171,7 @@ elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".msi")
 }
 elseif ([System.IO.Path]::GetExtension($file).ToLower() -eq ".svg")
 {
-    UploadVersionBadge $file
-    $result = $true
+    $result = UploadVersionBadge $file
 }
 
 exit $result

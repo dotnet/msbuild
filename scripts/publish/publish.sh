@@ -48,7 +48,7 @@ execute(){
         result=$?
     elif [[ $UPLOAD_FILE == *.svg ]]; then
         upload_version_badge $UPLOAD_FILE
-        result=0
+        result=$?
     fi
 
     exit $result
@@ -198,6 +198,8 @@ upload_version_badge(){
     
     echo "Uploading the version badge to $DOTNET_CLI_VERSION"
     upload_file_to_blob_storage_azure_cli "dev/Binaries/$DOTNET_CLI_VERSION/$filename" $badgefile
+
+    return 0
 }
 
 

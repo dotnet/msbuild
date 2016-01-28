@@ -17,6 +17,7 @@ _ "$RepoRoot\packaging\nuget\package.ps1" @("$Stage2Dir\bin", "$env:VersionSuffi
 
 header "Generating version badge"
 $VersionBadge = "$RepoRoot\resources\images\version_badge.svg"
-(get-content $VersionBadge).replace("ver_number", "$env:DOTNET_CLI_VERSION") | set-content $VersionBadge
+$BadgeDestination = "$RepoRoot\artifacts\version_badge.svg"
+(get-content $VersionBadge).replace("ver_number", "$env:DOTNET_CLI_VERSION") | set-content $BadgeDestination
 
-& "$RepoRoot\publish\publish.ps1" -file $VersionBadge
+& "$RepoRoot\publish\publish.ps1" -file $BadgeDestination
