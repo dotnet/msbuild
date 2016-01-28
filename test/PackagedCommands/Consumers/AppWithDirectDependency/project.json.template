@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
@@ -7,7 +7,7 @@
     "testRunner": "must-be-specified-to-generate-deps",
     
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc3-23722",
+        "NETStandard.Library": "1.0.0-rc2-23727",
         "dotnet-hello": {"version": "1.0.0", "target": "package"}
     },
 
