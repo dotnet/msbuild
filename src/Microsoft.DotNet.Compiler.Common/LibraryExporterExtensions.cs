@@ -32,16 +32,18 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             }));
         }
 
-        internal static IEnumerable<LibraryAsset> RuntimeAssets(this LibraryExport export)
+        internal static IEnumerable<string> RuntimeAssets(this LibraryExport export)
         {
-            return export.RuntimeAssemblies.Union(export.NativeLibraries);
+            return export.RuntimeAssemblies.Union(export.NativeLibraries)
+                .Select(e => e.ResolvedPath)
+                .Union(export.RuntimeAssets);
         }
 
-        internal static void CopyTo(this IEnumerable<LibraryAsset> assets, string destinationPath)
+        internal static void CopyTo(this IEnumerable<string> assets, string destinationPath)
         {
             foreach (var asset in assets)
             {
-                File.Copy(asset.ResolvedPath, Path.Combine(destinationPath, Path.GetFileName(asset.ResolvedPath)),
+                File.Copy(asset, Path.Combine(destinationPath, Path.GetFileName(asset)),
                     overwrite: true);
             }
         }

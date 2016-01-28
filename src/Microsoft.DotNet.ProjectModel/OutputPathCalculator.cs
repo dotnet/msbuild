@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -74,7 +75,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             return intermediateOutputPath;
         }
-        
+
         public string GetAssemblyPath(string buildConfiguration)
         {
             var compilationOptions = _project.GetCompilerOptions(_framework, buildConfiguration);
@@ -89,22 +90,43 @@ namespace Microsoft.DotNet.ProjectModel
                 GetOutputDirectoryPath(buildConfiguration),
                 _project.Name + outputExtension);
         }
-        
+
         public IEnumerable<string> GetBuildOutputs(string buildConfiguration)
         {
             var assemblyPath = GetAssemblyPath(buildConfiguration);
-            
+
             yield return assemblyPath;
             yield return Path.ChangeExtension(assemblyPath, "pdb");
 
             var compilationOptions = _project.GetCompilerOptions(_framework, buildConfiguration);
-            
+
             if (compilationOptions.GenerateXmlDocumentation == true)
             {
                 yield return Path.ChangeExtension(assemblyPath, "xml");
             }
+
+            // This should only exist in desktop framework
+            var configFile = assemblyPath + ".config";
+
+            if (File.Exists(configFile))
+            {
+                yield return configFile;
+            }
+
+            // Deps file
+            var depsFile = GetDepsPath(buildConfiguration);
+
+            if (File.Exists(depsFile))
+            {
+                yield return depsFile;
+            }
         }
-        
+
+        public string GetDepsPath(string buildConfiguration)
+        {
+            return Path.Combine(GetOutputDirectoryPath(buildConfiguration), _project.Name + FileNameSuffixes.Deps);
+        }
+
         public string GetExecutablePath(string buildConfiguration)
         {
             var extension = FileNameSuffixes.CurrentPlatform.Exe;
@@ -115,7 +137,7 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 extension = FileNameSuffixes.DotNet.Exe;
             }
-            
+
             return Path.Combine(
                 GetOutputDirectoryPath(buildConfiguration),
                 _project.Name + extension);

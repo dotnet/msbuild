@@ -132,6 +132,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 PublishFiles(export.RuntimeAssemblies, outputPath, nativeSubdirectories: false);
                 PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories);
+                PublishFiles(export.RuntimeAssets, outputPath);
             }
 
             CopyContents(context, outputPath);
@@ -173,6 +174,14 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             return 0;
+        }
+        private static void PublishFiles(IEnumerable<string> files, string outputPath)
+        {
+            foreach (var file in files)
+            {
+                var targetPath = Path.Combine(outputPath, Path.GetFileName(file));
+                File.Copy(file, targetPath, overwrite: true);
+            }
         }
 
         private static void PublishFiles(IEnumerable<LibraryAsset> files, string outputPath, bool nativeSubdirectories)
