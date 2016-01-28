@@ -1,5 +1,4 @@
 {
-    "name": "dotnet-compile-fsc",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true

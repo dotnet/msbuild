@@ -1,5 +1,4 @@
 {
-    "name": "dotnet-test",
     "description": "Test host for discovering and running unit tests at design time, such as in Visual Studio.",
     "version": "1.0.0-*",
     "repository": {

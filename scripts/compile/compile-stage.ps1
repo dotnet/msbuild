@@ -23,6 +23,7 @@ $Projects = @(
     "dotnet-compile-native",
     "dotnet-new",
     "dotnet-pack",
+    "dotnet-projectmodel-server",
     "dotnet-publish",
     "dotnet-restore",
     "dotnet-repl",
@@ -32,7 +33,6 @@ $Projects = @(
     "dotnet-test",
     "Microsoft.DotNet.Cli.Utils",
     "Microsoft.DotNet.ProjectModel.Loader",
-    "Microsoft.DotNet.ProjectModel.Server",
     "Microsoft.DotNet.ProjectModel.Workspaces",
     "Microsoft.Extensions.Testing.Abstractions"
 )

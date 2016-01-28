@@ -1,5 +1,4 @@
 {
-    "name": "appdepsdk",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true

@@ -1,5 +1,4 @@
 {
-    "name": "dotnet-compile-native",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true

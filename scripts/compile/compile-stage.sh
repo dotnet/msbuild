@@ -32,6 +32,7 @@ PROJECTS=( \
     dotnet-compile-native \
     dotnet-new \
     dotnet-pack \
+    dotnet-projectmodel-server \
     dotnet-publish \
     dotnet-repl \
     dotnet-repl-csi \
@@ -39,7 +40,6 @@ PROJECTS=( \
     dotnet-resgen \
     dotnet-run \
     dotnet-test \
-    Microsoft.DotNet.ProjectModel.Server \
 )
 
 BINARIES_FOR_COREHOST=( \
