@@ -1,5 +1,4 @@
 {
-    "name": "dotnet-projectmodel-server",
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
