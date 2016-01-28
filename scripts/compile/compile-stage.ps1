@@ -136,8 +136,6 @@ $BinariesForCoreHost | ForEach-Object {
 #}
 
 # Copy in AppDeps
-if (-not (Test-Path "$OutputDir\bin\appdepsdk\")) {
-    $env:PATH = "$OutputDir\bin;$StartPath"
-	header "Acquiring Native App Dependencies"
-	_cmd "$RepoRoot\scripts\build\build_appdeps.cmd ""$OutputDir"""
-}
+header "Acquiring Native App Dependencies"
+_ "$RepoRoot\scripts\build\build_appdeps.ps1" @("$RepoRoot", "$OutputDir")
+
