@@ -36,7 +36,7 @@
     <DnxDir Condition="'$(OsEnvironment)'=='Unix'">dnx-coreclr-linux-x64</DnxDir>
     <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-beta8</DnxVersion>
     <DnxDir Condition="'$(OsEnvironment)'=='OSX'">dnx-coreclr-darwin-x64</DnxDir>
-    <DnxVersion Condition="'$(OsEnvironment)'=='OSX'">1.0.0-rc2-16177</DnxVersion>
+    <DnxVersion Condition="'$(OsEnvironment)'=='OSX'">1.0.0-rc2-16357</DnxVersion>
 
     <!-- Output directories -->
     <BinDir>$(RepoRoot)bin$([System.IO.Path]::DirectorySeparatorChar)</BinDir>

@@ -50,7 +50,8 @@
   <PropertyGroup>
     <SetDnxPackages Condition="'$(OsEnvironment)'=='Windows_NT'">set DNX_PACKAGES=$(PackagesCache) &amp;</SetDnxPackages>
     <SetDnxPackages Condition="'$(OsEnvironment)'!='Windows_NT'">export DNX_PACKAGES=$(PackagesCache) ;</SetDnxPackages>
-    <DnuRestoreCommand>$(SetDnxPackages) $(DnuToolPath) restore  --parallel </DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(OS)'!='OSX'">$(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
+    <DnuRestoreCommand Condition="'$(OS)'=='OSX'">ulimit -n 2500 ; $(SetDnxPackages) &quot;$(DnuToolPath)&quot; restore  --parallel </DnuRestoreCommand>
   </PropertyGroup>
 
   <ItemGroup>
