@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
     "compilationOptions": {
         "emitEntryPoint": true
@@ -11,7 +11,7 @@
 
     "dependencies": {
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-151221",
-        "NETStandard.Library": "1.0.0-rc2-23704"
+        "NETStandard.Library": "1.0.0-rc2-23727"
     },
 
     "frameworks": {
