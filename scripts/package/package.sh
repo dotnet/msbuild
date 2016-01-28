@@ -20,7 +20,7 @@ if [ -z "$DOTNET_CLI_VERSION" ]; then
     DOTNET_CLI_VERSION=0.0.1-dev-t$TIMESTAMP
 fi
 
-$VERSION_BADGE="$REPOROOT/artifacts/version_badge.svg"
+$VERSION_BADGE="$REPOROOT/resources/images/version_badge.svg"
 
 header "Generating tarball"
 $DIR/package-dnvm.sh
@@ -28,13 +28,9 @@ $DIR/package-dnvm.sh
 header "Generating Native Installer"
 $DIR/package-native.sh
 
-header "Downloading version badge"
-status_code=$(curl -w "%{http_code}" -s -o $VERSION_BADGE "https://img.shields.io/badge/version-$DOTNET_CLI_VERSION-blue.svg")
+header "Generating version badge"
+sed -i "s/ver_number/$DOTNET_CLI_VERSION/g" $VERSION_BADGE
 
-if [ "$status_code" -eq "200"]; then 
-    header "Publishing version badge"
-    $REPOROOT/scripts/publish/publish.sh $VERSION_BADGE
-else
-    info "Downloading the badge failed - $status_code"
-fi
+header "Publishing version badge"
+$REPOROOT/scripts/publish/publish.sh $VERSION_BADGE
 

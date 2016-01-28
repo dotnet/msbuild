@@ -15,11 +15,8 @@ _ "$RepoRoot\packaging\windows\generatemsi.ps1" @("$Stage2Dir")
 header "Generating NuGet packages"
 _ "$RepoRoot\packaging\nuget\package.ps1" @("$Stage2Dir\bin", "$env:VersionSuffix")
 
-header "Downloading version badge"
-$VersionBadge = "$RepoRoot\artifacts\version_badge.svg"
-$r = Invoke-WebRequest -Uri "https://img.shields.io/badge/version-$env:DOTNET_CLI_VERSION-blue.svg" -OutFile $VersionBadge
+header "Generating version badge"
+$VersionBadge = "$RepoRoot\resources\images\version_badge.svg"
+(get-content $VersionBadge).replace("ver_number", "$env:DOTNET_CLI_VERSION") | set-content $VersionBadge
 
-if ($r.StatusCode == 200)
-{
-    & "$RepoRoot\publish\publish.ps1" "$RepoRoot\artifacts\version_badge.svg" -file $VersionBadge
-}
+& "$RepoRoot\publish\publish.ps1" -file $VersionBadge
