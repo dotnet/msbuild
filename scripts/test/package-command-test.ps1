@@ -9,7 +9,7 @@
 dir "$RepoRoot\test\PackagedCommands\Consumers" | where {$_.PsIsContainer} | where {$_.Name.Contains("Direct")} |
 foreach {
     pushd "$RepoRoot\test\PackagedCommands\Consumers\$_"
-    dotnet compile
+    dotnet build
     popd
 }
 
@@ -21,7 +21,6 @@ foreach {
     $outputArray = dotnet hello | Out-String
     $output = [string]::Join('\n', $outputArray).Trim("`r", "`n")
     
-    del "project.json"
     if ($output -ne "hello") {
         error "Test Failed: $testName\dotnet hello"
         error "             printed $output"

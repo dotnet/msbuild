@@ -21,7 +21,7 @@ source "$DIR/../common/_common.sh"
 for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "Direct") 
 do
     pushd "$REPOROOT/test/PackagedCommands/Consumers/$test"
-    dotnet compile
+    dotnet build
     popd
 done
 
@@ -34,7 +34,6 @@ do
 
     output=$(dotnet hello)
 
-    rm "project.json"
 
     if [ "$output" == "Hello" ] ;
     then

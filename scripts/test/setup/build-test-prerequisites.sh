@@ -19,7 +19,9 @@ source "$DIR/../../common/_common.sh"
 
 mkdir -p "$TEST_PACKAGE_DIR"
 
-for project in loadTestPackageList()
+PROJECTS=$(loadTestPackageList)
+
+for project in $PROJECTS
 do
     dotnet pack "$REPOROOT/test/TestPackages/$project" --output "$TEST_PACKAGE_DIR"
 done

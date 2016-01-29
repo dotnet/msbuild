@@ -38,5 +38,10 @@ export CHANNEL=$RELEASE_SUFFIX
 source "$COMMONDIR/_nuget.sh"
 source "$COMMONDIR/_configuration.sh"
 
+#TODO this is a workaround for a nuget bug on ubuntu. Remove
+export DISABLE_PARALLEL=""
+[[ "$RID" =~ "ubuntu" ]] && export DISABLE_PARALLEL="--disable-parallel" && echo "heyheyhey"
+
+
 unset COMMONSOURCE
 unset COMMONDIR

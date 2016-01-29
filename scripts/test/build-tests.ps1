@@ -13,6 +13,3 @@ loadTestProjectList | foreach {
         exit 1
     }
 }
-
-# TODO: Remove this when publish paths change back
-cp -rec -Force "$TestBinRoot\Debug\dnxcore50\*" "$TestBinRoot"
