@@ -4,7 +4,7 @@
     "dependencies": {
         "L22": "1.0.0-*",
 
-        "NETStandard.Library": "1.0.0-rc3-23727"
+        "NETStandard.Library": "1.0.0-rc2-23727"
     },
 
     "frameworks": {

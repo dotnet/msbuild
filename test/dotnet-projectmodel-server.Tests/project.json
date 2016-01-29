@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1-rc3-23727",
+        "Microsoft.NETCore.Platforms": "1.0.1-rc2-23727",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "dotnet-projectmodel-server": "1.0.0-*",
         "Newtonsoft.Json": "7.0.1",

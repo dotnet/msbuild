@@ -4,7 +4,7 @@
         "emitEntryPoint": true
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc3-23727",
+        "NETStandard.Library": "1.0.0-rc2-23727",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "dotnet-compile": "1.0.0-*",

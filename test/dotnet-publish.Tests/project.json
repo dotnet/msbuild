@@ -2,7 +2,7 @@
     "version": "1.0.0-*",
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc3-23727",
+        "NETStandard.Library": "1.0.0-rc2-23727",
         "Microsoft.NETCore.TestHost": "1.0.0-rc2-*",
 
         "xunit": "2.1.0",

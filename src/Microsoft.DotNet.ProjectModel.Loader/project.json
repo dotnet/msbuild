@@ -4,9 +4,9 @@
         "keyFile": "../../tools/Key.snk"
     },
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc3-23727",
+        "NETStandard.Library": "1.0.0-rc2-23727",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "System.Runtime.Loader": "4.0.0-rc3-23727"
+        "System.Runtime.Loader": "4.0.0-rc2-23727"
     },
     "frameworks": {
         "dnxcore50": {
