@@ -6,11 +6,16 @@ using System.IO;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Publish.Tests
+namespace Microsoft.DotNet.Tools.Compiler.Tests
 {
     public class CompilerTests : TestBase
     {
-        private string _testProjectsRoot = @"TestProjects";
+        private readonly string _testProjectsRoot;
+
+        public CompilerTests()
+        {
+            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, @"TestProjects");
+        }
 
         [Fact]
         public void XmlDocumentationFileIsGenerated()
@@ -20,8 +25,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
 
             var testLibDir = root.CreateDirectory("TestLibrary");
+            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestLibrary");
 
-            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
+            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
 
             // run compile
             var outputDir = Path.Combine(testLibDir.Path, "bin");
@@ -39,11 +45,12 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         
         [Fact]
         public void LibraryWithAnalyzer()
-        {
+        {            
             var root = Temp.CreateDirectory();
             var testLibDir = root.CreateDirectory("TestLibraryWithAnalyzer");
-            
-            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibraryWithAnalyzer"), testLibDir);
+            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestLibraryWithAnalyzer");
+
+            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
             
             // run compile
             var outputDir = Path.Combine(testLibDir.Path, "bin");

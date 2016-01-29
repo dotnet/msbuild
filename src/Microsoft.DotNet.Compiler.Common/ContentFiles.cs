@@ -39,7 +39,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             var pathMap = sourceFiles
                 .ToDictionary(s => s,
                     s => Path.Combine(targetDirectory,
-                        PathUtility.GetRelativePath(sourceDirectory, s)));
+                        PathUtility.GetRelativePathIgnoringDirectoryTraversals(sourceDirectory, s)));
 
             foreach (var targetDir in pathMap.Values
                 .Select(Path.GetDirectoryName)

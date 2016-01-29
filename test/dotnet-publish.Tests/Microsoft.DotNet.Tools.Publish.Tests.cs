@@ -8,13 +8,17 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
 using System;
-using System.Text;
 
 namespace Microsoft.DotNet.Tools.Publish.Tests
 {
     public class PublishTests : TestBase
     {
-        private string _testProjectsRoot = @"TestProjects";
+        private readonly string _testProjectsRoot;
+
+        public PublishTests()
+        {
+            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, @"TestProjects");
+        }
 
         public static IEnumerable<object[]> PublishOptions
         {
@@ -68,7 +72,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
-        [ActiveIssue(491)]
         public void ProjectWithContentsTest()
         {
             // create unique directories in the 'temp' folder

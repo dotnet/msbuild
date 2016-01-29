@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
@@ -16,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         private string[] _projects = new[] { "L0", "L11", "L12", "L21", "L22" };
 
         public ProjectToProjectDependenciesIncrementalTest() : base(
-            Path.Combine("TestProjects", "TestProjectToProjectDependencies"),
+            Path.Combine(AppContext.BaseDirectory, "TestProjects", "TestProjectToProjectDependencies"),
             "L0",
             "L0 L11 L12 L22 L21 L12 L22 " + Environment.NewLine)
         {
