@@ -5,13 +5,14 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Microsoft.DotNet.ProjectModel.Server;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Tests
 {
     public class DthTestServer : IDisposable
     {
-        private readonly Program _program;
+        private readonly ProjectModelServerCommand _program;
         private readonly Thread _thread;
 
         public DthTestServer(ILoggerFactory loggerFactory)
@@ -21,9 +22,9 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             Port = FindFreePort();
             HostId = Guid.NewGuid().ToString();
 
-            _program = new Program(Port, HostId, LoggerFactory);
+            _program = new ProjectModelServerCommand(Port, HostId, LoggerFactory);
 
-            _thread = new Thread(() => { _program.OpenChannel(); });
+            _thread = new Thread(() => { _program.OpenChannel(); }) { IsBackground = true };
             _thread.Start();
         }
 

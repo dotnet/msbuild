@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.ProjectModel.Graph
 
         public override string ToString()
         {
-            return Value;
+            return Value ?? nameof(Unspecified);
         }
 
         public bool CanSatisfyConstraint(LibraryType constraint)

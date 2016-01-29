@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // There is no reference assemblies path outside of windows
-                // The enviorment variable can be used to specify one
+                // The environment variable can be used to specify one
                 return null;
             }
 

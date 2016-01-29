@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
                 catch (IOException ex)
                 {
                     // swallow
-                    _log.LogWarning($"Ignore {nameof(IOException)} during sending message: \"{ex.Message}\".");
+                    _log.LogInformation($"Ignore {nameof(IOException)} during sending message: \"{ex.Message}\".");
                 }
                 catch (Exception ex)
                 {
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
             }
             catch (IOException ex)
             {
-                _log.LogWarning($"Ignore {nameof(IOException)} during receiving messages: \"{ex}\".");
+                _log.LogInformation($"Ignore {nameof(IOException)} during receiving messages: \"{ex}\".");
             }
             catch (Exception ex)
             {

@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -29,18 +30,19 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         // works in visual studio
         private readonly Dictionary<string, int> _projectContexts = new Dictionary<string, int>();
         private int _nextContextId;
+        private readonly Socket _socket;
 
         public DthTestClient(DthTestServer server)
         {
-            var socket = new Socket(AddressFamily.InterNetwork,
-                                    SocketType.Stream,
-                                    ProtocolType.Tcp);
+            _socket = new Socket(AddressFamily.InterNetwork,
+                                 SocketType.Stream,
+                                 ProtocolType.Tcp);
 
-            socket.Connect(new IPEndPoint(IPAddress.Loopback, server.Port));
+            _socket.Connect(new IPEndPoint(IPAddress.Loopback, server.Port));
 
             _hostId = server.HostId;
 
-            _networkStream = new NetworkStream(socket);
+            _networkStream = new NetworkStream(_socket);
             _reader = new BinaryReader(_networkStream);
             _writer = new BinaryWriter(_networkStream);
 
@@ -221,6 +223,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
             _writer.Dispose();
             _networkStream.Dispose();
             _readCancellationToken.Cancel();
+            _socket.Shutdown(SocketShutdown.Both);
         }
 
         private void ReadMessage(CancellationToken cancellationToken)

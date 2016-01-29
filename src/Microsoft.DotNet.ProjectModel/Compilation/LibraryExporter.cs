@@ -156,6 +156,18 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private LibraryExport ExportProject(ProjectDescription project)
         {
+            if (!project.Resolved)
+            {
+                // For a unresolved project reference returns a export with empty asset.
+                return new LibraryExport(library: project,
+                                         compileAssemblies: Enumerable.Empty<LibraryAsset>(),
+                                         sourceReferences: Enumerable.Empty<string>(),
+                                         nativeLibraries: Enumerable.Empty<LibraryAsset>(),
+                                         runtimeAssets: Enumerable.Empty<string>(),
+                                         runtimeAssemblies: Array.Empty<LibraryAsset>(),
+                                         analyzers: Array.Empty<AnalyzerReference>());
+            }
+
             var compileAssemblies = new List<LibraryAsset>();
             var runtimeAssets = new List<string>();
             var sourceReferences = new List<string>();
@@ -174,7 +186,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 compileAssemblies.Add(compileAsset);
                 runtimeAssets.Add(pdbPath);
             }
-            else if(project.Project.Files.SourceFiles.Any())
+            else if (project.Project.Files.SourceFiles.Any())
             {
                 var outputCalculator = project.GetOutputPathCalculator();
                 var assemblyPath = outputCalculator.GetAssemblyPath(_configuration);

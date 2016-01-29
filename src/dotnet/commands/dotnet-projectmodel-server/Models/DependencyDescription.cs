@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Server.Helpers;
 
 namespace Microsoft.DotNet.ProjectModel.Server.Models
@@ -54,26 +55,31 @@ namespace Microsoft.DotNet.ProjectModel.Server.Models
 
         public static DependencyDescription Create(LibraryDescription library,
                                                    List<DiagnosticMessage> diagnostics,
-                                                   Dictionary<string, LibraryExport> allExports)
+                                                   IDictionary<string, LibraryExport> exportsLookup)
         {
-            var name = library.GetUniqueName();
             return new DependencyDescription
             {
-                Name = name,
+                Name = library.Identity.Name,
                 DisplayName = library.Identity.Name,
                 Version = library.Identity.Version?.ToNormalizedString(),
                 Type = library.Identity.Type.Value,
                 Resolved = library.Resolved,
                 Path = library.Path,
-                Dependencies = library.Dependencies.Select(dependency => new DependencyItem
-                {
-                    Name = dependency.GetUniqueName(),
-                    Version = allExports[dependency.GetUniqueName()].Library.Identity.Version?.ToNormalizedString()
-                }),
+                Dependencies = library.Dependencies.Select(dependency => GetDependencyItem(dependency, exportsLookup)),
                 Errors = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Error)
                                     .Select(d => new DiagnosticMessageView(d)),
                 Warnings = diagnostics.Where(d => d.Severity == DiagnosticMessageSeverity.Warning)
                                       .Select(d => new DiagnosticMessageView(d))
+            };
+        }
+
+        private static DependencyItem GetDependencyItem(LibraryRange dependency,
+                                                        IDictionary<string, LibraryExport> exportsLookup)
+        {
+            return new DependencyItem
+            {
+                Name = dependency.Name,
+                Version = exportsLookup[dependency.Name].Library.Identity.Version?.ToNormalizedString()
             };
         }
     }

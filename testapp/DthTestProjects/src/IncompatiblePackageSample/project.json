@@ -1,6 +1,7 @@
 {
     "dependencies": {
-        "Newtonsoft.Json": "4.5.11"
+        "NETStandard.Library": "1.0.0-rc2-23728",
+        "Microsoft.Web.Administration": "7.0.0"
     },
     "frameworks": {
         "dnxcore50": {

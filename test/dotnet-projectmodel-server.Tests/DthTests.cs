@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.ProjectModel.Server.Tests
         [Theory]
         [InlineData("Project", "UnresolvedProjectSample", "EmptyLibrary", "Project")]
         [InlineData("Package", "UnresolvedPackageSample", "NoSuchPackage", null)]
-        [InlineData("Package", "IncompatiblePackageSample", "Newtonsoft.Json", "Package")]
+        [InlineData("Package", "IncompatiblePackageSample", "Microsoft.Web.Administration", "Package")]
         public void DthCompilation_Initialize_UnresolvedDependency(string referenceType,
                                                                    string testProjectName,
                                                                    string expectedUnresolvedDependency,

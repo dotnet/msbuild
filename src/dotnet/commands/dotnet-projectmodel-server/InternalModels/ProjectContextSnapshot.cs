@@ -34,7 +34,8 @@ namespace Microsoft.DotNet.ProjectModel.Server
 
             var allExports = context.CreateExporter(configuration)
                                     .GetAllExports()
-                                    .ToDictionary(export => export.Library.GetUniqueName());
+                                    .ToDictionary(export => export.Library.Identity.Name);
+
             var allSourceFiles = new List<string>(context.ProjectFile.Files.SourceFiles);
             var allFileReferences = new List<string>();
             var allProjectReferences = new List<ProjectReferenceDescription>();
@@ -42,10 +43,8 @@ namespace Microsoft.DotNet.ProjectModel.Server
 
             // All exports are returned. When the same library name have a ReferenceAssembly type export and a Package type export
             // both will be listed as dependencies. Prefix "fx/" will be added to ReferenceAssembly type dependency.
-            foreach (var pair in allExports)
+            foreach (var export in allExports.Values)
             {
-                var export = pair.Value;
-
                 allSourceFiles.AddRange(export.SourceReferences);
                 allFileReferences.AddRange(export.CompilationAssemblies.Select(asset => asset.ResolvedPath));
 
