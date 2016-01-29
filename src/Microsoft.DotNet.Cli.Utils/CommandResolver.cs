@@ -181,8 +181,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
                 if (depsPath != null)
                 {
-                    additionalArgs.Add("--depsfile");
-                    additionalArgs.Add(depsPath);
+                    additionalArgs.Add($"--depsfile:{depsPath}");
                 }
 
                 args = additionalArgs.Concat(args);
