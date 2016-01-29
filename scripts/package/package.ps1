@@ -20,4 +20,4 @@ $VersionBadge = "$RepoRoot\resources\images\version_badge.svg"
 $BadgeDestination = "$RepoRoot\artifacts\version_badge.svg"
 (get-content $VersionBadge).replace("ver_number", "$env:DOTNET_CLI_VERSION") | set-content $BadgeDestination
 
-& "$RepoRoot\publish\publish.ps1" -file $BadgeDestination
+& "$RepoRoot\scripts\publish\publish.ps1" -file $BadgeDestination

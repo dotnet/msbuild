@@ -137,7 +137,7 @@ function UploadInstallers($msiFile)
 
 function UploadVersionBadge($badgeFile)
 {
-    $fileName = [System.IO.Path]::GetFileName($badgeFile)
+    $fileName = "windows_$Configuration_$([System.IO.Path]::GetFileName($badgeFile))"
     
     Write-Host "Uploading the version badge to Latest"
     UploadFile "dev/Binaries/Latest/$filename" $badgeFile
