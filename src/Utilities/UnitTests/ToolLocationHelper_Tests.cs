@@ -400,6 +400,7 @@ namespace Microsoft.Build.UnitTests
         * Search for a whidbey when orcas is the current version.
         */
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void FindFrameworksPathRunningUnderOrcas()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
@@ -419,6 +420,7 @@ namespace Microsoft.Build.UnitTests
         * Search for a whidbey when orcas is the current version.
         */
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void FindFrameworksPathRunningUnderEverett()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath
@@ -2961,6 +2963,7 @@ namespace Microsoft.Build.UnitTests
         /// present in the manifest and the SDK is a framework extension SDK
         /// </summary>
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void VerifyFrameworkSdkWithOldManifest()
         {
             string tmpRootDirectory = Path.GetTempPath();

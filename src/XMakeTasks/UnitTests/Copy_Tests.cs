@@ -880,6 +880,7 @@ namespace Microsoft.Build.UnitTests
         /// (or skipped), not files for which there was an error.
         /// </summary>
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)] // "Under Unix all filenames are valid and this test is not useful"
         public void OutputsOnlyIncludeSuccessfulCopies()
         {
             string temp = Path.GetTempPath();
@@ -1038,6 +1039,7 @@ namespace Microsoft.Build.UnitTests
         /// or not skipUnchangedFiles is true or false. Variation with different casing/relativeness.
         /// </summary>
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
         public void CopyFileOnItself2()
         {
             string currdir = Directory.GetCurrentDirectory();
@@ -1092,7 +1094,7 @@ namespace Microsoft.Build.UnitTests
         {
             string temp = Path.GetTempPath();
             string file = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A395");
-            string invalidFile = "!@#$%^&*()|";
+            string invalidFile = NativeMethodsShared.IsUnixLike ? Path.Combine(temp, "!@#$%^&*()|") : "!@#$%^&*()|";
             string dest2 = "whatever";
 
             try

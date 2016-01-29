@@ -381,6 +381,7 @@ namespace Microsoft.Build.UnitTests
         /// (or skipped), not files for which there was an error.
         /// </summary>
         [Fact]
+        [PlatformSpecific(Xunit.PlatformID.Windows)] // "Under Unix all filenames are valid and this test is not useful"
         public void OutputsOnlyIncludeSuccessfulMoves()
         {
             string temp = Path.GetTempPath();
@@ -421,19 +422,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                if (NativeMethodsShared.IsWindows)
-                {
-                    Assert.False(success);
-                    Assert.Equal(1, t.MovedFiles.Length);
-                    Assert.Equal(validOutFile, t.MovedFiles[0].ItemSpec);
-                }
-                else
-                {
-                    // Since Unix does not have invalid file names, we should succceed
-                    Assert.True(success);
-                    Assert.Equal(2, t.MovedFiles.Length);
-                    Assert.Equal(validOutFile, t.MovedFiles[1].ItemSpec);
-                }
+                Assert.False(success);
+                Assert.Equal(1, t.MovedFiles.Length);
+                Assert.Equal(validOutFile, t.MovedFiles[0].ItemSpec);
                 Assert.Equal(2, t.DestinationFiles.Length);
                 Assert.Equal("fr", t.DestinationFiles[1].GetMetadata("Locale"));
 
