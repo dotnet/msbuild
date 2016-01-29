@@ -24,22 +24,22 @@ source "$DIR/../common/_common.sh"
 [ ! -z "$COMPILATION_OUTPUT_DIR" ] || die "Missing required environment variable COMPILATION_OUTPUT_DIR"
 
 PROJECTS=( \
-    Microsoft.DotNet.Cli \
-    Microsoft.DotNet.ProjectModel.Server \
-    Microsoft.DotNet.Tools.Builder \
-    Microsoft.DotNet.Tools.Compiler \
-    Microsoft.DotNet.Tools.Compiler.Csc \
-    Microsoft.DotNet.Tools.Compiler.Fsc \
-    Microsoft.DotNet.Tools.Compiler.Native \
-    Microsoft.DotNet.Tools.New \
-    Microsoft.DotNet.Tools.Pack \
-    Microsoft.DotNet.Tools.Publish \
-    Microsoft.DotNet.Tools.Repl \
-    Microsoft.DotNet.Tools.Repl.Csi \
+    dotnet \
+    dotnet-build \
+    dotnet-compile \
+    dotnet-compile-csc \
+    dotnet-compile-fsc \
+    dotnet-compile-native \
+    dotnet-new \
+    dotnet-pack \
+    dotnet-projectmodel-server \
+    dotnet-publish \
+    dotnet-repl \
+    dotnet-repl-csi \
     dotnet-restore \
-    Microsoft.DotNet.Tools.Resgen \
-    Microsoft.DotNet.Tools.Run \
-    Microsoft.DotNet.Tools.Test \
+    dotnet-resgen \
+    dotnet-run \
+    dotnet-test \
 )
 
 BINARIES_FOR_COREHOST=( \

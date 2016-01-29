@@ -1,17 +1,24 @@
 {
     "version": "1.0.0-*",
     "compilationOptions": {
-        "keyFile": "../../tools/Key.snk"
+        "emitEntryPoint": true
     },
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc3-23727",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
-        "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.2.0-beta1-20160108-01"
+        "dotnet-compile": "1.0.0-*",
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        }
     },
     "frameworks": {
         "dnxcore50": {
             "imports": "portable-net45+win8"
         }
+    },
+    "scripts": {
     }
 }

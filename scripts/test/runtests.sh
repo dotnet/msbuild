@@ -22,9 +22,9 @@ TestBinRoot="$REPOROOT/artifacts/tests"
 TestProjects=( \
     E2E \
     StreamForwarderTests \
-    Microsoft.DotNet.Tools.Publish.Tests \
-    Microsoft.DotNet.Tools.Compiler.Tests \
-    Microsoft.DotNet.Tools.Builder.Tests \
+    dotnet-publish.Tests \
+    dotnet-compile.Tests \
+    dotnet-build.Tests \
 )
 
 TestScripts=( \

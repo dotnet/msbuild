@@ -1,0 +1,27 @@
+{
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc3-23727",
+        "System.Threading.ThreadPool": "4.0.10-rc3-23727",
+        "System.Runtime.Serialization.Primitives": "4.1.0-rc3-23727",
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        },
+        "Microsoft.Extensions.Logging": "1.0.0-rc2-16011",
+        "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16011",
+        "Newtonsoft.Json": "7.0.1"
+    },
+    "frameworks": {
+        "dnxcore50": {
+            "imports": "portable-net45+win8"
+        }
+    },
+    "scripts": {
+    }
+}

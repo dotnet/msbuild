@@ -1,5 +1,4 @@
 {
-  "name": "dotnet-restore",
   "description": "Restore packages specified in project.json (project file)",
   "version": "1.0.0-*",
   "repository": {
@@ -31,7 +30,7 @@
   },
   "frameworks": {
     "dnxcore50": {
-      "imports": "portable-net451+win8"
+      "imports": "portable-net45+win8"
     }
   },
   "scripts": {

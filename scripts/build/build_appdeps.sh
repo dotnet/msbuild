@@ -16,7 +16,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-APPDEPS_PROJECT_DIR="$REPOROOT/src/Microsoft.DotNet.Tools.Compiler.Native/appdep"
+APPDEPS_PROJECT_DIR="$REPOROOT/src/dotnet-compile-native/appdep"
 
 # Get Absolute Output Dir
 pushd $1

@@ -48,8 +48,8 @@ The dotnet CLI considers any executable on the path named `dotnet-{commandName}`
 5. Add the project to the packaging scripts.
 
 #### Add a new command project
-Start by copying an existing command, like /src/Microsoft.DotNet.Tools.Init. Change the last part of the project name, .Init in this case, to the name of your command. 
-Update the Name property in project.json as well, but use the `dotnet-{command}` syntax here.
+Start by copying an existing command, like /src/dotnet-new.  
+Update the Name property in project.json as well, and use the `dotnet-{command}` syntax here.
 Make sure to use the System.CommandLine parser so behavior is consistant across commands.
 
 #### Add a Readme.md

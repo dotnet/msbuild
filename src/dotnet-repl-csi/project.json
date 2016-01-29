@@ -1,0 +1,24 @@
+{
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+    "dependencies": {
+        "NETStandard.Library": "1.0.0-rc3-23727",
+
+        "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta1-20160108-01",
+
+        "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.Extensions.CommandLineUtils.Sources": {
+            "type": "build",
+            "version": "1.0.0-*"
+        }
+    },
+    "frameworks": {
+        "dnxcore50": { 
+            "imports": "portable-net45+win8"
+        }
+    },
+    "scripts": {
+    }
+}
