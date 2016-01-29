@@ -52,52 +52,28 @@ $FilesToClean = @(
 )
 
 $RuntimeOutputDir = "$OutputDir\runtime\coreclr"
-$binariesOutputDir = "$CompilationOutputDir\bin\$Configuration\$Tfm"
-$runtimeBinariesOutputDir = "$CompilationOutputDir\runtime\coreclr\$Configuration\$Tfm"
-
-if(!(Test-Path $OutputDir\bin))
-{
-    mkdir $OutputDir\bin | Out-Null
-}
-
-if(!(Test-Path $RuntimeOutputDir))
-{
-    mkdir $RuntimeOutputDir | Out-Null
-}
 
 # Publish each project
 $Projects | ForEach-Object {
-    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
     if (!$?) {
-        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
         exit 1
     }
 }
 
-if (! (Test-Path $binariesOutputDir)) {
-    $binariesOutputDir = "$CompilationOutputDir\bin"
-}
-
-cp $binariesOutputDir\* $OutputDir\bin -force -recurse
-
 # Publish the runtime
-dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\runtime\coreclr" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
+dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
 if (!$?) {
-    Write-Host Command failed: dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$CompilationOutputDir\runtime\coreclr" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
+    Write-Host Command failed: dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
     Exit 1
 }
 
-if (! (Test-Path $runtimeBinariesOutputDir)) {
-    $runtimeBinariesOutputDir = "$CompilationOutputDir\runtime\coreclr"
-}
-
-cp $runtimeBinariesOutputDir\* $RuntimeOutputDir -force -recurse
-
 # Build the projects that we are going to ship as nuget packages
 $ProjectsToPack | ForEach-Object {
-    dotnet build --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+    dotnet build --output "$CompilationOutputDir\forPackaging" --configuration "$Configuration" "$RepoRoot\src\$_"
     if (!$?) {
-        Write-Host Command failed: dotnet build --native-subdirectory --output "$CompilationOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+        Write-Host Command failed: dotnet build --native-subdirectory --output "$CompilationOutputDir\forPackaging" --configuration "$Configuration" "$RepoRoot\src\$_"
         exit 1
     }
 }

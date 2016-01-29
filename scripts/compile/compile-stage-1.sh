@@ -21,6 +21,6 @@ export PATH=$DOTNET_INSTALL_DIR/bin:$PATH
 
 # Build Stage 1
 header "Building stage1 dotnet using downloaded stage0 ..."
-COMPILATION_OUTPUT_DIR=$STAGE1_COMPILATION_DIR OUTPUT_DIR=$STAGE1_DIR $REPOROOT/scripts/compile/compile-stage.sh
+OUTPUT_DIR=$STAGE1_DIR $REPOROOT/scripts/compile/compile-stage.sh
 
 export PATH=$StartPath

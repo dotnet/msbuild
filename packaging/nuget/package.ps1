@@ -24,7 +24,7 @@ New-Item -ItemType Directory -Force -Path $IntermediatePackagesDir
 foreach ($ProjectName in $ProjectsToPack) {
     $ProjectFile = "$RepoRoot\src\$ProjectName\project.json"
 
-    & $toolsDir\dotnet pack "$ProjectFile" --basepath "$Stage2CompilationDir\bin" --output "$IntermediatePackagesDir" --configuration "$Configuration" $versionArg $versionSuffix
+    & $toolsDir\dotnet pack "$ProjectFile" --basepath "$Stage2CompilationDir\forPackaging" --output "$IntermediatePackagesDir" --configuration "$Configuration" $versionArg $versionSuffix
     if (!$?) {
         Write-Host "$toolsDir\dotnet pack failed for: $ProjectFile"
         Exit 1
