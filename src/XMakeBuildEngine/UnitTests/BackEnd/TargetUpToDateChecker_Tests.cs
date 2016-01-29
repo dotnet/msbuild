@@ -417,8 +417,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems2()
         {
             Console.WriteLine("MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems2");
-            MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            string currentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
+                MockLogger logger = new MockLogger();
+                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 <Project InitialTargets='Setup' xmlns='msbuildnamespace'>
 
   <ItemGroup>
@@ -468,11 +473,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Message Text='GAFT B:@(B)' />
   </Target>
 </Project>
-            "))));
-            p.Build(new string[] { "Build" }, new ILogger[] { logger });
+                "))));
 
-            // If the log contains B.out twice, then there is leakage from the parent lookup
-            logger.AssertLogDoesntContain("B.out;B.out");
+                p.Build(new string[] { "Build" }, new ILogger[] { logger });
+
+                // If the log contains B.out twice, then there is leakage from the parent lookup
+                logger.AssertLogDoesntContain("B.out;B.out");
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(currentDirectory);
+            }
         }
 
         private readonly DateTime _today = DateTime.Today;

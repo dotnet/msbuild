@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
                         new string[] { "Name", "Private" },
                         new bool[] { false, true }
                     );
-                    Assert.Equal(NativeMethodsShared.IsWindows ? @"/myswitch:MyResource.bmp,Kenny,Private" : "-myswitch:MyResource.bmp,Kenny,Private", c.ToString());
+                    Assert.Equal(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
                 }
                 catch (ArgumentException e)
                 {

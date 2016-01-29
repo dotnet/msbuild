@@ -34,7 +34,7 @@
     <DnxDir Condition="'$(OsEnvironment)'=='Windows_NT'">dnx-coreclr-win-x86</DnxDir>
     <DnxVersion Condition="'$(OsEnvironment)'=='Windows_NT'">1.0.0-beta8</DnxVersion>
     <DnxDir Condition="'$(OsEnvironment)'=='Unix'">dnx-coreclr-linux-x64</DnxDir>
-    <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-beta8</DnxVersion>
+    <DnxVersion Condition="'$(OsEnvironment)'=='Unix'">1.0.0-rc2-16357</DnxVersion>
     <DnxDir Condition="'$(OsEnvironment)'=='OSX'">dnx-coreclr-darwin-x64</DnxDir>
     <DnxVersion Condition="'$(OsEnvironment)'=='OSX'">1.0.0-rc2-16357</DnxVersion>
 
