@@ -170,6 +170,37 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
+        public void RefsPublishTest()
+        {
+            // create unique directories in the 'temp' folder
+            var root = Temp.CreateDirectory();
+            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+            var testAppDir = root.CreateDirectory("TestAppCompilationContext");
+            var testLibDir = root.CreateDirectory("TestLibrary");
+
+            // copy projects to the temp dir
+            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestAppCompilationContext"), testAppDir);
+            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
+
+            RunRestore(testAppDir.Path);
+            RunRestore(testLibDir.Path);
+
+            var testProject = GetProjectPath(testAppDir);
+            var publishCommand = new PublishCommand(testProject);
+            publishCommand.Execute().Should().Pass();
+
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestAppCompilationContext.dll");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibrary.dll");
+
+            var refsDirectory = new DirectoryInfo(Path.Combine(publishCommand.GetOutputDirectory().FullName, "refs"));
+            // Should have compilation time assemblies
+            refsDirectory.Should().HaveFile("System.IO.dll");
+            // Libraries in which lib==ref should be deduped
+            refsDirectory.Should().NotHaveFile("TestLibrary.dll");
+        }
+
+
+        [Fact]
         public void CompilationFailedTest()
         {
             var testDir = Temp.CreateDirectory();

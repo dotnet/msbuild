@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Internal;
 
 namespace Microsoft.DotNet.ProjectModel.Compilation
 {
@@ -18,6 +19,28 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
             Name = name;
             RelativePath = relativePath;
             ResolvedPath = resolvedPath;
+        }
+
+        public bool Equals(LibraryAsset other)
+        {
+            return string.Equals(Name, other.Name)
+                && string.Equals(RelativePath, other.RelativePath)
+                && string.Equals(ResolvedPath, other.ResolvedPath);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is LibraryAsset && Equals((LibraryAsset) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            var combiner = HashCodeCombiner.Start();
+            combiner.Add(Name);
+            combiner.Add(RelativePath);
+            combiner.Add(ResolvedPath);
+            return combiner.CombinedHash;
         }
     }
 }
