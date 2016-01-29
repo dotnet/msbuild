@@ -109,10 +109,11 @@ namespace Microsoft.DotNet.Tools.Publish
                 new string[] {
                     "--framework",
                     $"{context.TargetFramework.DotNetFrameworkName}",
+                    "--runtime",
+                    context.RuntimeIdentifier,
                     "--configuration",
-                    $"{configuration}",
-                    "--no-host",
-                    $"{context.ProjectFile.ProjectDirectory}"
+                    configuration,
+                    context.ProjectFile.ProjectDirectory
                 })
                 .ForwardStdErr()
                 .ForwardStdOut()

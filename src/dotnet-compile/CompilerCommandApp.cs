@@ -23,8 +23,8 @@ namespace Microsoft.DotNet.Tools.Compiler
         private CommandOption _outputOption;
         private CommandOption _intermediateOutputOption;
         private CommandOption _frameworkOption;
+        private CommandOption _runtimeOption;
         private CommandOption _configurationOption;
-        private CommandOption _noHostOption;
         private CommandArgument _projectArgument;
         private CommandOption _nativeOption;
         private CommandOption _archOption;
@@ -39,8 +39,8 @@ namespace Microsoft.DotNet.Tools.Compiler
         public string ProjectPathValue { get; set; }
         public string OutputValue { get; set; }
         public string IntermediateValue { get; set; }
+        public string RuntimeValue{ get; set; }
         public string ConfigValue { get; set; }
-        public bool NoHostValue { get; set; }
         public bool IsNativeValue { get; set; }
         public string ArchValue { get; set; }
         public string IlcArgsValue { get; set; }
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             _intermediateOutputOption = _app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
             _frameworkOption = _app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             _configurationOption = _app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
-            _noHostOption = _app.Option("--no-host", "Set this to skip publishing a runtime host when building for CoreCLR", CommandOptionType.NoValue);
+            _runtimeOption = _app.Option("-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to publish for", CommandOptionType.SingleValue);
             _projectArgument = _app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
 
             // Native Args
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 OutputValue = _outputOption.Value();
                 IntermediateValue = _intermediateOutputOption.Value();
                 ConfigValue = _configurationOption.Value() ?? Constants.DefaultConfiguration;
-                NoHostValue = _noHostOption.HasValue();
+                RuntimeValue = _runtimeOption.Value();
 
                 IsNativeValue = _nativeOption.HasValue();
                 ArchValue = _archOption.Value();

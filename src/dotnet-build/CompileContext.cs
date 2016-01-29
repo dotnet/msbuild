@@ -274,15 +274,17 @@ namespace Microsoft.DotNet.Tools.Build
 
             args.Add("--framework");
             args.Add($"{projectDependency.Framework}");
+            
+            if (!string.IsNullOrEmpty(_args.RuntimeValue))
+            {
+                args.Add("--runtime");
+                args.Add(_args.RuntimeValue);
+            }
+            
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
             args.Add(projectDependency.Project.ProjectDirectory);
-
-            if (_args.NoHostValue)
-            {
-                args.Add("--no-host");
-            }
-
+            
             var compileResult = Command.Create("dotnet-compile", args)
                 .ForwardStdOut()
                 .ForwardStdErr()
@@ -297,17 +299,17 @@ namespace Microsoft.DotNet.Tools.Build
             var args = new List<string>();
             args.Add("--framework");
             args.Add(_rootProject.TargetFramework.ToString());
+            if (!string.IsNullOrEmpty(_args.RuntimeValue))
+            {
+                args.Add("--runtime");
+                args.Add(_args.RuntimeValue);
+            }
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
             args.Add("--output");
             args.Add(_args.OutputValue);
             args.Add("--temp-output");
             args.Add(_args.IntermediateValue);
-
-            if (_args.NoHostValue)
-            {
-                args.Add("--no-host");
-            }
 
             //native args
             if (_args.IsNativeValue)

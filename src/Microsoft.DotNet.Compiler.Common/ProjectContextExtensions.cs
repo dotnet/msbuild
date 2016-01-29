@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         public static void MakeCompilationOutputRunnable(this ProjectContext context, string outputPath, string configuration)
         {
+            // REVIEW: This shouldn't be copied on compile
             context
                 .ProjectFile
                 .Files
@@ -34,21 +35,28 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
             if (context.TargetFramework.IsDesktop())
             {
+                // On full framework, copy all dependencies to the output path
                 exporter
                     .GetDependencies()
                     .SelectMany(e => e.RuntimeAssets())
                     .CopyTo(outputPath);
+                    
+                // Generate binding redirects
+                var outputName = context.GetOutputPathCalculator(outputPath).GetAssemblyPath(configuration);
+                context.GenerateBindingRedirects(exporter, outputName);
             }
             else
             {
                 exporter
                     .GetDependencies(LibraryType.Package)
                     .WriteDepsTo(Path.Combine(outputPath, context.ProjectFile.Name + FileNameSuffixes.Deps));
-
+                
+                // On core clr, only copy project references
                 exporter.GetDependencies(LibraryType.Project)
                     .SelectMany(e => e.RuntimeAssets())
                     .CopyTo(outputPath);
 
+                // TODO: Pick a host based on the RID
                 CoreHost.CopyTo(outputPath, context.ProjectFile.Name + Constants.ExeSuffix);
             }
         }
