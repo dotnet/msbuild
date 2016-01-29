@@ -20,10 +20,10 @@
   <?define ProductEdition   =   "001dotnet" ?>
   <?define LCID  = "$(var.ProductLanguage)"?>
   <?define DowngradeErrorMessage  = "A newer version is already installed; please uninstall it and re-run setup."?>
-  <?define IncompatibleBuildTypeError = "You have installed '[INSTALLEDCLIBUILDTYPE]' build of Dotnet CLI. It cannot be upgraded to a '[EXPECTEDCLIBUILDTYPE]' build of Dotnet CLI. Please uninstall it and re-run setup."?>
-  
+  <?define IncompatibleBuildTypeError = "You have installed '[INSTALLEDCLIBUILDTYPE]' build of Dotnet CLI. It cannot be upgraded to a '$(var.BuildType)' build of Dotnet CLI. Please uninstall it and re-run setup."?>
+
   <?define Platform   =   "$(sys.BUILDARCH)" ?>
-  <?if $(var.Platform)=x86?>  
+  <?if $(var.Platform)=x86?>
   <?define Program_Files="ProgramFilesFolder"?>
   <?define Win64AttributeValue=no?>
   <?define UpgradeCode="70A1576F-63B6-4659-9E39-25C7B769DDE5"?>

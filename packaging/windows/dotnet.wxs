@@ -6,7 +6,8 @@
 
         <MajorUpgrade DowngradeErrorMessage="$(var.DowngradeErrorMessage)" Schedule="afterInstallInitialize"/>
 
-        <MediaTemplate CompressionLevel="mszip" EmbedCab="yes"/>
+        <MediaTemplate CompressionLevel="high" EmbedCab="yes"/>
+
         <Feature Id="MainFeature" Title="Main Feature" Level="1">
             <ComponentGroupRef Id="InstallFiles" />
             <ComponentGroupRef Id="AuthoredRegistryKeys"/>
@@ -19,6 +20,8 @@
         <Property Id="ProductCPU" Value="$(var.Platform)" />
         <Property Id="RTM_ProductVersion" Value="$(var.Dotnet_ProductVersion)" />
 
+        <Property Id="MSIFASTINSTALL" Value="7" />
+
         <WixVariable Id="WixUILicenseRtf" Value="$(var.MicrosoftEula)" />
 
         <Property Id="WIXUI_INSTALLDIR" Value="DOTNETHOME"/>
@@ -27,13 +30,10 @@
         <CustomActionRef Id="WixBroadcastEnvironmentChange" />
 
         <PropertyRef Id="INSTALLEDCLIBUILDTYPE"/>
-        <Condition Message="$(var.IncompatibleBuildTypeError)">
-            <![CDATA[NOT INSTALLEDCLIBUILDTYPE OR INSTALLEDCLIBUILDTYPE ~= EXPECTEDCLIBUILDTYPE]]>
-        </Condition>
     </Product>
     <Fragment>
         <Directory Id="TARGETDIR" Name="SourceDir">
-            <Directory Id="$(var.Program_Files)" Name="$(var.Program_Files)">
+            <Directory Id="$(var.Program_Files)">
                 <Directory Id="DOTNETHOME" Name="dotnet"/>
             </Directory>
         </Directory>

@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:dep="http://schemas.microsoft.com/wix/DependencyExtension">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?include "Variables.wxi" ?>
   <Fragment>
     <Property Id="INSTALLEDCLIBUILDTYPE">
         <RegistrySearch Id="DotnetCLI_BuildType" Type="raw"
             Root="HKLM" Key="SOFTWARE\dotnet\Setup" Name="BuildType" Win64="$(var.Win64AttributeValue)"/>
     </Property>
-    <SetProperty Before="LaunchConditions" Id="EXPECTEDCLIBUILDTYPE" Value="$(var.BuildType)" />
+
+    <Condition Message="$(var.IncompatibleBuildTypeError)">
+        Installed OR NOT INSTALLEDCLIBUILDTYPE OR INSTALLEDCLIBUILDTYPE ~= "$(var.BuildType)"
+    </Condition>
   </Fragment>
 </Wix>
