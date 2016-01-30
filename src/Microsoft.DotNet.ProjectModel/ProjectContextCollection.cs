@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.ProjectModel
 
         public string ProjectFilePath { get; set; }
 
-        public DateTime LastProjectFileWriteTime { get; set; }
+        public DateTime LastProjectFileWriteTimeUtc { get; set; }
 
-        public DateTime LastLockFileWriteTime { get; set; }
+        public DateTime LastLockFileWriteTimeUtc { get; set; }
 
         public bool HasChanged
         {
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.ProjectModel
                     return true;
                 }
 
-                if (LastProjectFileWriteTime < File.GetLastWriteTime(ProjectFilePath))
+                if (LastProjectFileWriteTimeUtc < File.GetLastWriteTimeUtc(ProjectFilePath))
                 {
                     return true;
                 }
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.ProjectModel
                     return true;
                 }
 
-                if (LastLockFileWriteTime < File.GetLastWriteTime(LockFilePath))
+                if (LastLockFileWriteTimeUtc < File.GetLastWriteTimeUtc(LockFilePath))
                 {
                     return true;
                 }
@@ -57,8 +57,8 @@ namespace Microsoft.DotNet.ProjectModel
             ProjectContexts.Clear();
             ProjectFilePath = null;
             LockFilePath = null;
-            LastLockFileWriteTime = DateTime.MinValue;
-            LastProjectFileWriteTime = DateTime.MinValue;
+            LastLockFileWriteTimeUtc = DateTime.MinValue;
+            LastProjectFileWriteTimeUtc = DateTime.MinValue;
             ProjectDiagnostics.Clear();
         }
     }

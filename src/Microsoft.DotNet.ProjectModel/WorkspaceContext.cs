@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.ProjectModel
                 {
                     currentEntry.Model = project;
                     currentEntry.FilePath = project.ProjectFilePath;
-                    currentEntry.UpdateLastWriteTime();
+                    currentEntry.UpdateLastWriteTimeUtc();
                 }
             }
 
@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.ProjectModel
                 {
                     currentEntry.FilePath = Path.Combine(projectDirectory, LockFile.FileName);
                     currentEntry.Model = LockFileReader.Read(currentEntry.FilePath);
-                    currentEntry.UpdateLastWriteTime();
+                    currentEntry.UpdateLastWriteTimeUtc();
                 }
             }
 
@@ -248,13 +248,13 @@ namespace Microsoft.DotNet.ProjectModel
 
                 currentEntry.Project = project;
                 currentEntry.ProjectFilePath = project.ProjectFilePath;
-                currentEntry.LastProjectFileWriteTime = File.GetLastWriteTime(currentEntry.ProjectFilePath);
+                currentEntry.LastProjectFileWriteTimeUtc = File.GetLastWriteTimeUtc(currentEntry.ProjectFilePath);
 
                 var lockFilePath = Path.Combine(project.ProjectDirectory, LockFile.FileName);
                 if (File.Exists(lockFilePath))
                 {
                     currentEntry.LockFilePath = lockFilePath;
-                    currentEntry.LastLockFileWriteTime = File.GetLastWriteTime(lockFilePath);
+                    currentEntry.LastLockFileWriteTimeUtc = File.GetLastWriteTimeUtc(lockFilePath);
                 }
 
                 currentEntry.ProjectDiagnostics.AddRange(projectEntry.Diagnostics);
@@ -265,7 +265,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         private class FileModelEntry<TModel> where TModel : class
         {
-            private DateTime _lastWriteTime;
+            private DateTime _lastWriteTimeUtc;
 
             public TModel Model { get; set; }
 
@@ -273,9 +273,9 @@ namespace Microsoft.DotNet.ProjectModel
 
             public List<DiagnosticMessage> Diagnostics { get; } = new List<DiagnosticMessage>();
 
-            public void UpdateLastWriteTime()
+            public void UpdateLastWriteTimeUtc()
             {
-                _lastWriteTime = File.GetLastWriteTime(FilePath);
+                _lastWriteTimeUtc = File.GetLastWriteTimeUtc(FilePath);
             }
 
             public bool IsInvalid
@@ -292,7 +292,7 @@ namespace Microsoft.DotNet.ProjectModel
                         return true;
                     }
 
-                    return _lastWriteTime < File.GetLastWriteTime(FilePath);
+                    return _lastWriteTimeUtc < File.GetLastWriteTimeUtc(FilePath);
                 }
             }
 
@@ -301,7 +301,7 @@ namespace Microsoft.DotNet.ProjectModel
                 Model = null;
                 FilePath = null;
                 Diagnostics.Clear();
-                _lastWriteTime = DateTime.MinValue;
+                _lastWriteTimeUtc = DateTime.MinValue;
             }
         }
 
