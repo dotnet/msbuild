@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
+using System;
+using System.Text;
 
 namespace Microsoft.DotNet.Tools.Publish.Tests
 {
@@ -37,16 +39,13 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         {
             // create unique directories in the 'temp' folder
             var root = Temp.CreateDirectory();
-            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+
             var testAppDir = root.CreateDirectory("TestApp");
             var testLibDir = root.CreateDirectory("TestLibrary");
 
             //copy projects to the temp dir
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestApp"), testAppDir);
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
-
-            RunRestore(testAppDir.Path);
-            RunRestore(testLibDir.Path);
 
             // run publish
             outputDir = string.IsNullOrEmpty(outputDir) ? "" : Path.Combine(root.Path, outputDir);
@@ -74,13 +73,11 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         {
             // create unique directories in the 'temp' folder
             var testDir = Temp.CreateDirectory();
-            testDir.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+
             var testAppDir = Path.Combine(_testProjectsRoot, "TestAppWithContents");
 
             // copy projects to the temp dir
             CopyProjectToTempDir(testAppDir, testDir);
-
-            RunRestore(testDir.Path);
 
             // run publish
             var testProject = GetProjectPath(testDir);
@@ -92,17 +89,20 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
-        public void BeforeRestoreTest()
+        public void FailWhenNoRestoreTest()
         {
             // create unique directories in the 'temp' folder
             var root = Temp.CreateDirectory();
-            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+
             var testAppDir = root.CreateDirectory("TestApp");
             var testLibDir = root.CreateDirectory("TestLibrary");
 
             // copy projects to the temp dir
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestApp"), testAppDir);
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
+
+            File.Delete(Path.Combine(testAppDir.Path, "project.lock.json"));
+            File.Delete(Path.Combine(testLibDir.Path, "project.lock.json"));
 
             var testProject = GetProjectPath(testAppDir);
             var publishCommand = new PublishCommand(testProject);
@@ -114,13 +114,11 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         {
             // create unique directories in the 'temp' folder
             var root = Temp.CreateDirectory();
-            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+
             var testLibDir = root.CreateDirectory("TestLibrary");
 
             //copy projects to the temp dir
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
-
-            RunRestore(testLibDir.Path);
 
             var testProject = GetProjectPath(testLibDir);
             var publishCommand = new PublishCommand(testProject);
@@ -134,37 +132,34 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [WindowsOnlyFact]
-        public void TestLibraryPublishTest()
+        public void TestLibraryBindingRedirectGeneration()
         {
-            // create unique directories in the 'temp' folder
+            // Set up Test Staging in Temporary Directory
             var root = Temp.CreateDirectory();
-            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
-            var testLibDir = root.CreateDirectory("TestLibraryWithRunner");
+            root.CopyDirectory(Path.Combine(_testProjectsRoot, "TestBindingRedirectGeneration"));
 
-            //copy projects to the temp dir
-            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibraryWithRunner"), testLibDir);
+            var testProjectsRootDir = Path.Combine(root.Path, "TestBindingRedirectGeneration");
+            var greaterTestLibDir = Path.Combine(testProjectsRootDir, "TestLibraryGreater");
+            var lesserTestLibDir = Path.Combine(testProjectsRootDir, "TestLibraryLesser");
 
-            RunRestore(testLibDir.Path);
-
-            var testProject = GetProjectPath(testLibDir);
-            var publishCommand = new PublishCommand(testProject, "net451");
+            var lesserTestProject = Path.Combine(lesserTestLibDir, "project.json");
+            var publishCommand = new PublishCommand(lesserTestProject, "net451");
             publishCommand.Execute().Should().Pass();
 
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.pdb");
-            publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryWithRunner.deps");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll.config");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.pdb");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll.config");
+
             // dependencies should also be copied
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
             publishCommand.GetOutputDirectory().Delete(true);
 
-            publishCommand = new PublishCommand(testProject, "dnxcore50", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier());
+            publishCommand = new PublishCommand(lesserTestProject, "dnxcore50", PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier());
             publishCommand.Execute().Should().Pass();
 
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.dll");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.pdb");
-            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryWithRunner.deps");
-            publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryWithRunner.dll.config");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.dll");
+            publishCommand.GetOutputDirectory().Should().HaveFile("TestLibraryLesser.pdb");
+            publishCommand.GetOutputDirectory().Should().NotHaveFile("TestLibraryLesser.dll.config");
             // dependencies should also be copied
             publishCommand.GetOutputDirectory().Should().HaveFile("Newtonsoft.Json.dll");
         }
@@ -174,16 +169,13 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         {
             // create unique directories in the 'temp' folder
             var root = Temp.CreateDirectory();
-            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+
             var testAppDir = root.CreateDirectory("TestAppCompilationContext");
             var testLibDir = root.CreateDirectory("TestLibrary");
 
             // copy projects to the temp dir
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestAppCompilationContext"), testAppDir);
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
-
-            RunRestore(testAppDir.Path);
-            RunRestore(testLibDir.Path);
 
             var testProject = GetProjectPath(testAppDir);
             var publishCommand = new PublishCommand(testProject);
@@ -204,12 +196,10 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         public void CompilationFailedTest()
         {
             var testDir = Temp.CreateDirectory();
-            testDir.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+
             var compileFailDir = Path.Combine(_testProjectsRoot, "CompileFail");
 
             CopyProjectToTempDir(compileFailDir, testDir);
-
-            RunRestore(testDir.Path);
 
             var testProject = GetProjectPath(testDir);
             var publishCommand = new PublishCommand(testProject);
@@ -223,16 +213,13 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         {
             // create unique directories in the 'temp' folder
             var root = Temp.CreateDirectory();
-            root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
+
             var testAppDir = root.CreateDirectory("TestApp");
             var testLibDir = root.CreateDirectory("TestLibrary");
 
             //copy projects to the temp dir
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestApp"), testAppDir);
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
-
-            RunRestore(testAppDir.Path);
-            RunRestore(testLibDir.Path);
 
             // run publish
             var testProject = GetProjectPath(testAppDir);
@@ -249,12 +236,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             // copy all the files to temp dir
             foreach (var file in Directory.EnumerateFiles(projectDir))
             {
-                // never copy project.lock.json. All the tests are expected to call 'dotnet restore'
-                if (file.ToLower().EndsWith("project.lock.json"))
-                {
-                    continue;
-                }
-
                 tempDir.CopyFile(file);
             }
         }
@@ -262,12 +243,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         private string GetProjectPath(TempDirectory projectDir)
         {
             return Path.Combine(projectDir.Path, "project.json");
-        }
-
-        private void RunRestore(string args)
-        {
-            var restoreCommand = new RestoreCommand();
-            restoreCommand.Execute($"--quiet {args}").Should().Pass();
         }
     }
 }
