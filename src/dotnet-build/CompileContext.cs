@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Dotnet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.DotNet.Tools.Compiler;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -273,13 +275,7 @@ namespace Microsoft.DotNet.Tools.Build
             var args = new List<string>();
 
             args.Add("--framework");
-            args.Add($"{projectDependency.Framework}");
-            
-            if (!string.IsNullOrEmpty(_args.RuntimeValue))
-            {
-                args.Add("--runtime");
-                args.Add(_args.RuntimeValue);
-            }
+            args.Add($"{projectDependency.Framework}");                       
             
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
@@ -298,12 +294,7 @@ namespace Microsoft.DotNet.Tools.Build
             // todo: add methods to CompilerCommandApp to generate the arg string?
             var args = new List<string>();
             args.Add("--framework");
-            args.Add(_rootProject.TargetFramework.ToString());
-            if (!string.IsNullOrEmpty(_args.RuntimeValue))
-            {
-                args.Add("--runtime");
-                args.Add(_args.RuntimeValue);
-            }
+            args.Add(_rootProject.TargetFramework.ToString());            
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
             args.Add("--output");
@@ -353,7 +344,41 @@ namespace Microsoft.DotNet.Tools.Build
                 .ForwardStdErr()
                 .Execute();
 
-            return compileResult.ExitCode == 0;
+            var succeeded = compileResult.ExitCode == 0;
+
+            if (succeeded)
+            {
+                MakeRunnableIfNecessary();
+            }            
+            
+            return succeeded;
+        }
+
+        private void MakeRunnableIfNecessary()
+        {
+            var compilationOptions = CompilerUtil.ResolveCompilationOptions(_rootProject, _args.ConfigValue);
+
+            // TODO: Make this opt in via another mechanism
+            var makeRunnable = compilationOptions.EmitEntryPoint.GetValueOrDefault() ||
+                               _rootProject.IsTestProject();
+
+            if (makeRunnable)
+            {
+                var outputPathCalculator = _rootProject.GetOutputPathCalculator(_args.OutputValue);
+                var rids = new List<string>();
+                if (string.IsNullOrEmpty(_args.RuntimeValue))
+                {
+                    rids.AddRange(PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+                }
+                else
+                {
+                    rids.Add(_args.RuntimeValue);
+                }
+
+                var runtimeContext = ProjectContext.Create(_rootProject.ProjectDirectory, _rootProject.TargetFramework, rids);
+                var executable = new Executable(runtimeContext, outputPathCalculator);
+                executable.MakeCompilationOutputRunnable(_args.ConfigValue);
+            }
         }
 
         private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)

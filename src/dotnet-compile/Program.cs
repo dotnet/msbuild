@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Dotnet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
@@ -315,31 +316,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, outputPath);
             }
-
-            if (success)
-            {
-                // TODO: Make this opt in via another mechanism
-                var makeRunnable = compilationOptions.EmitEntryPoint.GetValueOrDefault() ||
-                                   !string.IsNullOrEmpty(context.ProjectFile.TestRunner);
-
-                if (makeRunnable)
-                {
-                    var rids = new List<string>();
-                    if (string.IsNullOrEmpty(args.RuntimeValue))
-                    {
-                        rids.AddRange(PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
-                    }
-                    else
-                    {
-                        rids.Add(args.RuntimeValue);
-                    }
-
-                    var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, rids);
-                    runtimeContext
-                        .MakeCompilationOutputRunnable(outputPath, args.ConfigValue);
-                }
-            }
-
+            
             return PrintSummary(diagnostics, sw, success);
         }
 

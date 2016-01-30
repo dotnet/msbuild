@@ -9,6 +9,7 @@ using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
+using Microsoft.Dotnet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
 using NuGet.Frameworks;
@@ -169,12 +170,15 @@ namespace Microsoft.DotNet.Tools.Restore
                 toolDescription.Path,
                 Path.GetDirectoryName(toolDescription.Target.RuntimeAssemblies.First().Path),
                 toolDescription.Identity.Name + FileNameSuffixes.Deps);
-            
-            context.MakeCompilationOutputRunnable(context.ProjectDirectory, Constants.DefaultConfiguration);
+
+            var calculator = context.GetOutputPathCalculator(context.ProjectDirectory);
+            var executable = new Executable(context, calculator);
+
+            executable.MakeCompilationOutputRunnable(Constants.DefaultConfiguration);
 
             if (File.Exists(depsPath)) File.Delete(depsPath);
 
-            File.Move(Path.Combine(context.ProjectDirectory, "bin" + FileNameSuffixes.Deps), depsPath);
+            File.Move(Path.Combine(calculator.GetOutputDirectoryPath(Constants.DefaultConfiguration), "bin" + FileNameSuffixes.Deps), depsPath);
         }
 
         private static void RestoreToolToPath(LibraryRange tooldep, IEnumerable<string> args, string tempPath, bool quiet)
