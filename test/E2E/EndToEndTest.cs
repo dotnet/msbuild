@@ -21,10 +21,17 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         private static readonly string s_testdirName = "e2etestroot";
         private static readonly string s_outputdirName = "test space/bin";
         
+        private static string RestoredTestProjectDirectory { get; set; }
+
         private string Rid { get; set; }
         private string TestDirectory { get; set; }
         private string TestProject { get; set; }
         private string OutputDirectory { get; set; }
+
+        static EndToEndTest()
+        {
+            EndToEndTest.SetupStaticTestProject();
+        }
 
         public static void Main()
         {
@@ -33,9 +40,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
        
         public EndToEndTest()
         {
-            TestSetup();
-
-            Rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+            TestInstanceSetup();
         }
 
         [Fact]
@@ -169,21 +174,34 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             TestExecutable(OutputDirectory, publishCommand.GetOutputExecutable(), s_expectedOutput);    
         }
 
-        private void TestSetup()
+        private void TestInstanceSetup()
         {
             var root = Temp.CreateDirectory();
 
-            TestDirectory = root.CreateDirectory(s_testdirName).Path;
+            var testInstanceDir = root.CopyDirectory(RestoredTestProjectDirectory);
+
+            TestDirectory = testInstanceDir.Path;
             TestProject = Path.Combine(TestDirectory, "project.json");
             OutputDirectory = Path.Combine(TestDirectory, s_outputdirName);
 
-            InitializeTestDirectory();   
+            Rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
         }
 
-        private void InitializeTestDirectory()
+        private static void SetupStaticTestProject()
         {
+            RestoredTestProjectDirectory = Path.Combine(AppContext.BaseDirectory, "bin", s_testdirName);
+
+            // Ignore Delete Failure
+            try
+            {
+                Directory.Delete(RestoredTestProjectDirectory, true);
+            }
+            catch(Exception e) {}
+
+            Directory.CreateDirectory(RestoredTestProjectDirectory);
+
             var currentDirectory = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(TestDirectory);
+            Directory.SetCurrentDirectory(RestoredTestProjectDirectory);
 
             new NewCommand().Execute().Should().Pass();
             new RestoreCommand().Execute("--quiet").Should().Pass();

@@ -21,9 +21,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
 
             var testLibDir = root.CreateDirectory("TestLibrary");
 
-            // copy projects to the temp dir and restore them
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
-            RunRestore(testLibDir.Path);
 
             // run compile
             var outputDir = Path.Combine(testLibDir.Path, "bin");
@@ -46,7 +44,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             var testLibDir = root.CreateDirectory("TestLibraryWithAnalyzer");
             
             CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibraryWithAnalyzer"), testLibDir);
-            RunRestore(testLibDir.Path);
             
             // run compile
             var outputDir = Path.Combine(testLibDir.Path, "bin");
@@ -62,12 +59,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             // copy all the files to temp dir
             foreach (var file in Directory.EnumerateFiles(projectDir))
             {
-                // never copy project.lock.json. All the tests are expected to call 'dotnet restore'
-                if (file.ToLower().EndsWith("project.lock.json"))
-                {
-                    continue;
-                }
-
                 tempDir.CopyFile(file);
             }
         }
@@ -75,12 +66,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         private string GetProjectPath(TempDirectory projectDir)
         {
             return Path.Combine(projectDir.Path, "project.json");
-        }
-
-        private void RunRestore(string args)
-        {
-            var restoreCommand = new RestoreCommand();
-            restoreCommand.Execute($"--quiet {args}").Should().Pass();
         }
     }
 }
