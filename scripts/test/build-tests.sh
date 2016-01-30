@@ -17,10 +17,10 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-for project in loadTestList()
+PROJECTS=$(loadTestProjectList)
+
+for project in $PROJECTS
 do
-    dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$TestBinRoot" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
+    dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$TEST_BIN_ROOT" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
 done
 
-# TODO: Remove this when publish paths change back
-cp -a "$TestBinRoot/Debug/dnxcore50/." "$TestBinRoot"

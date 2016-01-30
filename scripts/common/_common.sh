@@ -40,8 +40,7 @@ source "$COMMONDIR/_configuration.sh"
 
 #TODO this is a workaround for a nuget bug on ubuntu. Remove
 export DISABLE_PARALLEL=""
-[[ "$RID" =~ "ubuntu" ]] && export DISABLE_PARALLEL="--disable-parallel" && echo "heyheyhey"
-
+[[ "$RID" =~ "ubuntu" ]] && export DISABLE_PARALLEL="--disable-parallel"
 
 unset COMMONSOURCE
 unset COMMONDIR

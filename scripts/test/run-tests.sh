@@ -16,17 +16,17 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-local TestProjects=$(loadTestProjectList)
-local TestScripts=$(loadTestScriptList)
+TestProjects=$(loadTestProjectList)
+TestScripts=$(loadTestScriptList)
 
-local failedTests=()
-local failCount=0
+failedTests=()
+failCount=0
 
-# Copy TestProjects to $TestBinRoot
-mkdir -p "$TestBinRoot/TestProjects"
-cp -a $REPOROOT/test/TestProjects/* $TestBinRoot/TestProjects
+# Copy TestProjects to $TEST_BIN_ROOT
+mkdir -p "$TEST_BIN_ROOT/TestProjects"
+cp -a $REPOROOT/test/TestProjects/* $TEST_BIN_ROOT/TestProjects
 
-pushd "$TestBinRoot"
+pushd "$TEST_BIN_ROOT"
 set +e
 
 for project in $TestProjects
@@ -42,7 +42,8 @@ done
 popd
 
 for script in $TestScripts
-    local scriptName=${script}.sh
+do
+    scriptName=${script}.sh
 
     "$REPOROOT/scripts/test/${scriptName}"
     exitCode=$?
@@ -54,7 +55,7 @@ done
 
 for test in ${failedTests[@]}
 do
-    error "$test failed. Logs in '$TestBinRoot/${test}-testResults.xml'"
+    error "$test failed. Logs in '$TEST_BIN_ROOT/${test}-testResults.xml'"
 done
 
 set -e

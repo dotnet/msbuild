@@ -25,7 +25,7 @@ popd
 
 ## App Deps ##
 pushd $APPDEPS_PROJECT_DIR
-dotnet restore --packages $APPDEPS_PROJECT_DIR/packages $DISABLE_PARALLEL
+dotnet restore --runtime $RID --packages $APPDEPS_PROJECT_DIR/packages $DISABLE_PARALLEL
 APPDEP_SDK=$APPDEPS_PROJECT_DIR/packages/toolchain*/*/
 popd
 

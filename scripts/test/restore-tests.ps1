@@ -9,4 +9,3 @@ info "Restoring Test Projects"
 
 # Restore packages
 & dotnet restore "$RepoRoot\test" -f "$TestPackageDir"
-
