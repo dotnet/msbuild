@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
                     syntax.DefineOption("out", ref outputName, "Name of the output assembly");
 
                     syntax.DefineOptionList("reference", ref references, "Path to a compiler metadata reference");
-                    
+
                     syntax.DefineOptionList("analyzer", ref analyzers, "Path to an analyzer assembly");
 
                     syntax.DefineOptionList("resource", ref resources, "Resources to embed");
@@ -145,6 +145,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             if (options.SuppressWarnings != null)
             {
                 commonArgs.AddRange(options.SuppressWarnings.Select(w => $"-nowarn:{w}"));
+            }
+
+            // Additional arguments are added verbatim
+            if (options.AdditionalArguments != null)
+            {
+                commonArgs.AddRange(options.AdditionalArguments);
             }
 
             if (options.LanguageVersion != null)

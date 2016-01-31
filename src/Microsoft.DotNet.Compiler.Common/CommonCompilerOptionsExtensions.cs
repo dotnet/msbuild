@@ -36,6 +36,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
 
         internal static readonly OptionTemplate s_generateXmlDocumentation = new OptionTemplate("generate-xml-documentation");
 
+        internal static readonly OptionTemplate s_additionalArgumentsTemplate = new OptionTemplate("additional-argument");
+
         public static CommonCompilerOptions Parse(ArgumentSyntax syntax)
         {
             IReadOnlyList<string> defines = null;
@@ -50,12 +52,15 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             bool? publicSign = null;
             bool? emitEntryPoint = null;
             bool? generateXmlDocumentation = null;
+            IReadOnlyList<string> additionalArguments = null;
 
             Func<string, bool?> nullableBoolConverter = v => bool.Parse(v);
 
             syntax.DefineOptionList(s_definesTemplate.LongName, ref defines, "Preprocessor definitions");
 
             syntax.DefineOptionList(s_suppressWarningTemplate.LongName, ref suppressWarnings, "Suppresses the specified warning");
+
+            syntax.DefineOptionList(s_additionalArgumentsTemplate.LongName, ref additionalArguments, "Pass the additional argument directly to the compiler");
 
             syntax.DefineOption(s_languageVersionTemplate.LongName, ref languageVersion,
                     "The version of the language used to compile");
@@ -100,7 +105,8 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
                 DelaySign = delaySign,
                 PublicSign = publicSign,
                 EmitEntryPoint = emitEntryPoint,
-                GenerateXmlDocumentation = generateXmlDocumentation
+                GenerateXmlDocumentation = generateXmlDocumentation,
+                AdditionalArguments = additionalArguments
             };
         }
 
@@ -118,6 +124,7 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             var publicSign = options.PublicSign;
             var emitEntryPoint = options.EmitEntryPoint;
             var generateXmlDocumentation = options.GenerateXmlDocumentation;
+            var additionalArguments = options.AdditionalArguments;
 
             var args = new List<string>();
 
@@ -129,6 +136,11 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
             if (suppressWarnings != null)
             {
                 args.AddRange(suppressWarnings.Select(def => s_suppressWarningTemplate.ToLongArg(def)));
+            }
+
+            if (additionalArguments != null)
+            {
+                args.AddRange(additionalArguments.Select(arg => s_additionalArgumentsTemplate.ToLongArg(arg)));
             }
 
             if (languageVersion != null)
