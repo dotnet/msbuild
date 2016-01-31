@@ -43,7 +43,7 @@ popd
 for test in $(ls -l "$REPOROOT/test/PackagedCommands/Consumers" | grep ^d | awk '{print $9}' | grep "Direct") 
 do
     pushd "$REPOROOT/test/PackagedCommands/Consumers/$test"
-    dotnet compile
+    dotnet build
     popd
 done
 

@@ -43,7 +43,7 @@ popd
 dir "$RepoRoot\test\PackagedCommands\Consumers" | where {$_.PsIsContainer} | where {$_.Name.Contains("Direct")} |
 foreach {
     pushd "$RepoRoot\test\PackagedCommands\Consumers\$_"
-    dotnet compile
+    dotnet build
     popd
 }
 
