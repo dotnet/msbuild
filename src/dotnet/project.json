@@ -3,14 +3,65 @@
     "compilationOptions": {
         "emitEntryPoint": true
     },
+    "compileExclude": [ 
+        "commands/dotnet-new/CSharp_Console/**", 
+        "commands/dotnet-new/FSharp_Console/**" 
+    ],
+    "resource": [ 
+        "commands/dotnet-new/CSharp_Console/NuGet.Config", 
+        "commands/dotnet-new/CSharp_Console/Program.cs", 
+        "commands/dotnet-new/CSharp_Console/project.json", 
+        "commands/dotnet-new/FSharp_Console/NuGet.config", 
+        "commands/dotnet-new/FSharp_Console/Program.fs", 
+        "commands/dotnet-new/FSharp_Console/project.json"
+    ],
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23727",
-
+        "Newtonsoft.Json": "7.0.1",
+        
+        "Microsoft.Net.Compilers.netcore": "1.2.0-beta1-20160108-01",
+        "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-151218",
+        "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta1-20160108-01",
+        "Microsoft.CodeAnalysis.CSharp":  "1.2.0-beta1-20160108-01",
+        "NuGet.CommandLine.XPlat": "3.4.0-beta-559",
+        "System.CommandLine" : "0.1.0-e160119-1",
+        
+        "Microsoft.DotNet.ProjectModel": "1.0.0-*",
+        "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
+        "Microsoft.DotNet.ILCompiler": "1.0.4-*",
+        "Microsoft.DotNet.ILCompiler.SDK": "1.0.4-*",
+        
+        "Microsoft.Extensions.Logging": "1.0.0-rc2-16011",
+        "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16011",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530",
         "Microsoft.Extensions.CommandLineUtils.Sources": {
             "type": "build",
             "version": "1.0.0-*"
-        }
+        },
+        "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
+            "version": "1.0.0-*",
+            "type": "build"
+        },
+        "Microsoft.Dnx.Runtime.Sources": {
+            "version": "1.0.0-*",
+            "type": "build"
+        },
+        "Microsoft.Extensions.Testing.Abstractions": {
+            "version": "1.0.0-*",
+            "type": "build"
+        },
+        "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23727",
+        "Microsoft.NETCore.TestHost": "1.0.0-rc2-23727",
+        "NETStandard.Library": "1.0.0-rc2-23727",
+        "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-23727",
+        "System.Diagnostics.TraceSource": "4.0.0-rc2-23727",
+        "System.Linq.Expressions": "4.0.11-rc2-23727",
+        "System.Xml.XDocument": "4.0.11-rc2-23727",
+        "System.Resources.ReaderWriter": "4.0.0-rc2-23727",
+        "System.Net.Sockets": "4.1.0-rc2-23727",
+        "System.IO.Compression.ZipFile": "4.0.1-rc2-23727",
+        "System.Threading.ThreadPool": "4.0.10-rc2-23727",
+        "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23727"
     },
     "frameworks": {
         "dnxcore50": {
