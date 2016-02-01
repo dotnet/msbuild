@@ -126,6 +126,7 @@ Common Commands:
                 ["compile-fsc"] = CompileFscCommand.Run,
                 ["compile-native"] = CompileNativeCommand.Run,
                 ["new"] = NewCommand.Run,
+                ["pack"] = PackCommand.Run,
                 ["projectmodel-server"] = ProjectModelServerCommand.Run,
                 ["publish"] = PublishCommand.Run,
                 ["restore"] = RestoreCommand.Run,
