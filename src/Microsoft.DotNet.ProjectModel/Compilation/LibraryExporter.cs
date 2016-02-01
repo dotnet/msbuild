@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                 compileAssemblies.Add(compileAsset);
                 runtimeAssets.Add(pdbPath);
             }
-            else
+            else if(project.Project.Files.SourceFiles.Any())
             {
                 var outputCalculator = project.GetOutputPathCalculator();
                 var assemblyPath = outputCalculator.GetAssemblyPath(_configuration);
