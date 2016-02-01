@@ -9,9 +9,17 @@ namespace Microsoft.DotNet.Cli.Compiler.Common
     {
         public static void WriteDepsTo(this IEnumerable<LibraryExport> exports, string path)
         {
+            CreateDirectoryIfNotExists(path);
+
             File.WriteAllLines(path, exports.SelectMany(GenerateLines));
         }
-        
+
+        private static void CreateDirectoryIfNotExists(string path)
+        {
+            var depsFile = new FileInfo(path);
+            depsFile.Directory.Create();
+        }
+
         private static IEnumerable<string> GenerateLines(LibraryExport export)
         {
             return GenerateLines(export, export.RuntimeAssemblies, "runtime")

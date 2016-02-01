@@ -6,13 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Dotnet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
-using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.DotNet.ProjectModel.Utilities;
-using NuGet.Frameworks;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.PlatformAbstractions;
 
@@ -317,38 +316,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, outputPath);
             }
-
-            bool generateBindingRedirects = false;
-            if (success && !args.NoHostValue && compilationOptions.EmitEntryPoint.GetValueOrDefault())
-            {
-                generateBindingRedirects = true;
-                var rids = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
-                var runtimeContext = ProjectContext.Create(context.ProjectDirectory, context.TargetFramework, rids);
-                runtimeContext
-                    .MakeCompilationOutputRunnable(outputPath, args.ConfigValue);
-            }
-            else if (!string.IsNullOrEmpty(context.ProjectFile.TestRunner))
-            {
-                generateBindingRedirects = true;
-                var projectContext =
-                    ProjectContext.Create(context.ProjectDirectory, context.TargetFramework,
-                        new[] { PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier() });
-
-                // Don't generate a deps file if we're on desktop
-                if (!context.TargetFramework.IsDesktop())
-                {
-                    projectContext
-                        .CreateExporter(args.ConfigValue)
-                        .GetDependencies(LibraryType.Package)
-                        .WriteDepsTo(Path.Combine(outputPath, projectContext.ProjectFile.Name + FileNameSuffixes.Deps));
-                }
-            }
-
-            if (generateBindingRedirects && context.TargetFramework.IsDesktop())
-            {
-                context.GenerateBindingRedirects(exporter, outputName);
-            }
-
+            
             return PrintSummary(diagnostics, sw, success);
         }
 
