@@ -14,20 +14,11 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$DIR/../common/_common.sh"
+source "$DIR/../../common/_common.sh"
 
-APPDEPS_PROJECT_DIR="$REPOROOT/src/dotnet-compile-native/appdep"
+header "Restoring packages"
+dotnet restore "$REPOROOT/test/TestPackages" --runtime $RID --quiet $DISABLE_PARALLEL
 
-# Get Absolute Output Dir
-pushd $1
-OUTPUT_DIR="$(pwd)"
-popd
-
-## App Deps ##
-pushd $APPDEPS_PROJECT_DIR
-dotnet restore --runtime $RID --packages $APPDEPS_PROJECT_DIR/packages $DISABLE_PARALLEL
-APPDEP_SDK=$APPDEPS_PROJECT_DIR/packages/toolchain*/*/
-popd
-
-mkdir -p $OUTPUT_DIR/appdepsdk
-cp -a $APPDEP_SDK/. $OUTPUT_DIR/appdepsdk
+set +e
+dotnet restore "$REPOROOT/testapp" --runtime $RID  $DISABLE_PARALLEL >/dev/null 2>&1
+set -e

@@ -12,22 +12,15 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   SOURCE="$(readlink "$SOURCE")"
   [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
+
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-APPDEPS_PROJECT_DIR="$REPOROOT/src/dotnet-compile-native/appdep"
+PROJECTS=$(loadTestProjectList)
 
-# Get Absolute Output Dir
-pushd $1
-OUTPUT_DIR="$(pwd)"
-popd
+for project in $PROJECTS
+do
+    dotnet publish --framework "dnxcore50" --runtime "$RID" --output "$TEST_BIN_ROOT" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
+done
 
-## App Deps ##
-pushd $APPDEPS_PROJECT_DIR
-dotnet restore --runtime $RID --packages $APPDEPS_PROJECT_DIR/packages $DISABLE_PARALLEL
-APPDEP_SDK=$APPDEPS_PROJECT_DIR/packages/toolchain*/*/
-popd
-
-mkdir -p $OUTPUT_DIR/appdepsdk
-cp -a $APPDEP_SDK/. $OUTPUT_DIR/appdepsdk

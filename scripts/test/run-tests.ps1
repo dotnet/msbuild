@@ -5,35 +5,13 @@
 
 . "$PSScriptRoot\..\common\_common.ps1"
 
-$failCount = 0
-
 $TestBinRoot = "$RepoRoot\artifacts\tests"
 
-$TestProjects = @(
-    "E2E",
-    "StreamForwarderTests",
-    "dotnet-publish.Tests",
-    "dotnet-compile.Tests",
-    "dotnet-build.Tests"
-)
+$TestProjects = loadTestProjectList
+$TestScripts = loadTestScriptList
 
-$TestScripts = @(
-    "package-command-test.ps1",
-    "argument-forwarding-tests.ps1"
-)
-
-# Publish each test project
-$TestProjects | ForEach-Object {
-    dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$TestBinRoot" --configuration "$Configuration" "$RepoRoot\test\$_"
-    if (!$?) {
-        Write-Host Command failed: dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$TestBinRoot" --configuration "$Configuration" "$RepoRoot\test\$_"
-        exit 1
-    }
-}
-
-if (Test-Path $TestBinRoot\$Configuration\dnxcore50) {
-    cp $TestBinRoot\$Configuration\dnxcore50\* $TestBinRoot -force -recurse
-}
+$failCount = 0
+$failingTests = @()
 
 ## Temporary Workaround for Native Compilation
 ## Need x64 Native Tools Dev Prompt Env Vars
@@ -47,21 +25,17 @@ foreach {
 }
 popd
 
-# copy TestProjects folder which is used by the test cases
+# copy TestProjects to $TestBinRoot
 mkdir -Force "$TestBinRoot\TestProjects"
 cp -rec -Force "$RepoRoot\test\TestProjects\*" "$TestBinRoot\TestProjects"
 
-$failCount = 0
-$failingTests = @()
-
 pushd "$TestBinRoot"
-
 # Run each test project
-$TestProjects | ForEach-Object {
-    & ".\corerun" "xunit.console.netcore.exe" "$_.dll" -xml "$_-testResults.xml" -notrait category=failing
+$TestProjects | foreach {
+    & ".\corerun" "xunit.console.netcore.exe" "$($_.ProjectName).dll" -xml "$($_.ProjectName)-testResults.xml" -notrait category=failing
     $exitCode = $LastExitCode
     if ($exitCode -ne 0) {
-        $failingTests += "$_"
+        $failingTests += "$($_.ProjectName)"
     }
 
     $failCount += $exitCode
@@ -69,18 +43,20 @@ $TestProjects | ForEach-Object {
 
 popd
 
-$TestScripts | ForEach-Object {
-    & "$RepoRoot\scripts\test\$_"
+$TestScripts | foreach {
+    $scriptName = "$($_.ProjectName).ps1"
+
+    & "$RepoRoot\scripts\test\$scriptName"
     $exitCode = $LastExitCode
     if ($exitCode -ne 0) {
-        $failingTests += "$_"
+        $failingTests += "$scriptName"
         $failCount += 1
     }
 }
 
 if ($failCount -ne 0) {
     Write-Host -ForegroundColor Red "The following tests failed."
-    $failingTests | ForEach-Object {
+    $failingTests | foreach {
         Write-Host -ForegroundColor Red "$_.dll failed. Logs in '$TestBinRoot\$_-testResults.xml'"
     }
 } else {

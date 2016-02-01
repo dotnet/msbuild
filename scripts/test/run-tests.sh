@@ -12,48 +12,24 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   SOURCE="$(readlink "$SOURCE")"
   [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
-
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-TestBinRoot="$REPOROOT/artifacts/tests"
-
-TestProjects=( \
-    E2E \
-    StreamForwarderTests \
-    dotnet-publish.Tests \
-    dotnet-compile.Tests \
-    dotnet-build.Tests \
-)
-
-TestScripts=( \
-    "package-command-test.sh" \
-    "argument-forwarding-tests.sh" \
-)
-
-for project in ${TestProjects[@]}
-do
-    dotnet publish --framework "dnxcore50" --output "$TestBinRoot" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
-done
-
-if [ -d "$TestBinRoot/$CONFIGURATION/dnxcore50" ]
-then
-    cp -R -f $TestBinRoot/$CONFIGURATION/dnxcore50/* $TestBinRoot
-fi
-
-# copy TestProjects folder which is used by the test cases
-mkdir -p "$TestBinRoot/TestProjects"
-cp -a $REPOROOT/test/TestProjects/* $TestBinRoot/TestProjects
-
-
-pushd "$TestBinRoot"
-set +e
+TestProjects=$(loadTestProjectList)
+TestScripts=$(loadTestScriptList)
 
 failedTests=()
 failCount=0
 
-for project in ${TestProjects[@]}
+# Copy TestProjects to $TEST_BIN_ROOT
+mkdir -p "$TEST_BIN_ROOT/TestProjects"
+cp -a $REPOROOT/test/TestProjects/* $TEST_BIN_ROOT/TestProjects
+
+pushd "$TEST_BIN_ROOT"
+set +e
+
+for project in $TestProjects
 do
     ./corerun "xunit.console.netcore.exe" "$project.dll" -xml "${project}-testResults.xml" -notrait category=failing
     exitCode=$?
@@ -63,22 +39,25 @@ do
     fi
 done
 
-for script in ${TestScripts[@]}
+popd
+
+for script in $TestScripts
 do
-    "$REPOROOT/scripts/test/$script"
+    scriptName=${script}.sh
+
+    "$REPOROOT/scripts/test/${scriptName}"
     exitCode=$?
     if [ $exitCode -ne 0 ]; then
-        failedTests+=($script)
+        failedTests+=("$scriptName")
         failCount+=1
     fi
 done
 
 for test in ${failedTests[@]}
 do
-    error "$test failed. Logs in '$TestBinRoot/${test}-testResults.xml'"
+    error "$test failed. Logs in '$TEST_BIN_ROOT/${test}-testResults.xml'"
 done
 
-popd
 set -e
 
 exit $failCount

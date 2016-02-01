@@ -8,12 +8,6 @@
 # Restore packages
 # NOTE(anurse): I had to remove --quiet, because NuGet3 is too quiet when that's provided :(
 header "Restoring packages"
-dotnet restore "$RepoRoot\src" --runtime "$Rid"
-dotnet restore "$RepoRoot\test" --runtime "$Rid"
-dotnet restore "$RepoRoot\tools" --runtime "$Rid"
 
-$oldErrorAction=$ErrorActionPreference
-$ErrorActionPreference="SilentlyContinue"
-dotnet restore "$RepoRoot\testapp" --runtime "$Rid" 2>&1 | Out-Null
-$ErrorActionPreference=$oldErrorAction
-
+& dotnet restore "$RepoRoot\src" --runtime "$Rid"
+& dotnet restore "$RepoRoot\tools" --runtime "$Rid"

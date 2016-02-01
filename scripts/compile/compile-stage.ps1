@@ -7,35 +7,14 @@ param(
     [Parameter(Mandatory=$true)][string]$Tfm,
     [Parameter(Mandatory=$true)][string]$Rid,
     [Parameter(Mandatory=$true)][string]$Configuration,
-    [Parameter(Mandatory=$true)][string]$OutputDir,
+    [Parameter(Mandatory=$true)][string]$StageOutputDir,
     [Parameter(Mandatory=$true)][string]$RepoRoot,
     [Parameter(Mandatory=$true)][string]$HostDir,
     [Parameter(Mandatory=$true)][string]$CompilationOutputDir)
 
 . $REPOROOT\scripts\package\projectsToPack.ps1
 
-$Projects = @(
-    "dotnet",
-    "dotnet-build",
-    "dotnet-compile",
-    "dotnet-compile-csc",
-    "dotnet-compile-fsc",
-    "dotnet-compile-native",
-    "dotnet-new",
-    "dotnet-pack",
-    "dotnet-projectmodel-server",
-    "dotnet-publish",
-    "dotnet-restore",
-    "dotnet-repl",
-    "dotnet-repl-csi",
-    "dotnet-resgen",
-    "dotnet-run",
-    "dotnet-test",
-    "Microsoft.DotNet.Cli.Utils",
-    "Microsoft.DotNet.ProjectModel.Loader",
-    "Microsoft.DotNet.ProjectModel.Workspaces",
-    "Microsoft.Extensions.Testing.Abstractions"
-)
+$Projects = loadBuildProjectList
 
 $BinariesForCoreHost = @(
     "csi"
@@ -51,13 +30,13 @@ $FilesToClean = @(
     "Microsoft.DotNet.Runtime.pdb"
 )
 
-$RuntimeOutputDir = "$OutputDir\runtime\coreclr"
+$RuntimeOutputDir = "$StageOutputDir\runtime\coreclr"
 
 # Publish each project
 $Projects | ForEach-Object {
-    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+    dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$StageOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$($_.ProjectName)"
     if (!$?) {
-        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$OutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$_"
+        Write-Host Command failed: dotnet publish --native-subdirectory --framework "$Tfm" --runtime "$Rid" --output "$StageOutputDir\bin" --configuration "$Configuration" "$RepoRoot\src\$($_.ProjectName)"
         exit 1
     }
 }
@@ -87,7 +66,7 @@ $FilesToClean | ForEach-Object {
 }
 
 # Copy the runtime app-local for the tools
-cp -rec "$RuntimeOutputDir\*" "$OutputDir\bin" -ErrorVariable capturedErrors -ErrorAction SilentlyContinue
+cp -rec "$RuntimeOutputDir\*" "$StageOutputDir\bin" -ErrorVariable capturedErrors -ErrorAction SilentlyContinue
 $capturedErrors | foreach-object {
     if ($_ -notmatch "already exists") {
         write-error $_
@@ -96,22 +75,22 @@ $capturedErrors | foreach-object {
 }
 
 # Deploy the CLR host to the output
-cp "$HostDir\corehost.exe" "$OutputDir\bin"
-cp "$HostDir\hostpolicy.dll" "$OutputDir\bin"
+cp "$HostDir\corehost.exe" "$StageOutputDir\bin"
+cp "$HostDir\hostpolicy.dll" "$StageOutputDir\bin"
 
 # corehostify externally-provided binaries (csc, vbc, etc.)
 $BinariesForCoreHost | ForEach-Object {
-    mv $OutputDir\bin\$_.exe $OutputDir\bin\$_.dll -Force
-    cp $OutputDir\bin\corehost.exe $OutputDir\bin\$_.exe -Force
+    mv $StageOutputDir\bin\$_.exe $StageOutputDir\bin\$_.dll -Force
+    cp $StageOutputDir\bin\corehost.exe $StageOutputDir\bin\$_.exe -Force
 }
 
 # Crossgen Roslyn
-#if (-not (Test-Path "$OutputDir\bin\csc.ni.exe")) {
+#if (-not (Test-Path "$StageOutputDir\bin\csc.ni.exe")) {
     #header "Crossgening Roslyn compiler ..."
-    #_cmd "$RepoRoot\scripts\crossgen\crossgen_roslyn.cmd ""$OutputDir"""
+    #_cmd "$RepoRoot\scripts\crossgen\crossgen_roslyn.cmd ""$StageOutputDir"""
 #}
 
 # Copy in AppDeps
 header "Acquiring Native App Dependencies"
-_ "$RepoRoot\scripts\build\build_appdeps.ps1" @("$RepoRoot", "$OutputDir")
+_ "$RepoRoot\scripts\build\build_appdeps.ps1" @("$RepoRoot", "$StageOutputDir")
 

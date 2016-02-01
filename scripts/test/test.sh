@@ -12,22 +12,19 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   SOURCE="$(readlink "$SOURCE")"
   [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
+
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-APPDEPS_PROJECT_DIR="$REPOROOT/src/dotnet-compile-native/appdep"
+header "Setting up Tests"
+"$REPOROOT/scripts/test/setup/setup-tests.sh"
 
-# Get Absolute Output Dir
-pushd $1
-OUTPUT_DIR="$(pwd)"
-popd
+header "Restoring test projects"
+"$REPOROOT/scripts/test/restore-tests.sh"
 
-## App Deps ##
-pushd $APPDEPS_PROJECT_DIR
-dotnet restore --runtime $RID --packages $APPDEPS_PROJECT_DIR/packages $DISABLE_PARALLEL
-APPDEP_SDK=$APPDEPS_PROJECT_DIR/packages/toolchain*/*/
-popd
+header "Building test projects"
+"$REPOROOT/scripts/test/build-tests.sh"
 
-mkdir -p $OUTPUT_DIR/appdepsdk
-cp -a $APPDEP_SDK/. $OUTPUT_DIR/appdepsdk
+header "Running Tests"
+"$REPOROOT/scripts/test/run-tests.sh"

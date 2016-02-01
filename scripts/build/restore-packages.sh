@@ -18,9 +18,5 @@ source "$DIR/../common/_common.sh"
 
 header "Restoring packages"
 
-dotnet restore "$REPOROOT/src" --runtime $RID
-dotnet restore "$REPOROOT/test" --runtime $RID
-dotnet restore "$REPOROOT/tools" --runtime $RID
-set +e
-dotnet restore "$REPOROOT/testapp" --runtime $RID >/dev/null 2>&1
-set -e
+dotnet restore "$REPOROOT/src" --runtime "$RID" $DISABLE_PARALLEL
+dotnet restore "$REPOROOT/tools" --runtime "$RID" $DISABLE_PARALLEL

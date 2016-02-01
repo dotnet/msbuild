@@ -42,8 +42,9 @@ namespace Microsoft.DotNet.Tools.Restore
             if (!args.Any(s => s.Equals("--runtime", StringComparison.OrdinalIgnoreCase)))
             {
                 args = Enumerable.Concat(
-                    PlatformServices.Default.Runtime.GetOverrideRestoreRuntimeIdentifiers().SelectMany(r => new [] { "--runtime", r }),
-                    args).ToArray();
+                    args,
+                    PlatformServices.Default.Runtime.GetOverrideRestoreRuntimeIdentifiers().SelectMany(r => new [] { "--runtime", r })
+                    ).ToArray();
             }
 
             app.OnExecute(() =>
