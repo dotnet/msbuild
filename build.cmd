@@ -27,7 +27,7 @@ set BUILDERRORLEVEL=%ERRORLEVEL%
 echo.
 
 :: Pull the build summary from the log file
-findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%~dp0msbuild.log"
+findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%MSBUILDLOGPATH%"
 echo ** Build completed. Log: %MSBUILDLOGPATH% Exit code: %BUILDERRORLEVEL%
 
 exit /b %BUILDERRORLEVEL%

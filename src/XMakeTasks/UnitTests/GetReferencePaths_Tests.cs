@@ -157,16 +157,51 @@ namespace Microsoft.Build.UnitTests
             MockEngine engine = new MockEngine();
             GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
             getReferencePaths.BuildEngine = engine;
-            // Make a framework which does not exist, intentional mispelling of framework
+            // Make a framework which does not exist, intentional misspelling of framework
             getReferencePaths.TargetFrameworkMoniker = ".NetFramewok, Version=v99.0";
-            getReferencePaths.Execute();
+            bool success = getReferencePaths.Execute();
+            Assert.False(success);
             string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
             Assert.Equal(0, returnedPaths.Length);
             string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
             Assert.Null(displayName);
             FrameworkNameVersioning frameworkMoniker = new FrameworkNameVersioning(getReferencePaths.TargetFrameworkMoniker);
             string message = ResourceUtilities.FormatResourceString("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkMoniker.ToString());
-            engine.AssertLogContains(message);
+            engine.AssertLogContains("ERROR MSB3644: " + message);
+        }
+
+        /// <summary>
+        /// Test the case where the target framework moniker is empty when using MSBUILDWARNONNOREFERENCEASSEMBLYDIRECTORY
+        /// override. Expect there to be a warning logged.
+        /// TODO: This should be removed for Dev15 (override feature removed)
+        /// </summary>
+        [Fact]
+        public void TestGeneralFrameworkMonikerNonExistentOverrideError()
+        {
+            MockEngine engine = new MockEngine();
+            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+            getReferencePaths.BuildEngine = engine;
+            // Make a framework which does not exist, intentional misspelling of framework
+            getReferencePaths.TargetFrameworkMoniker = ".NetFramewok, Version=v99.0";
+            
+            try
+            {
+                Environment.SetEnvironmentVariable("MSBUILDWARNONNOREFERENCEASSEMBLYDIRECTORY", "1");
+                bool success = getReferencePaths.Execute();
+                Assert.True(success);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("MSBUILDWARNONNOREFERENCEASSEMBLYDIRECTORY", null);
+            }
+            
+            string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
+            Assert.Equal(0, returnedPaths.Length);
+            string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
+            Assert.Null(displayName);
+            FrameworkNameVersioning frameworkMoniker = new FrameworkNameVersioning(getReferencePaths.TargetFrameworkMoniker);
+            string message = ResourceUtilities.FormatResourceString("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkMoniker.ToString());
+            engine.AssertLogContains("WARNING MSB3644: " + message);
         }
 
         /// <summary>
