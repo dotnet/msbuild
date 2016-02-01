@@ -13,7 +13,7 @@ If (Test-Path $intermediateDir){
     rmdir -Force -Rec  $intermediateDir
 }
 mkdir $intermediateDir
-& dotnet restore --packages "$intermediateDir" "$RepoRoot\src\dotnet-compile-native\appdep\project.json"
+& dotnet restore --packages "$intermediateDir" "$RepoRoot\src\dotnet\commands\dotnet-compile-native\appdep\project.json"
 
 
 If (Test-Path $appdepBinDir){
