@@ -131,11 +131,12 @@ namespace Microsoft.DotNet.Tools.Restore
             {
                 var tempPath = Path.Combine(tempRoot, Guid.NewGuid().ToString(), "bin");
 
-                RestoreToolToPath(tooldep, restoreTask.Arguments, tempPath, quiet);
-
-                CreateDepsInPackageCache(tooldep, tempPath);
-
-                PersistLockFile(tooldep, tempPath, restoreTask.ProjectDirectory);
+                var restoreSucceded = RestoreToolToPath(tooldep, restoreTask.Arguments, tempPath, quiet);
+                if (restoreSucceded)
+                {
+                    CreateDepsInPackageCache(tooldep, tempPath);
+                    PersistLockFile(tooldep, tempPath, restoreTask.ProjectDirectory);
+                }
             }
             finally
             {
@@ -182,7 +183,7 @@ namespace Microsoft.DotNet.Tools.Restore
             File.Move(Path.Combine(calculator.GetOutputDirectoryPath(Constants.DefaultConfiguration), "bin" + FileNameSuffixes.Deps), depsPath);
         }
 
-        private static void RestoreToolToPath(LibraryRange tooldep, IEnumerable<string> args, string tempPath, bool quiet)
+        private static bool RestoreToolToPath(LibraryRange tooldep, IEnumerable<string> args, string tempPath, bool quiet)
         {
             Directory.CreateDirectory(tempPath);
             var projectPath = Path.Combine(tempPath, Project.FileName);
@@ -190,7 +191,7 @@ namespace Microsoft.DotNet.Tools.Restore
             Console.WriteLine($"Restoring Tool '{tooldep.Name}' for '{projectPath}' in '{tempPath}'");
 
             File.WriteAllText(projectPath, GenerateProjectJsonContents(new[] {"dnxcore50"}, tooldep));
-            NuGet3.Restore(new [] { $"{projectPath}", "--runtime", $"{DefaultRid}"}.Concat(args), quiet);
+            return NuGet3.Restore(new [] { $"{projectPath}", "--runtime", $"{DefaultRid}"}.Concat(args), quiet) == 0;
         }
 
         private static string GenerateProjectJsonContents(IEnumerable<string> frameworks, LibraryRange tooldep)
