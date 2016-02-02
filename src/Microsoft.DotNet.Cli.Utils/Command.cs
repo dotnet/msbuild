@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using NuGet.Frameworks;
 
@@ -39,6 +40,11 @@ namespace Microsoft.DotNet.Cli.Utils
             ResolutionStrategy = commandSpec.ResolutionStrategy;
         }
 
+        public static Command CreateDotNet(string commandName, IEnumerable<string> args, NuGetFramework framework = null, bool useComSpec = false)
+        {
+            return Create("dotnet", new[] { commandName }.Concat(args), framework, useComSpec);
+        }
+
         /// <summary>
         /// Create a command with the specified arg array. Args will be 
         /// escaped properly to ensure that exactly the strings in this
@@ -51,7 +57,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns></returns>
         public static Command Create(string commandName, IEnumerable<string> args, NuGetFramework framework = null, bool useComSpec = false)
         {
-            var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, args, framework, useComSpec=useComSpec);
+            var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, args, framework, useComSpec);
 
             if (commandSpec == null)
             {

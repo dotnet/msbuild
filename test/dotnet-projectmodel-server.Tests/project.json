@@ -1,8 +1,7 @@
 {
     "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1-rc2-23727",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "dotnet-projectmodel-server": "1.0.0-*",
+        "dotnet": "1.0.0-*",
         "Newtonsoft.Json": "7.0.1",
         "xunit.runner.aspnet": "2.0.0-aspnet-rc2-16068"
     },

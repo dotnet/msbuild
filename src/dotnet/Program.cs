@@ -6,8 +6,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ProjectModel.Server;
+using Microsoft.DotNet.Tools.Build;
+using Microsoft.DotNet.Tools.Compiler;
+using Microsoft.DotNet.Tools.Compiler.Csc;
+using Microsoft.DotNet.Tools.Compiler.Fsc;
+using Microsoft.DotNet.Tools.Compiler.Native;
+using Microsoft.DotNet.Tools.New;
+using Microsoft.DotNet.Tools.Publish;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.Tools.Restore;
 using NuGet.Frameworks;
+using Microsoft.DotNet.Tools.Resgen;
+using Microsoft.DotNet.Tools.Run;
+using Microsoft.DotNet.Tools.Test;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -54,7 +66,7 @@ Common Commands:
 
                 return 1;
             }
-            
+
         }
 
         private static int ProcessArgs(string[] args)
@@ -71,7 +83,7 @@ Common Commands:
                 {
                     verbose = true;
                 }
-                else if(IsArg(args[lastArg], "version"))
+                else if (IsArg(args[lastArg], "version"))
                 {
                     PrintVersionInfo();
                     return 0;
@@ -104,6 +116,32 @@ Common Commands:
             if (string.IsNullOrEmpty(command) || command.Equals("help", StringComparison.OrdinalIgnoreCase))
             {
                 return RunHelpCommand(appArgs);
+            }
+
+            var builtIns = new Dictionary<string, Func<string[], int>>
+            {
+                ["build"] = BuildCommand.Run,
+                ["compile"] = CommpileCommand.Run,
+                ["compile-csc"] = CompileCscCommand.Run,
+                ["compile-fsc"] = CompileFscCommand.Run,
+                ["compile-native"] = CompileNativeCommand.Run,
+                ["new"] = NewCommand.Run,
+                ["pack"] = PackCommand.Run,
+                ["projectmodel-server"] = ProjectModelServerCommand.Run,
+                ["publish"] = PublishCommand.Run,
+                ["restore"] = RestoreCommand.Run,
+                ["resgen"] = ResgenCommand.Run,
+                ["run"] = RunCommand.Run,
+                ["test"] = TestCommand.Run
+            };
+
+            Func<string[], int> builtIn;
+            if (builtIns.TryGetValue(command, out builtIn))
+            {
+                // mimic the env variable
+                Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
+                Environment.SetEnvironmentVariable(CommandContext.Variables.AnsiPassThru, bool.TrueString);
+                return builtIn(appArgs.ToArray());
             }
 
             return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.DnxCore50)
