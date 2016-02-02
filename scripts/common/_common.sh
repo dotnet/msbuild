@@ -26,6 +26,9 @@ export HOST_DIR=$OUTPUT_ROOT/corehost
 export TEST_BIN_ROOT="$REPOROOT/artifacts/tests"
 export TEST_PACKAGE_DIR="$TEST_BIN_ROOT/packages"
 
+export TEST_ROOT="$OUTPUT_ROOT\tests"  
+export TEST_ARTIFACTS="$TEST_ROOT\artifacts"  
+
 export RELEASE_SUFFIX=beta
 export CHANNEL=$RELEASE_SUFFIX
 
