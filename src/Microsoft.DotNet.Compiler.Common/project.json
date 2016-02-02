@@ -6,7 +6,7 @@
     },
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23727",
+        "NETStandard.Library": "1.0.0-rc2-23728",
         "System.CommandLine": "0.1.0-e160119-1",
         "Microsoft.CodeAnalysis.CSharp":  "1.2.0-beta1-20160108-01",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
