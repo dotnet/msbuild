@@ -27,8 +27,7 @@
     "../TestProjects/CompileFail/**/*",
     "../TestProjects/TestBindingRedirectGeneration/**/*",
     "../TestProjects/TestAppCompilationContext/**/*",
-    "../TestProjects/TestAppWithContents/**/*",
-    "../TestProjects/global.json"
+    "../TestProjects/TestAppWithContents/**/*"
   ],
 
   "testRunner": "xunit"

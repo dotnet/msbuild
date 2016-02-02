@@ -1,25 +1,26 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
 
-    "dependencies": {
-        "NETStandard.Library" : "1.0.0-rc2-23728",
+  "dependencies": {
+    "NETStandard.Library": "1.0.0-rc2-23728",
 
-        "xunit": "2.1.0",
-        "xunit.console.netcore": "1.0.2-prerelease-00101",
-        "xunit.netcore.extensions": "1.0.0-prerelease-00153",
-        "xunit.runner.utility": "2.1.0",
+    "Microsoft.DotNet.ProjectModel": { "target": "project" },
+    "Microsoft.DotNet.Cli.Utils": { "target": "project" },
+    "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
 
-        "Microsoft.DotNet.ProjectModel": {"target":"project"},
-        "Microsoft.DotNet.Cli.Utils": {"target":"project"},
-        "Microsoft.DotNet.Tools.Tests.Utilities": {"target":"project"}
-    },
+    "xunit": "2.1.0",
+    "xunit.netcore.extensions": "1.0.0-prerelease-*",
+    "dotnet-test-xunit": "1.0.0-dev-45337-57"
+  },
 
-    "frameworks": {
-        "dnxcore50": {
-            "imports": "portable-net45+win8"
-        }
+  "frameworks": {
+    "dnxcore50": {
+      "imports": "portable-net45+win8"
     }
+  },
+
+  "testRunner": "xunit"
 }
