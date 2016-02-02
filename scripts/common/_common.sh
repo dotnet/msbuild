@@ -19,15 +19,13 @@ export TFM=dnxcore50
 export REPOROOT=$(cd $COMMONDIR/../.. && pwd)
 export OUTPUT_ROOT=$REPOROOT/artifacts/$RID
 export STAGE1_DIR=$OUTPUT_ROOT/stage1
-export STAGE1_COMPILATION_DIR=$OUTPUT_ROOT/stage1compilation
 export STAGE2_DIR=$OUTPUT_ROOT/stage2
-export STAGE2_COMPILATION_DIR=$OUTPUT_ROOT/stage2compilation
 export HOST_DIR=$OUTPUT_ROOT/corehost
 export TEST_BIN_ROOT="$REPOROOT/artifacts/tests"
 export TEST_PACKAGE_DIR="$TEST_BIN_ROOT/packages"
 
-export TEST_ROOT="$OUTPUT_ROOT\tests"  
-export TEST_ARTIFACTS="$TEST_ROOT\artifacts"  
+export TEST_ROOT="$OUTPUT_ROOT/tests"  
+export TEST_ARTIFACTS="$TEST_ROOT/artifacts"  
 
 export RELEASE_SUFFIX=beta
 export CHANNEL=$RELEASE_SUFFIX
