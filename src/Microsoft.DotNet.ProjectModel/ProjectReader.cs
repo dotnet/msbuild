@@ -560,6 +560,7 @@ namespace Microsoft.DotNet.ProjectModel
             {
                 Defines = rawOptions.ValueAsStringArray("define"),
                 SuppressWarnings = rawOptions.ValueAsStringArray("nowarn"),
+                AdditionalArguments = rawOptions.ValueAsStringArray("additionalArguments"),
                 LanguageVersion = rawOptions.ValueAsString("languageVersion"),
                 AllowUnsafe = rawOptions.ValueAsNullableBoolean("allowUnsafe"),
                 Platform = rawOptions.ValueAsString("platform"),

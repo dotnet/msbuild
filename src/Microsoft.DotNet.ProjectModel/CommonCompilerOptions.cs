@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,6 +35,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IEnumerable<string> SuppressWarnings { get; set; }
 
+        public IEnumerable<string> AdditionalArguments { get; set; }
+
         public override bool Equals(object obj)
         {
             var other = obj as CommonCompilerOptions;
@@ -49,13 +52,27 @@ namespace Microsoft.DotNet.ProjectModel
                    EmitEntryPoint == other.EmitEntryPoint &&
                    GenerateXmlDocumentation == other.GenerateXmlDocumentation &&
                    PreserveCompilationContext == other.PreserveCompilationContext &&
-                   Enumerable.SequenceEqual(Defines ?? Enumerable.Empty<string>(), other.Defines ?? Enumerable.Empty<string>()) &&
-                   Enumerable.SequenceEqual(SuppressWarnings ?? Enumerable.Empty<string>(), other.SuppressWarnings ?? Enumerable.Empty<string>());
+                   EnumerableEquals(Defines, other.Defines) &&
+                   EnumerableEquals(SuppressWarnings, other.SuppressWarnings) &&
+                   EnumerableEquals(AdditionalArguments, other.AdditionalArguments);
         }
+
+        private static bool EnumerableEquals(IEnumerable<string> left, IEnumerable<string> right)
+            => Enumerable.SequenceEqual(left ?? Array.Empty<string>(), right ?? Array.Empty<string>());
 
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        private static IEnumerable<string> Combine(IEnumerable<string> @new, IEnumerable<string> old)
+        {
+            if (@new != null)
+            {
+                old = old ?? Array.Empty<string>();
+                return old.Concat(@new).Distinct().ToArray();
+            }
+            return old;
         }
 
         public static CommonCompilerOptions Combine(params CommonCompilerOptions[] options)
@@ -69,18 +86,10 @@ namespace Microsoft.DotNet.ProjectModel
                     continue;
                 }
 
-                // Defines and suppressions are always combined
-                if (option.Defines != null)
-                {
-                    var existing = result.Defines ?? Enumerable.Empty<string>();
-                    result.Defines = existing.Concat(option.Defines).Distinct();
-                }
-
-                if (option.SuppressWarnings != null)
-                {
-                    var existing = result.SuppressWarnings ?? Enumerable.Empty<string>();
-                    result.SuppressWarnings = existing.Concat(option.SuppressWarnings).Distinct();
-                }
+                // Defines, suppressions, and additional arguments are always combined
+                result.Defines = Combine(option.Defines, result.Defines);
+                result.SuppressWarnings = Combine(option.SuppressWarnings, result.SuppressWarnings);
+                result.AdditionalArguments = Combine(option.AdditionalArguments, result.AdditionalArguments);
 
                 if (option.LanguageVersion != null)
                 {
