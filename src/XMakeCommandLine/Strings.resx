@@ -303,6 +303,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default. 
+                        ForceConsolColor--Use ANSI console colors even if
+                            console does not support it
                         Verbosity--overrides the /verbosity setting for this
                             logger.
                      Example:
