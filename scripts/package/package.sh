@@ -12,8 +12,9 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+export REPOROOT="$(cd -P "$DIR/../.." && pwd)"
+
 source "$DIR/../common/_common.sh"
-source "$REPOROOT/scripts/build/generate-version.sh"
 
 if [ -z "$DOTNET_CLI_VERSION" ]; then
     TIMESTAMP=$(date "+%Y%m%d%H%M%S")
@@ -33,5 +34,5 @@ header "Generating version badge"
 sed "s/ver_number/$DOTNET_CLI_VERSION/g" $VERSION_BADGE > $BADGE_DESTINATION
 
 header "Publishing version badge"
-$REPOROOT/scripts/publish/publish.sh $BADGE_DESTINATION
+$DIR/../publish/publish.sh $BADGE_DESTINATION
 

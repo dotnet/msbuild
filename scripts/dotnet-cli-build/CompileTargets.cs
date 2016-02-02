@@ -1,0 +1,401 @@
+﻿using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.Extensions.PlatformAbstractions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+
+using static Microsoft.DotNet.Cli.Build.FS;
+using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+
+namespace Microsoft.DotNet.Cli.Build
+{
+    public class CompileTargets
+    {
+        public static readonly string CoreCLRVersion = "1.0.1-rc2-23811";
+        public static readonly string AppDepSdkVersion = "1.0.5-prerelease-00001";
+
+        public static readonly List<string> AssembliesToCrossGen = GetAssembliesToCrossGen();
+
+        public static readonly string[] BinariesForCoreHost = new[]
+        {
+            "csi",
+            "csc",
+            "vbc"
+        };
+
+        public static readonly string[] ProjectsToPublish = new[]
+        {
+            "dotnet"
+        };
+
+        public static readonly string[] FilesToClean = new[]
+        {
+            "README.md",
+            "Microsoft.DotNet.Runtime.exe",
+            "Microsoft.DotNet.Runtime.dll",
+            "Microsoft.DotNet.Runtime.deps",
+            "Microsoft.DotNet.Runtime.pdb"
+        };
+
+        public static readonly string[] ProjectsToPack = new[]
+        {
+            "Microsoft.DotNet.Cli.Utils",
+            "Microsoft.DotNet.ProjectModel",
+            "Microsoft.DotNet.ProjectModel.Loader",
+            "Microsoft.DotNet.ProjectModel.Workspaces",
+            "Microsoft.Extensions.DependencyModel",
+            "Microsoft.Extensions.Testing.Abstractions"
+        };
+
+        [Target(nameof(PrepareTargets.Init), nameof(CompileCoreHost), nameof(CompileStage1), nameof(CompileStage2))]
+        public static BuildTargetResult Compile(BuildTargetContext c)
+        {
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult CompileCoreHost(BuildTargetContext c)
+        {
+            // Generate build files
+            var cmakeOut = Path.Combine(Dirs.Corehost, "cmake");
+
+            Rmdir(cmakeOut);
+            Mkdirp(cmakeOut);
+
+            var configuration = (string)c.BuildContext["Configuration"];
+
+            // Run the build
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Why does Windows directly call cmake but Linux/Mac calls "build.sh" in the corehost dir?
+                // See the comment in "src/corehost/build.sh" for details. It doesn't work for some reason.
+                ExecIn(cmakeOut, "cmake",
+                    Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost"),
+                    "-G",
+                    "Visual Studio 14 2015 Win64");
+
+                var pf32 = RuntimeInformation.OSArchitecture == Architecture.X64 ?
+                    Environment.GetEnvironmentVariable("ProgramFiles(x86)") :
+                    Environment.GetEnvironmentVariable("ProgramFiles");
+
+                if (configuration.Equals("Release"))
+                {
+                    // Cmake calls it "RelWithDebInfo" in the generated MSBuild
+                    configuration = "RelWithDebInfo";
+                }
+
+                Exec(Path.Combine(pf32, "MSBuild", "14.0", "Bin", "MSBuild.exe"),
+                    Path.Combine(cmakeOut, "ALL_BUILD.vcxproj"),
+                    $"/p:Configuration={configuration}");
+
+                // Copy the output out
+                File.Copy(Path.Combine(cmakeOut, "cli", "Debug", "corehost.exe"), Path.Combine(Dirs.Corehost, "corehost.exe"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "Debug", "corehost.pdb"), Path.Combine(Dirs.Corehost, "corehost.pdb"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dll", "Debug", "hostpolicy.dll"), Path.Combine(Dirs.Corehost, "hostpolicy.dll"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dll", "Debug", "hostpolicy.pdb"), Path.Combine(Dirs.Corehost, "hostpolicy.pdb"), overwrite: true);
+            }
+            else
+            {
+                ExecIn(cmakeOut, Path.Combine(c.BuildContext.BuildDirectory, "src", "corehost", "build.sh"));
+
+                // Copy the output out
+                File.Copy(Path.Combine(cmakeOut, "cli", "corehost"), Path.Combine(Dirs.Corehost, "corehost"), overwrite: true);
+                File.Copy(Path.Combine(cmakeOut, "cli", "dll", $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
+            }
+
+            return c.Success();
+        }
+
+        [Target]
+        public static BuildTargetResult CompileStage1(BuildTargetContext c)
+        {
+            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
+            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
+            return CompileStage(c,
+                dotnet: DotNetCli.Stage0,
+                outputDir: Dirs.Stage1);
+        }
+
+        [Target]
+        public static BuildTargetResult CompileStage2(BuildTargetContext c)
+        {
+            var configuration = (string)c.BuildContext["Configuration"];
+
+            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
+            CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
+            var result = CompileStage(c,
+                dotnet: DotNetCli.Stage1,
+                outputDir: Dirs.Stage2);
+            if (!result.Success)
+            {
+                return result;
+            }
+
+            // Build projects that are packed in NuGet packages, but only on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var packagingOutputDir = Path.Combine(Dirs.Stage2Compilation, "forPackaging");
+                Mkdirp(packagingOutputDir);
+                foreach(var project in ProjectsToPack)
+                {
+                    // Just build them, we'll pack later
+                    DotNetCli.Stage1.Build(
+                        "--build-base-path",
+                        packagingOutputDir,
+                        "--configuration",
+                        configuration,
+                        Path.Combine(c.BuildContext.BuildDirectory, "src", project))
+                        .Execute()
+                        .EnsureSuccessful();
+                }
+            }
+
+            return c.Success();
+        }
+
+        private static BuildTargetResult CompileStage(BuildTargetContext c, DotNetCli dotnet, string outputDir)
+        {
+            Rmdir(outputDir);
+
+            dotnet.SetDotNetHome();
+
+            var configuration = (string)c.BuildContext["Configuration"];
+            var binDir = Path.Combine(outputDir, "bin");
+            var runtimeOutputDir = Path.Combine(outputDir, "runtime", "coreclr");
+
+            Mkdirp(binDir);
+            Mkdirp(runtimeOutputDir);
+
+            foreach (var project in ProjectsToPublish)
+            {
+                dotnet.Publish(
+                    "--native-subdirectory",
+                    "--output",
+                    binDir,
+                    "--configuration",
+                    configuration,
+                    Path.Combine(c.BuildContext.BuildDirectory, "src", project))
+                    .Execute()
+                    .EnsureSuccessful();
+            }
+
+            // Publish the runtime
+            dotnet.Publish(
+                "--output",
+                runtimeOutputDir,
+                "--configuration",
+                configuration,
+                Path.Combine(c.BuildContext.BuildDirectory, "src", "Microsoft.DotNet.Runtime"))
+                .Execute()
+                .EnsureSuccessful();
+
+            // Clean bogus files
+            foreach (var fileToClean in FilesToClean)
+            {
+                var pathToClean = Path.Combine(runtimeOutputDir, fileToClean);
+                if (File.Exists(pathToClean))
+                {
+                    File.Delete(pathToClean);
+                }
+            }
+
+            FixModeFlags(outputDir);
+
+            // Copy the whole runtime local to the tools
+            CopyRecursive(runtimeOutputDir, binDir);
+
+            // Copy corehost
+            File.Copy(Path.Combine(Dirs.Corehost, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), overwrite: true);
+            File.Copy(Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(binDir, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
+
+            // Corehostify binaries
+            foreach(var binaryToCorehostify in BinariesForCoreHost)
+            {
+                try
+                {
+                    // Yes, it is .exe even on Linux. This is the managed exe we're working with
+                    File.Copy(Path.Combine(binDir, $"{binaryToCorehostify}.exe"), Path.Combine(binDir, $"{binaryToCorehostify}.dll"));
+                    File.Delete(Path.Combine(binDir, $"{binaryToCorehostify}.exe"));
+                    File.Copy(Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, binaryToCorehostify + Constants.ExeSuffix));
+                }
+                catch(Exception ex)
+                {
+                    return c.Failed($"Failed to corehostify '{binaryToCorehostify}': {ex.ToString()}");
+                }
+            }
+
+            // Crossgen Roslyn
+            var result = Crossgen(c, binDir);
+            if (!result.Success)
+            {
+                return result;
+            }
+
+            // Copy AppDeps
+            result = CopyAppDeps(c, binDir);
+            if(!result.Success)
+            {
+                return result;
+            }
+
+            // Generate .version file
+            var version = ((BuildVersion)c.BuildContext["BuildVersion"]).SimpleVersion;
+            var content = $@"{version}{Environment.NewLine}{c.BuildContext["CommitHash"]}{Environment.NewLine}";
+            File.WriteAllText(Path.Combine(outputDir, ".version"), content);
+
+            return c.Success();
+        }
+
+        private static BuildTargetResult CopyAppDeps(BuildTargetContext c, string outputDir)
+        {
+            var appDepOutputDir = Path.Combine(outputDir, "appdepsdk");
+            Rmdir(appDepOutputDir);
+            Mkdirp(appDepOutputDir);
+
+            // Find toolchain package
+            string packageId;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                packageId = "toolchain.win7-x64.Microsoft.DotNet.AppDep";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                if (string.Equals(osname, "ubuntu", StringComparison.OrdinalIgnoreCase))
+                {
+                    packageId = "toolchain.ubuntu.14.04-x64.Microsoft.DotNet.AppDep";
+                }
+                else if (string.Equals(osname, "centos", StringComparison.OrdinalIgnoreCase))
+                {
+                    c.Warn("Native compilation is not yet working on CentOS");
+                    return c.Success();
+                }
+                else
+                {
+                    return c.Failed($"Unknown Linux Distro: {osname}");
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                packageId = "toolchain.osx.10.10-x64.Microsoft.DotNet.AppDep";
+            }
+            else
+            {
+                return c.Failed("Unsupported OS Platform");
+            }
+
+            var appDepPath = Path.Combine(
+                Dirs.NuGetPackages,
+                packageId,
+                AppDepSdkVersion);
+            CopyRecursive(appDepPath, appDepOutputDir, overwrite: true);
+
+            return c.Success();
+        }
+
+        private static BuildTargetResult Crossgen(BuildTargetContext c, string outputDir)
+        {
+            // Check if we need to skip crossgen
+            if (string.Equals(Environment.GetEnvironmentVariable("DOTNET_BUILD_SKIP_CROSSGEN"), "1"))
+            {
+                c.Warn("Skipping crossgen because DOTNET_BUILD_SKIP_CROSSGEN is set");
+                return c.Success();
+            }
+
+            // Find crossgen
+            string packageId;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                packageId = "runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var osname = PlatformServices.Default.Runtime.OperatingSystem;
+                if (string.Equals(osname, "ubuntu", StringComparison.OrdinalIgnoreCase))
+                {
+                    packageId = "runtime.ubuntu.14.04-x64.Microsoft.NETCore.Runtime.CoreCLR";
+                }
+                else if (string.Equals(osname, "centos", StringComparison.OrdinalIgnoreCase))
+                {
+                    // CentOS runtime is in the runtime.rhel.7-x64... package.
+                    packageId = "runtime.rhel.7-x64.Microsoft.NETCore.Runtime.CoreCLR";
+                }
+                else
+                {
+                    return c.Failed($"Unknown Linux Distro: {osname}");
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                packageId = "runtime.osx.10.10-x64.Microsoft.NETCore.Runtime.CoreCLR";
+            }
+            else
+            {
+                return c.Failed("Unsupported OS Platform");
+            }
+
+            var crossGenExePath = Path.Combine(
+                Dirs.NuGetPackages,
+                packageId,
+                CoreCLRVersion,
+                "tools",
+                $"crossgen{Constants.ExeSuffix}");
+
+            // We have to copy crossgen next to mscorlib
+            var crossgen = Path.Combine(outputDir, $"crossgen{Constants.ExeSuffix}");
+            File.Copy(crossGenExePath, crossgen, overwrite: true);
+            Chmod(crossgen, "a+x");
+
+            // And if we have mscorlib.ni.dll, we need to rename it to mscorlib.dll
+            if (File.Exists(Path.Combine(outputDir, "mscorlib.ni.dll")))
+            {
+                File.Copy(Path.Combine(outputDir, "mscorlib.ni.dll"), Path.Combine(outputDir, "mscorlib.dll"), overwrite: true);
+            }
+
+            foreach (var assemblyToCrossgen in AssembliesToCrossGen)
+            {
+                c.Info($"Crossgenning {assemblyToCrossgen}");
+                ExecIn(outputDir, crossgen, "-nologo", "-platform_assemblies_paths", outputDir, assemblyToCrossgen);
+            }
+
+            c.Info("Crossgen complete");
+
+            // Check if csc/vbc.ni.exe exists, and overwrite the dll with it just in case
+            if (File.Exists(Path.Combine(outputDir, "csc.ni.exe")) && !File.Exists(Path.Combine(outputDir, "csc.ni.dll")))
+            {
+                File.Move(Path.Combine(outputDir, "csc.ni.exe"), Path.Combine(outputDir, "csc.ni.dll"));
+            }
+
+            if (File.Exists(Path.Combine(outputDir, "vbc.ni.exe")) && !File.Exists(Path.Combine(outputDir, "vbc.ni.dll")))
+            {
+                File.Move(Path.Combine(outputDir, "vbc.ni.exe"), Path.Combine(outputDir, "vbc.ni.dll"));
+            }
+
+            return c.Success();
+        }
+
+        private static List<string> GetAssembliesToCrossGen()
+        {
+            var list = new List<string>
+            {
+                "System.Collections.Immutable.dll",
+                "System.Reflection.Metadata.dll",
+                "Microsoft.CodeAnalysis.dll",
+                "Microsoft.CodeAnalysis.CSharp.dll",
+                "Microsoft.CodeAnalysis.VisualBasic.dll",
+                "csc.dll",
+                "vbc.dll"
+            };
+
+            // mscorlib is already crossgenned on Windows
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // mscorlib has to be crossgenned first
+                list.Insert(0, "mscorlib.dll");
+            }
+
+            return list;
+        }
+    }
+}

@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
-#
-# Copyright (c) .NET Foundation and contributors. All rights reserved.
-# Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#
 
-# Set OFFLINE environment variable to build offline
+# Why is this a separate script? Why not just invoke 'cmake' and 'make' in the C# build scripts themselves?
+# I really don't know, but it doesn't work when I do that. Something about SIGCHLD not getting from clang to cmake or something.
+#       -anurse
 
 set -e
 
@@ -16,9 +14,6 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# Check if we need to build in docker
-if [ ! -z "$BUILD_IN_DOCKER" ]; then
-    $DIR/scripts/dockerbuild.sh "$@"
-else
-    $DIR/scripts/run-build.sh "$@"
-fi
+echo "Building Corehost from $DIR to $(pwd)"
+cmake "$DIR" -G "Unix Makefiles"
+make

@@ -7,6 +7,7 @@
 set -e
 
 export CI_BUILD=1
+export NO_COLOR=1
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -16,7 +17,36 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source "$SCRIPT_DIR/common/_common.sh"
+while [[ $# > 0 ]]; do
+    lowerI="$(echo $1 | awk '{print tolower($0)}')"
+    case $lowerI in
+        "release" | "--release")
+            export CONFIGURATION=Release
+            ;;
+        "debug" | "--debug")
+            export CONFIGURATION=Debug
+            ;;
+        "offline" | "--offline")
+            export OFFLINE=true
+            ;;
+        "nopackage" | "--nopackage")
+            export NOPACKAGE=true
+            ;;
+        "--buildindocker-ubuntu")
+            export BUILD_IN_DOCKER=1
+            export DOCKER_IMAGENAME=ubuntu
+            ;;
+        "--buildindocker-centos")
+            export BUILD_IN_DOCKER=1
+            export DOCKER_IMAGENAME=centos
+            ;;
+        *)
+            break
+            ;;
+    esac
+
+    shift
+done
 
 # Tell install scripts to skip pre-req check since the CI has the pre-reqs but not ldconfig it seems
 # Also, install to a directory under the repo root since we don't have permission to work elsewhere
@@ -35,17 +65,15 @@ container_name=""
 
 #Jenkins
 [ ! -z "$BUILD_TAG" ] && container_name="$BUILD_TAG"
+
 #VSO
 [ ! -z "$BUILD_BUILDID" ] && container_name="$BUILD_BUILDID"
 
 export DOTNET_BUILD_CONTAINER_NAME="$container_name"
 
+## CentOS-based CI machines don't have docker, ditto OSX. So only build in docker if we're on Ubuntu
+#if [ "$(cat /etc/*-release | grep -cim1 ubuntu)" -eq 1 ]; then
+    #export BUILD_IN_DOCKER=1
+#fi
 
-if [[ "$OSNAME" == "ubuntu" ]]; then
-    export PACKAGE_IN_DOCKER="true"
-    unset BUILD_IN_DOCKER
-
-    $SCRIPT_DIR/../build.sh $@
-else
-    $SCRIPT_DIR/../build.sh $@
-fi
+VERBOSE=1 $SCRIPT_DIR/../build.sh "$@"
