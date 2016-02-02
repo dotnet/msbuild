@@ -26,12 +26,29 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             return compilerName;
         }
-        
+
+        private static readonly KeyValuePair<string, string>[] s_compilerNameToLanguageId =
+        {
+            new KeyValuePair<string, string>("csc", "cs"),
+            new KeyValuePair<string, string>("vbc", "vb"),
+            new KeyValuePair<string, string>("fsc", "fs")
+        };
+
         public static string ResolveLanguageId(ProjectContext context)
         {
             var languageId = context.ProjectFile.AnalyzerOptions?.LanguageId;
-            languageId = languageId ?? "cs";
-            
+            if (languageId == null)
+            {
+                var compilerName = ResolveCompilerName(context);
+                foreach (var kvp in s_compilerNameToLanguageId)
+                {
+                    if (kvp.Key == compilerName)
+                    {
+                        languageId = kvp.Value;
+                    }
+                }
+            }
+
             return languageId;
         }
 
