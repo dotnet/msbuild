@@ -29,10 +29,13 @@ popd
 mkdir -Force "$TestBinRoot\TestProjects"
 cp -rec -Force "$RepoRoot\test\TestProjects\*" "$TestBinRoot\TestProjects"
 
-pushd "$TestBinRoot"
 # Run each test project
 $TestProjects | foreach {
-    & ".\corerun" "xunit.console.netcore.exe" "$($_.ProjectName).dll" -xml "$($_.ProjectName)-testResults.xml" -notrait category=failing
+    # This is a workaroudn for issue #1184, where dotnet test needs to be executed from the folder containing the project.json.
+    pushd "$RepoRoot\test\$($_.ProjectName)"
+    dotnet test -xml "$TestBinRoot\$($_.ProjectName)-testResults.xml" -notrait category=failing
+    popd
+
     $exitCode = $LastExitCode
     if ($exitCode -ne 0) {
         $failingTests += "$($_.ProjectName)"
@@ -40,8 +43,6 @@ $TestProjects | foreach {
 
     $failCount += $exitCode
 }
-
-popd
 
 $TestScripts | foreach {
     $scriptName = "$($_.ProjectName).ps1"

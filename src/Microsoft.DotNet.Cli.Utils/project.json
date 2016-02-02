@@ -9,11 +9,7 @@
         "NETStandard.Library": "1.0.0-rc2-23728",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "System.Reflection.Metadata": "1.2.0-rc2-23728",
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
-        "Microsoft.DotNet.Files": {
-            "type": "build",
-            "version": "1.0.0-*"
-        }
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537"
     },
 
     "frameworks": {

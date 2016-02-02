@@ -31,7 +31,11 @@ set +e
 
 for project in $TestProjects
 do
-    ./corerun "xunit.console.netcore.exe" "$project.dll" -xml "${project}-testResults.xml" -notrait category=failing
+    # This is a workaroudn for issue #1184, where dotnet test needs to be executed from the folder containing the project.json.
+    pushd "$REPOROOT/test/$project"
+    dotnet test -xml "$TEST_BIN_ROOT\$project-testResults.xml" -notrait category=failing
+    popd
+
     exitCode=$?
     failCount+=$exitCode
     if [ $exitCode -ne 0 ]; then
