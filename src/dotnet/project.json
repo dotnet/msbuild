@@ -22,7 +22,7 @@
         "Microsoft.FSharp.Compiler.netcore": "1.0.0-alpha-151218",
         "Microsoft.Net.CSharp.Interactive.netcore": "1.2.0-beta1-20160108-01",
         "Microsoft.CodeAnalysis.CSharp":  "1.2.0-beta1-20160108-01",
-        "NuGet.CommandLine.XPlat": "3.4.0-beta-559",
+        "NuGet.CommandLine.XPlat": "3.4.0-beta-569",
         "System.CommandLine" : "0.1.0-e160119-1",
         
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
