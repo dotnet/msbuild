@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Linq;
-using Microsoft.Dnx.Runtime.Common.CommandLine;
-using Microsoft.DotNet.Cli.Compiler.Common;
+using System.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Resgen
@@ -16,68 +13,54 @@ namespace Microsoft.DotNet.Tools.Resgen
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            var app = new CommandLineApplication(false);
-            app.Name = "resgen";
-            app.FullName = "Resource compiler";
-            app.Description = "Microsoft (R) .NET Resource Generator";
-            app.HelpOption("-h|--help");
+            var help = false;
+            string helpText = null;
+            var returnCode = 0;
 
-            var ouputFile = app.Option("-o", "Output file name", CommandOptionType.SingleValue);
-            var culture = app.Option("-c", "Ouput assembly culture", CommandOptionType.SingleValue);
-            var version = app.Option("-v", "Ouput assembly version", CommandOptionType.SingleValue);
-            var references = app.Option("-r", "Compilation references", CommandOptionType.MultipleValue);
-            var inputFiles = app.Argument("<input>", "Input files", true);
-
-            app.OnExecute(() =>
+            var resgenCommand = new ResgenCommand();
+            try
             {
-                if (!inputFiles.Values.Any())
+                ArgumentSyntax.Parse(args, syntax =>
                 {
-                    Reporter.Error.WriteLine("No input files specified");
-                    return 1;
-                }
+                    syntax.ApplicationName = "Resource compiler";
 
-                var intputResourceFiles = inputFiles.Values.Select(ParseInputFile).ToArray();
-                var outputResourceFile = ResourceFile.Create(ouputFile.Value());
+                    syntax.HandleHelp = false;
+                    syntax.HandleErrors = false;
 
-                switch (outputResourceFile.Type)
-                {
-                    case ResourceFileType.Dll:
-                        using (var outputStream = outputResourceFile.File.Create())
-                        {
-                            var metadata = new AssemblyInfoOptions();
-                            metadata.Culture = culture.Value();
-                            metadata.AssemblyVersion = version.Value();
+                    syntax.DefineOption("o|output", ref resgenCommand.OutputFileName, "Output file name");
+                    syntax.DefineOption("c|culture", ref resgenCommand.AssemblyCulture, "Ouput assembly culture");
+                    syntax.DefineOption("v|version", ref resgenCommand.AssemblyVersion, "Ouput assembly version");
+                    syntax.DefineOption("h|help", ref help, "Help for compile native.");
 
-                            ResourceAssemblyGenerator.Generate(intputResourceFiles,
-                                outputStream,
-                                metadata,
-                                Path.GetFileNameWithoutExtension(outputResourceFile.File.Name),
-                                references.Values.ToArray()
-                                );
-                        }
-                        break;
-                    case ResourceFileType.Resources:
-                        using (var outputStream = outputResourceFile.File.Create())
-                        {
-                            if (intputResourceFiles.Length > 1)
-                            {
-                                Reporter.Error.WriteLine("Only one input file required when generating .resource output");
-                                return 1;
-                            }
-                            ResourcesFileGenerator.Generate(intputResourceFiles.Single().Resource, outputStream);
-                        }
-                        break;
-                    default:
-                        Reporter.Error.WriteLine("Resx output type not supported");
-                        return 1;
-                }
+                    syntax.DefineOptionList("r", ref resgenCommand.CompilationReferences, "Compilation references");
+                    syntax.DefineParameterList("args", ref resgenCommand.Args, "Input files");
 
-                return 0;
-            });
+                    helpText = syntax.GetHelpText();
+                });
+            }
+            catch (ArgumentSyntaxException exception)
+            {
+                Console.Error.WriteLine(exception.Message);
+                help = true;
+                returnCode = 1;
+            }
+
+            if (resgenCommand.Args.Count == 0)
+            {
+                Reporter.Error.WriteLine("No input files specified");
+                help = true;
+                returnCode = 1;
+            }
+
+            if (help)
+            {
+                Console.WriteLine(helpText);
+                return returnCode;
+            }
 
             try
             {
-                return app.Execute(args);
+                return resgenCommand.Execute();
             }
             catch (Exception ex)
             {
@@ -90,22 +73,5 @@ namespace Microsoft.DotNet.Tools.Resgen
             }
         }
 
-        private static ResourceSource ParseInputFile(string arg)
-        {
-            var seperatorIndex = arg.IndexOf(',');
-            string name = null;
-            string metadataName = null;
-            if (seperatorIndex > 0)
-            {
-                name = arg.Substring(0, seperatorIndex);
-                metadataName = arg.Substring(seperatorIndex + 1);
-            }
-            else
-            {
-                name = arg;
-                metadataName = arg;
-            }
-            return new ResourceSource(ResourceFile.Create(name), metadataName);
-        }
     }
 }

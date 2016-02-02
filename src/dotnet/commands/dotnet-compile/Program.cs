@@ -314,13 +314,11 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             if (success)
             {
-                success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, outputPath);
+                success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, intermediateOutputPath, outputPath);
             }
             
             return PrintSummary(diagnostics, sw, success);
         }
-
-
 
         private static void RunScripts(ProjectContext context, string name, Dictionary<string, string> contextVariables)
         {
@@ -370,16 +368,18 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 if (ResourceUtility.IsResxFile(resgenFile.InputFile))
                 {
+                    var arguments = new[]
+                    {
+                        resgenFile.InputFile,
+                        $"-o:{resgenFile.OutputFile}",
+                        $"-v:{project.Version.Version}"
+                    };
+
+                    var rsp = Path.Combine(intermediateOutputPath, $"dotnet-resgen-resx.rsp");
+                    File.WriteAllLines(rsp, arguments);
+
                     var result =
-                        Command.CreateDotNet("resgen",
-                            new string[]
-                            {
-                                $"{resgenFile.InputFile}",
-                                "-o",
-                                $"{resgenFile.OutputFile}",
-                                "-v",
-                                $"{project.Version.Version}"
-                            })
+                        Command.CreateDotNet("resgen", new[] { $"@{rsp}" })
                             .ForwardStdErr()
                             .ForwardStdOut()
                             .Execute();
@@ -400,11 +400,14 @@ namespace Microsoft.DotNet.Tools.Compiler
             return true;
         }
 
-        private static bool GenerateCultureResourceAssemblies(Project project, List<LibraryExport> dependencies, string outputPath)
+        private static bool GenerateCultureResourceAssemblies(
+            Project project,
+            List<LibraryExport> dependencies,
+            string intermediateOutputPath,
+            string outputPath)
         {
             var referencePaths = CompilerUtil.GetReferencePathsForCultureResgen(dependencies);
-            var resgenReferenceArgs = referencePaths.Select(referencePath => $"-r \"{referencePath}\"").ToList();
-
+            var resgenReferenceArgs = referencePaths.Select(path => $"-r:{path}").ToList();
             var cultureResgenFiles = CompilerUtil.GetCultureResources(project, outputPath);
 
             foreach (var resgenFile in cultureResgenFiles)
@@ -419,15 +422,17 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var arguments = new List<string>();
 
                 arguments.AddRange(resgenReferenceArgs);
-                arguments.Add($"-o \"{resgenFile.OutputFile}\"");
-                arguments.Add($"-c {resgenFile.Culture}");
-                arguments.Add($"-v {project.Version.Version}");
-                arguments.AddRange(resgenFile.InputFileToMetadata.Select(fileToMetadata => $"\"{fileToMetadata.Key}\",{fileToMetadata.Value}"));
+                arguments.Add($"-o:{resgenFile.OutputFile}");
+                arguments.Add($"-c:{resgenFile.Culture}");
+                arguments.Add($"-v:{project.Version.Version}");
+                arguments.AddRange(resgenFile.InputFileToMetadata.Select(fileToMetadata => $"{fileToMetadata.Key},{fileToMetadata.Value}"));
+                var rsp = Path.Combine(intermediateOutputPath, $"dotnet-resgen.rsp");
+                File.WriteAllLines(rsp, arguments);
 
-                var result = Command.CreateDotNet("resgen", arguments)
-                                        .ForwardStdErr()
-                                        .ForwardStdOut()
-                                        .Execute();
+                var result = Command.CreateDotNet("resgen", new[] { $"@{rsp}" })
+                    .ForwardStdErr()
+                    .ForwardStdOut()
+                    .Execute();
                 if (result.ExitCode != 0)
                 {
                     return false;
