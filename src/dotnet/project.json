@@ -28,22 +28,21 @@
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-        "Microsoft.DotNet.ILCompiler": "1.0.4-*",
-        "Microsoft.DotNet.ILCompiler.SDK": "1.0.4-*",
+        "Microsoft.DotNet.ILCompiler.SDK": "1.0.4-prerelease-00006",
         
         "Microsoft.Extensions.Logging": "1.0.0-rc2-16011",
         "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16011",
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16531",
         "Microsoft.Extensions.CommandLineUtils.Sources": {
             "type": "build",
-            "version": "1.0.0-*"
+            "version": "1.0.0-rc2-16453"
         },
         "Microsoft.Dnx.Runtime.CommandParsing.Sources": {
-            "version": "1.0.0-*",
+            "version": "1.0.0-rc2-16453",
             "type": "build"
         },
         "Microsoft.Dnx.Runtime.Sources": {
-            "version": "1.0.0-*",
+            "version": "1.0.0-rc2-16453",
             "type": "build"
         },
         "Microsoft.Extensions.Testing.Abstractions": {

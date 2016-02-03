@@ -6,7 +6,7 @@
     "description": "Types to model a .NET Project",
     "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23728",
-        "System.Reflection.Metadata": "1.2.0-rc2-23608",
+        "System.Reflection.Metadata": "1.2.0-rc2-23728",
         "System.Runtime.Loader": "4.0.0-rc2-23728",
         "System.Dynamic.Runtime": "4.0.11-rc2-23728",
         "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23728",
@@ -14,14 +14,14 @@
         "System.Xml.XDocument": "4.0.11-rc2-23728",
         "NuGet.Packaging": "3.4.0-beta-569",
 
-        "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15975",
+        "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15985",
         "Microsoft.Extensions.JsonParser.Sources": {
             "type": "build",
-            "version": "1.0.0-*"
+            "version": "1.0.0-rc2-16453"
         },
         "Microsoft.Extensions.HashCodeCombiner.Sources": {
             "type": "build",
-            "version": "1.0.0-*"
+            "version": "1.0.0-rc2-16054"
         },
         "Microsoft.Extensions.DependencyModel": {
             "type": "build",

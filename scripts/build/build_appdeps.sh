@@ -16,7 +16,17 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-APPDEPS_PROJECT_DIR="$REPOROOT/src/dotnet/commands/dotnet-compile-native/appdep"
+# Always recalculate the RID because the package always uses a specific RID, regardless of OS X version or Linux distro.
+if [ "$OSNAME" == "osx" ]; then
+    RID=osx.10.10-x64
+elif [ "$OSNAME" == "ubuntu" ]; then
+    RID=ubuntu.14.04-x64
+elif [ "$OSNAME" == "centos" ]; then
+    RID=centos.7.1-x64
+else
+    echo "Unknown OS: $OSNAME" 1>&2
+    exit 1
+fi
 
 # Get Absolute Output Dir
 pushd $1
@@ -24,10 +34,6 @@ OUTPUT_DIR="$(pwd)"
 popd
 
 ## App Deps ##
-pushd $APPDEPS_PROJECT_DIR
-dotnet restore --runtime $RID --packages $APPDEPS_PROJECT_DIR/packages $DISABLE_PARALLEL
-APPDEP_SDK=$APPDEPS_PROJECT_DIR/packages/toolchain*/*/
-popd
-
+APPDEP_SDK=$NUGET_PACKAGES/toolchain.$RID.Microsoft.DotNet.AppDep/1.0.4-prerelease-00001/
 mkdir -p $OUTPUT_DIR/appdepsdk
 cp -a $APPDEP_SDK/. $OUTPUT_DIR/appdepsdk
