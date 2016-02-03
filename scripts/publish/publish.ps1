@@ -135,6 +135,19 @@ function UploadInstallers($msiFile)
     return 0
 }
 
+function UploadVersionBadge($badgeFile)
+{
+    $fileName = "windows_$Configuration_$([System.IO.Path]::GetFileName($badgeFile))"
+    
+    Write-Host "Uploading the version badge to Latest"
+    UploadFile "dev/Binaries/Latest/$filename" $badgeFile
+    
+    Write-Host "Uploading the version badge to $env:DOTNET_CLI_VERSION"
+    UploadFile "dev/Binaries/$env:DOTNET_CLI_VERSION/$filename" $badgeFile
+
+    return 0
+}
+
 if(!(CheckRequiredVariables))
 {
     # fail silently if the required variables are not available for publishing the file
@@ -155,6 +168,10 @@ if([System.IO.Path]::GetExtension($file).ToLower() -eq ".zip")
 elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".msi")
 {
     $result = UploadInstallers $file
+}
+elseif ([System.IO.Path]::GetExtension($file).ToLower() -eq ".svg")
+{
+    $result = UploadVersionBadge $file
 }
 
 exit $result

@@ -46,6 +46,9 @@ execute(){
     elif [[ $UPLOAD_FILE == *.tar.gz ]]; then
         upload_binaries_to_blob_storage $UPLOAD_FILE
         result=$?
+    elif [[ $UPLOAD_FILE == *.svg ]]; then
+        upload_version_badge $UPLOAD_FILE
+        result=$?
     fi
 
     exit $result
@@ -186,6 +189,19 @@ upload_installers_to_blob_storage(){
 
     return 0
 }
+
+upload_version_badge(){
+    local badgefile=$1
+    local filename="$OSNAME_$CONFIGURATION_$(basename $badgefile)"
+    echo "Uploading the version badge to Latest"
+    upload_file_to_blob_storage_azure_cli "dev/Binaries/Latest/$filename" $badgefile
+    
+    echo "Uploading the version badge to $DOTNET_CLI_VERSION"
+    upload_file_to_blob_storage_azure_cli "dev/Binaries/$DOTNET_CLI_VERSION/$filename" $badgefile
+
+    return 0
+}
+
 
 generate_repoclient_json(){
     # Clean any existing json file
