@@ -29,16 +29,24 @@ if exist mscorlib.ni.dll (
 
 set READYTORUN=
 
+echo Crossgenning System.Collections.Immutable
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% System.Collections.Immutable.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
+echo Crossgenning System.Reflection.Metadata
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% System.Reflection.Metadata.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
+echo Crossgenning Microsoft.CodeAnalysis
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% Microsoft.CodeAnalysis.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
+echo Crossgenning Microsoft.CodeAnalysis.CSharp
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% Microsoft.CodeAnalysis.CSharp.dll >nul 2>nul
+if not %errorlevel% EQU 0 goto fail
+
+echo Crossgenning Microsoft.CodeAnalysis.CSharp.Scripting
+crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% Microsoft.CodeAnalysis.CSharp.Scripting.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
 echo Crossgenning Microsoft.CodeAnalysis.VisualBasic
@@ -47,6 +55,10 @@ if not %errorlevel% EQU 0 goto fail
 
 echo Crossgenning csc
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% csc.dll >nul 2>nul
+if not %errorlevel% EQU 0 goto fail
+
+echo Crossgenning csi
+crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% csi.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
 echo Crossgenning vbc
