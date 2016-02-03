@@ -30,9 +30,9 @@
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
         "Microsoft.DotNet.ILCompiler.SDK": "1.0.4-prerelease-00006",
         
-        "Microsoft.Extensions.Logging": "1.0.0-rc2-16011",
-        "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16011",
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16531",
+        "Microsoft.Extensions.Logging": "1.0.0-rc2-16040",
+        "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16040",
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537",
         "Microsoft.Extensions.CommandLineUtils.Sources": {
             "type": "build",
             "version": "1.0.0-rc2-16453"

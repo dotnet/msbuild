@@ -9,7 +9,7 @@
         "xunit": "2.1.0",
 
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16530"
+        "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537"
     },
 
 
