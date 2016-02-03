@@ -11,7 +11,7 @@
     },
 
     "xunit": "2.1.0",
-    "dotnet-test-xunit": "1.0.0-dev-45337-57"
+    "dotnet-test-xunit": "1.0.0-dev-48273-16"
   },
 
   "frameworks": {
