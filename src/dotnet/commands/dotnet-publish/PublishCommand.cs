@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Publish
             }
 
             // Compile the project (and transitively, all it's dependencies)
-            var result = Command.CreateDotNet("build",
+            var result = Build.BuildCommand.Run(
                 new string[] {
                     "--framework",
                     $"{context.TargetFramework.DotNetFrameworkName}",
@@ -115,12 +115,9 @@ namespace Microsoft.DotNet.Tools.Publish
                     "--configuration",
                     configuration,
                     context.ProjectFile.ProjectDirectory
-                })
-                .ForwardStdErr()
-                .ForwardStdOut()
-                .Execute();
+                });
 
-            if (result.ExitCode != 0)
+            if (result != 0)
             {
                 return false;
             }

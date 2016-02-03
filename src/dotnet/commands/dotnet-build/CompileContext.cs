@@ -280,13 +280,10 @@ namespace Microsoft.DotNet.Tools.Build
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
             args.Add(projectDependency.Project.ProjectDirectory);
-            
-            var compileResult = Command.CreateDotNet("compile", args)
-                .ForwardStdOut()
-                .ForwardStdErr()
-                .Execute();
 
-            return compileResult.ExitCode == 0;
+            var compileResult = CommpileCommand.Run(args.ToArray());
+
+            return compileResult == 0;
         }
 
         private bool InvokeCompileOnRootProject()
@@ -339,12 +336,9 @@ namespace Microsoft.DotNet.Tools.Build
 
             args.Add(_rootProject.ProjectDirectory);
 
-            var compileResult = Command.CreateDotNet("compile", args)
-                .ForwardStdOut()
-                .ForwardStdErr()
-                .Execute();
+            var compileResult = CommpileCommand.Run(args.ToArray());
 
-            var succeeded = compileResult.ExitCode == 0;
+            var succeeded = compileResult == 0;
 
             if (succeeded)
             {
