@@ -433,6 +433,8 @@ namespace Microsoft.DotNet.Tools.Build
             var compilerIO = new CompilerIO(new List<string>(), new List<string>());
             var calculator = project.GetOutputPathCalculator(outputPath);
             var binariesOutputPath = calculator.GetOutputDirectoryPath(buildConfiguration);
+            intermediaryOutputPath = calculator.GetIntermediateOutputDirectoryPath(buildConfiguration, intermediaryOutputPath);
+
 
             // input: project.json
             compilerIO.Inputs.Add(project.ProjectFile.ProjectFilePath);
