@@ -6,7 +6,7 @@
 
         <MajorUpgrade DowngradeErrorMessage="$(var.DowngradeErrorMessage)" Schedule="afterInstallInitialize"/>
 
-        <MediaTemplate CompressionLevel="high" EmbedCab="yes"/>
+        <MediaTemplate CabinetTemplate="dnet-{0}.cab" CompressionLevel="high" />
 
         <Feature Id="MainFeature" Title="Main Feature" Level="1">
             <ComponentGroupRef Id="InstallFiles" />

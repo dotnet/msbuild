@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Microsoft.Deployment.WindowsInstaller;
 using Microsoft.Deployment.WindowsInstaller.Package;
-
 
 namespace Dotnet.Cli.Msi.Tests
 {
     public class MsiManager
     {
+        private string _bundleFile;
         private string _msiFile;
         private string _productCode;
         private InstallPackage _installPackage;
@@ -48,6 +50,7 @@ namespace Dotnet.Cli.Msi.Tests
 
         public MsiManager(string msiFile)
         {
+            _bundleFile = Path.ChangeExtension(msiFile, "exe");
             _msiFile = msiFile;
 
             var ispackage = Installer.VerifyPackage(msiFile);
@@ -67,8 +70,8 @@ namespace Dotnet.Cli.Msi.Tests
             {
                 dotnetHome = $"DOTNETHOME={customLocation}";
             }
-            Installer.SetInternalUI(InstallUIOptions.Silent);
-            Installer.InstallProduct(_msiFile, $"ACTION=INSTALL ALLUSERS=2 ACCEPTEULA=1 {dotnetHome}");
+
+            RunBundle(dotnetHome);
 
             return IsInstalled;
         }
@@ -80,10 +83,25 @@ namespace Dotnet.Cli.Msi.Tests
                 throw new InvalidOperationException($"UnInstall Error: Msi at {_msiFile} is not installed.");
             }
 
-            Installer.SetInternalUI(InstallUIOptions.Silent);
-            Installer.InstallProduct(_msiFile, "REMOVE=ALL");
+            RunBundle("/uninstall");
 
             return !IsInstalled;
+        }
+
+        private void RunBundle(string additionalArguments)
+        {
+            var arguments = $"/q /norestart {additionalArguments}";
+            var process = Process.Start(_bundleFile, arguments);
+
+            if (!process.WaitForExit(5 * 60 * 1000))
+            {
+                throw new InvalidOperationException($"Failed to wait for the installation operation to complete. Check to see if the installation process is still running. Command line: {_bundleFile} {arguments}");
+            }
+
+            else if (0 != process.ExitCode)
+            {
+                throw new InvalidOperationException($"The installation operation failed with exit code: {process.ExitCode}. Command line: {_bundleFile} {arguments}");
+            }
         }
     }
 }
