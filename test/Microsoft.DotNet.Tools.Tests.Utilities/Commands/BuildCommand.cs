@@ -13,8 +13,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private Project _project;
         private string _projectPath;
         private string _outputDirectory;
-        private string _tempOutputDirectory;
+        private string _buidBasePathDirectory;
         private string _configuration;
+        private string _framework;
         private bool _noHost;
         private bool _native;
         private string _architecture;
@@ -36,13 +37,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
-        private string TempOutputOption
+        private string BuildBasePathOption
         {
             get
             {
-                return _tempOutputDirectory == string.Empty ?
+                return _buidBasePathDirectory == string.Empty ?
                                            "" :
-                                           $"-t {_tempOutputDirectory}";
+                                           $"-b {_buidBasePathDirectory}";
             }
         }
 
@@ -53,6 +54,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 return _configuration == string.Empty ?
                                            "" :
                                            $"-c {_configuration}";
+            }
+        }
+        private string FrameworkOption
+        {
+            get
+            {
+                return _framework == string.Empty ?
+                                           "" :
+                                           $"--framework {_framework}";
             }
         }
 
@@ -159,8 +169,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public BuildCommand(
             string projectPath,
             string output="",
-            string tempOutput="",
+            string buidBasePath="",
             string configuration="",
+            string framework="",
             bool noHost=false,
             bool native=false,
             string architecture="",
@@ -179,8 +190,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _project = ProjectReader.GetProject(projectPath);
 
             _outputDirectory = output;
-            _tempOutputDirectory = tempOutput;
+            _buidBasePathDirectory = buidBasePath;
             _configuration = configuration;
+            _framework = framework;
             _noHost = noHost;
             _native = native;
             _architecture = architecture;
@@ -214,7 +226,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string BuildArgs()
         {
-            return $"{BuildProfile} {NoIncremental} \"{_projectPath}\" {OutputOption} {TempOutputOption} {ConfigurationOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
+            return $"{BuildProfile} {NoIncremental} \"{_projectPath}\" {OutputOption} {BuildBasePathOption} {ConfigurationOption} {FrameworkOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
         }
     }
 }

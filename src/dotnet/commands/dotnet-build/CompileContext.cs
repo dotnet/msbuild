@@ -36,12 +36,9 @@ namespace Microsoft.DotNet.Tools.Build
             // Cleaner to clone the args and mutate the clone than have separate CompileContext fields for mutated args 
             // and then reasoning which ones to get from args and which ones from fields.
             _args = (BuilderCommandApp)args.ShallowCopy();
-
-            // Set up Output Paths. They are unique per each CompileContext
-            var outputPathCalculator = _rootProject.GetOutputPathCalculator(_args.OutputValue);
-            _args.OutputValue = outputPathCalculator.BaseCompilationOutputPath;
-            _args.IntermediateValue =
-                outputPathCalculator.GetIntermediateOutputDirectoryPath(_args.ConfigValue, _args.IntermediateValue);
+            
+            _args.OutputValue = _args.OutputValue;
+            _args.BuildBasePathValue = _args.BuildBasePathValue;
 
             // Set up dependencies
             _dependencies = new ProjectDependenciesFacade(_rootProject, _args.ConfigValue);
@@ -59,9 +56,9 @@ namespace Microsoft.DotNet.Tools.Build
             {
                 if (incremental)
                 {
-                    var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework);
+                    var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework, new[] { _rootProject.RuntimeIdentifier });
 
-                    if (!DependencyNeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue)))
+                    if (!NeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue)))
                     {
                         continue;
                     }
@@ -87,19 +84,14 @@ namespace Microsoft.DotNet.Tools.Build
             return success;
         }
 
-        private bool DependencyNeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies)
-        {
-            return NeedsRebuilding(project, dependencies, buildOutputPath: null, intermediateOutputPath: null);
-        }
-
         private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies)
         {
-            return NeedsRebuilding(project, dependencies, _args.OutputValue, _args.IntermediateValue);
+            return NeedsRebuilding(project, dependencies, _args.BuildBasePathValue);
         }
 
-        private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies, string buildOutputPath, string intermediateOutputPath)
+        private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies, string baseBuildPath)
         {
-            var compilerIO = GetCompileIO(project, _args.ConfigValue, buildOutputPath, intermediateOutputPath, dependencies);
+            var compilerIO = GetCompileIO(project, _args.ConfigValue, baseBuildPath, _args.OutputValue, dependencies);
 
             // rebuild if empty inputs / outputs
             if (!(compilerIO.Outputs.Any() && compilerIO.Inputs.Any()))
@@ -191,8 +183,14 @@ namespace Microsoft.DotNet.Tools.Build
 
         private void CreateOutputDirectories()
         {
-            Directory.CreateDirectory(_args.OutputValue);
-            Directory.CreateDirectory(_args.IntermediateValue);
+            if (!string.IsNullOrEmpty(_args.OutputValue))
+            {
+                Directory.CreateDirectory(_args.OutputValue);
+            }
+            if (!string.IsNullOrEmpty(_args.BuildBasePathValue))
+            {
+                Directory.CreateDirectory(_args.BuildBasePathValue);
+            }
         }
 
         private IncrementalPreconditions GatherIncrementalPreconditions()
@@ -281,6 +279,12 @@ namespace Microsoft.DotNet.Tools.Build
             args.Add(_args.ConfigValue);
             args.Add(projectDependency.Project.ProjectDirectory);
 
+            if (!string.IsNullOrWhiteSpace(_args.BuildBasePathValue))
+            {
+                args.Add("--build-base-path");
+                args.Add(_args.BuildBasePathValue);
+            }
+
             var compileResult = CommpileCommand.Run(args.ToArray());
 
             return compileResult == 0;
@@ -294,10 +298,18 @@ namespace Microsoft.DotNet.Tools.Build
             args.Add(_rootProject.TargetFramework.ToString());            
             args.Add("--configuration");
             args.Add(_args.ConfigValue);
-            args.Add("--output");
-            args.Add(_args.OutputValue);
-            args.Add("--temp-output");
-            args.Add(_args.IntermediateValue);
+
+            if (!string.IsNullOrEmpty(_args.OutputValue))
+            {
+                args.Add("--output");
+                args.Add(_args.OutputValue);
+            }
+
+            if (!string.IsNullOrEmpty(_args.BuildBasePathValue))
+            {
+                args.Add("--build-base-path");
+                args.Add(_args.BuildBasePathValue);
+            }
 
             //native args
             if (_args.IsNativeValue)
@@ -342,37 +354,45 @@ namespace Microsoft.DotNet.Tools.Build
 
             if (succeeded)
             {
-                MakeRunnableIfNecessary();
-            }            
-            
-            return succeeded;
-        }
-
-        private void MakeRunnableIfNecessary()
-        {
-            var compilationOptions = CompilerUtil.ResolveCompilationOptions(_rootProject, _args.ConfigValue);
-
-            // TODO: Make this opt in via another mechanism
-            var makeRunnable = compilationOptions.EmitEntryPoint.GetValueOrDefault() ||
-                               _rootProject.IsTestProject();
-
-            if (makeRunnable)
-            {
-                var outputPathCalculator = _rootProject.GetOutputPathCalculator(_args.OutputValue);
-                var rids = new List<string>();
-                if (string.IsNullOrEmpty(_args.RuntimeValue))
+                if (_rootProject.ProjectFile.HasRuntimeOutput(_args.ConfigValue))
                 {
-                    rids.AddRange(PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+                    MakeRunnable();
                 }
                 else
                 {
-                    rids.Add(_args.RuntimeValue);
+                    CopyCompilationOutput();
                 }
-
-                var runtimeContext = ProjectContext.Create(_rootProject.ProjectDirectory, _rootProject.TargetFramework, rids);
-                var executable = new Executable(runtimeContext, outputPathCalculator);
-                executable.MakeCompilationOutputRunnable(_args.ConfigValue);
             }
+
+            return succeeded;
+        }
+
+        private void CopyCompilationOutput()
+        {
+            if (!string.IsNullOrEmpty(_args.OutputValue))
+            {
+                var calculator = _rootProject.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
+                var dest = calculator.RuntimeOutputPath;
+                var source = calculator.CompilationOutputPath;
+                foreach (var file in calculator.CompilationFiles.All())
+                {
+                    var destFileName = file.Replace(source, dest);
+                    var directoryName = Path.GetDirectoryName(destFileName);
+                    if (!Directory.Exists(directoryName))
+                    {
+                        Directory.CreateDirectory(directoryName);
+                    }
+                    File.Copy(file, destFileName, true);
+                }
+            }
+        }
+
+        private void MakeRunnable()
+        {
+            var outputPaths = _rootProject.GetOutputPaths(_args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue);
+            var libraryExporter = _rootProject.CreateExporter(_args.ConfigValue, _args.BuildBasePathValue);
+            var executable = new Executable(_rootProject, outputPaths, libraryExporter);
+            executable.MakeCompilationOutputRunnable();
         }
 
         private static ISet<ProjectDescription> Sort(Dictionary<string, ProjectDescription> projects)
@@ -420,15 +440,13 @@ namespace Microsoft.DotNet.Tools.Build
         public static CompilerIO GetCompileIO(
             ProjectContext project,
             string buildConfiguration,
+            string buildBasePath,
             string outputPath,
-            string intermediaryOutputPath,
             ProjectDependenciesFacade dependencies)
         {
             var compilerIO = new CompilerIO(new List<string>(), new List<string>());
-            var calculator = project.GetOutputPathCalculator(outputPath);
-            var binariesOutputPath = calculator.GetOutputDirectoryPath(buildConfiguration);
-            intermediaryOutputPath = calculator.GetIntermediateOutputDirectoryPath(buildConfiguration, intermediaryOutputPath);
-
+            var calculator = project.GetOutputPaths(buildConfiguration, buildBasePath, outputPath);
+            var binariesOutputPath = calculator.CompilationOutputPath;
 
             // input: project.json
             compilerIO.Inputs.Add(project.ProjectFile.ProjectFilePath);
@@ -443,17 +461,22 @@ namespace Microsoft.DotNet.Tools.Build
             // input: dependencies
             AddDependencies(dependencies, compilerIO);
 
+            var allOutputPath = new List<string>(calculator.CompilationFiles.All());
+            if (!string.IsNullOrEmpty(project.RuntimeIdentifier))
+            {
+                allOutputPath.AddRange(calculator.RuntimeFiles.All());
+            }
             // output: compiler outputs
-            foreach (var path in calculator.GetBuildOutputs(buildConfiguration))
+            foreach (var path in allOutputPath)
             {
                 compilerIO.Outputs.Add(path);
             }
-            
+
             // input compilation options files
             AddCompilationOptions(project, buildConfiguration, compilerIO);
 
             // input / output: resources without culture
-            AddCultureResources(project, intermediaryOutputPath, compilerIO);
+            AddCultureResources(project, binariesOutputPath, compilerIO);
 
             // input / output: resources with culture
             AddNonCultureResources(project, binariesOutputPath, compilerIO);

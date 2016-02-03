@@ -12,8 +12,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     public static class DirectoryInfoExtensions
     {
         public static DirectoryInfoAssertions Should(this DirectoryInfo dir)
-        {            
+        {
             return new DirectoryInfoAssertions(dir);
+        }
+
+        public static DirectoryInfo Sub(this DirectoryInfo dir, string name)
+        {
+            return new DirectoryInfo(Path.Combine(dir.FullName, name));
         }
     }
 }

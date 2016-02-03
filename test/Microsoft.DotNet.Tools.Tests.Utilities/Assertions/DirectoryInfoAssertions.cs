@@ -21,9 +21,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _dirInfo = dir;                        
         }
 
+        public DirectoryInfo DirectoryInfo => _dirInfo;
+
         public AndConstraint<DirectoryInfoAssertions> Exist()
         {
-            _dirInfo.Exists.Should().BeTrue();
             Execute.Assertion.ForCondition(_dirInfo.Exists)
                 .FailWith("Expected directory {0} does not exist.", _dirInfo.FullName);
             return new AndConstraint<DirectoryInfoAssertions>(this);

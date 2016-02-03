@@ -88,6 +88,8 @@ namespace Microsoft.DotNet.ProjectModel
 
         public IDictionary<string, IEnumerable<string>> Scripts { get; } = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
 
+        public bool IsTestProject => !string.IsNullOrEmpty(TestRunner);
+
         public IEnumerable<TargetFrameworkInformation> GetTargetFrameworks()
         {
             return _targetFrameworks.Values;
@@ -120,6 +122,14 @@ namespace Microsoft.DotNet.ProjectModel
             return targetFrameworkInfo ?? _defaultTargetFrameworkConfiguration;
         }
 
+        public bool HasRuntimeOutput(string configuration)
+        {
+
+            var compilationOptions = GetCompilerOptions(targetFramework: null, configurationName: configuration);
+
+            // TODO: Make this opt in via another mechanism
+            return compilationOptions.EmitEntryPoint.GetValueOrDefault() || IsTestProject;
+        }
         private CommonCompilerOptions GetCompilerOptions()
         {
             return _defaultCompilerOptions;

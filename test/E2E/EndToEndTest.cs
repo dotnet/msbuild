@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void TestDotnetBuild()
         {
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, framework: DefaultFramework);
 
             buildCommand.Execute().Should().Pass();
 
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         public void TestDotnetIncrementalBuild()
         {
             // first build
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, framework: DefaultFramework);
             buildCommand.Execute().Should().Pass();
             TestOutputExecutable(OutputDirectory, buildCommand.GetOutputExecutableName(), s_expectedOutput);
 
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 return;
             }
 
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, framework: DefaultFramework);
 
             buildCommand.Execute().Should().Pass();
 
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 return;
             }
 
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true, framework: DefaultFramework);
 
             buildCommand.Execute().Should().Pass();
 
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             }
 
             // first build
-            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true);
+            var buildCommand = new BuildCommand(TestProject, output: OutputDirectory, native: true, nativeCppMode: true, framework: DefaultFramework);
             var binariesOutputDirectory = GetCompilationOutputPath(OutputDirectory, false);
 
             buildCommand.Execute().Should().Pass();

@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         /// <summary>
         /// Non assembly runtime assets.
         /// </summary>
-        public IEnumerable<string> RuntimeAssets { get; }
+        public IEnumerable<LibraryAsset> RuntimeAssets { get; }
 
         /// <summary>
         /// Gets a list of fully-qualified paths to native binaries required to run
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
                              IEnumerable<LibraryAsset> compileAssemblies,
                              IEnumerable<string> sourceReferences,
                              IEnumerable<LibraryAsset> runtimeAssemblies,
-                             IEnumerable<string> runtimeAssets,
+                             IEnumerable<LibraryAsset> runtimeAssets,
                              IEnumerable<LibraryAsset> nativeLibraries,
                              IEnumerable<AnalyzerReference> analyzers)
         {

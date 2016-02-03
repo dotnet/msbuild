@@ -5,7 +5,7 @@ dotnet-compile
 dotnet-compile -- Compiles source files for a single project to a binary format and saves to a target file.
 
 # SYNOPSIS
-dotnet compile [--output] [--temp-output] [--framework] [--configuration] [--output] [--arch] [--verbose]
+dotnet compile [--output] [--build-base-path] [--framework] [--configuration] [--output] [--arch] [--verbose]
 
 # DESCRIPTION
 The compile command compiles source files from a single project to a binary file, either intermmediate language (IL) byte code or native machine code, depending on the options provided. The default option is compilation to IL byte code, but may change in the future. Users who want to benefit from incremental builds and who want to compile both the project and its dependencies should use the dotnet-build(1) command.
@@ -31,8 +31,8 @@ This command relies on the following artifacts: source files, project.json proje
 `-n, --native`
 Compiles source to native machine code, for the local machine. The default is a native executable. The default executable extension is no extension and ".exe" on Windows.
 
-`-t, --temp-output <PATH>`
-Path where to drop the temporary binaries that are produced during compile. By default, the temporary binaries are dropped in the `obj` directory in the directory where `project.json` files lives, that is, where the application lives.  
+`-b, --build-base-path <PATH>`
+Path where to drop the output produced during compile. By default, the binaries are dropped in the `bin` and `obj` directory in the directory where `project.json` files lives, that is, where the application lives.  
 
 `-f, --framework <FID>`
 Compile the application for the specified framework. If the framework is not specified, one specified in `project.json` will be used. 

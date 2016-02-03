@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
+using Microsoft.DotNet.ProjectModel.Resources;
 
 namespace Microsoft.DotNet.Tools.Compiler
 {

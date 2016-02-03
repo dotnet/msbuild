@@ -10,6 +10,7 @@ using System.Linq;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Resources;
 using Microsoft.DotNet.Tools.Common;
 
 // This class is responsible with defining the arguments for the Compile verb.
