@@ -34,6 +34,6 @@ OUTPUT_DIR="$(pwd)"
 popd
 
 ## App Deps ##
-APPDEP_SDK=$NUGET_PACKAGES/toolchain.$RID.Microsoft.DotNet.AppDep/1.0.4-prerelease-00001/
+APPDEP_SDK=$NUGET_PACKAGES/toolchain.$RID.Microsoft.DotNet.AppDep/1.0.5-prerelease-00001/
 mkdir -p $OUTPUT_DIR/appdepsdk
 cp -a $APPDEP_SDK/. $OUTPUT_DIR/appdepsdk

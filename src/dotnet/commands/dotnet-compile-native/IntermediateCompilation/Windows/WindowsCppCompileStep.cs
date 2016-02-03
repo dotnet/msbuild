@@ -19,11 +19,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         private readonly string InputExtension = ".cpp";
         
         private readonly string CompilerOutputExtension = ".obj";
-        
+
+        private static readonly string[] DefaultCompilerOptions = { "/nologo", "/W3", "/GS", "/DCPPCODEGEN", "/EHs", "/MT", "/Zi" };
+
         private static readonly Dictionary<BuildConfiguration, string[]> ConfigurationCompilerOptionsMap = new Dictionary<BuildConfiguration, string[]>
         {
-            { BuildConfiguration.debug, new string[] {"/ZI", "/nologo", "/W3", "/WX-", "/sdl", "/Od", "/D", "CPPCODEGEN", "/D", "WIN32", "/D", "_CONSOLE", "/D", "_LIB", "/D", "_UNICODE", "/D", "UNICODE", "/Gm", "/EHsc", "/RTC1", "/MD", "/GS", "/fp:precise", "/Zc:wchar_t", "/Zc:forScope", "/Zc:inline", "/Gd", "/TP", "/wd4477", "/errorReport:prompt"} },
-            { BuildConfiguration.release, new string[] {"/Zi", "/nologo", "/W3", "/WX-", "/sdl", "/O2", "/Oi", "/GL", "/D", "CPPCODEGEN", "/D", "WIN32", "/D", "NDEBUG", "/D", "_CONSOLE", "/D", "_LIB", "/D", "_UNICODE", "/D", "UNICODE", "/Gm-", "/EHsc", "/MD", "/GS", "/Gy", "/fp:precise", "/Zc:wchar_t", "/Zc:forScope", "/Zc:inline", "/Gd", "/TP", "/wd4477", "/errorReport:prompt"} }
+            { BuildConfiguration.debug, new string[] { "/Od" } },
+            { BuildConfiguration.release, new string[] { "/O2" } }
         };
         
         private IEnumerable<string> CompilerArgs { get; set; }
@@ -71,6 +73,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var ilcSdkIncPath = Path.Combine(config.IlcSdkPath, "inc");
             argsList.Add("/I");
             argsList.Add($"{ilcSdkIncPath}");
+            
+            argsList.AddRange(DefaultCompilerOptions);
             
             // Configuration Based Compiler Options 
             argsList.AddRange(ConfigurationCompilerOptionsMap[config.BuildType]);

@@ -87,7 +87,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             foreach (var libPath in _ilcSdkLibs.Select(lib => Path.Combine(ilcSdkLibPath, lib)))
             {
                 // Forward the library to linked to the linker
-                argsList.Add("-Xlinker");
                 argsList.Add(libPath);
             }
 
@@ -95,7 +94,6 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             var baseAppDeplibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10/x64");
             foreach (var appDeplibPath in _appdeplibs.Select(lib => Path.Combine(baseAppDeplibPath, lib)))
             {
-                argsList.Add("-Xlinker");
                 argsList.Add(appDeplibPath);
             }
 

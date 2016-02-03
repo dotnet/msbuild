@@ -66,15 +66,15 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
             
             // Input File
             var inLibFile = DetermineInFile(config);
-            argsList.Add("-Xlinker "+inLibFile);
+            argsList.Add(inLibFile);
 
             // ILC SDK Libs
             var ilcSdkLibPath = Path.Combine(config.IlcSdkPath, "sdk");
-            argsList.AddRange(_ilcSdkLibs.Select(lib => Path.Combine(ilcSdkLibPath, lib)).Select(libPath => "-Xlinker " + libPath));
+            argsList.AddRange(_ilcSdkLibs.Select(lib => Path.Combine(ilcSdkLibPath, lib)));
 
             // AppDep Libs
             var baseAppDepLibPath = Path.Combine(config.AppDepSDKPath, "CPPSdk/osx.10.10", config.Architecture.ToString());
-            argsList.AddRange(appdeplibs.Select(lib => Path.Combine(baseAppDepLibPath, lib)).Select(appDepLibPath => "-Xlinker " + appDepLibPath));
+            argsList.AddRange(appdeplibs.Select(lib => Path.Combine(baseAppDepLibPath, lib)));
 
             // Output
             var libOut = DetermineOutputFile(config);
