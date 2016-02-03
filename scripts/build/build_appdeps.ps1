@@ -6,21 +6,14 @@ param(
     [Parameter(Mandatory=$true)][string]$RepoRoot,
     [Parameter(Mandatory=$true)][string]$OutputDir)
 
-$intermediateDir = "$RepoRoot\artifacts\appdepssdk\packages"
 $appdepBinDir = "$OutputDir\bin\appdepsdk"
-
-If (Test-Path $intermediateDir){
-    rmdir -Force -Rec  $intermediateDir
-}
-mkdir $intermediateDir
-& dotnet restore --packages "$intermediateDir" "$RepoRoot\src\dotnet\commands\dotnet-compile-native\appdep\project.json"
-
 
 If (Test-Path $appdepBinDir){
     rmdir -Force -Rec  $appdepBinDir
 }
+
 mkdir -Force "$appdepBinDir"
 
-ls "$intermediateDir\toolchain*\*\*" | foreach { 
+ls "$env:NUGET_PACKAGES\toolchain.win7-x64.Microsoft.DotNet.AppDep\1.0.4-prerelease-00001\*" | foreach { 
     copy -Rec $_ "$appdepBinDir"
 }
