@@ -348,9 +348,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true'">
     <_DebugSymbolsIntermediatePath Include="$(IntermediateOutputPath)$(TargetName).compile.pdb" Condition="'$(OutputType)' == 'winmdobj' and '@(_DebugSymbolsIntermediatePath)' == ''"/>
-    <_DebugSymbolsIntermediatePathPDB Include="$(IntermediateOutputPath)$(TargetName).pdb" Condition="'$(OutputType)' != 'winmdobj' and '@(_DebugSymbolsIntermediatePath)' == ''"/>
-    <_DebugSymbolsIntermediatePathMDB Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt).mdb" Condition="'$(OS)' != 'Windows_NT' and '$(OutputType)' != 'winmdobj' and '@(_DebugSymbolsIntermediatePath)' == ''"/>
-    <_DebugSymbolsIntermediatePath Include="@(_DebugSymbolsIntermediatePathPDB);@(_DebugSymbolsIntermediatePathMDB)" Condition="'$(OutputType)' != 'winmdobj' and '@(_DebugSymbolsIntermediatePath)' == ''"/>
+    <_DebugSymbolsIntermediatePath Include="$(IntermediateOutputPath)$(TargetName).pdb" Condition="'$(OutputType)' != 'winmdobj' and '@(_DebugSymbolsIntermediatePath)' == ''"/>
     <_DebugSymbolsOutputPath Include="@(_DebugSymbolsIntermediatePath->'$(OutDir)%(Filename)%(Extension)')" />
   </ItemGroup>
 
@@ -571,7 +569,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         -->
     <AllowedReferenceRelatedFileExtensions Condition=" '$(AllowedReferenceRelatedFileExtensions)' == '' ">
       .pdb;
-      .mdb;
       .xml;
       .pri
     </AllowedReferenceRelatedFileExtensions>
@@ -2922,7 +2919,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       BeforeCompile;
       _TimeStampBeforeCompile;
       CoreCompile;
-      _CheckOutputFiles;
       _TimeStampAfterCompile;
       AfterCompile;
     </CompileDependsOn>
@@ -3092,21 +3088,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_AssemblyTimestampAfterCompile>%(IntermediateAssembly.ModifiedTime)</_AssemblyTimestampAfterCompile>
     </PropertyGroup>
 
-  </Target>
-
-  <!--
-    ============================================================
-                                        _CheckOutputFiles
-
-    Update the list of output files.
-    ============================================================
-    -->
-  <Target Name="_CheckOutputFiles" Condition="'@(_DebugSymbolsIntermediatePathPDB)' != '' or '@(_DebugSymbolsIntermediatePathMDB)' != ''">
-    <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true'">
-      <_DebugSymbolsIntermediatePath Remove="@(_DebugSymbolsIntermediatePath)" Condition="!Exists(%(_DebugSymbolsIntermediatePath.FullPath))"/>
-      <_DebugSymbolsOutputPath Remove="@(_DebugSymbolsOutputPath)" />
-      <_DebugSymbolsOutputPath Include="@(_DebugSymbolsIntermediatePath->'$(OutDir)%(Filename)%(Extension)')" />
-    </ItemGroup>
   </Target>
 
   <!--
@@ -4274,25 +4255,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Record the .pdb if one was produced. -->
     <PropertyGroup>
-      <_DebugSymbolsProducedPDB Condition="!Exists('@(_DebugSymbolsIntermediatePathPDB)')">false</_DebugSymbolsProducedPDB>
+      <_DebugSymbolsProduced Condition="!Exists('@(_DebugSymbolsIntermediatePath)')">false</_DebugSymbolsProduced>
     </PropertyGroup>
 
     <ItemGroup>
-      <FileWrites Include="@(_DebugSymbolsIntermediatePathPDB)" Condition="'$(_DebugSymbolsProducedPDB)'!='false'"/>
+      <FileWrites Include="@(_DebugSymbolsIntermediatePath)" Condition="'$(_DebugSymbolsProduced)'=='true'"/>
     </ItemGroup>
-
-    <!-- Record the .mdb if one was produced. -->
-    <PropertyGroup>
-      <_DebugSymbolsProducedMDB Condition="!Exists('@(_DebugSymbolsIntermediatePathMDB)')">false</_DebugSymbolsProducedMDB>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <FileWrites Include="@(_DebugSymbolsIntermediatePathMDB)" Condition="'$(_DebugSymbolsProducedMDB)'!='false'"/>
-    </ItemGroup>
-
-    <PropertyGroup>
-      <_DebugSymbolsProduced Condition="'$(_DebugSymbolsProducedPDB)' == 'false' and '$(_DebugSymbolsProducedMDB)' == 'false'">false</_DebugSymbolsProduced>
-    </PropertyGroup>
   </Target>
 
   <!--
