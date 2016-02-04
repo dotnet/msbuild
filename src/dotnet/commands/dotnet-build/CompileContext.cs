@@ -339,10 +339,10 @@ namespace Microsoft.DotNet.Tools.Build
                 args.Add(_args.ArchValue);
             }
 
-            if (!string.IsNullOrWhiteSpace(_args.IlcArgsValue))
+            foreach (var ilcArg in _args.IlcArgsValue)
             {
-                args.Add("--ilcargs");
-                args.Add(_args.IlcArgsValue);
+                args.Add("--ilcarg");
+                args.Add(ilcArg);
             }
 
             if (!string.IsNullOrWhiteSpace(_args.IlcPathValue))

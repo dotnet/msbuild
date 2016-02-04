@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
         public ArchitectureMode Architecture { get; set; }
         public NativeIntermediateMode? NativeMode { get; set; }
         public IEnumerable<string> ReferencePaths { get; set; }
-        public string IlcArgs { get; set; }
+        public IEnumerable<string> IlcArgs { get; set; }
         public IEnumerable<string> LinkLibPaths { get; set; }
         public string AppDepSDKPath { get; set; }
         public string IlcPath { get; set; }
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Native
                 config.LogPath = LogPath;
             }
 
-            if (!string.IsNullOrEmpty(IlcArgs))
+            if (IlcArgs != null)
             {
                 config.IlcArgs = IlcArgs;
             }

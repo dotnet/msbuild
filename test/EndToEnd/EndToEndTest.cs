@@ -81,7 +81,6 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         }
 
         [Fact]
-        [ActiveIssue(712, PlatformID.Windows | PlatformID.OSX | PlatformID.Linux)]
         public void TestDotnetBuildNativeRyuJit()
         {
             if(IsCentOS())
