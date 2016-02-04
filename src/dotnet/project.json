@@ -10,10 +10,10 @@
     "resource": [ 
         "commands/dotnet-new/CSharp_Console/NuGet.Config", 
         "commands/dotnet-new/CSharp_Console/Program.cs", 
-        "commands/dotnet-new/CSharp_Console/project.json", 
+        "commands/dotnet-new/CSharp_Console/project.json.template", 
         "commands/dotnet-new/FSharp_Console/NuGet.config", 
         "commands/dotnet-new/FSharp_Console/Program.fs", 
-        "commands/dotnet-new/FSharp_Console/project.json"
+        "commands/dotnet-new/FSharp_Console/project.json.template"
     ],
     "dependencies": {
         "Newtonsoft.Json": "7.0.1",
