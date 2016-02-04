@@ -35,13 +35,16 @@ namespace NuGet
             elem.Add(new XElement(ns + "id", metadata.Id));
             elem.Add(new XElement(ns + "version", metadata.Version.ToString()));
             AddElementIfNotNull(elem, ns, "title", metadata.Title);
-            elem.Add(new XElement(ns + "requireLicenseAcceptance", metadata.RequireLicenseAcceptance));
-            elem.Add(new XElement(ns + "developmentDependency", metadata.DevelopmentDependency));
             AddElementIfNotNull(elem, ns, "authors", metadata.Authors, authors => string.Join(",", authors));
             AddElementIfNotNull(elem, ns, "owners", metadata.Owners, owners => string.Join(",", owners));
             AddElementIfNotNull(elem, ns, "licenseUrl", metadata.LicenseUrl);
             AddElementIfNotNull(elem, ns, "projectUrl", metadata.ProjectUrl);
             AddElementIfNotNull(elem, ns, "iconUrl", metadata.IconUrl);
+            elem.Add(new XElement(ns + "requireLicenseAcceptance", metadata.RequireLicenseAcceptance));
+            if (metadata.DevelopmentDependency == true)
+            {
+                elem.Add(new XElement(ns + "developmentDependency", metadata.DevelopmentDependency));
+            }
             AddElementIfNotNull(elem, ns, "description", metadata.Description);
             AddElementIfNotNull(elem, ns, "summary", metadata.Summary);
             AddElementIfNotNull(elem, ns, "releaseNotes", metadata.ReleaseNotes);
@@ -218,7 +221,7 @@ namespace NuGet
                 files.Select(file =>
                 new XElement(ns + File,
                     new XAttribute("src", file.Source),
-                    new XAttribute("target", file.Source),
+                    new XAttribute("target", file.Target),
                     new XAttribute("exclude", file.Exclude)
                 )));
         }
