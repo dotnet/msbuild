@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.DotNet.Files;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.ProjectModel.Utilities;
 
@@ -141,7 +142,8 @@ namespace Microsoft.DotNet.Tools.Publish
                 }
             }
 
-            CopyContents(context, outputPath);
+            var contentFiles = new ContentFiles(context);
+            contentFiles.StructuredCopyTo(outputPath);
 
             // Publish a host if this is an application
             if (options.EmitEntryPoint.GetValueOrDefault())

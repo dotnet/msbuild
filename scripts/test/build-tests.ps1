@@ -7,9 +7,10 @@
 
 # Publish each test project
 loadTestProjectList | foreach {
-    dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$TestBinRoot" --configuration "$Configuration" "$RepoRoot\test\$($_.ProjectName)"
+    #we should use publish to an output path, we will once issue #1183 has been fixed and we can point dotnet test do a dll.
+    dotnet build --framework "dnxcore50" --runtime "$Rid" --configuration "$Configuration" "$RepoRoot\test\$($_.ProjectName)"
     if (!$?) {
-        Write-Host Command failed: dotnet publish --framework "dnxcore50" --runtime "$Rid" --output "$TestBinRoot" --configuration "$Configuration" "$RepoRoot\test\$($_.ProjectName)"
+        Write-Host Command failed: dotnet publish --framework "dnxcore50" --runtime "$Rid" --configuration "$Configuration" "$RepoRoot\test\$($_.ProjectName)"
         exit 1
     }
 }
