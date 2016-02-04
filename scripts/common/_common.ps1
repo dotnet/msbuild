@@ -18,6 +18,9 @@ $PackageDir = "$RepoRoot\artifacts\packages\dnvm"
 $TestBinRoot = "$RepoRoot\artifacts\tests"
 $TestPackageDir = "$TestBinRoot\packages"
 
+$env:TEST_ROOT = "$OutputDir\tests"  
+$env:TEST_ARTIFACTS = "$env:TEST_ROOT\artifacts"  
+
 $env:ReleaseSuffix = "beta"
 $env:Channel = "$env:ReleaseSuffix"
 
