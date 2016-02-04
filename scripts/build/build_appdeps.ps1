@@ -14,6 +14,6 @@ If (Test-Path $appdepBinDir){
 
 mkdir -Force "$appdepBinDir"
 
-ls "$env:NUGET_PACKAGES\toolchain.win7-x64.Microsoft.DotNet.AppDep\1.0.4-prerelease-00001\*" | foreach { 
+ls "$env:NUGET_PACKAGES\toolchain.win7-x64.Microsoft.DotNet.AppDep\1.0.5-prerelease-00001\*" | foreach { 
     copy -Rec $_ "$appdepBinDir"
 }
