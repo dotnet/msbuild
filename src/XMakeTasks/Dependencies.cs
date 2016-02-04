@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks
         /// Hashtable of other dependency files.
         /// Key is filename and value is DependencyFile.
         /// </summary>
-        private Hashtable _dependencies = new Hashtable();
+        private Hashtable dependencies = new Hashtable();
 
         /// <summary>
         /// Look up a dependency file. Return null if its not there.
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal DependencyFile GetDependencyFile(string filename)
         {
-            return (DependencyFile)_dependencies[filename];
+            return (DependencyFile)dependencies[filename];
         }
 
 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal void AddDependencyFile(string filename, DependencyFile file)
         {
-            _dependencies[filename] = file;
+            dependencies[filename] = file;
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal void RemoveDependencyFile(string filename)
         {
-            _dependencies.Remove(filename);
+            dependencies.Remove(filename);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void Clear()
         {
-            _dependencies.Clear();
+            dependencies.Clear();
         }
     }
 }
