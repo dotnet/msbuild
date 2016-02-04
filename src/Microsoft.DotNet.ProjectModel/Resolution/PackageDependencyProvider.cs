@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
             foreach (var assembly in targetLibrary.CompileTimeAssemblies)
             {
                 // (ref/lib)/{tfm}/{assembly}
-                var pathParts = assembly.Path.Split('/');
+                var pathParts = assembly.Path.Split(Path.DirectorySeparatorChar);
 
                 if (pathParts.Length != 3)
                 {
