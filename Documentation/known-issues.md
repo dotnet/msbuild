@@ -39,7 +39,7 @@ If you cannot update, you can use the following `nuget.config`:
   <packageSources>
     <!--To inherit the global NuGet package sources remove the <clear/> line below -->
     <clear />
-    <add key="dotnet-core" value="https://www.myget.org/F/dotnet-core/api/v3/index.json" />
+    <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
     <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
   </packageSources>
 </configuration>
