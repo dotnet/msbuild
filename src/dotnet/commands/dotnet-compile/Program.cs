@@ -147,12 +147,9 @@ namespace Microsoft.DotNet.Tools.Compiler
             //     Need CoreRT Framework published to nuget
 
             // Do Native Compilation
-            var result = Command.CreateDotNet("compile-native", new string[] { "--rsp", $"{rsp}" })
-                                .ForwardStdErr()
-                                .ForwardStdOut()
-                                .Execute();
+            var result = Native.CompileNativeCommand.Run(new string[] { "--rsp", $"{rsp}" });
 
-            return result.ExitCode == 0;
+            return result == 0;
         }
 
         private static bool CompileProject(ProjectContext context, CompilerCommandApp args)
@@ -378,13 +375,9 @@ namespace Microsoft.DotNet.Tools.Compiler
                     var rsp = Path.Combine(intermediateOutputPath, $"dotnet-resgen-resx.rsp");
                     File.WriteAllLines(rsp, arguments);
 
-                    var result =
-                        Command.CreateDotNet("resgen", new[] { $"@{rsp}" })
-                            .ForwardStdErr()
-                            .ForwardStdOut()
-                            .Execute();
+                    var result = Resgen.ResgenCommand.Run(new[] { $"@{rsp}" });
 
-                    if (result.ExitCode != 0)
+                    if (result != 0)
                     {
                         return false;
                     }
@@ -429,11 +422,8 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var rsp = Path.Combine(intermediateOutputPath, $"dotnet-resgen.rsp");
                 File.WriteAllLines(rsp, arguments);
 
-                var result = Command.CreateDotNet("resgen", new[] { $"@{rsp}" })
-                    .ForwardStdErr()
-                    .ForwardStdOut()
-                    .Execute();
-                if (result.ExitCode != 0)
+                var result = Resgen.ResgenCommand.Run(new[] { $"@{rsp}" });
+                if (result != 0)
                 {
                     return false;
                 }

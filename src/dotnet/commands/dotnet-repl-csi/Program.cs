@@ -52,14 +52,14 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
             return context;
         }
 
-        private static CommandResult CompileProject(ProjectContext projectContext, string configuration, out string tempOutputDir)
+        private static int CompileProject(ProjectContext projectContext, string configuration, out string tempOutputDir)
         {
             tempOutputDir = Path.Combine(projectContext.ProjectDirectory, "bin", ".dotnetrepl", Guid.NewGuid().ToString("N"));
 
             Reporter.Output.WriteLine($"Compiling {projectContext.RootProject.Identity.Name.Yellow()} for {projectContext.TargetFramework.DotNetFrameworkName.Yellow()} to use with the {"C# REPL".Yellow()} environment.");
 
             // --temp-output is actually the intermediate output folder and can be the same as --output for our temporary compilation (`dotnet run` can be seen doing the same)
-            return Command.CreateDotNet($"build", new [] 
+            return Build.BuildCommand.Run(new[]
                 {
                     $"--output",
                     $"{tempOutputDir}",
@@ -70,10 +70,7 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
                     $"--configuration",
                     $"{configuration}",
                     $"{projectContext.ProjectDirectory}"
-                })
-                .ForwardStdOut(onlyIfVerbose: true)
-                .ForwardStdErr()
-                .Execute();
+                });
         }
 
         private static IEnumerable<string> GetRuntimeDependencies(ProjectContext projectContext, string buildConfiguration)
@@ -151,10 +148,10 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
                     var compileResult = CompileProject(projectContext, buildConfiguration, out tempOutputDir);
 
-                    if (compileResult.ExitCode != 0)
+                    if (compileResult != 0)
                     {
                         Reporter.Error.WriteLine($"Project compilation failed. Exiting REPL".Red());
-                        return compileResult.ExitCode;
+                        return compileResult;
                     }
 
                     string responseFile = CreateResponseFile(projectContext, buildConfiguration, tempOutputDir);
