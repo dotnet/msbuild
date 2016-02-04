@@ -19,6 +19,12 @@ namespace Microsoft.DotNet.Tools.New
                 return null;
             }
 
+            // filename.extension.template
+            if (parts.Length > 2 && string.Equals("template", parts[parts.Length - 1], StringComparison.OrdinalIgnoreCase))
+            {
+                return parts[parts.Length - 3] + "." + parts[parts.Length - 2];
+            }
+
             // filename.extension
             return parts[parts.Length - 2] + "." + parts[parts.Length - 1];
         }
