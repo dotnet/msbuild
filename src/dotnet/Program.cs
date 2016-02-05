@@ -20,6 +20,7 @@ using NuGet.Frameworks;
 using Microsoft.DotNet.Tools.Resgen;
 using Microsoft.DotNet.Tools.Run;
 using Microsoft.DotNet.Tools.Test;
+using Microsoft.DotNet.Tools.Repl;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -129,6 +130,7 @@ Common Commands:
                 ["pack"] = PackCommand.Run,
                 ["projectmodel-server"] = ProjectModelServerCommand.Run,
                 ["publish"] = PublishCommand.Run,
+                ["repl"] = ReplCommand.Run,
                 ["restore"] = RestoreCommand.Run,
                 ["resgen"] = ResgenCommand.Run,
                 ["run"] = RunCommand.Run,
