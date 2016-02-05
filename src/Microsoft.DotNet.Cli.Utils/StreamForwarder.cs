@@ -2,11 +2,15 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     public sealed class StreamForwarder
     {
+        private static readonly char[] s_ignoreCharacters = new char[] { '\r' };
+        private static readonly char s_flushBuilderCharacter = '\n';
+
         private StringBuilder _builder;
         private StringWriter _capture;
         private Action<string> _write;
@@ -22,10 +26,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public StreamForwarder Capture()
         {
-            if (_capture != null)
-            {
-                throw new InvalidOperationException("Already capturing stream!");
-            }
+            ThrowIfCaptureSet();
+
             _capture = new StringWriter();
 
             return this;
@@ -33,15 +35,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public StreamForwarder ForwardTo(Action<string> writeLine)
         {
-            if (writeLine == null)
-            {
-                throw new ArgumentNullException(nameof(writeLine));
-            }
+            ThrowIfNull(writeLine);
 
-            if (_writeLine != null)
-            {
-                throw new InvalidOperationException("WriteLine forwarder set previously");
-            }
+            ThrowIfForwarderSet();
 
             _writeLine = writeLine;
 
@@ -71,18 +67,13 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 currentCharacter = buffer[0];
 
-                // Flush per line
-                if (currentCharacter == '\n')
+                if (currentCharacter == s_flushBuilderCharacter)
                 {
                     WriteBuilder();
                 }
-                else
+                else if (! s_ignoreCharacters.Contains(currentCharacter))
                 {
-                    // Ignore \r
-                    if (currentCharacter != '\r')
-                    {
-                        _builder.Append(currentCharacter);
-                    }
+                    _builder.Append(currentCharacter);
                 }
             }
 
@@ -112,6 +103,30 @@ namespace Microsoft.DotNet.Cli.Utils
             if (_writeLine != null)
             {
                 _writeLine(str);
+            }
+        }
+
+        private void ThrowIfNull(object obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+        }
+
+        private void ThrowIfForwarderSet()
+        {
+            if (_writeLine != null)
+            {
+                throw new InvalidOperationException("WriteLine forwarder set previously");
+            }
+        }
+
+        private void ThrowIfCaptureSet()
+        {
+            if (_capture != null)
+            {
+                throw new InvalidOperationException("Already capturing stream!");
             }
         }
     }
