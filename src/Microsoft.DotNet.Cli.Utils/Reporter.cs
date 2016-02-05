@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli.Utils
     // Stupid-simple console manager
     public class Reporter
     {
-        private static readonly Reporter Null = new Reporter(console: null);
+        private static readonly Reporter NullReporter = new Reporter(console: null);
         private static object _lock = new object();
 
         private readonly AnsiConsole _console;
@@ -20,8 +20,8 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         public static Reporter Output { get; } = Create(AnsiConsole.GetOutput);
-        public static Reporter Error { get; } = Create(AnsiConsole.GetOutput);
-        public static Reporter Verbose { get; } = CommandContext.IsVerbose() ? Create(AnsiConsole.GetOutput) : Null;
+        public static Reporter Error { get; } = Create(AnsiConsole.GetError);
+        public static Reporter Verbose { get; } = CommandContext.IsVerbose() ? Create(AnsiConsole.GetOutput) : NullReporter;
 
         public static Reporter Create(Func<bool, AnsiConsole> getter)
         {

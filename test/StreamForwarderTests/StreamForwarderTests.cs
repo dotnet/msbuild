@@ -10,109 +10,192 @@ using Xunit;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.Extensions.PlatformAbstractions;
+using System.Threading;
 
 namespace StreamForwarderTests
 {
-    public class StreamForwarderTests
+    public class StreamForwarderTests : TestBase
     {
+        private static readonly string s_rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+        private static readonly string s_testProjectRoot = Path.Combine(AppContext.BaseDirectory, "TestProjects");
+
+        private TempDirectory _root;
+
         public static void Main()
         {
             Console.WriteLine("Dummy Entrypoint");
         }
 
-        [Fact]
-        public void Unbuffered()
+        public StreamForwarderTests()
         {
-            Forward(4, true, "");
-            Forward(4, true, "123", "123");
-            Forward(4, true, "1234", "1234");
-            Forward(3, true, "123456789", "123", "456", "789");
-            Forward(4, true, "\r\n", "\n");
-            Forward(4, true, "\r\n34", "\n", "34");
-            Forward(4, true, "1\r\n4", "1\n", "4");
-            Forward(4, true, "12\r\n", "12\n");
-            Forward(4, true, "123\r\n", "123\n");
-            Forward(4, true, "1234\r\n", "1234", "\n");
-            Forward(3, true, "\r\n3456\r\n9", "\n", "3456", "\n", "9");
-            Forward(4, true, "\n", "\n");
-            Forward(4, true, "\n234", "\n", "234");
-            Forward(4, true, "1\n34", "1\n", "34");
-            Forward(4, true, "12\n4", "12\n", "4");
-            Forward(4, true, "123\n", "123\n");
-            Forward(4, true, "1234\n", "1234", "\n");
-            Forward(3, true, "\n23456\n89", "\n", "23456", "\n", "89");
+            _root = Temp.CreateDirectory();
         }
 
-        [Fact]
-        public void LineBuffered()
+        public static IEnumerable<object[]> ForwardingTheoryVariations
         {
-            Forward(4, false, "");
-            Forward(4, false, "123", "123\n");
-            Forward(4, false, "1234", "1234\n");
-            Forward(3, false, "123456789", "123456789\n");
-            Forward(4, false, "\r\n", "\n");
-            Forward(4, false, "\r\n34", "\n", "34\n");
-            Forward(4, false, "1\r\n4", "1\n", "4\n");
-            Forward(4, false, "12\r\n", "12\n");
-            Forward(4, false, "123\r\n", "123\n");
-            Forward(4, false, "1234\r\n", "1234\n");
-            Forward(3, false, "\r\n3456\r\n9", "\n", "3456\n", "9\n");
-            Forward(4, false, "\n", "\n");
-            Forward(4, false, "\n234", "\n", "234\n");
-            Forward(4, false, "1\n34", "1\n", "34\n");
-            Forward(4, false, "12\n4", "12\n", "4\n");
-            Forward(4, false, "123\n", "123\n");
-            Forward(4, false, "1234\n", "1234\n");
-            Forward(3, false, "\n23456\n89", "\n", "23456\n", "89\n");
+            get
+            {
+                return new[]
+                {
+                    new object[] { "123", new string[]{"123"} },
+                    new object[] { "123\n", new string[] {"123"} },
+                    new object[] { "123\r\n", new string[] {"123"} },
+                    new object[] { "1234\n5678", new string[] {"1234", "5678"} },
+                    new object[] { "1234\r\n5678", new string[] {"1234", "5678"} },
+                    new object[] { "1234\n5678\n", new string[] {"1234", "5678"} },
+                    new object[] { "1234\r\n5678\r\n", new string[] {"1234", "5678"} },
+                    new object[] { "1234\n5678\nabcdefghijklmnopqrstuvwxyz", new string[] {"1234", "5678", "abcdefghijklmnopqrstuvwxyz"} },
+                    new object[] { "1234\r\n5678\r\nabcdefghijklmnopqrstuvwxyz", new string[] {"1234", "5678", "abcdefghijklmnopqrstuvwxyz"} },
+                    new object[] { "1234\n5678\nabcdefghijklmnopqrstuvwxyz\n", new string[] {"1234", "5678", "abcdefghijklmnopqrstuvwxyz"} },
+                    new object[] { "1234\r\n5678\r\nabcdefghijklmnopqrstuvwxyz\r\n", new string[] {"1234", "5678", "abcdefghijklmnopqrstuvwxyz"} }
+                };
+            }
         }
 
-        private static void Forward(int bufferSize, bool unbuffered, string str, params string[] expectedWrites)
+        [Theory]
+        [InlineData("123")]
+        [InlineData("123\n")]
+        public void TestNoForwardingNoCapture(string inputStr)
+        {   
+            TestCapturingAndForwardingHelper(ForwardOptions.None, inputStr, null, new string[0]);
+        }
+
+        [Theory]
+        [MemberData("ForwardingTheoryVariations")]
+        public void TestForwardingOnly(string inputStr, string[] expectedWrites)
         {
-            var expectedCaptured = str.Replace("\r", "").Replace("\n", Environment.NewLine);
+            for(int i = 0; i < expectedWrites.Length; ++i)
+            {
+                expectedWrites[i] += Environment.NewLine;
+            }
+            
+            TestCapturingAndForwardingHelper(ForwardOptions.WriteLine, inputStr, null, expectedWrites);
+        }
 
-            // No forwarding.
-            Forward(bufferSize, ForwardOptions.None, str, null, new string[0]);
+        [Theory]
+        [MemberData("ForwardingTheoryVariations")]
+        public void TestCaptureOnly(string inputStr, string[] expectedWrites)
+        {
+            for(int i = 0; i < expectedWrites.Length; ++i)
+            {
+                expectedWrites[i] += Environment.NewLine;
+            }
 
-            // Capture only.
-            Forward(bufferSize, ForwardOptions.Capture, str, expectedCaptured, new string[0]);
+            var expectedCaptured = string.Join("", expectedWrites);
+            
+            TestCapturingAndForwardingHelper(ForwardOptions.Capture, inputStr, expectedCaptured, new string[0]);
+        }
 
-            var writeOptions = unbuffered ?
-                ForwardOptions.Write | ForwardOptions.WriteLine :
-                ForwardOptions.WriteLine;
+        [Theory]
+        [MemberData("ForwardingTheoryVariations")]
+        public void TestCaptureAndForwardingTogether(string inputStr, string[] expectedWrites)
+        {
+            for(int i = 0; i < expectedWrites.Length; ++i)
+            {
+                expectedWrites[i] += Environment.NewLine;
+            }
 
-            // Forward.
-            Forward(bufferSize, writeOptions, str, null, expectedWrites);
+            var expectedCaptured = string.Join("", expectedWrites);
 
-            // Forward and capture.
-            Forward(bufferSize, writeOptions | ForwardOptions.Capture, str, expectedCaptured, expectedWrites);
+            TestCapturingAndForwardingHelper(ForwardOptions.WriteLine | ForwardOptions.Capture, inputStr, expectedCaptured, expectedWrites);
         }
 
         private enum ForwardOptions
         {
             None = 0x0,
             Capture = 0x1,
-            Write = 0x02,
-            WriteLine = 0x04,
+            WriteLine = 0x02,
         }
 
-        private static void Forward(int bufferSize, ForwardOptions options, string str, string expectedCaptured, string[] expectedWrites)
+        private void TestCapturingAndForwardingHelper(ForwardOptions options, string str, string expectedCaptured, string[] expectedWrites)
         {
-            var forwarder = new StreamForwarder(bufferSize);
+            var forwarder = new StreamForwarder();
             var writes = new List<string>();
+
             if ((options & ForwardOptions.WriteLine) != 0)
             {
-                forwarder.ForwardTo(
-                    write: (options & ForwardOptions.Write) == 0 ? (Action<string>)null : writes.Add,
-                    writeLine: s => writes.Add(s + "\n"));
+                forwarder.ForwardTo(writeLine: s => writes.Add(s + Environment.NewLine));
             }
             if ((options & ForwardOptions.Capture) != 0)
             {
                 forwarder.Capture();
             }
+
             forwarder.Read(new StringReader(str));
             Assert.Equal(expectedWrites, writes);
-            var captured = forwarder.GetCapturedOutput();
+
+            var captured = forwarder.CapturedOutput;
             Assert.Equal(expectedCaptured, captured);
+        }
+
+        [Fact]
+        public void TestAsyncOrdering()
+        {
+            var expectedOutputLines = new string[] 
+            {
+                "** Standard Out 1 **",
+                "** Standard Error 1 **",
+                "** Standard Out 2 **",
+                "** Standard Error 2 **"
+            };
+
+            var expectedOutput = string.Join(Environment.NewLine, expectedOutputLines) + Environment.NewLine;
+
+            var testProjectDllPath = SetupTestProject();
+
+            var testReporter = new TestReporter();
+
+            var testCommand = Command.Create(testProjectDllPath, new string[0])
+                .OnOutputLine(testReporter.WriteLine)
+                .OnErrorLine(testReporter.WriteLine);
+
+            testCommand.Execute();
+
+            var resultString = testReporter.InternalStringWriter.GetStringBuilder().ToString();
+            Console.WriteLine(expectedOutput);
+            Console.WriteLine(resultString);
+
+            Assert.Equal(expectedOutput, resultString);
+        }
+
+        private string SetupTestProject()
+        {
+            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "OutputStandardOutputAndError");
+
+            var binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
+
+            var buildCommand = new BuildCommand(Path.Combine(binTestProjectPath, "project.json"));
+            buildCommand.Execute();
+
+            var buildOutputExe = "OutputStandardOutputAndError" + Constants.ExeSuffix;
+            var buildOutputPath = Path.Combine(binTestProjectPath, "bin/Debug/dnxcore50", buildOutputExe);
+
+            return buildOutputPath;
+        } 
+
+        private class TestReporter
+        {   
+            private static object _lock = new object();
+            private StringWriter _stringWriter;
+
+            public StringWriter InternalStringWriter 
+            { 
+                get { return _stringWriter; } 
+            }
+
+            public TestReporter()
+            {
+                _stringWriter = new StringWriter();
+            }
+
+            public void WriteLine(string message)
+            {
+                lock(_lock)
+                {
+                    _stringWriter.WriteLine(message);
+                }
+            }
         }
     }
 }

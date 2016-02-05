@@ -111,8 +111,8 @@ namespace Microsoft.DotNet.Cli.Utils
             return new CommandResult(
                 this._process.StartInfo,
                 exitCode,
-                _stdOut.GetCapturedOutput(),
-                _stdErr.GetCapturedOutput());
+                _stdOut.CapturedOutput,
+                _stdErr.CapturedOutput);
         }
 
         public Command WorkingDirectory(string projectDirectory)
@@ -148,11 +148,11 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 if (to == null)
                 {
-                    _stdOut.ForwardTo(write: Reporter.Output.Write, writeLine: Reporter.Output.WriteLine);
+                    _stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
                 }
                 else
                 {
-                    _stdOut.ForwardTo(write: to.Write, writeLine: to.WriteLine);
+                    _stdOut.ForwardTo(writeLine: to.WriteLine);
                 }
             }
             return this;
@@ -165,11 +165,11 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 if (to == null)
                 {
-                    _stdErr.ForwardTo(write: Reporter.Error.Write, writeLine: Reporter.Error.WriteLine);
+                    _stdErr.ForwardTo(writeLine: Reporter.Error.WriteLine);
                 }
                 else
                 {
-                    _stdErr.ForwardTo(write: to.Write, writeLine: to.WriteLine);
+                    _stdErr.ForwardTo(writeLine: to.WriteLine);
                 }
             }
             return this;
@@ -178,14 +178,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public Command OnOutputLine(Action<string> handler)
         {
             ThrowIfRunning();
-            _stdOut.ForwardTo(write: null, writeLine: handler);
+            _stdOut.ForwardTo(writeLine: handler);
             return this;
         }
 
         public Command OnErrorLine(Action<string> handler)
         {
             ThrowIfRunning();
-            _stdErr.ForwardTo(write: null, writeLine: handler);
+            _stdErr.ForwardTo(writeLine: handler);
             return this;
         }
 

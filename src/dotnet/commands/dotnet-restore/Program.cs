@@ -21,7 +21,6 @@ namespace Microsoft.DotNet.Tools.Restore
     {
         private static readonly string DefaultRid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
 
-
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
