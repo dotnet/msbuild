@@ -68,8 +68,12 @@ namespace Microsoft.Extensions.DependencyModel
 
             var libraryAssets = runtime ? export.RuntimeAssemblies : export.CompilationAssemblies;
 
-            foreach (var libraryDependency in export.Library.Dependencies)
+            foreach (var libraryDependenciesGroup in export.Library.Dependencies.GroupBy(d => d.Name))
             {
+                LibraryRange libraryDependency = libraryDependenciesGroup
+                    .OrderByDescending(d => d.Target == LibraryType.ReferenceAssembly)
+                    .First();
+
                 Dependency dependency;
                 if (dependencyLookup.TryGetValue(libraryDependency.Name, out dependency))
                 {
