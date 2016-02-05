@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Tools.Run
 
                     syntax.DefineOption("f|framework", ref runCmd.Framework, "Compile a specific framework");
                     syntax.DefineOption("c|configuration", ref runCmd.Configuration, "Configuration under which to build");
-                    syntax.DefineOption("t|preserve-temporary", ref runCmd.PreserveTemporary, "Keep the output's temporary directory around");
                     syntax.DefineOption("p|project", ref runCmd.Project, "The path to the project to run (defaults to the current directory). Can be a path to a project.json or a project directory");
 
                     syntax.DefineOption("h|help", ref help, "Help for compile native.");
