@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -13,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class ProjectToProjectDependenciesIncrementalTest : IncrementalTestBase
     {
-        private string[] _projects = new[] { "L0", "L11", "L12", "L21", "L22" };
+        private readonly string[] _projects = new[] { "L0", "L11", "L12", "L21", "L22" };
 
         public ProjectToProjectDependenciesIncrementalTest() : base(
             Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestProjectToProjectDependencies"),
@@ -46,6 +47,38 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             // third build; all projects on the paths from touched project to root project need to be rebuilt
             var result3 = BuildProject();
             AssertRebuilt(result3, expectedRebuiltProjects);
+        }
+
+        [Fact]
+        public void TestNoDependencyFlag()
+        {
+            var dependencies = new[] { "L11", "L12", "L21", "L22" };
+            
+            // first clean build; all projects required compilation
+            var result1 = BuildProject();
+            AssertRebuilt(result1, _projects);
+
+            // modify the source code of a leaf dependency
+            TouchSourcesOfProject("L22");
+
+            // second build with no dependencies and no incremental; only the root rebuilds
+            var result2 = BuildProject(noDependencies: true, noIncremental: true);
+            result2.Should().StdOutMatchPattern("Compiling.*L0.*");
+
+            AssertResultDoesNotContainStrings(result2, dependencies);
+
+            // third build with no dependencies but incremental; nothing rebuilds
+            var result3 = BuildProject(noDependencies: true);
+            result3.Should().HaveSkippedProjectCompilation("L0");
+            AssertResultDoesNotContainStrings(result3, dependencies);
+        }
+
+        private static void AssertResultDoesNotContainStrings(CommandResult commandResult, string[] strings)
+        {
+            foreach (var s in strings)
+            {
+                commandResult.StdOut.Should().NotContain(s);
+            }
         }
 
         // compute A - B
