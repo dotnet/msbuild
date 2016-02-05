@@ -33,7 +33,7 @@ cp -rec -Force "$RepoRoot\test\TestProjects\*" "$TestBinRoot\TestProjects"
 $TestProjects | foreach {
     # This is a workaroudn for issue #1184, where dotnet test needs to be executed from the folder containing the project.json.
     pushd "$RepoRoot\test\$($_.ProjectName)"
-    dotnet test -xml "$TestBinRoot\$($_.ProjectName)-testResults.xml" -notrait category=failing
+    dotnet test -c "$Configuration" -xml "$TestBinRoot\$($_.ProjectName)-testResults.xml" -notrait category=failing
     popd
 
     $exitCode = $LastExitCode
