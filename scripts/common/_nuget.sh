@@ -4,7 +4,15 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-export NUGET_PACKAGES=~/.nuget/packages
+if [ ! -z "$CI_BUILD" ]; then
+	# On CI, $HOME is redirected under the repo, which gets deleted after every build.
+	# So make $NUGET_PACKAGES outside of the repo.
+	NUGET_PACKAGES=$REPOROOT/../.nuget/packages
+else
+	NUGET_PACKAGES=~/.nuget/packages
+fi
+
+export NUGET_PACKAGES
 export DOTNET_PACKAGES=$NUGET_PACKAGES
 export DNX_PACKAGES=$NUGET_PACKAGES
 
