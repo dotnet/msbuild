@@ -8,9 +8,10 @@
 # Publish each test project
 loadTestProjectList | foreach {
     #we should use publish to an output path, we will once issue #1183 has been fixed and we can point dotnet test do a dll.
-    dotnet build --framework "dnxcore50" --runtime "$Rid" --configuration "$Configuration" "$RepoRoot\test\$($_.ProjectName)"
+    #we need to add back tfm, rid and configuration, but dotnet test need to be made aware of those as well. Tracked at issue #1237.
+    dotnet build "$RepoRoot\test\$($_.ProjectName)"
     if (!$?) {
-        Write-Host Command failed: dotnet publish --framework "dnxcore50" --runtime "$Rid" --configuration "$Configuration" "$RepoRoot\test\$($_.ProjectName)"
+        Write-Host Command failed: dotnet build "$RepoRoot\test\$($_.ProjectName)"
         exit 1
     }
 }
