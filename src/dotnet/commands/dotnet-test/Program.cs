@@ -33,6 +33,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             var parentProcessIdOption = app.Option("--parentProcessId", "Used by IDEs to specify their process ID. Test will exit if the parent process does.", CommandOptionType.SingleValue);
             var portOption = app.Option("--port", "Used by IDEs to specify a port number to listen for a connection.", CommandOptionType.SingleValue);
+            var configurationOption = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var projectPath = app.Argument("<PROJECT>", "The project to test, defaults to the current directory. Can be a path to a project.json or a project directory.");
 
             app.OnExecute(() =>
@@ -57,6 +58,8 @@ namespace Microsoft.DotNet.Tools.Test
                     var projectContext = projectContexts.First();
 
                     var testRunner = projectContext.ProjectFile.TestRunner;
+                    
+                    var configuration = configurationOption.Value() ?? Constants.DefaultConfiguration;
 
                     if (portOption.HasValue())
                     {
@@ -67,11 +70,11 @@ namespace Microsoft.DotNet.Tools.Test
                             throw new InvalidOperationException($"{portOption.Value()} is not a valid port number.");
                         }
 
-                        return RunDesignTime(port, projectContext, testRunner);
+                        return RunDesignTime(port, projectContext, testRunner, configuration);
                     }
                     else
                     {
-                        return RunConsole(projectContext, app, testRunner);
+                        return RunConsole(projectContext, app, testRunner, configuration);
                     }
                 }
                 catch (InvalidOperationException ex)
@@ -90,9 +93,9 @@ namespace Microsoft.DotNet.Tools.Test
             return app.Execute(args);
         }
 
-        private static int RunConsole(ProjectContext projectContext, CommandLineApplication app, string testRunner)
+        private static int RunConsole(ProjectContext projectContext, CommandLineApplication app, string testRunner, string configuration)
         {
-            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(Constants.DefaultConfiguration) };
+            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(configuration) };
             commandArgs.AddRange(app.RemainingArguments);
 
             return Command.CreateDotNet($"{GetCommandName(testRunner)}", commandArgs, projectContext.TargetFramework)
@@ -102,20 +105,20 @@ namespace Microsoft.DotNet.Tools.Test
                 .ExitCode;
         }
 
-        private static int RunDesignTime(int port, ProjectContext projectContext, string testRunner)
+        private static int RunDesignTime(int port, ProjectContext projectContext, string testRunner, string configuration)
         {
             Console.WriteLine("Listening on port {0}", port);
             using (var channel = ReportingChannel.ListenOn(port))
             {
                 Console.WriteLine("Client accepted {0}", channel.Socket.LocalEndPoint);
 
-                HandleDesignTimeMessages(projectContext, testRunner, channel);
+                HandleDesignTimeMessages(projectContext, testRunner, channel, configuration);
 
                 return 0;
             }
         }
 
-        private static void HandleDesignTimeMessages(ProjectContext projectContext, string testRunner, ReportingChannel channel)
+        private static void HandleDesignTimeMessages(ProjectContext projectContext, string testRunner, ReportingChannel channel, string configuration)
         {
             try
             {
@@ -131,11 +134,11 @@ namespace Microsoft.DotNet.Tools.Test
 
                 if (message.MessageType == "TestDiscovery.Start")
                 {
-                    HandleTestDiscoveryStartMessage(testRunner, channel, projectContext);
+                    HandleTestDiscoveryStartMessage(testRunner, channel, projectContext, configuration);
                 }
                 else if (message.MessageType == "TestExecution.Start")
                 {
-                    HandleTestExecutionStartMessage(testRunner, message, channel, projectContext);
+                    HandleTestExecutionStartMessage(testRunner, message, channel, projectContext, configuration);
                 }
                 else
                 {
@@ -167,11 +170,11 @@ namespace Microsoft.DotNet.Tools.Test
             });
         }
 
-        private static void HandleTestDiscoveryStartMessage(string testRunner, ReportingChannel channel, ProjectContext projectContext)
+        private static void HandleTestDiscoveryStartMessage(string testRunner, ReportingChannel channel, ProjectContext projectContext, string configuration)
         {
             TestHostTracing.Source.TraceInformation("Starting Discovery");
 
-            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(Constants.DefaultConfiguration) };
+            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(configuration) };
 
             commandArgs.AddRange(new[]
             {
@@ -189,11 +192,11 @@ namespace Microsoft.DotNet.Tools.Test
             TestHostTracing.Source.TraceInformation("Completed Discovery");
         }
 
-        private static void HandleTestExecutionStartMessage(string testRunner, Message message, ReportingChannel channel, ProjectContext projectContext)
+        private static void HandleTestExecutionStartMessage(string testRunner, Message message, ReportingChannel channel, ProjectContext projectContext, string configuration)
         {
             TestHostTracing.Source.TraceInformation("Starting Execution");
 
-            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(Constants.DefaultConfiguration) };
+            var commandArgs = new List<string> { projectContext.GetOutputPathCalculator().GetAssemblyPath(configuration) };
 
             commandArgs.AddRange(new[]
             {
