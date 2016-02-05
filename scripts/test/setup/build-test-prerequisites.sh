@@ -23,5 +23,5 @@ PROJECTS=$(loadTestPackageList)
 
 for project in $PROJECTS
 do
-    dotnet pack "$REPOROOT/test/TestPackages/$project" --output "$TEST_PACKAGE_DIR"
+    dotnet pack "$REPOROOT/TestAssets/TestPackages/$project" --output "$TEST_PACKAGE_DIR"
 done

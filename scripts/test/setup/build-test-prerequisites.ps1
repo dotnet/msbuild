@@ -8,7 +8,7 @@
 mkdir -Force $TestPackageDir
 
 loadTestPackageList | foreach {
-    dotnet pack "$RepoRoot\test\TestPackages\$($_.ProjectName)" --output "$TestPackageDir"
+    dotnet pack "$RepoRoot\TestAssets\TestPackages\$($_.ProjectName)" --output "$TestPackageDir"
     
     if (!$?) {
         error "Command failed: dotnet pack"

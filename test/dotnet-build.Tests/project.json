@@ -21,9 +21,9 @@
   },
 
   "content": [
-    "../TestProjects/TestSimpleIncrementalApp/*",
-    "../TestProjects/TestProjectToProjectDependencies/**/*",
-    "../TestProjects/global.json"
+    "../../TestAssets/TestProjects/TestSimpleIncrementalApp/*",
+    "../../TestAssets/TestProjects/TestProjectToProjectDependencies/**/*",
+    "../../TestAssets/TestProjects/global.json"
   ],
 
   "testRunner": "xunit"

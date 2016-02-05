@@ -27,7 +27,7 @@ popd
 
 # copy TestProjects to $TestBinRoot
 mkdir -Force "$TestBinRoot\TestProjects"
-cp -rec -Force "$RepoRoot\test\TestProjects\*" "$TestBinRoot\TestProjects"
+cp -rec -Force "$RepoRoot\TestAssets\TestProjects\*" "$TestBinRoot\TestProjects"
 
 # Run each test project
 $TestProjects | foreach {

@@ -16,8 +16,8 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../../common/_common.sh"
 
-header "Restoring packages"
-dotnet restore "$REPOROOT/test/TestPackages" --runtime $RID --quiet $DISABLE_PARALLEL
+header "Restoring TestAssets"
+dotnet restore "$REPOROOT/TestAssets" --runtime $RID --quiet $DISABLE_PARALLEL
 
 set +e
 dotnet restore "$REPOROOT/testapp" --runtime $RID  $DISABLE_PARALLEL >/dev/null 2>&1

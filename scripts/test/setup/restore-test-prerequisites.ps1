@@ -5,8 +5,8 @@
 
 ". $PSScriptRoot\..\..\common\_common.ps1"
 
-header "Restoring packages"
-& dotnet restore "$RepoRoot\test\TestPackages" --quiet --runtime "$Rid"
+header "Restoring TestAssets"
+& dotnet restore "$RepoRoot\TestAssets" --quiet --runtime "$Rid"
 
 $oldErrorAction=$ErrorActionPreference
 $ErrorActionPreference="SilentlyContinue"

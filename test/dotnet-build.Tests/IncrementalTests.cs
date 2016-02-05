@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
     {
 
         public IncrementalTests() : base(
-            Path.Combine(AppContext.BaseDirectory, "TestProjects", "TestSimpleIncrementalApp"),
+            Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestSimpleIncrementalApp"),
             "TestSimpleIncrementalApp",
             "Hello World!" + Environment.NewLine)
         {
