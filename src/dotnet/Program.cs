@@ -74,7 +74,7 @@ Common Commands:
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
-            var verbose = false;
+            bool? verbose = null;
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
@@ -114,6 +114,11 @@ Common Commands:
 
             var appArgs = (lastArg + 1) >= args.Length ? Enumerable.Empty<string>() : args.Skip(lastArg + 1).ToArray();
 
+            if (verbose.HasValue)
+            {
+                Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
+            }
+
             if (string.IsNullOrEmpty(command) || command.Equals("help", StringComparison.OrdinalIgnoreCase))
             {
                 return RunHelpCommand(appArgs);
@@ -140,15 +145,10 @@ Common Commands:
             Func<string[], int> builtIn;
             if (builtIns.TryGetValue(command, out builtIn))
             {
-                // mimic the env variable
-                Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
-                Environment.SetEnvironmentVariable(CommandContext.Variables.AnsiPassThru, bool.TrueString);
                 return builtIn(appArgs.ToArray());
             }
 
             return Command.Create("dotnet-" + command, appArgs, FrameworkConstants.CommonFrameworks.DnxCore50)
-                .EnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString())
-                .EnvironmentVariable(CommandContext.Variables.AnsiPassThru, bool.TrueString)
                 .ForwardStdErr()
                 .ForwardStdOut()
                 .Execute()
