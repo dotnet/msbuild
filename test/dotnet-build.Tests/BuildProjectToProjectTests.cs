@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
@@ -59,18 +60,18 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
             foreach (var rebuiltProject in expectedRebuilt)
             {
-                AssertProjectCompiled(rebuiltProject, buildResult);
+                buildResult.Should().HaveCompiledProject(rebuiltProject);
             }
 
             foreach (var skippedProject in SetDifference(_projects, expectedRebuilt))
             {
-                AssertProjectSkipped(skippedProject, buildResult);
+                buildResult.Should().HaveSkippedProjectCompilation(skippedProject);
             }
         }
 
         protected override string GetProjectDirectory(string projectName)
         {
-            return Path.Combine(_tempProjectRoot.Path, "src", projectName);
+            return Path.Combine(TempProjectRoot.Path, "src", projectName);
         }
     }
 }

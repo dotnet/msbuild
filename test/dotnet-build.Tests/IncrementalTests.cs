@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
@@ -25,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         public void TestNoIncrementalFlag()
         {
             var buildResult = BuildProject();
-            AssertProjectCompiled(_mainProject, buildResult);
+            buildResult.Should().HaveCompiledProject(MainProject);
 
             buildResult = BuildProject(noIncremental: true);
             Assert.Contains("[Forced Unsafe]", buildResult.StdOut);
@@ -54,9 +53,9 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         {
 
             var buildResult = BuildProject();
-            AssertProjectCompiled(_mainProject, buildResult);
+            buildResult.Should().HaveCompiledProject(MainProject);
 
-            var lockFile = Path.Combine(_tempProjectRoot.Path, "project.lock.json");
+            var lockFile = Path.Combine(TempProjectRoot.Path, "project.lock.json");
             Assert.True(File.Exists(lockFile));
 
             File.Delete(lockFile);
@@ -66,38 +65,66 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             Assert.Contains("does not have a lock file", buildResult.StdOut);
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/980")]
+        [Fact]
         public void TestRebuildChangedLockFile()
         {
 
             var buildResult = BuildProject();
-            AssertProjectCompiled(_mainProject, buildResult);
+            buildResult.Should().HaveCompiledProject(MainProject);
 
-            var lockFile = Path.Combine(_tempProjectRoot.Path, "project.lock.json");
+            var lockFile = Path.Combine(TempProjectRoot.Path, "project.lock.json");
             TouchFile(lockFile);
 
             buildResult = BuildProject();
-            AssertProjectCompiled(_mainProject, buildResult);
+            buildResult.Should().HaveCompiledProject(MainProject);
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/980")]
+        [Fact]
         public void TestRebuildChangedProjectFile()
         {
 
             var buildResult = BuildProject();
-            AssertProjectCompiled(_mainProject, buildResult);
+            buildResult.Should().HaveCompiledProject(MainProject);
 
-            TouchFile(GetProjectFile(_mainProject));
+            TouchFile(GetProjectFile(MainProject));
 
             buildResult = BuildProject();
-            AssertProjectCompiled(_mainProject, buildResult);
+            buildResult.Should().HaveCompiledProject(MainProject);
+        }
+
+        // regression for https://github.com/dotnet/cli/issues/965
+        [Fact]
+        public void TestInputWithSameTimeAsOutputCausesProjectToCompile()
+        {
+            var buildResult = BuildProject();
+            buildResult.Should().HaveCompiledProject(MainProject);
+
+            var outputTimestamp = SetAllOutputItemsToSameTime();
+
+            // set an input to have the same last write time as an output item
+            // this should trigger recompilation to account for file systems with second timestamp granularity
+            // (an input file that changed within the same second as the previous outputs should trigger a rebuild)
+            File.SetLastWriteTime(GetProjectFile(MainProject), outputTimestamp);
+
+            buildResult = BuildProject();
+            buildResult.Should().HaveCompiledProject(MainProject);
+        }
+
+        private DateTime SetAllOutputItemsToSameTime()
+        {
+            var now = DateTime.Now;
+            foreach (var f in Directory.EnumerateFiles(GetCompilationOutputPath()))
+            {
+                File.SetLastWriteTime(f, now);
+            }
+            return now;
         }
 
         private void TestDeleteOutputWithExtension(string extension)
         {
 
             var buildResult = BuildProject();
-            AssertProjectCompiled(_mainProject, buildResult);
+            buildResult.Should().HaveCompiledProject(MainProject);
 
             Reporter.Verbose.WriteLine($"Files in {GetCompilationOutputPath()}");
             foreach (var file in Directory.EnumerateFiles(GetCompilationOutputPath()))
@@ -109,7 +136,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             foreach (var outputFile in Directory.EnumerateFiles(GetCompilationOutputPath()).Where(f =>
             {
                 var fileName = Path.GetFileName(f);
-                return fileName.StartsWith(_mainProject, StringComparison.OrdinalIgnoreCase) &&
+                return fileName.StartsWith(MainProject, StringComparison.OrdinalIgnoreCase) &&
                        fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
             }))
             {
@@ -121,7 +148,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
             // second build; should get rebuilt since we deleted an output item
             buildResult = BuildProject();
-            AssertProjectCompiled(_mainProject, buildResult);
+            buildResult.Should().HaveCompiledProject(MainProject);
         }
     }
 }
