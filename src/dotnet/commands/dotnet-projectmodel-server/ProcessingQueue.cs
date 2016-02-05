@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
         {
             return Send(_writer =>
             {
-                _log.LogInformation($"Send ({message})");
+                _log.LogInformation("OnSend ({0})", message);
                 _writer.Write(JsonConvert.SerializeObject(message));
             });
         }
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.ProjectModel.Server
                     var content = _reader.ReadString();
                     var message = JsonConvert.DeserializeObject<Message>(content);
 
-                    _log.LogInformation($"OnReceive({message})");
+                    _log.LogInformation("OnReceive ({0})", message);
                     OnReceive(message);
                 }
             }
