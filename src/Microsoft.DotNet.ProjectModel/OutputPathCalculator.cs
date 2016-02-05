@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.ProjectModel
 
             // This is the check for mono, if we're not on windows and producing outputs for
             // the desktop framework then it's an exe
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _framework.IsDesktop())
+            if (_framework.IsDesktop())
             {
                 extension = FileNameSuffixes.DotNet.Exe;
             }

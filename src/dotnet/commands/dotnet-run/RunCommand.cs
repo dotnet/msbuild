@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.Tools.Run
     {
         public string Framework = null;
         public string Configuration = null;
-        public bool PreserveTemporary = false;
         public string Project = null;
         public IReadOnlyList<string> Args = null;
 
@@ -85,23 +84,15 @@ namespace Microsoft.DotNet.Tools.Run
         {
             CalculateDefaultsForNonAssigned();
 
-            // Create a temporary directory under the project root
-            // REVIEW: MAX_PATH?
-            var tempDir = Path.Combine(_context.ProjectDirectory, "bin", ".dotnetrun", Guid.NewGuid().ToString("N"));
-
             // Compile to that directory
             var result = Build.BuildCommand.Run(new[]
-                {
-                    $"--output",
-                    $"{tempDir}",
-                    $"--temp-output",
-                    $"{tempDir}",
-                    $"--framework",
-                    $"{_context.TargetFramework}",
-                    $"--configuration",
-                    $"{Configuration}",
-                    $"{_context.ProjectFile.ProjectDirectory}"
-                });
+            {
+                $"--framework",
+                $"{_context.TargetFramework}",
+                $"--configuration",
+                $"{Configuration}",
+                $"{_context.ProjectFile.ProjectDirectory}"
+            });
 
             if (result != 0)
             {
@@ -109,7 +100,7 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             // Now launch the output and give it the results
-            var outputName = _context.GetOutputPathCalculator(tempDir).GetExecutablePath(Configuration);
+            var outputName = _context.GetOutputPathCalculator().GetExecutablePath(Configuration);
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -148,12 +139,6 @@ namespace Microsoft.DotNet.Tools.Run
                 .EnvironmentVariable("DOTNET_HOME", dotnetHome)
                 .Execute()
                 .ExitCode;
-
-            // Clean up
-            if (!PreserveTemporary)
-            {
-                Directory.Delete(tempDir, recursive: true);
-            }
 
             return result;
         }
