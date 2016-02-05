@@ -30,3 +30,6 @@ In addition Compile's parameters, Build adds the following flag:
 
 --build-profile
 Prints out the incremental safety checks that users need to address in order for incremental compilation to be automatically turned on.
+
+--no-incremental
+Marks the build as unsafe for incrementality. This turns off incremental compilation and forces a clean rebuild of the project dependency graph.

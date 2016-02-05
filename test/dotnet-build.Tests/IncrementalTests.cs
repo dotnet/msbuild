@@ -22,12 +22,12 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         }
 
         [Fact]
-        public void TestForceIncrementalUnsafe()
+        public void TestNoIncrementalFlag()
         {
             var buildResult = BuildProject();
             AssertProjectCompiled(_mainProject, buildResult);
 
-            buildResult = BuildProject(forceIncrementalUnsafe: true);
+            buildResult = BuildProject(noIncremental: true);
             Assert.Contains("[Forced Unsafe]", buildResult.StdOut);
         }
 

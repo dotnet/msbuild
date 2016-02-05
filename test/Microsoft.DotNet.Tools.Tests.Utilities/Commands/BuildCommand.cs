@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private bool _nativeCppMode;
         private string _cppCompilerFlags;
         private bool _buildProfile;
-        private bool _forceIncrementalUnsafe;
+        private bool _noIncremental;
 
         private string OutputOption
         {
@@ -146,12 +146,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
         }
 
-        private string ForceIncrementalUnsafe
+        private string NoIncremental
         {
             get
             {
-                return _forceIncrementalUnsafe ?
-                    "--force-incremental-unsafe" :
+                return _noIncremental ?
+                    "--no-incremental" :
                     "";
             }
         }
@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             bool nativeCppMode=false,
             string cppCompilerFlags="",
             bool buildProfile=true,
-            bool forceIncrementalUnsafe=false
+            bool noIncremental=false
             )
             : base("dotnet")
         {
@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _nativeCppMode = nativeCppMode;
             _cppCompilerFlags = cppCompilerFlags;
             _buildProfile = buildProfile;
-            _forceIncrementalUnsafe = forceIncrementalUnsafe;
+            _noIncremental = noIncremental;
         }
 
         public override CommandResult Execute(string args = "")
@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string BuildArgs()
         {
-            return $"{BuildProfile} {ForceIncrementalUnsafe} \"{_projectPath}\" {OutputOption} {TempOutputOption} {ConfigurationOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
+            return $"{BuildProfile} {NoIncremental} \"{_projectPath}\" {OutputOption} {TempOutputOption} {ConfigurationOption} {NoHostOption} {NativeOption} {ArchitectureOption} {IlcArgsOption} {IlcPathOption} {AppDepSDKPathOption} {NativeCppModeOption} {CppCompilerFlagsOption}";
         }
     }
 }
