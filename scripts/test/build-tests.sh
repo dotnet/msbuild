@@ -22,6 +22,6 @@ PROJECTS=$(loadTestProjectList)
 for project in $PROJECTS
 do
     #we should use publish to an output path, we will once issue #1183 has been fixed and we can point dotnet test do a dll.
-    dotnet build --framework "dnxcore50" --runtime "$RID" --configuration "$CONFIGURATION" "$REPOROOT/test/$project"
+    dotnet build "$REPOROOT/test/$project"
 done
 
