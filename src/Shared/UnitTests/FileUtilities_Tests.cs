@@ -843,7 +843,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.AnyUnix)]
+        [PlatformSpecific(Xunit.PlatformID.AnyUnix)]
         public void AbsolutePathLooksLikeUnixPathOnUnix()
         {
             var absolutePathToThisAssembly = Path.GetFullPath(typeof (FileUtilities_Tests).GetTypeInfo().Assembly.Location);
@@ -852,7 +852,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [PlatformSpecific(PlatformID.Windows)]
+        [PlatformSpecific(Xunit.PlatformID.Windows)]
         public void PathDoesNotLookLikeUnixPathOnWindows()
         {
             var absolutePathToThisAssembly = Path.GetFullPath(typeof(FileUtilities_Tests).GetTypeInfo().Assembly.Location);
