@@ -38,20 +38,7 @@
     ],
 
     "symlinks": {
-        "/usr/share/dotnet-nightly" : "/usr/share/dotnet",
         "bin/dotnet" : "usr/bin/dotnet",
-        "bin/dotnet-build" : "usr/bin/dotnet-build",
-        "bin/dotnet-compile" : "usr/bin/dotnet-compile",
-        "bin/dotnet-compile-csc" : "usr/bin/dotnet-compile-csc",
-        "bin/dotnet-compile-fsc" : "usr/bin/dotnet-compile-fsc",
-        "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native",
-        "bin/dotnet-new": "usr/bin/dotnet-new",
-        "bin/dotnet-publish" : "usr/bin/dotnet-publish",
-        "bin/dotnet-repl" : "usr/bin/dotnet-repl",
-        "bin/dotnet-repl-csi" : "usr/bin/dotnet-repl-csi",
-        "bin/dotnet-restore" : "usr/bin/dotnet-restore",
-        "bin/dotnet-dnx" : "usr/bin/dotnet-dnx",
-        "bin/dotnet-test" : "usr/bin/dotnet-test",
-        "bin/dotnet-resgen" : "usr/bin/dotnet-resgen"
+        "bin/dotnet-compile-native" : "/usr/bin/dotnet-compile-native"
     }
 }
