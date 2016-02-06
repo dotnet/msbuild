@@ -11,10 +11,9 @@ Check out our http://dotnet.github.io/getting-started/
 Build Status
 ------------
 
-|         |Ubuntu 14.04 |Windows |Mac OS X |CentOS 7.1 |
-|---------|:------:|:------:|:------:|:------:|
-|**Debug**|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=dotnet_cli/debug_ubuntu)](http://dotnet-ci.cloudapp.net/job/dotnet_cli/job/debug_ubuntu/)|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=dotnet_cli/debug_windows_nt)](http://dotnet-ci.cloudapp.net/job/dotnet_cli/job/debug_windows_nt/)|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=dotnet_cli/debug_osx)](http://dotnet-ci.cloudapp.net/job/dotnet_cli/job/debug_osx/) |[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=dotnet_cli/debug_centos7.1)](http://dotnet-ci.cloudapp.net/job/dotnet_cli/job/debug_centos7.1/) |
-|**Release**|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=dotnet_cli/release_ubuntu)](http://dotnet-ci.cloudapp.net/job/dotnet_cli/job/release_ubuntu/)|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=dotnet_cli/release_windows_nt)](http://dotnet-ci.cloudapp.net/job/dotnet_cli/job/release_windows_nt/)|[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=dotnet_cli/release_osx)](http://dotnet-ci.cloudapp.net/job/dotnet_cli/job/release_osx/) |[![Build Status](http://dotnet-ci.cloudapp.net/buildStatus/icon?job=dotnet_cli/release_centos7.1)](http://dotnet-ci.cloudapp.net/job/dotnet_cli/job/release_centos7.1/) |
+|Ubuntu 14.04 |Windows |Mac OS X |CentOS 7.1 |
+|:------:|:------:|:------:|:------:|
+|![](https://devdiv.visualstudio.com/DefaultCollection/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/601/badge)|![](https://devdiv.visualstudio.com/DefaultCollection/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/602/badge)|![](https://devdiv.visualstudio.com/DefaultCollection/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/600/badge) |![](https://devdiv.visualstudio.com/DefaultCollection/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/597/badge) |
 
 Installers
 ----------
