@@ -16,7 +16,7 @@ if [ "$OSNAME" == "osx" ]; then
 elif [ "$OSNAME" == "ubuntu" ]; then
     RID=ubuntu.14.04-x64
 elif [ "$OSNAME" == "centos" ]; then
-    RID=centos.7.1-x64
+    RID=rhel.7-x64
 else
     echo "Unknown OS: $OSNAME" 1>&2
     exit 1
