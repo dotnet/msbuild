@@ -13,10 +13,10 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class CommandResolver
     {
-        public static CommandSpec TryResolveCommandSpec(string commandName, IEnumerable<string> args, NuGetFramework framework = null)
+        public static CommandSpec TryResolveCommandSpec(string commandName, IEnumerable<string> args, NuGetFramework framework = null, string configuration=Constants.DefaultConfiguration)
         {
             return ResolveFromRootedCommand(commandName, args) ??
-                   ResolveFromProjectDependencies(commandName, args, framework) ??
+                   ResolveFromProjectDependencies(commandName, args, framework, configuration) ??
                    ResolveFromProjectTools(commandName, args) ??
                    ResolveFromAppBase(commandName, args) ??
                    ResolveFromPath(commandName, args);
@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Cli.Utils
                    ResolveFromAppBase(commandName, args) ??
                    ResolveFromPath(commandName, args);
         }
+        
 
         private static CommandSpec ResolveFromPath(string commandName, IEnumerable<string> args)
         {
@@ -65,8 +66,11 @@ namespace Microsoft.DotNet.Cli.Utils
             return null;
         }
 
-        public static CommandSpec ResolveFromProjectDependencies(string commandName, IEnumerable<string> args,
-            NuGetFramework framework)
+        public static CommandSpec ResolveFromProjectDependencies(
+            string commandName, 
+            IEnumerable<string> args, 
+            NuGetFramework framework, 
+            string configuration)
         {
             if (framework == null) return null;
 
@@ -78,7 +82,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (commandPackage == null) return null;
 
-            var depsPath = projectContext.GetOutputPaths(Constants.DefaultConfiguration).RuntimeFiles.Deps;
+            var depsPath = projectContext.GetOutputPaths(configuration).RuntimeFiles.Deps;
 
             return ConfigureCommandFromPackage(commandName, args, commandPackage, projectContext, depsPath);
         }
