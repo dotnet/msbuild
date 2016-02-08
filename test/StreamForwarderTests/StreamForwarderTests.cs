@@ -129,36 +129,6 @@ namespace StreamForwarderTests
             Assert.Equal(expectedCaptured, captured);
         }
 
-        [Fact]
-        public void TestAsyncOrdering()
-        {
-            var expectedOutputLines = new string[] 
-            {
-                "** Standard Out 1 **",
-                "** Standard Error 1 **",
-                "** Standard Out 2 **",
-                "** Standard Error 2 **"
-            };
-
-            var expectedOutput = string.Join(Environment.NewLine, expectedOutputLines) + Environment.NewLine;
-
-            var testProjectDllPath = SetupTestProject();
-
-            var testReporter = new TestReporter();
-
-            var testCommand = Command.Create(testProjectDllPath, new string[0])
-                .OnOutputLine(testReporter.WriteLine)
-                .OnErrorLine(testReporter.WriteLine);
-
-            testCommand.Execute();
-
-            var resultString = testReporter.InternalStringWriter.GetStringBuilder().ToString();
-            Console.WriteLine(expectedOutput);
-            Console.WriteLine(resultString);
-
-            Assert.Equal(expectedOutput, resultString);
-        }
-
         private string SetupTestProject()
         {
             var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "OutputStandardOutputAndError");
@@ -172,30 +142,6 @@ namespace StreamForwarderTests
             var buildOutputPath = Path.Combine(binTestProjectPath, "bin/Debug/dnxcore50", buildOutputExe);
 
             return buildOutputPath;
-        } 
-
-        private class TestReporter
-        {   
-            private static object _lock = new object();
-            private StringWriter _stringWriter;
-
-            public StringWriter InternalStringWriter 
-            { 
-                get { return _stringWriter; } 
-            }
-
-            public TestReporter()
-            {
-                _stringWriter = new StringWriter();
-            }
-
-            public void WriteLine(string message)
-            {
-                lock(_lock)
-                {
-                    _stringWriter.WriteLine(message);
-                }
-            }
         }
     }
 }
