@@ -134,6 +134,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 File.Move(outputName, originalOutputName);
             }
 
+            //HACK dotnet build require a pdb (crash without), fsc atm cant generate a portable pdb, so an empty pdb is created
+            string pdbPath = Path.ChangeExtension(outputName, ".pdb");
+            if (!File.Exists(pdbPath))
+            {
+                File.WriteAllBytes(pdbPath, Array.Empty<byte>());
+            }
+
             return result.ExitCode;
         }
 
