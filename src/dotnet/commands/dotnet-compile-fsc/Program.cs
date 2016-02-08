@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Compiler.Fsc
 {
@@ -102,6 +103,13 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
 
                 allArgs.Add($"--out:");
                 allArgs.Add($"{outputName}");
+            }
+
+            //set target framework
+            var framework = new NuGetFramework(assemblyInfoOptions.TargetFramework);
+            if (!framework.IsDesktop())
+            {
+                allArgs.Add("--targetprofile:netcore");
             }
 
             foreach (var reference in references)
