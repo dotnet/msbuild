@@ -80,6 +80,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 return returnCode;
             }
 
+            outputName = outputName.Trim('"');
+            tempOutDir = tempOutDir.Trim('"');
+
             var translated = TranslateCommonOptions(commonOptions, outputName);
 
             var allArgs = new List<string>(translated);
@@ -101,8 +104,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                     outputName = Path.ChangeExtension(outputName, ".exe");
                 }
 
-                allArgs.Add($"--out:");
-                allArgs.Add($"{outputName}");
+                allArgs.Add($"--out:{outputName}");
             }
 
             //set target framework
@@ -112,22 +114,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 allArgs.Add("--targetprofile:netcore");
             }
 
-            foreach (var reference in references)
-            {
-                allArgs.Add("-r");
-                allArgs.Add($"{reference}");
-            }
-
-            foreach (var resource in resources)
-            {
-                allArgs.Add("--resource");
-                allArgs.Add($"{resource}");
-            }
-
-            foreach (var source in sources)
-            {
-                allArgs.Add($"{source}");
-            }
+            allArgs.AddRange(references.Select(r => $"-r:{r.Trim('"')}"));
+            allArgs.AddRange(resources.Select(resource => $"--resource:{resource.Trim('"')}"));
+            allArgs.AddRange(sources.Select(s => $"{s.Trim('"')}"));
 
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-fsc.rsp");
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
@@ -175,9 +164,21 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 commonArgs.AddRange(options.Defines.Select(def => $"-d:{def}"));
             }
 
+            if (options.SuppressWarnings != null)
+            {
+            }
+
+            if (options.LanguageVersion != null)
+            {
+            }
+
             if (options.Platform != null)
             {
                 commonArgs.Add($"--platform:{options.Platform}");
+            }
+
+            if (options.AllowUnsafe == true)
+            {
             }
 
             if (options.WarningsAsErrors == true)
@@ -190,7 +191,19 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 commonArgs.Add("--optimize");
             }
 
-            if(options.GenerateXmlDocumentation == true)
+            if (options.KeyFile != null)
+            {
+            }
+
+            if (options.DelaySign == true)
+            {
+            }
+
+            if (options.PublicSign == true)
+            {
+            }
+
+            if (options.GenerateXmlDocumentation == true)
             {
                 commonArgs.Add($"--doc:{Path.ChangeExtension(outputName, "xml")}");
             }
@@ -207,7 +220,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     var win32manifestPath = Path.Combine(AppContext.BaseDirectory, "default.win32manifest");
-                    commonArgs.Add($"--win32manifest:\"{win32manifestPath}\"");
+                    commonArgs.Add($"--win32manifest:{win32manifestPath}");
                 }
             }
 
