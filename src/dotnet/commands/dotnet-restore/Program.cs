@@ -203,7 +203,9 @@ namespace Microsoft.DotNet.Tools.Restore
             sb.AppendLine("    \"frameworks\": {");
             foreach (var framework in frameworks)
             {
-                sb.AppendLine($"        \"{framework}\": {{}}");
+                var importsStatement = "\"imports\": \"portable-net452+win81\"";
+                
+                sb.AppendLine($"        \"{framework}\": {{ {importsStatement} }}");
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");
