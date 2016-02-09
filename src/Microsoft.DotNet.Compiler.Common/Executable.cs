@@ -32,6 +32,11 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         public void MakeCompilationOutputRunnable()
         {
+            if (string.IsNullOrEmpty(_context.RuntimeIdentifier))
+            {
+                throw new InvalidOperationException($"Can not make output runnable for framework {_context.TargetFramework}, because it doesn't have runtime target");
+            }
+
             var outputPath = _outputPaths.RuntimeOutputPath;
 
             CopyContentFiles(outputPath);
