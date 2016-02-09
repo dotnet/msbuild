@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -79,10 +80,15 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
 
         private static void CopyAllDependencies(string outputPath, LibraryExporter exporter)
         {
-            exporter
-                .GetAllExports()
-                .SelectMany(e => e.RuntimeAssets())
+            var libraryExports = exporter.GetAllExports();
+
+            libraryExports
+                .SelectMany(e => e.RuntimeAssemblies)
                 .CopyTo(outputPath);
+
+            libraryExports
+                .SelectMany(RuntimeAssets)
+                .StructuredCopyTo(outputPath);
         }
 
         private static void WriteDepsFileAndCopyProjectDependencies(
@@ -94,11 +100,24 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 .GetDependencies(LibraryType.Package)
                 .WriteDepsTo(Path.Combine(outputPath, projectFileName + FileNameSuffixes.Deps));
 
-            exporter
-                .GetAllExports()
+            var projectExports = exporter.GetAllExports()
                 .Where(e => e.Library.Identity.Type == LibraryType.Project)
-                .SelectMany(e => e.RuntimeAssets())
+                .ToArray();
+
+            projectExports
+                .SelectMany(e => e.RuntimeAssemblies)
                 .CopyTo(outputPath);
+
+            projectExports
+                .SelectMany(RuntimeAssets)
+                .StructuredCopyTo(outputPath);
+        }
+
+
+        private static IEnumerable<LibraryAsset> RuntimeAssets(LibraryExport export)
+        {
+            return export.NativeLibraries
+                .Union(export.RuntimeAssets);
         }
 
         public void GenerateBindingRedirects(LibraryExporter exporter)

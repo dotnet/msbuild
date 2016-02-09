@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
                 PublishFiles(export.RuntimeAssemblies, outputPath, nativeSubdirectories: false);
                 PublishFiles(export.NativeLibraries, outputPath, nativeSubdirectories);
-                export.RuntimeAssets.CopyTo(outputPath);
+                export.RuntimeAssets.StructuredCopyTo(outputPath);
 
                 if (options.PreserveCompilationContext.GetValueOrDefault())
                 {
