@@ -20,7 +20,6 @@
         "Microsoft.NETCore.TestHost": "1.0.0-rc2-23712",
         "System.Xml.XmlDocument": "4.0.1-rc2-23712",
         "Microsoft.Win32.Primitives": "4.0.1-rc2-23712",
-        "Microsoft.Win32.Registry": "4.0.0-rc2-23712",
         "System.Xml.XPath.XmlDocument": "4.0.1-rc2-23712"
       },
       "imports": "portable-net451+win81"
