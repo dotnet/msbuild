@@ -17,9 +17,9 @@ _ "$RepoRoot\scripts\compile\compile-stage.ps1" @("$Tfm","$Rid","$Configuration"
 . $REPOROOT\scripts\package\projectsToPack.ps1
 
 $ProjectsToPack | ForEach-Object {
-    dotnet build --build-base-path "$Stage2Dir\forPackaging" --configuration "$Configuration" "$RepoRoot\src\$_"
+    dotnet build --build-base-path "$Stage2CompilationDir\forPackaging" --configuration "$Configuration" "$RepoRoot\src\$_"
     if (!$?) {
-        Write-Host Command failed: dotnet build --native-subdirectory --build-base-path "$Stage2Dir\forPackaging" --configuration "$Configuration" "$RepoRoot\src\$_"
+        Write-Host Command failed: dotnet build --native-subdirectory --build-base-path "$Stage2CompilationDir\forPackaging" --configuration "$Configuration" "$RepoRoot\src\$_"
         exit 1
     }
 }
