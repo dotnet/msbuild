@@ -21,6 +21,7 @@ if(!(Test-Path $inputMsi))
 }
 
 $env:CLI_MSI=$inputMsi
+$testDir="$PSScriptRoot\Dotnet.Cli.Msi.Tests"
 $testBin="$RepoRoot\artifacts\tests\Dotnet.Cli.Msi.Tests"
 $xunitRunner="$env:USERPROFILE\.dnx\packages\xunit.runner.console\2.1.0\tools\xunit.console.exe"
 
@@ -29,7 +30,7 @@ pushd "$Stage2Dir\bin"
 try {
     .\dotnet restore `
         --runtime win-anycpu `
-        $RepoRoot\packaging\windows\Dotnet.Cli.Msi.Tests\project.json `
+        $testDir `
         -f https://www.myget.org/F/dotnet-buildtools/api/v3/index.json | Out-Host
 
     if($LastExitCode -ne 0)
@@ -41,7 +42,7 @@ try {
         --framework net46 `
         --runtime win-anycpu `
         --output $testBin `
-        $RepoRoot\packaging\windows\Dotnet.Cli.Msi.Tests\project.json | Out-Host
+        $testDir | Out-Host
 
     if($LastExitCode -ne 0)
     {
