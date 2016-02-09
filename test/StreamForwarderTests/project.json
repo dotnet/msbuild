@@ -23,7 +23,7 @@
     },
 
     "content": [
-        "../TestProjects/OutputStandardOutputAndError/*"
+        "../../TestAssets/TestProjects/OutputStandardOutputAndError/*"
     ],
 
     "testRunner": "xunit"

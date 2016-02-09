@@ -18,7 +18,7 @@ namespace StreamForwarderTests
     public class StreamForwarderTests : TestBase
     {
         private static readonly string s_rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
-        private static readonly string s_testProjectRoot = Path.Combine(AppContext.BaseDirectory, "TestProjects");
+        private static readonly string s_testProjectRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
 
         private TempDirectory _root;
 
