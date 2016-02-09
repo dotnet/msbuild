@@ -42,7 +42,33 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             Assert.True(File.Exists(outputXml));
             Assert.Contains("Gets the message from the helper", File.ReadAllText(outputXml));
         }
-         
+
+        [Fact]
+        public void SatelliteAssemblyIsGeneratedByDotnetBuild()
+        {
+            // create unique directories in the 'temp' folder
+            var root = Temp.CreateDirectory();
+            var testLibDir = root.CreateDirectory("TestProjectWithCultureSpecificResource");
+            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestProjectWithCultureSpecificResource");
+
+            CopyProjectToTempDir(sourceTestLibDir, testLibDir);
+
+            // run compile on a project with resources
+            var outputDir = Path.Combine(testLibDir.Path, "bin");
+            var testProject = GetProjectPath(testLibDir);
+            var buildCmd = new BuildCommand(testProject, output: outputDir, framework: DefaultFramework);
+            var result = buildCmd.ExecuteWithCapturedOutput();
+            result.Should().Pass();
+
+            var generatedSatelliteAssemblyPath = Path.Combine(
+                outputDir,
+                "Debug",
+                DefaultFramework,
+                "fr",
+                "TestProjectWithCultureSpecificResource.resources.dll");
+            Assert.True(File.Exists(generatedSatelliteAssemblyPath), $"File {generatedSatelliteAssemblyPath} was not found.");
+        }
+
         [Fact]
         public void LibraryWithAnalyzer()
         {            

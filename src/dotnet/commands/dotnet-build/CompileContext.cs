@@ -475,11 +475,11 @@ namespace Microsoft.DotNet.Tools.Build
             // input compilation options files
             AddCompilationOptions(project, buildConfiguration, compilerIO);
 
+            // input / output: resources with culture
+            AddNonCultureResources(project, calculator.IntermediateOutputDirectoryPath, compilerIO);
+
             // input / output: resources without culture
             AddCultureResources(project, binariesOutputPath, compilerIO);
-
-            // input / output: resources with culture
-            AddNonCultureResources(project, binariesOutputPath, compilerIO);
 
             return compilerIO;
         }
