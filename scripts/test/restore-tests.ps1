@@ -8,4 +8,4 @@
 info "Restoring Test Projects"
 
 # Restore packages
-& dotnet restore "$RepoRoot\test" -f "$TestPackageDir\Debug"
+& dotnet restore "$RepoRoot\test" -f "$TestPackageDir"
