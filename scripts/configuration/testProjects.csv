@@ -1,4 +1,4 @@
-E2E
+EndToEnd
 StreamForwarderTests
 dotnet-publish.Tests
 dotnet-compile.Tests
