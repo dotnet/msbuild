@@ -135,7 +135,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Run pre-compile event
             var contextVariables = new Dictionary<string, string>()
             {
-                { "compile:TargetFramework", context.TargetFramework.DotNetFrameworkName },
+                { "compile:TargetFramework", context.TargetFramework.GetShortFolderName() },
+                { "compile:FullTargetFramework", context.TargetFramework.DotNetFrameworkName },
                 { "compile:Configuration", args.ConfigValue },
                 { "compile:OutputFile", outputName },
                 { "compile:OutputDir", outputPath.TrimEnd('\\', '/') },

@@ -94,16 +94,12 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         [InlineData("\"abc\"\t\td\te")]
         [InlineData(@"a\\b d""e f""g h")]
         [InlineData(@"\ \\ \\\")]
-        [InlineData(@"a\""b c d")]
         [InlineData(@"a\\""b c d")]
-        [InlineData(@"a\\\""b c d")]
         [InlineData(@"a\\\\""b c d")]
         [InlineData(@"a\\\\""b c d")]
         [InlineData(@"a\\\\""b c"" d e")]
         [InlineData(@"a""b c""d e""f g""h i""j k""l")]
         [InlineData(@"a b c""def")]
-        [InlineData(@"""\a\"" \\""\\\ b c")]
-        [InlineData(@"a\""b \\ cd ""\e f\"" \\""\\\")]
         public void TestArgumentForwardingCmd(string testUserArgument)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -151,6 +147,29 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
                     throw e;
                 }
             }
+        }
+
+        [Theory]
+        [InlineData(@"a\""b c d")]
+        [InlineData(@"a\\\""b c d")]
+        [InlineData(@"""\a\"" \\""\\\ b c")]
+        [InlineData(@"a\""b \\ cd ""\e f\"" \\""\\\")]
+        public void TestArgumentForwardingCmdFailsWithUnbalancedQuote(string testArgString)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            // Get Baseline Argument Evaluation via Reflector
+            // This does not need to be different for cmd because
+            // it only establishes what the string[] args should be
+            var rawEvaluatedArgument = RawEvaluateArgumentString(testArgString);
+
+            // Escape and Re-Evaluate the rawEvaluatedArgument
+            var escapedEvaluatedRawArgument = EscapeAndEvaluateArgumentStringCmd(rawEvaluatedArgument);
+
+            rawEvaluatedArgument.Length.Should().NotBe(escapedEvaluatedRawArgument.Length);
         }
 
         /// <summary>

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using NuGet.Frameworks;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -40,9 +41,9 @@ namespace Microsoft.DotNet.Cli.Utils
             ResolutionStrategy = commandSpec.ResolutionStrategy;
         }
 
-        public static Command CreateDotNet(string commandName, IEnumerable<string> args, NuGetFramework framework = null, bool useComSpec = false)
+        public static Command CreateDotNet(string commandName, IEnumerable<string> args, NuGetFramework framework = null)
         {
-            return Create("dotnet", new[] { commandName }.Concat(args), framework, useComSpec);
+            return Create("dotnet", new[] { commandName }.Concat(args), framework);
         }
 
         /// <summary>
@@ -55,9 +56,23 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <param name="args"></param>
         /// <param name="framework"></param>
         /// <returns></returns>
-        public static Command Create(string commandName, IEnumerable<string> args, NuGetFramework framework = null, bool useComSpec = false)
+        public static Command Create(string commandName, IEnumerable<string> args, NuGetFramework framework = null)
         {
-            var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, args, framework, useComSpec);
+            var commandSpec = CommandResolver.TryResolveCommandSpec(commandName, args, framework);
+
+            if (commandSpec == null)
+            {
+                throw new CommandUnknownException(commandName);
+            }
+
+            var command = new Command(commandSpec);
+
+            return command;
+        }
+        
+        public static Command CreateForScript(string commandName, IEnumerable<string> args, Project project, string[] inferredExtensionList)
+        {
+            var commandSpec = CommandResolver.TryResolveScriptCommandSpec(commandName, args, project, inferredExtensionList);
 
             if (commandSpec == null)
             {
@@ -196,6 +211,8 @@ namespace Microsoft.DotNet.Cli.Utils
         public CommandResolutionStrategy ResolutionStrategy { get; }
 
         public string CommandName => _process.StartInfo.FileName;
+
+        public string CommandArgs => _process.StartInfo.Arguments;
 
         private string FormatProcessInfo(ProcessStartInfo info)
         {

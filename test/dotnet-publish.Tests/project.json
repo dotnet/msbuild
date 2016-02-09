@@ -23,6 +23,7 @@
 
   "content": [
     "../../TestAssets/TestProjects/TestApp/**/*",
+    "../../TestAssets/TestProjects/TestAppWithScripts/**/*",
     "../../TestAssets/TestProjects/TestLibrary/**/*",
     "../../TestAssets/TestProjects/CompileFail/**/*",
     "../../TestAssets/TestProjects/TestBindingRedirectGeneration/**/*",
