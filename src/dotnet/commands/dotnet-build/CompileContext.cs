@@ -462,7 +462,7 @@ namespace Microsoft.DotNet.Tools.Build
             AddDependencies(dependencies, compilerIO);
 
             var allOutputPath = new List<string>(calculator.CompilationFiles.All());
-            if (!string.IsNullOrEmpty(project.RuntimeIdentifier))
+            if (project.ProjectFile.HasRuntimeOutput(buildConfiguration))
             {
                 allOutputPath.AddRange(calculator.RuntimeFiles.All());
             }
