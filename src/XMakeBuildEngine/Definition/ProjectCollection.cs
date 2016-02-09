@@ -308,6 +308,14 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Finalizer. During GC all items that were saved in strong cache during project loading will be removed.
+        /// </summary>
+        ~ProjectCollection()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
         /// Handler to receive which project got added to the project collection.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible", Justification = "This has been API reviewed")]
@@ -1489,6 +1497,9 @@ namespace Microsoft.Build.Evaluation
                 ShutDownLoggingService();
                 Tracing.Dump();
             }
+
+            //releasing cached items from strong reference cache for projects loaded into current collection
+            ProjectRootElementCache.Clear();
         }
 
         /// <summary>
