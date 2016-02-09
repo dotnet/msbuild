@@ -58,7 +58,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             var buildCmd = new BuildCommand(testProject, output: outputDir);
             var result = buildCmd.ExecuteWithCapturedOutput();
             result.Should().Pass();
-            Assert.Contains("CA1018", result.StdOut);
+            
+            Assert.Contains("CA1018", result.StdErr);
         }
 
         private void CopyProjectToTempDir(string projectDir, TempDirectory tempDir)
