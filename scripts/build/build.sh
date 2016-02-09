@@ -17,7 +17,10 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
+
 source "$REPOROOT/scripts/build/generate-version.sh"
+
+"$REPOROOT/scripts/clean/clear-nuget-cache.sh"
 
 header "Building dotnet tools version $DOTNET_CLI_VERSION - $CONFIGURATION"
 header "Checking Pre-Reqs"
@@ -39,10 +42,12 @@ if [ ! -z "$OFFLINE" ]; then
     info "Skipping Tools and Package Download: Offline build"
 else
    $REPOROOT/scripts/obtain/install-tools.sh
-
-   # Restore using the stage 0
-   PATH="$REPOROOT/.dotnet_stage0/$RID/bin:$PATH" $REPOROOT/scripts/build/restore-packages.sh
 fi
+
+header "Cleaning out .ni's from Stage0"
+find ".dotnet_stage0" -name '*.ni.*' -delete
+
+$REPOROOT/scripts/build/restore-packages.sh
 
 header "Compiling"
 $REPOROOT/scripts/compile/compile.sh

@@ -3,8 +3,8 @@
     "description": "Microsoft.DotNet.Tools.Tests.Utilities Class Library",
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23805",
-        "System.Collections.Immutable": "1.2.0-rc2-23805",
+        "NETStandard.Library": "1.0.0-rc2-23808",
+        "System.Collections.Immutable": "1.2.0-rc2-23808",
         "FluentAssertions": "4.0.0",
         "xunit": "2.1.0",
 

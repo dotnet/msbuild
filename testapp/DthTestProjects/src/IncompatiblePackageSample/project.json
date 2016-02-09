@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23805",
+        "NETStandard.Library": "1.0.0-rc2-23808",
         "Microsoft.Web.Administration": "7.0.0"
     },
     "frameworks": {
