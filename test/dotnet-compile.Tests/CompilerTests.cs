@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
         public CompilerTests()
         {
-            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, @"TestProjects");
+            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
         }
 
         [Fact]

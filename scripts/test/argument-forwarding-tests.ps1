@@ -5,8 +5,6 @@
 
 . "$PSScriptRoot\..\common\_common.ps1"
 
-$TestPackagesPath = "$RepoRoot\tests\packages"
-
 $ArgTestRoot = "$RepoRoot\test\ArgumentForwardingTests"
 $ArgTestOutputRoot = "$RepoRoot\artifacts\tests\arg-forwarding"
 

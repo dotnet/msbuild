@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
 
         public PublishTests()
         {
-            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, @"TestProjects");
+            _testProjectsRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects");
         }
 
         public static IEnumerable<object[]> PublishOptions

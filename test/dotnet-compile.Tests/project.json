@@ -21,9 +21,9 @@
   },
 
   "content": [
-    "../TestProjects/TestLibraryWithAnalyzer/*",
-    "../TestProjects/TestLibrary/*",
-    "../TestProjects/global.json"
+    "../../TestAssets/TestProjects/TestLibraryWithAnalyzer/*",
+    "../../TestAssets/TestProjects/TestLibrary/*",
+    "../../TestAssets/TestProjects/global.json"
   ],
 
   "testRunner": "xunit"

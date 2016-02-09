@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         private string[] _projects = new[] { "L0", "L11", "L12", "L21", "L22" };
 
         public ProjectToProjectDependenciesIncrementalTest() : base(
-            Path.Combine(AppContext.BaseDirectory, "TestProjects", "TestProjectToProjectDependencies"),
+            Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestProjectToProjectDependencies"),
             "L0",
             "L0 L11 L12 L22 L21 L12 L22 " + Environment.NewLine)
         {

@@ -24,7 +24,7 @@ failCount=0
 
 # Copy TestProjects to $TEST_BIN_ROOT
 mkdir -p "$TEST_BIN_ROOT/TestProjects"
-cp -a $REPOROOT/test/TestProjects/* $TEST_BIN_ROOT/TestProjects
+cp -a $REPOROOT/TestAssets/TestProjects/* $TEST_BIN_ROOT/TestProjects
 
 pushd "$TEST_BIN_ROOT"
 set +e
