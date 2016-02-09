@@ -243,7 +243,7 @@ if(!(Test-Path $DotnetBundleOutput))
 Write-Host -ForegroundColor Green "Successfully created dotnet MSI - $DotnetMSIOutput"
 Write-Host -ForegroundColor Green "Successfully created dotnet bundle - $DotnetBundleOutput"
 
-_ $PSScriptRoot\testmsi.ps1 @("$DotnetMSIOutput")
+_ $RepoRoot\test\Installer\testmsi.ps1 @("$DotnetMSIOutput")
 
 $PublishScript = Join-Path $PSScriptRoot "..\..\scripts\publish\publish.ps1"
 & $PublishScript -file $DotnetMSIOutput
