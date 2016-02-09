@@ -35,7 +35,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MultiProjectValidator", "to
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Extensions.DependencyModel", "src\Microsoft.Extensions.DependencyModel\Microsoft.Extensions.DependencyModel.xproj", "{688870C8-9843-4F9E-8576-D39290AD0F25}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "E2E", "test\E2E\E2E.xproj", "{65741CB1-8AEE-4C66-8198-10A7EA0E4258}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EndToEnd", "test\EndToEnd\EndToEnd.xproj", "{65741CB1-8AEE-4C66-8198-10A7EA0E4258}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.DotNet.Tools.Test.Utilities", "test\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Test.Utilities.xproj", "{E4F46EAB-B5A5-4E60-9B9D-40A1FADBF45C}"
 EndProject
