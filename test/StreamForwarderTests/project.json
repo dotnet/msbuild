@@ -22,5 +22,9 @@
         }
     },
 
+    "content": [
+        "../TestProjects/OutputStandardOutputAndError/*"
+    ],
+
     "testRunner": "xunit"
 }

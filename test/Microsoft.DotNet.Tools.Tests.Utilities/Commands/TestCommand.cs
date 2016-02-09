@@ -32,8 +32,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
 
-            stdOut.ForwardTo(write: Reporter.Output.Write, writeLine: Reporter.Output.WriteLine);
-            stdErr.ForwardTo(write: Reporter.Error.Write, writeLine: Reporter.Output.WriteLine);
+            stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
+            stdErr.ForwardTo(writeLine: Reporter.Output.WriteLine);
 
             return RunProcess(commandPath, args, stdOut, stdErr);
         }
@@ -82,8 +82,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             var result = new CommandResult(
                 process.StartInfo,
                 process.ExitCode, 
-                stdOut.GetCapturedOutput(), 
-                stdErr.GetCapturedOutput());
+                stdOut.CapturedOutput, 
+                stdErr.CapturedOutput);
 
             return result;
         }

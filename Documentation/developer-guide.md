@@ -65,3 +65,6 @@ Each command's project root should contain a manpage-style Readme.md that descri
 #### Add command to packages
 - Update the `symlinks` property of `packaging/debian/debian_config.json` to include the new command
 - Update the `$Projects` property in `packaging/osx/scripts/postinstall`
+
+#### Things to Know
+- Any added commands are usually invoked through `dotnet {command}`. As a result of this, stdout and stderr are redirected through the driver (`dotnet`) and buffered by line. As a result of this, child commands should use Console.WriteLine in any cases where they expect output to be written immediately. Any uses of Console.Write should be followed by Console.WriteLine to ensure the output is written.

@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// <returns></returns>
         private string[] ParseReflectorOutput(string reflectorOutput)
         {
-            return reflectorOutput.Split(',');
+            return reflectorOutput.TrimEnd('\r', '\n').Split(',');
         }
 
         /// <summary>

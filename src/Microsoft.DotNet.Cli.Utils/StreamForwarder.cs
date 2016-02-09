@@ -2,50 +2,46 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     public sealed class StreamForwarder
     {
-        private const int DefaultBufferSize = 256;
+        private static readonly char[] s_ignoreCharacters = new char[] { '\r' };
+        private static readonly char s_flushBuilderCharacter = '\n';
 
-        private readonly int _bufferSize;
         private StringBuilder _builder;
         private StringWriter _capture;
         private Action<string> _write;
         private Action<string> _writeLine;
 
-        public StreamForwarder(int bufferSize = DefaultBufferSize)
+        public string CapturedOutput
         {
-            _bufferSize = bufferSize;
+            get 
+            {
+                return _capture?.GetStringBuilder()?.ToString();
+            }
         }
 
-        public void Capture()
+        public StreamForwarder Capture()
         {
-            if (_capture != null)
-            {
-                throw new InvalidOperationException("Already capturing stream!");
-            }
+            ThrowIfCaptureSet();
+
             _capture = new StringWriter();
+
+            return this;
         }
 
-        public string GetCapturedOutput()
+        public StreamForwarder ForwardTo(Action<string> writeLine)
         {
-            return _capture?.GetStringBuilder()?.ToString();
-        }
+            ThrowIfNull(writeLine);
 
-        public void ForwardTo(Action<string> write, Action<string> writeLine)
-        {
-            if (writeLine == null)
-            {
-                throw new ArgumentNullException(nameof(writeLine));
-            }
-            if (_writeLine != null)
-            {
-                throw new InvalidOperationException("Already handling stream!");
-            }
-            _write = write;
+            ThrowIfForwarderSet();
+
             _writeLine = writeLine;
+
+            return this;
         }
 
         public Thread BeginRead(TextReader reader)
@@ -57,93 +53,80 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public void Read(TextReader reader)
         {
+            var bufferSize = 1;
+
+            int readCharacterCount; 
+            char currentCharacter;
+
+            var buffer = new char[bufferSize];
             _builder = new StringBuilder();
-            var buffer = new char[_bufferSize];
-            int n;
-            while ((n = reader.Read(buffer, 0, _bufferSize)) > 0)
-            {
-                _builder.Append(buffer, 0, n);
-                WriteBlocks();
-            }
-            WriteRemainder();
-        }
 
-        private void WriteBlocks()
-        {
-            int n = _builder.Length;
-            if (n == 0)
+            // Using Read with buffer size 1 to prevent looping endlessly
+            // like we would when using Read() with no buffer
+            while ((readCharacterCount = reader.Read(buffer, 0, bufferSize)) > 0)
             {
-                return;
-            }
+                currentCharacter = buffer[0];
 
-            int offset = 0;
-            bool sawReturn = false;
-            for (int i = 0; i < n; i++)
-            {
-                char c = _builder[i];
-                switch (c)
+                if (currentCharacter == s_flushBuilderCharacter)
                 {
-                    case '\r':
-                        sawReturn = true;
-                        continue;
-                    case '\n':
-                        WriteLine(_builder.ToString(offset, i - offset - (sawReturn ? 1 : 0)));
-                        offset = i + 1;
-                        break;
+                    WriteBuilder();
                 }
-                sawReturn = false;
+                else if (! s_ignoreCharacters.Contains(currentCharacter))
+                {
+                    _builder.Append(currentCharacter);
+                }
             }
 
-            // If the buffer contains no line breaks and _write is
-            // supported, send the buffer content.
-            if (!sawReturn &&
-                (offset == 0) &&
-                ((_write != null) || (_writeLine == null)))
-            {
-                WriteRemainder();
-            }
-            else
-            {
-                _builder.Remove(0, offset);
-            }
+            // Flush anything else when the stream is closed
+            // Which should only happen if someone used console.Write
+            WriteBuilder();
         }
 
-        private void WriteRemainder()
+        private void WriteBuilder()
         {
             if (_builder.Length == 0)
             {
                 return;
             }
-            Write(_builder.ToString());
+
+            WriteLine(_builder.ToString());
             _builder.Clear();
         }
 
         private void WriteLine(string str)
-        {
+        { 
             if (_capture != null)
             {
                 _capture.WriteLine(str);
             }
-            // If _write is supported, so is _writeLine.
+
             if (_writeLine != null)
             {
                 _writeLine(str);
             }
         }
 
-        private void Write(string str)
+        private void ThrowIfNull(object obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+        }
+
+        private void ThrowIfForwarderSet()
+        {
+            if (_writeLine != null)
+            {
+                throw new InvalidOperationException("WriteLine forwarder set previously");
+            }
+        }
+
+        private void ThrowIfCaptureSet()
         {
             if (_capture != null)
             {
-                _capture.Write(str);
-            }
-            if (_write != null)
-            {
-                _write(str);
-            }
-            else if (_writeLine != null)
-            {
-                _writeLine(str);
+                throw new InvalidOperationException("Already capturing stream!");
             }
         }
     }
