@@ -175,6 +175,12 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             {
             }
 
+            // Additional arguments are added verbatim
+            if (options.AdditionalArguments != null)
+            {
+                commonArgs.AddRange(options.AdditionalArguments);
+            }
+
             if (options.LanguageVersion != null)
             {
             }
