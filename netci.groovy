@@ -40,7 +40,6 @@ def static getBuildJobName(def configuration, def os) {
 
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
                 // Set the label.
-                label(machineLabelMap[os])
                 steps {
                     if (os == 'Windows_NT') {
                         // Batch
@@ -64,7 +63,7 @@ def static getBuildJobName(def configuration, def os) {
                 }
             }
 
-
+            Utilities.setMachineAffinity(newJob, os, 'latest-or-auto')
             Utilities.standardJobSetup(newJob, project, isPR)
             Utilities.addXUnitDotNETResults(newJob, '**/*-testResults.xml')
             if (isPR) {
