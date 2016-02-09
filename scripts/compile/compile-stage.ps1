@@ -12,8 +12,6 @@ param(
     [Parameter(Mandatory=$true)][string]$HostDir,
     [Parameter(Mandatory=$true)][string]$CompilationOutputDir)
 
-. $REPOROOT\scripts\package\projectsToPack.ps1
-
 $Projects = loadBuildProjectList
 
 $BinariesForCoreHost = @(
@@ -46,15 +44,6 @@ dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" 
 if (!$?) {
     Write-Host Command failed: dotnet publish --framework "$Tfm" --runtime "$Rid" --output "$RuntimeOutputDir" --configuration "$Configuration" "$RepoRoot\src\Microsoft.DotNet.Runtime"
     Exit 1
-}
-
-# Build the projects that we are going to ship as nuget packages
-$ProjectsToPack | ForEach-Object {
-    dotnet build --output "$CompilationOutputDir\forPackaging" --configuration "$Configuration" "$RepoRoot\src\$_"
-    if (!$?) {
-        Write-Host Command failed: dotnet build --native-subdirectory --output "$CompilationOutputDir\forPackaging" --configuration "$Configuration" "$RepoRoot\src\$_"
-        exit 1
-    }
 }
 
 # Clean up bogus additional files

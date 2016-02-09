@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Run
@@ -59,15 +60,27 @@ namespace Microsoft.DotNet.Tools.Run
                 Configuration = Constants.DefaultConfiguration;
             }
 
-            var contexts = ProjectContext.CreateContextForEachFramework(Project);
+            var rids = PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers();
             if (Framework == null)
             {
-                _context = contexts.First();
+                var defaultFrameworks = new[]
+                {
+                    FrameworkConstants.FrameworkIdentifiers.DnxCore,
+                    FrameworkConstants.FrameworkIdentifiers.NetStandardApp,
+                };
+
+                var contexts = ProjectContext.CreateContextForEachFramework(Project, null, rids);
+                _context = contexts.FirstOrDefault(c =>
+                    defaultFrameworks.Contains(c.TargetFramework.Framework) && !string.IsNullOrEmpty(c.RuntimeIdentifier));
+
+                if (_context == null)
+                {
+                    throw new InvalidOperationException($"Couldn't find default target with framework: {string.Join(",", defaultFrameworks)}");
+                }
             }
             else
             {
-                var fx = NuGetFramework.Parse(Framework);
-                _context = contexts.FirstOrDefault(c => c.TargetFramework.Equals(fx));
+                _context = ProjectContext.Create(Project, NuGetFramework.Parse(Framework), rids);
             }
 
             if (Args == null)
@@ -90,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Run
                 $"--framework",
                 $"{_context.TargetFramework}",
                 $"--configuration",
-                $"{Configuration}",
+                Configuration,
                 $"{_context.ProjectFile.ProjectDirectory}"
             });
 
@@ -100,7 +113,7 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             // Now launch the output and give it the results
-            var outputName = _context.GetOutputPathCalculator().GetExecutablePath(Configuration);
+            var outputName = _context.GetOutputPaths(Configuration).RuntimeFiles.Executable;
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

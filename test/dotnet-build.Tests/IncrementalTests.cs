@@ -126,14 +126,14 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             var buildResult = BuildProject();
             buildResult.Should().HaveCompiledProject(MainProject);
 
-            Reporter.Verbose.WriteLine($"Files in {GetCompilationOutputPath()}");
-            foreach (var file in Directory.EnumerateFiles(GetCompilationOutputPath()))
+            Reporter.Verbose.WriteLine($"Files in {GetBinRoot()}");
+            foreach (var file in Directory.EnumerateFiles(GetBinRoot()))
             {
                 Reporter.Verbose.Write($"\t {file}");
             }
 
             // delete output files with extensions
-            foreach (var outputFile in Directory.EnumerateFiles(GetCompilationOutputPath()).Where(f =>
+            foreach (var outputFile in Directory.EnumerateFiles(GetBinRoot()).Where(f =>
             {
                 var fileName = Path.GetFileName(f);
                 return fileName.StartsWith(MainProject, StringComparison.OrdinalIgnoreCase) &&

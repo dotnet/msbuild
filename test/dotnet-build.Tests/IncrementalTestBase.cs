@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Xunit;
 
 namespace Microsoft.DotNet.Tools.Builder.Tests
 {
@@ -48,17 +47,15 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         protected CommandResult BuildProject(bool noIncremental = false, bool expectBuildFailure = false)
         {
-            var outputDir = GetBinRoot();
-            var intermediateOutputDir = Path.Combine(Directory.GetParent(outputDir).FullName, "obj", MainProject);
             var mainProjectFile = GetProjectFile(MainProject);
 
-            var buildCommand = new BuildCommand(mainProjectFile, output: outputDir, tempOutput: intermediateOutputDir ,noIncremental : noIncremental);
+            var buildCommand = new BuildCommand(mainProjectFile, output: GetBinRoot(), framework: "dnxcore50",  noIncremental : noIncremental);
             var result = buildCommand.ExecuteWithCapturedOutput();
 
             if (!expectBuildFailure)
             {
                 result.Should().Pass();
-                TestOutputExecutable(outputDir, buildCommand.GetOutputExecutableName(), ExpectedOutput);
+                TestOutputExecutable(GetBinRoot(), buildCommand.GetOutputExecutableName(), ExpectedOutput);
             }
             else
             {

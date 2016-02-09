@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Packaging;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -69,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (commandPackage == null) return null;
 
-            var depsPath = projectContext.GetOutputPathCalculator().GetDepsPath(Constants.DefaultConfiguration);
+            var depsPath = projectContext.GetOutputPaths(Constants.DefaultConfiguration).RuntimeFiles.Deps;
 
             return ConfigureCommandFromPackage(commandName, args, commandPackage, projectContext, depsPath, useComSpec);
         }
@@ -83,7 +84,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 return null;
             }
 
-            var projectContext = ProjectContext.Create(projectRootPath, framework);
+            var projectContext = ProjectContext.Create(projectRootPath, framework, PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
             return projectContext;
         }
 

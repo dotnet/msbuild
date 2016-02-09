@@ -48,6 +48,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             get { return _path; }
         }
  
+        public DirectoryInfo DirectoryInfo => new DirectoryInfo(Path);
+
         /// <summary>
         /// Creates a file in this directory.
         /// </summary>
@@ -78,7 +80,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         /// <returns></returns>
         public TempDirectory CopyDirectory(string sourceDirectory)
         {
-            Debug.Assert(Directory.Exists(sourceDirectory));
+            Debug.Assert(Directory.Exists(sourceDirectory), $"{sourceDirectory} does not exists");
              
             var tempCopy = CreateDirectory(new DirectoryInfo(sourceDirectory).Name);
 

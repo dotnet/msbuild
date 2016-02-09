@@ -44,9 +44,15 @@ namespace Microsoft.DotNet.ProjectModel
 
         public TargetFrameworkInformation TargetFrameworkInfo { get; }
         
-        public OutputPathCalculator GetOutputPathCalculator()
+        public OutputPaths GetOutputPaths(string buildBasePath, string solutionRootPath, string configuration, string runtime)
         {
-            return new OutputPathCalculator(Project, Framework, runtimeIdentifier: null, baseOutputPath: null);
+            return OutputPathsCalculator.GetOutputPaths(Project,
+                Framework,
+                runtimeIdentifier: runtime,
+                configuration: configuration,
+                solutionRootPath: solutionRootPath,
+                buildBasePath: buildBasePath,
+                outputPath: null);
         }
     }
 }

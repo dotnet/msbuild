@@ -1,13 +1,15 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Dnx.Runtime.Common.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
-using System.Linq;
 
 // This class is responsible with defining the arguments for the Compile verb.
 // It knows how to interpret them and set default values
@@ -21,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         // options and arguments for compilation
         private CommandOption _outputOption;
-        private CommandOption _intermediateOutputOption;
+        private CommandOption _buildBasePath;
         private CommandOption _frameworkOption;
         private CommandOption _runtimeOption;
         private CommandOption _configurationOption;
@@ -37,8 +39,8 @@ namespace Microsoft.DotNet.Tools.Compiler
 
         // resolved values for the options and arguments
         public string ProjectPathValue { get; set; }
+        public string BuildBasePathValue { get; set; }
         public string OutputValue { get; set; }
-        public string IntermediateValue { get; set; }
         public string RuntimeValue{ get; set; }
         public string ConfigValue { get; set; }
         public bool IsNativeValue { get; set; }
@@ -72,7 +74,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             _app.HelpOption("-h|--help");
 
             _outputOption = _app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
-            _intermediateOutputOption = _app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
+            _buildBasePath = _app.Option("-b|--build-base-path <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
             _frameworkOption = _app.Option("-f|--framework <FRAMEWORK>", "Compile a specific framework", CommandOptionType.MultipleValue);
             _configurationOption = _app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             _runtimeOption = _app.Option("-r|--runtime <RUNTIME_IDENTIFIER>", "Target runtime to publish for", CommandOptionType.SingleValue);
@@ -101,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Compiler
                 }
 
                 OutputValue = _outputOption.Value();
-                IntermediateValue = _intermediateOutputOption.Value();
+                BuildBasePathValue = _buildBasePath.Value();
                 ConfigValue = _configurationOption.Value() ?? Constants.DefaultConfiguration;
                 RuntimeValue = _runtimeOption.Value();
 
@@ -114,10 +116,34 @@ namespace Microsoft.DotNet.Tools.Compiler
                 IsCppModeValue = _cppModeOption.HasValue();
                 CppCompilerFlagsValue = _cppCompilerFlagsOption.Value();
 
-                // Load project contexts for each framework
-                var contexts = _frameworkOption.HasValue() ?
-                    _frameworkOption.Values.Select(f => ProjectContext.Create(ProjectPathValue, NuGetFramework.Parse(f))) :
-                    ProjectContext.CreateContextForEachFramework(ProjectPathValue);
+                var rids = new List<string>();
+                if (string.IsNullOrEmpty(RuntimeValue))
+                {
+                    rids.AddRange(PlatformServices.Default.Runtime.GetAllCandidateRuntimeIdentifiers());
+                }
+                else
+                {
+                    rids.Add(RuntimeValue);
+                }
+
+                IEnumerable<ProjectContext> contexts;
+
+                if (_frameworkOption.HasValue())
+                {
+                    contexts = _frameworkOption.Values
+                        .Select(f => ProjectContext.Create(ProjectPathValue, NuGetFramework.Parse(f), rids));
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(OutputValue))
+                    {
+                        throw new InvalidOperationException($"'{_frameworkOption.LongName}' is required when '{_outputOption.LongName}' is specified");
+                    }
+                    else
+                    {
+                        contexts = ProjectContext.CreateContextForEachFramework(ProjectPathValue, settings: null, runtimeIdentifiers: rids);
+                    }
+                }
 
                 var success = execute(contexts.ToList(), this);
 

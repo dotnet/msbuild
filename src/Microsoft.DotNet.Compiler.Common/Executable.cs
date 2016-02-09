@@ -19,51 +19,48 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
     {
         private readonly ProjectContext _context;
 
-        private readonly OutputPathCalculator _calculator;
+        private readonly OutputPaths _outputPaths;
 
-        public Executable(ProjectContext context, OutputPathCalculator calculator)
+        private readonly LibraryExporter _exporter;
+
+        public Executable(ProjectContext context, OutputPaths outputPaths, LibraryExporter exporter)
         {
             _context = context;
-
-            _calculator = calculator;
+            _outputPaths = outputPaths;
+            _exporter = exporter;
         }
 
-        public void MakeCompilationOutputRunnable(string configuration)
+        public void MakeCompilationOutputRunnable()
         {
-            var outputPath = _calculator.GetOutputDirectoryPath(configuration);
+            var outputPath = _outputPaths.RuntimeOutputPath;
 
             CopyContentFiles(outputPath);
 
-            ExportRuntimeAssets(outputPath, configuration);
+            ExportRuntimeAssets(outputPath);
         }
 
-        private void ExportRuntimeAssets(string outputPath, string configuration)
+        private void ExportRuntimeAssets(string outputPath)
         {
-            var exporter = _context.CreateExporter(configuration);
-
             if (_context.TargetFramework.IsDesktop())
             {
-                MakeCompilationOutputRunnableForFullFramework(outputPath, configuration, exporter);
+                MakeCompilationOutputRunnableForFullFramework(outputPath);
             }
             else
             {
-                MakeCompilationOutputRunnableForCoreCLR(outputPath, exporter);
+                MakeCompilationOutputRunnableForCoreCLR(outputPath);
             }
-        }        
+        }
 
         private void MakeCompilationOutputRunnableForFullFramework(
-            string outputPath,
-            string configuration,
-            LibraryExporter exporter)
+            string outputPath)
         {
-            CopyAllDependencies(outputPath, exporter);
+            CopyAllDependencies(outputPath, _exporter);
+            GenerateBindingRedirects(_exporter);
+        }
 
-            GenerateBindingRedirects(exporter, configuration);
-        }        
-
-        private void MakeCompilationOutputRunnableForCoreCLR(string outputPath, LibraryExporter exporter)
+        private void MakeCompilationOutputRunnableForCoreCLR(string outputPath)
         {
-            WriteDepsFileAndCopyProjectDependencies(exporter, _context.ProjectFile.Name, outputPath);
+            WriteDepsFileAndCopyProjectDependencies(_exporter, _context.ProjectFile.Name, outputPath);
 
             // TODO: Pick a host based on the RID
             CoreHost.CopyTo(outputPath, _context.ProjectFile.Name + Constants.ExeSuffix);
@@ -78,7 +75,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         private static void CopyAllDependencies(string outputPath, LibraryExporter exporter)
         {
             exporter
-                .GetDependencies()
+                .GetAllExports()
                 .SelectMany(e => e.RuntimeAssets())
                 .CopyTo(outputPath);
         }
@@ -93,14 +90,15 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 .WriteDepsTo(Path.Combine(outputPath, projectFileName + FileNameSuffixes.Deps));
 
             exporter
-                .GetDependencies(LibraryType.Project)
+                .GetAllExports()
+                .Where(e => e.Library.Identity.Type == LibraryType.Project)
                 .SelectMany(e => e.RuntimeAssets())
                 .CopyTo(outputPath);
-        }                        
+        }
 
-        public void GenerateBindingRedirects(LibraryExporter exporter, string configuration)
+        public void GenerateBindingRedirects(LibraryExporter exporter)
         {
-            var outputName = _calculator.GetAssemblyPath(configuration);
+            var outputName = _outputPaths.RuntimeFiles.Assembly;
 
             var existingConfig = new DirectoryInfo(_context.ProjectDirectory)
                 .EnumerateFiles()

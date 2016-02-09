@@ -18,4 +18,4 @@ source "$DIR/../common/_common.sh"
 
 header "Restoring Test Packages"
 
-dotnet restore "$REPOROOT/test" --runtime $RID -f "$TEST_PACKAGE_DIR/Debug" $DISABLE_PARALLEL
+dotnet restore "$REPOROOT/test" --runtime $RID -f "$TEST_PACKAGE_DIR" $DISABLE_PARALLEL

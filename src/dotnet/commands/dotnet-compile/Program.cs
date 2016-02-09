@@ -11,6 +11,7 @@ using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
+using Microsoft.DotNet.ProjectModel.Resources;
 using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -59,17 +60,16 @@ namespace Microsoft.DotNet.Tools.Compiler
             ProjectContext context,
             CompilerCommandApp args)
         {
-            var outputPathCalculator = context.GetOutputPathCalculator(args.OutputValue);
-            var outputPath = outputPathCalculator.GetOutputDirectoryPath(args.ConfigValue);
+            var outputPaths = context.GetOutputPaths(args.ConfigValue, args.BuildBasePathValue, args.OutputValue);
+            var outputPath = outputPaths.RuntimeOutputPath;
             var nativeOutputPath = Path.Combine(outputPath, "native");
             var intermediateOutputPath =
-                outputPathCalculator.GetIntermediateOutputDirectoryPath(args.ConfigValue, args.IntermediateValue);
-            var nativeIntermediateOutputPath = Path.Combine(intermediateOutputPath, "native");
+                outputPaths.IntermediateOutputDirectoryPath;
+            var nativeTempOutput = Path.Combine(intermediateOutputPath, "native");
             Directory.CreateDirectory(nativeOutputPath);
-            Directory.CreateDirectory(nativeIntermediateOutputPath);
+            Directory.CreateDirectory(nativeTempOutput);
 
-            var compilationOptions = context.ProjectFile.GetCompilerOptions(context.TargetFramework, args.ConfigValue);
-            var managedOutput = outputPathCalculator.GetAssemblyPath(args.ConfigValue);
+            var managedOutput = outputPaths.CompilationFiles.Assembly;
 
             var nativeArgs = new List<string>();
 
@@ -133,14 +133,14 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             // Intermediate Path
             nativeArgs.Add("--temp-output");
-            nativeArgs.Add($"{nativeIntermediateOutputPath}");
+            nativeArgs.Add($"{nativeTempOutput}");
 
             // Output Path
             nativeArgs.Add("--output");
             nativeArgs.Add($"{nativeOutputPath}");
 
             // Write Response File
-            var rsp = Path.Combine(nativeIntermediateOutputPath, $"dotnet-compile-native.{context.ProjectFile.Name}.rsp");
+            var rsp = Path.Combine(nativeTempOutput, $"dotnet-compile-native.{context.ProjectFile.Name}.rsp");
             File.WriteAllLines(rsp, nativeArgs);
 
             // TODO Add -r assembly.dll for all Nuget References
@@ -155,16 +155,16 @@ namespace Microsoft.DotNet.Tools.Compiler
         private static bool CompileProject(ProjectContext context, CompilerCommandApp args)
         {
             // Set up Output Paths
-            var outputPathCalculator = context.GetOutputPathCalculator(args.OutputValue);
-            var outputPath = outputPathCalculator.GetOutputDirectoryPath(args.ConfigValue);
+            var outputPaths = context.GetOutputPaths(args.ConfigValue, args.BuildBasePathValue);
+            var outputPath = outputPaths.CompilationOutputPath;
             var intermediateOutputPath =
-                outputPathCalculator.GetIntermediateOutputDirectoryPath(args.ConfigValue, args.IntermediateValue);
+                outputPaths.IntermediateOutputDirectoryPath;
 
             Directory.CreateDirectory(outputPath);
             Directory.CreateDirectory(intermediateOutputPath);
 
             // Create the library exporter
-            var exporter = context.CreateExporter(args.ConfigValue);
+            var exporter = context.CreateExporter(args.ConfigValue, args.BuildBasePathValue);
 
             // Gather exports for the project
             var dependencies = exporter.GetDependencies().ToList();
@@ -196,7 +196,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             }
 
             // Get compilation options
-            var outputName = outputPathCalculator.GetAssemblyPath(args.ConfigValue);
+            var outputName = outputPaths.CompilationFiles.Assembly;
 
             // Assemble args
             var compilerArgs = new List<string>()
@@ -313,7 +313,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             {
                 success &= GenerateCultureResourceAssemblies(context.ProjectFile, dependencies, intermediateOutputPath, outputPath);
             }
-            
+
             return PrintSummary(diagnostics, sw, success);
         }
 

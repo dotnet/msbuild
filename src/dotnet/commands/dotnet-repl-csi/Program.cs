@@ -58,12 +58,9 @@ namespace Microsoft.DotNet.Tools.Repl.Csi
 
             Reporter.Output.WriteLine($"Compiling {projectContext.RootProject.Identity.Name.Yellow()} for {projectContext.TargetFramework.DotNetFrameworkName.Yellow()} to use with the {"C# REPL".Yellow()} environment.");
 
-            // --temp-output is actually the intermediate output folder and can be the same as --output for our temporary compilation (`dotnet run` can be seen doing the same)
             return Build.BuildCommand.Run(new[]
                 {
                     $"--output",
-                    $"{tempOutputDir}",
-                    $"--temp-output",
                     $"{tempOutputDir}",
                     $"--framework",
                     $"{projectContext.TargetFramework}",

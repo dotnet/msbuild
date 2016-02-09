@@ -16,6 +16,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
     /// </summary>
     public abstract class TestBase : IDisposable
     {
+        protected const string DefaultFramework = "dnxcore50";
         private TempRoot _temp;
 
         protected TestBase()
@@ -89,10 +90,10 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         protected string GetCompilationOutputPath(string outputDir, bool native)
         {
-            var executablePath = Path.Combine(outputDir, "Debug", "dnxcore50");
+            var executablePath = outputDir;
             if (native)
             {
-                executablePath = Path.Combine(outputDir, "Debug", "dnxcore50", "native");
+                executablePath = Path.Combine(executablePath, "native");
             }
 
             return executablePath;

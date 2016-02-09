@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.Cli.Compiler.Common
+namespace Microsoft.DotNet.ProjectModel.Resources
 {
     /// <summary>
     /// Contains a list of known culture names that can be used to create a <see cref="System.Globalization.CultureInfo"/>.

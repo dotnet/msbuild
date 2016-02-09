@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace Microsoft.DotNet.ProjectModel
 
         public LockFile LockFile { get; }
 
-        public string RootDirectory => GlobalSettings.DirectoryPath;
+        public string RootDirectory => GlobalSettings?.DirectoryPath;
 
         public string ProjectDirectory => ProjectFile.ProjectDirectory;
 
@@ -51,9 +52,9 @@ namespace Microsoft.DotNet.ProjectModel
             LockFile = lockfile;
         }
 
-        public LibraryExporter CreateExporter(string configuration)
+        public LibraryExporter CreateExporter(string configuration, string buildBasePath = null)
         {
-            return new LibraryExporter(RootProject, LibraryManager, configuration);
+            return new LibraryExporter(RootProject, LibraryManager, configuration, RuntimeIdentifier, buildBasePath, RootDirectory);
         }
 
         /// <summary>
@@ -86,7 +87,7 @@ namespace Microsoft.DotNet.ProjectModel
         /// <summary>
         /// Creates a project context for each framework located in the project at <paramref name="projectPath"/>
         /// </summary>
-        public static IEnumerable<ProjectContext> CreateContextForEachFramework(string projectPath, ProjectReaderSettings settings = null)
+        public static IEnumerable<ProjectContext> CreateContextForEachFramework(string projectPath, ProjectReaderSettings settings = null, IEnumerable<string> runtimeIdentifiers = null)
         {
             if (!projectPath.EndsWith(Project.FileName))
             {
@@ -100,6 +101,7 @@ namespace Microsoft.DotNet.ProjectModel
                                 .WithProject(project)
                                 .WithTargetFramework(framework.FrameworkName)
                                 .WithReaderSettings(settings)
+                                .WithRuntimeIdentifiers(runtimeIdentifiers ?? Enumerable.Empty<string>())
                                 .Build();
             }
         }
@@ -120,9 +122,15 @@ namespace Microsoft.DotNet.ProjectModel
                         .BuildAllTargets();
         }
 
-        public OutputPathCalculator GetOutputPathCalculator(string baseOutputPath = null)
+        public OutputPaths GetOutputPaths(string configuration, string buidBasePath = null, string outputPath = null)
         {
-            return new OutputPathCalculator(ProjectFile, TargetFramework, RuntimeIdentifier, baseOutputPath);
+            return OutputPathsCalculator.GetOutputPaths(ProjectFile,
+                TargetFramework,
+                RuntimeIdentifier,
+                configuration,
+                RootDirectory,
+                buidBasePath,
+                outputPath);
         }
     }
 }

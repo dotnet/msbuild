@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using Microsoft.DotNet.Tools.Common;
+using Microsoft.DotNet.ProjectModel.Utilities;
 
-namespace Microsoft.DotNet.Cli.Compiler.Common
+namespace Microsoft.DotNet.ProjectModel.Resources
 {
     public static class ResourceUtility
     {

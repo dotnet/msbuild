@@ -23,9 +23,8 @@ namespace Microsoft.DotNet.Tools.Compiler
             app.Description = "Packager for the .NET Platform";
             app.HelpOption("-h|--help");
 
-            var basePath = app.Option("-b|--basepath <BASE_PATH>", "Directory from where the assets to be packaged are going to be picked up", CommandOptionType.SingleValue);
             var output = app.Option("-o|--output <OUTPUT_DIR>", "Directory in which to place outputs", CommandOptionType.SingleValue);
-            var intermediateOutput = app.Option("-t|--temp-output <OUTPUT_DIR>", "Directory in which to place temporary outputs", CommandOptionType.SingleValue);
+            var buildBasePath = app.Option("-b|--build-base-path <OUTPUT_DIR>", "Directory in which to place temporary build outputs", CommandOptionType.SingleValue);
             var configuration = app.Option("-c|--configuration <CONFIGURATION>", "Configuration under which to build", CommandOptionType.SingleValue);
             var versionSuffix = app.Option("--version-suffix <VERSION_SUFFIX>", "Defines what `*` should be replaced with in version field in project.json", CommandOptionType.SingleValue);
             var path = app.Argument("<PROJECT>", "The project to compile, defaults to the current directory. Can be a path to a project.json or a project directory");
@@ -63,14 +62,13 @@ namespace Microsoft.DotNet.Tools.Compiler
                 var contexts = ProjectContext.CreateContextForEachFramework(pathValue, settings);
 
                 var configValue = configuration.Value() ?? Cli.Utils.Constants.DefaultConfiguration;
-                var basePathValue = basePath.Value();
                 var outputValue = output.Value();
-                var intermediateOutputValue = intermediateOutput.Value();
+                var buildBasePathValue = buildBasePath.Value();
 
                 var project = contexts.First().ProjectFile;
 
-                var artifactPathsCalculator = new ArtifactPathsCalculator(project, basePathValue, outputValue, configValue);
-                var buildProjectCommand = new BuildProjectCommand(project, artifactPathsCalculator, intermediateOutputValue, configValue);
+                var artifactPathsCalculator = new ArtifactPathsCalculator(project, buildBasePathValue, outputValue, configValue);
+                var buildProjectCommand = new BuildProjectCommand(project, artifactPathsCalculator, buildBasePathValue, configValue);
                 var packageBuilder = new PackagesGenerator(contexts, artifactPathsCalculator, configValue);
 
                 var buildResult = buildProjectCommand.Execute();

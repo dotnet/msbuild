@@ -173,14 +173,14 @@ namespace Microsoft.DotNet.Tools.Restore
                 Path.GetDirectoryName(toolDescription.Target.RuntimeAssemblies.First().Path),
                 toolDescription.Identity.Name + FileNameSuffixes.Deps);
 
-            var calculator = context.GetOutputPathCalculator(context.ProjectDirectory);
-            var executable = new Executable(context, calculator);
+            var calculator = context.GetOutputPaths(Constants.DefaultConfiguration, buidBasePath: null, outputPath: context.ProjectDirectory);
+            var executable = new Executable(context, calculator, context.CreateExporter(Constants.DefaultConfiguration));
 
-            executable.MakeCompilationOutputRunnable(Constants.DefaultConfiguration);
+            executable.MakeCompilationOutputRunnable();
 
             if (File.Exists(depsPath)) File.Delete(depsPath);
 
-            File.Move(Path.Combine(calculator.GetOutputDirectoryPath(Constants.DefaultConfiguration), "bin" + FileNameSuffixes.Deps), depsPath);
+            File.Move(Path.Combine(calculator.RuntimeOutputPath, "bin" + FileNameSuffixes.Deps), depsPath);
         }
 
         private static bool RestoreToolToPath(LibraryRange tooldep, IEnumerable<string> args, string tempPath, bool quiet)
