@@ -68,10 +68,10 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         [Theory]
         // global.json exists
-        [InlineData(true, null, null, "src/TestLibrary/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}/{rid}")]
-        [InlineData(true, "out", null, "src/TestLibrary/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}", "out")]
-        [InlineData(true, null, "build", "build/src/TestLibrary/bin/debug/{fw}", "build/src/TestApp/bin/debug/{fw}", "build/src/TestApp/bin/debug/{fw}/{rid}")]
-        [InlineData(true, "out", "build", "build/src/TestLibrary/bin/debug/{fw}", "build/src/TestApp/bin/debug/{fw}", "out")]
+        [InlineData(true, null, null, "src/TestLibrary/bin/Debug/{fw}", "src/TestApp/bin/Debug/{fw}", "src/TestApp/bin/Debug/{fw}/{rid}")]
+        [InlineData(true, "out", null, "src/TestLibrary/bin/Debug/{fw}", "src/TestApp/bin/Debug/{fw}", "out")]
+        [InlineData(true, null, "build", "build/src/TestLibrary/bin/Debug/{fw}", "build/src/TestApp/bin/Debug/{fw}", "build/src/TestApp/bin/Debug/{fw}/{rid}")]
+        [InlineData(true, "out", "build", "build/src/TestLibrary/bin/Debug/{fw}", "build/src/TestApp/bin/Debug/{fw}", "out")]
         //no global.json
         //[InlineData(false, null, null, "src/TestLibrary/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}/{rid}")]
         //[InlineData(false, "out", null, "src/TestLibrary/bin/debug/{fw}", "src/TestApp/bin/debug/{fw}", "out")]
