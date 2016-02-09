@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyModel
     {
         public static DependencyContext Build(CommonCompilerOptions compilerOptions, LibraryExporter libraryExporter, string configuration, NuGetFramework target, string runtime)
         {
-            var dependencies = libraryExporter.GetAllExports().Where(export => export.Library.Framework.Equals(target)).ToList();
+            var dependencies = libraryExporter.GetAllExports();
 
             // Sometimes we have package and reference assembly with the same name (System.Runtime for example) thats why we
             // deduplicating them prefering reference assembly
