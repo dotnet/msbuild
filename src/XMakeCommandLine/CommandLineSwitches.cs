@@ -442,10 +442,19 @@ namespace Microsoft.Build.CommandLine
             {
                 // initialize its parameter storage
                 _parameterizedSwitches[(int)parameterizedSwitch].parameters = new ArrayList();
-            }
 
-            // save the switch text
-            _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg = commandLineArg;
+                // save the switch text
+                _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg = commandLineArg;
+            }
+            else
+            {
+                // append the switch text
+                _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg = string.Concat(
+                        _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg,
+                        " ",
+                        commandLineArg
+                    );
+            }
 
             // check if the switch has multiple parameters
             if (multipleParametersAllowed)
