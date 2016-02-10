@@ -7,7 +7,9 @@ namespace Microsoft.DotNet.ProjectModel
 {
     public class OutputPaths
     {
-        private readonly string _runtimePath;
+        private string _compilationPath;
+        private string _intermediatePath;
+        private string _runtimePath;
         private readonly RuntimeOutputFiles _runtimeFiles;
 
         public OutputPaths(string intermediateOutputDirectoryPath,
@@ -16,16 +18,36 @@ namespace Microsoft.DotNet.ProjectModel
             CompilationOutputFiles compilationFiles,
             RuntimeOutputFiles runtimeFiles)
         {
-            _runtimePath = runtimePath;
+            RuntimeOutputPath = runtimePath;
             _runtimeFiles = runtimeFiles;
             CompilationOutputPath = compilationOutputPath;
             IntermediateOutputDirectoryPath = intermediateOutputDirectoryPath;
             CompilationFiles = compilationFiles;
         }
 
-        public string CompilationOutputPath { get; }
+        public string CompilationOutputPath
+        {
+            get
+            {
+                return _compilationPath;
+            }
+            private set
+            {
+                _compilationPath = value?.TrimEnd('\\');
+            }
+        }
 
-        public string IntermediateOutputDirectoryPath { get; }
+        public string IntermediateOutputDirectoryPath
+        {
+            get
+            {
+                return _intermediatePath;
+            }
+            private set
+            {
+                _intermediatePath = value?.TrimEnd('\\');
+            }
+        }
 
         public string RuntimeOutputPath
         {
@@ -36,7 +58,12 @@ namespace Microsoft.DotNet.ProjectModel
                     throw new InvalidOperationException(
                         $"Cannot get runtime output path for {nameof(OutputPaths)} with no runtime set");
                 }
+
                 return _runtimePath;
+            }
+            private set
+            {
+                _runtimePath = value?.TrimEnd('\\');
             }
         }
 

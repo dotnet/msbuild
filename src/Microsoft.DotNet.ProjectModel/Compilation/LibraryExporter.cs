@@ -122,8 +122,8 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         }
 
         /// <summary>
-        /// Create a LibraryExport from LibraryDescription. 
-        /// 
+        /// Create a LibraryExport from LibraryDescription.
+        ///
         /// When the library is not resolved the LibraryExport is created nevertheless.
         /// </summary>
         private LibraryExport GetExport(LibraryDescription library)
