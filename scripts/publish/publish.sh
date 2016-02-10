@@ -194,10 +194,10 @@ upload_version_badge(){
     local badgefile=$1
     local filename="$OSNAME_$CONFIGURATION_$(basename $badgefile)"
     echo "Uploading the version badge to Latest"
-    upload_file_to_blob_storage_azure_cli "dev/Binaries/Latest/$filename" $badgefile
+    upload_file_to_blob_storage_azure_cli "$CHANNEL/Binaries/Latest/$filename" $badgefile
     
     echo "Uploading the version badge to $DOTNET_CLI_VERSION"
-    upload_file_to_blob_storage_azure_cli "dev/Binaries/$DOTNET_CLI_VERSION/$filename" $badgefile
+    upload_file_to_blob_storage_azure_cli "$CHANNEL/Binaries/$DOTNET_CLI_VERSION/$filename" $badgefile
 
     return 0
 }
