@@ -12,15 +12,18 @@
     "dependencies": {
         "Newtonsoft.Json": "7.0.1",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
-        "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc2-16040",
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc2-16040"
+  },
+  "frameworks": {
+    "net451": { },
+    "dnxcore50": {
+      "imports": "portable-net45+win8",
+      "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",
         "System.Resources.ResourceManager": "4.0.1-rc2-23811",
         "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23811"
-    },
-    "frameworks": {
-        "dnxcore50": {
-            "imports": "portable-net45+win8"
         }
+    }
     },
     "scripts": {
     }

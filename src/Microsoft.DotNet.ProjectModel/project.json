@@ -5,15 +5,9 @@
     },
     "description": "Types to model a .NET Project",
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23811",
-        "System.Reflection.Metadata": "1.2.0-rc2-23811",
-        "System.Runtime.Loader": "4.0.0-rc2-23811",
-        "System.Dynamic.Runtime": "4.0.11-rc2-23811",
-        "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23811",
-        "Microsoft.CSharp": "4.0.1-rc2-23811",
-        "System.Xml.XDocument": "4.0.11-rc2-23811",
-        "NuGet.Packaging": "3.4.0-beta-583",
+    "System.Reflection.Metadata": "1.2.0-rc2-23811",
 
+        "NuGet.Packaging": "3.4.0-beta-583",
         "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc2-15996",
         "Microsoft.Extensions.JsonParser.Sources": {
             "type": "build",
@@ -28,11 +22,23 @@
             "version": "1.0.0-*"
         }
     },
-
     "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.IO": ""
+      }
+    },
         "dnxcore50": {
-            "imports": "portable-net45+win8"
+      "imports": "portable-net45+win8",
+      "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23811",
+        "System.Dynamic.Runtime": "4.0.11-rc2-23811",
+        "System.Runtime.Loader": "4.0.0-rc2-23811",
+        "System.Security.Cryptography.Algorithms": "4.0.0-rc2-23811",
+        "Microsoft.CSharp": "4.0.1-rc2-23811",
+        "System.Xml.XDocument": "4.0.11-rc2-23811"
         }
+    }
     },
     "scripts": {
     }
