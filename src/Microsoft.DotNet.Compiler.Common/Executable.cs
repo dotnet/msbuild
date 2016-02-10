@@ -60,7 +60,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
         private void MakeCompilationOutputRunnableForFullFramework(
             string outputPath)
         {
-            CopyAllDependencies(outputPath, _exporter);
+            CopyAllDependencies(outputPath, _exporter.GetAllExports());
             GenerateBindingRedirects(_exporter);
         }
 
@@ -78,17 +78,14 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
             contentFiles.StructuredCopyTo(outputPath);
         }
 
-        private static void CopyAllDependencies(string outputPath, LibraryExporter exporter)
+        private static void CopyAllDependencies(string outputPath, IEnumerable<LibraryExport> libraryExports)
         {
-            var libraryExports = exporter.GetAllExports();
-
-            libraryExports
-                .SelectMany(e => e.RuntimeAssemblies)
-                .CopyTo(outputPath);
-
-            libraryExports
-                .SelectMany(RuntimeAssets)
-                .StructuredCopyTo(outputPath);
+            foreach (var libraryExport in libraryExports)
+            {
+                libraryExport.RuntimeAssemblies.CopyTo(outputPath);
+                libraryExport.NativeLibraries.CopyTo(outputPath);
+                libraryExport.RuntimeAssets.StructuredCopyTo(outputPath);
+            }
         }
 
         private static void WriteDepsFileAndCopyProjectDependencies(
@@ -104,20 +101,7 @@ namespace Microsoft.Dotnet.Cli.Compiler.Common
                 .Where(e => e.Library.Identity.Type == LibraryType.Project)
                 .ToArray();
 
-            projectExports
-                .SelectMany(e => e.RuntimeAssemblies)
-                .CopyTo(outputPath);
-
-            projectExports
-                .SelectMany(RuntimeAssets)
-                .StructuredCopyTo(outputPath);
-        }
-
-
-        private static IEnumerable<LibraryAsset> RuntimeAssets(LibraryExport export)
-        {
-            return export.NativeLibraries
-                .Union(export.RuntimeAssets);
+            CopyAllDependencies(outputPath, projectExports);
         }
 
         public void GenerateBindingRedirects(LibraryExporter exporter)

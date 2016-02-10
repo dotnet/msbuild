@@ -2,10 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Graph;
+using Microsoft.DotNet.ProjectModel.Resolution;
+using Microsoft.DotNet.ProjectModel.Utilities;
 using NuGet.Frameworks;
 
 namespace Microsoft.Extensions.DependencyModel
@@ -61,7 +64,7 @@ namespace Microsoft.Extensions.DependencyModel
             bool runtime,
             IDictionary<string, Dependency> dependencyLookup)
         {
-            var type = export.Library.Identity.Type.Value.ToLowerInvariant();
+            var type = export.Library.Identity.Type;
 
             var serviceable = (export.Library as PackageDescription)?.Library.IsServiceable ?? false;
             var libraryDependencies = new List<Dependency>();
@@ -82,7 +85,7 @@ namespace Microsoft.Extensions.DependencyModel
             }
 
             string[] assemblies;
-            if (type == "project")
+            if (type == LibraryType.Project)
             {
                 var isExe = ((ProjectDescription)export.Library)
                     .Project
@@ -94,6 +97,10 @@ namespace Microsoft.Extensions.DependencyModel
 
                 assemblies = new[] { export.Library.Identity.Name + (isExe ? ".exe" : ".dll") };
             }
+            else if (type == LibraryType.ReferenceAssembly)
+            {
+                assemblies = ResolveReferenceAssembliesPath(libraryAssets);
+            }
             else
             {
                 assemblies = libraryAssets.Select(libraryAsset => libraryAsset.RelativePath).ToArray();
@@ -102,7 +109,7 @@ namespace Microsoft.Extensions.DependencyModel
             if (runtime)
             {
                 return new RuntimeLibrary(
-                    type,
+                    type.ToString().ToLowerInvariant(),
                     export.Library.Identity.Name,
                     export.Library.Identity.Version.ToString(),
                     export.Library.Hash,
@@ -114,7 +121,7 @@ namespace Microsoft.Extensions.DependencyModel
             else
             {
                 return new CompilationLibrary(
-                    type,
+                    type.ToString().ToLowerInvariant(),
                     export.Library.Identity.Name,
                     export.Library.Identity.Version.ToString(),
                     export.Library.Hash,
@@ -123,6 +130,27 @@ namespace Microsoft.Extensions.DependencyModel
                     serviceable
                    );
             }
+        }
+
+        private static string[] ResolveReferenceAssembliesPath(IEnumerable<LibraryAsset> libraryAssets)
+        {
+            var resolvedPaths = new List<string>();
+            var referenceAssembliesPath =
+                PathUtility.EnsureTrailingSlash(FrameworkReferenceResolver.Default.ReferenceAssembliesPath);
+            foreach (var libraryAsset in libraryAssets)
+            {
+                // If resolved path is under ReferenceAssembliesPath store it as a relative to it
+                // if not, save only assembly name and try to find it somehow later
+                if (libraryAsset.ResolvedPath.StartsWith(referenceAssembliesPath))
+                {
+                    resolvedPaths.Add(libraryAsset.ResolvedPath.Substring(referenceAssembliesPath.Length));
+                }
+                else
+                {
+                    resolvedPaths.Add(Path.GetFileName(libraryAsset.ResolvedPath));
+                }
+            }
+            return resolvedPaths.ToArray();
         }
     }
 }
