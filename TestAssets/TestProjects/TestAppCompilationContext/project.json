@@ -8,7 +8,7 @@
     "dependencies": {
         "TestLibrary": "1.0.0-*",
 
-        "NETStandard.Library": "1.0.0-rc2-23805"
+        "NETStandard.Library": "1.0.0-rc2-23808"
     },
 
     "frameworks": {

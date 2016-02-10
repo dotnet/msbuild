@@ -16,11 +16,22 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-$REPOROOT/scripts/compile/compile-corehost.sh
+if [ ! -z "$CI_BUILD" ]; then
+	# periodically clear out the package cache on the CI server
+	PackageCacheFile="$NUGET_PACKAGES/packageCacheTime.txt"
+	if [ ! -f $PackageCacheFile ]; then
+		date > $PackageCacheFile
+	else
+		#$NUGET_PACKAGES_CACHE_TIME_LIMIT is in hours
+		CacheTimeLimitInSeconds=$(($NUGET_PACKAGES_CACHE_TIME_LIMIT * 3600))
+		CacheExpireTime=$(($(date +%s) - $CacheTimeLimitInSeconds))
 
-$REPOROOT/scripts/compile/compile-stage-1.sh
+		if [ $(date +%s -r $PackageCacheFile) -lt $CacheExpireTime ]; then
+			header "Clearing package cache"
 
-# Issue https://github.com/dotnet/cli/issues/1294
-$REPOROOT/scripts/build/restore-packages.sh
-
-$REPOROOT/scripts/compile/compile-stage-2.sh
+			rm -Rf $NUGET_PACKAGES
+			mkdir -p $NUGET_PACKAGES
+			date > $PackageCacheFile
+		fi
+	fi
+fi

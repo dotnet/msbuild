@@ -16,27 +16,12 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../common/_common.sh"
 
-if [ ! -z "$CI_BUILD" ]; then
-	# periodically clear out the package cache on the CI server
-	PackageCacheFile="$NUGET_PACKAGES/packageCacheTime.txt"
-	if [ ! -f $PackageCacheFile ]; then
-		date > $PackageCacheFile
-	else
-		#$NUGET_PACKAGES_CACHE_TIME_LIMIT is in hours
-		CacheTimeLimitInSeconds=$(($NUGET_PACKAGES_CACHE_TIME_LIMIT * 3600))
-		CacheExpireTime=$(($(date +%s) - $CacheTimeLimitInSeconds))
-
-		if [ $(date +%s -r $PackageCacheFile) -lt $CacheExpireTime ]; then
-			header "Clearing package cache"
-
-			rm -Rf $NUGET_PACKAGES
-			mkdir -p $NUGET_PACKAGES
-			date > $PackageCacheFile
-		fi
-	fi
-fi
+export StartPath=$PATH
+export PATH=$DOTNET_INSTALL_DIR/bin:$PATH
 
 header "Restoring packages"
 
 dotnet restore "$REPOROOT/src" --runtime "$RID" $DISABLE_PARALLEL
 dotnet restore "$REPOROOT/tools" --runtime "$RID" $DISABLE_PARALLEL
+
+export PATH=$StartPath

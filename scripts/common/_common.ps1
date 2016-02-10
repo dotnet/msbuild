@@ -5,6 +5,7 @@
 
 . $PSScriptRoot\_utility.ps1
 
+$Skip_Crossgen = $false
 $Rid = "win7-x64"
 $Tfm = "dnxcore50"
 $RepoRoot = Resolve-Path "$PSScriptRoot\..\.."
@@ -25,8 +26,9 @@ $env:ReleaseSuffix = "beta"
 $env:Channel = "$env:ReleaseSuffix"
 
 # Set reasonable defaults for unset variables
-setEnvIfDefault "DOTNET_INSTALL_DIR"  "$(Convert-Path "$PSScriptRoot\..")\.dotnet_stage0\win7-x64"
+setEnvIfDefault "DOTNET_INSTALL_DIR"  "$RepoRoot\.dotnet_stage0\win7-x64"
 setEnvIfDefault "DOTNET_CLI_VERSION" "0.1.0.0"
+setEnvIfDefault "SKIP_CROSSGEN" "$Skip_Crossgen"
 setPathAndHomeIfDefault "$Stage2Dir"
 setVarIfDefault "Configuration" "Debug"
 

@@ -81,7 +81,6 @@ find . -type f | xargs chmod 644
 $REPOROOT/scripts/build/fix-mode-flags.sh
 
 if [ ! -f "$OUTPUT_DIR/bin/csc.ni.exe" ]; then
-    info "Crossgenning Roslyn compiler ..."
     $REPOROOT/scripts/crossgen/crossgen_roslyn.sh "$OUTPUT_DIR/bin"
 fi
 

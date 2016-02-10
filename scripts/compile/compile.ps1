@@ -18,6 +18,9 @@ try {
 
     _ "$RepoRoot\scripts\compile\compile-stage-1.ps1"
     
+    # Issue https://github.com/dotnet/cli/issues/1294
+    _ "$RepoRoot\scripts\build\restore-packages.ps1"
+    
     _ "$RepoRoot\scripts\compile\compile-stage-2.ps1"
 } finally {
     $env:PATH = $StartPath
