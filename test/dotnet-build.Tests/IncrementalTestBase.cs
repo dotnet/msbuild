@@ -16,15 +16,16 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         protected readonly string MainProject;
         protected readonly string ExpectedOutput;
+        protected readonly TempDirectory Root;
 
         public IncrementalTestBase(string testProjectsRoot, string mainProject, string expectedOutput)
         {
             MainProject = mainProject;
             ExpectedOutput = expectedOutput;
 
-            var root = Temp.CreateDirectory();
+            Root = Temp.CreateDirectory();
 
-            TempProjectRoot = root.CopyDirectory(testProjectsRoot);
+            TempProjectRoot = Root.CopyDirectory(testProjectsRoot);
         }
 
         protected void TouchSourcesOfProject()
