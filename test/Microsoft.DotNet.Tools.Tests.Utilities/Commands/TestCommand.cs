@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public class TestCommand
@@ -40,11 +39,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public virtual CommandResult ExecuteWithCapturedOutput(string args = "")
         {
+            var commandPath = _command;
+            if (!Path.IsPathRooted(_command))
+            {
+                _command = Env.GetCommandPath(_command, ".exe", ".cmd", "") ??
+                           Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, _command, ".exe", ".cmd", "");
+            }
+
             Console.WriteLine($"Executing (Captured Output) - {_command} {args}");
 
-            var commandPath = Env.GetCommandPath(_command, ".exe", ".cmd", "") ??
-                Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, _command, ".exe", ".cmd", "");
-                
             var stdOut = new StreamForwarder();
             var stdErr = new StreamForwarder();
 

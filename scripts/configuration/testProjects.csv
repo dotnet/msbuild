@@ -1,4 +1,5 @@
 EndToEnd
+dotnet.Tests
 dotnet-publish.Tests
 dotnet-compile.Tests
 dotnet-build.Tests
