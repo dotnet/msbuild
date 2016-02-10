@@ -1,0 +1,16 @@
+{
+    "version": "1.0.0-*",
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+
+    "dependencies": {
+        "TestLibraryWithAppDependency":  { "target":"project", "version":"1.0.0-*" },
+
+        "NETStandard.Library": "1.0.0-rc2-23808"
+    },
+
+    "frameworks": {
+        "dnxcore50": { }
+    },
+}

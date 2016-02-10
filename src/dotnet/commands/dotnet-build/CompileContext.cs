@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies, string baseBuildPath)
         {
-            var compilerIO = GetCompileIO(project, _args.ConfigValue, baseBuildPath, _args.OutputValue, dependencies);
+            var compilerIO = GetCompileIO(project, _args.ConfigValue, baseBuildPath, _args.OutputValue, dependencies, project == _rootProject);
 
             // rebuild if empty inputs / outputs
             if (!(compilerIO.Outputs.Any() && compilerIO.Inputs.Any()))
@@ -437,12 +437,7 @@ namespace Microsoft.DotNet.Tools.Build
         // computes all the inputs and outputs that would be used in the compilation of a project
         // ensures that all paths are files
         // ensures no missing inputs
-        public static CompilerIO GetCompileIO(
-            ProjectContext project,
-            string buildConfiguration,
-            string buildBasePath,
-            string outputPath,
-            ProjectDependenciesFacade dependencies)
+        public static CompilerIO GetCompileIO(ProjectContext project, string buildConfiguration, string buildBasePath, string outputPath, ProjectDependenciesFacade dependencies, bool isRootProject)
         {
             var compilerIO = new CompilerIO(new List<string>(), new List<string>());
             var calculator = project.GetOutputPaths(buildConfiguration, buildBasePath, outputPath);
@@ -462,7 +457,7 @@ namespace Microsoft.DotNet.Tools.Build
             AddDependencies(dependencies, compilerIO);
 
             var allOutputPath = new List<string>(calculator.CompilationFiles.All());
-            if (project.ProjectFile.HasRuntimeOutput(buildConfiguration))
+            if (isRootProject && project.ProjectFile.HasRuntimeOutput(buildConfiguration))
             {
                 allOutputPath.AddRange(calculator.RuntimeFiles.All());
             }

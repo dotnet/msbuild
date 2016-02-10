@@ -27,6 +27,8 @@
     "../../TestAssets/TestProjects/TestProjectToProjectDependencies/**/*",
     "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/**/*",
     "../../TestAssets/TestProjects/TestProjectWithResource/**/*",
+    "../../TestAssets/TestProjects/TestLibraryWithAppDependency/**/*",
+    "../../TestAssets/TestProjects/TestAppWithTransitiveAppDependency/**/*",
     "../../TestAssets/TestProjects/global.json"
   ],
 
