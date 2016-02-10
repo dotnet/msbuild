@@ -246,6 +246,6 @@ Write-Host -ForegroundColor Green "Successfully created dotnet bundle - $DotnetB
 _ $RepoRoot\test\Installer\testmsi.ps1 @("$DotnetMSIOutput")
 
 $PublishScript = Join-Path $PSScriptRoot "..\..\scripts\publish\publish.ps1"
-& $PublishScript -file $DotnetMSIOutput
+& $PublishScript -file $DotnetBundleOutput
 
 exit $LastExitCode

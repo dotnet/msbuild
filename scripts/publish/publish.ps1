@@ -165,7 +165,7 @@ if([System.IO.Path]::GetExtension($file).ToLower() -eq ".zip")
 {
     $result = UploadBinaries $file
 }
-elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".msi")
+elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".exe")
 {
     $result = UploadInstallers $file
 }
