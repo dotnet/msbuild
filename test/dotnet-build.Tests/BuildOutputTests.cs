@@ -63,18 +63,18 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         [Theory]
         // global.json exists
-        [InlineData(true, null, null, "TestLibrary/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}/{rid}")]
-        [InlineData(true, "out", null, "TestLibrary/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}", "out")]
-        [InlineData(true, null, "build", "build/TestLibrary/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}/{rid}")]
-        [InlineData(true, "out", "build", "build/TestLibrary/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}", "out")]
+        [InlineData("1", true, null, null, "TestLibrary/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}/{rid}")]
+        [InlineData("2", true, "out", null, "TestLibrary/bin/Debug/{fw}", "TestApp/bin/Debug/{fw}", "out")]
+        [InlineData("3", true, null, "build", "build/TestLibrary/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}/{rid}")]
+        [InlineData("4", true, "out", "build", "build/TestLibrary/bin/Debug/{fw}", "build/TestApp/bin/Debug/{fw}", "out")]
         //no global.json
         //[InlineData(false, null, null, "TestLibrary/bin/debug/{fw}", "TestApp/bin/debug/{fw}", "TestApp/bin/debug/{fw}/{rid}")]
         //[InlineData(false, "out", null, "TestLibrary/bin/debug/{fw}", "TestApp/bin/debug/{fw}", "out")]
         //[InlineData(false, null, "build", "build/TestLibrary/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}/{rid}")]
         //[InlineData(false, "out", "build", "build/TestLibrary/bin/debug/{fw}", "build/TestApp/bin/debug/{fw}", "out")]
-        public void DefaultPaths(bool global, string outputValue, string baseValue, string expectedLibCompile, string expectedAppCompile, string expectedAppRuntime)
+        public void DefaultPaths(string testIdentifer, bool global, string outputValue, string baseValue, string expectedLibCompile, string expectedAppCompile, string expectedAppRuntime)
         {
-            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary", callingMethod: )
+            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary", identifier: testIdentifer)
                                                 .WithLockFiles();
             GetProjectInfo(testInstance.TestRoot);
 
@@ -96,6 +96,10 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         [Fact]
         public void ResourceTest()
         {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary")
+                                                .WithLockFiles();
+            GetProjectInfo(testInstance.TestRoot);
+
             var names = new[]
             {
                 "uk-UA",

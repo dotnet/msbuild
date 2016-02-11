@@ -14,19 +14,18 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
         private const string LibraryProject = "TestLibrary";
         private const string AppProject = "TestApp";
 
-        public IncrementalTestsTransitiveRuntime() : base(
-            Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestAppWithTransitiveAppDependency"),
-            "TestAppWithTransitiveAppDependency",
-            "This string came from the test library!" + Environment.NewLine)
+        public IncrementalTestsTransitiveRuntime()
         {
-            Root.CopyDirectory(Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", LibraryProject));
-            Root.CopyDirectory(Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", AppProject));
-            Root.CopyDirectory(Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", TestLibraryWithAppDependency));
+            MainProject = "TestLibrary2";
+            ExpectedOutput = "This string came from the test library!" + Environment.NewLine;
         }
 
         [Fact]
         public void TestSkipsRebuildWithTransitiveExeDependency()
         {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestAppWithTransitiveAppDependency")
+                                                .WithLockFiles();
+            TestProjectRoot = testInstance.TestRoot;
             var buildResult = BuildProject();
             buildResult.Should().HaveCompiledProject(MainProject);
             buildResult.Should().HaveCompiledProject(TestLibraryWithAppDependency);
@@ -39,6 +38,11 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             buildResult.Should().HaveSkippedProjectCompilation(TestLibraryWithAppDependency);
             buildResult.Should().HaveSkippedProjectCompilation(AppProject);
             buildResult.Should().HaveSkippedProjectCompilation(LibraryProject);
+        }
+
+        protected override string GetProjectDirectory(string projectName)
+        {
+            return Path.Combine(TestProjectRoot, projectName);
         }
     }
 }

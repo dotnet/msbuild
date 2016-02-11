@@ -44,8 +44,10 @@ namespace Microsoft.DotNet.TestFramework
                                  .Where(dir =>
                                  {
                                      dir = dir.ToLower();
-                                     return !dir.EndsWith("\\bin") && !dir.Contains("\\bin\\")
-                                            && !dir.EndsWith("\\obj") && !dir.Contains("\\obj\\");
+                                     return !dir.EndsWith($"{Path.DirectorySeparatorChar}bin") 
+                                            && !dir.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")
+                                            && !dir.EndsWith($"{Path.DirectorySeparatorChar}obj") 
+                                            && !dir.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}");
                                  });
 
             foreach (string sourceDir in sourceDirs)
@@ -58,7 +60,8 @@ namespace Microsoft.DotNet.TestFramework
                                   {
                                       file = file.ToLower();
                                       return !file.EndsWith("project.lock.json")
-                                            && !file.Contains("\\bin\\") && !file.Contains("\\obj\\");
+                                            && !file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}") 
+                                            && !file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}");
                                   });
 
             foreach (string srcFile in sourceFiles)
@@ -84,8 +87,10 @@ namespace Microsoft.DotNet.TestFramework
                                  .Where(dir =>
                                  {
                                      dir = dir.ToLower();
-                                     return dir.EndsWith("\\bin") || dir.Contains("\\bin\\")
-                                            || dir.EndsWith("\\obj") || dir.Contains("\\obj\\");
+                                     return dir.EndsWith($"{Path.DirectorySeparatorChar}bin") 
+                                            || dir.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")
+                                            || dir.EndsWith($"{Path.DirectorySeparatorChar}obj") 
+                                            || dir.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}");
                                  });
 
             foreach (string dirPath in binDirs)
@@ -97,7 +102,8 @@ namespace Microsoft.DotNet.TestFramework
                                  .Where(file =>
                                  {
                                      file = file.ToLower();
-                                     return file.Contains("\\bin\\") || file.Contains("\\obj\\");
+                                     return file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}") 
+                                            || file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}");
                                  });
 
             foreach (string binFile in binFiles)

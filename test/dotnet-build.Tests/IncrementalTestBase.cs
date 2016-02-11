@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             File.SetLastWriteTimeUtc(file, DateTime.UtcNow);
         }
 
-        protected CommandResult BuildProject(bool defaultOutput = false, bool noIncremental = false, bool expectBuildFailure = false)
+        protected CommandResult BuildProject(bool noIncremental = false, bool expectBuildFailure = false)
         {
             var mainProjectFile = GetProjectFile(MainProject);
             return BuildProject(mainProjectFile, noIncremental, expectBuildFailure);
