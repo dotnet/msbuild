@@ -114,20 +114,20 @@ function UploadBinaries($zipFile)
     return 0
 }
 
-function UploadInstallers($msiFile)
+function UploadInstallers($installerFile)
 {
-    $fileName = [System.IO.Path]::GetFileName($msiFile)
-    $msiBlob = "$env:CHANNEL/Installers/$env:DOTNET_CLI_VERSION/$fileName"
+    $fileName = [System.IO.Path]::GetFileName($installerFile)
+    $installerBlob = "$env:CHANNEL/Installers/$env:DOTNET_CLI_VERSION/$fileName"
 
-    if(-Not (UploadFile $msiBlob $msiFile))
+    if(-Not (UploadFile $installerBlob $installerFile))
     {
         return -1
     }
 
     Write-Host "Updating the latest dotnet installer for windows.."
-    $msiBlobLatest = "$env:CHANNEL/Installers/Latest/dotnet-win-x64.latest.msi"
+    $installerBlobLatest = "$env:CHANNEL/Installers/Latest/dotnet-win-x64.latest.exe"
 
-    if(-Not (UploadFile $msiBlobLatest $msiFile))
+    if(-Not (UploadFile $installerBlobLatest $installerFile))
     {
         return -1
     }
@@ -165,7 +165,7 @@ if([System.IO.Path]::GetExtension($file).ToLower() -eq ".zip")
 {
     $result = UploadBinaries $file
 }
-elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".msi")
+elseif([System.IO.Path]::GetExtension($file).ToLower() -eq ".exe")
 {
     $result = UploadInstallers $file
 }

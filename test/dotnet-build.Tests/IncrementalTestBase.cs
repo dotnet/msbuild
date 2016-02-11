@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 
         }
 
+
         public IncrementalTestBase(string testProjectsRoot, string mainProject, string expectedOutput)
         {
             MainProject = mainProject;

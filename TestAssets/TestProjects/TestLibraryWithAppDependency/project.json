@@ -1,0 +1,12 @@
+{
+    "version": "1.0.0-*",
+    "dependencies": {
+        "TestApp":  { "target":"project", "version":"1.0.0-*" },
+
+        "NETStandard.Library": "1.0.0-rc2-23808",
+    },
+
+    "frameworks": {
+        "dnxcore50": { }
+    }
+}

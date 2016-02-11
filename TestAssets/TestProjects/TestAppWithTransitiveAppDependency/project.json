@@ -5,14 +5,12 @@
     },
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23811"
+        "TestLibraryWithAppDependency":  { "target":"project", "version":"1.0.0-*" },
+
+        "NETStandard.Library": "1.0.0-rc2-23808"
     },
 
     "frameworks": {
         "dnxcore50": { }
     },
-
-    "tools": {
-        "dotnet-hello": { "version": "1.0.0", "target": "package" }
-    }
 }
