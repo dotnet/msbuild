@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Runtime.InteropServices;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static Reporter Create(Func<bool, AnsiConsole> getter)
         {
-            return new Reporter(getter(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)));
+            return new Reporter(getter(PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows));
         }
 
         public void WriteLine(string message)

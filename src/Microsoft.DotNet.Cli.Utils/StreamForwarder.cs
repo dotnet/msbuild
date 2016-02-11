@@ -13,7 +13,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private StringBuilder _builder;
         private StringWriter _capture;
-        private Action<string> _write;
         private Action<string> _writeLine;
 
         public string CapturedOutput

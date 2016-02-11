@@ -1,6 +1,5 @@
-using System;
 using System.IO;
-using Microsoft.DotNet.ProjectModel;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -12,7 +11,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <summary>
         /// Gets the path to the version of corehost that was shipped with this command
         /// </summary>
-        public static string LocalHostExePath => Path.Combine(AppContext.BaseDirectory, Constants.HostExecutableName);
+        public static string LocalHostExePath => Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, Constants.HostExecutableName);
 
         public static string HostExePath
         {
@@ -33,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 if (_hostDir == null)
                 {
                     _hostDir = Path.GetDirectoryName(Env.GetCommandPath(
-                        Constants.HostExecutableName, new[] {string.Empty}));
+                        Constants.HostExecutableName, new[] { string.Empty }));
                 }
 
                 return _hostDir;
