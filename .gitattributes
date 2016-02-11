@@ -22,6 +22,7 @@
 *.filters	wintext
 *.cd	wintext
 cibuild.sh text eol=lf
+init-tools.sh text eol=lf
 
 # Sources (Managed)
 *.cs	wintext
