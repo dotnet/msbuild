@@ -108,8 +108,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             }
 
             //set target framework
-            var framework = new NuGetFramework(assemblyInfoOptions.TargetFramework);
-            if (!framework.IsDesktop())
+            if (commonOptions.Defines.Contains("DNXCORE50"))
             {
                 allArgs.Add("--targetprofile:netcore");
             }
