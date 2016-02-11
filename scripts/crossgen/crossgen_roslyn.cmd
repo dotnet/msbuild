@@ -1,4 +1,6 @@
-@echo off
+REM Turn echo off off so we can echo with echo and the echoing
+REM (But seriously, this script has weird hangs and crashes sometimes so we want to know exactly which commands are failing)
+REM @echo off
 
 REM Copyright (c) .NET Foundation and contributors. All rights reserved.
 REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
