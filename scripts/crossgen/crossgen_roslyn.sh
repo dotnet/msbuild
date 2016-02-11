@@ -44,7 +44,7 @@ fi
 READYTORUN=""
 
 # Replace with a robust method for finding the right crossgen.exe
-CROSSGEN_UTIL=$NUGET_PACKAGES/runtime.$RID.Microsoft.NETCore.Runtime.CoreCLR/1.0.1-rc2-23810/tools/crossgen
+CROSSGEN_UTIL=$NUGET_PACKAGES/runtime.$RID.Microsoft.NETCore.Runtime.CoreCLR/1.0.1-rc2-23811/tools/crossgen
 
 cd $BIN_DIR
 

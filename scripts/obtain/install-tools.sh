@@ -22,3 +22,13 @@ source "$DIR/../common/_common.sh"
 # Ensure the latest stage0 is installed
 header "Installing dotnet stage 0"
 $REPOROOT/scripts/obtain/install.sh
+
+# Now patch the runtime in stage 0
+# HACK(anurse): BIG HACK. This is just to dodge the current broken Linux stage0. We'll remove it as soon as we've got a new stage 0
+(
+    export PATH="$DOTNET_INSTALL_DIR/bin:$PATH"
+    cd $REPOROOT/src/Microsoft.DotNet.Runtime
+    dotnet restore
+    dotnet publish -o "$DOTNET_INSTALL_DIR/share/dotnet/cli/runtime/coreclr"
+    cp $DOTNET_INSTALL_DIR/share/dotnet/cli/runtime/coreclr/* $DOTNET_INSTALL_DIR/share/dotnet/cli/bin
+)

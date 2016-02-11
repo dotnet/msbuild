@@ -49,18 +49,18 @@
             "version": "1.0.0-*",
             "type": "build"
         },
-        "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23810",
-        "Microsoft.NETCore.TestHost": "1.0.0-rc2-23810",
-        "NETStandard.Library": "1.0.0-rc2-23810",
-        "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-23810",
-        "System.Diagnostics.TraceSource": "4.0.0-rc2-23810",
-        "System.Linq.Expressions": "4.0.11-rc2-23810",
-        "System.Xml.XDocument": "4.0.11-rc2-23810",
-        "System.Resources.ReaderWriter": "4.0.0-rc2-23810",
-        "System.Net.Sockets": "4.1.0-rc2-23810",
-        "System.IO.Compression.ZipFile": "4.0.1-rc2-23810",
-        "System.Threading.ThreadPool": "4.0.10-rc2-23810",
-        "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23810"
+        "Microsoft.NETCore.ConsoleHost": "1.0.0-rc2-23811",
+        "Microsoft.NETCore.TestHost": "1.0.0-rc2-23811",
+        "NETStandard.Library": "1.0.0-rc2-23811",
+        "System.Diagnostics.TextWriterTraceListener": "4.0.0-rc2-23811",
+        "System.Diagnostics.TraceSource": "4.0.0-rc2-23811",
+        "System.Linq.Expressions": "4.0.11-rc2-23811",
+        "System.Xml.XDocument": "4.0.11-rc2-23811",
+        "System.Resources.ReaderWriter": "4.0.0-rc2-23811",
+        "System.Net.Sockets": "4.1.0-rc2-23811",
+        "System.IO.Compression.ZipFile": "4.0.1-rc2-23811",
+        "System.Threading.ThreadPool": "4.0.10-rc2-23811",
+        "System.Runtime.Serialization.Primitives": "4.1.0-rc2-23811"
     },
     "frameworks": {
         "dnxcore50": {

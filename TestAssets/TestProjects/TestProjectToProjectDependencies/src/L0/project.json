@@ -8,7 +8,7 @@
         "L11": "1.0.0-*",
         "L12": "1.0.0-*",
         
-        "NETStandard.Library": "1.0.0-rc2-23810"
+        "NETStandard.Library": "1.0.0-rc2-23811"
     },
 
     "frameworks": {

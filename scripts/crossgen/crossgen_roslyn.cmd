@@ -1,4 +1,6 @@
-@echo off
+REM Turn echo off off so we can echo with echo and the echoing
+REM (But seriously, this script has weird hangs and crashes sometimes so we want to know exactly which commands are failing)
+REM @echo off
 
 REM Copyright (c) .NET Foundation and contributors. All rights reserved.
 REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
@@ -13,7 +15,7 @@ set BIN_DIR=%CD%\bin
 popd
 
 REM Replace with a robust method for finding the right crossgen.exe
-set CROSSGEN_UTIL=%NUGET_PACKAGES%\runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\1.0.1-rc2-23810\tools\crossgen.exe
+set CROSSGEN_UTIL=%NUGET_PACKAGES%\runtime.win7-x64.Microsoft.NETCore.Runtime.CoreCLR\1.0.1-rc2-23811\tools\crossgen.exe
 
 REM Crossgen currently requires itself to be next to mscorlib
 copy %CROSSGEN_UTIL% /Y %BIN_DIR% > nul
