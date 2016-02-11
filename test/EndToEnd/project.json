@@ -5,7 +5,7 @@
   },
 
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23810",
+    "NETStandard.Library": "1.0.0-rc2-23811",
 
     "Microsoft.DotNet.ProjectModel": { "target": "project" },
     "Microsoft.DotNet.Cli.Utils": { "target": "project" },
