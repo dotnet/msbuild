@@ -93,8 +93,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateFSharp(assemblyInfoOptions));
             allArgs.Add($"{assemblyInfo}");
 
+            bool targetNetCore = commonOptions.Defines.Contains("DNXCORE50");
+
             //HACK fsc raise error FS0208 if target exe doesnt have extension .exe
-            bool hackFS0208 = commonOptions.EmitEntryPoint == true;
+            bool hackFS0208 = targetNetCore && commonOptions.EmitEntryPoint == true;
             string originalOutputName = outputName;
 
             if (outputName != null)
@@ -108,7 +110,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             }
 
             //set target framework
-            if (commonOptions.Defines.Contains("DNXCORE50"))
+            if (targetNetCore)
             {
                 allArgs.Add("--targetprofile:netcore");
             }
@@ -126,6 +128,8 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 .ForwardStdOut()
                 .Execute();
 
+            bool successFsc = result.ExitCode == 0;
+
             if (hackFS0208 && File.Exists(outputName))
             {
                 if (File.Exists(originalOutputName))
@@ -135,7 +139,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
 
             //HACK dotnet build require a pdb (crash without), fsc atm cant generate a portable pdb, so an empty pdb is created
             string pdbPath = Path.ChangeExtension(outputName, ".pdb");
-            if (!File.Exists(pdbPath))
+            if (successFsc && !File.Exists(pdbPath))
             {
                 File.WriteAllBytes(pdbPath, Array.Empty<byte>());
             }
