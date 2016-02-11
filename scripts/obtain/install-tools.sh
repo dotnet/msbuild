@@ -29,6 +29,6 @@ $REPOROOT/scripts/obtain/install.sh
     export PATH="$DOTNET_INSTALL_DIR/bin:$PATH"
     cd $REPOROOT/src/Microsoft.DotNet.Runtime
     dotnet restore
-    dotnet publish -o "$DOTNET_INSTALL_DIR/share/dotnet/cli/runtime"
+    dotnet publish -o "$DOTNET_INSTALL_DIR/share/dotnet/cli/runtime/coreclr"
     cp $DOTNET_INSTALL_DIR/share/dotnet/cli/runtime/coreclr/* $DOTNET_INSTALL_DIR/share/dotnet/cli/bin
 )
