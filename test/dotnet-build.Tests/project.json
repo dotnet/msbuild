@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
   
   "dependencies": {
-    "NETStandard.Library": "1.0.0-rc2-23808",      
+    "NETStandard.Library": "1.0.0-rc2-23811",      
 
     "Microsoft.DotNet.Tools.Tests.Utilities": { "target": "project" },
     "Microsoft.DotNet.Cli.Utils": {
@@ -19,16 +19,6 @@
       "imports": "portable-net45+win8"
     }
   },
-
-  "content": [
-    "../../TestAssets/TestProjects/TestApp/**/*",
-    "../../TestAssets/TestProjects/TestLibrary/**/*",
-    "../../TestAssets/TestProjects/TestSimpleIncrementalApp/*",
-    "../../TestAssets/TestProjects/TestProjectToProjectDependencies/**/*",
-    "../../TestAssets/TestProjects/TestProjectWithCultureSpecificResource/**/*",
-    "../../TestAssets/TestProjects/TestProjectWithResource/**/*",
-    "../../TestAssets/TestProjects/global.json"
-  ],
 
   "testRunner": "xunit"
 }

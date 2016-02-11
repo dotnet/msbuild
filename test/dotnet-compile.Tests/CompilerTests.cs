@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             root.CopyFile(Path.Combine(_testProjectsRoot, "global.json"));
 
             var testLibDir = root.CreateDirectory("TestLibrary");
-            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestLibrary");
+            var sourceTestLibDir = Path.Combine(_testProjectsRoot, "TestAppWithLibrary", "TestLibrary");
 
             CopyProjectToTempDir(sourceTestLibDir, testLibDir);
 

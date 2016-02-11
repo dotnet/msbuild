@@ -15,33 +15,6 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
     public class PublishTests : TestBase
     {
         private readonly string _testProjectsRoot;
-        private string _repoRoot;
-
-        private string RepoRoot
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(_repoRoot))
-                {
-                    return _repoRoot;
-                }
-
-                string directory = AppContext.BaseDirectory;
-
-                while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
-                {
-                    directory = Directory.GetParent(directory).FullName;
-                }
-
-                if (directory == null)
-                {
-                    throw new Exception("Cannot find the git repository root");
-                }
-
-                _repoRoot = directory;
-                return _repoRoot;
-            }
-        }
 
         public PublishTests()
         {
@@ -69,10 +42,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [MemberData("PublishOptions")]
         public void PublishOptionsTest(string testIdentifier, string framework, string runtime, string config, string outputDir)
         {
-            TestScenario scenario = TestScenario.Create(Path.Combine(_testProjectsRoot, "TestAppWithLibrary"), skipRestore: true);
-            TestInstance instance = scenario.CreateTestInstance(identifier: testIdentifier)
-                                   .WithLockFiles()
-                                   .WithBinaries();
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary", identifier: testIdentifier)
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
 
             string testRoot = Path.Combine(instance.TestRoot, "TestApp", "project.json");
 
@@ -97,10 +69,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [Fact]
         public void ProjectWithContentsTest()
         {
-            TestScenario scenario = TestScenario.Create(Path.Combine(_testProjectsRoot, "TestAppWithContents"), skipRestore: true);
-            TestInstance instance = scenario.CreateTestInstance()
-                                   .WithLockFiles()
-                                   .WithBinaries();
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithContents")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
 
             var testProject = Path.Combine(instance.TestRoot, "project.json");
             var publishCommand = new PublishCommand(testProject);
@@ -112,8 +83,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [Fact]
         public void FailWhenNoRestoreTest()
         {
-            TestScenario scenario = TestScenario.Create(Path.Combine(_testProjectsRoot, "TestAppWithLibrary"), skipRestore: true);
-            TestInstance instance = scenario.CreateTestInstance();
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary");
 
             string testProject = Path.Combine(instance.TestRoot, "TestApp", "project.json");
             var publishCommand = new PublishCommand(testProject);
@@ -123,10 +93,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [Fact]
         public void LibraryPublishTest()
         {
-            TestScenario scenario = TestScenario.Create(Path.Combine(_testProjectsRoot, "TestAppWithLibrary", "TestLibrary"), skipRestore: true);
-            TestInstance instance = scenario.CreateTestInstance()
-                                   .WithLockFiles()
-                                   .WithBinaries();
+            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppWithLibrary", "TestLibrary"))
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
 
             var testProject = Path.Combine(instance.TestRoot, "project.json");
             var publishCommand = new PublishCommand(testProject);
@@ -142,10 +111,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [WindowsOnlyFact]
         public void TestLibraryBindingRedirectGeneration()
         {
-            TestScenario scenario = TestScenario.Create(Path.Combine(_testProjectsRoot, "TestBindingRedirectGeneration"), skipRestore: true);
-            TestInstance instance = scenario.CreateTestInstance()
-                                   .WithLockFiles()
-                                   .WithBinaries();
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestBindingRedirectGeneration")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
 
             var lesserTestLibDir = Path.Combine(instance.TestRoot, "TestLibraryLesser");
 
@@ -177,10 +145,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [Fact]
         public void RefsPublishTest()
         {
-            TestScenario scenario = TestScenario.Create(Path.Combine(_testProjectsRoot, "TestAppCompilationContext"), skipRestore: true);
-            TestInstance instance = scenario.CreateTestInstance()
-                                   .WithLockFiles()
-                                   .WithBinaries();
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppCompilationContext")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
 
             var testProject = Path.Combine(instance.TestRoot, "TestApp", "project.json");
             var publishCommand = new PublishCommand(testProject);
@@ -200,9 +167,8 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [Fact]
         public void CompilationFailedTest()
         {
-            TestScenario scenario = TestScenario.Create(Path.Combine(_testProjectsRoot, "CompileFail"), skipRestore: true, skipBuild: true);
-            TestInstance instance = scenario.CreateTestInstance()
-                                   .WithLockFiles();
+            TestInstance instance = TestAssetsManager.CreateTestInstance("CompileFail")
+                                                     .WithLockFiles();
 
             var testProject = Path.Combine(instance.TestRoot, "project.json");
             var publishCommand = new PublishCommand(testProject);
@@ -214,10 +180,9 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [ActiveIssue(982)]
         public void PublishScriptsRun()
         {
-            TestScenario scenario = TestScenario.Create(Path.Combine(_testProjectsRoot, "TestAppWithLibrary"), skipRestore: true);
-            TestInstance instance = scenario.CreateTestInstance()
-                                   .WithLockFiles()
-                                   .WithBinaries();
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary")
+                                                     .WithLockFiles()
+                                                     .WithBuildArtifacts();
 
             var testProject = Path.Combine(instance.TestRoot, "TestApp", "project.json");
 

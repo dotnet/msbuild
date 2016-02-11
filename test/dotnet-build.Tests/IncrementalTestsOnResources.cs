@@ -10,16 +10,20 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
 {
     public class IncrementalTestsOnResources : IncrementalTestBase
     {
-        public IncrementalTestsOnResources() : base(
-            Path.Combine(AppContext.BaseDirectory, "TestAssets", "TestProjects", "TestProjectWithResource"),
-            "TestProjectWithResource",
-            "Hello World!" + Environment.NewLine)
+        public IncrementalTestsOnResources()
         {
+            MainProject = "TestProjectWithResource";
+            ExpectedOutput = "Hello World!" + Environment.NewLine;
         }
 
         [Fact]
         public void TestRebuildSkipsCompilationOnNonCultureResource()
         {
+            var testInstance = TestAssetsManager.CreateTestInstance("TestProjectWithResource")
+                                                .WithLockFiles();
+
+            TestProjectRoot = testInstance.TestRoot;
+
             var buildResult = BuildProject();
             buildResult.Should().HaveCompiledProject(MainProject);
 
