@@ -41,12 +41,15 @@ if not %errorlevel% EQU 0 goto fail
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% Microsoft.CodeAnalysis.CSharp.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
+echo Crossgenning Microsoft.CodeAnalysis.VisualBasic
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% Microsoft.CodeAnalysis.VisualBasic.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
+echo Crossgenning csc
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% csc.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 
+echo Crossgenning vbc
 crossgen /nologo %READYTORUN% /Platform_Assemblies_Paths %BIN_DIR% vbc.dll >nul 2>nul
 if not %errorlevel% EQU 0 goto fail
 

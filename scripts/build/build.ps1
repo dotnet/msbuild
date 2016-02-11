@@ -30,9 +30,6 @@ else {
     _ "$RepoRoot\scripts\obtain\install-tools.ps1"
 }
 
-header "Cleaning out .ni's from Stage0"
-rm "$RepoRoot\.dotnet_stage0\**\*.ni.*"
-
 _ "$RepoRoot\scripts\build\restore-packages.ps1"
 
 header "Compiling"

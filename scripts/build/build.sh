@@ -44,9 +44,6 @@ else
    $REPOROOT/scripts/obtain/install-tools.sh
 fi
 
-header "Cleaning out .ni's from Stage0"
-find ".dotnet_stage0" -name '*.ni.*' -delete
-
 $REPOROOT/scripts/build/restore-packages.sh
 
 header "Compiling"
