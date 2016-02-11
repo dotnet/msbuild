@@ -1984,7 +1984,7 @@ namespace Microsoft.Build.CommandLine
 #if !STANDALONEBUILD
             else
             {
-                StartLocalNodeOldOM(nodeNumber);
+                StartLocalNodeOldOM(nodeModeNumber);
             }
 #endif
         }
