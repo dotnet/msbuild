@@ -1,6 +1,7 @@
 EndToEnd
 dotnet-publish.Tests
 dotnet-compile.Tests
+dotnet-compile.UnitTests
 dotnet-build.Tests
 Microsoft.DotNet.Cli.Utils.Tests
 Microsoft.DotNet.Compiler.Common.Tests

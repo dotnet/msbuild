@@ -11,7 +11,7 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public class Command
+    public class Command : ICommand
     {
         private readonly Process _process;
         private readonly StreamForwarder _stdOut;
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             _stdOut = new StreamForwarder();
             _stdErr = new StreamForwarder();
-        
+
             _process = new Process
             {
                 StartInfo = psi
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return command;
         }
-        
+
         public CommandResult Execute()
         {
 
@@ -115,33 +115,33 @@ namespace Microsoft.DotNet.Cli.Utils
                 _stdErr.CapturedOutput);
         }
 
-        public Command WorkingDirectory(string projectDirectory)
+        public ICommand WorkingDirectory(string projectDirectory)
         {
             _process.StartInfo.WorkingDirectory = projectDirectory;
             return this;
         }
 
-        public Command EnvironmentVariable(string name, string value)
+        public ICommand EnvironmentVariable(string name, string value)
         {
             _process.StartInfo.Environment[name] = value;
             return this;
         }
 
-        public Command CaptureStdOut()
+        public ICommand CaptureStdOut()
         {
             ThrowIfRunning();
             _stdOut.Capture();
             return this;
         }
 
-        public Command CaptureStdErr()
+        public ICommand CaptureStdErr()
         {
             ThrowIfRunning();
             _stdErr.Capture();
             return this;
         }
 
-        public Command ForwardStdOut(TextWriter to = null, bool onlyIfVerbose = false)
+        public ICommand ForwardStdOut(TextWriter to = null, bool onlyIfVerbose = false)
         {
             ThrowIfRunning();
             if (!onlyIfVerbose || CommandContext.IsVerbose())
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return this;
         }
 
-        public Command ForwardStdErr(TextWriter to = null, bool onlyIfVerbose = false)
+        public ICommand ForwardStdErr(TextWriter to = null, bool onlyIfVerbose = false)
         {
             ThrowIfRunning();
             if (!onlyIfVerbose || CommandContext.IsVerbose())
@@ -175,14 +175,14 @@ namespace Microsoft.DotNet.Cli.Utils
             return this;
         }
 
-        public Command OnOutputLine(Action<string> handler)
+        public ICommand OnOutputLine(Action<string> handler)
         {
             ThrowIfRunning();
             _stdOut.ForwardTo(writeLine: handler);
             return this;
         }
 
-        public Command OnErrorLine(Action<string> handler)
+        public ICommand OnErrorLine(Action<string> handler)
         {
             ThrowIfRunning();
             _stdErr.ForwardTo(writeLine: handler);

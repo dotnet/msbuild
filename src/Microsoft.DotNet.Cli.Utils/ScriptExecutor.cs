@@ -10,12 +10,12 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public static class ScriptExecutor
     {
-        public static Command CreateCommandForScript(Project project, string scriptCommandLine, IDictionary<string, string> variables)
+        public static ICommand CreateCommandForScript(Project project, string scriptCommandLine, IDictionary<string, string> variables)
         {
             return CreateCommandForScript(project, scriptCommandLine, WrapVariableDictionary(variables));
         }
 
-        public static Command CreateCommandForScript(Project project, string scriptCommandLine, Func<string, string> getVariable)
+        public static ICommand CreateCommandForScript(Project project, string scriptCommandLine, Func<string, string> getVariable)
         {
             // Preserve quotation marks around arguments since command is about to be passed to a shell. May need
             // the quotes to ensure the shell groups arguments correctly.
