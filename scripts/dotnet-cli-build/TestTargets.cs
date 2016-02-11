@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.Cli.Build
             "dotnet-build.Tests",
             "Microsoft.DotNet.Cli.Utils.Tests",
             "Microsoft.DotNet.Compiler.Common.Tests",
+            "Microsoft.Extensions.DependencyModel.Tests",
             "ArgumentForwardingTests"
         };
 
