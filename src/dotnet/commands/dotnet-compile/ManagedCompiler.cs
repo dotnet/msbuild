@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.DotNet.ProjectModel.Utilities;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Microsoft.DotNet.Tools.Compiler
@@ -137,13 +138,15 @@ namespace Microsoft.DotNet.Tools.Compiler
                 { "compile:TargetFramework", context.TargetFramework.DotNetFrameworkName },
                 { "compile:Configuration", args.ConfigValue },
                 { "compile:OutputFile", outputName },
-                { "compile:OutputDir", outputPath },
+                { "compile:OutputDir", outputPath.TrimEnd('\\', '/') },
                 { "compile:ResponseFile", rsp }
             };
 
             if (!string.IsNullOrEmpty(context.RuntimeIdentifier))
             {
-                contextVariables.Add("compile:RuntimeOutputDir", outputPaths.RuntimeOutputPath);
+                contextVariables.Add(
+                    "compile:RuntimeOutputDir",
+                    outputPaths.RuntimeOutputPath.TrimEnd('\\', '/'));
             }
 
             _scriptRunner.RunScripts(context, ScriptNames.PreCompile, contextVariables);

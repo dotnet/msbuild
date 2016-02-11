@@ -11,6 +11,7 @@ using Xunit;
 using Microsoft.DotNet.Cli.Utils;
 using FluentAssertions;
 using System.Linq;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Tools.Compiler.Tests
 {
@@ -68,10 +69,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void It_passes_a_RuntimeOutputDir_variable_to_the_pre_compile_scripts_if_rid_is_set_in_the_ProjectContext()
         {
-            var fixture = ScriptVariablesFixture.GetFixtureWithRids(new[] { "win7-x64" });
+            var rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+            var fixture = ScriptVariablesFixture.GetFixtureWithRids(rid);
             fixture.PreCompileScriptVariables.Should().ContainKey("compile:RuntimeOutputDir");
-            fixture.PreCompileScriptVariables["compile:RuntimeOutputDir"].Should().Be(
-                ScriptVariablesFixture.RuntimeOutputDir);
+            fixture.PreCompileScriptVariables["compile:RuntimeOutputDir"].Should().Be(fixture.RuntimeOutputDir);
         }
 
         [Fact]
@@ -126,10 +127,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         [Fact]
         public void It_passes_a_RuntimeOutputDir_variable_to_the_post_compile_scripts_if_rid_is_set_in_the_ProjectContext()
         {
-            var fixture = ScriptVariablesFixture.GetFixtureWithRids(new [] { "win7-x64" });
+            var rid = PlatformServices.Default.Runtime.GetLegacyRestoreRuntimeIdentifier();
+            var fixture = ScriptVariablesFixture.GetFixtureWithRids(rid);
             fixture.PostCompileScriptVariables.Should().ContainKey("compile:RuntimeOutputDir");
-            fixture.PostCompileScriptVariables["compile:RuntimeOutputDir"].Should().Be(
-                ScriptVariablesFixture.RuntimeOutputDir);
+            fixture.PostCompileScriptVariables["compile:RuntimeOutputDir"].Should().Be(fixture.RuntimeOutputDir);
         }
     }
 
@@ -149,7 +150,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
             ConfigValue,
             "dnxcore50");
 
-        public static string RuntimeOutputDir = Path.Combine(OutputPath, "win7-x64");
+        public string RuntimeOutputDir { get; private set; }
 
         public static string OutputFile = Path.Combine(OutputPath, "TestApp.dll");
 
@@ -163,12 +164,11 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
         public Dictionary<string, string> PreCompileScriptVariables { get; private set; }
         public Dictionary<string, string> PostCompileScriptVariables { get; private set; }
 
-        public ScriptVariablesFixture() : this(Enumerable.Empty<string>())
+        public ScriptVariablesFixture() : this(string.Empty)
         {
-
         }
 
-        private ScriptVariablesFixture(IEnumerable<string> rids)
+        private ScriptVariablesFixture(string rid)
         {
             var projectJson = Path.Combine(TestAssetPath, "project.json");
             var command = new Mock<ICommand>();
@@ -209,13 +209,21 @@ namespace Microsoft.DotNet.Tools.Compiler.Tests
 
             var managedCompiler = new ManagedCompiler(_scriptRunner.Object, commandFactory.Object);
 
+            var rids = new List<string>();
+            if (!string.IsNullOrEmpty(rid))
+            {
+                rids.Add(rid);
+            }
+
             var context = ProjectContext.Create(projectJson, new NuGetFramework("dnxcore", new Version(5, 0)), rids);
             managedCompiler.Compile(context, _args);
+
+            RuntimeOutputDir = Path.Combine(OutputPath, rid);
         }
 
-        public static ScriptVariablesFixture GetFixtureWithRids(IEnumerable<string> rids)
+        public static ScriptVariablesFixture GetFixtureWithRids(string rid)
         {
-            return new ScriptVariablesFixture(rids);
+            return new ScriptVariablesFixture(rid);
         }
     }
 }
