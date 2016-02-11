@@ -12,13 +12,13 @@ namespace Microsoft.DotNet.TestFramework
     public class TestInstance
     {
         private string _testDestination;
-        private TestScenario _testScenario;
+        private string _testAssetRoot;
 
-        internal TestInstance(TestScenario testScenario, string testDestination)
+        internal TestInstance(string testAssetRoot, string testDestination)
         {
-            if (testScenario == null)
+            if (string.IsNullOrEmpty(testAssetRoot))
             {
-                throw new ArgumentNullException("testScenario");
+                throw new ArgumentException("testScenario");
             }
 
             if (string.IsNullOrEmpty(testDestination))
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.TestFramework
                 throw new ArgumentException("testDestination");
             }
 
-            _testScenario = testScenario;
+            _testAssetRoot = testAssetRoot;
             _testDestination = testDestination;
 
             if (Directory.Exists(testDestination))
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.TestFramework
 
         private void CopySource()
         {
-            var sourceDirs = Directory.GetDirectories(_testScenario.SourceRoot, "*", SearchOption.AllDirectories)
+            var sourceDirs = Directory.GetDirectories(_testAssetRoot, "*", SearchOption.AllDirectories)
                                  .Where(dir =>
                                  {
                                      dir = dir.ToLower();
@@ -50,10 +50,10 @@ namespace Microsoft.DotNet.TestFramework
 
             foreach (string sourceDir in sourceDirs)
             {
-                Directory.CreateDirectory(sourceDir.Replace(_testScenario.SourceRoot, _testDestination));
+                Directory.CreateDirectory(sourceDir.Replace(_testAssetRoot, _testDestination));
             }
 
-            var sourceFiles = Directory.GetFiles(_testScenario.SourceRoot, "*.*", SearchOption.AllDirectories)
+            var sourceFiles = Directory.GetFiles(_testAssetRoot, "*.*", SearchOption.AllDirectories)
                                   .Where(file =>
                                   {
                                       file = file.ToLower();
@@ -63,24 +63,24 @@ namespace Microsoft.DotNet.TestFramework
 
             foreach (string srcFile in sourceFiles)
             {
-                File.Copy(srcFile, srcFile.Replace(_testScenario.SourceRoot, _testDestination), true);
+                File.Copy(srcFile, srcFile.Replace(_testAssetRoot, _testDestination), true);
             }
         }
 
         public TestInstance WithLockFiles()
         {
-            foreach (string lockFile in Directory.GetFiles(_testScenario.SourceRoot, "project.lock.json", SearchOption.AllDirectories))
+            foreach (string lockFile in Directory.GetFiles(_testAssetRoot, "project.lock.json", SearchOption.AllDirectories))
             {
-                string destinationLockFile = lockFile.Replace(_testScenario.SourceRoot, _testDestination);
+                string destinationLockFile = lockFile.Replace(_testAssetRoot, _testDestination);
                 File.Copy(lockFile, destinationLockFile, true);
             }
 
             return this;
         }
 
-        public TestInstance WithBinaries()
+        public TestInstance WithBuildArtifacts()
         {
-            var binDirs = Directory.GetDirectories(_testScenario.SourceRoot, "*", SearchOption.AllDirectories)
+            var binDirs = Directory.GetDirectories(_testAssetRoot, "*", SearchOption.AllDirectories)
                                  .Where(dir =>
                                  {
                                      dir = dir.ToLower();
@@ -90,10 +90,10 @@ namespace Microsoft.DotNet.TestFramework
 
             foreach (string dirPath in binDirs)
             {
-                Directory.CreateDirectory(dirPath.Replace(_testScenario.SourceRoot, _testDestination));
+                Directory.CreateDirectory(dirPath.Replace(_testAssetRoot, _testDestination));
             }
 
-            var binFiles = Directory.GetFiles(_testScenario.SourceRoot, "*.*", SearchOption.AllDirectories)
+            var binFiles = Directory.GetFiles(_testAssetRoot, "*.*", SearchOption.AllDirectories)
                                  .Where(file =>
                                  {
                                      file = file.ToLower();
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.TestFramework
 
             foreach (string binFile in binFiles)
             {
-                File.Copy(binFile, binFile.Replace(_testScenario.SourceRoot, _testDestination), true);
+                File.Copy(binFile, binFile.Replace(_testAssetRoot, _testDestination), true);
             }
 
             return this;
