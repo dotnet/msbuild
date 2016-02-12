@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 if (to == null)
                 {
                     _stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
-                    _process.StartInfo.Environment[CommandContext.Variables.AnsiPassThru] = ansiPassThrough.ToString();
+                    EnvironmentVariable(CommandContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
                 }
                 else
                 {
@@ -186,7 +186,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 if (to == null)
                 {
                     _stdErr.ForwardTo(writeLine: Reporter.Error.WriteLine);
-                    _process.StartInfo.Environment[CommandContext.Variables.AnsiPassThru] = ansiPassThrough.ToString();
+                    EnvironmentVariable(CommandContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
                 }
                 else
                 {
