@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.DotNet.Cli.Compiler.Common;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ProjectModel;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Tools.Compiler.Fsc
 {
@@ -79,6 +80,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 return returnCode;
             }
 
+            outputName = outputName.Trim('"');
+            tempOutDir = tempOutDir.Trim('"');
+
             var translated = TranslateCommonOptions(commonOptions, outputName);
 
             var allArgs = new List<string>(translated);
@@ -89,8 +93,10 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
             File.WriteAllText(assemblyInfo, AssemblyInfoFileGenerator.GenerateFSharp(assemblyInfoOptions));
             allArgs.Add($"{assemblyInfo}");
 
+            bool targetNetCore = commonOptions.Defines.Contains("DNXCORE50");
+
             //HACK fsc raise error FS0208 if target exe doesnt have extension .exe
-            bool hackFS0208 = commonOptions.EmitEntryPoint == true;
+            bool hackFS0208 = targetNetCore && commonOptions.EmitEntryPoint == true;
             string originalOutputName = outputName;
 
             if (outputName != null)
@@ -100,26 +106,18 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                     outputName = Path.ChangeExtension(outputName, ".exe");
                 }
 
-                allArgs.Add($"--out:");
-                allArgs.Add($"{outputName}");
+                allArgs.Add($"--out:{outputName}");
             }
 
-            foreach (var reference in references)
+            //set target framework
+            if (targetNetCore)
             {
-                allArgs.Add("-r");
-                allArgs.Add($"{reference}");
+                allArgs.Add("--targetprofile:netcore");
             }
 
-            foreach (var resource in resources)
-            {
-                allArgs.Add("--resource");
-                allArgs.Add($"{resource}");
-            }
-
-            foreach (var source in sources)
-            {
-                allArgs.Add($"{source}");
-            }
+            allArgs.AddRange(references.Select(r => $"-r:{r.Trim('"')}"));
+            allArgs.AddRange(resources.Select(resource => $"--resource:{resource.Trim('"')}"));
+            allArgs.AddRange(sources.Select(s => $"{s.Trim('"')}"));
 
             var rsp = Path.Combine(tempOutDir, "dotnet-compile-fsc.rsp");
             File.WriteAllLines(rsp, allArgs, Encoding.UTF8);
@@ -130,11 +128,20 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 .ForwardStdOut()
                 .Execute();
 
+            bool successFsc = result.ExitCode == 0;
+
             if (hackFS0208 && File.Exists(outputName))
             {
                 if (File.Exists(originalOutputName))
                     File.Delete(originalOutputName);
                 File.Move(outputName, originalOutputName);
+            }
+
+            //HACK dotnet build require a pdb (crash without), fsc atm cant generate a portable pdb, so an empty pdb is created
+            string pdbPath = Path.ChangeExtension(outputName, ".pdb");
+            if (successFsc && !File.Exists(pdbPath))
+            {
+                File.WriteAllBytes(pdbPath, Array.Empty<byte>());
             }
 
             return result.ExitCode;
@@ -167,9 +174,27 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 commonArgs.AddRange(options.Defines.Select(def => $"-d:{def}"));
             }
 
+            if (options.SuppressWarnings != null)
+            {
+            }
+
+            // Additional arguments are added verbatim
+            if (options.AdditionalArguments != null)
+            {
+                commonArgs.AddRange(options.AdditionalArguments);
+            }
+
+            if (options.LanguageVersion != null)
+            {
+            }
+
             if (options.Platform != null)
             {
                 commonArgs.Add($"--platform:{options.Platform}");
+            }
+
+            if (options.AllowUnsafe == true)
+            {
             }
 
             if (options.WarningsAsErrors == true)
@@ -182,7 +207,19 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 commonArgs.Add("--optimize");
             }
 
-            if(options.GenerateXmlDocumentation == true)
+            if (options.KeyFile != null)
+            {
+            }
+
+            if (options.DelaySign == true)
+            {
+            }
+
+            if (options.PublicSign == true)
+            {
+            }
+
+            if (options.GenerateXmlDocumentation == true)
             {
                 commonArgs.Add($"--doc:{Path.ChangeExtension(outputName, "xml")}");
             }
@@ -199,7 +236,7 @@ namespace Microsoft.DotNet.Tools.Compiler.Fsc
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     var win32manifestPath = Path.Combine(AppContext.BaseDirectory, "default.win32manifest");
-                    commonArgs.Add($"--win32manifest:\"{win32manifestPath}\"");
+                    commonArgs.Add($"--win32manifest:{win32manifestPath}");
                 }
             }
 
