@@ -17,11 +17,29 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/../../common/_common.sh"
 
-mkdir -p "$TEST_PACKAGE_DIR"
+buildTestPackages() {
+	mkdir -p "$TEST_PACKAGE_DIR"
 
-PROJECTS=$(loadTestPackageList)
+	PROJECTS=$(loadTestPackageList)
 
-for project in $PROJECTS
-do
-    dotnet pack "$REPOROOT/TestAssets/TestPackages/$project" --output "$TEST_PACKAGE_DIR"
-done
+	for project in $PROJECTS
+	do
+		dotnet pack "$REPOROOT/TestAssets/TestPackages/$project" --output "$TEST_PACKAGE_DIR"
+	done
+}
+
+buildTestProjects() {
+	testProjectsRoot="$REPOROOT/TestAssets/TestProjects"
+    exclusionList=( "$testProjectsRoot/CompileFail/project.json" )
+    testProjectsList=( $(find $testProjectsRoot -name "project.json") )
+
+	for project in "${testProjectsList[@]}"
+	do
+		if [[ "${exclusionList[@]}" != "${project}" ]]; then
+			dotnet build "$project" --framework dnxcore50
+		fi
+	done
+}
+
+buildTestPackages
+buildTestProjects

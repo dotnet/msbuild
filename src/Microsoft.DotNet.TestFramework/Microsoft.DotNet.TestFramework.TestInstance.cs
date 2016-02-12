@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.TestFramework
 {
@@ -66,7 +66,9 @@ namespace Microsoft.DotNet.TestFramework
 
             foreach (string srcFile in sourceFiles)
             {
-                File.Copy(srcFile, srcFile.Replace(_testAssetRoot, _testDestination), true);
+                string destFile = srcFile.Replace(_testAssetRoot, _testDestination);
+                File.Copy(srcFile, destFile, true);
+                FixTimeStamp(srcFile, destFile);
             }
         }
 
@@ -76,6 +78,7 @@ namespace Microsoft.DotNet.TestFramework
             {
                 string destinationLockFile = lockFile.Replace(_testAssetRoot, _testDestination);
                 File.Copy(lockFile, destinationLockFile, true);
+                FixTimeStamp(lockFile, destinationLockFile);
             }
 
             return this;
@@ -108,7 +111,9 @@ namespace Microsoft.DotNet.TestFramework
 
             foreach (string binFile in binFiles)
             {
-                File.Copy(binFile, binFile.Replace(_testAssetRoot, _testDestination), true);
+                string destFile = binFile.Replace(_testAssetRoot, _testDestination);
+                File.Copy(binFile, destFile, true);
+                FixTimeStamp(binFile, destFile);
             }
 
             return this;
@@ -117,6 +122,16 @@ namespace Microsoft.DotNet.TestFramework
         public string TestRoot
         {
             get { return _testDestination; }
+        }
+
+        private static void FixTimeStamp(string originalFile, string newFile)
+        {
+            // workaround for https://github.com/dotnet/corefx/issues/6083
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var originalTime = File.GetLastWriteTime(originalFile);
+                File.SetLastWriteTime(newFile, originalTime);
+            }
         }
     }
 }
