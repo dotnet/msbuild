@@ -128,12 +128,9 @@ namespace Microsoft.DotNet.Tools.Compiler.Csc
             var args = new List<string>()
             {
                 "-nostdlib",
-                "-nologo"
+                "-nologo",
+                "-debug:portable"
             };
-
-            args.Add(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? "-debug:full"
-                : "-debug:portable");
 
             return args;
         }
