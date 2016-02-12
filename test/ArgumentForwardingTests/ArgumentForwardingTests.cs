@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
 {
     public class ArgumentForwardingTests : TestBase
     {
-        private static readonly string s_reflectorExeName = "Reflector" + Constants.ExeSuffix;
+        private static readonly string s_reflectorExeName = "ArgumentsReflector" + Constants.ExeSuffix;
         private static readonly string s_reflectorCmdName = "reflector_cmd";
 
         private string ReflectorPath { get; set; }
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         {
             Console.WriteLine("Dummy Entrypoint.");
         }
-       
+
         public ArgumentForwardingTests()
         {
             // This test has a dependency on an argument reflector
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             {
                 var rawArg = rawEvaluatedArgument[i];
                 var escapedArg = escapedEvaluatedRawArgument[i];
-                
+
                 try
                 {
                     rawArg.Should().Be(escapedArg);
@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// <summary>
         /// EscapeAndEvaluateArgumentString returns a representation of string[] args
         /// when rawEvaluatedArgument is passed as an argument to a process using
-        /// Command.Create(). Ideally this should escape the argument such that 
+        /// Command.Create(). Ideally this should escape the argument such that
         /// the output is == rawEvaluatedArgument.
         /// </summary>
         /// <param name="rawEvaluatedArgument">A string[] representing string[] args as already evaluated by a process</param>
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// <summary>
         /// EscapeAndEvaluateArgumentString returns a representation of string[] args
         /// when rawEvaluatedArgument is passed as an argument to a process using
-        /// Command.Create(). Ideally this should escape the argument such that 
+        /// Command.Create(). Ideally this should escape the argument such that
         /// the output is == rawEvaluatedArgument.
         /// </summary>
         /// <param name="rawEvaluatedArgument">A string[] representing string[] args as already evaluated by a process</param>
@@ -218,7 +218,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
 
         /// <summary>
         /// Parse the output of the reflector into a string array.
-        /// Reflector output is simply string[] args written to 
+        /// Reflector output is simply string[] args written to
         /// one string separated by commas.
         /// </summary>
         /// <param name="reflectorOutput"></param>
@@ -230,7 +230,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
 
         /// <summary>
         /// Parse the output of the reflector into a string array.
-        /// Reflector output is simply string[] args written to 
+        /// Reflector output is simply string[] args written to
         /// one string separated by commas.
         /// </summary>
         /// <param name="reflectorOutput"></param>
@@ -262,7 +262,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = s_reflectorExeName,
+                    FileName = ReflectorPath,
                     Arguments = testUserArgument,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
