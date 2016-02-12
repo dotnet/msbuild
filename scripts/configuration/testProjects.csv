@@ -5,3 +5,4 @@ dotnet-compile.UnitTests
 dotnet-build.Tests
 Microsoft.DotNet.Cli.Utils.Tests
 Microsoft.DotNet.Compiler.Common.Tests
+ArgumentForwardingTests
