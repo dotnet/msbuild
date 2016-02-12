@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static string[] DetermineInferredScriptExtensions()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows)
             {
                 return new string[] { "", ".cmd" };
             }

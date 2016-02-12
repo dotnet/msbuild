@@ -16,20 +16,21 @@ namespace Microsoft.DotNet.Cli.Utils.ScriptExecutorTests
         private static readonly string s_testProjectRoot = Path.Combine(AppContext.BaseDirectory, "TestAssets/TestProjects");
 
         private TempDirectory _root;
+        private string binTestProjectPath;
+        private Project project;
 
         public ScriptExecutorTests()
         {
             _root = Temp.CreateDirectory();
+
+            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "TestApp");
+            binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
+            project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("dnxcore50")).ProjectFile;
         }
 
         [Fact]
         public void Test_Project_Local_Script_is_Resolved()
         {
-            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "TestApp");
-            var binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
-
-            var project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("dnxcore50")).ProjectFile;
-
             CreateTestFile("some.script", binTestProjectPath);
             var scriptCommandLine = "some.script";
 
@@ -40,13 +41,8 @@ namespace Microsoft.DotNet.Cli.Utils.ScriptExecutorTests
         }
         
         [Fact]
-        public void Test_Nonexistent_Project_Local_Script_is_not_Resolved()
+        public void Test_Nonexistent_Project_Local_Script_throws_CommandUnknownException()
         {
-            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "TestApp");
-            var binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
-
-            var project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("dnxcore50")).ProjectFile;
-
             var scriptCommandLine = "nonexistent.script";
 
             Action action = () => ScriptExecutor.CreateCommandForScript(project, scriptCommandLine, new Dictionary<string, string>());
@@ -54,24 +50,43 @@ namespace Microsoft.DotNet.Cli.Utils.ScriptExecutorTests
         }
         
         [Fact]
-        public void Test_Extension_Inference_in_Resolution_for_Project_Local_Scripts()
+        public void Test_Extension_sh_is_Inferred_over_cmd_in_Project_Local_Scripts_on_Unix()
         {
-            var extensionList = new string[] {".cmd", ".sh"};
-
-            var expectedExtension = default(string);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                expectedExtension = ".cmd";
+                return;
             }
-            else
+
+            var extensionList = new string[] { ".cmd", ".sh" };
+
+            var expectedExtension = ".sh";
+
+            foreach (var extension in extensionList)
             {
-                expectedExtension = ".sh";
+                CreateTestFile("uniquescriptname" + extension, binTestProjectPath);
             }
 
-            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "TestApp");
-            var binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
+            // Don't include extension
+            var scriptCommandLine = "uniquescriptname";
 
-            var project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("dnxcore50")).ProjectFile;
+            var command = ScriptExecutor.CreateCommandForScript(project, scriptCommandLine, new Dictionary<string, string>());
+
+            command.Should().NotBeNull();
+            command.ResolutionStrategy.Should().Be(CommandResolutionStrategy.ProjectLocal);
+            command.CommandArgs.Should().Contain(scriptCommandLine + expectedExtension);
+        }
+
+        [Fact]
+        public void Test_Extension_cmd_is_Inferred_over_sh_in_Project_Local_Scripts_on_Windows()
+        {
+            if (! RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            var extensionList = new string[] { ".cmd", ".sh" };
+
+            var expectedExtension = ".cmd";
 
             foreach (var extension in extensionList)
             {
@@ -91,11 +106,6 @@ namespace Microsoft.DotNet.Cli.Utils.ScriptExecutorTests
         [Fact]
         public void Test_Script_Exe_Files_Dont_Use_Cmd_or_Sh()
         {
-            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "TestApp");
-            var binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
-
-            var project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("dnxcore50")).ProjectFile;
-
             CreateTestFile("some.exe", binTestProjectPath);
             var scriptCommandLine = "some.exe";
 
@@ -116,11 +126,6 @@ namespace Microsoft.DotNet.Cli.Utils.ScriptExecutorTests
                 return;
             }
 
-            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "TestApp");
-            var binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
-
-            var project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("dnxcore50")).ProjectFile;
-
             CreateTestFile("some.cmd", binTestProjectPath);
             var scriptCommandLine = "some.cmd";
 
@@ -133,13 +138,8 @@ namespace Microsoft.DotNet.Cli.Utils.ScriptExecutorTests
         }
         
         [Fact]
-        public void Test_Script_Builtins_Fail()
+        public void Test_Script_Builtins_throws_CommandUnknownException()
         {
-            var sourceTestProjectPath = Path.Combine(s_testProjectRoot, "TestApp");
-            var binTestProjectPath = _root.CopyDirectory(sourceTestProjectPath).Path;
-
-            var project = ProjectContext.Create(binTestProjectPath, NuGetFramework.Parse("dnxcore50")).ProjectFile;
-
             var scriptCommandLine = "echo";
 
             Action action = () => ScriptExecutor.CreateCommandForScript(project, scriptCommandLine, new Dictionary<string, string>());

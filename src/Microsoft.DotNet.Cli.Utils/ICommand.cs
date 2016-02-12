@@ -29,5 +29,7 @@ namespace Microsoft.DotNet.Cli.Utils
         CommandResolutionStrategy ResolutionStrategy { get; }
 
         string CommandName { get; }
+
+        string CommandArgs { get; }
     }
 }
