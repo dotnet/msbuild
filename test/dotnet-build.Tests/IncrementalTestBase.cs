@@ -46,11 +46,11 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             File.SetLastWriteTimeUtc(file, DateTime.UtcNow);
         }
 
-        protected CommandResult BuildProject(bool noIncremental = false, bool expectBuildFailure = false)
+        protected CommandResult BuildProject(bool noDependencies = false, bool noIncremental = false, bool expectBuildFailure = false)
         {
             var mainProjectFile = GetProjectFile(MainProject);
 
-            var buildCommand = new BuildCommand(mainProjectFile, output: GetBinRoot(), framework: "dnxcore50",  noIncremental : noIncremental);
+            var buildCommand = new BuildCommand(mainProjectFile, output: GetBinRoot(), framework: "dnxcore50",  noIncremental : noIncremental, noDependencies : noDependencies);
             var result = buildCommand.ExecuteWithCapturedOutput();
 
             if (!expectBuildFailure)

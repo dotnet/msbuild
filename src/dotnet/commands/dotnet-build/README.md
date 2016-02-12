@@ -33,3 +33,6 @@ Prints out the incremental safety checks that users need to address in order for
 
 --no-incremental
 Marks the build as unsafe for incrementality. This turns off incremental compilation and forces a clean rebuild of the project dependency graph.
+
+--no-dependencies
+Ignore project to project references and only build the root project specified to build.

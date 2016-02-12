@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Build
 
         public void AddForceUnsafePrecondition()
         {
-            _preconditions.Add($"[Forced Unsafe] The build was marked as unsafe. Remove the {BuilderCommandApp.ForceUnsafeFlag} flag to enable incremental compilation");
+            _preconditions.Add($"[Forced Unsafe] The build was marked as unsafe. Remove the {BuilderCommandApp.NoIncrementalFlag} flag to enable incremental compilation");
         }
 
         public bool PreconditionsDetected()
