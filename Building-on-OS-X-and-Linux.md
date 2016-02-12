@@ -12,4 +12,7 @@ The initial build process is done with a Mono-hosted version of MSBuild. Until w
 
 # Tests
 
-Tests are currently disabled on platforms other than Windows. To enable them, ...
+Tests are currently disabled on platforms other than Windows. If you'd like to run them, explicitly opt in with
+```sh
+./cibuild.sh --scope Test
+```
