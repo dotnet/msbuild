@@ -2,20 +2,24 @@
     "version": "1.0.0-*",
     
     "compilationOptions": {
-        "keyFile": "../../tools/Key.snk"
+    "keyFile": "../../tools/Key.snk",
+    "warningsAsErrors": true
     },
 
     "dependencies": {
-        "NETStandard.Library": "1.0.0-rc2-23811",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "System.Reflection.Metadata": "1.2.0-rc2-23811",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc2-16537"
     },
 
     "frameworks": {
+    "net451": { },
         "dnxcore50": {
-            "imports": "portable-net45+win8"
+      "imports": "portable-net45+win8",
+      "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23811"
         }
+    }
     },
   
     "scripts": {

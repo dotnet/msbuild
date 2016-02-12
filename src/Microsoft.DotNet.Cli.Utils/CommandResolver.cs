@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using NuGet.Frameworks;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.DotNet.ProjectModel.Graph;
 using Microsoft.Extensions.PlatformAbstractions;
+using NuGet.Frameworks;
 using NuGet.Packaging;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static CommandSpec ResolveFromAppBase(string commandName, IEnumerable<string> args, bool useComSpec = false)
         {
-            var commandPath = Env.GetCommandPathFromAppBase(AppContext.BaseDirectory, commandName);
+            var commandPath = Env.GetCommandPathFromAppBase(PlatformServices.Default.Application.ApplicationBasePath, commandName);
             return commandPath == null
                 ? null
                 : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.BaseDirectory, useComSpec);
@@ -210,7 +210,7 @@ namespace Microsoft.DotNet.Cli.Utils
             CommandResolutionStrategy resolutionStrategy,
             bool useComSpec = false)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows &&
                 Path.GetExtension(commandPath).Equals(".cmd", StringComparison.OrdinalIgnoreCase))
             {
                 var preferredCommandPath = Env.GetCommandPath(commandName, ".exe");

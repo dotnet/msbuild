@@ -1,5 +1,5 @@
 using System;
-using System.Runtime.InteropServices;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.ProjectModel
 {
@@ -11,11 +11,17 @@ namespace Microsoft.DotNet.ProjectModel
         {
             get
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { return Windows; }
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) { return Linux; }
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) { return OSX; }
-
-                throw new InvalidOperationException("Unknown Platform");
+                switch (PlatformServices.Default.Runtime.OperatingSystemPlatform)
+                {
+                    case Platform.Windows:
+                        return Windows;
+                    case Platform.Darwin:
+                        return OSX;
+                    case Platform.Linux:
+                        return Linux;
+                    default:
+                        throw new InvalidOperationException("Unknown Platform");
+                }
             }
         }
 

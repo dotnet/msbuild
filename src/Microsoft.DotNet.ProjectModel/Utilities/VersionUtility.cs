@@ -1,7 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if !NET451
 using System.Runtime.Loader;
+#endif
+using System.Reflection;
 using System.Text;
 using NuGet.Versioning;
 
@@ -16,7 +19,11 @@ namespace Microsoft.DotNet.ProjectModel.Utilities
 
         internal static NuGetVersion GetAssemblyVersion(string path)
         {
+#if NET451
+            return new NuGetVersion(AssemblyName.GetAssemblyName(path).Version);
+#else
             return new NuGetVersion(AssemblyLoadContext.GetAssemblyName(path).Version);
+#endif
         }
 
         public static string RenderVersion(VersionRange range)
