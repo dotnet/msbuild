@@ -8,6 +8,9 @@
         //command loaded from the same directory as the executing assembly
         BaseDirectory,
 
+        //command loaded from the same directory as a project.json file
+        ProjectLocal,
+
         //command loaded from path
         Path,
 

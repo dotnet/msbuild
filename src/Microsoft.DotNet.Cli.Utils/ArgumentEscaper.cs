@@ -86,8 +86,10 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             var sb = new StringBuilder();
 
-            var quoted = ShouldSurroundWithQuotes(arg);
-            if (quoted) sb.Append("\"");
+            var needsQuotes = ShouldSurroundWithQuotes(arg);
+            var isQuoted = needsQuotes || IsSurroundedWithQuotes(arg);
+
+            if (needsQuotes) sb.Append("\"");
 
             for (int i = 0; i < arg.Length; ++i)
             {
@@ -101,11 +103,19 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
 
                 // Escape any backslashes at the end of the arg
+                // when the argument is also quoted.
                 // This ensures the outside quote is interpreted as
                 // an argument delimiter
-                if (i == arg.Length)
+                if (i == arg.Length && isQuoted)
                 {
                     sb.Append('\\', 2 * backslashCount);
+                }
+
+                // At then end of the arg, which isn't quoted,
+                // just add the backslashes, no need to escape
+                else if (i == arg.Length)
+                {
+                    sb.Append('\\', backslashCount);
                 }
 
                 // Escape any preceding backslashes and the quote
@@ -123,7 +133,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 }
             }
             
-            if (quoted) sb.Append("\"");
+            if (needsQuotes) sb.Append("\"");
 
             return sb.ToString();
         }
@@ -149,22 +159,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (quoted) sb.Append("^\"");
 
+            // Prepend every character with ^
+            // This is harmless when passing through cmd
+            // and ensures cmd metacharacters are not interpreted
+            // as such
             foreach (var character in argument)
             {
-
-                if (character == '"')
-                {
-
-                    sb.Append('^');
-                    sb.Append('"');
-                    sb.Append('^');
-                    sb.Append(character);
-                }
-                else
-                {
-                    sb.Append("^");
-                    sb.Append(character);
-                }
+                sb.Append("^");
+                sb.Append(character);
             }
 
             if (quoted) sb.Append("^\"");
@@ -172,35 +174,27 @@ namespace Microsoft.DotNet.Cli.Utils
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Prepare as single argument to 
-        /// roundtrip properly through cmd.
-        /// 
-        /// This prefixes every character with the '^' character to force cmd to
-        /// interpret the argument string literally. An alternative option would 
-        /// be to do this only for cmd metacharacters.
-        /// 
-        /// See here for more info:
-        /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
         internal static bool ShouldSurroundWithQuotes(string argument)
         {
             // Don't quote already quoted strings
-            if (argument.StartsWith("\"", StringComparison.Ordinal) &&
-                    argument.EndsWith("\"", StringComparison.Ordinal))
+            if (IsSurroundedWithQuotes(argument))
             {
                 return false;
             }
 
             // Only quote if whitespace exists in the string
-            if (argument.Contains(" ") || argument.Contains("\t") || argument.Contains("\n"))
-            {
-                return true;
-            }
+            return ArgumentContainsWhitespace(argument);
+        }
 
-            return true;
+        internal static bool IsSurroundedWithQuotes(string argument)
+        {
+            return argument.StartsWith("\"", StringComparison.Ordinal) &&
+                   argument.EndsWith("\"", StringComparison.Ordinal);
+        }
+
+        internal static bool ArgumentContainsWhitespace(string argument)
+        {
+            return argument.Contains(" ") || argument.Contains("\t") || argument.Contains("\n");
         }
     }
 }

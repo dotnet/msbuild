@@ -96,7 +96,8 @@ namespace Microsoft.DotNet.Tools.Publish
                 { "publish:ProjectPath", context.ProjectDirectory },
                 { "publish:Configuration", configuration },
                 { "publish:OutputPath", outputPath },
-                { "publish:Framework", context.TargetFramework.Framework },
+                { "publish:TargetFramework", context.TargetFramework.GetShortFolderName() },
+                { "publish:FullTargetFramework", context.TargetFramework.DotNetFrameworkName },
                 { "publish:Runtime", context.RuntimeIdentifier },
             };
 

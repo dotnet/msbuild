@@ -13,52 +13,60 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal static class CommandResolver
     {
-        public static CommandSpec TryResolveCommandSpec(string commandName, IEnumerable<string> args, NuGetFramework framework = null, bool useComSpec = false)
+        public static CommandSpec TryResolveCommandSpec(string commandName, IEnumerable<string> args, NuGetFramework framework = null)
         {
-            return ResolveFromRootedCommand(commandName, args, useComSpec) ??
-                   ResolveFromProjectDependencies(commandName, args, framework, useComSpec) ??
-                   ResolveFromProjectTools(commandName, args, useComSpec) ??
-                   ResolveFromAppBase(commandName, args, useComSpec) ??
-                   ResolveFromPath(commandName, args, useComSpec);
+            return ResolveFromRootedCommand(commandName, args) ??
+                   ResolveFromProjectDependencies(commandName, args, framework) ??
+                   ResolveFromProjectTools(commandName, args) ??
+                   ResolveFromAppBase(commandName, args) ??
+                   ResolveFromPath(commandName, args);
+        }
+        
+        public static CommandSpec TryResolveScriptCommandSpec(string commandName, IEnumerable<string> args, Project project, string[] inferredExtensionList)
+        {
+            return ResolveFromRootedCommand(commandName, args) ??
+                   ResolveFromProjectPath(commandName, args, project, inferredExtensionList) ??
+                   ResolveFromAppBase(commandName, args) ??
+                   ResolveFromPath(commandName, args);
         }
 
-        private static CommandSpec ResolveFromPath(string commandName, IEnumerable<string> args, bool useComSpec = false)
+        private static CommandSpec ResolveFromPath(string commandName, IEnumerable<string> args)
         {
             var commandPath = Env.GetCommandPath(commandName);
             return commandPath == null
                 ? null
-                : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.Path, useComSpec);
+                : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.Path);
         }
 
-        private static CommandSpec ResolveFromAppBase(string commandName, IEnumerable<string> args, bool useComSpec = false)
+        private static CommandSpec ResolveFromAppBase(string commandName, IEnumerable<string> args)
         {
-            var commandPath = Env.GetCommandPathFromAppBase(PlatformServices.Default.Application.ApplicationBasePath, commandName);
+            var commandPath = Env.GetCommandPathFromRootPath(PlatformServices.Default.Application.ApplicationBasePath, commandName);
             return commandPath == null
                 ? null
-                : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.BaseDirectory, useComSpec);
+                : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.BaseDirectory);
+        }
+        
+        private static CommandSpec ResolveFromProjectPath(string commandName, IEnumerable<string> args, Project project, string[] inferredExtensionList)
+        {
+            var commandPath = Env.GetCommandPathFromRootPath(project.ProjectDirectory, commandName, inferredExtensionList);
+            return commandPath == null
+                ? null
+                : CreateCommandSpecPreferringExe(commandName, args, commandPath, CommandResolutionStrategy.ProjectLocal);
         }
 
-        private static CommandSpec ResolveFromRootedCommand(string commandName, IEnumerable<string> args, bool useComSpec = false)
+        private static CommandSpec ResolveFromRootedCommand(string commandName, IEnumerable<string> args)
         {
             if (Path.IsPathRooted(commandName))
             {
-                if (useComSpec)
-                {
-                    return CreateComSpecCommandSpec(commandName, args, CommandResolutionStrategy.Path);
-                }
-                else
-                {
-                    var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
-                    return new CommandSpec(commandName, escapedArgs, CommandResolutionStrategy.Path);
-                }
-
+                var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
+                return new CommandSpec(commandName, escapedArgs, CommandResolutionStrategy.Path);
             }
 
             return null;
         }
 
         public static CommandSpec ResolveFromProjectDependencies(string commandName, IEnumerable<string> args,
-            NuGetFramework framework, bool useComSpec = false)
+            NuGetFramework framework)
         {
             if (framework == null) return null;
 
@@ -72,7 +80,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var depsPath = projectContext.GetOutputPaths(Constants.DefaultConfiguration).RuntimeFiles.Deps;
 
-            return ConfigureCommandFromPackage(commandName, args, commandPackage, projectContext, depsPath, useComSpec);
+            return ConfigureCommandFromPackage(commandName, args, commandPackage, projectContext, depsPath);
         }
 
         private static ProjectContext GetProjectContext(NuGetFramework framework)
@@ -101,7 +109,7 @@ namespace Microsoft.DotNet.Cli.Utils
                               e == FileNameSuffixes.DotNet.DynamicLib));
         }
 
-        public static CommandSpec ResolveFromProjectTools(string commandName, IEnumerable<string> args, bool useComSpec = false)
+        public static CommandSpec ResolveFromProjectTools(string commandName, IEnumerable<string> args)
         {
             var context = GetProjectContext(FrameworkConstants.CommonFrameworks.DnxCore50);
 
@@ -147,7 +155,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private static CommandSpec ConfigureCommandFromPackage(string commandName, IEnumerable<string> args,
-            PackageDescription commandPackage, ProjectContext projectContext, string depsPath = null, bool useComSpec = false)
+            PackageDescription commandPackage, ProjectContext projectContext, string depsPath = null)
         {
             var files = commandPackage.Library.Files;
 
@@ -157,11 +165,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var packageDir = Path.Combine(packageRoot, packagePath);
 
-            return ConfigureCommandFromPackage(commandName, args, files, packageDir, depsPath, useComSpec);
+            return ConfigureCommandFromPackage(commandName, args, files, packageDir, depsPath);
         }
 
         private static CommandSpec ConfigureCommandFromPackage(string commandName, IEnumerable<string> args,
-            IEnumerable<string> files, string packageDir, string depsPath = null, bool useComSpec = false)
+            IEnumerable<string> files, string packageDir, string depsPath = null)
         {
             var fileName = string.Empty;
 
@@ -192,24 +200,18 @@ namespace Microsoft.DotNet.Cli.Utils
                 fileName = Path.Combine(packageDir, commandPath);
             }
 
-            if (useComSpec)
-            {
-                return CreateComSpecCommandSpec(fileName, args, CommandResolutionStrategy.NugetPackage);
-            }
-            else
-            {
-                var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
-                return new CommandSpec(fileName, escapedArgs, CommandResolutionStrategy.NugetPackage);
-            }
+            var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
+            return new CommandSpec(fileName, escapedArgs, CommandResolutionStrategy.NugetPackage);
         }
 
         private static CommandSpec CreateCommandSpecPreferringExe(
             string commandName,
             IEnumerable<string> args,
             string commandPath,
-            CommandResolutionStrategy resolutionStrategy,
-            bool useComSpec = false)
+            CommandResolutionStrategy resolutionStrategy)
         {
+            var useComSpec = false;
+            
             if (PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows &&
                 Path.GetExtension(commandPath).Equals(".cmd", StringComparison.OrdinalIgnoreCase))
             {
@@ -228,7 +230,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (useComSpec)
             {
-                return CreateComSpecCommandSpec(commandPath, args, resolutionStrategy);
+                return CreateCmdCommandSpec(commandPath, args, resolutionStrategy);
             }
             else
             {
@@ -237,14 +239,14 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
-        private static CommandSpec CreateComSpecCommandSpec(
+        private static CommandSpec CreateCmdCommandSpec(
             string command,
             IEnumerable<string> args,
             CommandResolutionStrategy resolutionStrategy)
         {
-            // To prevent Command Not Found, comspec gets passed in as
-            // the command already in some cases
             var comSpec = Environment.GetEnvironmentVariable("ComSpec");
+            
+            // Handle the case where ComSpec is already the command
             if (command.Equals(comSpec, StringComparison.OrdinalIgnoreCase))
             {
                 command = args.FirstOrDefault();

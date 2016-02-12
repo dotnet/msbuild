@@ -214,18 +214,15 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
-        [ActiveIssue(982)]
         public void PublishScriptsRun()
         {
             // create unique directories in the 'temp' folder
             var root = Temp.CreateDirectory();
 
-            var testAppDir = root.CreateDirectory("TestApp");
-            var testLibDir = root.CreateDirectory("TestLibrary");
+            var testAppDir = root.CreateDirectory("TestAppWithScripts");
 
             //copy projects to the temp dir
-            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestApp"), testAppDir);
-            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestLibrary"), testLibDir);
+            CopyProjectToTempDir(Path.Combine(_testProjectsRoot, "TestAppWithScripts"), testAppDir);
 
             // run publish
             var testProject = GetProjectPath(testAppDir);

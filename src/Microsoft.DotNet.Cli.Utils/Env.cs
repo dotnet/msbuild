@@ -66,14 +66,14 @@ namespace Microsoft.DotNet.Cli.Utils
             return commandPath;
         }
 
-        public static string GetCommandPathFromAppBase(string appBase, string commandName, params string[] extensions)
+        public static string GetCommandPathFromRootPath(string rootPath, string commandName, params string[] extensions)
         {
             if (!extensions.Any())
             {
                 extensions = Env.ExecutableExtensions.ToArray();
             }
 
-            var commandPath = extensions.Select(e => Path.Combine(appBase, commandName + e))
+            var commandPath = extensions.Select(e => Path.Combine(rootPath, commandName + e))
                 .FirstOrDefault(File.Exists);
 
             return commandPath;

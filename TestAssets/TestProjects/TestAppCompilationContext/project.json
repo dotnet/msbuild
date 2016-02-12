@@ -13,10 +13,5 @@
 
     "frameworks": {
         "dnxcore50": { }
-    },
-
-    "scripts": {
-        "prepublish" : ["echo prepublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:Framework%? ?%publish:Runtime%?"],
-        "postpublish" : ["echo postpublish_output ?%publish:ProjectPath%? ?%publish:Configuration%? ?%publish:OutputPath%? ?%publish:Framework%? ?%publish:Runtime%?"]
     }
 }
