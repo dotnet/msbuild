@@ -112,6 +112,11 @@ case $target in
         ;;
     Mono)
         CONFIGURATION=Debug-MONO
+        if [[ "$MONO_BIN_DIR" = "" ]]; then
+                MONO_BIN_DIR=`dirname \`which mono\``
+        fi
+        MONO_BIN_DIR=${MONO_BIN_DIR}/
+        EXTRA_ARGS="/p:CscToolExe=mcs /p:CscToolPath=$MONO_BIN_DIR"
         ;;
     *)
         echo "Unsupported target $target detected, configuring as if for CoreCLR"
@@ -119,9 +124,9 @@ case $target in
         ;;
 esac
 
-MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal"' "'"/fileloggerparameters:Verbosity=diag;LogFile=$LOG_PATH_ARG"'"'
+MSBUILD_ARGS="$PROJECT_FILE_ARG /t:$TARGET_ARG /p:OS=$OS_ARG /p:Configuration=$CONFIGURATION /verbosity:minimal $EXTRA_ARGS"' "'"/fileloggerparameters:Verbosity=diag;LogFile=$LOG_PATH_ARG"'"'
 
-MONO_COMMAND="mono $MSBUILD_EXE $MSBUILD_ARGS"
+MONO_COMMAND="${MONO_BIN_DIR}mono $MSBUILD_EXE $MSBUILD_ARGS"
 
 #home is not defined on CI machines
 setHome
