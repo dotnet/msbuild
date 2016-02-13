@@ -177,14 +177,13 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         }
 
         [Fact]
-        [ActiveIssue(982)]
         public void PublishScriptsRun()
         {
-            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary")
+            TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithScripts")
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
 
-            var testProject = _getProjectJson(instance.TestRoot, "TestApp");
+            var testProject = _getProjectJson(instance.TestRoot, "TestAppWithScripts");
 
             var publishCommand = new PublishCommand(testProject);
             var result = publishCommand.ExecuteWithCapturedOutput();

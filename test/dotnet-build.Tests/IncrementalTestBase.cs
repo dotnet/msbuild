@@ -58,15 +58,15 @@ namespace Microsoft.DotNet.Tools.Builder.Tests
             File.SetLastWriteTimeUtc(file, DateTime.UtcNow);
         }
 
-        protected CommandResult BuildProject(bool noIncremental = false, bool expectBuildFailure = false)
+        protected CommandResult BuildProject(bool noDependencies = false, bool noIncremental = false, bool expectBuildFailure = false)
         {
             var mainProjectFile = GetProjectFile(MainProject);
             return BuildProject(mainProjectFile, noIncremental, expectBuildFailure);
         }
 
-        protected CommandResult BuildProject(string projectFile, bool noIncremental = false, bool expectBuildFailure = false)
+        protected CommandResult BuildProject(string projectFile, bool noDependencies = false, bool noIncremental = false, bool expectBuildFailure = false)
         {
-            var buildCommand = new BuildCommand(projectFile, output: GetOutputDir(), framework: "dnxcore50", noIncremental: noIncremental);
+            var buildCommand = new BuildCommand(projectFile, output: GetOutputDir(), framework: "dnxcore50", noIncremental: noIncremental, noDependencies : noDependencies);
             var result = buildCommand.ExecuteWithCapturedOutput();
 
             if (!expectBuildFailure)

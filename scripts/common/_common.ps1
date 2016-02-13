@@ -5,33 +5,26 @@
 
 . $PSScriptRoot\_utility.ps1
 
-$Skip_Crossgen = $false
-$Rid = "win7-x64"
-$Tfm = "dnxcore50"
-$RepoRoot = Resolve-Path "$PSScriptRoot\..\.."
-$OutputDir = "$RepoRoot\artifacts\$Rid"
-$Stage1Dir = "$OutputDir\stage1"
-$Stage1CompilationDir = "$OutputDir\stage1compilation"
-$Stage2Dir = "$OutputDir\stage2"
-$Stage2CompilationDir = "$OutputDir\stage2compilation"
-$HostDir = "$OutputDir\corehost"
-$PackageDir = "$RepoRoot\artifacts\packages\dnvm"
-$TestBinRoot = "$RepoRoot\artifacts\tests"
-$TestPackageDir = "$TestBinRoot\packages"
+# Copy things from environment variables that were sent by the build scripts
+$Rid = $env:Rid
+$Tfm = $env:Tfm
+$OutputDir = $env:OutputDir
+$Stage1Dir = $env:Stage1Dir
+$Stage1CompilationDir = $env:Stage1CompilationDir
+$Stage2Dir = $env:Stage2Dir
+$Stage2CompilationDir = $env:Stage2CompilationDir
+$HostDir = $env:HostDir
+$PackageDir = $env:PackageDir
+$TestBinRoot = $env:TestBinRoot
+$TestPackageDir = $env:TestPackageDir
 
-$env:TEST_ROOT = "$OutputDir\tests"  
-$env:TEST_ARTIFACTS = "$env:TEST_ROOT\artifacts"  
+$env:TEST_ROOT = "$OutputDir\tests"
+$env:TEST_ARTIFACTS = "$env:TEST_ROOT\artifacts"
 
-$env:ReleaseSuffix = "beta"
-$env:Channel = "$env:ReleaseSuffix"
+$env:Channel = "$env:RELEASE_SUFFIX"
 
 # Set reasonable defaults for unset variables
 setEnvIfDefault "DOTNET_INSTALL_DIR"  "$RepoRoot\.dotnet_stage0\win7-x64"
 setEnvIfDefault "DOTNET_CLI_VERSION" "0.1.0.0"
-setEnvIfDefault "SKIP_CROSSGEN" "$Skip_Crossgen"
 setPathAndHomeIfDefault "$Stage2Dir"
 setVarIfDefault "Configuration" "Debug"
-
-# Common Files which depend on above properties
-. $PSScriptRoot\_nuget.ps1
-. $PSScriptRoot\_configuration.ps1

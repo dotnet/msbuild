@@ -1,5 +1,8 @@
 ### Repo-specific things ###
 
+# Test results
+*-testResults.xml
+
 # NuGet keeps dropping
 Library/
 

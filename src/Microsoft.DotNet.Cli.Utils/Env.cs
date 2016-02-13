@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -18,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 if (_executableExtensions == null)
                 {
 
-                    _executableExtensions = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    _executableExtensions = PlatformServices.Default.Runtime.OperatingSystemPlatform == Platform.Windows
                         ? Environment.GetEnvironmentVariable("PATHEXT")
                             .Split(';')
                             .Select(e => e.ToLower().Trim('"'))
@@ -35,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 if (_searchPaths == null)
                 {
-                    var searchPaths = new List<string> {AppContext.BaseDirectory};
+                    var searchPaths = new List<string> { PlatformServices.Default.Application.ApplicationBasePath };
 
                     searchPaths.AddRange(Environment
                         .GetEnvironmentVariable("PATH")
@@ -65,14 +66,14 @@ namespace Microsoft.DotNet.Cli.Utils
             return commandPath;
         }
 
-        public static string GetCommandPathFromAppBase(string appBase, string commandName, params string[] extensions)
+        public static string GetCommandPathFromRootPath(string rootPath, string commandName, params string[] extensions)
         {
             if (!extensions.Any())
             {
                 extensions = Env.ExecutableExtensions.ToArray();
             }
 
-            var commandPath = extensions.Select(e => Path.Combine(appBase, commandName + e))
+            var commandPath = extensions.Select(e => Path.Combine(rootPath, commandName + e))
                 .FirstOrDefault(File.Exists);
 
             return commandPath;

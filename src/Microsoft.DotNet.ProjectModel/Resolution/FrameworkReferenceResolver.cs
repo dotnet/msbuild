@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
 using Microsoft.DotNet.ProjectModel.Utilities;
+using Microsoft.Extensions.PlatformAbstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ProjectModel.Resolution
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.ProjectModel.Resolution
                 return referenceAssembliesPath;
             }
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (PlatformServices.Default.Runtime.OperatingSystemPlatform != Platform.Windows)
             {
                 // There is no reference assemblies path outside of windows
                 // The environment variable can be used to specify one

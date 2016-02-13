@@ -23,9 +23,9 @@ namespace Microsoft.DotNet.Tools.Build
         public static readonly string[] KnownCompilers = { "csc", "vbc", "fsc" };
 
         private readonly ProjectContext _rootProject;
+        private readonly ProjectDependenciesFacade _rootProjectDependencies;
         private readonly BuilderCommandApp _args;
         private readonly IncrementalPreconditions _preconditions;
-        private readonly ProjectDependenciesFacade _dependencies;
 
         public bool IsSafeForIncrementalCompilation => !_preconditions.PreconditionsDetected();
 
@@ -36,12 +36,9 @@ namespace Microsoft.DotNet.Tools.Build
             // Cleaner to clone the args and mutate the clone than have separate CompileContext fields for mutated args 
             // and then reasoning which ones to get from args and which ones from fields.
             _args = (BuilderCommandApp)args.ShallowCopy();
-            
-            _args.OutputValue = _args.OutputValue;
-            _args.BuildBasePathValue = _args.BuildBasePathValue;
 
             // Set up dependencies
-            _dependencies = new ProjectDependenciesFacade(_rootProject, _args.ConfigValue);
+            _rootProjectDependencies = new ProjectDependenciesFacade(_rootProject, _args.ConfigValue);
 
             // gather preconditions
             _preconditions = GatherIncrementalPreconditions();
@@ -51,17 +48,36 @@ namespace Microsoft.DotNet.Tools.Build
         {
             CreateOutputDirectories();
 
-            // compile dependencies
-            foreach (var dependency in Sort(_dependencies.ProjectDependenciesWithSources))
-            {
-                if (incremental)
-                {
-                    var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework, new[] { _rootProject.RuntimeIdentifier });
+            return CompileDendencies(incremental) && CompileRootProject(incremental);
+        }
 
-                    if (!NeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue)))
-                    {
-                        continue;
-                    }
+        private bool CompileRootProject(bool incremental)
+        {
+            if (incremental && !NeedsRebuilding(_rootProject, _rootProjectDependencies))
+            {
+                // todo: what if the previous build had errors / warnings and nothing changed? Need to propagate them in case of incremental
+                return true;
+            }
+
+            var success = InvokeCompileOnRootProject();
+
+            PrintSummary(success);
+
+            return success;
+        }
+
+        private bool CompileDendencies(bool incremental)
+        {
+            if (_args.ShouldSkipDependencies)
+            {
+                return true;
+            }
+
+            foreach (var dependency in Sort(_rootProjectDependencies.ProjectDependenciesWithSources))
+            {
+                if (incremental && !DependencyNeedsRebuilding(dependency))
+                {
+                    continue;
                 }
 
                 if (!InvokeCompileOnDependency(dependency))
@@ -70,28 +86,18 @@ namespace Microsoft.DotNet.Tools.Build
                 }
             }
 
-            if (incremental && !NeedsRebuilding(_rootProject, _dependencies))
-            {
-                // todo: what if the previous build had errors / warnings and nothing changed? Need to propagate them in case of incremental
-                return true;
-            }
+            return true;
+        }
 
-            // compile project
-            var success = InvokeCompileOnRootProject();
-
-            PrintSummary(success);
-
-            return success;
+        private bool DependencyNeedsRebuilding(ProjectDescription dependency)
+        {
+            var dependencyProjectContext = ProjectContext.Create(dependency.Path, dependency.Framework, new[] { _rootProject.RuntimeIdentifier });
+            return NeedsRebuilding(dependencyProjectContext, new ProjectDependenciesFacade(dependencyProjectContext, _args.ConfigValue));
         }
 
         private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies)
         {
-            return NeedsRebuilding(project, dependencies, _args.BuildBasePathValue);
-        }
-
-        private bool NeedsRebuilding(ProjectContext project, ProjectDependenciesFacade dependencies, string baseBuildPath)
-        {
-            var compilerIO = GetCompileIO(project, _args.ConfigValue, baseBuildPath, _args.OutputValue, dependencies, project == _rootProject);
+            var compilerIO = GetCompileIO(project, _args.ConfigValue, _args.BuildBasePathValue, _args.OutputValue, dependencies, project == _rootProject);
 
             // rebuild if empty inputs / outputs
             if (!(compilerIO.Outputs.Any() && compilerIO.Inputs.Any()))
@@ -195,9 +201,9 @@ namespace Microsoft.DotNet.Tools.Build
 
         private IncrementalPreconditions GatherIncrementalPreconditions()
         {
-            var preconditions = new IncrementalPreconditions(_args.BuildProfileValue);
+            var preconditions = new IncrementalPreconditions(_args.ShouldPrintIncrementalPreconditions);
 
-            if (_args.ForceUnsafeValue)
+            if (_args.ShouldNotUseIncrementality)
             {
                 preconditions.AddForceUnsafePrecondition();
             }
@@ -217,11 +223,16 @@ namespace Microsoft.DotNet.Tools.Build
         // check the entire project tree that needs to be compiled, duplicated for each framework
         private List<ProjectContext> GetProjectsToCheck()
         {
+            if (_args.ShouldSkipDependencies)
+            {
+                return new List<ProjectContext>(1) { _rootProject };
+            }
+
             // include initial root project
-            var contextsToCheck = new List<ProjectContext>(1 + _dependencies.ProjectDependenciesWithSources.Count) { _rootProject };
+            var contextsToCheck = new List<ProjectContext>(1 + _rootProjectDependencies.ProjectDependenciesWithSources.Count) { _rootProject };
 
             // convert ProjectDescription to ProjectContext
-            var dependencyContexts = _dependencies.ProjectDependenciesWithSources.Select
+            var dependencyContexts = _rootProjectDependencies.ProjectDependenciesWithSources.Select
                 (keyValuePair => ProjectContext.Create(keyValuePair.Value.Path, keyValuePair.Value.Framework));
 
             contextsToCheck.AddRange(dependencyContexts);

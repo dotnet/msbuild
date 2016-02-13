@@ -6,18 +6,13 @@
 import jobs.generation.Utilities;
 
 def project = GithubProject
+def branch = GithubBranchName
 
 def osList = ['Ubuntu', 'OSX', 'Windows_NT', 'CentOS7.1']
-
-def machineLabelMap = ['Ubuntu':'ubuntu-doc',
-                       'OSX':'mac',
-                       'Windows_NT':'windows',
-                       'CentOS7.1' : 'centos-71']
 
 def static getBuildJobName(def configuration, def os) {
     return configuration.toLowerCase() + '_' + os.toLowerCase()
 }
-
 
 [true, false].each { isPR ->
     ['Debug', 'Release'].each { configuration ->
@@ -28,7 +23,6 @@ def static getBuildJobName(def configuration, def os) {
             // Calculate job name
             def jobName = getBuildJobName(configuration, os)
             def buildCommand = '';
-            def postBuildCommand = '';
 
             // Calculate the build command
             if (os == 'Windows_NT') {
@@ -40,7 +34,6 @@ def static getBuildJobName(def configuration, def os) {
 
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
                 // Set the label.
-                label(machineLabelMap[os])
                 steps {
                     if (os == 'Windows_NT') {
                         // Batch
@@ -49,26 +42,15 @@ def static getBuildJobName(def configuration, def os) {
                     else {
                         // Shell
                         shell(buildCommand)
-
-                        // Post Build Cleanup
-                        publishers {
-                            postBuildScripts {
-                                steps {
-                                    shell(postBuildCommand)
-                                }
-                                onlyIfBuildSucceeds(false)
-                            }
-                        }
-
                     }
                 }
             }
 
-
-            Utilities.standardJobSetup(newJob, project, isPR)
+            Utilities.setMachineAffinity(newJob, os, 'latest-or-auto')
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
             Utilities.addXUnitDotNETResults(newJob, '**/*-testResults.xml')
             if (isPR) {
-                Utilities.addGithubPRTrigger(newJob, "${os} ${configuration} Build")
+                Utilities.addGithubPRTriggerForBranch(newJob, branch, "${os} ${configuration} Build")
             }
             else {
                 Utilities.addGithubPushTrigger(newJob)

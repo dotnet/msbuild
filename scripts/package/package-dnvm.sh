@@ -33,6 +33,6 @@ header "Packaging $PACKAGE_SHORT_NAME"
 # We need both "*" and ".version" to ensure we pick up that file
 tar -czf $PACKAGE_NAME * .version
 
-info "Packaged stage2 to $PACKAGE_NAME"
+info "Packaged stage2 from '$STAGE2_DIR' to '$PACKAGE_NAME'"
 
 $REPOROOT/scripts/publish/publish.sh $PACKAGE_NAME

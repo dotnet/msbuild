@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.ProjectModel
         }
 
         private static bool EnumerableEquals(IEnumerable<string> left, IEnumerable<string> right)
-            => Enumerable.SequenceEqual(left ?? Array.Empty<string>(), right ?? Array.Empty<string>());
+            => Enumerable.SequenceEqual(left ?? EmptyArray<string>.Value, right ?? EmptyArray<string>.Value);
 
         public override int GetHashCode()
         {
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.ProjectModel
         {
             if (@new != null)
             {
-                old = old ?? Array.Empty<string>();
+                old = old ?? EmptyArray<string>.Value;
                 return old.Concat(@new).Distinct().ToArray();
             }
             return old;
