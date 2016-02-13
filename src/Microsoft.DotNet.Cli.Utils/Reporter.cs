@@ -55,7 +55,14 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             lock (_lock)
             {
-                _console?.Writer?.Write(message);
+                if (CommandContext.ShouldPassAnsiCodesThrough())
+                {
+                    _console?.Writer?.Write(message);
+                }
+                else
+                {
+                    _console?.Write(message);
+                }
             }
         }
     }
