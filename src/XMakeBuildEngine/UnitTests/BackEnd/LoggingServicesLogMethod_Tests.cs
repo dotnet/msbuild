@@ -895,6 +895,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void LogBuildStartedCriticalOnly()
         {
             ProcessBuildEventHelper service =

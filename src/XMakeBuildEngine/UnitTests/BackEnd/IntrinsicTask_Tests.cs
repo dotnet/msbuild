@@ -2920,6 +2920,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// 
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void IncludeCheckOnMetadata_3()
         {
             MockLogger logger = new MockLogger();

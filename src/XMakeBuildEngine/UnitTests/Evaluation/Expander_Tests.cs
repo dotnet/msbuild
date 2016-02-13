@@ -224,6 +224,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand an item vector function Metadata()->DirectoryName()->Distinct()
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ExpandItemVectorFunctionsGetDirectoryNameOfMetadataValueDistinct()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -248,6 +249,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// /// Expand an item vector function that is an itemspec modifier
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ExpandItemVectorFunctionsItemSpecModifier()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -306,6 +308,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand an item vector function that is chained into a string
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ExpandItemVectorFunctionsChained1()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -320,6 +323,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand an item vector function that is chained and has constants into a string
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ExpandItemVectorFunctionsChained2()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -345,6 +349,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ExpandItemVectorFunctionsChainedProject1()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -619,6 +624,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// /// Expand an item vector function that is an itemspec modifier
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ExpandItemVectorFunctionsItemSpecModifier2()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -673,6 +679,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand an item vector function Metadata() that contains semi-colon delimited sub-items
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ExpandItemVectorFunctionsMetadataValueMultiItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -846,6 +853,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void InvalidPathAndMetadataItemFunction()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -884,6 +892,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void InvalidPathAndMetadataItemFunction2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -922,6 +931,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void InvalidPathAndMetadataItemFunction3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1925,6 +1935,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function that returns a Dictionary
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void PropertyFunctionDictionaryReturn()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2278,6 +2289,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function calls a static method 
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void PropertyFunctionStaticMethodQuoted1()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2452,6 +2464,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function calls a static method an enum argument
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void PropertyFunctionStaticMethodEnumArgument()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2700,6 +2713,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand property function calls a static bitwise method to retrieve file attribute
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void PropertyFunctionStaticMethodFileAttributes()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();

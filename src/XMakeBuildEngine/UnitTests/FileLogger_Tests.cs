@@ -85,6 +85,7 @@ namespace Microsoft.Build.UnitTests
         /// Invalid file should error nicely
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void InvalidFile()
         {
             Assert.Throws<LoggerException>(() =>

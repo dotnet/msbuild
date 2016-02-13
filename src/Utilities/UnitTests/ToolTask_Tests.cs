@@ -196,6 +196,7 @@ namespace Microsoft.Build.UnitTests
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void HandleExecutionErrorsWhenToolDoesntLogError()
         {
             using (MyTool t = new MyTool())
@@ -219,6 +220,7 @@ namespace Microsoft.Build.UnitTests
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
             using (MyTool t = new MyTool())

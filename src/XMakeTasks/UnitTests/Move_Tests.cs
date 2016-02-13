@@ -461,6 +461,7 @@ namespace Microsoft.Build.UnitTests
         /// Moving a locked file will fail
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void MoveLockedFile()
         {
             string file = null;

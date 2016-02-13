@@ -107,6 +107,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ProjectToolsVersion20Present()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -148,6 +149,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void MSBuildToolsVersionProperty()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)

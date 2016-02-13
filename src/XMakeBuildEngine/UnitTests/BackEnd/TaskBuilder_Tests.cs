@@ -439,6 +439,7 @@ namespace ItemCreationTask
         /// else could let the item get corrupt (inconsistent values for Filename and FullPath, for example)
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void TasksCanAddRecursiveDirBuiltInMetadata()
         {
             MockLogger logger = new MockLogger();
