@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Generate .version file
             var version = ((BuildVersion)c.BuildContext["BuildVersion"]).SimpleVersion;
-            var content = $@"{version}{Environment.NewLine}{c.BuildContext["CommitHash"]}{Environment.NewLine}";
+            var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(outputDir, ".version"), content);
 
             return c.Success();
