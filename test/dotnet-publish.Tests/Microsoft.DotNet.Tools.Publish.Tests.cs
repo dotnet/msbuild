@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
     public class PublishTests : TestBase
     {
         private readonly string _testProjectsRoot;
+        private readonly Func<string, string, string> _getProjectJson = ProjectUtils.GetProjectJson;
 
         public PublishTests()
         {
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
 
-            string testRoot = Path.Combine(instance.TestRoot, "TestApp", "project.json");
+            string testRoot = _getProjectJson(instance.TestRoot, "TestApp");
 
             outputDir = string.IsNullOrEmpty(outputDir) ? "" : Path.Combine(instance.TestRoot, outputDir);
             var publishCommand = new PublishCommand(testRoot, output: outputDir);
@@ -73,7 +74,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
 
-            var testProject = Path.Combine(instance.TestRoot, "project.json");
+            var testProject = _getProjectJson(instance.TestRoot, "TestAppWithContents");
             var publishCommand = new PublishCommand(testProject);
 
             publishCommand.Execute().Should().Pass();
@@ -85,7 +86,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         {
             TestInstance instance = TestAssetsManager.CreateTestInstance("TestAppWithLibrary");
 
-            string testProject = Path.Combine(instance.TestRoot, "TestApp", "project.json");
+            string testProject = _getProjectJson(instance.TestRoot, "TestApp");
             var publishCommand = new PublishCommand(testProject);
             publishCommand.Execute().Should().Fail();
         }
@@ -93,11 +94,11 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
         [Fact]
         public void LibraryPublishTest()
         {
-            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppWithLibrary", "TestLibrary"))
+            TestInstance instance = TestAssetsManager.CreateTestInstance(Path.Combine("TestAppWithLibrary"))
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
 
-            var testProject = Path.Combine(instance.TestRoot, "project.json");
+            var testProject = _getProjectJson(instance.TestRoot, "TestLibrary");
             var publishCommand = new PublishCommand(testProject);
             publishCommand.Execute().Should().Pass();
 
@@ -115,9 +116,8 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
 
-            var lesserTestLibDir = Path.Combine(instance.TestRoot, "TestLibraryLesser");
+            var lesserTestProject = _getProjectJson(instance.TestRoot, "TestLibraryLesser");
 
-            var lesserTestProject = Path.Combine(lesserTestLibDir, "project.json");
             var publishCommand = new PublishCommand(lesserTestProject, "net451");
             publishCommand.Execute().Should().Pass();
 
@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
 
-            var testProject = Path.Combine(instance.TestRoot, "TestApp", "project.json");
+            var testProject = _getProjectJson(instance.TestRoot, "TestApp");
             var publishCommand = new PublishCommand(testProject);
             publishCommand.Execute().Should().Pass();
 
@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
             TestInstance instance = TestAssetsManager.CreateTestInstance("CompileFail")
                                                      .WithLockFiles();
 
-            var testProject = Path.Combine(instance.TestRoot, "project.json");
+            var testProject = _getProjectJson(instance.TestRoot, "CompileFail");
             var publishCommand = new PublishCommand(testProject);
 
             publishCommand.Execute().Should().Fail();
@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.Tools.Publish.Tests
                                                      .WithLockFiles()
                                                      .WithBuildArtifacts();
 
-            var testProject = Path.Combine(instance.TestRoot, "TestApp", "project.json");
+            var testProject = _getProjectJson(instance.TestRoot, "TestApp");
 
             var publishCommand = new PublishCommand(testProject);
             var result = publishCommand.ExecuteWithCapturedOutput();
