@@ -10,7 +10,7 @@ Goals:
 - Runtime agnostic.
 - Simple extensibility and layering - "you had one job!"
 - Cross-platform - support and personality.
-- Outside-in philosphy - higher-level tools drive the CLI.
+- Outside-in philosophy - higher-level tools drive the CLI.
 
 Historical Context - DNX
 ========================
@@ -42,7 +42,7 @@ You can get a sense of using the tools from the examples below.
 
 `dotnet build --native` native compiles your app into a single executable file.
 
-`dotnet build` compiles your app or library as an IL binary. In the case of an app, `build` generates runable assets by copying an executable host to make the IL binary runable. The host relies on a shared framework for dependencies, including a runtime.
+`dotnet build` compiles your app or library as an IL binary. In the case of an app, `build` generates runnable assets by copying an executable host to make the IL binary runable. The host relies on a shared framework for dependencies, including a runtime.
 
 Design
 ======
@@ -74,7 +74,7 @@ Adding a new command locally
 ============================ 
 Given the extensibility model described above, it is very easy to add a command that can be invoked with the `dotnet` driver. Just add any executable in a PATH and name it as per the instructions above.
 
-As an example, let's say we want to add a local command that will mimick `dotnet clean`. By convention, `dotnet build` will drop binaries in two directories `./bin` and `./obj`. A clean command thus will need to delete these two directores. A trivial example, but it should work.
+As an example, let's say we want to add a local command that will mimic `dotnet clean`. By convention, `dotnet build` will drop binaries in two directories `./bin` and `./obj`. A clean command thus will need to delete these two directories. A trivial example, but it should work.
 
 On *nix OS-es, we will write a very simple shell script to help us with this:
 ```shell
@@ -97,9 +97,4 @@ How you write a given command depends largely on whether you are trying to add i
 
 For the former case, the [developer guide](developer-guide.md) has all of the details that you will need to get going. 
 
-If you are adding a command on your own machine(s), then there is really no special model to keep in mind. However, since your users will be using the local commands through the `dotnet` driver, we strongly suggest to keep to the principles outlned above in the [design section](#design) to have an unified user experience for your users. 
-
-
-
-
-
+If you are adding a command on your own machine(s), then there is really no special model to keep in mind. However, since your users will be using the local commands through the `dotnet` driver, we strongly suggest to keep to the principles outlined above in the [design section](#design) to have an unified user experience for your users. 
