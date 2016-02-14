@@ -661,6 +661,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand an item vector function Metadata()->DirectoryName()
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void ExpandItemVectorFunctionsGetDirectoryNameOfMetadataValue()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();

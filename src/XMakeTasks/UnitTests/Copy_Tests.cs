@@ -663,6 +663,7 @@ namespace Microsoft.Build.UnitTests
         /// Most important case is when destination is locked
         /// </summary>
         [Fact]
+        [Trait("Category", "nonosxtests")]
         public void DoRetryWhenDestinationLocked()
         {
             string destinationFile = Path.GetTempFileName();
