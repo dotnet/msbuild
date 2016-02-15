@@ -127,6 +127,7 @@ namespace Microsoft.DotNet.Cli.Build
             var result = CompileStage(c,
                 dotnet: DotNetCli.Stage1,
                 outputDir: Dirs.Stage2);
+
             if (!result.Success)
             {
                 return result;
@@ -137,7 +138,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 var packagingOutputDir = Path.Combine(Dirs.Stage2Compilation, "forPackaging");
                 Mkdirp(packagingOutputDir);
-                foreach(var project in ProjectsToPack)
+                foreach (var project in ProjectsToPack)
                 {
                     // Just build them, we'll pack later
                     DotNetCli.Stage1.Build(
@@ -210,7 +211,7 @@ namespace Microsoft.DotNet.Cli.Build
             File.Copy(Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(binDir, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
 
             // Corehostify binaries
-            foreach(var binaryToCorehostify in BinariesForCoreHost)
+            foreach (var binaryToCorehostify in BinariesForCoreHost)
             {
                 try
                 {
@@ -219,7 +220,7 @@ namespace Microsoft.DotNet.Cli.Build
                     File.Delete(Path.Combine(binDir, $"{binaryToCorehostify}.exe"));
                     File.Copy(Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, binaryToCorehostify + Constants.ExeSuffix));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return c.Failed($"Failed to corehostify '{binaryToCorehostify}': {ex.ToString()}");
                 }
@@ -234,7 +235,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Copy AppDeps
             result = CopyAppDeps(c, binDir);
-            if(!result.Success)
+            if (!result.Success)
             {
                 return result;
             }

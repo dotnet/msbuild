@@ -25,10 +25,11 @@ namespace Microsoft.DotNet.Cli.Build
 
             var configEnv = Environment.GetEnvironmentVariable("CONFIGURATION");
 
-            if(string.IsNullOrEmpty(configEnv))
+            if (string.IsNullOrEmpty(configEnv))
             {
                 configEnv = "Debug";
             }
+
             c.BuildContext["Configuration"] = configEnv;
 
             c.Info($"Building {c.BuildContext["Configuration"]} to: {Dirs.Output}");
@@ -160,22 +161,22 @@ cmake is required to build the native host 'corehost'";
                 try
                 {
                     // Read the cache file
-                    if(File.Exists(cacheTimeFile))
+                    if (File.Exists(cacheTimeFile))
                     {
                         var content = File.ReadAllText(cacheTimeFile);
-                        if(!string.IsNullOrEmpty(content))
+                        if (!string.IsNullOrEmpty(content))
                         {
                             cacheTime = DateTime.ParseExact("O", content, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     c.Warn($"Error reading NuGet cache time file, leaving the cache alone");
                     c.Warn($"Error Detail: {ex.ToString()}");
                 }
 
-                if(cacheTime == null || (cacheTime.Value.AddHours(cacheExpiration) < DateTime.UtcNow))
+                if (cacheTime == null || (cacheTime.Value.AddHours(cacheExpiration) < DateTime.UtcNow))
                 {
                     // Cache has expired or the status is unknown, clear it and write the file
                     c.Info("Clearing NuGet cache");
@@ -204,9 +205,9 @@ cmake is required to build the native host 'corehost'";
             var lines = File.ReadAllLines(path);
             var dict = new Dictionary<string, string>();
             c.Verbose("Branch Info:");
-            foreach(var line in lines)
+            foreach (var line in lines)
             {
-                if(!line.Trim().StartsWith("#") && !string.IsNullOrWhiteSpace(line))
+                if (!line.Trim().StartsWith("#") && !string.IsNullOrWhiteSpace(line))
                 {
                     var splat = line.Split(new[] { '=' }, 2);
                     dict[splat[0]] = splat[1];

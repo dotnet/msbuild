@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (var relativePath in TestPackageProjects)
             {
                 var fullPath = Path.Combine(c.BuildContext.BuildDirectory, "TestAssets", "TestPackages", relativePath.Replace('/', Path.DirectorySeparatorChar));
-                c.Info("Packing: {fullPath}");
+                c.Info($"Packing: {fullPath}");
                 dotnet.Pack("--output", Dirs.TestPackages)
                     .WorkingDirectory(fullPath)
                     .Execute()
@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Cli.Build
             var dotnet = DotNetCli.Stage2;
             foreach (var testProject in TestProjects)
             {
-                c.Info("Building tests: {project}");
+                c.Info($"Building tests: {testProject}");
                 dotnet.Build()
                     .WorkingDirectory(Path.Combine(c.BuildContext.BuildDirectory, "test", testProject))
                     .Execute()
@@ -155,17 +155,17 @@ namespace Microsoft.DotNet.Cli.Build
             var consumers = Path.Combine(c.BuildContext.BuildDirectory, "test", "PackagedCommands", "Consumers");
 
             // Compile the consumer apps
-            foreach(var dir in Directory.EnumerateDirectories(consumers))
+            foreach (var dir in Directory.EnumerateDirectories(consumers))
             {
                 dotnet.Build().WorkingDirectory(dir).Execute().EnsureSuccessful();
             }
 
             // Test the apps
-            foreach(var dir in Directory.EnumerateDirectories(consumers))
+            foreach (var dir in Directory.EnumerateDirectories(consumers))
             {
                 var result = dotnet.Exec("hello").WorkingDirectory(dir).CaptureStdOut().CaptureStdErr().Execute();
                 result.EnsureSuccessful();
-                if(!string.Equals("Hello", result.StdOut.Trim(), StringComparison.Ordinal))
+                if (!string.Equals("Hello", result.StdOut.Trim(), StringComparison.Ordinal))
                 {
                     var testName = Path.GetFileName(dir);
                     c.Error($"Packaged Commands Test '{testName}' failed");

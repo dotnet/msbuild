@@ -3,11 +3,9 @@
     "compilationOptions": {
         "emitEntryPoint": true
     },
-
     "dependencies": {
-        "NETStandard.Library" : "1.0.0-rc2-23811"
+        "NETStandard.Library": "1.0.0-rc2-23811"
     },
-
     "frameworks": {
         "dnxcore50": {
             "imports": "portable-net45+win8"
