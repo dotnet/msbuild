@@ -356,7 +356,7 @@ namespace Microsoft.DotNet.Cli.Build
             foreach (var assemblyToCrossgen in AssembliesToCrossGen)
             {
                 c.Info($"Crossgenning {assemblyToCrossgen}");
-                ExecIn(outputDir, crossgen, "-nologo", "-platform_assemblies_paths", outputDir, assemblyToCrossgen);
+                ExecInSilent(outputDir, crossgen, "-nologo", "-platform_assemblies_paths", outputDir, assemblyToCrossgen);
             }
 
             c.Info("Crossgen complete");
