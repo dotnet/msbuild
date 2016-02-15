@@ -1,336 +1,445 @@
 Canonical scenarios
 ===================
 
+# Contents
+
+* [Overview](#overview)
+* [Acquisition](#acquisition)
+* Scenarios
+  * [Starting a new console application](#starting-a-new-console-application)
+  * [Starting a new class library](#starting-a-new-class-library)
+  * [Adding 3rd party dependencies to the projects](#adding-3rd-party-dependencies-to-the-projects)
+  * [Running unit tests](#running-unit-tests)
+  * [Publishing a shared runtime console application](#publishing-a-shared-runtime-console-application)
+  * [Publishing a self-contained console application for all platforms](#publishing-a-self-contained-console-application-for-all-platforms)
+  * [Packaging a class library](#packaging-a-class-library)
+  * [Installing `dotnet` extensions as tools](#installing-dotnet-extensions-as-tools)
+
 # Overview
 
-The scenarios are all grouped around the major activity that the developer is expected to do. Each scenario has the following components: 
+This document outlines the End-to-End canonical scenarios for the CLI tooling. The scenarios outline the planned steps that the developer needs to to to work with her applications. 
 
-* A description of the scenario, from the perspective of the developer
-* Set of commands that are used to get results
-* Description of the result(s) that should happen
+Each scenario is organized around a narrative, which provides an explanation on what the developers are trying to do, steps that are needed for the user to achieve the needed narrative. Steps are organized as commands that the developer would need to execute on the command line to achieve the result.
 
-Unless otherwise specified, the commands and scenario below imply a basic console application as the main code. Unless otherwise specified, all of the samples have one project.json and no global.json. The project.json file is the following:
-
-```json
-{
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
-
-    "dependencies": {
-    },
-
-    "frameworks": {
-        "netstandard10": { }
-    }
-}
-```
+These scenarios are focused on console applications and libraries.
 
 # Acquisition
-The idea of acquisition is simple. We need to get bits to the developer machines. Acquisition in general has the following principles applied to it:
+All of the scenarios below assume that the CLI tools have been acquired in some way. The acquisition of the CLI tools is explained in detail in a [separate specification](cli-install-experience.md). This document only contains a very short summary of that document.
 
-* Each platform uses its own native package 
-* Post acquisition the user is able to start using the toolchain and .NET Core immediately 
+There are two main ways to acquire the CLI toolset:
+1. Using targeted platform's native installers - this approach is used by developers who want to get stable bits on their development machines and don't mind the system-wide installation and need for elevated priviliges. 
+2. Using a local install (a zip/tarball) - this approach is used by developers who want to enable their build servers to use CLI toolset or who want to have multiple, side-by-side installs.
 
-Also, most of the scenarios here mention a *well-known location*, which here means the following URLs for the CLI toolchain:
+The bits that are gotten are same modulo potential differences in stability of the bits, however, the smoothness of the experience is not. With native installers the installers themselves do as much as possible to set up a working environment (installing dependencies where possible, setting needed envioronment variables etc.). Local installs require all of the work to be done by developers after dropping bits on the machine.
 
-* For Windows: https://dotnetcli.blob.core.windows.net/dotnet/dev/Installers/Latest/dotnet-win-x64.latest.msi
-* For OS X: https://dotnetcli.blob.core.windows.net/dotnet/dev/Installers/Latest/dotnet-osx-x64.latest.pkg
+The below scenarios must work regardless of the way used to acquire the tools. 
 
-## Windows interactive install
 
-### Description
-The users download the MSI off of a well-known location. The user double clicks on the MSI to start the installation. 
 
-### Commands
-N/A - GUI interaction
+# Starting a new console application
 
-### Results
-The package is installed with no errors. Running `dotnet` produces the proper output. 
+## Narative
+The developer would like to kick the tires on .NET Core by writing a console application. She would like to use the new .NET Core CLI tooling to help her get started, manage dependencies and quickly test out the console application by running it from source. She would then like to try building the code and running it using the shared host that is installed with the CLI toolset. 
 
-## Ubuntu install
+## Steps
+1. Create a C# console application via `dotnet new` command
 
-### Description
-The user adds an apt-get feed to their machine and update their package index. After that, they can install the `dotnet` package using the proper commands. 
+```
+/myapp> dotnet new myapp 
 
-### Commands
-`sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'`
+```
+2. Edit  the C# code 
+
+```
+  namespace myapp
+  {
+      public static class Program
+      {
+          public static void Main(string[] args)
+          {
+              Console.WriteLine("Hello, World!");
+          }
+      }
+  }
+```
+
+3. Restore packages
+  ```
+  /myapp> dotnet restore
+  
+  [messages about restore progress]
+  
+  Writing lock file /myapp/project.lock.json
+  
+  /myapp> 
+  ```
+
+4. Run from source for a quick test
+
+```
+/myapp> dotnet run
+
+Hello World!
+
+/myapp>
+```
+
+5. Build a binary that can be executed by the shared host
+
+```
+/myapp> dotnet build
+
+[information about the build]
+
+  Creating build output:
+    /myapp/bin/Debug/netstandardapp1.5/myapp.dll
+    /myapp/bin/Debug/netstandardapp1.5/myapp.deps
+    /myapp/bin/Debug/netstandardapp1.5/[All dependencies' IL assemblies].dll
+
+/myapp>
+```
+
+6. Run the built version using the shared host in the installed toolset
+
+```
+/myapp> dotnet run /myapp/bin/Debug/netstandardapp1.5/myapp.dll
+Hello World!
+```
+
  
-`sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893`
+# Starting a new class library
 
-`sudo apt-get update`
+## Narrative 
+Once started, the developer wants to also include a class library in order to have a place to share common code. She wants to use the CLI toolset to boostrap this effort as well. 
 
-`sudo apt-get install dotnet`
+## Steps
 
-### Results
-The package is installed with no errors. Running `dotnet` produces the proper output. 
+1. Create a new class library using `dotnet new`
 
-## OS X interactive install 
+```
+/> dotnet new mylib --type lib
 
-### Description
-The user downloads the PKG file from a well-known location. The user double-clicks the PKG file to start the installation. 
+Creating a "mylib" class library in "mylib"
 
-### Commands
-N/A - GUI interaction 
+/mylib> 
+```
 
-### Results
-The package is installed with no errors. Running `dotnet` produces the proper output. 
+2. Restore the dependencies
+
+  ```
+  /mylib> dotnet restore
+  
+  [messages about restore progress]
+  
+  Writing lock file /mylib/project.lock.json
+  
+  /mylib> 
+  ```
 
 
-# Initializing and working with projects
-We group several things here that all help developers get started with their projects and code. Operations that fall into this 
-category cover basic working with packages (restoring and installing) as well as getting started with the "blessed" project files and basic code samples.
+3. Edit the `MyLib.cs` file
 
-## Initializing the project & code
+```
+  namespace mylib
+  {
+      public class mylib
+      {
+          public void Method1()
+          {
+          }
+      }
+  }
+```
 
-### Description
-The developer has acquired the .NET Command Line Interface (CLI) toolchain on her operating system. She wants to have a quick sample of how the code and the project file look like. She also wants to udnerstand the structure of the project file, and have a "blessed" version of the project file that she can modify. 
-### Commands
+4. Build the code
 
-`mkdir testapp`
+```
+/mylib> dotnet build
 
-`cd testapp` 
+[information about the build]
 
-`dotnet init`
+  Creating build output:
+    /mylib/bin/Debug/netstandardapp1.5/mylib.dll
+    /mylib/bin/Debug/netstandardapp1.5/mylib.deps
+    /mylib/bin/Debug/netstandardapp1.5/[All dependencies' IL assemblies].dll
 
-### Results
-Directory is populated with 2 files:
+/mylib>
 
-1. Code file (Program.cs)
-2. Project file (project.json)
+```
 
-## Installing packages
+# Adding 3rd party dependencies to the projects
 
-### Description
-Once the initial code is dropped using the `dotnet init` command, the developer decides to add a package to her application. She scours the depths of [Nuget.org](https://www.nuget.org) and finds the package she needs. She now wants to install the package to the local machine as well as add it to her `project.json` file. 
+## Narrative
+Working towards a complete application, the developer realizes she needs to add good JSON parsing support. Searching across the internet, she finds JSON.NET to be the most reccomended choice. She now uses the CLI tooling to install a dependency off of NuGet. 
 
-### Commands
+>**NOTE:** the shape of the commands used in this scenario is still being discussed. 
 
-`dotnet install-package Json.net`
+## Steps
 
-### Results
-JSON.net is installed in the local cache. The `project.json` has a new line in it that outlines the new dependency that was added. 
+1. Install the package
 
-## Restoring packages
+```
+/myapp> dotnet pkg install Newtonsoft.Json --version 8.0.2
 
-### Description
-Our developer has commited her initial work into source control and cloned/restored that work to another machine. She wants to continue developing on the new machine, and for that, she needs to get all of the dependencies her application has. 
+[lots of messages about getting JSON.NET]
 
-### Commands
+Writing lock file /tests/project.lock.json
 
-`dotnet restore`
+/myapp>
+```
 
-`dotnet run`
+2. Change the code to use the new dependency
 
-### Results
-All packages are restored to the local cache. The last command runs the application and no missing dependencies errors are encountered. 
+```
+   using Newtonsoft.Json;
+   namespace myapp
+  {
+      public static class Program
+      {
+          public static void Main(string[] args)
+          {
+              var thing = JsonConvert.DeserializeObject("{ 'item': 1 }");
+              Console.WriteLine("Hello, World!");
+              Console.WriteLine(thing.item);
+          }
+      }
+  }
+```
 
-# Building code 
-Building code scenarios cover all of the actions that produce an executable artifact on disk, be it a single file or a "package" of some sorts. I called this set of scenarios "building" because of that, not because they imply any orchestration or similar things. 
+3. Run code from source 
 
-## Compiling code to IL executable
+```
+/myapp> dotnet run
+Hello, World!
+1
+/myapp>
+```
 
-### Description
-The developer wants to check if the code has compile errors (that is, does it compile). Developer also wants 
-to try to run the application being developed to test whether it works, so the expectation is that the product of compile is always runnable. 
+# Running unit tests
 
-### Commands
+## Narrative
+Writing tests is important, and our developer knows that. She is now writing out the shared logic in her class library and she wants to make sure that she has test coverage. Investigating the manuals, she realizes that the CLI toolset comes with support for xUnit tests including the test runner.  
 
-`mkdir testapp`
+## Steps
 
-`cd testapp`
+1. Create a new xunit test project using `dotnet new`
 
-`dotnet init`
+```
+/> dotnet new tests --type xunit
+Created "tests" xunit test project in "tests".
 
-`dotnet compile`
+/tests>
+```
+2. Restore the runner and dependencies
 
-`./bin/Debug/netstandard10/testapp`
+  ```
+  /tests> dotnet restore
+  
+  [messages about restore progress]
+  
+  Writing lock file /tests/project.lock.json
+  
+  [messages about tool dependencies restore]
+  
+  /tests> 
+  ```
 
-### Results
-Outputs "Hello World" to the console. No errors are encountered. 
+3. Add a test to the test class
+```
+using System;
+using Xunit;
 
-## Compiling code to IL library
-
-### Description
-When creating an application, the developer wants to move some of the code into a separate library. She wants to use the toolchain to produce a managed, IL assembly without producing an executable. 
-
-In order to do that, the following `project.json` is used:
-```json
+namespace tests
 {
-    "version": "1.0.0-*",
-
-    "dependencies": {
-    },
-
-    "frameworks": {
-        "netstandard10": { }
+    public class Tests
+    {
+        [Fact]
+        public void AssertTrue() {
+            Assert.True(true);
+        }        
     }
 }
 ```
 
-### Commands
+3. Run tests using `dotnet test`
 
-`mkdir testapp`
+```
+/tests> dotnet test
 
-`cd testapp`
+[information about discovery of tests]
 
-`dotnet compile`
-
-`ls ./bin/Debug/netstandard10/`
-
-
-### Results
-The final command shows just two files, an libname.dll and a libname.pdb files. No executable is dropped.  
-
-## Compiling code to native
-
-### Description
-The developer wants to have a small microservice that is easily deployed to a Docker container or similar barebones machine. She writes her application and then compiles it down to a single native executable binary that can be moved easily eslwewhere.  
-
-### Commands
-
-`mkdir testapp`
-
-`cd testapp`
-
-`dotnet init`
-
-`dotnet compile --native`
-
-`./bin/Debug/netstandard10/native/testapp`
-
-### Results
-Outputs "Hello World" to the console. No errors are encountered. 
-
-## Publishing a self-contained application with default runtime and framework 
-
-### Description
-Developer wants to have a runtime coupled and packaged with the application being built. The final package contains the 
-application code and the runtime which makes it cleanly deployable to another machine, *regardless* of presence of .NET 
-Core and/or the CLI toolchain on it. 
-
-The developer has a single framework defined in her `project.json` file. The developer doesn't want to specify the runtime version or the framework, instead expecting sensible defaults to be inferred.  
-
-### Commands
-`dotnet publish`
-
-`ls ./bin/Debug/netstandard10/[runtime-id]`
-
-`./bin/Debug/netstandard10/[runtime-id]/appname`
-
-### Results 
-The entire path exists. Command #2 shows all of the DLLs that the application requires as well as the needed native files that comprise the runtime for a given platform. The final command is runnable and there are no errors when running it.  
-
-## Publishing a self-contained application with default runtime and multiple frameworks
-
-### Description
-Similar to the previous one, however, the developer has added several frameworks in `project.json`. The file looks like this now:
-```json
-{
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
-
-    "dependencies": {
-    },
-
-    "frameworks": {
-        "netstandard10": { },
-        "netstandard20": { }
-    }
-}
+=== TEST EXECUTION SUMMARY ===
+   test  Total: 1, Errors: 0, Failed: 0, Skipped: 0, Time: 0.323s
+ 
+/tests>
 ```
 
-The developer wants 
+# Publishing a shared runtime console application
 
-### Commands
-`dotnet publish`
+## Narrative
+Coding away on the application has proven worthwhile and our developer wants to share her progress with another developer on her team. She wants to give just the application and its dependencies. Luckily, another developer can easily install the .NET Core SDK and get a shared host, which would be enough to run the application. The CLI toolset allows our developer to publish just the application's code (in IL) and dependencies. 
 
-`ls ./bin/Debug/publish/[runtime-id]`
+## Steps
 
-`./bin/Debug/publish/[runtime-id]/netstandard10/appname`
+1. Publish the application
+```
+  /myapp> dotnet publish --output /pubapp
+  
+  [Lots of messages about publishing stuff]
+  
+  Creating publish output:
+    /pubapp/myapp/myapp.dll
+    /pubapp/myapp/myapp.deps
+    /pubapp/myapp/[All dependencies' IL assemblies].dll
+  
+  /myapp> 
+  ```
 
-`./bin/Debug/publish/[runtime-id]/netstandard20/appname`
+2. Run the project publish output:
+  ```
+  /myapp> cd /pubapp/myapp
+  /pubapp/myapp> dotnet ./myapp.dll
+  Hello, World!
+  
+  /published/myapp> 
+  ```
+3. The published application can be transferred over to a machine that has the .NET Core shared host installed and it is possible for it to be ran. 
 
-### Results 
-The paths are created wthout errors. The ls command shows the following two directories exist:
+# Publishing a self-contained console application for all platforms
 
-1. `netstandard10`
-2. `netstandard20`
+## Narrative
+After getting feedback from her collegaue developer, our developer decides to test on another machine. However, this machine doesn't have the shared host installed and she cannot get it installed. Luckily, she realizes that .NET Core has support for self-contained applications 
 
-The last two commands are runnable and the applications produce the expected results. 
+**NOTE**: some of the behaviors in this scenario are still being discussed with the relevant stakeholders. 
 
-## Publishing a self-contained application with specific runtime
+## Steps
 
-**[TODO]**
-
-## Publishing a self-contained application with shared runtime w/ framework
-
-### Description
-Developer wants to create a publishing package that contains her application code and her dependencies, but relies on the shared runtime on the deployment target. This is being done because the deployment and servicing of the .NET Core runtime(s) is done by central IT. 
-
-The developer creates the following `project.json` file with a single dependency that is extrenal to the standard library:
-
-```json
-{
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
+1. Modify the project file to enable it to be published as a standalone, platform-specific application (one that doesn't require `dotnet` on the target machine to run) for the desired platforms by adding the `"runtimes"` section:
+  ```
+  {
+    "imports": {
+      "Microsoft.ProjectType.ConsoleApplication": "1.0.0"
     },
-
-    "dependencies": {
-        "Newtonsoft.JSON": "7.0.1"
-    },
-
-    "frameworks": {
-        "netstandard10": { }
+    "runtimes": {
+      "linux-x64": { },
+      "win7-x64": { }
     }
-}
+  }
+  ```
+
+2. Restore the project's dependencies again to ensure the platform-specific depdendencies for the specified runtimes are acquired:
+  ```
+  /myapp> dotnet restore
+  
+  [lots of messages about restoring stuff]
+  
+  Writing lock file /myapp/project.lock.json
+  
+  /myapp> 
+  ```
+
+
+
+3. Publish the project again. In this case, the publish will publish for each runtime in the `project.json` file
+  ```
+  /myapp> dotnet publish --output /published/myapp
+  
+  [Lots of messages about publishing stuff]
+  
+  Creating publish output for (linux-x64):
+    /published/myapp-linux-x64/myapp
+    /published/myapp-linux-x64/myapp.dll
+    /published/myapp-linux-x64/myapp.deps
+    /published/myapp-linux-x64/[All dependencies' IL & platform-specific assemblies, inc. stdlib]
+
+  Creating publish output for (win7-x64):
+    /published/myapp-win7-x64/myapp
+    /published/myapp-win7-x64/myapp.dll
+    /published/myapp-win7-x64/myapp.deps
+    /published/myapp-win7-x64/[All dependencies' IL & platform-specific assemblies, inc. stdlib]
+  
+  /myapp> 
+ 
+  ```
+  
+4. Any of the outputs above can be xcopied to the platform in question and it will work without having to have the shared host installed. 
+  
+5. Publish the project for a specific platform (win7-x64):
+
+```
+  /myapp> dotnet publish --output /win7/myapp --runtime win7-x64
+  
+  [Lots of messages about publishing stuff]
+  
+  Creating publish output for (win7-x64):
+    /published/myapp-win7-x64/myapp
+    /published/myapp-win7-x64/myapp.dll
+    /published/myapp-win7-x64/myapp.deps
+    /published/myapp-win7-x64/[All dependencies' IL & platform-specific assemblies, inc. stdlib]
+  
+  /myapp> 
+  ```
+
+# Packaging a class library 
+
+## Narative 
+The developer wants to take the library she built and package it up as a NuGet package in order to share it with the rest of the ecosystem. Again, she would like to use the CLI toolset to achieve this. Since she wants to be sure that all her code is in a pristine condition, she will also build it one more time, run tests and then package it. 
+
+## Steps 
+1. Build the code to make sure no build errors have crept in
+
+```
+/mylib> dotnet build
+
+[information about the build]
+
+  Creating build output:
+    /myapp/bin/Debug/netstandardapp1.5/myapp.dll
+    /myapp/bin/Debug/netstandardapp1.5/myapp.deps
+    /myapp/bin/Debug/netstandardapp1.5/[All dependencies' IL assemblies].dll
+
+/mylib>
+
 ```
 
-### Commands
+2. Switch to the test project and run unit tests
 
-`dotnet publish --runtime shared`
+```console
+[switch to the directory containg unit tests]
+/mytests> dotnet test
 
-`ls ./bin/Debug/netstandard10/[runtime-id]/libcore*`
+[info about tests flies around]
 
-`ls ./bin/Debig/netstandard10/[runtime-id]/`
+=== TEST EXECUTION SUMMARY ===
+   test  Total: 50, Errors: 0, Failed: 0, Skipped: 0, Time: 5.323s
 
-`./bin/Debug/netstandard10/[runtime-id]/appname`
+/mytests>
 
-### Results 
-The path in `/bin/Debug/netstandard10/` is created correctly with the correct runtime id directory. The second command should not find any files, which confirms that the runtime was not deployed. Third command should show the executable files as well as . The final command should still run. 
+``` 
+
+3. Package the library 
+
+```console
+[switch to the library directory]
+
+/mylib> dotnet pack
+
+[information about build is shown]
+
+Producing nuget package "mylib.1.0.0" for mylib
+mylib -> /mylib/bin/Debug/mylib.1.0.0.nupkg
+Producing nuget package "mylib.1.0.0.symbols" for mylib
+mylib -> /mylib/bin/Debug/mylib.1.0.0.symbols.nupkg
+
+/mylib> 
+```
+
+# Installing `dotnet` extensions as tools 
+
+## Narrative
+As our developer is going further with her usage of the CLI tools, she figures out that there is an easy way to extend the CLI tools on her machine by adding project-level tools to her `project.json`. She uses the CLI to work with the tools and she is able to extend the default toolset to further fit her needs. 
+
+## Steps 
+>**TODO:** at this point, this needs more work to figure out how it will surface; it is listed her so it is not forgotten.
 
 
-# Running code
-In this set of scenarios we are focused on quick testing and turnaround, as well as application types that have different running scenarios than console applications. 
-
-## Running from source
-
-### Description
-The developer is working on a web application using ASP.NET 5 (MVC6). She wants to see if her application will work, and wishes to run it directly without bothering with compile. 
-
-**[TODO]: add Startup.cs with adequate code**
-
-### Commands
-
-`dotnet run`
-
-### Results
-The application is ran. Since this is a web application, the developer can navigate to a defined URL to test out the application. 
-
-# Testing code
-
-### Description
-Developer is close to finishing her application. However, as she is completing the scenarios, she also wants to add a certain amount of unit tests written using a popular test runner. She writes the unit tests in a separate directory that is a sibling to the code directory. 
-
-The test runner is defined in `project.json` file, and it is pointed to the source files that contain the tests. 
-
-### Commands
-
-`dotnet test`
-
-### Results 
-The unit tests are compiled, assemblies dropped in the location specified by `dotnet compile`. The tests are then executed using the specified test runner. 
