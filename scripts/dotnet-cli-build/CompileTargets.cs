@@ -1,9 +1,9 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.Extensions.PlatformAbstractions;
 
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Build
             Rmdir(cmakeOut);
             Mkdirp(cmakeOut);
 
-            var configuration = (string)c.BuildContext["Configuration"];
+            var configuration = c.BuildContext.Get<string>("Configuration");
 
             // Run the build
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -120,13 +120,14 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult CompileStage2(BuildTargetContext c)
         {
-            var configuration = (string)c.BuildContext["Configuration"];
+            var configuration = c.BuildContext.Get<string>("Configuration");
 
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
             var result = CompileStage(c,
                 dotnet: DotNetCli.Stage1,
                 outputDir: Dirs.Stage2);
+
             if (!result.Success)
             {
                 return result;
@@ -137,7 +138,7 @@ namespace Microsoft.DotNet.Cli.Build
             {
                 var packagingOutputDir = Path.Combine(Dirs.Stage2Compilation, "forPackaging");
                 Mkdirp(packagingOutputDir);
-                foreach(var project in ProjectsToPack)
+                foreach (var project in ProjectsToPack)
                 {
                     // Just build them, we'll pack later
                     DotNetCli.Stage1.Build(
@@ -158,9 +159,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             Rmdir(outputDir);
 
-            dotnet.SetDotNetHome();
-
-            var configuration = (string)c.BuildContext["Configuration"];
+            var configuration = c.BuildContext.Get<string>("Configuration");
             var binDir = Path.Combine(outputDir, "bin");
             var runtimeOutputDir = Path.Combine(outputDir, "runtime", "coreclr");
 
@@ -210,7 +209,7 @@ namespace Microsoft.DotNet.Cli.Build
             File.Copy(Path.Combine(Dirs.Corehost, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), Path.Combine(binDir, $"{Constants.DynamicLibPrefix}hostpolicy{Constants.DynamicLibSuffix}"), overwrite: true);
 
             // Corehostify binaries
-            foreach(var binaryToCorehostify in BinariesForCoreHost)
+            foreach (var binaryToCorehostify in BinariesForCoreHost)
             {
                 try
                 {
@@ -219,7 +218,7 @@ namespace Microsoft.DotNet.Cli.Build
                     File.Delete(Path.Combine(binDir, $"{binaryToCorehostify}.exe"));
                     File.Copy(Path.Combine(binDir, $"corehost{Constants.ExeSuffix}"), Path.Combine(binDir, binaryToCorehostify + Constants.ExeSuffix));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return c.Failed($"Failed to corehostify '{binaryToCorehostify}': {ex.ToString()}");
                 }
@@ -234,13 +233,13 @@ namespace Microsoft.DotNet.Cli.Build
 
             // Copy AppDeps
             result = CopyAppDeps(c, binDir);
-            if(!result.Success)
+            if (!result.Success)
             {
                 return result;
             }
 
             // Generate .version file
-            var version = ((BuildVersion)c.BuildContext["BuildVersion"]).SimpleVersion;
+            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(outputDir, ".version"), content);
 

@@ -33,6 +33,8 @@ namespace Microsoft.DotNet.Cli.Build.Framework
             _maxTargetLen = targets.Values.Select(t => t.Name.Length).Max();
         }
 
+        public T Get<T>(string name) => (T)this[name];
+
         public BuildTargetResult RunTarget(string name) => RunTarget(name, force: false);
 
         public BuildTargetResult RunTarget(string name, bool force)
