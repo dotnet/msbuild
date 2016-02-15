@@ -9,10 +9,7 @@
         "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160202-02",
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-        "Microsoft.DotNet.Files": {
-            "version": "1.0.0-*",
-            "target": "project"
-        }
+        "Microsoft.DotNet.Files": "1.0.0-*"
     },
     "frameworks": {
         "dnxcore50": {

@@ -16,10 +16,7 @@
             "type": "build",
             "version": "1.0.0-rc2-16054"
         },
-        "Microsoft.Extensions.DependencyModel": {
-            "type": "build",
-            "version": "1.0.0-*"
-        }
+        "Microsoft.Extensions.DependencyModel": "1.0.0-*"
     },
     "frameworks": {
         "net451": {
