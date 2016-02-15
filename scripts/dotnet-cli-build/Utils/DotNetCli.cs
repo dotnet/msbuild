@@ -20,11 +20,6 @@ namespace Microsoft.DotNet.Cli.Build
             BinPath = binPath;
         }
 
-        public void SetDotNetHome()
-        {
-            Environment.SetEnvironmentVariable("DOTNET_HOME", Path.GetDirectoryName(BinPath));
-        }
-
         public Command Exec(string command, params string[] args)
         {
             return Command.Create(Path.Combine(BinPath, $"dotnet{Constants.ExeSuffix}"), Enumerable.Concat(new[] { command }, args));

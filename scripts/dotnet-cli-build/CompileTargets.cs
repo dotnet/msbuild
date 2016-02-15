@@ -159,8 +159,6 @@ namespace Microsoft.DotNet.Cli.Build
         {
             Rmdir(outputDir);
 
-            dotnet.SetDotNetHome();
-
             var configuration = c.BuildContext.Get<string>("Configuration");
             var binDir = Path.Combine(outputDir, "bin");
             var runtimeOutputDir = Path.Combine(outputDir, "runtime", "coreclr");
