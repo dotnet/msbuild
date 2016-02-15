@@ -6694,6 +6694,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
+    [PlatformSpecific(Xunit.PlatformID.Windows)]
     sealed public class WinMDTests : ResolveAssemblyReferenceTestFixture
     {
         #region AssemblyInformationIsWinMDFile Tests
