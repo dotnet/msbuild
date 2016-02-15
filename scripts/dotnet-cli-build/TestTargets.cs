@@ -1,13 +1,13 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli.Build.Framework;
 
 using static Microsoft.DotNet.Cli.Build.FS;
-using static Microsoft.DotNet.Cli.Build.Utils;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
+using static Microsoft.DotNet.Cli.Build.Utils;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -180,7 +180,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult ValidateDependencies(BuildTargetContext c)
         {
-            var configuration = (string)c.BuildContext["Configuration"];
+            var configuration = c.BuildContext.Get<string>("Configuration");
             var dotnet = DotNetCli.Stage2;
 
             c.Info("Publishing MultiProjectValidator");

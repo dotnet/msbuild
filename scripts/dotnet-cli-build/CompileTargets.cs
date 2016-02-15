@@ -1,9 +1,9 @@
-﻿using Microsoft.DotNet.Cli.Build.Framework;
-using Microsoft.Extensions.PlatformAbstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli.Build.Framework;
+using Microsoft.Extensions.PlatformAbstractions;
 
 using static Microsoft.DotNet.Cli.Build.FS;
 using static Microsoft.DotNet.Cli.Build.Framework.BuildHelpers;
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Build
             Rmdir(cmakeOut);
             Mkdirp(cmakeOut);
 
-            var configuration = (string)c.BuildContext["Configuration"];
+            var configuration = c.BuildContext.Get<string>("Configuration");
 
             // Run the build
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Cli.Build
         [Target]
         public static BuildTargetResult CompileStage2(BuildTargetContext c)
         {
-            var configuration = (string)c.BuildContext["Configuration"];
+            var configuration = c.BuildContext.Get<string>("Configuration");
 
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "src"));
             CleanBinObj(c, Path.Combine(c.BuildContext.BuildDirectory, "test"));
@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             dotnet.SetDotNetHome();
 
-            var configuration = (string)c.BuildContext["Configuration"];
+            var configuration = c.BuildContext.Get<string>("Configuration");
             var binDir = Path.Combine(outputDir, "bin");
             var runtimeOutputDir = Path.Combine(outputDir, "runtime", "coreclr");
 
@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.Cli.Build
             }
 
             // Generate .version file
-            var version = ((BuildVersion)c.BuildContext["BuildVersion"]).SimpleVersion;
+            var version = c.BuildContext.Get<BuildVersion>("BuildVersion").SimpleVersion;
             var content = $@"{c.BuildContext["CommitHash"]}{Environment.NewLine}{version}{Environment.NewLine}";
             File.WriteAllText(Path.Combine(outputDir, ".version"), content);
 
