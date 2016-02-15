@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.DotNet.Tools.Compiler
@@ -22,16 +23,37 @@ namespace Microsoft.DotNet.Tools.Compiler
 
             var managedOutput = outputPaths.CompilationFiles.Assembly;
 
+            // Create the library exporter
+            var exporter = context.CreateExporter(args.ConfigValue);
+ 
+            // Gather exports for the project
+            var exports = exporter.GetAllExports();
+ 
+            // Runtime assemblies.
+            // TODO: native assets/resources.
+            var references = exports
+                .SelectMany(export => export.RuntimeAssemblies)
+                .Select(r => r.ResolvedPath)
+                .ToList();
+
+            // Setup native args.
             var nativeArgs = new List<string>();
 
             // Input Assembly
             nativeArgs.Add($"{managedOutput}");
 
-            // ILC Args
-            if (!string.IsNullOrWhiteSpace(args.IlcArgsValue))
+            // Add Resolved Assembly References
+            foreach (var reference in references)
             {
-                nativeArgs.Add("--ilcargs");
-                nativeArgs.Add($"{args.IlcArgsValue}");
+                nativeArgs.Add("--reference");
+                nativeArgs.Add(reference);
+            }
+
+            // ILC Args
+            foreach (var ilcArg in args.IlcArgsValue)
+            {
+                nativeArgs.Add("--ilcarg");
+                nativeArgs.Add($"\"{ilcArg}\"");
             }
 
             // ILC Path

@@ -30,7 +30,7 @@
         "Microsoft.DotNet.ProjectModel": "1.0.0-*",
         "Microsoft.DotNet.Compiler.Common": "1.0.0-*",
         "Microsoft.DotNet.Cli.Utils": "1.0.0-*",
-        "Microsoft.DotNet.ILCompiler.SDK": "1.0.5-prerelease-00002",
+        "Microsoft.DotNet.ILCompiler.SDK": "1.0.6-prerelease-00003",
 
         "Microsoft.Extensions.Logging": "1.0.0-rc2-16040",
         "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-16040",

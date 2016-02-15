@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Compiler
         public string ConfigValue { get; set; }
         public bool IsNativeValue { get; set; }
         public string ArchValue { get; set; }
-        public string IlcArgsValue { get; set; }
+        public IEnumerable<string> IlcArgsValue { get; set; }
         public string IlcPathValue { get; set; }
         public string IlcSdkPathValue { get; set; }
         public bool IsCppModeValue { get; set; }
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Tools.Compiler
             // Native Args
             _nativeOption = _app.Option("-n|--native", "Compiles source to native machine code.", CommandOptionType.NoValue);
             _archOption = _app.Option("-a|--arch <ARCH>", "The architecture for which to compile. x64 only currently supported.", CommandOptionType.SingleValue);
-            _ilcArgsOption = _app.Option("--ilcargs <ARGS>", "Command line arguments to be passed directly to ILCompiler.", CommandOptionType.SingleValue);
+            _ilcArgsOption = _app.Option("--ilcarg <ARG>", "Command line option to be passed directly to ILCompiler.", CommandOptionType.MultipleValue);
             _ilcPathOption = _app.Option("--ilcpath <PATH>", "Path to the folder containing custom built ILCompiler.", CommandOptionType.SingleValue);
             _ilcSdkPathOption = _app.Option("--ilcsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
             _appDepSdkPathOption = _app.Option("--appdepsdkpath <PATH>", "Path to the folder containing ILCompiler application dependencies.", CommandOptionType.SingleValue);
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Tools.Compiler
 
                 IsNativeValue = _nativeOption.HasValue();
                 ArchValue = _archOption.Value();
-                IlcArgsValue = _ilcArgsOption.Value();
+                IlcArgsValue = _ilcArgsOption.HasValue() ? _ilcArgsOption.Values : Enumerable.Empty<string>();
                 IlcPathValue = _ilcPathOption.Value();
                 IlcSdkPathValue = _ilcSdkPathOption.Value();
                 AppDepSdkPathValue = _appDepSdkPathOption.Value();
