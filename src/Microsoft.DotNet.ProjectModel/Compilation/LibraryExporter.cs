@@ -128,6 +128,18 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
         /// </summary>
         private LibraryExport GetExport(LibraryDescription library)
         {
+            if (!library.Resolved)
+            {
+                // For a unresolved project reference returns a export with empty asset.
+                return new LibraryExport(library: library,
+                                         compileAssemblies: Enumerable.Empty<LibraryAsset>(),
+                                         sourceReferences: Enumerable.Empty<string>(),
+                                         nativeLibraries: Enumerable.Empty<LibraryAsset>(),
+                                         runtimeAssets: Enumerable.Empty<LibraryAsset>(),
+                                         runtimeAssemblies: EmptyArray<LibraryAsset>.Value,
+                                         analyzers: EmptyArray<AnalyzerReference>.Value);
+            }
+
             if (Equals(LibraryType.Package, library.Identity.Type))
             {
                 return ExportPackage((PackageDescription)library);
@@ -167,18 +179,6 @@ namespace Microsoft.DotNet.ProjectModel.Compilation
 
         private LibraryExport ExportProject(ProjectDescription project)
         {
-            if (!project.Resolved)
-            {
-                // For a unresolved project reference returns a export with empty asset.
-                return new LibraryExport(library: project,
-                                         compileAssemblies: Enumerable.Empty<LibraryAsset>(),
-                                         sourceReferences: Enumerable.Empty<string>(),
-                                         nativeLibraries: Enumerable.Empty<LibraryAsset>(),
-                                         runtimeAssets: Enumerable.Empty<LibraryAsset>(),
-                                         runtimeAssemblies: EmptyArray<LibraryAsset>.Value,
-                                         analyzers: EmptyArray<AnalyzerReference>.Value);
-            }
-
             var compileAssemblies = new List<LibraryAsset>();
             var runtimeAssets = new List<LibraryAsset>();
             var sourceReferences = new List<string>();
