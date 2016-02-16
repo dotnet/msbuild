@@ -31,6 +31,17 @@ while [[ $# > 0 ]]; do
             export DOCKER_IMAGENAME=$2
             shift
             ;;
+        --help)
+            echo "Usage: $0 [--configuration <CONFIGURATION>] [--nopackage] [--docker <IMAGENAME>] [--help] <TARGETS...>"
+            echo ""
+            echo "Options:"
+            echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
+            echo "  --nopackage                         Skip packaging targets"
+            echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
+            echo "  --help                              Display this help message"
+            echo "  <TARGETS...>                        The build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
+            exit 0
+            ;;
         *)
             break
             ;;

@@ -5,7 +5,20 @@
 
 param(
     [string]$Configuration="Debug",
-    [switch]$NoPackage)
+    [switch]$NoPackage,
+    [switch]$Help)
+
+if($Help)
+{
+    Write-Host "Usage: ./build.cmd [-Configuration <CONFIGURATION>] [-NoPackage] [-Help] <TARGETS...>"
+    Write-Host ""
+    Write-Host "Options:"
+    Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
+    Write-Host "  -NoPackage                         Skip packaging targets"
+    Write-Host "  -Help                              Display this help message"
+    Write-Host "  <TARGETS...>                       The build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"
+    exit 0
+}
 
 $env:CONFIGURATION = $Configuration;
 
