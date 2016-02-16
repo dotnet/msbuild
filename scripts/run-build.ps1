@@ -10,7 +10,7 @@ param(
 
 if($Help)
 {
-    Write-Host "Usage: ./build.cmd [-Configuration <CONFIGURATION>] [-NoPackage] [-Help] <TARGETS...>"
+    Write-Host "Usage: .\build.cmd [-Configuration <CONFIGURATION>] [-NoPackage] [-Help] <TARGETS...>"
     Write-Host ""
     Write-Host "Options:"
     Write-Host "  -Configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
