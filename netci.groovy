@@ -26,10 +26,14 @@ def static getBuildJobName(def configuration, def os) {
 
             // Calculate the build command
             if (os == 'Windows_NT') {
-                buildCommand = ".\\scripts\\ci_build.cmd ${lowerConfiguration}"
+                buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} Default"
+            }
+            else if (os == 'Ubuntu') {
+                buildCommand = "./build.sh --configuration ${lowerConfiguration} --docker ubuntu Default"
             }
             else {
-                buildCommand = "./scripts/ci_build.sh ${lowerConfiguration}"
+                // Jenkins non-Ubuntu CI machines don't have docker
+                buildCommand = "./build.sh --configuration ${lowerConfiguration} Default"
             }
 
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
