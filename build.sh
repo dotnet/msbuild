@@ -31,12 +31,17 @@ while [[ $# > 0 ]]; do
             export DOCKER_IMAGENAME=$2
             shift
             ;;
+        --skip-prereqs)
+            # Allow CI to disable prereqs check since the CI has the pre-reqs but not ldconfig it seems
+            export DOTNET_INSTALL_SKIP_PREREQS=1
+            ;;
         --help)
-            echo "Usage: $0 [--configuration <CONFIGURATION>] [--nopackage] [--docker <IMAGENAME>] [--help] <TARGETS...>"
+            echo "Usage: $0 [--configuration <CONFIGURATION>] [--skip-prereqs] [--nopackage] [--docker <IMAGENAME>] [--help] <TARGETS...>"
             echo ""
             echo "Options:"
             echo "  --configuration <CONFIGURATION>     Build the specified Configuration (Debug or Release, default: Debug)"
             echo "  --nopackage                         Skip packaging targets"
+            echo "  --skip-prereqs                      Skip checks for pre-reqs in dotnet_install"
             echo "  --docker <IMAGENAME>                Build in Docker using the Dockerfile located in scripts/docker/IMAGENAME"
             echo "  --help                              Display this help message"
             echo "  <TARGETS...>                        The build targets to run (Init, Compile, Publish, etc.; Default is a full build and publish)"

@@ -29,11 +29,11 @@ def static getBuildJobName(def configuration, def os) {
                 buildCommand = ".\\build.cmd -Configuration ${lowerConfiguration} Default"
             }
             else if (os == 'Ubuntu') {
-                buildCommand = "./build.sh --configuration ${lowerConfiguration} --docker ubuntu Default"
+                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} --docker ubuntu Default"
             }
             else {
                 // Jenkins non-Ubuntu CI machines don't have docker
-                buildCommand = "./build.sh --configuration ${lowerConfiguration} Default"
+                buildCommand = "./build.sh --skip-prereqs --configuration ${lowerConfiguration} Default"
             }
 
             def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
